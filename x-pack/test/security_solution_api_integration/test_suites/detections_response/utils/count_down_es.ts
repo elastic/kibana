@@ -7,7 +7,7 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { countDownTest } from './count_down_test';
+import { countDownTest } from '../../../../common/utils/security_solution';
 
 /**
  * Does a plain countdown and checks against es queries for either conflicts in the error

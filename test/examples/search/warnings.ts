@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import assert from 'assert';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
-import type { WebElementWrapper } from '../../functional/services/lib/web_element_wrapper';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
@@ -25,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const monacoEditor = getService('monacoEditor');
+  const toasts = getService('toasts');
 
   describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
@@ -34,7 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const testIndex = 'sample-01';
     const testRollupIndex = 'sample-01-rollup';
     const testRollupField = 'kubernetes.container.memory.usage.bytes';
-    const toastsSelector = '[data-test-subj=globalToastList] [data-test-subj=euiToastHeader]';
     const shardFailureType = 'unsupported_aggregation_on_downsampled_index';
     const shardFailureReason = `Field [${testRollupField}] of type [aggregate_metric_double] is not supported for aggregation [percentiles]`;
 
@@ -97,15 +96,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await PageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
     });
 
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
 
       await retry.try(async () => {
-        const toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        expect(await toasts.getCount()).to.be(2);
         await testSubjects.click('viewWarningBtn');
       });
 
@@ -152,10 +150,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
-      let toasts: WebElementWrapper[] = [];
       await retry.try(async () => {
-        toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        expect(await toasts.getCount()).to.be(2);
       });
 
       // warnings tab

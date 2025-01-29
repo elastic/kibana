@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -14,13 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const browser = getService('browser');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
   const config = getService('config');
+  const dataViews = getService('dataViews');
   const localArchiveDirectories = {
     nested: 'test/functional/fixtures/kbn_archiver/date_nested.json',
     discover: 'test/functional/fixtures/kbn_archiver/discover.json',
@@ -52,24 +54,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await kibanaServer.savedObjects.clean({ types: ['search', 'query'] });
     // set up a query with filters and a time filter
     log.debug('set up a query with filters to save');
-    await PageObjects.common.setTime({ from, to });
-    await PageObjects.common.navigateToApp('discover');
-    await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
+    await common.setTime({ from, to });
+    await common.navigateToApp('discover');
+    await dataViews.switchToAndValidate(logstashIndexPatternString);
     await retry.try(async function tryingForTime() {
-      const hitCount = await PageObjects.discover.getHitCount();
+      const hitCount = await discover.getHitCount();
       expect(hitCount).to.be('4,731');
     });
 
     await filterBar.addFilter({ field: 'extension.raw', operation: 'is one of', value: ['jpg'] });
     await retry.try(async function tryingForTime() {
-      const hitCount = await PageObjects.discover.getHitCount();
+      const hitCount = await discover.getHitCount();
       expect(hitCount).to.be('3,029');
     });
 
     await queryBar.setQuery('response:200');
     await queryBar.submitQuery();
     await retry.try(async function tryingForTime() {
-      const hitCount = await PageObjects.discover.getHitCount();
+      const hitCount = await discover.getHitCount();
       expect(hitCount).to.be('2,792');
     });
   };
@@ -86,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -96,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'query'] });
       await esNode.unload('test/functional/fixtures/es_archiver/date_nested');
       await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     describe('saved query selection', () => {
@@ -115,21 +117,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(await queryBar.getQueryString()).to.eql('response:200');
 
-        await PageObjects.discover.clickNewSearchButton();
+        await discover.clickNewSearchButton();
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern(dateNestedIndexPattern);
+        await dataViews.switchToAndValidate(dateNestedIndexPattern);
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
-        const currentDataView = await PageObjects.discover.getCurrentlySelectedDataView();
-        expect(currentDataView).to.be(logstashIndexPatternString);
+        await dataViews.switchToAndValidate(logstashIndexPatternString);
         await retry.try(async function tryingForTime() {
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be('4,731');
         });
 
@@ -164,10 +164,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('reinstates filters and the time filter when a saved query has filters and a time filter included', async () => {
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await timePicker.setDefaultAbsoluteRange();
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+        const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(timePickerValues.start).to.eql(from);
         expect(timePickerValues.end).to.eql(to);
@@ -175,12 +175,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
-        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+        const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(timePickerValues.start).to.eql(from);
         expect(timePickerValues.end).to.eql(to);
         await retry.waitForWithTimeout('the right hit count', 65000, async () => {
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           log.debug(`Found hit count is ${hitCount}. Looking for 2,792.`);
           return hitCount === '2,792';
         });
@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('allows clearing if non default language was remembered in localstorage', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');
-        await PageObjects.common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
+        await common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');

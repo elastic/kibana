@@ -56,7 +56,7 @@ export function SvlRuleDetailsPageProvider({ getService }: FtrProviderContext) {
       const alertDurationEpoch = await find.byCssSelector(
         'input[data-test-subj="alertsDurationEpoch"]'
       );
-      return parseInt(await alertDurationEpoch.getAttribute('value'), 10);
+      return parseInt((await alertDurationEpoch.getAttribute('value')) ?? '', 10);
     },
     async clickAlertMuteButton(alert: string) {
       const muteAlertButton = await testSubjects.find(`muteAlertButton_${alert}`);
@@ -91,8 +91,7 @@ export function SvlRuleDetailsPageProvider({ getService }: FtrProviderContext) {
       });
     },
     async clickPaginationNextPage() {
-      const nextButton = await testSubjects.find(`pagination-button-next`);
-      nextButton.click();
+      await testSubjects.click(`pagination-button-next`);
     },
     async isViewInAppDisabled() {
       await retry.try(async () => {

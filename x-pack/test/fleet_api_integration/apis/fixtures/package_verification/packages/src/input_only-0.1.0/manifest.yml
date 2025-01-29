@@ -6,6 +6,9 @@ description: >-
 type: input
 version: 0.1.0
 license: basic
+agent:
+  privileges:
+    root: true
 categories:
   - custom
 policy_templates:
@@ -34,12 +37,12 @@ policy_templates:
         required: false
         default: 72h
 icons:
-  - src: "/img/sample-logo.svg"
-    type: "image/svg+xml"
+  - src: '/img/sample-logo.svg'
+    type: 'image/svg+xml'
 screenshots:
-  - src: "/img/sample-screenshot.png"
-    title: "Sample screenshot"
-    size: "600x600"
-    type: "image/png"
+  - src: '/img/sample-screenshot.png'
+    title: 'Sample screenshot'
+    size: '600x600'
+    type: 'image/png'
 owner:
   github: elastic/integrations

@@ -20,6 +20,7 @@ import {
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
@@ -54,7 +55,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     const ruleType = 'test.waitingRule';
     const aadIndex = `.alerts-${ruleType.toLowerCase()}.alerts-default`;
 
-    describe(`should be handled for alerting framework based AaD`, () => {
+    describe(`should be handled for alerting framework based AaD`, function () {
+      this.tags('skipFIPS');
       it('for a single conflicted alert', async () => {
         const source = uuidv4();
         const count = 1;
@@ -98,7 +100,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         await esTestIndexTool.waitForDocs(source, 'rule-starting-2');
 
         log(`ad-hoc update the alert doc`);
-        await adHocUpdate(es, aadIndex, initialDocs[0]._id);
+        await adHocUpdate(es, aadIndex, initialDocs[0]._id!);
 
         log(`signal the rule to finish`);
         await esTestIndexTool.indexDoc(source, 'rule-complete-2');
@@ -156,8 +158,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         await esTestIndexTool.waitForDocs(source, 'rule-starting-2');
 
         log(`ad-hoc update the 2nd and 4th alert docs`);
-        await adHocUpdate(es, aadIndex, initialDocs[1]._id);
-        await adHocUpdate(es, aadIndex, initialDocs[3]._id);
+        await adHocUpdate(es, aadIndex, initialDocs[1]._id!);
+        await adHocUpdate(es, aadIndex, initialDocs[3]._id!);
 
         log(`signal the rule to finish`);
         await esTestIndexTool.indexDoc(source, 'rule-complete-2');
@@ -238,6 +240,9 @@ function compareAlertDocs(
     expect(get(updatedAlert, 'kibana.alert.workflow_status')).to.eql(
       get(DocUpdate, 'kibana.alert.workflow_status')
     );
+    expect(get(updatedAlert, 'kibana.alert.consecutive_matches')).to.eql(
+      get(DocUpdate, 'kibana.alert.consecutive_matches') + 1
+    );
 
     expect(get(initialAlert, 'kibana.alert.status')).to.be('active');
     expect(get(updatedAlert, 'kibana.alert.status')).to.be('untracked');
@@ -264,6 +269,7 @@ const DocUpdate = {
   [ALERT_WORKFLOW_TAGS]: ['fee', 'fi', 'fo', 'fum'],
   [ALERT_CASE_IDS]: ['123', '456', '789'],
   [ALERT_STATUS]: 'untracked',
+  [ALERT_CONSECUTIVE_MATCHES]: 1,
 };
 
 const SkipFields = [
@@ -273,6 +279,7 @@ const SkipFields = [
   'kibana.alert.duration.us',
   'kibana.alert.flapping_history',
   'kibana.alert.rule.execution.uuid',
+  'kibana.alert.rule.execution.timestamp',
 
   // fields under our control we test separately
   'runCount',
@@ -280,6 +287,9 @@ const SkipFields = [
   'kibana.alert.case_ids',
   'kibana.alert.workflow_tags',
   'kibana.alert.workflow_status',
+  'kibana.alert.consecutive_matches',
+  'kibana.alert.severity_improving',
+  'kibana.alert.previous_action_group',
 ];
 
 function log(message: string) {

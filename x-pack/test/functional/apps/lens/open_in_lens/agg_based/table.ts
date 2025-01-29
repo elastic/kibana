@@ -9,28 +9,25 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visEditor, lens, timePicker, header } = getPageObjects([
+  const { visualize, visEditor, lens, header } = getPageObjects([
     'visualize',
     'lens',
     'visEditor',
-    'timePicker',
     'header',
   ]);
 
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
 
   describe('Table', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickDataTable();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should not allow converting of unsupported aggregations', async () => {
@@ -85,8 +82,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
-      const summaryRowFunction = await testSubjects.find('lnsDatatable_summaryrow_function');
-      expect(await summaryRowFunction.getVisibleText()).to.be('Sum');
+      expect(await comboBox.getComboBoxSelectedOptions('lnsDatatable_summaryrow_function')).to.eql([
+        'Sum',
+      ]);
     });
 
     it('should convert sibling pipeline aggregation', async () => {
@@ -171,8 +169,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const percentageColumnText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger', 0, 1);
-      const format = await testSubjects.find('indexPattern-dimension-format');
-      expect(await format.getVisibleText()).to.be('Percent');
+      expect(await comboBox.getComboBoxSelectedOptions('indexPattern-dimension-format')).to.eql([
+        'Percent',
+      ]);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);

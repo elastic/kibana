@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext) {
@@ -13,6 +13,10 @@ export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext)
   const comboBox = getService('comboBox');
 
   return {
+    async clearMetrics() {
+      await comboBox.clear('metricsExplorer-metrics');
+    },
+
     async getMetrics() {
       const subject = await testSubjects.find('metricsExplorer-metrics');
       return await subject.findAllByCssSelector('span.euiBadge');
@@ -60,6 +64,12 @@ export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext)
     async ensureMetricsExplorerFeedbackLinkIsVisible() {
       await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
       await testSubjects.existOrFail('infraMetricsExplorerFeedbackLink');
+    },
+
+    async ensureMaxMetricsLimiteReachedIsVisible() {
+      const subject = await testSubjects.find('metricsExplorer-metrics');
+      await subject.click();
+      await testSubjects.existOrFail('infraMetricsExplorerMaxMetricsReached');
     },
   };
 }

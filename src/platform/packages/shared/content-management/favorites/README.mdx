@@ -1,0 +1,78 @@
+---
+id: sharedUX/Favorites
+slug: /shared-ux/favorites
+title: Favorites Service
+description: A service and a set of components and hooks for implementing content favorites
+tags: ['shared-ux', 'component']
+date: 2024-07-26
+---
+
+## Description
+
+The Favorites service provides a way to add favorites feature to your content. It includes a service for managing the list of favorites and a set of components for displaying and interacting with the list.
+
+- The favorites are isolated per user, per space.
+- The service provides an API for adding, removing, and listing favorites.
+- The service provides a set of react-query hooks for interacting with the favorites list
+- The components include a button for toggling the favorite state of an object
+- The service relies on ambiguous object ids to identify the objects being favorite. This allows the service to be used with any type of content, not just saved objects.
+
+## API
+
+```tsx
+// client side
+import {
+  FavoritesClient,
+  FavoritesContextProvider,
+  useFavorites,
+  FavoriteButton,
+} from '@kbn/content-management-favorites-public';
+
+const appName = 'my-app';
+const favoriteObjectType = 'dashboard';
+const favoritesClient = new FavoritesClient(appName, favoriteObjectType, {
+  http: core.http,
+  usageCollection: plugins.usageCollection,
+});
+
+// wrap your content with the favorites context provider
+const myApp = () => {
+  <FavoritesContextProvider favoritesClient={favoritesClient}>
+    <App />
+  </FavoritesContextProvider>;
+};
+
+const App = () => {
+  // get the favorites list
+  const favoritesQuery = useFavorites();
+
+  // display favorite state and toggle button for an object
+  return <FavoriteButton id={'some-object-id'} />;
+};
+```
+
+## Implementation Details
+
+Internally the favorites list is backed by a saved object. A saved object of type "favorites" is created for each user (user profile id) and space (space id) and object type (e.g. dashboard) combination when a user for the first time favorites an object. The saved object contains a list of favorite objects of the type.
+
+```
+{
+  "_index": ".kibana_8.16.0_001",
+  "_id": "spaceid:favorites:object_type:u_profile_id",
+  "_source": {
+    "favorites": {
+      "userId": "u_profile_id",
+      "type: "dashboard",
+      "favoriteIds": [
+        "dashboard_id_1",
+        "dashboard_id_2",
+      ]
+    },
+    "type": "favorites",
+    "references": [],
+    "namespace": "spaceid",
+  }
+},
+```
+
+The service doesn't track the favorite object itself, only the object id. When the object is deleted, the favorite isn't removed from the list automatically.

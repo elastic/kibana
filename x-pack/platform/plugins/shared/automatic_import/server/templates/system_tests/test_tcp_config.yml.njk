@@ -1,0 +1,7 @@
+service: {{package_name}}-{{data_stream_name}}-tcp
+input: tcp
+data_stream:
+  vars:
+    preserve_original_event: true
+    listen_address: 0.0.0.0
+    listen_port: 9025

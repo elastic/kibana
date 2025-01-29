@@ -39,6 +39,10 @@ This rule validates that every import request in the repsitory follows a standar
 
 This rule is not configurable, should never be skipped, and is auto-fixable.
 
+## `@kbn/imports/require_import`
+
+This rule validates that specific imports are present in a file. This allows you to e.g. require Mocha globals in test files automatically. Currently the only supported import type is a TypeScript reference type. This rule is auto-fixable.
+
 ## `@kbn/imports/exports_moved_packages`
 
 This rule assists package authors who are doing the good work of breaking up large packages. The goal is to define exports which used to be part of one package as having moved to another package. The configuration maintains this mapping and is designed to be extended in the future is additional needs arrise like targetting specific package types.

@@ -76,39 +76,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
-          expect(objects).to.eql([
-            'logstash-*',
-            'A Pie',
-            'A Dashboard',
-            `Global Settings [${version}]`,
-            `Advanced Settings [${version}]`,
-          ]);
+          expect(objects.sort()).to.eql(
+            [
+              'logstash-*',
+              'A Pie',
+              'A Dashboard',
+              `Global Settings [${version}]`,
+              `Advanced Settings [${version}]`,
+            ].sort()
+          );
         });
 
         it('can view all saved objects in applications', async () => {
           const bools = await PageObjects.savedObjects.getTableSummary();
-          expect(bools).to.eql([
-            {
-              title: 'logstash-*',
-              canViewInApp: true,
-            },
-            {
-              title: 'A Pie',
-              canViewInApp: true,
-            },
-            {
-              title: 'A Dashboard',
-              canViewInApp: true,
-            },
-            {
-              title: `Global Settings [${version}]`,
-              canViewInApp: false,
-            },
-            {
-              title: `Advanced Settings [${version}]`,
-              canViewInApp: false,
-            },
-          ]);
+          expect(bools.sort((a, b) => a.title.localeCompare(b.title))).to.eql(
+            [
+              {
+                title: 'logstash-*',
+                canViewInApp: true,
+              },
+              {
+                title: 'A Pie',
+                canViewInApp: true,
+              },
+              {
+                title: 'A Dashboard',
+                canViewInApp: true,
+              },
+              {
+                title: `Global Settings [${version}]`,
+                canViewInApp: false,
+              },
+              {
+                title: `Advanced Settings [${version}]`,
+                canViewInApp: false,
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title))
+          );
         });
 
         it('can delete all saved objects', async () => {
@@ -200,39 +204,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
-          expect(objects).to.eql([
-            'logstash-*',
-            'A Pie',
-            'A Dashboard',
-            `Global Settings [${version}]`,
-            `Advanced Settings [${version}]`,
-          ]);
+          expect(objects.sort()).to.eql(
+            [
+              'logstash-*',
+              'A Pie',
+              'A Dashboard',
+              `Global Settings [${version}]`,
+              `Advanced Settings [${version}]`,
+            ].sort()
+          );
         });
 
         it('cannot view any saved objects in applications', async () => {
           const bools = await PageObjects.savedObjects.getTableSummary();
-          expect(bools).to.eql([
-            {
-              title: 'logstash-*',
-              canViewInApp: false,
-            },
-            {
-              title: 'A Pie',
-              canViewInApp: false,
-            },
-            {
-              title: 'A Dashboard',
-              canViewInApp: false,
-            },
-            {
-              title: `Global Settings [${version}]`,
-              canViewInApp: false,
-            },
-            {
-              title: `Advanced Settings [${version}]`,
-              canViewInApp: false,
-            },
-          ]);
+          expect(bools.sort((a, b) => a.title.localeCompare(b.title))).to.eql(
+            [
+              {
+                title: 'logstash-*',
+                canViewInApp: false,
+              },
+              {
+                title: 'A Pie',
+                canViewInApp: false,
+              },
+              {
+                title: 'A Dashboard',
+                canViewInApp: false,
+              },
+              {
+                title: `Global Settings [${version}]`,
+                canViewInApp: false,
+              },
+              {
+                title: `Advanced Settings [${version}]`,
+                canViewInApp: false,
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title))
+          );
         });
 
         it(`can't delete all saved objects`, async () => {

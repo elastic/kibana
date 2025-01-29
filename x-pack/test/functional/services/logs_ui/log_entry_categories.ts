@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function LogEntryCategoriesPageProvider({ getPageObjects, getService }: FtrProviderContext) {
@@ -23,6 +23,14 @@ export function LogEntryCategoriesPageProvider({ getPageObjects, getService }: F
 
     async getSetupScreen(): Promise<WebElementWrapper> {
       return await testSubjects.find('logEntryCategoriesSetupPage');
+    },
+
+    getNoMlReadPrivilegesPrompt() {
+      return testSubjects.find('logsMissingMLReadPrivileges');
+    },
+
+    getNoMlAllPrivilegesPrompt() {
+      return testSubjects.find('logsMissingMLAllPrivileges');
     },
   };
 }

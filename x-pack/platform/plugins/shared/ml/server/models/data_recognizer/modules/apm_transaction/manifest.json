@@ -1,0 +1,31 @@
+{
+  "id": "apm_transaction",
+  "title": "APM",
+  "description": "Legacy job for detecting anomalies in transaction latency, throughput and failure rate from your APM services for metric data. The latest version can be installed from the APM app in Observability.",
+  "type": "Transaction data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "apm-*-metric,metrics-apm*",
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "processor.event": "metric" } },
+        { "term": { "metricset.name": "transaction" } }
+      ],
+      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
+    }
+  },
+  "jobs": [
+    {
+      "id": "apm_tx_metrics",
+      "file": "apm_tx_metrics.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-apm_tx_metrics",
+      "file": "datafeed_apm_tx_metrics.json",
+      "job_id": "apm_tx_metrics"
+    }
+  ],
+  "tags": ["observability"]
+}

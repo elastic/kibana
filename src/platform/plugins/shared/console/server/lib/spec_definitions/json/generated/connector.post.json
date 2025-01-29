@@ -1,0 +1,21 @@
+{
+  "connector.post": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_connector"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/create-connector-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

@@ -14,6 +14,7 @@ interface PageProps {
   title: string;
   crumb?: string;
   isHome?: boolean;
+  children: React.ReactNode;
 }
 
 export const Page: React.FC<PageProps> = (props) => {
@@ -39,14 +40,14 @@ export const Page: React.FC<PageProps> = (props) => {
   }
 
   return (
-    <EuiPageTemplate offset={0}>
+    <EuiPageTemplate grow={false} offset={0}>
       <EuiPageTemplate.Header>
         <EuiTitle size="l">
           <h1>{title}</h1>
         </EuiTitle>
         <EuiBreadcrumbs responsive={false} breadcrumbs={breadcrumbs} />
       </EuiPageTemplate.Header>
-      <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="none">{children}</EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
 };

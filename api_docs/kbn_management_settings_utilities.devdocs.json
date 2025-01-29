@@ -2,26 +2,10 @@
   "id": "@kbn/management-settings-utilities",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.categorizeFields",
+        "id": "def-public.categorizeFields",
         "type": "Function",
         "tags": [],
         "label": "categorizeFields",
@@ -30,35 +14,29 @@
           "(fields: ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>[]) => ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.CategorizedFields",
+            "section": "def-public.CategorizedFields",
             "text": "CategorizedFields"
           }
         ],
-        "path": "packages/kbn-management/settings/utilities/category/categorize_fields.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/categorize_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.categorizeFields.$1",
+            "id": "def-public.categorizeFields.$1",
             "type": "Array",
             "tags": [],
             "label": "fields",
@@ -66,22 +44,16 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.FieldDefinition",
+                "section": "def-public.FieldDefinition",
                 "text": "FieldDefinition"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>[]"
             ],
-            "path": "packages/kbn-management/settings/utilities/category/categorize_fields.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/categorize_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,7 +64,72 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getCategoryName",
+        "id": "def-public.getCategoryCounts",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategoryCounts",
+        "description": [
+          "\nUtility function to extract the number of fields in each settings category."
+        ],
+        "signature": [
+          "(fields: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<",
+          "UiSettingsType",
+          ", string | number | boolean | (string | number)[] | null | undefined>[]) => ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.CategoryCounts",
+            "text": "CategoryCounts"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_counts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-public.getCategoryCounts.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "A list of {@link FieldDefinition } objects."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<",
+              "UiSettingsType",
+              ", string | number | boolean | (string | number)[] | null | undefined>[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_counts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A {@link CategoryCounts } object."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-public.getCategoryName",
         "type": "Function",
         "tags": [],
         "label": "getCategoryName",
@@ -100,13 +137,13 @@
         "signature": [
           "(category: string | undefined) => string"
         ],
-        "path": "packages/kbn-management/settings/utilities/category/get_category_name.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_name.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getCategoryName.$1",
+            "id": "def-public.getCategoryName.$1",
             "type": "string",
             "tags": [],
             "label": "category",
@@ -114,7 +151,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/category/get_category_name.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -125,7 +162,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -135,13 +172,13 @@
         "signature": [
           "(field: F<\"array\">, change: C<\"array\"> | undefined) => [string[], boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -151,14 +188,14 @@
             "signature": [
               "F<\"array\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -168,7 +205,7 @@
             "signature": [
               "C<\"array\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -179,7 +216,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -189,13 +226,13 @@
         "signature": [
           "(field: F<\"color\">, change: C<\"color\"> | undefined) => [string, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -205,14 +242,14 @@
             "signature": [
               "F<\"color\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -222,7 +259,7 @@
             "signature": [
               "C<\"color\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -233,7 +270,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -243,13 +280,13 @@
         "signature": [
           "(field: F<\"boolean\">, change: C<\"boolean\"> | undefined) => [boolean, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -259,14 +296,14 @@
             "signature": [
               "F<\"boolean\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -276,7 +313,7 @@
             "signature": [
               "C<\"boolean\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -287,7 +324,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -297,13 +334,13 @@
         "signature": [
           "(field: F<\"image\">, change: C<\"image\"> | undefined) => [string, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -313,14 +350,14 @@
             "signature": [
               "F<\"image\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -330,7 +367,7 @@
             "signature": [
               "C<\"image\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -341,7 +378,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -351,13 +388,13 @@
         "signature": [
           "(field: F<\"json\">, change: C<\"json\"> | undefined) => [string, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -367,14 +404,14 @@
             "signature": [
               "F<\"json\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -384,7 +421,7 @@
             "signature": [
               "C<\"json\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -395,7 +432,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -405,13 +442,13 @@
         "signature": [
           "(field: F<\"markdown\">, change: C<\"markdown\"> | undefined) => [string, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -421,14 +458,14 @@
             "signature": [
               "F<\"markdown\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -438,7 +475,7 @@
             "signature": [
               "C<\"markdown\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -449,7 +486,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -459,13 +496,13 @@
         "signature": [
           "(field: F<\"number\">, change: C<\"number\"> | undefined) => [number, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -475,14 +512,14 @@
             "signature": [
               "F<\"number\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -492,7 +529,7 @@
             "signature": [
               "C<\"number\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -503,7 +540,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -513,13 +550,13 @@
         "signature": [
           "(field: F<\"select\">, change: C<\"select\"> | undefined) => [string, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -529,14 +566,14 @@
             "signature": [
               "F<\"select\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -546,7 +583,7 @@
             "signature": [
               "C<\"select\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -557,7 +594,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -567,13 +604,13 @@
         "signature": [
           "(field: F<\"string\">, change: C<\"string\"> | undefined) => [string, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -583,14 +620,14 @@
             "signature": [
               "F<\"string\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -600,7 +637,7 @@
             "signature": [
               "C<\"string\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -611,7 +648,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -621,13 +658,13 @@
         "signature": [
           "(field: F<\"undefined\">, change: C<\"undefined\"> | undefined) => [string | null | undefined, boolean]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -637,14 +674,14 @@
             "signature": [
               "F<\"undefined\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -654,7 +691,7 @@
             "signature": [
               "C<\"undefined\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -665,7 +702,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.getFieldInputValue",
+        "id": "def-public.getFieldInputValue",
         "type": "Function",
         "tags": [],
         "label": "getFieldInputValue",
@@ -676,20 +713,20 @@
           "(field: F<S>, change: C<S> | undefined) => (boolean | ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.KnownTypeToValue",
+            "section": "def-public.KnownTypeToValue",
             "text": "KnownTypeToValue"
           },
           "<S> | null | undefined)[]"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$1",
+            "id": "def-public.getFieldInputValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -699,14 +736,14 @@
             "signature": [
               "F<S>"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.getFieldInputValue.$2",
+            "id": "def-public.getFieldInputValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -716,7 +753,7 @@
             "signature": [
               "C<S> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/get_input_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -727,7 +764,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.hasUnsavedChange",
+        "id": "def-public.hasUnsavedChange",
         "type": "Function",
         "tags": [],
         "label": "hasUnsavedChange",
@@ -736,46 +773,40 @@
         ],
         "signature": [
           "<T extends ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">(field: Pick<",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.FieldDefinition",
+            "section": "def-public.FieldDefinition",
             "text": "FieldDefinition"
           },
           "<T, ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.KnownTypeToValue",
+            "section": "def-public.KnownTypeToValue",
             "text": "KnownTypeToValue"
           },
           "<T> | null>, \"defaultValue\" | \"savedValue\">, unsavedChange?: Pick<",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
+            "section": "def-public.UnsavedFieldChange",
             "text": "UnsavedFieldChange"
           },
           "<T>, \"unsavedValue\"> | undefined) => boolean"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/has_unsaved_change.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/has_unsaved_change.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.hasUnsavedChange.$1",
+            "id": "def-public.hasUnsavedChange.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -786,29 +817,29 @@
               "Pick<",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.FieldDefinition",
+                "section": "def-public.FieldDefinition",
                 "text": "FieldDefinition"
               },
               "<T, ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.KnownTypeToValue",
+                "section": "def-public.KnownTypeToValue",
                 "text": "KnownTypeToValue"
               },
               "<T> | null>, \"defaultValue\" | \"savedValue\">"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/has_unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/has_unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.hasUnsavedChange.$2",
+            "id": "def-public.hasUnsavedChange.$2",
             "type": "Object",
             "tags": [],
             "label": "unsavedChange",
@@ -819,14 +850,14 @@
               "Pick<",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<T>, \"unsavedValue\"> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/has_unsaved_change.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/has_unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -837,7 +868,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.isFieldDefaultValue",
+        "id": "def-public.isFieldDefaultValue",
         "type": "Function",
         "tags": [],
         "label": "isFieldDefaultValue",
@@ -847,13 +878,13 @@
         "signature": [
           "(field: F<S>, change: C<S> | undefined) => boolean"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/is_default_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/is_default_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.isFieldDefaultValue.$1",
+            "id": "def-public.isFieldDefaultValue.$1",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -863,14 +894,14 @@
             "signature": [
               "F<S>"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/is_default_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/is_default_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.isFieldDefaultValue.$2",
+            "id": "def-public.isFieldDefaultValue.$2",
             "type": "Object",
             "tags": [],
             "label": "change",
@@ -880,7 +911,7 @@
             "signature": [
               "C<S> | undefined"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/is_default_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/is_default_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -891,7 +922,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.isSettingDefaultValue",
+        "id": "def-public.isSettingDefaultValue",
         "type": "Function",
         "tags": [],
         "label": "isSettingDefaultValue",
@@ -902,36 +933,30 @@
           "(setting: ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>, userValue?: ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.Value",
+            "section": "def-public.Value",
             "text": "Value"
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-management/settings/utilities/setting/is_default_value.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/is_default_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.isSettingDefaultValue.$1",
+            "id": "def-public.isSettingDefaultValue.$1",
             "type": "Object",
             "tags": [],
             "label": "setting",
@@ -941,29 +966,23 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UiSettingMetadata",
+                "section": "def-public.UiSettingMetadata",
                 "text": "UiSettingMetadata"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               ", string | number | boolean | (string | number)[] | null | undefined>"
             ],
-            "path": "packages/kbn-management/settings/utilities/setting/is_default_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/is_default_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.isSettingDefaultValue.$2",
+            "id": "def-public.isSettingDefaultValue.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "userValue",
@@ -973,13 +992,13 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.Value",
+                "section": "def-public.Value",
                 "text": "Value"
               }
             ],
-            "path": "packages/kbn-management/settings/utilities/setting/is_default_value.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/is_default_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -992,7 +1011,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.normalizeSettings",
+        "id": "def-public.normalizeSettings",
         "type": "Function",
         "tags": [],
         "label": "normalizeSettings",
@@ -1003,28 +1022,22 @@
           "(rawSettings: RawSettings) => Record<string, ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UiSettingMetadata",
+            "section": "def-public.UiSettingMetadata",
             "text": "UiSettingMetadata"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ", string | number | boolean | (string | number)[] | null | undefined>>"
         ],
-        "path": "packages/kbn-management/settings/utilities/setting/normalize_settings.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/normalize_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.normalizeSettings.$1",
+            "id": "def-public.normalizeSettings.$1",
             "type": "Object",
             "tags": [],
             "label": "rawSettings",
@@ -1034,7 +1047,7 @@
             "signature": [
               "RawSettings"
             ],
-            "path": "packages/kbn-management/settings/utilities/setting/normalize_settings.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/normalize_settings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1047,7 +1060,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.useUpdate",
+        "id": "def-public.useUpdate",
         "type": "Function",
         "tags": [],
         "label": "useUpdate",
@@ -1056,38 +1069,32 @@
         ],
         "signature": [
           "<T extends ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           ">(params: ",
           {
             "pluginId": "@kbn/management-settings-utilities",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
-            "section": "def-common.UseUpdateParameters",
+            "section": "def-public.UseUpdateParameters",
             "text": "UseUpdateParameters"
           },
           "<T>) => ",
           {
             "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.OnInputChangeFn",
+            "section": "def-public.OnInputChangeFn",
             "text": "OnInputChangeFn"
           },
           "<T>"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/use_update.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.useUpdate.$1",
+            "id": "def-public.useUpdate.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -1097,14 +1104,14 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-utilities",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
-                "section": "def-common.UseUpdateParameters",
+                "section": "def-public.UseUpdateParameters",
                 "text": "UseUpdateParameters"
               },
               "<T>"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/use_update.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1119,7 +1126,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/management-settings-utilities",
-        "id": "def-common.UseUpdateParameters",
+        "id": "def-public.UseUpdateParameters",
         "type": "Interface",
         "tags": [],
         "label": "UseUpdateParameters",
@@ -1127,20 +1134,20 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-utilities",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsUtilitiesPluginApi",
-            "section": "def-common.UseUpdateParameters",
+            "section": "def-public.UseUpdateParameters",
             "text": "UseUpdateParameters"
           },
           "<T>"
         ],
-        "path": "packages/kbn-management/settings/utilities/field/use_update.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.UseUpdateParameters.onInputChange",
+            "id": "def-public.UseUpdateParameters.onInputChange",
             "type": "Function",
             "tags": [],
             "label": "onInputChange",
@@ -1151,21 +1158,21 @@
               "(change?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
+                "section": "def-public.UnsavedFieldChange",
                 "text": "UnsavedFieldChange"
               },
               "<T> | undefined) => void"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/use_update.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-utilities",
-                "id": "def-common.UseUpdateParameters.onInputChange.$1",
+                "id": "def-public.UseUpdateParameters.onInputChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "change",
@@ -1173,14 +1180,14 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/management-settings-types",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnManagementSettingsTypesPluginApi",
-                    "section": "def-common.UnsavedFieldChange",
+                    "section": "def-public.UnsavedFieldChange",
                     "text": "UnsavedFieldChange"
                   },
                   "<T> | undefined"
                 ],
-                "path": "packages/kbn-management/settings/types/index.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1188,7 +1195,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-utilities",
-            "id": "def-common.UseUpdateParameters.field",
+            "id": "def-public.UseUpdateParameters.field",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -1199,22 +1206,22 @@
               "{ defaultValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.KnownTypeToValue",
+                "section": "def-public.KnownTypeToValue",
                 "text": "KnownTypeToValue"
               },
               "<T> | null | undefined; savedValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.KnownTypeToValue",
+                "section": "def-public.KnownTypeToValue",
                 "text": "KnownTypeToValue"
               },
               "<T> | null | undefined; }"
             ],
-            "path": "packages/kbn-management/settings/utilities/field/use_update.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1222,6 +1229,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

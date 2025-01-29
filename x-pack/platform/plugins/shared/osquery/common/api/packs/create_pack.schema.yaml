@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+  title: Create Pack Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  schemas:
+    CreatePacksRequestBody:
+      type: object
+      properties:
+        name:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
+        description:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DescriptionOrUndefined'
+        enabled:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/EnabledOrUndefined'
+        policy_ids:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PolicyIdsOrUndefined'
+        shards:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
+        queries:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
+

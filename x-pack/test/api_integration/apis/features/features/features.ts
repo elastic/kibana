@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { KibanaFeature } from '@kbn/features-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -97,18 +98,22 @@ export default function ({ getService }: FtrProviderContext) {
             'discover',
             'visualize',
             'dashboard',
+            'dataQuality',
             'dev_tools',
             'actions',
             'enterpriseSearch',
+            'enterpriseSearchApplications',
+            'enterpriseSearchAnalytics',
             'filesManagement',
             'filesSharedImage',
             'advancedSettings',
+            'aiAssistantManagementSelection',
             'indexPatterns',
             'graph',
             'guidedOnboardingFeature',
             'monitoring',
             'observabilityAIAssistant',
-            'observabilityCases',
+            'observabilityCasesV2',
             'savedObjectsManagement',
             'savedQueryManagement',
             'savedObjectsTagging',
@@ -116,21 +121,95 @@ export default function ({ getService }: FtrProviderContext) {
             'apm',
             'stackAlerts',
             'canvas',
-            'generalCases',
+            'generalCasesV2',
             'infrastructure',
+            'inventory',
             'logs',
             'maintenanceWindow',
             'maps',
             'osquery',
             'rulesSettings',
             'uptime',
-            'siem',
+            'searchInferenceEndpoints',
+            'searchPlayground',
+            'siemV2',
             'slo',
             'securitySolutionAssistant',
-            'securitySolutionCases',
+            'securitySolutionAttackDiscovery',
+            'securitySolutionCasesV2',
+            'securitySolutionTimeline',
+            'securitySolutionNotes',
             'fleet',
             'fleetv2',
+            'entityManager',
           ].sort()
+        );
+      });
+
+      it('should return a full feature set with correct scope', async () => {
+        const { body } = await supertest.get('/api/features').expect(200);
+        expect(body).to.be.an(Array);
+
+        const scopeAgnosticFeatures = [
+          'discover',
+          'visualize',
+          'dashboard',
+          'dataQuality',
+          'dev_tools',
+          'actions',
+          'enterpriseSearch',
+          'enterpriseSearchApplications',
+          'enterpriseSearchAnalytics',
+          'filesManagement',
+          'filesSharedImage',
+          'advancedSettings',
+          'aiAssistantManagementSelection',
+          'indexPatterns',
+          'graph',
+          'guidedOnboardingFeature',
+          'monitoring',
+          'observabilityAIAssistant',
+          'observabilityCasesV2',
+          'savedObjectsManagement',
+          'savedQueryManagement',
+          'savedObjectsTagging',
+          'ml',
+          'apm',
+          'stackAlerts',
+          'canvas',
+          'generalCasesV2',
+          'infrastructure',
+          'inventory',
+          'logs',
+          'maintenanceWindow',
+          'maps',
+          'osquery',
+          'rulesSettings',
+          'uptime',
+          'searchInferenceEndpoints',
+          'searchSynonyms',
+          'searchPlayground',
+          'siem',
+          'siemV2',
+          'slo',
+          'securitySolutionAssistant',
+          'securitySolutionAttackDiscovery',
+          'securitySolutionCasesV2',
+          'securitySolutionTimeline',
+          'securitySolutionNotes',
+          'fleet',
+          'fleetv2',
+          'entityManager',
+        ];
+
+        const features = body.filter(
+          (f: KibanaFeature) =>
+            f.scope?.includes(KibanaFeatureScope.Spaces) &&
+            f.scope?.includes(KibanaFeatureScope.Security)
+        );
+
+        expect(features.every((f: KibanaFeature) => scopeAgnosticFeatures.includes(f.id))).to.be(
+          true
         );
       });
     });

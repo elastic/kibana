@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
   describe('data view field editor example', function () {
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()`

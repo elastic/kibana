@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -179,13 +180,13 @@ describe('#downloadSnapshot()', () => {
 });
 
 describe('#installSource()', () => {
-  test('awaits installSource() promise and returns { installPath }', async () => {
+  test('awaits installSource() promise and returns { installPath, disableEsTmpDir }', async () => {
     let resolveInstallSource: Function;
     installSourceMock.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveInstallSource = () => {
-            resolve({ installPath: 'foo' });
+            resolve({ installPath: 'foo', disableEsTmpDir: false });
           };
         })
     );
@@ -196,11 +197,12 @@ describe('#installSource()', () => {
     resolveInstallSource!();
     await expect(ensureResolve(promise, 'installSource()')).resolves.toEqual({
       installPath: 'foo',
+      disableEsTmpDir: false,
     });
   });
 
   test('passes through all options+log to installSource()', async () => {
-    installSourceMock.mockResolvedValue({ installPath: 'foo' });
+    installSourceMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: false });
     const options: InstallSourceOptions = {
       sourcePath: 'bar',
       license: 'trial',
@@ -228,13 +230,13 @@ describe('#installSource()', () => {
 });
 
 describe('#installSnapshot()', () => {
-  test('awaits installSnapshot() promise and returns { installPath }', async () => {
+  test('awaits installSnapshot() promise and returns { installPath, disableEsTmpDir }', async () => {
     let resolveInstallSnapshot: Function;
     installSnapshotMock.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveInstallSnapshot = () => {
-            resolve({ installPath: 'foo' });
+            resolve({ installPath: 'foo', disableEsTmpDir: false });
           };
         })
     );
@@ -245,11 +247,12 @@ describe('#installSnapshot()', () => {
     resolveInstallSnapshot!();
     await expect(ensureResolve(promise, 'installSnapshot()')).resolves.toEqual({
       installPath: 'foo',
+      disableEsTmpDir: false,
     });
   });
 
   test('passes through all options+log to installSnapshot()', async () => {
-    installSnapshotMock.mockResolvedValue({ installPath: 'foo' });
+    installSnapshotMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: false });
     const options: InstallSnapshotOptions = {
       version: '8.10.0',
       license: 'trial',
@@ -278,13 +281,13 @@ describe('#installSnapshot()', () => {
 });
 
 describe('#installArchive()', () => {
-  test('awaits installArchive() promise and returns { installPath }', async () => {
+  test('awaits installArchive() promise and returns { installPath, disableEsTmpDir }', async () => {
     let resolveInstallArchive: Function;
     installArchiveMock.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveInstallArchive = () => {
-            resolve({ installPath: 'foo' });
+            resolve({ installPath: 'foo', disableEsTmpDir: false });
           };
         })
     );
@@ -295,11 +298,12 @@ describe('#installArchive()', () => {
     resolveInstallArchive!();
     await expect(ensureResolve(promise, 'installArchive()')).resolves.toEqual({
       installPath: 'foo',
+      disableEsTmpDir: false,
     });
   });
 
   test('passes through all options+log to installArchive()', async () => {
-    installArchiveMock.mockResolvedValue({ installPath: 'foo' });
+    installArchiveMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: true });
     const options: InstallArchiveOptions = {
       license: 'trial',
       password: 'changeme',
@@ -307,6 +311,8 @@ describe('#installArchive()', () => {
       installPath: 'someInstallPath',
       esArgs: ['foo=true'],
       log,
+      disableEsTmpDir: true,
+      resources: ['path/to/resource'],
     };
     const cluster = new Cluster({ log });
     await cluster.installArchive('bar', options);
@@ -723,12 +729,16 @@ describe('#kill()', () => {
 });
 
 describe('#runServerless()', () => {
+  const defaultOptions = {
+    projectType: 'es' as dockerUtils.ServerlessProjectType,
+    basePath: installPath,
+  };
   test(`rejects if #start() was called before`, async () => {
     mockEsBin({ start: true });
 
     const cluster = new Cluster({ log });
     await cluster.start(installPath, esClusterExecOptions);
-    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
       'ES stateful cluster has already been started'
     );
   });
@@ -738,7 +748,7 @@ describe('#runServerless()', () => {
 
     const cluster = new Cluster({ log });
     await cluster.run(installPath, esClusterExecOptions);
-    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
       'ES stateful cluster has already been started'
     );
   });
@@ -756,7 +766,7 @@ describe('#runServerless()', () => {
     );
 
     const cluster = new Cluster({ log });
-    const promise = cluster.runServerless({ basePath: installPath });
+    const promise = cluster.runServerless(defaultOptions);
     await ensureNoResolve(promise);
     resolveRunServerlessCluster!();
     await expect(ensureResolve(promise, 'runServerless()')).resolves.toEqual(nodeNames);
@@ -767,8 +777,8 @@ describe('#runServerless()', () => {
     runServerlessClusterMock.mockResolvedValueOnce(nodeNames);
 
     const cluster = new Cluster({ log });
-    await cluster.runServerless({ basePath: installPath });
-    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+    await cluster.runServerless(defaultOptions);
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError(
       'ES serverless docker cluster has already been started'
     );
   });
@@ -776,7 +786,7 @@ describe('#runServerless()', () => {
   test('rejects if #runServerlessCluster() rejects', async () => {
     runServerlessClusterMock.mockRejectedValueOnce(new Error('foo'));
     const cluster = new Cluster({ log });
-    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError('foo');
+    await expect(cluster.runServerless(defaultOptions)).rejects.toThrowError('foo');
   });
 
   test('passes through all options+log to #runServerlessCluster()', async () => {
@@ -785,6 +795,7 @@ describe('#runServerless()', () => {
 
     const cluster = new Cluster({ log });
     const serverlessOptions = {
+      projectType: 'es' as dockerUtils.ServerlessProjectType,
       clean: true,
       basePath: installPath,
       teardown: true,

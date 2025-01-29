@@ -33,8 +33,6 @@ export const GET_DATE_PICKER_END_DATE_POPOVER_BUTTON = (
   container: string = GLOBAL_FILTERS_CONTAINER
 ) => `${container} [data-test-subj="superDatePickerendDatePopoverButton"]`;
 
-export const DATE_PICKER_CONTAINER = `${GLOBAL_FILTERS_CONTAINER} .euiSuperDatePicker`;
-
 export const LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON =
   'button[data-test-subj="superDatePickerstartDatePopoverButton"]';
 
@@ -44,8 +42,6 @@ export const SHOW_DATES_BUTTON = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="s
 
 export const GET_LOCAL_SHOW_DATES_BUTTON = (container: string) =>
   `${container} [data-test-subj="superDatePickerShowDatesButton"]`;
-
-export const DATE_PICKER_SHOW_DATE_POPOVER_BUTTON = `${GLOBAL_FILTERS_CONTAINER} ${SHOW_DATES_BUTTON}`;
 
 export const GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON = (container: string = '') =>
   `${container} [data-test-subj="superDatePickerstartDatePopoverButton"]`;

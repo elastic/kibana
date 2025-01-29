@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('overview alert popover controls', async () => {
       await uptimeService.overview.openAlertsPopover();
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 

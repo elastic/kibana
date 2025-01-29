@@ -83,6 +83,25 @@ export const RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX =
 
 export const RULES_BULK_EDIT_TAGS_WARNING = '[data-test-subj="bulkEditRulesTagsWarning"]';
 
+// INVESTIGATION FIELDS
+export const INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="investigationFieldsBulkEditRule"]';
+
+export const ADD_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="addInvestigationFieldsBulkEditRule"]';
+
+export const DELETE_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="deleteInvestigationFieldsBulkEditRule"]';
+
+export const RULES_BULK_EDIT_INVESTIGATION_FIELDS =
+  '[data-test-subj="bulkEditRulesInvestigationFields"]';
+
+export const RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX =
+  '[data-test-subj="bulkEditRulesOverwriteInvestigationFields"]';
+
+export const RULES_BULK_EDIT_INVESTIGATION_FIELDS_WARNING =
+  '[data-test-subj="bulkEditRulesInvestigationFieldsWarning"]';
+
 // ENABLE/DISABLE
 export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
@@ -96,3 +115,8 @@ export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
 // EXPORT
 export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
+
+// SCHEDULE MANUAL RULE RUN
+export const BULK_MANUAL_RULE_RUN_BTN = '[data-test-subj="scheduleRuleRunBulk"]';
+
+export const BULK_MANUAL_RULE_RUN_WARNING_MODAL = '[data-test-subj="bulkActionConfirmationModal"]';

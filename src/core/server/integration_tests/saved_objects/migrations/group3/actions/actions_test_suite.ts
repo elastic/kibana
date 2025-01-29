@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
@@ -39,11 +40,12 @@ import {
   removeWriteBlock,
   transformDocs,
   waitForIndexStatus,
-  initAction,
+  fetchIndices,
   cloneIndex,
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
   createBulkIndexOperationTuple,
+  checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
 interface EsServer {
@@ -125,17 +127,19 @@ export const runActionTestSuite = ({
         properties: {},
       },
     })();
-    const docs100k = new Array(100000).fill({
+    const docs10k = new Array(10000).fill({
       _source: { title: new Array(1000).fill('a').join(), type: 'large' },
-    }) as unknown as SavedObjectsRawDoc[]; // 100k "large" saved objects
+    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
+    const operations = docs10k.map((doc) => createBulkIndexOperationTuple(doc));
 
-    await bulkOverwriteTransformedDocuments({
-      client,
-      index: 'existing_index_with_100k_docs',
-      operations: docs100k.map((doc) => createBulkIndexOperationTuple(doc)),
-      refresh: 'wait_for',
-    })();
-
+    for (let i = 0; i < 10; i++) {
+      await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'existing_index_with_100k_docs',
+        operations,
+        refresh: 'wait_for',
+      })();
+    }
     await createIndex({
       client,
       indexName: 'existing_index_2',
@@ -169,7 +173,7 @@ export const runActionTestSuite = ({
     await esServer.stop();
   });
 
-  describe('initAction', () => {
+  describe('fetchIndices', () => {
     afterAll(async () => {
       await client.cluster.putSettings({
         body: {
@@ -182,7 +186,7 @@ export const runActionTestSuite = ({
     });
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = initAction({ client, indices: ['no_such_index'] });
+      const task = fetchIndices({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -192,7 +196,7 @@ export const runActionTestSuite = ({
     });
     it('resolves right record with found indices', async () => {
       expect.assertions(1);
-      const res = (await initAction({
+      const res = (await fetchIndices({
         client,
         indices: ['no_such_index', 'existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -211,7 +215,7 @@ export const runActionTestSuite = ({
     });
     it('includes the _meta data of the indices in the response', async () => {
       expect.assertions(1);
-      const res = (await initAction({
+      const res = (await fetchIndices({
         client,
         indices: ['existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -237,6 +241,9 @@ export const runActionTestSuite = ({
         })
       );
     });
+  });
+
+  describe('checkClusterRoutingAllocation', () => {
     it('resolves left when cluster.routing.allocation.enabled is incompatible', async () => {
       expect.assertions(3);
       await client.cluster.putSettings({
@@ -247,10 +254,7 @@ export const runActionTestSuite = ({
           },
         },
       });
-      const task = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task = checkClusterRoutingAllocationEnabled(client);
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -267,10 +271,7 @@ export const runActionTestSuite = ({
           },
         },
       });
-      const task2 = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task2 = checkClusterRoutingAllocationEnabled(client);
       await expect(task2()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -287,10 +288,7 @@ export const runActionTestSuite = ({
           },
         },
       });
-      const task3 = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task3 = checkClusterRoutingAllocationEnabled(client);
       await expect(task3()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -309,10 +307,7 @@ export const runActionTestSuite = ({
           },
         },
       });
-      const task = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task = checkClusterRoutingAllocationEnabled(client);
       const result = await task();
       expect(Either.isRight(result)).toBe(true);
     });
@@ -464,7 +459,7 @@ export const runActionTestSuite = ({
         const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
         expect(redStatusResponse.status).toBe('red');
 
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'red_then_yellow_index',
           body: {
             // Enable all shard allocation so that the index status turns yellow
@@ -619,7 +614,7 @@ export const runActionTestSuite = ({
 
         let indexGreen = false;
         setTimeout(() => {
-          client.indices.putSettings({
+          void client.indices.putSettings({
             index: 'clone_red_then_green_index',
             body: {
               // Enable all shard allocation so that the index status goes green
@@ -777,9 +772,10 @@ export const runActionTestSuite = ({
     });
   });
 
-  // Reindex doesn't return any errors on it's own, so we have to test
+  // Reindex doesn't return any errors on its own, so we have to test
   // together with waitForReindexTask
-  // Failing: See https://github.com/elastic/kibana/issues/166190
+  // Flaky: https://github.com/elastic/kibana/issues/166190
+  // Reported here: https://github.com/elastic/kibana/issues/167273
   describe.skip('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
@@ -1358,11 +1354,15 @@ export const runActionTestSuite = ({
         query: { match_all: {} },
         batchSize: 1, // small batch size so we don't exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSizeBytes: 500, // set a small size to force the error
+        maxResponseSizeBytes: 5000, // make sure long ids don't cause es_response_too_large
       });
-      const rightResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+      const rightResponse = await readWithPitTask();
 
-      await expect(Either.isRight(rightResponse)).toBe(true);
+      if (Either.isLeft(rightResponse)) {
+        throw new Error(
+          `Expected a successful response but got ${JSON.stringify(rightResponse.left)}`
+        );
+      }
 
       readWithPitTask = readWithPit({
         client,
@@ -1370,17 +1370,12 @@ export const runActionTestSuite = ({
         query: { match_all: {} },
         batchSize: 10, // a bigger batch will exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSizeBytes: 500, // set a small size to force the error
+        maxResponseSizeBytes: 1000, // set a small size to force the error
       });
       const leftResponse = (await readWithPitTask()) as Either.Left<EsResponseTooLargeError>;
 
       expect(leftResponse.left.type).toBe('es_response_too_large');
-      // ES response contains a field that indicates how long it took ES to get the response, e.g.: "took": 7
-      // if ES takes more than 9ms, the payload will be 1 byte bigger.
-      // see https://github.com/elastic/kibana/issues/160994
-      // Thus, the statements below account for response times up to 99ms
       expect(leftResponse.left.contentLength).toBeGreaterThanOrEqual(3184);
-      expect(leftResponse.left.contentLength).toBeLessThanOrEqual(3185);
     });
 
     it('rejects if PIT does not exist', async () => {
@@ -1452,8 +1447,7 @@ export const runActionTestSuite = ({
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/166199
-  describe.skip('waitForPickupUpdatedMappingsTask', () => {
+  describe('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
@@ -1899,7 +1893,7 @@ export const runActionTestSuite = ({
         let indexYellow = false;
 
         setTimeout(() => {
-          client.indices.putSettings({
+          void client.indices.putSettings({
             index: 'red_then_yellow_index',
             body: {
               // Renable allocation so that the status becomes yellow
@@ -1952,7 +1946,7 @@ export const runActionTestSuite = ({
         let indexGreen = false;
 
         setTimeout(() => {
-          client.indices.putSettings({
+          void client.indices.putSettings({
             index: 'yellow_then_green_index',
             body: {
               // Set 0 replican so that this index becomes green
@@ -2093,31 +2087,6 @@ export const runActionTestSuite = ({
             },
           }
       `);
-    });
-
-    // no way to configure http.max_content_length on the serverless instance for now.
-    runOnTraditionalOnly(() => {
-      it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-        const newDocs = new Array(10000).fill({
-          _source: {
-            title:
-              'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-          },
-        }) as SavedObjectsRawDoc[];
-        const task = bulkOverwriteTransformedDocuments({
-          client,
-          index: 'existing_index_with_docs',
-          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-        });
-        await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
-      `);
-      });
     });
   });
 };

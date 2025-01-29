@@ -1,0 +1,592 @@
+{
+  "id": "@kbn/test-eui-helpers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiButtonGroupTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiButtonGroupTestHarness",
+        "description": [],
+        "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.buttonGroup",
+            "type": "Object",
+            "tags": [],
+            "label": "#buttonGroup",
+            "description": [
+              "\nReturns button group or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiButtonGroupTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [
+              "\nReturns `data-test-subj` of button group"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.self",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "self",
+            "description": [
+              "\nReturns button group if found, otherwise `null`"
+            ],
+            "signature": [
+              "HTMLElement | null"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.options",
+            "type": "Array",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "\nReturns all options of button groups"
+            ],
+            "signature": [
+              "HTMLElement[]"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.selected",
+            "type": "Object",
+            "tags": [],
+            "label": "selected",
+            "description": [
+              "\nReturns selected option of button group"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiButtonGroupTestHarness.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [
+              "\nSelect option from group"
+            ],
+            "signature": [
+              "(optionName: string | RegExp) => void"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiButtonGroupTestHarness.select.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "optionName",
+                "description": [],
+                "signature": [
+                  "string | RegExp"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiSelectTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiSelectTestHarness",
+        "description": [],
+        "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSelectTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSelectTestHarness.selectEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#selectEl",
+            "description": [
+              "\nReturns select or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSelectTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSelectTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSelectTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [
+              "\nReturns `data-test-subj` of select"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSelectTestHarness.self",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "self",
+            "description": [
+              "\nReturns button select if found, otherwise `null`"
+            ],
+            "signature": [
+              "HTMLElement | null"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSelectTestHarness.options",
+            "type": "Array",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "\nReturns all options of select"
+            ],
+            "signature": [
+              "HTMLOptionElement[]"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSelectTestHarness.selected",
+            "type": "string",
+            "tags": [],
+            "label": "selected",
+            "description": [
+              "\nReturns selected option"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSelectTestHarness.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [
+              "\nSelect option by value"
+            ],
+            "signature": [
+              "(optionName: string | RegExp) => void"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSelectTestHarness.select.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "optionName",
+                "description": [],
+                "signature": [
+                  "string | RegExp"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiSuperDatePickerTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiSuperDatePickerTestHarness",
+        "description": [],
+        "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.currentCommonlyUsedRange",
+            "type": "string",
+            "tags": [],
+            "label": "currentCommonlyUsedRange",
+            "description": [
+              "\nThis method returns the currently selected commonly-used range as a string\n\nThe empty string is returned if a commonly-used range is not currently selected"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.currentRange",
+            "type": "Object",
+            "tags": [],
+            "label": "currentRange",
+            "description": [
+              "\nThis method returns the currently selected range as a pair of strings"
+            ],
+            "signature": [
+              "{ from: string | null; to: string | null; }"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange",
+            "type": "Function",
+            "tags": [],
+            "label": "assertCurrentRange",
+            "description": [
+              "\nThis method runs an assertion against the currently selected range using\nUNIX timestamps.\n\nNOTE: it does not (yet) support commonly-used (textual) ranges like \"Last 15 minutes\""
+            ],
+            "signature": [
+              "(range: { from: number; to: number; }, expect: jest.Expect) => void"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange.$1.from",
+                    "type": "number",
+                    "tags": [],
+                    "label": "from",
+                    "description": [],
+                    "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-eui-helpers",
+                    "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange.$1.to",
+                    "type": "number",
+                    "tags": [],
+                    "label": "to",
+                    "description": [],
+                    "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperDatePickerTestHarness.assertCurrentRange.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "expect",
+                "description": [],
+                "signature": [
+                  "jest.Expect"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.togglePopover",
+            "type": "Function",
+            "tags": [],
+            "label": "togglePopover",
+            "description": [
+              "\nOpens the popover for the date picker"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.selectCommonlyUsedRange",
+            "type": "Function",
+            "tags": [],
+            "label": "selectCommonlyUsedRange",
+            "description": [
+              "\nSelects a commonly-used range from the date picker (opens the popover if it's not already open)"
+            ],
+            "signature": [
+              "(label: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiSuperDatePickerTestHarness.selectCommonlyUsedRange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiSuperDatePickerTestHarness.refresh",
+            "type": "Function",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "\nActivates the refresh button"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.getSelectedButtonInGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "getSelectedButtonInGroup",
+        "description": [],
+        "signature": [
+          "(testId: string, container?: any) => () => HTMLElement"
+        ],
+        "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.getSelectedButtonInGroup.$1",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.getSelectedButtonInGroup.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "container",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

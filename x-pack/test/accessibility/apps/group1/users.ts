@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         confirm_password: 'password',
         full_name: 'a11y user',
         email: 'example@example.com',
-        roles: ['apm_user'],
+        roles: ['editor'],
       });
       await testSubjects.click('rolesDropdown');
       await a11y.testAppSnapshot();
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         confirm_password: 'password',
         full_name: 'DeleteA11y user',
         email: 'example@example.com',
-        roles: ['apm_user'],
+        roles: ['editor'],
       });
       await testSubjects.click('checkboxSelectRow-deleteA11y');
       await a11y.testAppSnapshot();

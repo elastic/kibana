@@ -39,6 +39,7 @@ All rule types pass the following variables:
 `rule.params`:: The rule parameters, which vary by rule type.
 `rule.spaceId`:: The space identifier for the rule.
 `rule.tags`:: The list of tags applied to the rule.
+`rule.url`:: The URL for the rule that generated the alert. This will be an empty string if the `server.publicBaseUrl` setting is not configured.
 
 [float]
 [role="child_attributes"]
@@ -107,6 +108,7 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 `alert.actionGroup`:: The ID of the action group of the alert that scheduled the action.
 `alert.actionGroupName`:: The name of the action group of the alert that scheduled the action.
 `alert.actionSubgroup`:: The action subgroup of the alert that scheduled the action.
+`alert.consecutiveMatches`:: The number of consecutive runs that meet the rule conditions.
 `alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly.
 `alert.id`:: The ID of the alert that scheduled the action.
 `alert.uuid`:: A universally unique identifier for the alert. While the alert is active, the UUID value remains unchanged each time the rule runs. preview:[]

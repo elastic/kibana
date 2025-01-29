@@ -21,7 +21,6 @@ import {
   DETECTION_RESPONSE,
   DASHBOARDS,
   CSP_DASHBOARD,
-  KUBERNETES,
   INDICATORS,
   BLOCKLIST,
   CSP_BENCHMARKS,
@@ -40,7 +39,6 @@ import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import {
   ALERTS_URL,
   CASES_URL,
-  hostsUrl,
   KIBANA_HOME,
   ENDPOINTS_URL,
   TRUSTED_APPS_URL,
@@ -55,7 +53,6 @@ import {
   EXPLORE_URL,
   MANAGE_URL,
   CSP_DASHBOARD_URL,
-  KUBERNETES_URL,
   BLOCKLIST_URL,
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
@@ -71,6 +68,7 @@ import {
   ASSETS_URL,
   FLEET_URL,
   CLOUD_DEFEND_URL,
+  HOSTS_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
@@ -114,11 +112,6 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
 
-  it('navigates to the Kubernetes page', () => {
-    navigateFromHeaderTo(KUBERNETES);
-    cy.url().should('include', KUBERNETES_URL);
-  });
-
   it('navigates to the CSP dashboard page', () => {
     navigateFromHeaderTo(CSP_DASHBOARD);
     cy.url().should('include', CSP_DASHBOARD_URL);
@@ -146,7 +139,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(HOSTS);
-    cy.url().should('include', hostsUrl('allHosts'));
+    cy.url().should('include', HOSTS_URL);
   });
 
   it('navigates to the Network page', () => {
@@ -289,11 +282,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
 
-  it('navigates to the Kubernetes page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.KUBERNETES, true);
-    cy.url().should('include', KUBERNETES_URL);
-  });
-
   it('navigates to the CSP dashboard page', () => {
     navigateFromHeaderTo(ServerlessHeaders.CSP_DASHBOARD, true);
     cy.url().should('include', CSP_DASHBOARD_URL);
@@ -364,7 +352,7 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(ServerlessHeaders.HOSTS, true);
-    cy.url().should('include', hostsUrl('allHosts'));
+    cy.url().should('include', HOSTS_URL);
   });
 
   it('navigates to the Network page', () => {

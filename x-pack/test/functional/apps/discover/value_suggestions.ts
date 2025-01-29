@@ -14,15 +14,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'settings', 'context']);
+  const { common, timePicker, settings, context } = getPageObjects([
+    'common',
+    'timePicker',
+    'settings',
+    'context',
+  ]);
 
   async function setAutocompleteUseTimeRange(value: boolean) {
-    await PageObjects.settings.navigateTo();
-    await PageObjects.settings.clickKibanaSettings();
-    await PageObjects.settings.toggleAdvancedSettingCheckbox(
-      UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE,
-      value
-    );
+    await settings.navigateTo();
+    await settings.clickKibanaSettings();
+    await settings.toggleAdvancedSettingCheckbox(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE, value);
   }
 
   describe('value suggestions', function describeIndexTests() {
@@ -33,15 +35,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
       );
-      await kibanaServer.uiSettings.update({
-        'doc_table:legacy': false,
-      });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.unset('doc_table:legacy');
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
@@ -51,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
       });
 
       describe('discover', () => {
@@ -60,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('dont show up if outside of range', async () => {
-          await PageObjects.timePicker.setAbsoluteRange(
+          await timePicker.setAbsoluteRange(
             'Mar 1, 2020 @ 00:00:00.000',
             'Nov 1, 2020 @ 00:00:00.000'
           );
@@ -70,13 +68,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('show up if in range', async () => {
-          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await timePicker.setDefaultAbsoluteRange();
           await queryBar.setQuery('extension.raw : ');
           await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
         });
 
         it('also displays descriptions for operators', async () => {
-          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await timePicker.setDefaultAbsoluteRange();
           await queryBar.setQuery('extension.raw');
           await queryBar.expectSuggestionsDescription({ count: 2 });
         });
@@ -89,13 +87,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('shows all autosuggest options for a filter in discover context app', async () => {
           // Set a good time range
-          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await timePicker.setDefaultAbsoluteRange();
 
           // navigate to context
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
           await rowActions[1].click();
-          await PageObjects.context.waitUntilContextLoadingHasFinished();
+          await context.waitUntilContextLoadingHasFinished();
 
           // Apply filter in context view
           await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'US' });
@@ -109,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
       });
 
       afterEach(async () => {
@@ -117,13 +115,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSettings();
-        await PageObjects.settings.clearAdvancedSettings(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
+        await settings.navigateTo();
+        await settings.clickKibanaSettings();
+        await settings.clearAdvancedSettings(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
       });
 
       it('DO show up if outside of range', async () => {
-        await PageObjects.timePicker.setAbsoluteRange(
+        await timePicker.setAbsoluteRange(
           'Mar 1, 2020 @ 00:00:00.000',
           'Nov 1, 2020 @ 00:00:00.000'
         );
@@ -133,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('show up', async () => {
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await timePicker.setDefaultAbsoluteRange();
         await queryBar.setQuery('extension.raw : ');
         await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
       });

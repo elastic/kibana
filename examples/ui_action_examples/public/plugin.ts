@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
@@ -29,15 +30,14 @@ export class UiActionExamplesPlugin
   ) {
     uiActions.registerTrigger(helloWorldTrigger);
 
-    const helloWorldAction = createHelloWorldActionDefinition(async () => ({
-      openModal: (await core.getStartServices())[0].overlays.openModal,
-    }));
+    const helloWorldAction = createHelloWorldActionDefinition(
+      async () => (await core.getStartServices())[0]
+    );
 
-    uiActions.registerAction(helloWorldAction);
     uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
   }
 
-  public start(core: CoreStart, plugins: UiActionExamplesStartDependencies) {}
+  public start(_core: CoreStart, _plugins: UiActionExamplesStartDependencies) {}
 
   public stop() {}
 }

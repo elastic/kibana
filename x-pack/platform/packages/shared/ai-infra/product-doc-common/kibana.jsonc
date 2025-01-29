@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/product-doc-common",
+  "owner": [
+    "@elastic/appex-ai-infra"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

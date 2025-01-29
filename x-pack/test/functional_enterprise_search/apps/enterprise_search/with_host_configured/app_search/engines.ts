@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { Browser } from '@kbn/ftr-common-functional-ui-services';
 import { AppSearchService, IEngine } from '../../../../services/app_search_service';
-import { Browser } from '../../../../../../../test/functional/services/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function enterpriseSearchSetupEnginesTests({
@@ -34,9 +34,9 @@ export default function enterpriseSearchSetupEnginesTests({
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      appSearch.destroyEngine(engine1.name);
-      appSearch.destroyEngine(engine2.name);
-      appSearch.destroyEngine(metaEngine.name);
+      await appSearch.destroyEngine(engine1.name);
+      await appSearch.destroyEngine(engine2.name);
+      await appSearch.destroyEngine(metaEngine.name);
     });
 
     describe('when an enterpriseSearch.host is configured', () => {

@@ -11,7 +11,7 @@ This guide introduces you to three of {kib}'s security features: spaces, roles, 
 [float]
 === Spaces
 
-Do you have multiple teams or tenants using {kib}? Do you want a “playground” to experiment with new visualizations or rules? If so, then <<xpack-spaces,{kib} Spaces>> can help.
+Do you have multiple teams using {kib}? Do you want a “playground” to experiment with new visualizations or rules? If so, then <<xpack-spaces,{kib} Spaces>> can help.
 
 Think of a space as another instance of {kib}. A space allows you to organize your <<dashboard, dashboards>>, <<alerting-getting-started, rules>>, <<xpack-ml, machine learning jobs>>, and much more into their own categories. For example, you might have a Marketing space for your marketeers to track the results of their campaigns, and an Engineering space for your developers to {apm-guide-ref}/apm-overview.html[monitor application performance].
 
@@ -52,8 +52,8 @@ Let’s work through an example together. Consider a marketing analyst who wants
 
 Create a Marketing space for your marketing analysts to use.
 
-. Open the main menu, and select **Stack Management**.
-. Under **{kib}**, select **Spaces**.
+. Go to the *Spaces* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . Click **Create a space**.
 . Give this space a unique name. For example: `Marketing`.
 . Click **Create space**.
@@ -75,8 +75,8 @@ In this example, a marketing analyst will need:
 
 To create the role:
 
-. Open the main menu, and select **Stack Management**.
-. Under **Security**, select **Roles**.
+. Go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . Click **Create role**.
 . Give this role a unique name. For example: `marketing_dashboards_role`.
 . For this example, you want to store all marketing data in the `acme-marketing-*` set of indices. To grant this access, locate the **Index privileges** section and enter:

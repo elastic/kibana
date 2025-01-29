@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import type { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../services/types';
 
 type ServiceStatusSerialized = Omit<ServiceStatus, 'level'> & { level: string };
@@ -29,19 +31,21 @@ export default function ({ getService }: FtrProviderContext) {
     supertest
       .post(`/internal/status_plugin_a/status/set?level=${level}`)
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(200);
 
-  describe('status service', () => {
+  describe('status service', function () {
+    this.tags('skipFIPS');
     // This test must come first because the timeout only applies to the initial emission
     it("returns a timeout for status check that doesn't emit after 30s", async () => {
       let aStatus = await getStatus('statusPluginA');
-      expect(aStatus.level).to.eql('unavailable');
+      expect(aStatus === undefined || aStatus.level === 'unavailable').to.eql(true);
 
       // Status will remain in unavailable until the custom status check times out
       // Keep polling until that condition ends, up to a timeout
       await retry.waitForWithTimeout(`Status check to timeout`, 40_000, async () => {
         aStatus = await getStatus('statusPluginA');
-        return aStatus.summary === 'Status check timed out after 30s';
+        return aStatus?.summary === 'Status check timed out after 30s';
       });
 
       expect(aStatus.level).to.eql('unavailable');
@@ -53,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.waitForWithTimeout(
         `statusPluginA status to update`,
         5_000,
-        async () => (await getStatus('statusPluginA')).level === 'degraded'
+        async () => (await getStatus('statusPluginA'))?.level === 'degraded'
       );
       await statusPropagation();
       expect((await getStatus('statusPluginA')).level).to.eql('degraded');

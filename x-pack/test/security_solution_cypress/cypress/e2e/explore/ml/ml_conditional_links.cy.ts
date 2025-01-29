@@ -26,7 +26,8 @@ import {
   mlNetworkSingleIpNullKqlQuery,
 } from '../../../urls/ml_conditional_links';
 
-describe('ml conditional links', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/180748
+describe.skip('ml conditional links', { tags: ['@ess', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
   });

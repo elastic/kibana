@@ -14,29 +14,40 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
+import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import { v4 as uuidv4 } from 'uuid';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+import { omitMonitorKeys } from './add_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('getSyntheticsMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const kibanaServer = getService('kibanaServer');
+    const retry = getService('retry');
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
 
-    const saveMonitor = async (monitor: MonitorFields) => {
-      const res = await supertest
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(monitor)
-        .expect(200);
+    const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
+      let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?internal=true';
+      if (spaceId) {
+        url = '/s/' + spaceId + url;
+      }
+      const res = await supertest.post(url).set('kbn-xsrf', 'true').send(monitor);
+
+      expect(res.status).eql(200, JSON.stringify(res.body));
 
       return res.body as EncryptedSyntheticsSavedMonitor;
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
@@ -56,10 +67,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('get many monitors', () => {
       it('without params', async () => {
-        const [mon1, mon2] = await Promise.all(monitors.map(saveMonitor));
+        const [mon1, mon2] = await Promise.all(monitors.map((mon) => saveMonitor(mon)));
 
         const apiResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?perPage=1000') // 1000 to sort of load all saved monitors
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?perPage=1000&internal=true') // 1000 to sort of load all saved monitors
           .expect(200);
 
         const found: MonitorFields[] = apiResponse.body.monitors.filter(({ id }: MonitorFields) =>
@@ -81,30 +92,39 @@ export default function ({ getService }: FtrProviderContext) {
           expect(moment(updatedAt).isValid()).to.be(true);
         });
 
-        expect(foundMonitors.map((fm) => omit(fm, 'updated_at', 'created_at'))).eql(
-          expected.map((expectedMon) => omit(expectedMon, 'updated_at', 'created_at'))
+        expect(foundMonitors.map((fm) => omit(fm, 'updated_at', 'created_at', 'spaceId'))).eql(
+          expected.map((expectedMon) =>
+            omit(expectedMon, ['updated_at', 'created_at', ...secretKeys])
+          )
         );
       });
 
       it('with page params', async () => {
-        await Promise.all([...monitors, ...monitors].map(saveMonitor));
+        const allMonitors = [...monitors, ...monitors];
+        for (const mon of allMonitors) {
+          await saveMonitor({ ...mon, name: mon.name + Date.now() });
+        }
 
-        const firstPageResp = await supertest
-          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
-          .expect(200);
-        const secondPageResp = await supertest
-          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResp = await supertest
+            .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
+            .expect(200);
+          const secondPageResp = await supertest
+            .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
+            .expect(200);
 
-        expect(firstPageResp.body.total).greaterThan(6);
-        expect(firstPageResp.body.monitors.length).eql(2);
-        expect(secondPageResp.body.monitors.length).eql(3);
+          expect(firstPageResp.body.total).greaterThan(6);
+          expect(firstPageResp.body.monitors.length).eql(2);
+          expect(secondPageResp.body.monitors.length).eql(3);
 
-        expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
+          expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
+        });
       });
 
       it('with single monitorQueryId filter', async () => {
-        const [_, { id: id2 }] = await Promise.all(monitors.map(saveMonitor));
+        const [_, { id: id2 }] = await Promise.all(
+          monitors.map((mon) => ({ ...mon, name: mon.name + '2' })).map((mon) => saveMonitor(mon))
+        );
 
         const resp = await supertest
           .get(
@@ -118,7 +138,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('with multiple monitorQueryId filter', async () => {
-        const [_, { id: id2 }, { id: id3 }] = await Promise.all(monitors.map(saveMonitor));
+        const [_, { id: id2 }, { id: id3 }] = await Promise.all(
+          monitors.map((mon) => ({ ...mon, name: mon.name + '3' })).map((monT) => saveMonitor(monT))
+        );
 
         const resp = await supertest
           .get(
@@ -147,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
               [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId1,
               [ConfigKey.NAME]: `NAME-${customHeartbeatId1}`,
             },
-          ].map(saveMonitor)
+          ].map((monT) => saveMonitor(monT))
         );
 
         const resp = await supertest
@@ -162,25 +184,92 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resultMonitorIds.length).eql(2);
         expect(resultMonitorIds).eql([customHeartbeatId0, customHeartbeatId1]);
       });
+
+      it('gets monitors from all spaces', async () => {
+        const SPACE_ID = `test-space-${uuidv4()}`;
+        const SPACE_NAME = `test-space-name ${uuidv4()}`;
+        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+
+        const allMonitors = [...monitors, ...monitors];
+        for (const mon of allMonitors) {
+          await saveMonitor({ ...mon, name: mon.name + Date.now() }, SPACE_ID);
+        }
+
+        const firstPageResp = await supertest
+          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=1000`)
+          .expect(200);
+        const defaultSpaceMons = firstPageResp.body.monitors.filter(
+          ({ spaceId }: { spaceId: string }) => spaceId === 'default'
+        );
+        const testSpaceMons = firstPageResp.body.monitors.filter(
+          ({ spaceId }: { spaceId: string }) => spaceId === SPACE_ID
+        );
+
+        expect(defaultSpaceMons.length).to.eql(22);
+        expect(testSpaceMons.length).to.eql(0);
+
+        const res = await supertest
+          .get(
+            `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=1000&showFromAllSpaces=true`
+          )
+          .expect(200);
+
+        const defaultSpaceMons1 = res.body.monitors.filter(
+          ({ spaceId }: { spaceId: string }) => spaceId === 'default'
+        );
+        const testSpaceMons1 = res.body.monitors.filter(
+          ({ spaceId }: { spaceId: string }) => spaceId === SPACE_ID
+        );
+
+        expect(defaultSpaceMons1.length).to.eql(22);
+        expect(testSpaceMons1.length).to.eql(8);
+      });
     });
 
     describe('get one monitor', () => {
       it('should get by id', async () => {
-        const [{ id: id1 }] = await Promise.all(monitors.map(saveMonitor));
+        const [{ id: id1 }] = await Promise.all(
+          monitors.map((mon) => ({ ...mon, name: mon.name + '4' })).map((monT) => saveMonitor(monT))
+        );
 
-        const apiResponse = await supertest
-          .get(
-            SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id1) +
-              '?decrypted=true'
+        const apiResponse = await monitorTestService.getMonitor(id1);
+
+        expect(apiResponse.body).eql(
+          omitMonitorKeys({
+            ...monitors[0],
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            revision: 1,
+            locations: [LOCAL_LOCATION],
+            name: 'Test HTTP Monitor 044',
+          })
+        );
+      });
+
+      it('should get by id with ui query param', async () => {
+        const [{ id: id1 }] = await Promise.all(
+          monitors.map((mon) => ({ ...mon, name: mon.name + '5' })).map((monT) => saveMonitor(monT))
+        );
+
+        const apiResponse = await monitorTestService.getMonitor(id1, { internal: true });
+
+        expect(apiResponse.body).eql(
+          omit(
+            {
+              ...monitors[0],
+              form_monitor_type: 'icmp',
+              revision: 1,
+              locations: [LOCAL_LOCATION],
+              name: 'Test HTTP Monitor 045',
+              hosts: '192.33.22.111:3333',
+              hash: '',
+              journey_id: '',
+              max_attempts: 2,
+              labels: {},
+            },
+            ['config_id', 'id', 'form_monitor_type']
           )
-          .expect(200);
-
-        expect(apiResponse.body).eql({
-          ...monitors[0],
-          [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-          [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-          revision: 1,
-        });
+        );
       });
 
       it('returns 404 if monitor id is not found', async () => {

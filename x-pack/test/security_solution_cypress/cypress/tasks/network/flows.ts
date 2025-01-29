@@ -26,7 +26,7 @@ export const openHoverActions = () => {
 };
 
 export const mouseoverOnToOverflowItem = () => {
-  cy.get(OVERFLOW_ITEM).first().realHover();
+  cy.get(OVERFLOW_ITEM).first().trigger('mouseover');
 };
 
 export const clickOnFilterIn = () => {
@@ -47,6 +47,5 @@ export const clickOnShowTopN = () => {
 };
 
 export const clickOnCopyValue = () => {
-  cy.get(COPY).first().focus();
-  cy.focused().click({ force: true }); // eslint-disable-line cypress/unsafe-to-chain-command
+  cy.get(COPY).first().click();
 };

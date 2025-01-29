@@ -1,0 +1,21 @@
+title: Connector request properties for an index connector
+required:
+  - index
+description: Defines properties for connectors when type is `.index`.
+type: object
+properties:
+  executionTimeField:
+    description: A field that indicates when the document was indexed.
+    default: null
+    type: string
+    nullable: true
+  index:
+    description: The Elasticsearch index to be written to.
+    type: string
+  refresh:
+    description: >
+      The refresh policy for the write request, which affects when changes are
+      made visible to search. Refer to the refresh setting for Elasticsearch
+      document APIs.
+    default: false
+    type: boolean

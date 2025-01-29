@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visEditor, visualize, lens, timePicker, visChart } = getPageObjects([
+  const { visEditor, visualize, lens, visChart, timePicker } = getPageObjects([
     'visEditor',
     'visualize',
     'visChart',
@@ -21,10 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
 
   describe('Metric', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
@@ -49,7 +47,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: '',
           value: '14,005',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -79,7 +78,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: '',
           value: '13,104,036,080.615',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -109,7 +109,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: '',
           value: '1,437',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -163,7 +164,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: 'Average machine.ram',
           extraText: '',
           value: '13,228,964,670.613',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -172,7 +174,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: 'Average machine.ram',
           extraText: '',
           value: '13,186,695,551.251',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -181,7 +184,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: 'Average machine.ram',
           extraText: '',
           value: '13,073,190,186.423',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -190,7 +194,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: 'Average machine.ram',
           extraText: '',
           value: '13,031,579,645.108',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -199,7 +204,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: 'Average machine.ram',
           extraText: '',
           value: '13,009,497,206.823',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -208,7 +214,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: undefined,
           value: undefined,
-          color: 'rgba(0, 0, 0, 0)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -216,7 +223,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dimensions[0].click();
 
-      await lens.openPalettePanel('lnsMetric');
+      await lens.openPalettePanel();
       const colorStops = await lens.getPaletteColorStops();
 
       expect(colorStops).to.eql([

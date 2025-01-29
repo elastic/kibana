@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         results: {
           title: 'artificial_server_log',
-          numberOfFields: 4,
+          highlightedText: true,
         },
         metricFields: [
           {
@@ -85,6 +85,24 @@ export default function ({ getService }: FtrProviderContext) {
             docCountFormatted: '19 (100%)',
           },
         ],
+        allFields: [
+          '@timestamp',
+          'http',
+          'http.request',
+          'http.request.method',
+          'http.response',
+          'http.response.body',
+          'http.response.body.bytes',
+          'http.response.status_code',
+          'http.version',
+          'message',
+          'source',
+          'source.address',
+          'url',
+          'url.original',
+          'user_agent',
+          'user_agent.original',
+        ],
         visibleMetricFieldsCount: 3,
         totalMetricFieldsCount: 3,
         populatedFieldsCount: 9,
@@ -104,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         results: {
           title: 'geo_file.csv',
-          numberOfFields: 3,
+          highlightedText: false,
         },
         metricFields: [],
         nonMetricFields: [
@@ -127,6 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
             exampleCount: 7,
           },
         ],
+        allFields: ['Coordinates', 'Location'],
         visibleMetricFieldsCount: 0,
         totalMetricFieldsCount: 0,
         populatedFieldsCount: 3,
@@ -146,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         results: {
           title: 'missing_end_of_file_newline.csv',
-          numberOfFields: 3,
+          highlightedText: false,
         },
         metricFields: [
           {
@@ -171,6 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
             exampleCount: 3,
           },
         ],
+        allFields: ['description', 'title', 'value'],
         visibleMetricFieldsCount: 0,
         totalMetricFieldsCount: 0,
         populatedFieldsCount: 3,
@@ -178,6 +198,77 @@ export default function ({ getService }: FtrProviderContext) {
         fieldTypeFiltersResultCount: 3,
         fieldNameFiltersResultCount: 3,
         ingestedDocCount: 3,
+      },
+    },
+    {
+      suiteSuffix: 'with a file which does not generate a ingest pipeline',
+      filePath: require.resolve('./files_to_import/flights_small.json'),
+      indexName: 'user-import_4',
+      createIndexPattern: false,
+      fieldTypeFilters: [ML_JOB_FIELD_TYPES.KEYWORD],
+      fieldNameFilters: ['timestamp'],
+      expected: {
+        results: {
+          title: 'flights_small.json',
+          highlightedText: false,
+        },
+        metricFields: [],
+        nonMetricFields: [
+          {
+            fieldName: 'Carrier',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            docCountFormatted: '20 (100%)',
+            exampleCount: 4,
+          },
+          {
+            fieldName: 'timestamp',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            docCountFormatted: '20 (100%)',
+            exampleCount: 11,
+          },
+        ],
+        allFields: [
+          'AvgTicketPrice',
+          'Cancelled',
+          'Carrier',
+          'Dest',
+          'DestAirportID',
+          'DestCityName',
+          'DestCountry',
+          'DestLocation',
+          'DestLocation.lat',
+          'DestLocation.lat.keyword',
+          'DestLocation.lon',
+          'DestLocation.lon.keyword',
+          'DestRegion',
+          'DestWeather',
+          'DistanceKilometers',
+          'FlightDelayMin',
+          'FlightDelayType',
+          'FlightNum',
+          'FlightTimeHour',
+          'FlightTimeMin',
+          'Origin',
+          'OriginAirportID',
+          'OriginCityName',
+          'OriginCountry',
+          'OriginLocation',
+          'OriginLocation.lat',
+          'OriginLocation.lat.keyword',
+          'OriginLocation.lon',
+          'OriginLocation.lon.keyword',
+          'OriginRegion',
+          'OriginWeather',
+          'dayOfWeek',
+          'timestamp',
+        ],
+        visibleMetricFieldsCount: 0,
+        totalMetricFieldsCount: 0,
+        populatedFieldsCount: 3,
+        totalFieldsCount: 25,
+        fieldTypeFiltersResultCount: 16,
+        fieldNameFiltersResultCount: 1,
+        ingestedDocCount: 20,
       },
     },
   ];
@@ -217,6 +308,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the components of the file details page');
           await ml.dataVisualizerFileBased.assertFileTitle(testData.expected.results.title);
           await ml.dataVisualizerFileBased.assertFileContentPanelExists();
+          await ml.dataVisualizerFileBased.assertFileContentHighlightingSwitchExists(
+            testData.expected.results.highlightedText
+          );
+          await ml.dataVisualizerFileBased.assertFileContentHighlighting(
+            testData.expected.results.highlightedText,
+            testData.expected.totalFieldsCount - 1 // -1 for the message field
+          );
           await ml.dataVisualizerFileBased.assertSummaryPanelExists();
           await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
 
@@ -306,6 +404,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('closes filebeat config');
           await ml.dataVisualizerFileBased.closeCreateFilebeatConfig();
+
+          await ml.dataVisualizerFileBased.assertDocCountInIndex(
+            testData.indexName,
+            testData.expected.ingestedDocCount
+          );
+
+          await ml.dataVisualizerFileBased.assertFieldsFromIndex(
+            testData.indexName,
+            testData.expected.allFields
+          );
         });
       });
     }

@@ -16,7 +16,7 @@ import type SuperTest from 'supertest';
  * @returns Review Upgrade prebuilt rules response
  */
 export const reviewPrebuiltRulesToUpgrade = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<ReviewRuleUpgradeResponseBody> => {
   const response = await supertest
     .post(REVIEW_RULE_UPGRADE_URL)

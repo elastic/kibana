@@ -1,0 +1,137 @@
+.kbnBody--hasEmbeddableConsole .euiPageTemplate main {
+  // Ensure page content is not overlapped by console control bar
+  padding-bottom: $embeddableConsoleInitialHeight;
+}
+
+.embeddableConsole {
+  background: $embeddableConsoleBackground;
+  color: $embeddableConsoleText;
+  display: flex;
+  flex-direction: column;
+  // This large box shadow helps prevent a flicker of dark
+  // background when the content is shown and hidden
+  box-shadow: inset 0 $embeddableConsoleInitialHeight 0 $embeddableConsoleBackground, inset 0 600rem 0 $euiPageBackgroundColor;
+  bottom: 0;
+  right: 0;
+  transform: translateY(0);
+  height: $embeddableConsoleInitialHeight;
+  max-height: $embeddableConsoleMaxHeight;
+
+  &--fixed {
+    position: fixed;
+    z-index: $euiZLevel1 - 2;
+  }
+
+  &--projectChrome {
+    left: var(--euiCollapsibleNavOffset, 0);
+  }
+
+  &--classicChrome {
+    left: var(--kbnSolutionNavOffset, 0);
+  }
+
+  &--unknownChrome {
+    left: 0;
+  }
+
+  &-isOpen {
+    animation-duration: $euiAnimSpeedNormal;
+    animation-timing-function: $euiAnimSlightResistance;
+    animation-fill-mode: forwards;
+    animation-name: embeddableConsoleOpenPanel;
+    height: var(--embedded-console-height);
+    bottom: var(--embedded-console-bottom);
+  }
+}
+
+.embeddableConsole__controls {
+  height: $embeddableConsoleInitialHeight;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  overflow-y: hidden; // Ensures the movement of buttons in :focus don't cause scrollbars
+  overflow-x: auto;
+  padding-right: $euiSizeS;
+
+  &--button {
+    flex-grow: 1;
+    width: 100%;
+
+    .euiButtonEmpty__content {
+      justify-content: flex-start;
+    }
+  }
+
+  &--altViewButton-container {
+    margin-left: auto;
+  }
+}
+
+.embeddableConsole__content {
+  @include euiScrollBar;
+  overflow-y: auto;
+  width: 100%;
+  height: calc(100% - #{$embeddableConsoleInitialHeight});
+  background-color: $euiPageBackgroundColor;
+  animation-name: embeddableConsoleShowContent;
+  animation-duration: $euiAnimSpeedSlow;
+  animation-iteration-count: 1;
+  animation-timing-function: $euiAnimSlightResistance;
+  color: $euiColorDarkestShade;
+
+  #consoleRoot {
+    height: 100%;
+  }
+}
+
+@each $colorName, $colorValue in $euiButtonTypes {
+  .embeddableConsole__controls {
+    .euiLink.euiLink--#{$colorName} {
+      color: makeHighContrastColor($colorValue, $embeddableConsoleBackground);
+
+      &:hover {
+        color: tintOrShade($colorValue, 30%, 30%);
+      }
+    }
+
+    .euiLink.euiLink--text {
+      color: $euiColorGhost;
+    }
+
+    .embeddableConsole__button.euiButton[class*='#{$colorName}']:enabled:not(.euiButton--fill) {
+      color: makeHighContrastColor($colorValue, $embeddableConsoleBackground);
+      border-color: makeHighContrastColor($colorValue, $embeddableConsoleBackground);
+    }
+
+    .euiButtonIcon[class*='#{$colorName}'] {
+      color: makeHighContrastColor($colorValue, $embeddableConsoleBackground);
+    }
+  }
+}
+
+@include euiBreakpoint('xs', 's') {
+  .embeddableConsole:not(.embeddableConsole--showOnMobile) {
+    display: none;
+  }
+}
+
+@keyframes embeddableConsoleOpenPanel {
+  0% {
+    transform: translateY(-$embeddableConsoleInitialHeight);
+  }
+
+  100% {
+    transform: translateY(var(--embedded-console-bottom));
+  }
+}
+
+@keyframes embeddableConsoleShowContent {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

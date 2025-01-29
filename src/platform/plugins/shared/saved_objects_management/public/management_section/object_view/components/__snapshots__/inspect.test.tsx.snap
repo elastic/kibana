@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Inspect component renders correctly 1`] = `
+<CodeEditor
+  aria-label="inspect MyIndexPattern*"
+  languageId="xjson"
+  options={
+    Object {
+      "automaticLayout": false,
+      "fontSize": 12,
+      "guides": Object {
+        "indentation": false,
+      },
+      "lineNumbers": "on",
+      "minimap": Object {
+        "enabled": false,
+      },
+      "overviewRulerBorder": false,
+      "readOnly": true,
+      "scrollBeyondLastLine": false,
+      "scrollbar": Object {
+        "alwaysConsumeMouseWheel": false,
+      },
+      "wordWrap": "on",
+      "wrappingIndent": "indent",
+    }
+  }
+  value="{
+  \\"id\\": \\"1\\",
+  \\"type\\": \\"index-pattern\\",
+  \\"attributes\\": {
+    \\"title\\": \\"MyIndexPattern*\\"
+  },
+  \\"references\\": []
+}"
+/>
+`;

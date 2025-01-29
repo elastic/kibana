@@ -1,81 +1,7 @@
 {
   "id": "bfetch",
   "client": {
-    "classes": [
-      {
-        "parentPluginId": "bfetch",
-        "id": "def-public.BfetchRequestError",
-        "type": "Class",
-        "tags": [],
-        "label": "BfetchRequestError",
-        "description": [
-          "\nError thrown when xhr request fails"
-        ],
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.BfetchRequestError",
-            "text": "BfetchRequestError"
-          },
-          " extends Error"
-        ],
-        "path": "src/plugins/bfetch/common/bfetch_error.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-public.BfetchRequestError.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [
-              "\nconstructor"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/bfetch/common/bfetch_error.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "bfetch",
-                "id": "def-public.BfetchRequestError.Unnamed.$1",
-                "type": "number",
-                "tags": [],
-                "label": "code",
-                "description": [
-                  "- Xhr error code"
-                ],
-                "signature": [
-                  "number"
-                ],
-                "path": "src/plugins/bfetch/common/bfetch_error.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-public.BfetchRequestError.code",
-            "type": "number",
-            "tags": [],
-            "label": "code",
-            "description": [],
-            "path": "src/plugins/bfetch/common/bfetch_error.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "bfetch",
@@ -364,9 +290,9 @@
             "<BatchItemData extends object, BatchItemResult extends object>(path: string, handler: (request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
+              "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
@@ -409,9 +335,9 @@
                 "(request: ",
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.KibanaRequest",
+                  "section": "def-server.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>) => ",
@@ -443,17 +369,17 @@
             "<Payload, Response>(path: string, params: (request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
+              "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>, context: ",
             {
               "pluginId": "@kbn/core-http-request-handler-context-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-              "section": "def-common.RequestHandlerContext",
+              "section": "def-server.RequestHandlerContext",
               "text": "RequestHandlerContext"
             },
             ") => ",
@@ -467,17 +393,17 @@
             "<Payload, Response>, method?: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | undefined, pluginRouter?: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.IRouter",
+              "section": "def-server.IRouter",
               "text": "IRouter"
             },
             "<",
             {
               "pluginId": "@kbn/core-http-request-handler-context-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-              "section": "def-common.RequestHandlerContext",
+              "section": "def-server.RequestHandlerContext",
               "text": "RequestHandlerContext"
             },
             "> | undefined) => void"
@@ -512,17 +438,17 @@
                 "(request: ",
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.KibanaRequest",
+                  "section": "def-server.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>, context: ",
                 {
                   "pluginId": "@kbn/core-http-request-handler-context-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                  "section": "def-common.RequestHandlerContext",
+                  "section": "def-server.RequestHandlerContext",
                   "text": "RequestHandlerContext"
                 },
                 ") => ",
@@ -565,17 +491,17 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.IRouter",
+                  "section": "def-server.IRouter",
                   "text": "IRouter"
                 },
                 "<",
                 {
                   "pluginId": "@kbn/core-http-request-handler-context-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                  "section": "def-common.RequestHandlerContext",
+                  "section": "def-server.RequestHandlerContext",
                   "text": "RequestHandlerContext"
                 },
                 "> | undefined"
@@ -608,398 +534,7 @@
     }
   },
   "common": {
-    "classes": [
-      {
-        "parentPluginId": "bfetch",
-        "id": "def-common.BfetchRequestError",
-        "type": "Class",
-        "tags": [],
-        "label": "BfetchRequestError",
-        "description": [
-          "\nError thrown when xhr request fails"
-        ],
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.BfetchRequestError",
-            "text": "BfetchRequestError"
-          },
-          " extends Error"
-        ],
-        "path": "src/plugins/bfetch/common/bfetch_error.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.BfetchRequestError.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [
-              "\nconstructor"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/bfetch/common/bfetch_error.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "bfetch",
-                "id": "def-common.BfetchRequestError.Unnamed.$1",
-                "type": "number",
-                "tags": [],
-                "label": "code",
-                "description": [
-                  "- Xhr error code"
-                ],
-                "signature": [
-                  "number"
-                ],
-                "path": "src/plugins/bfetch/common/bfetch_error.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.BfetchRequestError.code",
-            "type": "number",
-            "tags": [],
-            "label": "code",
-            "description": [],
-            "path": "src/plugins/bfetch/common/bfetch_error.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "bfetch",
-        "id": "def-common.ItemBuffer",
-        "type": "Class",
-        "tags": [],
-        "label": "ItemBuffer",
-        "description": [
-          "\nA simple buffer that collects items. Can be cleared or flushed; and can\nautomatically flush when specified number of items is reached."
-        ],
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.ItemBuffer",
-            "text": "ItemBuffer"
-          },
-          "<Item>"
-        ],
-        "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.ItemBuffer.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "bfetch",
-                "id": "def-common.ItemBuffer.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "bfetch",
-                    "scope": "common",
-                    "docId": "kibBfetchPluginApi",
-                    "section": "def-common.ItemBufferParams",
-                    "text": "ItemBufferParams"
-                  },
-                  "<Item>"
-                ],
-                "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.ItemBuffer.length",
-            "type": "number",
-            "tags": [],
-            "label": "length",
-            "description": [
-              "\nGet current buffer size."
-            ],
-            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.ItemBuffer.write",
-            "type": "Function",
-            "tags": [],
-            "label": "write",
-            "description": [
-              "\nAdd item to the buffer."
-            ],
-            "signature": [
-              "(item: Item) => void"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "bfetch",
-                "id": "def-common.ItemBuffer.write.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "item",
-                "description": [],
-                "signature": [
-                  "Item"
-                ],
-                "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.ItemBuffer.clear",
-            "type": "Function",
-            "tags": [],
-            "label": "clear",
-            "description": [
-              "\nRemove all items from the buffer."
-            ],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.ItemBuffer.flush",
-            "type": "Function",
-            "tags": [],
-            "label": "flush",
-            "description": [
-              "\nCall `.onFlush` method and clear buffer."
-            ],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.ItemBuffer.flushAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "flushAsync",
-            "description": [
-              "\nSame as `.flush()` but asynchronous, and returns a promise, which\nrejects if `.onFlush` throws."
-            ],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "bfetch",
-        "id": "def-common.TimedItemBuffer",
-        "type": "Class",
-        "tags": [],
-        "label": "TimedItemBuffer",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.TimedItemBuffer",
-            "text": "TimedItemBuffer"
-          },
-          "<Item> extends ",
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.ItemBuffer",
-            "text": "ItemBuffer"
-          },
-          "<Item>"
-        ],
-        "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.TimedItemBuffer.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "bfetch",
-                "id": "def-common.TimedItemBuffer.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "bfetch",
-                    "scope": "common",
-                    "docId": "kibBfetchPluginApi",
-                    "section": "def-common.TimedItemBufferParams",
-                    "text": "TimedItemBufferParams"
-                  },
-                  "<Item>"
-                ],
-                "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.TimedItemBuffer.write",
-            "type": "Function",
-            "tags": [],
-            "label": "write",
-            "description": [],
-            "signature": [
-              "(item: Item) => void"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "bfetch",
-                "id": "def-common.TimedItemBuffer.write.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "item",
-                "description": [],
-                "signature": [
-                  "Item"
-                ],
-                "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.TimedItemBuffer.clear",
-            "type": "Function",
-            "tags": [],
-            "label": "clear",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.TimedItemBuffer.flush",
-            "type": "Function",
-            "tags": [],
-            "label": "flush",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.TimedItemBuffer.flushAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "flushAsync",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "bfetch",
@@ -1082,9 +617,9 @@
           },
           "<Func, BatchEntry>) => [Func, ",
           {
-            "pluginId": "bfetch",
+            "pluginId": "@kbn/item-buffer",
             "scope": "common",
-            "docId": "kibBfetchPluginApi",
+            "docId": "kibKbnItemBufferPluginApi",
             "section": "def-common.TimedItemBuffer",
             "text": "TimedItemBuffer"
           },
@@ -1484,80 +1019,6 @@
       },
       {
         "parentPluginId": "bfetch",
-        "id": "def-common.ItemBufferParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "ItemBufferParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.ItemBufferParams",
-            "text": "ItemBufferParams"
-          },
-          "<Item>"
-        ],
-        "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.ItemBufferParams.flushOnMaxItems",
-            "type": "number",
-            "tags": [],
-            "label": "flushOnMaxItems",
-            "description": [
-              "\nFlushes buffer automatically if number of items in the buffer reaches\nthis number. Omit it or set to `Infinity` to never flush on max buffer\nsize automatically."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.ItemBufferParams.onFlush",
-            "type": "Function",
-            "tags": [],
-            "label": "onFlush",
-            "description": [
-              "\nCallback that is called every time buffer is flushed. It receives a single\nargument which is a list of all buffered items. If `.flush()` is called\nwhen buffer is empty, `.onflush` is called with empty array."
-            ],
-            "signature": [
-              "(items: Item[]) => void | Promise<void>"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "bfetch",
-                "id": "def-common.ItemBufferParams.onFlush.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "items",
-                "description": [],
-                "signature": [
-                  "Item[]"
-                ],
-                "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "bfetch",
         "id": "def-common.StreamingResponseHandler",
         "type": "Interface",
         "tags": [],
@@ -1610,54 +1071,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "bfetch",
-        "id": "def-common.TimedItemBufferParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "TimedItemBufferParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.TimedItemBufferParams",
-            "text": "TimedItemBufferParams"
-          },
-          "<Item> extends ",
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.ItemBufferParams",
-            "text": "ItemBufferParams"
-          },
-          "<Item>"
-        ],
-        "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "bfetch",
-            "id": "def-common.TimedItemBufferParams.maxItemAge",
-            "type": "number",
-            "tags": [],
-            "label": "maxItemAge",
-            "description": [
-              "\nFlushes buffer when oldest item reaches age specified by this parameter,\nin milliseconds."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

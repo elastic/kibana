@@ -11,10 +11,10 @@ Each tutorial contains three sets of instructions:
 
 [discrete]
 === Creating a new tutorial
-1. Create a new directory in the link:https://github.com/elastic/kibana/tree/main/src/plugins/home/server/tutorials[tutorials directory].
+1. Create a new directory in the link:https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/home/server/tutorials[tutorials directory].
 2. In the new directory, create a file called `index.ts` that exports a function.
-The function must return a function object that conforms to the `TutorialSchema` interface link:{kib-repo}tree/{branch}/src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts[tutorial schema].
-3. Register the tutorial in link:{kib-repo}tree/{branch}/src/plugins/home/server/tutorials/register.ts[register.ts] by adding it to the `builtInTutorials`.
+The function must return a function object that conforms to the `TutorialSchema` interface link:{kib-repo}tree/{branch}/src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts[tutorial schema].
+3. Register the tutorial in link:{kib-repo}tree/{branch}/src/platform/plugins/shared/home/server/tutorials/register.ts[register.ts] by adding it to the `builtInTutorials`.
 // TODO update path once assets are migrated
 4. Add image assets to the `tutorial_resources` directory.
 5. Run {kib} locally to preview the tutorial.
@@ -28,7 +28,7 @@ Then register the tutorial object by calling `home.tutorials.registerTutorial(tu
 String values can contain variables that are substituted when rendered. Variables are specified by `{}`.
 For example: `{config.docs.version}` is rendered as `6.2` when running the tutorial in {kib} 6.2.
 
-link:{kib-repo}tree/{branch}/src/plugins/home/public/application/components/tutorial/replace_template_strings.js[Provided variables]
+link:{kib-repo}tree/{branch}/src/platform/plugins/shared/home/public/application/components/tutorial/replace_template_strings.js[Provided variables]
 
 [discrete]
 ==== Markdown

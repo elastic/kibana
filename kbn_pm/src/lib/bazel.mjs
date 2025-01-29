@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -19,9 +20,9 @@ import { indent } from './indent.mjs';
 const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
 
 const BAZEL_TARGETS = [
-  '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
-  '//packages/kbn-ui-shared-deps-src:shared_built_assets',
-  '//packages/kbn-monaco:target_workers',
+  '//src/platform/packages/private/kbn-ui-shared-deps-npm:shared_built_assets',
+  '//src/platform/packages/private/kbn-ui-shared-deps-src:shared_built_assets',
+  '//src/platform/packages/shared/kbn-monaco:target_workers',
 ];
 
 async function getBazelRunner() {
@@ -57,15 +58,19 @@ function throwBazelError(log, name, code, output) {
 /**
  * @param {import('./log.mjs').Log} log
  * @param {string[]} inputArgs
- * @param {{ quiet?: boolean; offline?: boolean, env?: Record<string, string> } | undefined} opts
+ * @param {{ quiet?: boolean; offline?: boolean, reactVersion?: string, env?: Record<string, string> } | undefined} opts
  */
 async function runBazel(log, inputArgs, opts = undefined) {
   const bazel = (await getBazelRunner()).runBazel;
 
-  const args = [...inputArgs, ...(opts?.offline ? ['--config=offline'] : [])];
+  const args = [
+    ...inputArgs,
+    `--define=REACT_18=${opts?.reactVersion === '18' ? 'true' : 'false'}`,
+    ...(opts?.offline ? ['--config=offline'] : []),
+  ];
   log.debug(`> bazel ${args.join(' ')}`);
   await bazel(args, {
-    env: opts?.env,
+    env: { ...opts?.env, REACT_18: opts?.reactVersion === '18' ? 'true' : 'false' },
     cwd: REPO_ROOT,
     quiet: opts?.quiet,
     logPrefix: Color.info('[bazel]'),
@@ -78,7 +83,7 @@ async function runBazel(log, inputArgs, opts = undefined) {
 /**
  *
  * @param {import('./log.mjs').Log} log
- * @param {{ offline: boolean } | undefined} opts
+ * @param {{ offline: boolean, reactVersion?: string } | undefined} opts
  */
 export async function watch(log, opts = undefined) {
   const ibazel = (await getBazelRunner()).runIBazel;
@@ -92,10 +97,12 @@ export async function watch(log, opts = undefined) {
     ...BAZEL_TARGETS,
     '--show_result=1',
     ...(opts?.offline ? ['--config=offline'] : []),
+    `--define=REACT_18=${opts?.reactVersion === '18' ? 'true' : 'false'}`,
   ];
   log.debug(`> ibazel ${args.join(' ')}`);
   await ibazel(args, {
     cwd: REPO_ROOT,
+    env: { ...process.env, REACT_18: opts?.reactVersion === '18' ? 'true' : 'false' },
     logPrefix: Color.info('[ibazel]'),
     onErrorExit(code, output) {
       throwBazelError(log, 'ibazel', code, output);
@@ -149,25 +156,24 @@ export async function installYarnDeps(log, opts = undefined) {
   await runBazel(log, ['run', '@nodejs//:yarn'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
-    env: {
-      SASS_BINARY_SITE:
-        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
-      RE2_DOWNLOAD_MIRROR:
-        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
-    },
   });
 
   log.success('yarn deps installed');
+
+  await run('yarn', ['playwright', 'install']);
+
+  log.success('Playwright browsers installed');
 }
 
 /**
  * @param {import('./log.mjs').Log} log
- * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
+ * @param {{ offline?: boolean, quiet?: boolean, reactVersion?: string } | undefined} opts
  */
 export async function buildWebpackBundles(log, opts = undefined) {
   await runBazel(log, ['build', ...BAZEL_TARGETS, '--show_result=1'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
+    reactVersion: opts?.reactVersion,
   });
 
   log.success('shared bundles built');

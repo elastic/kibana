@@ -1,50 +1,34 @@
 {
   "id": "@kbn/management-settings-section-registry",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.SectionRegistry",
+        "id": "def-public.SectionRegistry",
         "type": "Class",
         "tags": [],
         "label": "SectionRegistry",
         "description": [
           "\nA registry of sections to add to pages within Advanced Settings."
         ],
-        "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.SectionRegistry.setup",
+            "id": "def-public.SectionRegistry.setup",
             "type": "Object",
             "tags": [],
             "label": "setup",
             "description": [],
-            "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.SectionRegistry.setup.addSpaceSection",
+                "id": "def-public.SectionRegistry.setup.addSpaceSection",
                 "type": "Function",
                 "tags": [],
                 "label": "addSpaceSection",
@@ -54,13 +38,13 @@
                 "signature": [
                   "(Component: RegistryComponent, queryMatch: QueryMatchFn) => void"
                 ],
-                "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/management-settings-section-registry",
-                    "id": "def-common.SectionRegistry.setup.addSpaceSection.$1",
+                    "id": "def-public.SectionRegistry.setup.addSpaceSection.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "Component",
@@ -68,14 +52,14 @@
                     "signature": [
                       "RegistryComponent"
                     ],
-                    "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                    "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
                   },
                   {
                     "parentPluginId": "@kbn/management-settings-section-registry",
-                    "id": "def-common.SectionRegistry.setup.addSpaceSection.$2",
+                    "id": "def-public.SectionRegistry.setup.addSpaceSection.$2",
                     "type": "Function",
                     "tags": [],
                     "label": "queryMatch",
@@ -83,7 +67,7 @@
                     "signature": [
                       "QueryMatchFn"
                     ],
-                    "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                    "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -93,7 +77,7 @@
               },
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.SectionRegistry.setup.addGlobalSection",
+                "id": "def-public.SectionRegistry.setup.addGlobalSection",
                 "type": "Function",
                 "tags": [],
                 "label": "addGlobalSection",
@@ -103,13 +87,13 @@
                 "signature": [
                   "(Component: RegistryComponent, queryMatch: QueryMatchFn) => void"
                 ],
-                "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/management-settings-section-registry",
-                    "id": "def-common.SectionRegistry.setup.addGlobalSection.$1",
+                    "id": "def-public.SectionRegistry.setup.addGlobalSection.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "Component",
@@ -117,14 +101,14 @@
                     "signature": [
                       "RegistryComponent"
                     ],
-                    "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                    "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
                   },
                   {
                     "parentPluginId": "@kbn/management-settings-section-registry",
-                    "id": "def-common.SectionRegistry.setup.addGlobalSection.$2",
+                    "id": "def-public.SectionRegistry.setup.addGlobalSection.$2",
                     "type": "Function",
                     "tags": [],
                     "label": "queryMatch",
@@ -132,7 +116,7 @@
                     "signature": [
                       "QueryMatchFn"
                     ],
-                    "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                    "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -144,18 +128,18 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.SectionRegistry.start",
+            "id": "def-public.SectionRegistry.start",
             "type": "Object",
             "tags": [],
             "label": "start",
             "description": [],
-            "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.SectionRegistry.start.getGlobalSections",
+                "id": "def-public.SectionRegistry.start.getGlobalSections",
                 "type": "Function",
                 "tags": [],
                 "label": "getGlobalSections",
@@ -166,14 +150,14 @@
                   "() => ",
                   {
                     "pluginId": "@kbn/management-settings-section-registry",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-                    "section": "def-common.RegistryEntry",
+                    "section": "def-public.RegistryEntry",
                     "text": "RegistryEntry"
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -181,7 +165,7 @@
               },
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.SectionRegistry.start.getSpacesSections",
+                "id": "def-public.SectionRegistry.start.getSpacesSections",
                 "type": "Function",
                 "tags": [],
                 "label": "getSpacesSections",
@@ -192,14 +176,14 @@
                   "() => ",
                   {
                     "pluginId": "@kbn/management-settings-section-registry",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-                    "section": "def-common.RegistryEntry",
+                    "section": "def-public.RegistryEntry",
                     "text": "RegistryEntry"
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -215,48 +199,42 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.RegistryComponentProps",
+        "id": "def-public.RegistryComponentProps",
         "type": "Interface",
         "tags": [],
         "label": "RegistryComponentProps",
         "description": [
           "\nProps provided to a `RegistryComponent`."
         ],
-        "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.RegistryComponentProps.toasts",
+            "id": "def-public.RegistryComponentProps.toasts",
             "type": "Object",
             "tags": [],
             "label": "toasts",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
-            "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.RegistryComponentProps.enableSaving",
+            "id": "def-public.RegistryComponentProps.enableSaving",
             "type": "Object",
             "tags": [],
             "label": "enableSaving",
             "description": [],
             "signature": [
-              "{ global: boolean; namespace: boolean; }"
+              "{ namespace: boolean; global: boolean; }"
             ],
-            "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -265,20 +243,20 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.RegistryEntry",
+        "id": "def-public.RegistryEntry",
         "type": "Interface",
         "tags": [],
         "label": "RegistryEntry",
         "description": [
           "\nA registry entry for a section."
         ],
-        "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.RegistryEntry.Component",
+            "id": "def-public.RegistryEntry.Component",
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
@@ -287,28 +265,28 @@
               "React.ComponentClass<",
               {
                 "pluginId": "@kbn/management-settings-section-registry",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-                "section": "def-common.RegistryComponentProps",
+                "section": "def-public.RegistryComponentProps",
                 "text": "RegistryComponentProps"
               },
               ", any> | React.FunctionComponent<",
               {
                 "pluginId": "@kbn/management-settings-section-registry",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-                "section": "def-common.RegistryComponentProps",
+                "section": "def-public.RegistryComponentProps",
                 "text": "RegistryComponentProps"
               },
               ">"
             ],
-            "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/management-settings-section-registry",
-            "id": "def-common.RegistryEntry.queryMatch",
+            "id": "def-public.RegistryEntry.queryMatch",
             "type": "Function",
             "tags": [],
             "label": "queryMatch",
@@ -316,19 +294,19 @@
             "signature": [
               "(term: string) => boolean"
             ],
-            "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-section-registry",
-                "id": "def-common.RegistryEntry.queryMatch.$1",
+                "id": "def-public.RegistryEntry.queryMatch.$1",
                 "type": "string",
                 "tags": [],
                 "label": "term",
                 "description": [],
-                "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -342,7 +320,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.SectionRegistrySetup",
+        "id": "def-public.SectionRegistrySetup",
         "type": "Type",
         "tags": [],
         "label": "SectionRegistrySetup",
@@ -352,14 +330,14 @@
         "signature": [
           "{ addSpaceSection: (Component: RegistryComponent, queryMatch: QueryMatchFn) => void; addGlobalSection: (Component: RegistryComponent, queryMatch: QueryMatchFn) => void; }"
         ],
-        "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/management-settings-section-registry",
-        "id": "def-common.SectionRegistryStart",
+        "id": "def-public.SectionRegistryStart",
         "type": "Type",
         "tags": [],
         "label": "SectionRegistryStart",
@@ -370,27 +348,43 @@
           "{ getGlobalSections: () => ",
           {
             "pluginId": "@kbn/management-settings-section-registry",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-            "section": "def-common.RegistryEntry",
+            "section": "def-public.RegistryEntry",
             "text": "RegistryEntry"
           },
           "[]; getSpacesSections: () => ",
           {
             "pluginId": "@kbn/management-settings-section-registry",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
-            "section": "def-common.RegistryEntry",
+            "section": "def-public.RegistryEntry",
             "text": "RegistryEntry"
           },
           "[]; }"
         ],
-        "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/section_registry/section_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

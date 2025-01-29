@@ -7,14 +7,23 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 const API_BASE_PATH = '/api/grokdebugger';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
 
   describe('Grok Debugger Routes', function () {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     describe('Simulate', () => {
       it('should simulate a valid pattern', async () => {
         const rawEvent = '55.3.244.1 GET /index.html 15824 0.043';
@@ -22,11 +31,12 @@ export default function ({ getService }: FtrProviderContext) {
           '%{IP:client} %{WORD:method} %{URIPATHPARAM:request} %{NUMBER:bytes} %{NUMBER:duration}';
         const requestBody = { rawEvent, pattern };
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/simulate`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set('Content-Type', 'application/json;charset=UTF-8')
           .send(requestBody)
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         const expectedStructuredEvent = {
@@ -46,11 +56,12 @@ export default function ({ getService }: FtrProviderContext) {
         const invalidPattern = 'test';
         const requestBody = { rawEvent, pattern: invalidPattern };
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/simulate`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set('Content-Type', 'application/json;charset=UTF-8')
           .send(requestBody)
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(body.error).to.eql('Provided Grok patterns do not match data in the input');
@@ -67,11 +78,12 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const requestBody = { rawEvent, pattern, customPatterns };
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/simulate`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set('Content-Type', 'application/json;charset=UTF-8')
           .send(requestBody)
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         const expectedStructuredEvent = {

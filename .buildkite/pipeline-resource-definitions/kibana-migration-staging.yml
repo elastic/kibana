@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana_migration_pipeline_staging_area
+  description: Kibana / Pipeline migration staging area
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana_migration_pipeline_staging
+      description: Kibana / Pipeline migration staging
+    spec:
+      env:
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/upload_pipeline.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+      tags:
+        - kibana

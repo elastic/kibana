@@ -137,15 +137,16 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         .set('kbn-xsrf', 'xxx')
         .send({
           requesterId: 'functional_tester',
-          id: 'my-slack1',
+          id: 'preconfigured-es-index-action',
           params: {
-            message: 'does this work??',
+            documents: [{ test: 'test' }],
+            indexOverride: null,
           },
         })
         .expect(200);
       expect(result.status).to.eql('error');
       expect(result.error).to.eql(
-        `Error: .slack actions cannot be scheduled for unsecured actions execution`
+        `Error: .index actions cannot be scheduled for unsecured actions execution`
       );
     });
 
@@ -168,7 +169,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       expect(response.status).to.eql(200);
 
       const connectorId = response.body.id;
-      objectRemover.add(Spaces.space1.id, connectorId, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, connectorId, 'connector', 'actions');
       const { body: result } = await supertest
         .post(`/api/sample_unsecured_action`)
         .set('kbn-xsrf', 'xxx')

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const fs = require('fs');
@@ -87,11 +87,11 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
     }
   );
 
-  // setup server auto close after 1 second of silence
+  // setup server auto close after 5 second of silence
   let serverCloseTimer;
   const delayServerClose = () => {
     clearTimeout(serverCloseTimer);
-    serverCloseTimer = setTimeout(() => server.close(), 1000);
+    serverCloseTimer = setTimeout(() => server.close(), 5000);
   };
   server.on('request', delayServerClose);
   server.on('listening', delayServerClose);

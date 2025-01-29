@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { HOSTS_VIEW_PATH } from './constants';
@@ -36,32 +36,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await retry.waitFor(
       'wait for table and KPI charts to load',
       async () =>
-        (await pageObjects.infraHostsView.isHostTableLoading()) &&
+        (await pageObjects.infraHostsView.isHostTableLoaded()) &&
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
   describe('Hosts Page', function () {
     before(async () => {
-      await Promise.all([
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-      ]);
-      await pageObjects.svlCommonPage.login();
-      await browser.setWindowSize(1600, 1200);
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await pageObjects.svlCommonPage.loginAsViewer();
+
+      await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await browser.setWindowSize(1600, 1400);
     });
 
     after(async () => {
-      await Promise.all([
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-      ]);
-      await pageObjects.svlCommonPage.forceLogout();
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
     describe('#Single Host Flyout', () => {
-      before(async () => {
-        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-        await pageObjects.header.waitUntilLoadingHasFinished();
-      });
-
       describe('Tabs', () => {
         before(async () => {
           await pageObjects.timePicker.setAbsoluteRange(
@@ -76,7 +70,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+            await pageObjects.infraHome.clickCloseFlyoutButton();
           });
         });
 
@@ -85,18 +79,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickOverviewTab();
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const charts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(charts.length).to.equal(chartsCount);
+            });
           });
 
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
-            const CreateRuleButtonExist = await testSubjects.exists(
-              'infraAssetDetailsCreateAlertsRuleButton'
-            );
-            expect(CreateRuleButtonExist).to.be(false);
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
           });
         });
 
@@ -116,17 +114,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should show processes title', async () => {
-            await await testSubjects.existOrFail('infraAssetDetailsTopProcessesTitle');
+            await testSubjects.existOrFail('infraAssetDetailsTopProcessesTitle');
+          });
+        });
+
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
           });
 
-          describe('Logs Tab', () => {
-            before(async () => {
-              await pageObjects.assetDetails.clickLogsTab();
-            });
-
-            it('should render logs tab', async () => {
-              await pageObjects.assetDetails.logsExists();
-            });
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
           });
         });
       });
@@ -148,11 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
         });
 
-        it('should render the title beta badge', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
-        });
-
-        describe('Hosts table', async () => {
+        describe('Hosts table', () => {
           let hostRows: WebElementWrapper[] = [];
 
           before(async () => {
@@ -172,7 +166,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metrics Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitMetricsTab();
           });
 
@@ -180,15 +173,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await browser.scrollTop();
           });
 
-          it('should load 12 lens metric charts', async () => {
+          it('should load 11 lens metric charts', async () => {
             const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-            expect(metricCharts.length).to.equal(12);
+            expect(metricCharts.length).to.equal(11);
           });
         });
 
         describe('Logs Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitLogsTab();
           });
 
@@ -203,7 +195,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Alerts Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitAlertTab();
           });
 
@@ -212,7 +203,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should correctly load the Alerts tab section when clicking on it', async () => {
-            testSubjects.existOrFail('hostsView-alerts');
+            await testSubjects.existOrFail('hostsView-alerts');
           });
         });
       });

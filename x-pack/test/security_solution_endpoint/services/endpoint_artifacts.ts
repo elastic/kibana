@@ -6,11 +6,16 @@
  */
 
 import type {
-  ExceptionListItemSchema,
-  CreateExceptionListSchema,
   CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_ARTIFACT_LIST_IDS,
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
 import { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_apps/constants';
@@ -18,7 +23,9 @@ import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/err
 import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
+import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import { FtrService } from '../../functional/ftr_provider_context';
+import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -29,6 +36,7 @@ export class EndpointArtifactsTestResources extends FtrService {
   private readonly exceptionsGenerator = new ExceptionsListItemGenerator();
   private readonly supertest = this.ctx.getService('supertest');
   private readonly log = this.ctx.getService('log');
+  private readonly esClient = this.ctx.getService('es');
 
   private getHttpResponseFailureHandler(
     ignoredStatusCodes: number[] = []
@@ -117,5 +125,44 @@ export class EndpointArtifactsTestResources extends FtrService {
     const blocklist = this.exceptionsGenerator.generateBlocklistForCreate(overrides);
 
     return this.createExceptionItem(blocklist);
+  }
+
+  async createArtifact(
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData | undefined> {
+    switch (listId) {
+      case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
+        return this.createTrustedApp(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
+        return this.createEventFilter(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
+        return this.createBlocklist(overrides);
+      }
+      case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
+        return this.createHostIsolationException(overrides);
+      }
+    }
+  }
+
+  async getArtifactsFromUnifiedManifestSO(): Promise<
+    Array<
+      InternalUnifiedManifestSchemaResponseType['_source']['endpoint:unified-user-artifact-manifest']
+    >
+  > {
+    const {
+      hits: { hits: manifestResults },
+    } = await this.esClient.search<InternalUnifiedManifestSchemaResponseType['_source']>({
+      index: '.kibana*',
+      query: {
+        bool: { filter: [{ term: { type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE } }] },
+      },
+    });
+
+    return manifestResults.map(
+      (result) => result._source!['endpoint:unified-user-artifact-manifest']
+    );
   }
 }

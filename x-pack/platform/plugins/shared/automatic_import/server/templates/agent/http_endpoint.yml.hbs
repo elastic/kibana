@@ -1,0 +1,57 @@
+{{#if listen_address}}
+listen_address: {{listen_address}}
+{{/if}}
+{{#if listen_port}}
+listen_port: {{listen_port}}
+{{/if}}
+{{#if prefix}}
+prefix: {{prefix}}
+{{/if}}
+{{#if preserve_original_event}}
+preserve_original_event: {{preserve_original_event}}
+{{/if}}
+{{#if basic_auth}}
+basic_auth: {{basic_auth}}
+{{/if}}
+{{#if username}}
+username: {{username}}
+{{/if}}
+{{#if password}}
+password: {{password}}
+{{/if}}
+{{#if secret_header}}
+secret.header: {{secret_header}}
+{{/if}}
+{{#if secret_value}}
+secret.value: {{secret_value}}
+{{/if}}
+{{#if hmac_header}}
+hmac.header: {{hmac_header}}
+{{/if}}
+{{#if hmac_key}}
+hmac.key: {{hmac_key}}
+{{/if}}
+{{#if hmac_type}}
+hmac.type: {{hmac_type}}
+{{/if}}
+{{#if hmac_prefix}}
+hmac.prefix: {{hmac_prefix}}
+{{/if}}
+{{#if content_type}}
+content_type: {{content_type}}
+{{/if}}
+{{#if response_code}}
+response_code: {{response_code}}
+{{/if}}
+{{#if response_body}}
+response_body: '{{response_body}}'
+{{/if}}
+{{#if url}}
+url: {{url}}
+{{/if}}
+{{#if include_headers}}
+include_headers:
+{{#each include_headers as |header|}}
+  - {{header}}
+{{/each}}
+{{/if}}

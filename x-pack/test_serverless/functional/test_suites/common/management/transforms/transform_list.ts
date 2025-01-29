@@ -13,15 +13,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const security = getService('security');
   const transform = getService('transform');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Transform List', function () {
     before(async () => {
       await security.testUser.setRoles(['transform_user']);
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
+
+      // Load logstash* data and create dataview for logstash*, logstash-2015.09.22
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+      );
 
       // For this test to work, make sure there are no pre-existing transform present.
       // For example, solutions might set up transforms automatically.
       await transform.api.cleanTransformIndices();
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('renders the transform list', async () => {
@@ -39,10 +52,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await transform.management.assertNoTransformsFoundMessageExists();
 
       await transform.testExecution.logTestStep(
-        'should display a disabled "Create first transform" button'
+        'should display an enabled "Create first transform" button'
       );
       await transform.management.assertCreateFirstTransformButtonExists();
       await transform.management.assertCreateFirstTransformButtonEnabled(true);
+    });
+
+    it('opens transform creation wizard', async () => {
+      await transform.management.startTransformCreation();
+      await transform.sourceSelection.selectSource('logstash-2015.09.22');
+      await transform.datePicker.assertUseFullDataButtonVisible(true);
+      await transform.datePicker.assertDatePickerDataTierOptionsVisible(false);
     });
   });
 };

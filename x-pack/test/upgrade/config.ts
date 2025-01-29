@@ -9,7 +9,6 @@ import { resolve } from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
-import { ReportingAPIProvider } from './services/reporting_upgrade_services';
 import { MapsHelper } from './services/maps_upgrade_services';
 import { RulesHelper } from './services/rules_upgrade_services';
 
@@ -25,7 +24,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/graph'),
-      require.resolve('./apps/logs'),
       require.resolve('./apps/maps'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/rules'),
@@ -36,7 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services: {
       ...apiConfig.get('services'),
       ...functionalConfig.get('services'),
-      reportingAPI: ReportingAPIProvider,
       mapsHelper: MapsHelper,
       rulesHelper: RulesHelper,
     },

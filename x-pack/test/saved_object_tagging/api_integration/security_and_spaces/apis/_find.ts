@@ -43,6 +43,7 @@ export default function (ftrContext: FtrProviderContext) {
                 description: 'Tag 2 in default space',
                 color: '#77CC11',
                 relationCount: 0,
+                managed: false,
               },
             ],
             total: 1,
@@ -79,8 +80,9 @@ export default function (ftrContext: FtrProviderContext) {
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
         USERS.DEFAULT_SPACE_MAPS_READ_USER,
+        USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER,
       ],
-      noResults: [USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
+      noResults: [],
       unauthorized: [USERS.NOT_A_KIBANA_USER],
     };
 

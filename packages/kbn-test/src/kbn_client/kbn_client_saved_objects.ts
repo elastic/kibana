@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { chunk } from 'lodash';
@@ -107,6 +108,8 @@ const STANDARD_LIST_TYPES = [
   // synthetics based objects
   'synthetics-monitor',
   'uptime-dynamic-settings',
+  'synthetics-privates-locations',
+  'synthetics-private-location',
 
   'osquery-saved-query',
   'osquery-pack',
@@ -117,15 +120,20 @@ const STANDARD_LIST_TYPES = [
   'infrastructure-monitoring-log-view',
   'apm-indices',
   // Fleet saved object types
+  'ingest_manager_settings',
   'ingest-outputs',
   'ingest-download-sources',
   'ingest-agent-policies',
+  'fleet-agent-policies',
   'ingest-package-policies',
+  'fleet-package-policies',
   'epm-packages',
   'epm-packages-assets',
   'fleet-preconfiguration-deletion-record',
   'fleet-fleet-server-host',
+  'fleet-proxy',
   'fleet-uninstall-tokens',
+  'fleet-space-settings',
 ];
 
 /**

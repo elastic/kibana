@@ -13,7 +13,8 @@ import { ALERTS_URL, TIMELINES_URL } from '../../../urls/navigation';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../screens/alerts';
 import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
-import { createTimeline } from '../../../tasks/timelines';
+import { openTimelineUsingToggle } from '../../../tasks/security_main';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -24,39 +25,38 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  describe('Ransomware display in Alerts Section', () => {
+  after(() => {
+    cy.task('esArchiverUnload', { archiveName: 'ransomware_detection' });
+  });
+
+  describe('Ransomware in Alerts Page', () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
-    describe('Alerts table', () => {
-      it('shows Ransomware Alerts', () => {
-        cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Detection Alert');
-      });
-    });
+    it('should show ransomware alerts on alerts page', () => {
+      cy.log('should show ransomware alerts in alerts table');
 
-    describe('Trend Chart', () => {
-      beforeEach(() => {
-        selectAlertsHistogram();
-      });
+      cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Detection Alert');
 
-      it('shows Ransomware Detection Alert in the trend chart', () => {
-        cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Detection Alert');
-      });
+      cy.log('should show ransomware prevention alert in the trend chart');
+
+      selectAlertsHistogram();
+      cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Detection Alert');
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170846
-  describe.skip('Ransomware in Timelines', () => {
-    before(() => {
+  describe('Ransomware in Timelines', () => {
+    beforeEach(() => {
+      deleteTimelines();
       login();
       visitWithTimeRange(TIMELINES_URL);
-      createTimeline();
     });
 
-    it('Renders ransomware entries in timelines table', () => {
+    it('should show ransomware entries in timelines table', () => {
+      openTimelineUsingToggle();
       cy.get(TIMELINE_QUERY).type('event.code: "ransomware"{enter}');
 
       // Wait for grid to load, it should have an analyzer icon

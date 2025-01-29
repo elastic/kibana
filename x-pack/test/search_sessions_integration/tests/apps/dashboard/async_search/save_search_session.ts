@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const PageObjects = getPageObjects([
+  const { common, header, dashboard, visChart, searchSessionsManagement } = getPageObjects([
     'common',
     'header',
     'dashboard',
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Skipping because this build does not have the required shard_delay agg');
         this.skip();
       }
-      await PageObjects.common.navigateToApp('dashboard');
+      await common.navigateToApp('dashboard');
     });
 
     after(async function () {
@@ -47,12 +47,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes. Back button restores a session.', async () => {
-      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+      await dashboard.loadSavedDashboard('Not Delayed');
       let url = await browser.getCurrentUrl();
       const fakeSessionId = '__fake__';
       const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
       await browser.get(savedSessionURL);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       await testSubjects.existOrFail('embeddableError'); // expected that panel errors out because of non existing session
 
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(session1).to.be(fakeSessionId);
 
       await queryBar.clickQuerySubmitButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('completed');
       await dashboardExpect.noErrorEmbeddablesPresent();
       const session2 = await dashboardPanelActions.getSearchSessionIdByTitle(
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       url = await browser.getCurrentUrl();
       expect(url).to.contain('searchSessionId');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
 
       expect(
@@ -87,8 +87,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Saves and restores a session', async () => {
-      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.loadSavedDashboard('Not Delayed');
+      await dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
@@ -100,8 +100,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const url = await browser.getCurrentUrl();
       const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
       await browser.get(savedSessionURL);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
 
       // Check that session is restored
       await searchSessions.expectState('restored');
@@ -109,23 +109,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // switching dashboard to edit mode (or any other non-fetch required) state change
       // should leave session state untouched
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
       await searchSessions.expectState('restored');
 
       const xyChartSelector = 'xyVisChart';
       await enableNewChartLibraryDebug();
-      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
+      const data = await visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
 
       // navigating to a listing page clears the session
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
       await searchSessions.missingOrFail();
     });
 
     describe('TSVB & Timelion', () => {
       it('Restore session with TSVB & Timelion', async () => {
-        await PageObjects.dashboard.loadSavedDashboard('TSVBwithTimelion');
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.loadSavedDashboard('TSVBwithTimelion');
+        await dashboard.waitForRenderComplete();
         await searchSessions.expectState('completed');
         await searchSessions.save();
         await searchSessions.expectState('backgroundCompleted');
@@ -136,17 +136,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.openPopover();
         await searchSessions.viewSearchSessions();
 
-        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        const searchSessionList = await searchSessionsManagement.getList();
         const searchSessionItem = searchSessionList.find(
           (session) => session.id === savedSessionId
         )!;
         expect(searchSessionItem.searchesCount).to.be(2);
 
         await searchSessionItem.view();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         await searchSessions.expectState('restored');
-        expect(await toasts.getToastCount()).to.be(0); // no session restoration related warnings
+        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
       });
     });
   });

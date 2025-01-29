@@ -9,7 +9,7 @@ import { omit, pickBy } from 'lodash';
 
 const serverGeneratedProperties = ['id', 'created_at', 'updated_at', 'execution_summary'] as const;
 
-type ServerGeneratedProperties = typeof serverGeneratedProperties[number];
+type ServerGeneratedProperties = (typeof serverGeneratedProperties)[number];
 export type RuleWithoutServerGeneratedProperties = Omit<RuleResponse, ServerGeneratedProperties>;
 
 /**

@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/spec-to-console",
-  "devOnly": true,
-  "owner": "@elastic/platform-deployment-management"
-}

@@ -9,19 +9,17 @@ import expect from '@kbn/expect';
 import path from 'path';
 import fs from 'fs';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const experimentalPkgName = 'experimental';
   const experimental2PkgName = 'experimental2';
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uploadPkgName = 'apache';
 
@@ -59,12 +57,13 @@ export default function (providerContext: FtrProviderContext) {
     return Promise.all(uninstallingPackagesPromise);
   };
 
-  describe('installs and uninstalls multiple packages side effects', async () => {
+  describe('installs and uninstalls multiple packages side effects', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
-      if (!server.enabled) return;
+      await fleetAndAgents.setup();
+
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await installPackages([
         { name: pkgName, version: pkgVersion },
         { name: experimentalPkgName, version: pkgVersion },
@@ -73,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
       await installUploadPackage(uploadPkgName);
     });
     after(async () => {
-      if (!server.enabled) return;
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await uninstallPackages([
         { name: pkgName, version: pkgVersion },
         { name: experimentalPkgName, version: pkgVersion },

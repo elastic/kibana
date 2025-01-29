@@ -20,6 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const actions = getService('actions');
   const rules = getService('rules');
   const browser = getService('browser');
+  const toasts = getService('toasts');
   let objectRemover: ObjectRemover;
 
   describe('Opsgenie', () => {
@@ -45,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           apiKey: 'apiKey',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -58,15 +59,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
         const connector = await getConnectorByName(connectorName, supertest);
-        objectRemover.add(connector.id, 'action', 'actions');
+        objectRemover.add(connector.id, 'connector', 'actions');
       });
 
       it('should edit the connector', async () => {
         const connectorName = generateUniqueKey();
         const updatedConnectorName = `${connectorName}updated`;
         const createdAction = await createOpsgenieConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        objectRemover.add(createdAction.id, 'connector', 'actions');
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -80,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           apiKey: 'apiKey',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
 
         await testSubjects.click('euiFlyoutCloseButton');
@@ -98,8 +99,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should reset connector when canceling an edit', async () => {
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        objectRemover.add(createdAction.id, 'connector', 'actions');
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -126,8 +127,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should disable the run button when the message field is not filled', async () => {
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        objectRemover.add(createdAction.id, 'connector', 'actions');
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -148,7 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const connectorName = generateUniqueKey();
           const createdAction = await createOpsgenieConnector(connectorName);
           connectorId = createdAction.id;
-          objectRemover.add(createdAction.id, 'action', 'actions');
+          objectRemover.add(createdAction.id, 'connector', 'actions');
         });
 
         beforeEach(async () => {
@@ -291,7 +292,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       before(async () => {
         const createdAction = await createOpsgenieConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
+        objectRemover.add(createdAction.id, 'connector', 'actions');
 
         await pageObjects.common.navigateToApp('triggersActions');
       });
@@ -306,48 +307,58 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should default to the create alert action', async () => {
+        await find.clickByButtonText('Message');
         await testSubjects.existOrFail('messageInput');
 
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
       });
 
       it('should default to the close alert action when setting the run when to recovered', async () => {
-        await testSubjects.click('addNewActionConnectorActionGroup-0');
-        await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
+        await find.clickByButtonText('Settings');
+        await testSubjects.click('ruleActionsSettingsSelectActionGroup');
+        await testSubjects.click('addNewActionConnectorActionGroup-recovered');
 
+        await find.clickByButtonText('Message');
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
         await testSubjects.existOrFail('noteTextArea');
         await testSubjects.missingOrFail('messageInput');
       });
 
       it('should not preserve the alias when switching run when to recover', async () => {
+        await find.clickByButtonText('Message');
         await testSubjects.setValue('aliasInput', 'an alias');
-        await testSubjects.click('addNewActionConnectorActionGroup-0');
-        await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
 
+        await find.clickByButtonText('Settings');
+        await testSubjects.click('ruleActionsSettingsSelectActionGroup');
+        await testSubjects.click('addNewActionConnectorActionGroup-recovered');
+
+        await find.clickByButtonText('Message');
         await testSubjects.missingOrFail('messageInput');
-
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
       });
 
       it('should not preserve the alias when switching run when to threshold met', async () => {
-        await testSubjects.click('addNewActionConnectorActionGroup-0');
-        await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
+        await find.clickByButtonText('Settings');
+        await testSubjects.click('ruleActionsSettingsSelectActionGroup');
+        await testSubjects.click('addNewActionConnectorActionGroup-recovered');
+
+        await find.clickByButtonText('Message');
         await testSubjects.missingOrFail('messageInput');
-
         await testSubjects.setValue('aliasInput', 'an alias');
-        await testSubjects.click('addNewActionConnectorActionGroup-0');
-        await testSubjects.click('addNewActionConnectorActionGroup-0-option-threshold met');
-        await testSubjects.exists('messageInput');
 
+        await find.clickByButtonText('Settings');
+        await testSubjects.click('ruleActionsSettingsSelectActionGroup');
+        await testSubjects.click('addNewActionConnectorActionGroup-threshold met');
+
+        await find.clickByButtonText('Message');
+        await testSubjects.exists('messageInput');
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
       });
 
       it('should show the message is required error when clicking the save button', async () => {
-        await testSubjects.click('saveRuleButton');
-        const messageError = await find.byClassName('euiFormErrorText');
-
-        expect(await messageError.getVisibleText()).to.eql('Message is required.');
+        expect(
+          await (await testSubjects.find('rulePageFooterSaveButton')).getAttribute('disabled')
+        ).to.be('true');
       });
     });
 
@@ -359,8 +370,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const selectOpsgenieConnectorInRuleAction = async (name: string) => {
-      await testSubjects.click('.opsgenie-alerting-ActionTypeSelectOption');
-      await testSubjects.selectValue('comboBoxInput', name);
+      await testSubjects.click('ruleActionsAddActionButton');
+      await testSubjects.existOrFail('ruleActionsConnectorsModal');
+      await find.clickByButtonText(name);
+
+      await find.clickByButtonText('Settings');
       await rules.common.setNotifyThrottleInput();
     };
 

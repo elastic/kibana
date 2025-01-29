@@ -26,7 +26,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
       await esTestIndexTool.destroy();
     });
 
@@ -47,7 +47,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const actionId = response.body.id;
-      objectRemover.add('default', actionId, 'action', 'actions');
+      objectRemover.add('default', actionId, 'connector', 'actions');
 
       const actions = [];
       for (let i = 0; i < 510; i++) {

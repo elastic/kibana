@@ -34,7 +34,7 @@ and enrichments on your data.
 [cols="50, 50"]
 |===
 
-a| {ref}/index-mgmt.html[Index Management]
+| {ref}/index-mgmt.html[Index Management]
 | View index settings, mappings, and statistics and perform operations, such as refreshing,
 flushing, and clearing the cache. Practicing good index management ensures
 that your data is stored cost effectively.
@@ -85,7 +85,7 @@ You can add and remove remote clusters, and check their connectivity.
 
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
-A report can contain a dashboard, visualization, saved search, or Canvas workpad.
+A report can contain a dashboard, visualization, table with Discover search results, or Canvas workpad.
 
 | Machine Learning Jobs
 | View, export, and import your <<xpack-ml-anomalies,{anomaly-detect}>> and
@@ -109,7 +109,7 @@ above a certain percentage.
 [cols="50, 50"]
 |===
 
-a| <<xpack-security, Users>>
+| <<xpack-security, Users>>
 |View the users that have been defined on your cluster.
 Add or delete users and assign roles that give users
 specific privileges.
@@ -136,7 +136,7 @@ Kerberos, PKI, OIDC, and SAML.
 [cols="50, 50"]
 |===
 
-a| <<data-views, Data Views>>
+| <<data-views, Data Views>>
 |Manage the fields in the data views that retrieve your data from {es}.
 
 | <<managing-saved-objects, Saved Objects>>
@@ -157,7 +157,7 @@ for example, when you have a large volume of data or when the performance of you
 A space is isolated from all other spaces,
 so you can tailor it to your needs without impacting others.
 
-a| <<advanced-options, Advanced Settings>>
+| <<advanced-options, Advanced Settings>>
 | Customize {kib} to suit your needs. Change the format for displaying dates, turn on dark mode,
 set the timespan for notification messages, and much more.
 
@@ -181,32 +181,32 @@ see the https://www.elastic.co/subscriptions[subscription page].
 
 --
 
-include::{kib-repo-dir}/management/cases/index.asciidoc[]
+include::{kibana-root}/docs/management/cases/index.asciidoc[]
 
-include::{kib-repo-dir}/management/action-types.asciidoc[]
+include::{kibana-root}/docs/management/action-types.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
+include::{kibana-root}/docs/management/managing-licenses.asciidoc[]
 
-include::{kib-repo-dir}/management/maintenance-windows/maintenance-windows.asciidoc[]
+include::{kibana-root}/docs/management/maintenance-windows/maintenance-windows.asciidoc[]
 
-include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
+include::{kibana-root}/docs/management/manage-data-views.asciidoc[]
 
-include::{kib-repo-dir}/management/numeral.asciidoc[]
+include::{kibana-root}/docs/management/numeral.asciidoc[]
 
-include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
+include::{kibana-root}/docs/management/rollups/create_and_manage_rollups.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
+include::{kibana-root}/docs/management/managing-saved-objects.asciidoc[]
+
+include::{kibana-root}/docs/management/saved-objects/saved-object-ids.asciidoc[]
 
 include::security/index.asciidoc[]
 
-include::{kib-repo-dir}/spaces/index.asciidoc[]
+include::{kibana-root}/docs/spaces/index.asciidoc[]
 
-include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+include::{kibana-root}/docs/management/advanced-options.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-tags.asciidoc[]
+include::{kibana-root}/docs/management/managing-tags.asciidoc[]
 
-include::{kib-repo-dir}/management/upgrade-assistant.asciidoc[]
+include::{kibana-root}/docs/management/upgrade-assistant.asciidoc[]
 
-include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
-
-
+include::{kibana-root}/docs/management/watcher-ui/index.asciidoc[]

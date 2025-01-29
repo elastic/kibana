@@ -1,25 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { services as commonServiceProviders } from '../../common/services';
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 import { AppsMenuService } from './apps_menu';
 import {
-  BrowserProvider,
   FailureDebuggingProvider,
-  FindProvider,
   PngService,
   ScreenshotsService,
   SnapshotsService,
-  TestSubjects,
-  RetryOnStaleProvider,
 } from './common';
 import { ComboBoxService } from './combo_box';
+import { SelectableService } from './selectable';
 import {
   DashboardAddPanelService,
   DashboardReplacePanelService,
@@ -31,7 +30,6 @@ import {
   DashboardDrilldownPanelActionsProvider,
   DashboardDrilldownsManageProvider,
 } from './dashboard';
-import { DocTableService } from './doc_table';
 import { EmbeddingService } from './embedding';
 import { FilterBarService } from './filter_bar';
 import { FlyoutService } from './flyout';
@@ -40,9 +38,7 @@ import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarService } from './query_bar';
-import { RemoteProvider } from './remote';
 import { RenderableService } from './renderable';
-import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
 import {
   PieChartService,
@@ -57,16 +53,14 @@ import { MonacoEditorService } from './monaco_editor';
 import { UsageCollectionService } from './usage_collection';
 import { SavedObjectsFinderService } from './saved_objects_finder';
 import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
+import { ESQLService } from './esql';
+import { DataViewsService } from './data_views';
 
 export const services = {
-  ...commonServiceProviders,
-
-  __webdriver__: RemoteProvider,
+  ...commonFunctionalServices,
+  ...commonFunctionalUIServices,
   filterBar: FilterBarService,
   queryBar: QueryBarService,
-  find: FindProvider,
-  testSubjects: TestSubjects,
-  docTable: DocTableService,
   png: PngService,
   screenshots: ScreenshotsService,
   snapshots: SnapshotsService,
@@ -82,26 +76,26 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardSettings: DashboardSettingsProvider,
+  dataViews: DataViewsService,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
+  selectable: SelectableService,
   dataGrid: DataGridService,
   embedding: EmbeddingService,
   renderable: RenderableService,
-  browser: BrowserProvider,
   pieChart: PieChartService,
   inspector: InspectorService,
   fieldEditor: FieldEditorService,
   vegaDebugInspector: VegaDebugInspectorViewService,
   appsMenu: AppsMenuService,
   globalNav: GlobalNavService,
-  toasts: ToastsService,
   savedQueryManagementComponent: SavedQueryManagementComponentService,
   elasticChart: ElasticChartService,
   supertest: KibanaSupertestProvider,
   managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
-  retryOnStale: RetryOnStaleProvider,
   usageCollection: UsageCollectionService,
   savedObjectsFinder: SavedObjectsFinderService,
+  esql: ESQLService,
 };

@@ -173,6 +173,9 @@
             "updatedBy": {
               "type": "keyword"
             },
+            "updatedAt": {
+              "type": "date"
+            },
             "isSnoozedUntil": {
               "type": "date"
             },

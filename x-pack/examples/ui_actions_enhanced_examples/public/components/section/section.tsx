@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
 export interface Props {
+  children: React.ReactNode;
   title: React.ReactNode;
 }
 

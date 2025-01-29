@@ -249,71 +249,6 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        it('should handle delete alert request appropriately when consumer is not the producer', async () => {
-          const { body: createdRule1 } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                rule_type_id: 'test.restricted-noop',
-                consumer: 'alertsFixture',
-              })
-            )
-            .expect(200);
-
-          const response = await supertestWithoutAuth
-            .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
-            .set('kbn-xsrf', 'foo')
-            .send({ ids: [createdRule1.id] })
-            .auth(user.username, user.password);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
-                statusCode: 403,
-              });
-              expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
-              // Ensure task still exists
-              await getScheduledTask(createdRule1.scheduled_task_id);
-              break;
-            case 'space_1_all at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'global_read at space1':
-              expect(response.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message: 'No rules found for bulk delete',
-              });
-              expect(response.statusCode).to.eql(400);
-              objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
-              // Ensure task still exists
-              await getScheduledTask(createdRule1.scheduled_task_id);
-              break;
-            case 'superuser at space1':
-              expect(response.body).to.eql({
-                rules: [{ ...getDefaultRules(response), rule_type_id: 'test.restricted-noop' }],
-                errors: [],
-                total: 1,
-                taskIdsFailedToBeDeleted: [],
-              });
-              expect(response.statusCode).to.eql(200);
-              try {
-                await getScheduledTask(createdRule1.scheduled_task_id);
-                throw new Error('Should have removed scheduled task');
-              } catch (e) {
-                expect(e.meta.statusCode).to.eql(404);
-              }
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
         it('should handle delete alert request appropriately when consumer is "alerts"', async () => {
           const { body: createdRule1 } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -348,7 +283,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('bulkDelete', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('bulkDelete', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -672,6 +607,69 @@ export default ({ getService }: FtrProviderContext) => {
             "Error validating bulk delete data - Either 'ids' or 'filter' property in method's arguments should be provided",
           statusCode: 400,
         });
+      });
+    });
+
+    describe('Actions', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should return the actions correctly', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule1 } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  id: createdAction.id,
+                  group: 'default',
+                  params: {},
+                },
+                {
+                  id: 'system-connector-test.system-action',
+                  params: {},
+                },
+              ],
+            })
+          )
+          .expect(200);
+
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
+          .set('kbn-xsrf', 'foo')
+          .send({ ids: [createdRule1.id] })
+          .auth(user.username, user.password);
+
+        const action = response.body.rules[0].actions[0];
+        const systemAction = response.body.rules[0].actions[1];
+        const { uuid, ...restAction } = action;
+        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+        expect([restAction, restSystemAction]).to.eql([
+          {
+            id: createdAction.id,
+            connector_type_id: 'test.noop',
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+          },
+          ,
+        ]);
       });
     });
   });

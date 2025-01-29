@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Assign alerts API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/assignees:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: SetAlertAssignees
+      summary: Assign and unassign users from detection alerts
+      description: |
+        Assign users to detection alerts, and unassign them from alerts.
+        > info
+        > You cannot add and remove the same assignee in the same request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - assignees
+                - ids
+              properties:
+                assignees:
+                  $ref: '#/components/schemas/AlertAssignees'
+                  description: Details about the assignees to assign and unassign.
+                ids:
+                  $ref: '../../model/alert.schema.yaml#/components/schemas/AlertIds'
+                  description: List of alerts ids to assign and unassign passed assignees.
+      responses:
+        200:
+          description: Indicates a successful call.
+        400:
+          description: Invalid request.
+
+components:
+  schemas:
+    AlertAssignees:
+      type: object
+      required:
+        - add
+        - remove
+      properties:
+        add:
+          type: array
+          items:
+            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: A list of users ids to assign.
+        remove:
+          type: array
+          items:
+            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: A list of users ids to unassign.

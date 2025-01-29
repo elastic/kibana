@@ -1,0 +1,18 @@
+title: Find SLO definitions response
+description: >
+  A paginated response of SLO definitions matching the query.
+type: object
+properties:
+  page:
+    type: number
+    example: 2
+  perPage:
+    type: number
+    example: 100
+  total:
+    type: number
+    example: 123
+  results:
+    type: array
+    items:
+      $ref: 'slo_definition_response.yaml'

@@ -1,0 +1,1277 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "namespace": "default"
+      },
+      "data_stream": {
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-entityanalytics_okta.user-default"
+      ],
+      "name": "logs-entityanalytics_okta.user-default-index-template",
+      "template": {
+        "mappings": {
+          "dynamic": false,
+          "properties": {
+            "@timestamp": {
+              "type": "date",
+              "ignore_malformed": false
+            },
+            "agent": {
+              "properties": {
+                "ephemeral_id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "version": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "asset": {
+              "properties": {
+                "category": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "costCenter": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "create_date": {
+                  "type": "date"
+                },
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "last_seen": {
+                  "type": "date"
+                },
+                "last_status_change_date": {
+                  "type": "date"
+                },
+                "last_updated": {
+                  "type": "date"
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "status": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "vendor": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "entityanalytics_okta.user"
+                },
+                "namespace": {
+                  "type": "constant_keyword",
+                  "value": "default"
+                },
+                "type": {
+                  "type": "constant_keyword",
+                  "value": "logs"
+                }
+              }
+            },
+            "ecs": {
+              "properties": {
+                "version": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "elastic_agent": {
+              "properties": {
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "snapshot": {
+                  "type": "boolean"
+                },
+                "version": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "entityanalytics_okta": {
+              "properties": {
+                "user": {
+                  "properties": {
+                    "_embedded": {
+                      "type": "flattened"
+                    },
+                    "_links": {
+                      "type": "flattened"
+                    },
+                    "activated": {
+                      "type": "date"
+                    },
+                    "created": {
+                      "type": "date"
+                    },
+                    "credentials": {
+                      "properties": {
+                        "provider": {
+                          "properties": {
+                            "name": {
+                              "type": "keyword",
+                              "ignore_above": 1024
+                            },
+                            "type": {
+                              "type": "keyword",
+                              "ignore_above": 1024
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "last_login": {
+                      "type": "date"
+                    },
+                    "last_updated": {
+                      "type": "date"
+                    },
+                    "password_changed": {
+                      "type": "date"
+                    },
+                    "profile": {
+                      "properties": {
+                        "city": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "cost_center": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "country_code": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "department": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "display_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "division": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "email": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "employee_number": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "first_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "honorific": {
+                          "properties": {
+                            "prefix": {
+                              "type": "keyword",
+                              "ignore_above": 1024
+                            },
+                            "suffix": {
+                              "type": "keyword",
+                              "ignore_above": 1024
+                            }
+                          }
+                        },
+                        "last_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "locale": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "login": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "manager": {
+                          "properties": {
+                            "id": {
+                              "type": "keyword",
+                              "ignore_above": 1024
+                            },
+                            "name": {
+                              "type": "keyword",
+                              "ignore_above": 1024
+                            }
+                          }
+                        },
+                        "middle_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "mobile_phone": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "nick_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "organization": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "postal_address": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "preferred_language": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "primary_phone": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "second_email": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "state": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "street_address": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "timezone": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "title": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "url": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "user_type": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "zip_code": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "status_changed": {
+                      "type": "date"
+                    },
+                    "transitioning_to_status": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "type": {
+                      "type": "flattened"
+                    }
+                  }
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "action": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "agent_id_status": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "category": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "entityanalytics_okta.user"
+                },
+                "end": {
+                  "type": "date"
+                },
+                "ingested": {
+                  "type": "date",
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis"
+                },
+                "kind": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "module": {
+                  "type": "constant_keyword",
+                  "value": "entityanalytics_okta"
+                },
+                "start": {
+                  "type": "date"
+                },
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "input": {
+              "properties": {
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "labels": {
+              "properties": {
+                "identity_source": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "offset": {
+                  "type": "long"
+                }
+              }
+            },
+            "related": {
+              "properties": {
+                "user": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "tags": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "user": {
+              "properties": {
+                "account": {
+                  "properties": {
+                    "activated_date": {
+                      "type": "date"
+                    },
+                    "change_date": {
+                      "type": "date"
+                    },
+                    "create_date": {
+                      "type": "date"
+                    },
+                    "password_change_date": {
+                      "type": "date"
+                    },
+                    "status": {
+                      "properties": {
+                        "deprovisioned": {
+                          "type": "boolean"
+                        },
+                        "locked_out": {
+                          "type": "boolean"
+                        },
+                        "password_expired": {
+                          "type": "boolean"
+                        },
+                        "recovery": {
+                          "type": "boolean"
+                        },
+                        "suspended": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "email": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "full_name": {
+                  "type": "keyword",
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  }
+                },
+                "geo": {
+                  "properties": {
+                    "city_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "country_iso_code": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "postal_code": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "region_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "timezone": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "name": {
+                  "type": "keyword",
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  }
+                },
+                "organization": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "profile": {
+                  "properties": {
+                    "department": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "first_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "job_title": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "last_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "manager": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "mobile_phone": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "other_identities": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "primaryPhone": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "secondEmail": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "status": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "type": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-entityanalytics_entra_id.user-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "namespace": "default"
+      },
+      "data_stream": {
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-entityanalytics_entra_id.user-default"
+      ],
+      "name": "logs-entityanalytics_entra_id.user-default-index-template",
+      "template": {
+        "mappings": {
+          "dynamic": false,
+          "properties": {
+            "@timestamp": {
+              "type": "date",
+              "ignore_malformed": false
+            },
+            "agent": {
+              "properties": {
+                "ephemeral_id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "version": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "asset": {
+              "properties": {
+                "category": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "first_seen": {
+                  "type": "date"
+                },
+                "group": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "is_managed": {
+                  "type": "boolean"
+                },
+                "last_seen": {
+                  "type": "date"
+                },
+                "last_updated": {
+                  "type": "date"
+                },
+                "model": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "status": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "tags": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "vendor": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "version": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "cloud": {
+              "properties": {
+                "account": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "availability_zone": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "fields": {
+                        "text": {
+                          "type": "match_only_text"
+                        }
+                      }
+                    }
+                  }
+                },
+                "machine": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "project": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "provider": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "region": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "service": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "entityanalytics_entra_id.entity"
+                },
+                "namespace": {
+                  "type": "constant_keyword",
+                  "value": "default"
+                },
+                "type": {
+                  "type": "constant_keyword",
+                  "value": "logs"
+                }
+              }
+            },
+            "device": {
+              "properties": {
+                "group": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "registered_owners": {
+                  "properties": {
+                    "business_phones": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "display_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "given_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "job_title": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "mail": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "mobile_phone": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "surname": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "user_principal_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "registered_users": {
+                  "properties": {
+                    "business_phones": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "display_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "given_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "job_title": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "mail": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "mobile_phone": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "surname": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "user_principal_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                }
+              }
+            },
+            "ecs": {
+              "properties": {
+                "version": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "elastic_agent": {
+              "properties": {
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "snapshot": {
+                  "type": "boolean"
+                },
+                "version": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "entityanalytics_entra_id": {
+              "properties": {
+                "device": {
+                  "dynamic": "true",
+                  "properties": {
+                    "account_enabled": {
+                      "type": "boolean"
+                    },
+                    "alternative_security_ids": {
+                      "properties": {
+                        "identity_provider": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "key": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "type": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "approximate_last_sign_in_date_time": {
+                      "type": "date"
+                    },
+                    "category": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "compliance_expiration_date_time": {
+                      "type": "date"
+                    },
+                    "d_id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "display_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "enrollment_profile_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "extension_attributes": {
+                      "type": "object",
+                      "dynamic": "true"
+                    },
+                    "group": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "is_compliant": {
+                      "type": "boolean"
+                    },
+                    "is_managed": {
+                      "type": "boolean"
+                    },
+                    "manufacturer": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "mdm_app_id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "metadata": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "model": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "on_premises_last_sync_date_time": {
+                      "type": "date"
+                    },
+                    "on_premises_sync_enabled": {
+                      "type": "boolean"
+                    },
+                    "operating_system": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "operating_system_version": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "ownership": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "physical_ids": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "profile_type": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "registered_owners": {
+                      "properties": {
+                        "business_phones": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "display_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "given_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "id": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "job_title": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "mail": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "mobile_phone": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "surname": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "user_principal_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        }
+                      }
+                    },
+                    "registered_users": {
+                      "properties": {
+                        "business_phones": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "display_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "given_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "id": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "job_title": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "mail": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "mobile_phone": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "surname": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "user_principal_name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        }
+                      }
+                    },
+                    "registration_date_time": {
+                      "type": "date"
+                    },
+                    "system_labels": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "trust_type": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "version": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "user": {
+                  "properties": {
+                    "account_enabled": {
+                      "type": "boolean"
+                    },
+                    "business_phones": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "display_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "given_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "group": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        },
+                        "name": {
+                          "type": "keyword",
+                          "ignore_above": 1024
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "job_title": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "mail": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "mobile_phone": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "office_location": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "preferred_language": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "surname": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "user_principal_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "action": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "agent_id_status": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "entityanalytics_entra_id.entity"
+                },
+                "end": {
+                  "type": "date"
+                },
+                "ingested": {
+                  "type": "date",
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis"
+                },
+                "kind": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "message": {
+                  "type": "text"
+                },
+                "module": {
+                  "type": "constant_keyword",
+                  "value": "entityanalytics_entra_id"
+                },
+                "provider": {
+                  "type": "constant_keyword",
+                  "value": "Microsoft Entra ID"
+                },
+                "start": {
+                  "type": "date"
+                }
+              }
+            },
+            "input": {
+              "properties": {
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "labels": {
+              "properties": {
+                "identity_source": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "file": {
+                  "properties": {
+                    "path": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "flags": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "offset": {
+                  "type": "long"
+                }
+              }
+            },
+            "tags": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "user": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "first_name": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "group": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                },
+                "job_title": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "last_name": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "phone": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                },
+                "work": {
+                  "properties": {
+                    "location_name": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

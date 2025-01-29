@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -18,6 +19,7 @@ import { promisify } from 'util';
 import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import treeKill from 'tree-kill';
+import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
 import {
@@ -89,8 +91,9 @@ export class Cluster {
   async installSource(options: InstallSourceOptions) {
     this.log.info(chalk.bold('Installing from source'));
     return await this.log.indent(4, async () => {
-      const { installPath } = await installSource({ log: this.log, ...options });
-      return { installPath };
+      const { installPath, disableEsTmpDir } = await installSource({ log: this.log, ...options });
+
+      return { installPath, disableEsTmpDir };
     });
   }
 
@@ -115,12 +118,12 @@ export class Cluster {
   async installSnapshot(options: InstallSnapshotOptions) {
     this.log.info(chalk.bold('Installing from snapshot'));
     return await this.log.indent(4, async () => {
-      const { installPath } = await installSnapshot({
+      const { installPath, disableEsTmpDir } = await installSnapshot({
         log: this.log,
         ...options,
       });
 
-      return { installPath };
+      return { installPath, disableEsTmpDir };
     });
   }
 
@@ -130,12 +133,12 @@ export class Cluster {
   async installArchive(archivePath: string, options?: InstallArchiveOptions) {
     this.log.info(chalk.bold('Installing from an archive'));
     return await this.log.indent(4, async () => {
-      const { installPath } = await installArchive(archivePath, {
+      const { installPath, disableEsTmpDir } = await installArchive(archivePath, {
         log: this.log,
         ...(options || {}),
       });
 
-      return { installPath };
+      return { installPath, disableEsTmpDir };
     });
   }
 
@@ -311,12 +314,13 @@ export class Cluster {
    */
   private exec(installPath: string, opts: EsClusterExecOptions) {
     const {
-      skipNativeRealmSetup = false,
+      skipSecuritySetup = false,
       reportTime = () => {},
       startTime,
       skipReadyCheck,
       readyTimeout,
       writeLogsToPath,
+      disableEsTmpDir,
       ...options
     } = opts;
 
@@ -389,7 +393,9 @@ export class Cluster {
     this.process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
-        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+        ...(installPath && !disableEsTmpDir
+          ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') }
+          : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ES_JAVA_OPTS: esJavaOpts,
@@ -433,8 +439,8 @@ export class Cluster {
         });
       }
 
-      // once the cluster is ready setup the native realm
-      if (!skipNativeRealmSetup) {
+      // once the cluster is ready setup the realm
+      if (!skipSecuritySetup) {
         const nativeRealm = new NativeRealm({
           log: this.log,
           elasticPassword: options.password,
@@ -442,8 +448,12 @@ export class Cluster {
         });
 
         await nativeRealm.setPasswords(options);
-      }
 
+        const samlRealmConfigPrefix = `authc.realms.saml.${MOCK_IDP_REALM_NAME}.`;
+        if (args.some((arg) => arg.includes(samlRealmConfigPrefix))) {
+          await ensureSAMLRoleMapping(client);
+        }
+      }
       this.log.success('kbn/es setup complete');
     });
 

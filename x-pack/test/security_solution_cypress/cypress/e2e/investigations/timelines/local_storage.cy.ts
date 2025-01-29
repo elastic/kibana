@@ -14,7 +14,7 @@ import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { removeColumn } from '../../../tasks/timeline';
 
 describe('persistent timeline', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     openEvents();

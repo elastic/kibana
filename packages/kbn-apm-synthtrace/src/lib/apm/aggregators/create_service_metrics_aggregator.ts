@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { pick } from 'lodash';
 import { hashKeysOf, ApmFields } from '@kbn/apm-synthtrace-client';
 import { createLosslessHistogram } from '../../utils/create_lossless_histogram';
@@ -23,7 +25,7 @@ export function createServiceMetricsAggregator(flushInterval: string) {
     {
       filter: (event) => event['processor.event'] === 'transaction',
       getAggregateKey: (event) => {
-        // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
+        // see https://github.com/elastic/apm-server/blob/8.10/x-pack/apm-server/aggregation/txmetrics/aggregator.go
         return hashKeysOf(event, KEY_FIELDS);
       },
       flushInterval,

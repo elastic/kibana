@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Client } from '@elastic/elasticsearch';
@@ -22,7 +23,8 @@ export function createIndexDocRecordsStream(
   client: Client,
   stats: Stats,
   progress: Progress,
-  useCreate: boolean = false
+  useCreate: boolean = false,
+  performance?: LoadActionPerfOptions
 ) {
   async function indexDocs(docs: any[]) {
     const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
@@ -32,6 +34,7 @@ export function createIndexDocRecordsStream(
     await client.helpers.bulk(
       {
         retries: 5,
+        concurrency: performance?.concurrency || DEFAULT_PERFORMANCE_OPTIONS.concurrency,
         datasource: docs.map((doc) => {
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
@@ -68,7 +71,7 @@ export function createIndexDocRecordsStream(
   }
 
   return new Writable({
-    highWaterMark: 300,
+    highWaterMark: performance?.batchSize || DEFAULT_PERFORMANCE_OPTIONS.batchSize,
     objectMode: true,
 
     async write(record, enc, callback) {
@@ -92,3 +95,13 @@ export function createIndexDocRecordsStream(
     },
   });
 }
+
+export interface LoadActionPerfOptions {
+  batchSize?: number;
+  concurrency?: number;
+}
+
+const DEFAULT_PERFORMANCE_OPTIONS: LoadActionPerfOptions = {
+  batchSize: 5000,
+  concurrency: 4,
+} as const;

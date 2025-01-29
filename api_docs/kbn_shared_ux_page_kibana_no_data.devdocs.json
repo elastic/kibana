@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-page-kibana-no-data",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
-        "id": "def-common.KibanaNoDataPage",
+        "id": "def-public.KibanaNoDataPage",
         "type": "Function",
         "tags": [],
         "label": "KibanaNoDataPage",
@@ -29,25 +13,25 @@
           "\nA page to display when Kibana has no data, prompting a person to add integrations or create a new data view."
         ],
         "signature": [
-          "({ onDataViewCreated, noDataConfig, allowAdHocDataView, showPlainSpinner, }: ",
+          "({ onDataViewCreated, noDataConfig, allowAdHocDataView, onTryESQL, onESQLNavigationComplete, showPlainSpinner, }: ",
           "KibanaNoDataPageProps",
-          ") => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
-            "id": "def-common.KibanaNoDataPage.$1",
+            "id": "def-public.KibanaNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  noDataConfig,\n  allowAdHocDataView,\n  showPlainSpinner,\n}",
+            "label": "{\n  onDataViewCreated,\n  noDataConfig,\n  allowAdHocDataView,\n  onTryESQL,\n  onESQLNavigationComplete,\n  showPlainSpinner,\n}",
             "description": [],
             "signature": [
               "KibanaNoDataPageProps"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -58,7 +42,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
-        "id": "def-common.KibanaNoDataPageKibanaProvider",
+        "id": "def-public.KibanaNoDataPageKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "KibanaNoDataPageKibanaProvider",
@@ -68,25 +52,25 @@
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
           "KibanaNoDataPageKibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
-            "id": "def-common.KibanaNoDataPageKibanaProvider.$1",
+            "id": "def-public.KibanaNoDataPageKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
               "KibanaNoDataPageKibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -97,7 +81,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
-        "id": "def-common.KibanaNoDataPageProvider",
+        "id": "def-public.KibanaNoDataPageProvider",
         "type": "Function",
         "tags": [],
         "label": "KibanaNoDataPageProvider",
@@ -107,15 +91,15 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "KibanaNoDataPageServices",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
-            "id": "def-common.KibanaNoDataPageProvider.$1",
+            "id": "def-public.KibanaNoDataPageProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -125,7 +109,7 @@
               "KibanaNoDataPageServices",
               ">"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -140,7 +124,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
-        "id": "def-common.KibanaNoDataPageKibanaDependencies",
+        "id": "def-public.KibanaNoDataPageKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "KibanaNoDataPageKibanaDependencies",
@@ -156,14 +140,14 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
-        "id": "def-common.KibanaNoDataPageServices",
+        "id": "def-public.KibanaNoDataPageServices",
         "type": "Type",
         "tags": [],
         "label": "KibanaNoDataPageServices",
@@ -179,12 +163,28 @@
           " & ",
           "NoDataViewsPromptServices"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

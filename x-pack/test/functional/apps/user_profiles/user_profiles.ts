@@ -8,13 +8,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObjects }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'userProfiles', 'settings']);
+  const toasts = getService('toasts');
 
-  describe('User Profile Page', async () => {
+  describe('User Profile Page', () => {
     before(async () => {});
 
-    describe('Details', async () => {
+    describe('Details', () => {
       before(async () => {
         await pageObjects.common.navigateToApp('security_account');
       });
@@ -24,7 +25,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        let toast = await pageObjects.common.closeToast();
+        let toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
 
@@ -32,7 +33,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        toast = await pageObjects.common.closeToast();
+        toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
       });
@@ -42,7 +43,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        let toast = await pageObjects.common.closeToast();
+        let toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
 
@@ -50,13 +51,13 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        toast = await pageObjects.common.closeToast();
+        toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
       });
     });
 
-    describe('Change Password', async () => {
+    describe('Change Password', () => {
       before(async () => {
         await pageObjects.common.navigateToApp('security_account');
       });
@@ -72,7 +73,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         const submitButton = await pageObjects.userProfiles.getChangePasswordFormSubmitButton();
         await submitButton.click();
 
-        const initialToast = await pageObjects.common.closeToast();
+        const initialToast = await toasts.getTitleAndDismiss();
 
         expect(initialToast).to.be('Password successfully changed');
 
@@ -84,30 +85,30 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await submitButton.click();
 
-        const resetToast = await pageObjects.common.closeToast();
+        const resetToast = await toasts.getTitleAndDismiss();
 
         expect(resetToast).to.be('Password successfully changed');
       });
     });
 
-    describe('Theme', async () => {
+    describe('Theme', () => {
       it('should change theme based on the User Profile Theme control with default Adv. Settings value (light)', async () => {
         await pageObjects.common.navigateToApp('security_account');
 
         const themeKeyPadMenu = await pageObjects.userProfiles.getThemeKeypadMenu();
         expect(themeKeyPadMenu).not.to.be(null);
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Dark');
+        await pageObjects.userProfiles.changeUserProfileTheme('dark');
         const darkModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(darkModeTag).to.be('v8dark');
+        expect(darkModeTag).to.be('borealisdark');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Light');
+        await pageObjects.userProfiles.changeUserProfileTheme('light');
         const lightModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(lightModeTag).to.be('v8light');
+        expect(lightModeTag).to.be('borealislight');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Space default');
+        await pageObjects.userProfiles.changeUserProfileTheme('space_default');
         const spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(spaceDefaultModeTag).to.be('v8light');
+        expect(spaceDefaultModeTag).to.be('borealislight');
       });
 
       it('should change theme based on the User Profile Theme control with default Adv. Settings value set to dark', async () => {
@@ -118,31 +119,29 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           shouldUseHashForSubUrl: false,
         });
 
-        let advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox(
-          'theme:darkMode'
-        );
-        expect(advancedSetting).to.be(null);
+        let advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('disabled');
 
-        await pageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode', true);
-        advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox('theme:darkMode');
-        expect(advancedSetting).to.be('true');
+        await pageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'enabled');
+        advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('enabled');
 
         await pageObjects.common.navigateToApp('security_account');
 
         let spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(spaceDefaultModeTag).to.be('v8dark');
+        expect(spaceDefaultModeTag).to.be('borealisdark');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Light');
+        await pageObjects.userProfiles.changeUserProfileTheme('light');
         const lightModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(lightModeTag).to.be('v8light');
+        expect(lightModeTag).to.be('borealislight');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Dark');
+        await pageObjects.userProfiles.changeUserProfileTheme('dark');
         const darkModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(darkModeTag).to.be('v8dark');
+        expect(darkModeTag).to.be('borealisdark');
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Space default');
+        await pageObjects.userProfiles.changeUserProfileTheme('space_default');
         spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(spaceDefaultModeTag).to.be('v8dark');
+        expect(spaceDefaultModeTag).to.be('borealisdark');
 
         await pageObjects.common.navigateToUrl('management', 'kibana/settings', {
           basePath: '',
@@ -151,9 +150,9 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           shouldUseHashForSubUrl: false,
         });
 
-        await pageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode', false);
-        advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox('theme:darkMode');
-        expect(advancedSetting).to.be(null);
+        await pageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'disabled');
+        advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('disabled');
       });
     });
   });

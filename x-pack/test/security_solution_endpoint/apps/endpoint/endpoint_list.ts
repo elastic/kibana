@@ -7,13 +7,8 @@
 
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 
-import {
-  deleteMetadataStream,
-  deleteAllDocsFromMetadataCurrentIndex,
-  deleteAllDocsFromMetadataUnitedIndex,
-} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -23,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
   const expectedData = [
     [
@@ -91,9 +87,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
       before(async () => {
-        await deleteMetadataStream(getService);
-        await deleteAllDocsFromMetadataCurrentIndex(getService);
-        await deleteAllDocsFromMetadataUnitedIndex(getService);
+        await endpointDataStreamHelpers.deleteMetadataStream(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
+        await endpointDataStreamHelpers.deleteAllDocsFromMetadataUnitedIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       it('finds no data in list and prompts onboarding to add policy', async () => {
@@ -117,8 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.endpoint.navigateToEndpointList();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/170357
-      describe.skip('when there is data,', () => {
+      describe('when there is data,', () => {
         before(async () => {
           indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
           await pageObjects.endpoint.navigateToEndpointList();
@@ -129,8 +124,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
         });
         after(async () => {
-          await deleteAllDocsFromMetadataCurrentIndex(getService);
-          await deleteAllDocsFromMetadataUnitedIndex(getService);
+          await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
+          await endpointDataStreamHelpers.deleteAllDocsFromMetadataUnitedIndex(getService);
           if (indexedData) {
             await endpointTestResources.unloadEndpointData(indexedData);
           }

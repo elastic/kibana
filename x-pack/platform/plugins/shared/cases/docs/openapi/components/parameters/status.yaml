@@ -1,0 +1,10 @@
+in: query
+name: status
+description: Filters the returned cases by state.
+schema:
+  type: string
+  enum:
+    - closed
+    - in-progress
+    - open
+example: open

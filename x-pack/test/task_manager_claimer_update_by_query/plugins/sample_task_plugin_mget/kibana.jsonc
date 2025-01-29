@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/sample-task-plugin-update-by-query",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "sampleTaskPluginUpdateByQuery",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager"
+    ]
+  }
+}

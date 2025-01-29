@@ -16,4 +16,9 @@ export default createTestConfig('security_and_spaces', {
   publicBaseUrl: true,
   testFiles: [require.resolve('./tests')],
   useDedicatedTaskRunner: false,
+  experimentalFeatures: [
+    'sentinelOneConnectorOn',
+    'crowdstrikeConnectorOn',
+    'microsoftDefenderEndpointOn',
+  ],
 });

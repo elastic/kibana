@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
 import { Environment } from '@kbn/apm-plugin/common/environment_rt';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const logger = getService('log');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = moment().subtract(2, 'days');
   const end = moment();
@@ -72,17 +72,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(
     'fetching service anomalies with a basic license',
     { config: 'basic', archives: [] },
-    () => {
-      it('returns a 501', async () => {
-        const status = await statusOf(
-          getAnomalyCharts({
-            serviceName: 'a',
-            transactionType: 'request',
-            environment: 'ENVIRONMENT_ALL',
-          })
-        );
+    function () {
+      describe('should return a 501', function () {
+        this.tags('skipFIPS');
+        it('returns a 501', async function () {
+          const status = await statusOf(
+            getAnomalyCharts({
+              serviceName: 'a',
+              transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+            })
+          );
 
-        expect(status).to.eql(501);
+          expect(status).to.eql(501);
+        });
       });
     }
   );
@@ -94,7 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const NORMAL_DURATION = 100;
       const NORMAL_RATE = 1;
 
-      before(async () => {
+      beforeEach(async () => {
         const serviceA = apm
           .service({ name: 'a', environment: 'production', agentName: 'java' })
           .instance('a');
@@ -128,15 +131,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ];
           });
 
-        await synthtraceEsClient.index(events);
+        await apmSynthtraceEsClient.index(events);
       });
 
-      after(async () => {
+      afterEach(async () => {
         await cleanup();
       });
 
       async function cleanup() {
-        await synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
         await ml.cleanMlIndices();
       }
 
@@ -169,8 +172,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
+      // FLAKY: https://github.com/elastic/kibana/issues/176966
       describe('with ml jobs', () => {
-        before(async () => {
+        beforeEach(async () => {
           await createAndRunApmMlJobs({
             es,
             ml,
@@ -199,7 +203,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let failureRateSeries: ServiceAnomalyTimeseries | undefined;
           const endTimeMs = end.valueOf();
 
-          before(async () => {
+          beforeEach(async () => {
             allAnomalyTimeseries = (
               await getAnomalyCharts({
                 serviceName: 'a',
@@ -209,13 +213,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ).body.allAnomalyTimeseries;
 
             latencySeries = allAnomalyTimeseries.find(
-              (spec) => spec.type === ApmMlDetectorType.txLatency
+              (spec) => spec.type === AnomalyDetectorType.txLatency
             );
             throughputSeries = allAnomalyTimeseries.find(
-              (spec) => spec.type === ApmMlDetectorType.txThroughput
+              (spec) => spec.type === AnomalyDetectorType.txThroughput
             );
             failureRateSeries = allAnomalyTimeseries.find(
-              (spec) => spec.type === ApmMlDetectorType.txFailureRate
+              (spec) => spec.type === AnomalyDetectorType.txFailureRate
             );
           });
 
@@ -247,7 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             }
 
             expect(omitTimeseriesData(latencySeries)).to.eql({
-              type: ApmMlDetectorType.txLatency,
+              type: AnomalyDetectorType.txLatency,
               jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
@@ -256,7 +260,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             expect(omitTimeseriesData(throughputSeries)).to.eql({
-              type: ApmMlDetectorType.txThroughput,
+              type: AnomalyDetectorType.txThroughput,
               jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
@@ -265,7 +269,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             expect(omitTimeseriesData(failureRateSeries)).to.eql({
-              type: ApmMlDetectorType.txFailureRate,
+              type: AnomalyDetectorType.txFailureRate,
               jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',

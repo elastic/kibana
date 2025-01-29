@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import deepEqual from 'fast-deep-equal';
@@ -13,7 +14,7 @@ import { createTestEsCluster } from '@kbn/test';
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
 import { checkAdditiveOnlyChange } from './check_additive_only_change';
 import { checkIncompatibleMappings } from './check_incompatible_mappings';
-import { readCurrentMappings, updateCurrentMappings } from './current_mappings';
+import { readCurrentMappings, writeCurrentMappings } from './current_mappings';
 
 export const runMappingsCompatibilityChecks = async ({
   fix,
@@ -78,7 +79,7 @@ export const runMappingsCompatibilityChecks = async ({
   }
 
   if (fix) {
-    await updateCurrentMappings(extractedMappings);
+    await writeCurrentMappings(extractedMappings);
     log.warning(
       `Updated extracted mappings in current_mappings.json file, please commit the changes if desired.`
     );

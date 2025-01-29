@@ -4,7 +4,7 @@
 ################################################################################
 ARG BASE_REGISTRY=registry1.dso.mil
 ARG BASE_IMAGE=ironbank/redhat/ubi/ubi9
-ARG BASE_TAG=9.3
+ARG BASE_TAG=9.5
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as prep_files
 

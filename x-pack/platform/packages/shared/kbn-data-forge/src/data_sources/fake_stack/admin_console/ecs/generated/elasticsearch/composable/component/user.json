@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "documentation": "https://www.elastic.co/guide/en/ecs/current/ecs-user.html",
+    "ecs_version": "8.0.0"
+  },
+  "template": {
+    "mappings": {
+      "properties": {
+        "user": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              },
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "roles": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

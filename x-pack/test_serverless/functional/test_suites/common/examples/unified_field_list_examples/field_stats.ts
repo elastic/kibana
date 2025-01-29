@@ -29,8 +29,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   describe('Field stats', () => {
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -68,7 +67,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('field distribution', () => {
       before(async () => {
-        await PageObjects.unifiedFieldList.toggleSidebarSection('empty'); // it will allow to render more fields in Available fields section
+        await PageObjects.unifiedFieldList.toggleSidebarSection('meta'); // it will allow to render more fields in Available fields section
       });
 
       it('should return an auto histogram for numbers and top values', async () => {

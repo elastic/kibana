@@ -1,0 +1,28 @@
+# Recommended Redocly CLI ruleset https://redocly.com/docs/cli/rules/recommended/#recommended-ruleset
+# Redocly CLI custom plugins https://redocly.com/docs/cli/custom-plugins/
+plugins:
+  - extra_linter_rules_plugin.js
+
+rules:
+  spec: error
+  spec-strict-refs: error
+  no-path-trailing-slash: error
+  no-identical-paths: error
+  no-ambiguous-paths: error
+  no-unresolved-refs: error
+  no-enum-type-mismatch: error
+  component-name-unique: error
+  path-declaration-must-exist: error
+  path-not-include-query: error
+  operation-2xx-response: error
+  operation-operationId: error
+  operation-operationId-unique: error
+  operation-operationId-url-safe: error
+  operation-parameters-unique: error
+  extra-linter-rules-plugin/valid-x-modify: error
+  # Disable rules generating the majority of warnings.
+  # They will be handled separately.
+  # operation-description: warn
+  # operation-summary: warn
+  # operation-4xx-response: warn
+  # path-parameters-defined: warn

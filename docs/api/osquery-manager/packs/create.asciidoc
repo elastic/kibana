@@ -4,6 +4,12 @@
 <titleabbrev>Create pack</titleabbrev>
 ++++
 
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-kibana}/group/endpoint-security-osquery-api[Osquery APIs].
+--
+
 experimental[] Create packs.
 
 
@@ -69,6 +75,7 @@ $ curl -X POST api/osquery/packs \
     "my_query": {
       "query": "SELECT * FROM listening_ports;",
       "interval": 60,
+      "timeout": 120,
       "ecs_mapping": {
         "client.port": {
           "field": "port"

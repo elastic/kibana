@@ -10,22 +10,34 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
+        "id": "def-server.createDocumentMigratorMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createDocumentMigratorMock",
+        "description": [],
+        "signature": [
+          "() => jest.Mocked<",
+          "IDocumentMigrator",
+          ">"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/document_migrator.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
-        "id": "def-common.serializerMock",
+        "id": "def-server.serializerMock",
         "type": "Object",
         "tags": [],
         "label": "serializerMock",
@@ -36,20 +48,14 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
-            "id": "def-common.serializerMock.create",
+            "id": "def-server.serializerMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.ISavedObjectsSerializer",
-                "text": "ISavedObjectsSerializer"
-              },
+              "ISavedObjectsSerializer",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/serializer.mock.ts",
@@ -63,7 +69,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
-        "id": "def-common.typeRegistryMock",
+        "id": "def-server.typeRegistryMock",
         "type": "Object",
         "tags": [],
         "label": "typeRegistryMock",
@@ -74,20 +80,14 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-mocks",
-            "id": "def-common.typeRegistryMock.create",
+            "id": "def-server.typeRegistryMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              },
+              "ISavedObjectTypeRegistry",
               " & Pick<",
               "SavedObjectTypeRegistry",
               ", \"registerType\">>"
@@ -102,5 +102,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { PluginInitializer, Plugin } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { Plugin, PluginInitializer } from '@kbn/core/server';
+
 import { initRoutes } from './init_routes';
 
-export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> => ({
-  setup: (core) => initRoutes(core),
+export interface PluginSetupDependencies {
+  cloud?: CloudSetup;
+}
+
+export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
+  context
+): Promise<Plugin> => ({
+  setup: (core, plugins: PluginSetupDependencies) => initRoutes(context, core, plugins),
   start: () => {},
   stop: () => {},
 });

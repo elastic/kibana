@@ -16,14 +16,19 @@ import {
   TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
   TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON,
 } from '../../../screens/timeline';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { addNameToTimelineAndSave, populateTimeline, saveTimeline } from '../../../tasks/timeline';
+import {
+  addNameToTimelineAndSave,
+  enableAllRowRenderersWithSwitch,
+  populateTimeline,
+  saveTimeline,
+} from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
@@ -41,16 +46,19 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     });
     openTimelineUsingToggle();
     populateTimeline();
-    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
-    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
   });
 
-  it('Row renderers should be enabled by default', () => {
+  it('Row renderers should be disabled by default', () => {
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).should('exist');
-    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).should('be.checked');
+    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).should('not.be.checked');
   });
 
   it('Selected renderer can be disabled and enabled', () => {
+    enableAllRowRenderersWithSwitch();
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).should('exist');
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
 
@@ -69,9 +77,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     addNameToTimelineAndSave('Test');
 
     cy.wait('@excludedNetflow').then((interception) => {
-      expect(
-        interception?.response?.body.data.persistTimeline.timeline.excludedRowRendererIds
-      ).to.contain('netflow');
+      expect(interception?.response?.body.excludedRowRendererIds).to.contain('netflow');
     });
 
     // open modal, filter and check
@@ -85,15 +91,16 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     saveTimeline();
 
     cy.wait('@includedNetflow').then((interception) => {
-      expect(
-        interception?.response?.body.data.persistTimeline.timeline.excludedRowRendererIds
-      ).not.to.contain('netflow');
+      expect(interception?.response?.body.excludedRowRendererIds).not.to.contain('netflow');
     });
   });
 
   it('Selected renderer can be disabled with one click', () => {
     // Ensure these elements are visible before continuing since sometimes it takes a second for the modal to show up
     // and it gives the click handlers a bit of time to be initialized as well to reduce chances of flake
+    enableAllRowRenderersWithSwitch();
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
     cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).should('exist');
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).should('be.checked');
 
@@ -116,7 +123,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     // A follw-up ticket to tackle this issue has been created.
     it.skip('Signature tooltips do not overlap', () => {
       // Hover the signature to show the tooltips
-      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE).parents('.euiPopover__anchor').realHover();
+      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE).parents('.euiPopover').realHover();
 
       cy.get(TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP).then(($googleLinkTooltip) => {
         cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP).then(($signatureTooltip) => {

@@ -13,7 +13,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker']);
+  const { timePicker } = getPageObjects(['timePicker']);
   const config = getService('config');
   let remoteEsArchiver;
 
@@ -52,11 +52,12 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       }
 
       await esNode.load(esArchive);
-      // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
+        // changing the timepicker default here saves us from having to set it in Discover (~8s)
+        // The TSVB tests are using a slightly difference end date, so it needs to be set manually here
+        'timepicker:timeDefaults': `{ "from": "${timePicker.defaultStartTime}", "to": "Sep 22, 2015 @ 18:31:44.000" }`,
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
@@ -64,15 +65,15 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
     after(async () => {
       await esArchiver.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
+    loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./gauge'));
     loadTestFile(require.resolve('./timeseries'));
-    loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./top_n'));
     loadTestFile(require.resolve('./table'));
   });

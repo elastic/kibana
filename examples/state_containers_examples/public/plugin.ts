@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, Plugin, AppNavLinkStatus } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { AppPluginDependencies } from './with_data_services/types';
 import image from './state_sync.png';
@@ -37,11 +38,12 @@ export class StateContainersExamplesPlugin implements Plugin {
     core.application.register({
       id: 'stateContainersExampleBrowserHistory',
       title: examples.stateContainersExampleBrowserHistory.title,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp, History } = await import('./todo/app');
         const [coreStart] = await core.getStartServices();
         return renderApp(
+          coreStart,
           params,
           {
             appTitle: examples.stateContainersExampleBrowserHistory.title,
@@ -54,11 +56,12 @@ export class StateContainersExamplesPlugin implements Plugin {
     core.application.register({
       id: 'stateContainersExampleHashHistory',
       title: examples.stateContainersExampleHashHistory.title,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp, History } = await import('./todo/app');
         const [coreStart] = await core.getStartServices();
         return renderApp(
+          coreStart,
           params,
           {
             appTitle: examples.stateContainersExampleHashHistory.title,
@@ -72,7 +75,7 @@ export class StateContainersExamplesPlugin implements Plugin {
     core.application.register({
       id: 'stateContainersExampleWithDataServices',
       title: examples.stateContainersExampleWithDataServices.title,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./with_data_services/application');
         const [coreStart, depsStart] = await core.getStartServices();
@@ -88,14 +91,14 @@ export class StateContainersExamplesPlugin implements Plugin {
       links: [
         {
           label: 'State containers README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_containers',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_containers',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
         },
         {
           label: 'State sync utils README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_sync',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

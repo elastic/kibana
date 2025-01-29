@@ -5,46 +5,33 @@
  * 2.0.
  */
 
-import {
-  RULE_PREVIEW_TITLE_TEST_ID,
-  RULE_PREVIEW_RULE_CREATED_BY_TEST_ID,
-  RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID,
-  RULE_PREVIEW_ABOUT_HEADER_TEST_ID,
-  RULE_PREVIEW_ABOUT_CONTENT_TEST_ID,
-  RULE_PREVIEW_DEFINITION_HEADER_TEST_ID,
-  RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID,
-  RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID,
-  RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID,
-  RULE_PREVIEW_FOOTER_TEST_ID,
-  RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/document_details/preview/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE = getDataTestSubjectSelector(
-  RULE_PREVIEW_TITLE_TEST_ID
+  'securitySolutionFlyoutRulePanelTitle'
 );
 export const DOCUMENT_DETAILS_FLYOUT_CREATED_BY = getDataTestSubjectSelector(
-  RULE_PREVIEW_RULE_CREATED_BY_TEST_ID
+  'securitySolutionFlyoutRulePanelCreatedByText'
 );
 export const DOCUMENT_DETAILS_FLYOUT_UPDATED_BY = getDataTestSubjectSelector(
-  RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID
+  'securitySolutionFlyoutRulePanelUpdatedByText'
 );
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER = getDataTestSubjectSelector(
-  RULE_PREVIEW_ABOUT_HEADER_TEST_ID
+  'securitySolutionFlyoutRulePanelAboutSectionHeader'
 );
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT =
-  getDataTestSubjectSelector(RULE_PREVIEW_ABOUT_CONTENT_TEST_ID);
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelAboutSectionContent');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER =
-  getDataTestSubjectSelector(RULE_PREVIEW_DEFINITION_HEADER_TEST_ID);
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelDefinitionSectionHeader');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_CONTENT =
-  getDataTestSubjectSelector(RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID);
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelDefinitionSectionContent');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER =
-  getDataTestSubjectSelector(RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID);
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelScheduleSectionHeader');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT =
-  getDataTestSubjectSelector(RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID);
+  getDataTestSubjectSelector('securitySolutionFlyoutRulePanelScheduleSectionContent');
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER = getDataTestSubjectSelector(
-  RULE_PREVIEW_FOOTER_TEST_ID
+  'securitySolutionFlyoutRulePreviewPanelFooter'
 );
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER_LINK = getDataTestSubjectSelector(
-  RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID
+  'securitySolutionFlyoutRulePreviewPanelFooterOpenRuleFlyout'
 );

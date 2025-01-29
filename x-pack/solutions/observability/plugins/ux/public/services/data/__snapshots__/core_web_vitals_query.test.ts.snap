@@ -1,0 +1,103 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`core web vitals query fetches rum core vitals 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "cls": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.cls",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "clsRanks": Object {
+        "percentile_ranks": Object {
+          "field": "transaction.experience.cls",
+          "keyed": false,
+          "values": Array [
+            0.1,
+            0.25,
+          ],
+        },
+      },
+      "coreVitalPages": Object {
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.experience",
+          },
+        },
+      },
+      "fcp": Object {
+        "percentiles": Object {
+          "field": "transaction.marks.agent.firstContentfulPaint",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "lcp": Object {
+        "percentiles": Object {
+          "field": "transaction.marks.agent.largestContentfulPaint",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "lcpRanks": Object {
+        "percentile_ranks": Object {
+          "field": "transaction.marks.agent.largestContentfulPaint",
+          "keyed": false,
+          "values": Array [
+            2500,
+            4000,
+          ],
+        },
+      },
+      "tbt": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.tbt",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 5000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+              ],
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+        ],
+        "must_not": Array [],
+      },
+    },
+    "size": 0,
+  },
+}
+`;

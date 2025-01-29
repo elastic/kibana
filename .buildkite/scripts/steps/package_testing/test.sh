@@ -5,6 +5,10 @@ set -euo pipefail
 source "$(dirname "$0")/../../common/util.sh"
 .buildkite/scripts/bootstrap.sh
 
+# temporary enable this to get screenshots on package testing failures
+#
+#is_test_execution_step
+
 echo "--- Package Testing for $TEST_PACKAGE"
 
 mkdir -p target

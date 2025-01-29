@@ -92,7 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
 
-        await testSubjects.existOrFail('spaces-edit-page');
+        await testSubjects.existOrFail('spaces-create-page');
       });
 
       it(`can navigate to edit space page`, async () => {
@@ -102,7 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
 
-        await testSubjects.existOrFail('spaces-edit-page');
+        await testSubjects.existOrFail('spaces-view-page');
       });
     });
 

@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  CustomCheerio,
-  CustomCheerioStatic,
-} from '../../../../test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+import type { CustomCheerio, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
@@ -19,6 +16,7 @@ export function SvlTriggersActionsPageProvider({ getService }: FtrProviderContex
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const rules = getService('rules');
+  const dataGrid = getService('dataGrid');
 
   function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
@@ -54,7 +52,7 @@ export function SvlTriggersActionsPageProvider({ getService }: FtrProviderContex
       return await noPermissionsTitle.getVisibleText();
     },
     async clickCreateConnectorButton() {
-      const createBtn = await testSubjects.find('createActionButton');
+      const createBtn = await testSubjects.find('createConnectorButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
@@ -205,7 +203,7 @@ export function SvlTriggersActionsPageProvider({ getService }: FtrProviderContex
         await this.searchRules(ruleName);
         const statusControl = await testSubjects.find(controlName);
         const title = await statusControl.getAttribute('title');
-        expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
+        expect(title?.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
     },
     async ensureEventLogColumnExists(columnId: string) {
@@ -224,15 +222,11 @@ export function SvlTriggersActionsPageProvider({ getService }: FtrProviderContex
       await columnsButton.click();
     },
     async sortEventLogColumn(columnId: string, direction: string) {
-      await testSubjects.click(`dataGridHeaderCell-${columnId}`);
-      const popover = await testSubjects.find(`dataGridHeaderCellActionGroup-${columnId}`);
-      const popoverListItems = await popover.findAllByCssSelector('li');
-
       if (direction === 'asc') {
-        await popoverListItems[1].click();
+        await dataGrid.clickColumnActionAt(columnId, 1);
       }
       if (direction === 'desc') {
-        await popoverListItems[2].click();
+        await dataGrid.clickColumnActionAt(columnId, 2);
       }
     },
   };

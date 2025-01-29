@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/preview/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER = getDataTestSubjectSelector(
-  ALERT_REASON_PREVIEW_BODY_TEST_ID
+  'securitySolutionFlyoutAlertReasonBody'
 );

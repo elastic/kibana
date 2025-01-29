@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import path from 'path';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['header']);
+  const pageObjects = getPageObjects(['header', 'common']);
   const aceEditor = getService('aceEditor');
+  const retry = getService('retry');
 
   return {
     async sectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
-    },
-
-    async emptyStateHeaderText() {
-      return await testSubjects.getVisibleText('title');
     },
 
     async createNewPipeline({
@@ -35,10 +33,9 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
+      await pageObjects.common.sleep(250);
       await testSubjects.click('createPipelineDropdown');
       await testSubjects.click('createNewPipeline');
-
-      await testSubjects.exists('pipelineForm');
 
       await testSubjects.setValue('nameField > input', name);
       await testSubjects.setValue('descriptionField > input', description);
@@ -61,7 +58,11 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async getPipelinesList() {
+    async getPipelinesList(options?: { searchFor?: string }) {
+      if (options?.searchFor) {
+        await this.searchPipelineList(options.searchFor);
+      }
+
       const pipelines = await testSubjects.findAll('pipelineTableRow');
 
       const getPipelineName = async (pipeline: WebElementWrapper) => {
@@ -72,24 +73,28 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
     },
 
-    async navigateToCreateFromCsv() {
-      await testSubjects.click('createPipelineDropdown');
-      await testSubjects.click('createPipelineFromCsv');
+    async searchPipelineList(searchTerm: string) {
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('pipelineTableSearch', searchTerm);
+    },
 
-      await testSubjects.exists('createFromCsvInstructions');
+    async clickPipelineLink(index: number) {
+      const links = await testSubjects.findAll('pipelineDetailsLink');
+      await links.at(index)?.click();
     },
 
     async createPipelineFromCsv({ name }: { name: string }) {
+      await pageObjects.common.sleep(250);
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createPipelineFromCsv');
+
+      await pageObjects.common.setFileInputPath(
+        path.join(__dirname, '..', 'fixtures', 'ingest_pipeline_example_mapping.csv')
+      );
+
       await testSubjects.click('processFileButton');
 
-      await testSubjects.exists('pipelineMappingsJSONEditor');
-
-      await testSubjects.exists('copyToClipboard');
-      await testSubjects.exists('downloadJson');
-
       await testSubjects.click('continueToCreate');
-
-      await testSubjects.exists('pipelineForm');
 
       await testSubjects.setValue('nameField > input', name);
       await testSubjects.click('submitButton');
@@ -101,9 +106,66 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async detailsFlyoutExists() {
+      return await testSubjects.exists('pipelineDetails');
+    },
+
     async increasePipelineListPageSize() {
       await testSubjects.click('tablePaginationPopoverButton');
       await testSubjects.click(`tablePagination-50-rows`);
+    },
+
+    async navigateToManageProcessorsPage() {
+      await testSubjects.click('manageProcessorsLink');
+      await retry.waitFor('Manage Processors page title to be displayed', async () => {
+        return await testSubjects.isDisplayed('manageProcessorsTitle');
+      });
+    },
+
+    async geoipEmptyListPromptExists() {
+      return await testSubjects.exists('geoipEmptyListPrompt');
+    },
+
+    async openCreateDatabaseModal() {
+      await testSubjects.click('addGeoipDatabaseButton');
+    },
+
+    async fillAddDatabaseForm(databaseType: string, databaseName: string, maxmind?: string) {
+      await testSubjects.selectValue('databaseTypeSelect', databaseType);
+
+      await retry.waitFor('Database name field to be displayed', async () => {
+        return await testSubjects.isDisplayed('databaseNameSelect');
+      });
+
+      if (maxmind) {
+        await testSubjects.setValue('maxmindField', maxmind);
+      }
+
+      await testSubjects.selectValue('databaseNameSelect', databaseName);
+    },
+
+    async clickAddDatabaseButton() {
+      await retry.waitFor('Add button to be enabled', async () => {
+        return await testSubjects.isEnabled('addGeoipDatabaseSubmit');
+      });
+      await testSubjects.click('addGeoipDatabaseSubmit');
+    },
+
+    async getGeoipDatabases() {
+      const databases = await testSubjects.findAll('geoipDatabaseListRow');
+
+      const getDatabaseRow = async (database: WebElementWrapper) => {
+        return await database.getVisibleText();
+      };
+
+      return await Promise.all(databases.map((database) => getDatabaseRow(database)));
+    },
+
+    async deleteDatabase(index: number) {
+      const deleteButtons = await testSubjects.findAll('deleteGeoipDatabaseButton');
+      await deleteButtons.at(index)?.click();
+      await testSubjects.setValue('geoipDatabaseConfirmation', 'delete');
+      await testSubjects.click('deleteGeoipDatabaseSubmit');
     },
   };
 }

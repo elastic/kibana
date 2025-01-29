@@ -18,49 +18,32 @@ import {
   MARKDOWN_INVESTIGATE_BUTTON,
 } from '../../../screens/timeline';
 import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
-import {
-  addNotesToTimeline,
-  goToNotesTab,
-  openTimelineById,
-  refreshTimelinesUntilTimeLinePresent,
-} from '../../../tasks/timeline';
+import { visitTimeline } from '../../../tasks/navigation';
+import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
+import { getFullname } from '../../../tasks/common';
 
-import { TIMELINES_URL } from '../../../urls/navigation';
-
-const text = 'system_indices_superuser';
+const author = Cypress.env('ELASTICSEARCH_USERNAME');
 const link = 'https://www.elastic.co/';
 
-describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    login();
-    visit(TIMELINES_URL);
+describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
+  beforeEach(function () {
+    deleteTimelines();
 
     createTimeline(getTimelineNonValidQuery())
-      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-      .then((timelineId: string) =>
-        refreshTimelinesUntilTimeLinePresent(timelineId)
-          // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
-          // request responses and indeterminism since on clicks to activates URL's.
-          .then(() => cy.wrap(timelineId).as('timelineId'))
-      );
-  });
-
-  beforeEach(function () {
-    login();
-    visit(TIMELINES_URL);
-    openTimelineById(this?.timelineId as string);
+      .then((response) => response.body.savedObjectId)
+      .then((timelineId: string) => {
+        login();
+        visitTimeline(timelineId);
+      });
     goToNotesTab();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
   });
 
   it('should render mockdown', () => {
     addNotesToTimeline(getTimelineNonValidQuery().notes);
-    cy.get(NOTES_TEXT_AREA).should('exist');
+    cy.get(NOTES_TEXT_AREA).should('be.visible');
   });
 
   it('should contain notes', () => {
@@ -80,17 +63,23 @@ describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
 
   it('should be able to render code blocks', () => {
     addNotesToTimeline(`\`code\``);
-    cy.get(NOTES_CODE_BLOCK).should('exist');
+    cy.get(NOTES_CODE_BLOCK).should('be.visible');
   });
 
   it('should render the right author', () => {
-    addNotesToTimeline(getTimelineNonValidQuery().notes);
-    cy.get(NOTES_AUTHOR).first().should('have.text', text);
+    getFullname('admin').then((username) => {
+      addNotesToTimeline(getTimelineNonValidQuery().notes);
+      cy.get(NOTES_AUTHOR).first().should('have.text', username);
+    });
   });
 
-  it('should be able to render a link', () => {
-    addNotesToTimeline(`[${text}](${link})`);
-    cy.get(NOTES_LINK).last().should('have.text', `${text}(opens in a new tab or window)`);
+  // this test is failing on MKI only, the change was introduced by this EUI PR https://github.com/elastic/kibana/pull/195525
+  // for some reason, on MKI the value we're getting is testing-internal(opens in a new tab or window)' instead of 'testing-internal(external, opens in a new tab or window)'
+  it.skip('should be able to render a link', () => {
+    addNotesToTimeline(`[${author}](${link})`);
+    cy.get(NOTES_LINK)
+      .last()
+      .should('have.text', `${author}(external, opens in a new tab or window)`);
     cy.get(NOTES_LINK).last().click();
   });
 
@@ -104,7 +93,7 @@ describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   it('should be able to delete a note', () => {
     const deleteNoteContent = 'delete me';
     addNotesToTimeline(deleteNoteContent);
-    cy.get(DELETE_NOTE).last().click();
+    cy.get(DELETE_NOTE(0)).click();
     cy.get(MODAL_CONFIRMATION_BTN).click();
     cy.get(NOTE_DESCRIPTION).last().should('not.have.text', deleteNoteContent);
   });

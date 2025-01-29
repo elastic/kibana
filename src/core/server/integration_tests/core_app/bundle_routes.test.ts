@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -14,10 +15,10 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { HttpService } from '@kbn/core-http-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
 
-const buildNum = 1234;
+const buildHash = 'buildHash';
 const fooPluginFixture = resolve(__dirname, './__fixtures__/plugin/foo');
 
 describe('bundle routes', () => {
@@ -31,7 +32,7 @@ describe('bundle routes', () => {
     logger = loggingSystemMock.create();
     fileHashCache = new FileHashCache();
 
-    server = createHttpServer({ logger });
+    server = createHttpService({ logger });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
   });
 
@@ -47,8 +48,8 @@ describe('bundle routes', () => {
       isDist,
       fileHashCache,
       bundlesPath: fooPluginFixture,
-      routePath: `/${buildNum}/bundles/plugin/foo/`,
-      publicPath: `/${buildNum}/bundles/plugin/foo/`,
+      routePath: `/${buildHash}/bundles/plugin/foo/`,
+      publicPath: `/${buildHash}/bundles/plugin/foo/`,
     });
   };
 
@@ -62,7 +63,7 @@ describe('bundle routes', () => {
     await server.start();
 
     const response = await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/image.png`)
+      .get(`/${buildHash}/bundles/plugin/foo/image.png`)
       .expect(200);
 
     const actualImage = await readFile(resolve(fooPluginFixture, 'image.png'));
@@ -80,7 +81,7 @@ describe('bundle routes', () => {
     await server.start();
 
     const response = await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/plugin.js`)
+      .get(`/${buildHash}/bundles/plugin/foo/plugin.js`)
       .expect(200);
 
     const actualFile = await readFile(resolve(fooPluginFixture, 'plugin.js'));
@@ -98,7 +99,7 @@ describe('bundle routes', () => {
     await server.start();
 
     await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/../outside_output.js`)
+      .get(`/${buildHash}/bundles/plugin/foo/../outside_output.js`)
       .expect(404);
   });
 
@@ -112,7 +113,7 @@ describe('bundle routes', () => {
     await server.start();
 
     await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/missing.js`)
+      .get(`/${buildHash}/bundles/plugin/foo/missing.js`)
       .expect(404);
   });
 
@@ -126,7 +127,7 @@ describe('bundle routes', () => {
     await server.start();
 
     const response = await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
+      .get(`/${buildHash}/bundles/plugin/foo/gzip_chunk.js`)
       .expect(200);
 
     expect(response.get('content-encoding')).toEqual('gzip');
@@ -151,10 +152,10 @@ describe('bundle routes', () => {
       await server.start();
 
       const response = await supertest(innerServer.listener)
-        .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
+        .get(`/${buildHash}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
-      expect(response.get('cache-control')).toEqual('max-age=31536000');
+      expect(response.get('cache-control')).toEqual('public, max-age=31536000, immutable');
       expect(response.get('etag')).toBeUndefined();
     });
   });
@@ -170,7 +171,7 @@ describe('bundle routes', () => {
       await server.start();
 
       const response = await supertest(innerServer.listener)
-        .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
+        .get(`/${buildHash}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
       expect(response.get('cache-control')).toEqual('must-revalidate');

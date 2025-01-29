@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+  title: Execution Result Schema
+  version: not applicable
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleExecutionResult:
+      type: object
+      description: |-
+        Rule execution result is an aggregate that groups plain rule execution events by execution UUID. It contains such information as execution UUID, date, status and metrics.
+      properties:
+        execution_uuid:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        duration_ms:
+          type: integer
+        status:
+          type: string
+        message:
+          type: string
+        num_active_alerts:
+          type: integer
+        num_new_alerts:
+          type: integer
+        num_recovered_alerts:
+          type: integer
+        num_triggered_actions:
+          type: integer
+        num_succeeded_actions:
+          type: integer
+        num_errored_actions:
+          type: integer
+        total_search_duration_ms:
+          type: integer
+        es_search_duration_ms:
+          type: integer
+        schedule_delay_ms:
+          type: integer
+        timed_out:
+          type: boolean
+        indexing_duration_ms:
+          type: integer
+        search_duration_ms:
+          type: integer
+        gap_duration_s:
+          type: integer
+        security_status:
+          type: string
+        security_message:
+          type: string
+        backfill:
+          type: object
+          description: Backfill information for the rule execution result with source event date range
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string     
+              format: date-time     
+          required:
+            - from
+            - to    
+      required:
+        - execution_uuid
+        - timestamp
+        - duration_ms
+        - status
+        - message
+        - num_active_alerts
+        - num_new_alerts
+        - num_recovered_alerts
+        - num_triggered_actions
+        - num_succeeded_actions
+        - num_errored_actions
+        - total_search_duration_ms
+        - es_search_duration_ms
+        - schedule_delay_ms
+        - timed_out
+        - indexing_duration_ms
+        - search_duration_ms
+        - gap_duration_s
+        - security_status
+        - security_message
+
+    SortFieldOfRuleExecutionResult:
+      type: string
+      description: We support sorting rule execution results by these fields.
+      enum:
+        - timestamp
+        - duration_ms
+        - gap_duration_s
+        - indexing_duration_ms
+        - search_duration_ms
+        - schedule_delay_ms

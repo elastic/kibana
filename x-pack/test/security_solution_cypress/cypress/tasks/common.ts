@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 
@@ -55,6 +56,22 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
+const getUserValue = (taskName: 'getFullname' | 'getUsername', role: string = 'admin') => {
+  if (Cypress.env('IS_SERVERLESS')) {
+    return cy.task(taskName, role);
+  } else {
+    return cy.wrap(Cypress.env('ELASTICSEARCH_USERNAME'));
+  }
+};
+
+export const getFullname = (role: string = 'admin') => {
+  return getUserValue('getFullname', role);
+};
+
+export const getUsername = (role: string = 'admin') => {
+  return getUserValue('getUsername', role);
+};
+
 export const reload = () => {
   cy.reload();
   cy.contains('a', 'Security');
@@ -80,4 +97,14 @@ export const waitForWelcomePanelToBeLoaded = () => {
 export const waitForTableToLoad = () => {
   cy.get(EUI_BASIC_TABLE_LOADING).should('exist');
   cy.get(EUI_BASIC_TABLE_LOADING).should('not.exist');
+};
+
+export const waitForTabToBeLoaded = (tabId: string) => {
+  recurse(
+    () => cy.get(tabId).click(),
+    ($el) => expect($el).to.have.class('euiTab-isSelected'),
+    {
+      delay: 500,
+    }
+  );
 };

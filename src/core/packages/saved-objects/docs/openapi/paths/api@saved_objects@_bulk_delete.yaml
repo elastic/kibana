@@ -1,0 +1,44 @@
+post:
+  summary: Delete saved objects
+  operationId: bulkDeleteSavedObjects
+  description: >
+    WARNING: When you delete a saved object, it cannot be recovered.
+  deprecated: true
+  tags:
+    - saved objects
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - in: query
+      name: force
+      description: >
+        When true, force delete objects that exist in multiple namespaces.
+        Note that the option applies to the whole request.
+        Use the delete object API to specify per-object deletion behavior.
+        TIP: Use this if you attempted to delete objects and received an HTTP 400 error with the following message: "Unable to delete saved object that exists in multiple namespaces, use the force option to delete it anyway".
+        WARNING: When you bulk delete objects that exist in multiple namespaces, the API also deletes legacy url aliases that reference the object. These requests are batched to minimise the impact but they can place a heavy load on Kibana. Make sure you limit the number of objects that exist in multiple namespaces in a single bulk delete operation.
+      schema:
+        type: boolean
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            type: object
+  responses:
+    '200':
+      description: >
+        Indicates a successful call.
+        NOTE: This HTTP response code indicates that the bulk operation succeeded.
+        Errors pertaining to individual objects will be returned in the response body.
+      content:
+         application/json:
+          schema:
+            type: object
+    '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/400_response.yaml'

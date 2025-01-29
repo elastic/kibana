@@ -6,10 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  CustomCheerio,
-  CustomCheerioStatic,
-} from '../../../../test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+import type { CustomCheerio, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
@@ -19,6 +16,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const rules = getService('rules');
+  const dataGrid = getService('dataGrid');
 
   function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
@@ -54,7 +52,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       return await noPermissionsTitle.getVisibleText();
     },
     async clickCreateConnectorButton() {
-      const createBtn = await testSubjects.find('createActionButton');
+      const createBtn = await testSubjects.find('createConnectorButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
@@ -168,31 +166,33 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await rules.common.clickCreateAlertButton();
     },
     async setAlertName(value: string) {
-      await testSubjects.setValue('ruleNameInput', value);
+      await testSubjects.setValue('ruleDetailsNameInput', value);
       await this.assertAlertName(value);
     },
     async assertAlertName(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute('ruleNameInput', 'value');
+      const actualValue = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
       expect(actualValue).to.eql(expectedValue);
     },
     async setAlertInterval(value: number, unit?: 's' | 'm' | 'h' | 'd') {
-      await testSubjects.setValue('intervalInput', value.toString());
+      await testSubjects.setValue('ruleScheduleNumberInput', value.toString());
       if (unit) {
-        await testSubjects.selectValue('intervalInputUnit', unit);
+        await testSubjects.selectValue('ruleScheduleUnitInput', unit);
       }
       await this.assertAlertInterval(value, unit);
     },
     async assertAlertInterval(expectedValue: number, expectedUnit?: 's' | 'm' | 'h' | 'd') {
-      const actualValue = await testSubjects.getAttribute('intervalInput', 'value');
+      const actualValue = await testSubjects.getAttribute('ruleScheduleNumberInput', 'value');
       expect(actualValue).to.eql(expectedValue);
       if (expectedUnit) {
-        const actualUnitValue = await testSubjects.getAttribute('intervalInputUnit', 'value');
+        const actualUnitValue = await testSubjects.getAttribute('ruleScheduleUnitInput', 'value');
         expect(actualUnitValue).to.eql(expectedUnit);
       }
     },
     async saveAlert() {
-      await testSubjects.click('saveRuleButton');
-      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmRuleSaveModal');
+      await testSubjects.click('rulePageFooterSaveButton');
+      const isConfirmationModalVisible = await testSubjects.isDisplayed(
+        'rulePageConfirmCreateRule'
+      );
       expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
       await testSubjects.click('confirmModalConfirmButton');
     },
@@ -204,7 +204,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
         const statusControl = await testSubjects.find(controlName);
-        const title = await statusControl.getAttribute('title');
+        const title = (await statusControl.getAttribute('title')) ?? '';
         expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
     },
@@ -224,16 +224,23 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await columnsButton.click();
     },
     async sortEventLogColumn(columnId: string, direction: string) {
-      await testSubjects.click(`dataGridHeaderCell-${columnId}`);
-      const popover = await testSubjects.find(`dataGridHeaderCellActionGroup-${columnId}`);
-      const popoverListItems = await popover.findAllByCssSelector('li');
-
       if (direction === 'asc') {
-        await popoverListItems[1].click();
+        await dataGrid.clickColumnActionAt(columnId, 1);
       }
       if (direction === 'desc') {
-        await popoverListItems[2].click();
+        await dataGrid.clickColumnActionAt(columnId, 2);
       }
+    },
+    async clickAlertsPageShowQueryMenuButton() {
+      await testSubjects.click('showQueryBarMenu');
+    },
+    async getAlertsPageQuickFilters() {
+      const queryBarMenuPanel = await find.byCssSelector('[data-test-subj="queryBarMenuPanel"]');
+      const $ = await queryBarMenuPanel.parseDomContent();
+      return $('[data-test-subj^="quick-filters-item"]');
+    },
+    async getAlertsPageAppliedFilters() {
+      return await find.allByCssSelector('[data-test-subj="filter-items-group"] > *');
     },
   };
 }

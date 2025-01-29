@@ -27,7 +27,7 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async cancelRuleCreation() {
-      await testSubjects.click('cancelSaveRuleButton');
+      await testSubjects.click('rulePageFooterCancelButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
@@ -42,8 +42,6 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
     async defineIndexThresholdAlert(alertName: string) {
       await browser.refresh();
       await this.clickCreateAlertButton();
-      await testSubjects.scrollIntoView('ruleNameInput');
-      await testSubjects.setValue('ruleNameInput', alertName);
       await testSubjects.click(`.index-threshold-SelectOption`);
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
@@ -55,9 +53,6 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
         await fieldOptions[1].click();
       });
       await testSubjects.click('closePopover');
-      // need this two out of popup clicks to close them
-      const nameInput = await testSubjects.find('ruleNameInput');
-      await nameInput.click();
 
       await testSubjects.click('whenExpression');
       await testSubjects.click('whenExpressionSelect');
@@ -70,10 +65,13 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await testSubjects.click('ofExpressionPopover');
       const ofComboBox = await find.byCssSelector('#ofField');
       await ofComboBox.click();
-      const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
       const ofOptions = ofOptionsString.trim().split('\n');
       expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
+
+      await testSubjects.scrollIntoView('ruleDetailsNameInput');
+      await testSubjects.setValue('ruleDetailsNameInput', alertName);
     },
   };
 }

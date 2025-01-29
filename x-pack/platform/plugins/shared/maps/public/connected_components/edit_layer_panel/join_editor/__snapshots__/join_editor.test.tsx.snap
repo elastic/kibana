@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render join editor 1`] = `
+<div>
+  <EuiTitle
+    size="xs"
+  >
+    <h5>
+      <MemoizedFormattedMessage
+        defaultMessage="Joins"
+        id="xpack.maps.layerPanel.joinEditor.title"
+      />
+       
+      <JoinDocumentationPopover />
+    </h5>
+  </EuiTitle>
+  <Join
+    join={
+      Object {
+        "leftField": "iso2",
+        "right": Object {
+          "id": "673ff994-fc75-4c67-909b-69fcb0e1060e",
+          "indexPatternId": "abcde",
+          "metrics": Array [
+            Object {
+              "label": "web logs count",
+              "type": "count",
+            },
+          ],
+          "term": "geo.src",
+          "type": "ES_TERM_SOURCE",
+        },
+      }
+    }
+    key="673ff994-fc75-4c67-909b-69fcb0e1060e"
+    leftFields={Array []}
+    leftSourceName="myLeftJoinField"
+    onChange={[Function]}
+    onRemove={[Function]}
+  />
+  <EuiSkeletonText
+    isLoading={false}
+    lines={1}
+  >
+    <EuiTextAlign
+      textAlign="center"
+    >
+      <AddJoinButton
+        disabledReason=""
+        isDisabled={true}
+        label="Add spatial join"
+        onClick={[Function]}
+      />
+      <AddJoinButton
+        disabledReason="Vector tiles can only support a single join."
+        isDisabled={false}
+        label="Add term join"
+        onClick={[Function]}
+      />
+    </EuiTextAlign>
+  </EuiSkeletonText>
+</div>
+`;

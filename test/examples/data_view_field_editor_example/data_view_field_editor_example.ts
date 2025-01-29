@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -13,8 +14,9 @@ import { PluginFunctionalProviderContext } from '../../plugin_functional/service
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
 
-  describe('', () => {
+  describe('data_view_field_editor_example', () => {
     it('finds a data view', async () => {
       await testSubjects.existOrFail('dataViewTitle');
     });
@@ -22,7 +24,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('opens the field editor', async () => {
       await testSubjects.click('addField');
       await testSubjects.existOrFail('flyoutTitle');
-      await testSubjects.click('closeFlyoutButton');
+      await retry.try(async () => {
+        await testSubjects.click('closeFlyoutButton');
+        await testSubjects.missingOrFail('flyoutTitle');
+      });
     });
 
     it('uses preconfigured options for a new field', async () => {

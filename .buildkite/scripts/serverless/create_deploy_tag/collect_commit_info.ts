@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { COMMIT_INFO_CTX, exec } from './shared';
@@ -13,6 +14,7 @@ import {
   getSelectedCommitHash,
   getCommitByHash,
   makeCommitInfoHtml,
+  getRecentCommits,
 } from './info_sections/commit_info';
 import {
   getArtifactBuild,
@@ -45,7 +47,8 @@ async function main() {
   const buildkiteBuild = await getOnMergePRBuild(selectedSha);
   const nextBuildContainingCommit = await getQAFBuildContainingCommit(
     selectedSha,
-    selectedCommitInfo.date!
+    selectedCommitInfo.date!,
+    await getRecentCommits(50)
   );
   const artifactBuild = await getArtifactBuild(selectedSha);
   addBuildkiteInfoSection(

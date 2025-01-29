@@ -295,3 +295,7 @@ export const validateImportExceptionListFailedBecauseExistingListFound = () => {
     cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
   });
 };
+
+export const validateImportExceptionListCreateNewOptionDisabled = () => {
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).should('be.disabled');
+};

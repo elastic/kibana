@@ -9,80 +9,89 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { EXISTING_INDICES_PATH } from '@kbn/data-views-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
   const randomness = getService('randomness');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('_existing_indices params', () => {
-    before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
-    );
-    after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
-    );
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+    });
+    after(async () => {
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
 
     it('requires a query param', () =>
-      supertest
+      supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({})
         .expect(400));
 
     it('accepts indices param as single index string', () =>
-      supertest
+      supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           indices: 'filebeat-*',
         })
         .expect(200));
 
     it('accepts indices param as single index array', () =>
-      supertest
+      supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           indices: ['filebeat-*'],
         })
         .expect(200));
 
     it('accepts indices param', () =>
-      supertest
+      supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           indices: ['filebeat-*', 'packetbeat-*'],
         })
         .expect(200));
 
     it('rejects unexpected query params', () =>
-      supertest
+      supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           [randomness.word()]: randomness.word(),
         })
         .expect(400));
 
     it('rejects a comma-separated list of indices', () =>
-      supertest
+      supertestWithoutAuth
         .get(EXISTING_INDICES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({
           indices: 'filebeat-*,packetbeat-*',
         })

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { components } from '@octokit/openapi-types';
-import { buildkite, buildkiteBuildStateToEmoji, CommitWithStatuses, octokit } from '../shared';
+import { buildkite, buildkiteBuildStateToEmoji, CommitWithStatuses } from '../shared';
+import { GitCommitExtract } from './commit_info';
 import { Build } from '#pipeline-utils/buildkite';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
@@ -70,27 +71,30 @@ export async function getArtifactBuild(commitSha: string): Promise<BuildkiteBuil
 
 export async function getQAFBuildContainingCommit(
   commitSha: string,
-  date: string
+  date: string,
+  recentGitCommits: GitCommitExtract[]
 ): Promise<BuildkiteBuildExtract | null> {
-  // List of commits
-  const commitShaList = await getCommitListCached();
-
   // List of QAF builds
   const qafBuilds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 30);
+  qafBuilds.reverse();
 
   // Find the first build that contains this commit
-  const build = qafBuilds.find((kbBuild) => {
-    // Check if build.commit is after commitSha?
-    const kibanaCommitSha = tryGetKibanaBuildHashFromQAFBuild(kbBuild);
-    const buildkiteBuildShaIndex = commitShaList.findIndex((c) => c.sha === kibanaCommitSha);
-    const commitShaIndex = commitShaList.findIndex((c) => c.sha === commitSha);
+  const build = qafBuilds
+    // Scheduled and manually tagged builds will have this variable, other builds might have non-relevant commits
+    .filter((e) => e.env.PRE_RELEASE_CHECK?.match(/(1|true)/i))
+    .find((kbBuild) => {
+      const commitShaIndex = recentGitCommits.findIndex((c) => c.sha === commitSha);
 
-    return (
-      commitShaIndex !== -1 &&
-      buildkiteBuildShaIndex !== -1 &&
-      buildkiteBuildShaIndex < commitShaIndex
-    );
-  });
+      const kibanaCommitOfFTR = tryGetKibanaBuildHashFromQAFBuild(kbBuild);
+      const buildkiteBuildShaIndex = recentGitCommits.findIndex((c) => c.sha === kibanaCommitOfFTR);
+
+      // Check if build.commit is after commitSha?
+      return (
+        commitShaIndex !== -1 &&
+        buildkiteBuildShaIndex !== -1 &&
+        buildkiteBuildShaIndex <= commitShaIndex
+      );
+    });
 
   if (!build) {
     return null;
@@ -119,25 +123,6 @@ function tryGetKibanaBuildHashFromQAFBuild(build: Build) {
     console.error(e);
     return null;
   }
-}
-
-let _commitListCache: Array<components['schemas']['commit']> | null = null;
-async function getCommitListCached() {
-  if (!_commitListCache) {
-    const resp = await octokit.request<'GET /repos/{owner}/{repo}/commits'>(
-      'GET /repos/{owner}/{repo}/commits',
-      {
-        owner: 'elastic',
-        repo: 'kibana',
-        headers: {
-          accept: 'application/vnd.github.v3+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
-      }
-    );
-    _commitListCache = resp.data;
-  }
-  return _commitListCache;
 }
 
 function makeBuildInfoSnippetHtml(name: string, build: BuildkiteBuildExtract | null) {

@@ -17,8 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('runtime fields', function () {
-    this.tags(['skipFirefox']);
-
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -38,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-card-dataViews');
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount(), 10);
-        await log.debug('add runtime field');
+        log.debug('add runtime field');
         await PageObjects.settings.addRuntimeField(
           fieldName,
           'Keyword',
@@ -46,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           false
         );
 
-        await log.debug('check that field preview is rendered');
+        log.debug('check that field preview is rendered');
         expect(await testSubjects.exists('fieldPreviewItem', { timeout: 1500 })).to.be(true);
 
         await PageObjects.settings.clickSaveField();
@@ -61,7 +59,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should modify runtime field', async function () {
         await PageObjects.settings.filterField(fieldName);
         await testSubjects.click('editFieldFormat');
+        await retry.try(async () => {
+          await testSubjects.existOrFail('flyoutTitle');
+        });
         await PageObjects.settings.setFieldType('Long');
+        await new Promise((r) => setTimeout(r, 500));
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
         await PageObjects.settings.toggleRow('formatRow');
         await PageObjects.settings.setFieldFormat('bytes');

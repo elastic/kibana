@@ -6,7 +6,82 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
+        "id": "def-public.customBrandingServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "customBrandingServiceMock",
+        "description": [],
+        "path": "src/core/packages/custom-branding/browser-mocks/custom_branding_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
+            "id": "def-public.customBrandingServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => any"
+            ],
+            "path": "src/core/packages/custom-branding/browser-mocks/custom_branding_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
+            "id": "def-public.customBrandingServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => { customBranding$: ",
+              "Observable",
+              "<",
+              "CustomBranding",
+              ">; hasCustomBranding$: ",
+              "Observable",
+              "<boolean>; }"
+            ],
+            "path": "src/core/packages/custom-branding/browser-mocks/custom_branding_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
+            "id": "def-public.customBrandingServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => { customBranding$: ",
+              "Observable",
+              "<",
+              "CustomBranding",
+              ">; hasCustomBranding$: ",
+              "Observable",
+              "<boolean>; }"
+            ],
+            "path": "src/core/packages/custom-branding/browser-mocks/custom_branding_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -22,93 +97,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
-        "id": "def-common.customBrandingServiceMock",
-        "type": "Object",
-        "tags": [],
-        "label": "customBrandingServiceMock",
-        "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-browser-mocks/custom_branding_service.mock.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
-            "id": "def-common.customBrandingServiceMock.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "() => any"
-            ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser-mocks/custom_branding_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
-            "id": "def-common.customBrandingServiceMock.createSetupContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createSetupContract",
-            "description": [],
-            "signature": [
-              "() => { customBranding$: ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/core-custom-branding-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
-                "section": "def-common.CustomBranding",
-                "text": "CustomBranding"
-              },
-              ">; hasCustomBranding$: ",
-              "Observable",
-              "<boolean>; }"
-            ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser-mocks/custom_branding_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/core-custom-branding-browser-mocks",
-            "id": "def-common.customBrandingServiceMock.createStartContract",
-            "type": "Function",
-            "tags": [],
-            "label": "createStartContract",
-            "description": [],
-            "signature": [
-              "() => { customBranding$: ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/core-custom-branding-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
-                "section": "def-common.CustomBranding",
-                "text": "CustomBranding"
-              },
-              ">; hasCustomBranding$: ",
-              "Observable",
-              "<boolean>; }"
-            ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser-mocks/custom_branding_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

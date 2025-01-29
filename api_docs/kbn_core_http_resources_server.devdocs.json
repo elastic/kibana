@@ -11,31 +11,23 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-http-resources-server",
-        "id": "def-common.HttpResources",
+        "id": "def-server.HttpResources",
         "type": "Interface",
         "tags": [],
         "label": "HttpResources",
         "description": [
           "\nHttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.\nProvides API allowing plug-ins to respond with:\n- a pre-configured HTML page bootstrapping Kibana client app\n- custom HTML page\n- custom JS script file."
         ],
-        "path": "packages/core/http/core-http-resources-server/src/types.ts",
+        "path": "src/core/packages/http/resources-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResources.register",
+            "id": "def-server.HttpResources.register",
             "type": "Function",
             "tags": [],
             "label": "register",
@@ -44,83 +36,47 @@
             ],
             "signature": [
               "<P, Q, B, Context extends ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               " = ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ">(route: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.RouteConfig",
-                "text": "RouteConfig"
-              },
+              "RouteConfig",
               "<P, Q, B, \"get\">, handler: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesRequestHandler",
-                "text": "HttpResourcesRequestHandler"
-              },
+              "HttpResourcesRequestHandler",
               "<P, Q, B, Context>) => void"
             ],
-            "path": "packages/core/http/core-http-resources-server/src/types.ts",
+            "path": "src/core/packages/http/resources-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server",
-                "id": "def-common.HttpResources.register.$1",
+                "id": "def-server.HttpResources.register.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.RouteConfig",
-                    "text": "RouteConfig"
-                  },
+                  "RouteConfig",
                   "<P, Q, B, \"get\">"
                 ],
-                "path": "packages/core/http/core-http-resources-server/src/types.ts",
+                "path": "src/core/packages/http/resources-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-http-resources-server",
-                "id": "def-common.HttpResources.register.$2",
+                "id": "def-server.HttpResources.register.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-resources-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                    "section": "def-common.HttpResourcesRequestHandler",
-                    "text": "HttpResourcesRequestHandler"
-                  },
+                  "HttpResourcesRequestHandler",
                   "<P, Q, B, Context>"
                 ],
-                "path": "packages/core/http/core-http-resources-server/src/types.ts",
+                "path": "src/core/packages/http/resources-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -133,20 +89,20 @@
       },
       {
         "parentPluginId": "@kbn/core-http-resources-server",
-        "id": "def-common.HttpResourcesRenderOptions",
+        "id": "def-server.HttpResourcesRenderOptions",
         "type": "Interface",
         "tags": [],
         "label": "HttpResourcesRenderOptions",
         "description": [
           "\nAllows to configure HTTP response parameters"
         ],
-        "path": "packages/core/http/core-http-resources-server/src/types.ts",
+        "path": "src/core/packages/http/resources-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesRenderOptions.headers",
+            "id": "def-server.HttpResourcesRenderOptions.headers",
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
@@ -154,16 +110,10 @@
               "\nHTTP Headers with additional information about response."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseHeaders",
-                "text": "ResponseHeaders"
-              },
+              "ResponseHeaders",
               " | undefined"
             ],
-            "path": "packages/core/http/core-http-resources-server/src/types.ts",
+            "path": "src/core/packages/http/resources-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -172,20 +122,20 @@
       },
       {
         "parentPluginId": "@kbn/core-http-resources-server",
-        "id": "def-common.HttpResourcesServiceToolkit",
+        "id": "def-server.HttpResourcesServiceToolkit",
         "type": "Interface",
         "tags": [],
         "label": "HttpResourcesServiceToolkit",
         "description": [
           "\nExtended set of {@link KibanaResponseFactory} helpers used to respond with HTML or JS resource."
         ],
-        "path": "packages/core/http/core-http-resources-server/src/types.ts",
+        "path": "src/core/packages/http/resources-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesServiceToolkit.renderCoreApp",
+            "id": "def-server.HttpResourcesServiceToolkit.renderCoreApp",
             "type": "Function",
             "tags": [],
             "label": "renderCoreApp",
@@ -194,45 +144,27 @@
             ],
             "signature": [
               "(options?: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>"
             ],
-            "path": "packages/core/http/core-http-resources-server/src/types.ts",
+            "path": "src/core/packages/http/resources-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server",
-                "id": "def-common.HttpResourcesServiceToolkit.renderCoreApp.$1",
+                "id": "def-server.HttpResourcesServiceToolkit.renderCoreApp.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-resources-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                    "section": "def-common.HttpResourcesRenderOptions",
-                    "text": "HttpResourcesRenderOptions"
-                  },
+                  "HttpResourcesRenderOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/http/core-http-resources-server/src/types.ts",
+                "path": "src/core/packages/http/resources-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -242,54 +174,36 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesServiceToolkit.renderAnonymousCoreApp",
+            "id": "def-server.HttpResourcesServiceToolkit.renderAnonymousCoreApp",
             "type": "Function",
             "tags": [],
             "label": "renderAnonymousCoreApp",
             "description": [
-              "To respond with HTML page bootstrapping Kibana application without retrieving user-specific information."
+              "\nTo respond with HTML page bootstrapping Kibana application without retrieving user-specific information.\n**Note:**\n- Your client-side JavaScript bundle will only be loaded on an anonymous page if `plugin.enabledOnAnonymousPages` is enabled in your plugin's `kibana.jsonc` manifest file.\n- You will also need to register the route serving your anonymous app with the `coreSetup.http.anonymousPaths` service in your plugin's client-side `setup` method."
             ],
             "signature": [
               "(options?: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>"
             ],
-            "path": "packages/core/http/core-http-resources-server/src/types.ts",
+            "path": "src/core/packages/http/resources-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server",
-                "id": "def-common.HttpResourcesServiceToolkit.renderAnonymousCoreApp.$1",
+                "id": "def-server.HttpResourcesServiceToolkit.renderAnonymousCoreApp.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-resources-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                    "section": "def-common.HttpResourcesRenderOptions",
-                    "text": "HttpResourcesRenderOptions"
-                  },
+                  "HttpResourcesRenderOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/http/core-http-resources-server/src/types.ts",
+                "path": "src/core/packages/http/resources-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -299,7 +213,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesServiceToolkit.renderHtml",
+            "id": "def-server.HttpResourcesServiceToolkit.renderHtml",
             "type": "Function",
             "tags": [],
             "label": "renderHtml",
@@ -308,44 +222,26 @@
             ],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>"
             ],
-            "path": "packages/core/http/core-http-resources-server/src/types.ts",
+            "path": "src/core/packages/http/resources-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server",
-                "id": "def-common.HttpResourcesServiceToolkit.renderHtml.$1",
+                "id": "def-server.HttpResourcesServiceToolkit.renderHtml.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-resources-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                    "section": "def-common.HttpResourcesResponseOptions",
-                    "text": "HttpResourcesResponseOptions"
-                  }
+                  "HttpResourcesResponseOptions"
                 ],
-                "path": "packages/core/http/core-http-resources-server/src/types.ts",
+                "path": "src/core/packages/http/resources-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -355,7 +251,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesServiceToolkit.renderJs",
+            "id": "def-server.HttpResourcesServiceToolkit.renderJs",
             "type": "Function",
             "tags": [],
             "label": "renderJs",
@@ -364,44 +260,26 @@
             ],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>"
             ],
-            "path": "packages/core/http/core-http-resources-server/src/types.ts",
+            "path": "src/core/packages/http/resources-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server",
-                "id": "def-common.HttpResourcesServiceToolkit.renderJs.$1",
+                "id": "def-server.HttpResourcesServiceToolkit.renderJs.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-resources-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                    "section": "def-common.HttpResourcesResponseOptions",
-                    "text": "HttpResourcesResponseOptions"
-                  }
+                  "HttpResourcesResponseOptions"
                 ],
-                "path": "packages/core/http/core-http-resources-server/src/types.ts",
+                "path": "src/core/packages/http/resources-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -411,7 +289,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesServiceToolkit.renderCss",
+            "id": "def-server.HttpResourcesServiceToolkit.renderCss",
             "type": "Function",
             "tags": [],
             "label": "renderCss",
@@ -420,44 +298,26 @@
             ],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>"
             ],
-            "path": "packages/core/http/core-http-resources-server/src/types.ts",
+            "path": "src/core/packages/http/resources-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server",
-                "id": "def-common.HttpResourcesServiceToolkit.renderCss.$1",
+                "id": "def-server.HttpResourcesServiceToolkit.renderCss.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-resources-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                    "section": "def-common.HttpResourcesResponseOptions",
-                    "text": "HttpResourcesResponseOptions"
-                  }
+                  "HttpResourcesResponseOptions"
                 ],
-                "path": "packages/core/http/core-http-resources-server/src/types.ts",
+                "path": "src/core/packages/http/resources-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -473,7 +333,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-resources-server",
-        "id": "def-common.HttpResourcesRequestHandler",
+        "id": "def-server.HttpResourcesRequestHandler",
         "type": "Type",
         "tags": [],
         "label": "HttpResourcesRequestHandler",
@@ -482,123 +342,47 @@
         ],
         "signature": [
           "(context: Context, request: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<P, Q, B, \"get\">, response: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaSuccessResponseFactory",
-            "text": "KibanaSuccessResponseFactory"
-          },
+          "KibanaSuccessResponseFactory",
           " & ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRedirectionResponseFactory",
-            "text": "KibanaRedirectionResponseFactory"
-          },
+          "KibanaRedirectionResponseFactory",
           " & ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaErrorResponseFactory",
-            "text": "KibanaErrorResponseFactory"
-          },
+          "KibanaNotModifiedResponseFactory",
+          " & ",
+          "KibanaErrorResponseFactory",
           " & { file<T extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
           " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
+          "ResponseErrorAttributes",
           " | undefined; } | undefined>(options: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.FileHttpResponseOptions",
-            "text": "FileHttpResponseOptions"
-          },
+          "FileHttpResponseOptions",
           "<T>): ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>; custom<T extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
           " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
+          "ResponseErrorAttributes",
           " | undefined; } | undefined>(options: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.CustomHttpResponseOptions",
-            "text": "CustomHttpResponseOptions"
-          },
+          "CustomHttpResponseOptions",
           "<T>): ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>; } & ",
-          {
-            "pluginId": "@kbn/core-http-resources-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-            "section": "def-common.HttpResourcesServiceToolkit",
-            "text": "HttpResourcesServiceToolkit"
-          },
+          "HttpResourcesServiceToolkit",
           ") => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any> | Promise<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>>"
         ],
-        "path": "packages/core/http/core-http-resources-server/src/types.ts",
+        "path": "src/core/packages/http/resources-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesRequestHandler.$1",
+            "id": "def-server.HttpResourcesRequestHandler.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "context",
@@ -608,13 +392,13 @@
             "signature": [
               "Context"
             ],
-            "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
+            "path": "src/core/packages/http/server/src/router/request_handler.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesRequestHandler.$2",
+            "id": "def-server.HttpResourcesRequestHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -622,22 +406,16 @@
               "{@link KibanaRequest } - object containing information about requested resource,\nsuch as path, method, headers, parameters, query, body, etc."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<P, Q, B, Method>"
             ],
-            "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
+            "path": "src/core/packages/http/server/src/router/request_handler.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server",
-            "id": "def-common.HttpResourcesRequestHandler.$3",
+            "id": "def-server.HttpResourcesRequestHandler.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "response",
@@ -647,7 +425,7 @@
             "signature": [
               "ResponseFactory"
             ],
-            "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
+            "path": "src/core/packages/http/server/src/router/request_handler.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -656,7 +434,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-resources-server",
-        "id": "def-common.HttpResourcesResponseOptions",
+        "id": "def-server.HttpResourcesResponseOptions",
         "type": "Type",
         "tags": [],
         "label": "HttpResourcesResponseOptions",
@@ -664,21 +442,23 @@
           "\nHTTP Resources response parameters"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpResponseOptions",
-            "text": "HttpResponseOptions"
-          },
+          "HttpResponseOptions",
           "<any>"
         ],
-        "path": "packages/core/http/core-http-resources-server/src/types.ts",
+        "path": "src/core/packages/http/resources-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

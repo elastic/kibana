@@ -40,16 +40,16 @@ import {
   removeServerGeneratedPropertiesFromSavedObject,
   superUserSpace1Auth,
   updateCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   getAllComments,
   bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../detection_engine_api_integration/utils';
+} from '../../../../../common/utils/security_solution';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: postCommentUserReq,
         });
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
         expect(commentUserAction).to.eql({
@@ -162,7 +162,6 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           },
-          case_id: postedCase.id,
           comment_id: patchedCase.comments![0].id,
           owner: 'securitySolutionFixture',
         });
@@ -546,7 +545,7 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('security_solution', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
@@ -632,13 +631,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: attachmentExpectedHttpCode,
             auth: attachmentAuth,
           });
 
-          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id!]);
 
           expect(updatedAlert.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS]).eql(
             expectedAlertStatus
@@ -661,12 +660,12 @@ export default ({ getService }: FtrProviderContext): void => {
           for (const theCase of cases) {
             await createCommentAndRefreshIndex({
               caseId: theCase.id,
-              alertId: alert._id,
+              alertId: alert._id!,
               alertIndex: alert._index,
             });
           }
 
-          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id!]);
           const caseIds = cases.map((theCase) => theCase.id);
 
           expect(updatedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql(caseIds);
@@ -741,11 +740,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
           });
 
-          const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id!]);
           expect(updatedAlertSecondTime.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql([
             postedCase.id,
           ]);
@@ -762,7 +761,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: 400,
           });
@@ -784,7 +783,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: 200,
             auth: { user: secOnlyReadAlerts, space: 'space1' },
@@ -807,7 +806,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: 403,
             auth: { user: obsSec, space: 'space1' },
@@ -830,7 +829,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: 200,
             auth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
@@ -1120,6 +1119,36 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(secondAttachment.alertId).to.eql(['test-id-3']);
         expect(secondAttachment.index).to.eql(['test-index-3']);
+      });
+    });
+
+    describe('partial updates', () => {
+      it('should not result to a version conflict (409) when adding a comment to an updated case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        /**
+         * Updating the status of the case will
+         * change the version of the case
+         */
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+        });
       });
     });
 

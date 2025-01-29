@@ -15,7 +15,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/mode.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -36,7 +36,7 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "path": "src/plugins/screenshot_mode/common/mode.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,33 +48,33 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "path": "src/plugins/screenshot_mode/common/constants.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
-    "setup": {
+    "start": {
       "parentPluginId": "screenshotMode",
-      "id": "def-public.ScreenshotModePluginStart",
+      "id": "def-public.ScreenshotModePublicStart",
       "type": "Type",
       "tags": [],
-      "label": "ScreenshotModePluginStart",
+      "label": "ScreenshotModePublicStart",
       "description": [],
       "signature": [
         {
           "pluginId": "screenshotMode",
           "scope": "public",
           "docId": "kibScreenshotModePluginApi",
-          "section": "def-public.ScreenshotModePluginSetup",
-          "text": "ScreenshotModePluginSetup"
+          "section": "def-public.ScreenshotModePublicSetup",
+          "text": "ScreenshotModePublicSetup"
         }
       ],
-      "path": "src/plugins/screenshot_mode/public/types.ts",
+      "path": "src/platform/plugins/shared/screenshot_mode/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "lifecycle": "setup",
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
@@ -93,7 +93,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/mode.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -114,7 +114,7 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "path": "src/plugins/screenshot_mode/common/mode.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -126,7 +126,7 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "path": "src/plugins/screenshot_mode/common/constants.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -139,16 +139,10 @@
         "label": "ScreenshotModeRequestHandlerContext",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-request-handler-context-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-            "section": "def-common.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          },
+          "RequestHandlerContext",
           " & { screenshotMode: Promise<{ isScreenshot: boolean; }>; }"
         ],
-        "path": "src/plugins/screenshot_mode/server/types.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -157,35 +151,35 @@
     "objects": [],
     "setup": {
       "parentPluginId": "screenshotMode",
-      "id": "def-server.ScreenshotModePluginSetup",
+      "id": "def-server.ScreenshotModeServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "ScreenshotModePluginSetup",
+      "label": "ScreenshotModeServerSetup",
       "description": [],
       "signature": [
         {
           "pluginId": "screenshotMode",
           "scope": "server",
           "docId": "kibScreenshotModePluginApi",
-          "section": "def-server.ScreenshotModePluginSetup",
-          "text": "ScreenshotModePluginSetup"
+          "section": "def-server.ScreenshotModeServerSetup",
+          "text": "ScreenshotModeServerSetup"
         },
         " extends ",
         {
           "pluginId": "screenshotMode",
           "scope": "server",
           "docId": "kibScreenshotModePluginApi",
-          "section": "def-server.ScreenshotModePluginStart",
-          "text": "ScreenshotModePluginStart"
+          "section": "def-server.ScreenshotModeServerStart",
+          "text": "ScreenshotModeServerStart"
         }
       ],
-      "path": "src/plugins/screenshot_mode/server/types.ts",
+      "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "screenshotMode",
-          "id": "def-server.ScreenshotModePluginSetup.setScreenshotContext",
+          "id": "def-server.ScreenshotModeServerSetup.setScreenshotContext",
           "type": "Function",
           "tags": [],
           "label": "setScreenshotContext",
@@ -195,13 +189,13 @@
           "signature": [
             "<T = unknown>(key: string, value: T) => void"
           ],
-          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "screenshotMode",
-              "id": "def-server.ScreenshotModePluginSetup.setScreenshotContext.$1",
+              "id": "def-server.ScreenshotModeServerSetup.setScreenshotContext.$1",
               "type": "string",
               "tags": [],
               "label": "key",
@@ -211,14 +205,14 @@
               "signature": [
                 "string"
               ],
-              "path": "src/plugins/screenshot_mode/server/types.ts",
+              "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
             },
             {
               "parentPluginId": "screenshotMode",
-              "id": "def-server.ScreenshotModePluginSetup.setScreenshotContext.$2",
+              "id": "def-server.ScreenshotModeServerSetup.setScreenshotContext.$2",
               "type": "Uncategorized",
               "tags": [],
               "label": "value",
@@ -228,7 +222,7 @@
               "signature": [
                 "T"
               ],
-              "path": "src/plugins/screenshot_mode/server/types.ts",
+              "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -238,7 +232,7 @@
         },
         {
           "parentPluginId": "screenshotMode",
-          "id": "def-server.ScreenshotModePluginSetup.setScreenshotModeEnabled",
+          "id": "def-server.ScreenshotModeServerSetup.setScreenshotModeEnabled",
           "type": "Function",
           "tags": [],
           "label": "setScreenshotModeEnabled",
@@ -248,7 +242,7 @@
           "signature": [
             "() => void"
           ],
-          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -260,18 +254,18 @@
     },
     "start": {
       "parentPluginId": "screenshotMode",
-      "id": "def-server.ScreenshotModePluginStart",
+      "id": "def-server.ScreenshotModeServerStart",
       "type": "Interface",
       "tags": [],
-      "label": "ScreenshotModePluginStart",
+      "label": "ScreenshotModeServerStart",
       "description": [],
-      "path": "src/plugins/screenshot_mode/server/types.ts",
+      "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "screenshotMode",
-          "id": "def-server.ScreenshotModePluginStart.isScreenshotMode",
+          "id": "def-server.ScreenshotModeServerStart.isScreenshotMode",
           "type": "Function",
           "tags": [],
           "label": "isScreenshotMode",
@@ -280,37 +274,25 @@
           ],
           "signature": [
             "(request: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "common",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => boolean"
           ],
-          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "screenshotMode",
-              "id": "def-server.ScreenshotModePluginStart.isScreenshotMode.$1",
+              "id": "def-server.ScreenshotModeServerStart.isScreenshotMode.$1",
               "type": "Object",
               "tags": [],
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
-                  "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "src/plugins/screenshot_mode/server/types.ts",
+              "path": "src/platform/plugins/shared/screenshot_mode/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -340,7 +322,7 @@
         "signature": [
           "(key: string, defaultValue: T | undefined) => T | undefined"
         ],
-        "path": "src/plugins/screenshot_mode/common/context.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -356,7 +338,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/screenshot_mode/common/context.ts",
+            "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -373,7 +355,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/plugins/screenshot_mode/common/context.ts",
+            "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -396,7 +378,7 @@
         "signature": [
           "() => boolean"
         ],
-        "path": "src/plugins/screenshot_mode/common/mode.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -415,7 +397,7 @@
         "signature": [
           "(key: string, value: T) => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/context.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -431,7 +413,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/screenshot_mode/common/context.ts",
+            "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -448,7 +430,7 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/screenshot_mode/common/context.ts",
+            "path": "src/platform/plugins/shared/screenshot_mode/common/context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -467,7 +449,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/mode.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -486,7 +468,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/plugins/screenshot_mode/common/mode.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -507,7 +489,7 @@
         "signature": [
           "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
         ],
-        "path": "src/plugins/screenshot_mode/common/mode.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -519,7 +501,7 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_HEADER",
         "description": [],
-        "path": "src/plugins/screenshot_mode/common/constants.ts",
+        "path": "src/platform/plugins/shared/screenshot_mode/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

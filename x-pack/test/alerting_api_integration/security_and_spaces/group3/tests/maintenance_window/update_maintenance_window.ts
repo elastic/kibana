@@ -11,37 +11,37 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+const scopedQuery = {
+  kql: "_id: '1234'",
+  filters: [
+    {
+      meta: {
+        disabled: false,
+        negate: false,
+        alias: null,
+        key: 'kibana.alert.action_group',
+        field: 'kibana.alert.action_group',
+        params: {
+          query: 'test',
+        },
+        type: 'phrase',
+      },
+      $state: {
+        store: 'appState',
+      },
+      query: {
+        match_phrase: {
+          'kibana.alert.action_group': 'test',
+        },
+      },
+    },
+  ],
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function updateMaintenanceWindowTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-
-  const scopedQuery = {
-    kql: "_id: '1234'",
-    filters: [
-      {
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-          key: 'kibana.alert.action_group',
-          field: 'kibana.alert.action_group',
-          params: {
-            query: 'test',
-          },
-          type: 'phrase',
-        },
-        $state: {
-          store: 'appState',
-        },
-        query: {
-          match_phrase: {
-            'kibana.alert.action_group': 'test',
-          },
-        },
-      },
-    ],
-  };
 
   describe('updateMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -53,6 +53,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         tzid: 'UTC',
         freq: 2, // weekly
       },
+      category_ids: ['management'],
       scoped_query: scopedQuery,
     };
     afterEach(() => objectRemover.removeAll());
@@ -98,7 +99,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/maintenance_window/${createdMaintenanceWindow.id}] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
                 statusCode: 403,
               });
               break;
@@ -276,6 +277,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
             freq: 2, // weekly
             count: 1,
           },
+          category_ids: ['management'],
           scoped_query: scopedQuery,
         })
         .expect(200);
@@ -302,6 +304,120 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
           },
         })
         .expect(400);
+    });
+
+    describe('validation', () => {
+      it('should return 400 if the timezone is not valid', async () => {
+        const { body: createdMaintenanceWindow } = await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send(createParams)
+          .expect(200);
+
+        objectRemover.add(
+          'space1',
+          createdMaintenanceWindow.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+
+        await supertest
+          .post(
+            `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+              createdMaintenanceWindow.id
+            }`
+          )
+          .set('kbn-xsrf', 'foo')
+          .send({
+            r_rule: { ...createParams.r_rule, tzid: 'invalid' },
+          })
+          .expect(400);
+      });
+
+      it('should return 400 if the byweekday is not valid', async () => {
+        const { body: createdMaintenanceWindow } = await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send(createParams)
+          .expect(200);
+
+        objectRemover.add(
+          'space1',
+          createdMaintenanceWindow.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+
+        await supertest
+          .post(
+            `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+              createdMaintenanceWindow.id
+            }`
+          )
+          .set('kbn-xsrf', 'foo')
+          .send({
+            r_rule: { ...createParams.r_rule, byweekday: ['invalid'] },
+          })
+          .expect(400);
+      });
+
+      it('should return 400 if the bymonthday is not valid', async () => {
+        const { body: createdMaintenanceWindow } = await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send(createParams)
+          .expect(200);
+
+        objectRemover.add(
+          'space1',
+          createdMaintenanceWindow.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+
+        await supertest
+          .post(
+            `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+              createdMaintenanceWindow.id
+            }`
+          )
+          .set('kbn-xsrf', 'foo')
+          .send({
+            r_rule: { ...createParams.r_rule, bymonthday: [35] },
+          })
+          .expect(400);
+      });
+
+      it('should return 400 if the bymonth is not valid', async () => {
+        const { body: createdMaintenanceWindow } = await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send(createParams)
+          .expect(200);
+
+        objectRemover.add(
+          'space1',
+          createdMaintenanceWindow.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+
+        await supertest
+          .post(
+            `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+              createdMaintenanceWindow.id
+            }`
+          )
+          .set('kbn-xsrf', 'foo')
+          .send({
+            r_rule: { ...createParams.r_rule, bymonth: [14] },
+          })
+          .expect(400);
+      });
     });
   });
 }

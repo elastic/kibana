@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');

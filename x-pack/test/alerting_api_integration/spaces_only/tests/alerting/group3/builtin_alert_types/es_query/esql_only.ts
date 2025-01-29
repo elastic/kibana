@@ -38,7 +38,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     getAllAADDocs,
   } = getRuleServices(getService);
 
-  describe('rule', async () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -72,15 +72,17 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+        esqlQuery:
+          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c > -1',
+        esqlQuery:
+          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
       });
 
       const docs = await waitForDocs(2);
-      const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+      const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
 
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
@@ -99,9 +101,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
       expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
       expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
+      expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
       const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
       expect(value).greaterThan(0);
       expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+      expect(alertDoc['host.name']).to.eql(['host-1']);
+      expect(alertDoc['host.hostname']).to.eql(['host-1']);
+      expect(alertDoc['host.id']).to.eql(['1']);
     });
 
     it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
@@ -130,7 +136,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+        const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -150,7 +156,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+        const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -180,7 +186,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
       expect(activeValue).to.be('1');
       expect(activeMessage).to.match(
-        /Document count is \d+ in the last 4s. Alert when greater than 0./
+        /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
       await createEsDocumentsInGroups(1, endDate);
       docs = await waitForDocs(2);
@@ -194,7 +200,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(recoveredName).to.be('fire then recovers');
       expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
       expect(recoveredMessage).to.match(
-        /Document count is \d+ in the last 4s. Alert when greater than 0./
+        /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
     });
 
@@ -208,12 +214,16 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from test-data-stream | stats c = count(@timestamp) | where c < 0',
+        esqlQuery:
+          'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c < 0',
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from test-data-stream | stats c = count(@timestamp) | where c > -1',
+        esqlQuery:
+          'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c > -1',
       });
+
+      const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
 
       const docs = await waitForDocs(2);
       for (let i = 0; i < docs.length; i++) {
@@ -223,10 +233,22 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
+
+      const aadDocs = await getAllAADDocs(1);
+
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
+      expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+      expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+      expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
+      const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+      expect(value).greaterThan(0);
+      expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+      expect(alertDoc['host.name']).to.eql(['host-1']);
+      expect(alertDoc['host.hostname']).to.eql(['host-1']);
+      expect(alertDoc['host.id']).to.eql(['1']);
     });
 
     it('throws an error if the thresholdComparator is not >', async () => {
@@ -435,6 +457,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             termSize: params.termSize,
             timeField: params.timeField || 'date',
             esqlQuery: { esql: params.esqlQuery },
+            sourceFields: [],
           },
         })
         .expect(200);

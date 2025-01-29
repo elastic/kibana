@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'header',
     'context',
     'discover',
@@ -47,6 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
+      // TODO: Serverless tests require login first
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {

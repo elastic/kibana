@@ -100,6 +100,25 @@ export function DeployDFAModelFlyoutProvider(
       await saveChangesButton.click();
     }
 
+    public async clearTrainedModelsInferenceFlyoutCustomEditorValues(
+      selector: string,
+      defaultValue?: string
+    ) {
+      const configElement = await testSubjects.find(selector);
+      const editor = await configElement.findByClassName('kibanaCodeEditor');
+      await editor.click();
+      const input = await find.activeElement();
+      // check default value then clear
+      const editorContent = await input.getAttribute('value');
+      if (defaultValue !== undefined) {
+        expect(editorContent).to.contain(defaultValue);
+      }
+      await input.clearValueWithKeyboard();
+      // Ensure the editor is cleared
+      const editorContentAfterClearing = await input.getAttribute('value');
+      expect(editorContentAfterClearing).to.eql('');
+    }
+
     public async setTrainedModelsInferenceFlyoutCustomEditorValues(
       selector: string,
       value: string
@@ -108,10 +127,6 @@ export function DeployDFAModelFlyoutProvider(
       const editor = await configElement.findByClassName('kibanaCodeEditor');
       await editor.click();
       const input = await find.activeElement();
-      await input.clearValueWithKeyboard();
-      // Ensure the editor is cleared before adding input
-      const editorContentAfterClearing = await input.getAttribute('value');
-      expect(editorContentAfterClearing).to.eql('');
 
       for (const chr of value) {
         await retry.tryForTime(5000, async () => {
@@ -131,6 +146,9 @@ export function DeployDFAModelFlyoutProvider(
         'mlTrainedModelsInferencePipelineInferenceConfigEditButton'
       );
       await editInferenceConfigButton.click();
+      await this.clearTrainedModelsInferenceFlyoutCustomEditorValues(
+        'mlTrainedModelsInferencePipelineInferenceConfigEditor'
+      );
       await this.setTrainedModelsInferenceFlyoutCustomEditorValues(
         'mlTrainedModelsInferencePipelineInferenceConfigEditor',
         JSON.stringify(values.editedInferenceConfig)
@@ -141,6 +159,10 @@ export function DeployDFAModelFlyoutProvider(
         'mlTrainedModelsInferencePipelineFieldMapEditButton'
       );
       await editFieldMapButton.click();
+      await this.clearTrainedModelsInferenceFlyoutCustomEditorValues(
+        'mlTrainedModelsInferencePipelineFieldMapEdit',
+        '{\n  "field_map": {\n    "incoming_field": "field_the_model_expects"\n  }\n'
+      );
 
       await this.setTrainedModelsInferenceFlyoutCustomEditorValues(
         'mlTrainedModelsInferencePipelineFieldMapEdit',

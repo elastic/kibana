@@ -1,0 +1,148 @@
+{
+  "id": "observabilityAIAssistantApp",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "observabilityAIAssistantApp",
+      "id": "def-public.ObservabilityAIAssistantAppPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityAIAssistantAppPublicSetup",
+      "description": [],
+      "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "observabilityAIAssistantApp",
+      "id": "def-public.ObservabilityAIAssistantAppPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityAIAssistantAppPublicStart",
+      "description": [],
+      "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "observabilityAIAssistantApp",
+          "id": "def-public.ObservabilityAIAssistantAppPublicStart.RootCauseAnalysisContainer",
+          "type": "Function",
+          "tags": [],
+          "label": "RootCauseAnalysisContainer",
+          "description": [],
+          "signature": [
+            "React.ExoticComponent<{ events?: ",
+            "RootCauseAnalysisEvent",
+            "[] | undefined; completeInBackground: boolean; onStartAnalysisClick: () => void; onStopAnalysisClick: () => void; onResetAnalysisClick: () => void; onClearAnalysisClick: () => void; onCompleteInBackgroundClick: () => void; loading: boolean; error?: Error | undefined; }>"
+          ],
+          "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "observabilityAIAssistantApp",
+              "id": "def-public.ObservabilityAIAssistantAppPublicStart.RootCauseAnalysisContainer.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P"
+              ],
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityAIAssistantApp",
+        "id": "def-server.CHANGES_FUNCTION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CHANGES_FUNCTION_NAME",
+        "description": [],
+        "signature": [
+          "\"changes\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/changes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistantApp",
+        "id": "def-server.QUERY_FUNCTION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_FUNCTION_NAME",
+        "description": [],
+        "signature": [
+          "\"query\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/query/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "observabilityAIAssistantApp",
+      "id": "def-server.ObservabilityAIAssistantAppServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityAIAssistantAppServerStart",
+      "description": [],
+      "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "observabilityAIAssistantApp",
+      "id": "def-server.ObservabilityAIAssistantAppServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityAIAssistantAppServerSetup",
+      "description": [],
+      "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

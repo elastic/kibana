@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { ServerlessRoleName } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
@@ -34,17 +35,14 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     { label: 'Machine Learning / Data Visualizer', expected: true },
     { label: 'Machine Learning / File Upload', expected: true },
     { label: 'Machine Learning / Index Data Visualizer', expected: true },
+    { label: 'Machine Learning / ES|QL Data Visualizer', expected: true },
     { label: 'Machine Learning / Data Drift', expected: true },
     { label: 'Alerts and Insights / Machine Learning', expected: true },
   ];
 
   describe('Search bar features', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
+      await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
     });
 
     describe('list features', () => {

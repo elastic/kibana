@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-card-no-data",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data",
-        "id": "def-common.NoDataCard",
+        "id": "def-public.NoDataCard",
         "type": "Function",
         "tags": [],
         "label": "NoDataCard",
@@ -29,15 +13,15 @@
         "signature": [
           "({ href: srcHref, category, description, ...props }: ",
           "NoDataCardComponentProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/card/no_data/impl/src/no_data_card.tsx",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data",
-            "id": "def-common.NoDataCard.$1",
+            "id": "def-public.NoDataCard.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{ href: srcHref, category, description, ...props }",
@@ -45,7 +29,7 @@
             "signature": [
               "NoDataCardComponentProps"
             ],
-            "path": "packages/shared-ux/card/no_data/impl/src/no_data_card.tsx",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -56,7 +40,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data",
-        "id": "def-common.NoDataCardKibanaProvider",
+        "id": "def-public.NoDataCardKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "NoDataCardKibanaProvider",
@@ -66,15 +50,15 @@
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data",
-            "id": "def-common.NoDataCardKibanaProvider.$1",
+            "id": "def-public.NoDataCardKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...dependencies\n}",
@@ -84,7 +68,7 @@
               "NoDataCardKibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,7 +79,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data",
-        "id": "def-common.NoDataCardProvider",
+        "id": "def-public.NoDataCardProvider",
         "type": "Function",
         "tags": [],
         "label": "NoDataCardProvider",
@@ -105,25 +89,25 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "NoDataCardServices",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-card-no-data",
-            "id": "def-common.NoDataCardProvider.$1",
+            "id": "def-public.NoDataCardProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
               "NoDataCardServices",
               ">"
             ],
-            "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -138,7 +122,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data",
-        "id": "def-common.NoDataCardComponentProps",
+        "id": "def-public.NoDataCardComponentProps",
         "type": "Type",
         "tags": [],
         "label": "NoDataCardComponentProps",
@@ -146,18 +130,18 @@
           "\nProps for the `NoDataCard` pure component."
         ],
         "signature": [
-          "Partial<Omit<",
+          "Partial<Pick<",
           "EuiCardProps",
-          ", \"description\" | \"onClick\" | \"isDisabled\" | \"button\" | \"layout\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
+          ", \"className\" | \"title\" | \"href\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
         ],
-        "path": "packages/shared-ux/card/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data",
-        "id": "def-common.NoDataCardKibanaDependencies",
+        "id": "def-public.NoDataCardKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "NoDataCardKibanaDependencies",
@@ -169,14 +153,14 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/card/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data",
-        "id": "def-common.NoDataCardProps",
+        "id": "def-public.NoDataCardProps",
         "type": "Type",
         "tags": [],
         "label": "NoDataCardProps",
@@ -184,18 +168,18 @@
           "\nProps for the `NoDataCard` sevice-connected component."
         ],
         "signature": [
-          "Partial<Omit<",
+          "Partial<Pick<",
           "EuiCardProps",
-          ", \"description\" | \"onClick\" | \"isDisabled\" | \"button\" | \"layout\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
+          ", \"className\" | \"title\" | \"href\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
         ],
-        "path": "packages/shared-ux/card/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/shared-ux-card-no-data",
-        "id": "def-common.NoDataCardServices",
+        "id": "def-public.NoDataCardServices",
         "type": "Type",
         "tags": [],
         "label": "NoDataCardServices",
@@ -207,12 +191,28 @@
           " & ",
           "RedirectAppLinksServices"
         ],
-        "path": "packages/shared-ux/card/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

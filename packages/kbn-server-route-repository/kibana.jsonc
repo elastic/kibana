@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/server-route-repository",
-  "owner": ["@elastic/obs-knowledge-team", "@elastic/obs-ux-management-team"]
-}

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { targetTags } from '../../target_tags';
 
@@ -17,8 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171649
-  // FLAKY: https://github.com/elastic/kibana/issues/171650
+  // FLAKY: https://github.com/elastic/kibana/issues/191243
   describe.skip('Endpoint permissions:', function () {
     targetTags(this, ['@ess']);
 
@@ -30,10 +29,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Force a logout so that we start from the login page
       await PageObjects.security.forceLogout();
+
+      // ensure Security Solution is properly initialized
+      await PageObjects.security.login('system_indices_superuser', 'changeme');
+      await PageObjects.detections.navigateToAlerts();
+      await testSubjects.existOrFail('manage-alert-detection-rules');
+
+      // logout again
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
+      if (indexedData) {
+        await endpointTestResources.unloadEndpointData(indexedData);
+      }
     });
 
     // Run the same set of tests against all of the Security Solution roles
@@ -83,8 +92,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(endpointSummary['Endpoint version']).to.be(endpoint.agent.version);
 
           // The values for these are calculated, so let's just make sure its not teh default when no data is returned
-          expect(endpointSummary['Policy status']).not.be('—');
-          expect(endpointSummary['Agent status']).not.to.be('—');
+          expect(endpointSummary['Policy status']).not.to.equal('—');
+          expect(endpointSummary['Agent status']).not.to.equal('—');
         });
       });
     }

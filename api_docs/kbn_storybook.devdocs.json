@@ -697,9 +697,7 @@
               "(config: ",
               "Configuration",
               ") => ",
-              "Configuration",
-              " & ",
-              "ConfigurationMergeFunction"
+              "Configuration"
             ],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,

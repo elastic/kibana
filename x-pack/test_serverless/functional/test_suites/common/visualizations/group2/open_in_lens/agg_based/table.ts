@@ -9,11 +9,17 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
+  const { svlCommonPage, lens, timePicker, dashboard } = getPageObjects([
+    'svlCommonPage',
+    'lens',
+    'timePicker',
+    'dashboard',
+  ]);
 
   const testSubjects = getService('testSubjects');
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
+  const comboBox = getService('comboBox');
 
   describe('Table', function describeIndexTests() {
     const fixture =
@@ -21,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
@@ -34,18 +41,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not allow converting of unsupported aggregations', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Unsupported Agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Table - Unsupported Agg')).to.eql(false);
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Agg with params');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Table - Agg with params')).to.eql(true);
     });
 
     it('should convert aggregation with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Agg with params');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Agg with params');
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -56,8 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert total function to summary row', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Summary row');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Summary row');
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -67,13 +70,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
-      const summaryRowFunction = await testSubjects.find('lnsDatatable_summaryrow_function');
-      expect(await summaryRowFunction.getVisibleText()).to.be('Sum');
+      expect(await comboBox.getComboBoxSelectedOptions('lnsDatatable_summaryrow_function')).to.eql([
+        'Sum',
+      ]);
     });
 
     it('should convert sibling pipeline aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Sibling pipeline agg');
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -88,8 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert parent pipeline aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Parent pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Parent pipeline agg');
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -104,8 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert split rows and split table to split table rows', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Split rows and tables');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Split rows and tables');
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -122,8 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert percentage column', async () => {
-      const visPanel = await panelActions.getPanelHeading('Table - Percentage Column');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Table - Percentage Column');
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -132,8 +132,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const percentageColumnText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger', 0, 1);
-      const format = await testSubjects.find('indexPattern-dimension-format');
-      expect(await format.getVisibleText()).to.be('Percent');
+      expect(await comboBox.getComboBoxSelectedOptions('indexPattern-dimension-format')).to.eql([
+        'Percent',
+      ]);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);

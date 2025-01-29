@@ -5,30 +5,20 @@
  * 2.0.
  */
 
-import { ObjectRemover } from '../../../lib/object_remover';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-export const createObjectRemover = async ({
-  getService,
-}: {
-  getService: FtrProviderContext['getService'];
-}) => {
-  const supertest = getService('supertest');
-  const objectRemover = new ObjectRemover(supertest);
-
-  return objectRemover;
-};
 
 export const createMaintenanceWindow = async ({
   name,
   startDate,
   notRecurring,
   getService,
+  overwrite,
 }: {
   name: string;
   startDate?: Date;
   notRecurring?: boolean;
   getService: FtrProviderContext['getService'];
+  overwrite?: Record<string, any>;
 }) => {
   const supertest = getService('supertest');
   const dtstart = startDate ? startDate : new Date();
@@ -40,6 +30,7 @@ export const createMaintenanceWindow = async ({
       tzid: 'UTC',
       ...(notRecurring ? { freq: 1, count: 1 } : { freq: 2 }),
     },
+    ...overwrite,
   };
 
   const { body } = await supertest

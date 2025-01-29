@@ -14,29 +14,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-user-settings-server-mocks",
-        "id": "def-common.userSettingsServiceMock",
+        "id": "def-server.userSettingsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "userSettingsServiceMock",
         "description": [],
-        "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
+        "path": "src/core/packages/user-settings/server-mocks/src/user_settings_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-user-settings-server-mocks",
-            "id": "def-common.userSettingsServiceMock.create",
+            "id": "def-server.userSettingsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,15 +36,17 @@
             "signature": [
               "() => jest.Mocked<",
               {
-                "pluginId": "@kbn/core-user-settings-server-internal",
+                "pluginId": "@kbn/utility-types",
                 "scope": "common",
-                "docId": "kibKbnCoreUserSettingsServerInternalPluginApi",
-                "section": "def-common.UserSettingsService",
-                "text": "UserSettingsService"
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
               },
-              ">"
+              "<",
+              "UserSettingsService",
+              ">>"
             ],
-            "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
+            "path": "src/core/packages/user-settings/server-mocks/src/user_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -60,15 +54,17 @@
           },
           {
             "parentPluginId": "@kbn/core-user-settings-server-mocks",
-            "id": "def-common.userSettingsServiceMock.createSetupContract",
+            "id": "def-server.userSettingsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
-              "() => { setUserProfileSettings: jest.Mock<any, any, any>; getUserSettingDarkMode: jest.Mock<any, any, any>; }"
+              "() => jest.Mocked<",
+              "InternalUserSettingsServiceSetup",
+              ">"
             ],
-            "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
+            "path": "src/core/packages/user-settings/server-mocks/src/user_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -78,5 +74,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

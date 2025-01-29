@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'home']);
+  const PageObjects = getPageObjects(['common', 'home', 'header']);
   const kibanaServer = getService('kibanaServer');
 
   describe('Welcome interstitial', () => {
@@ -32,6 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Reload the home screen and verify the interstitial is displayed
       await PageObjects.common.navigateToUrl('home', undefined, { disableWelcomePrompt: false });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
       expect(await PageObjects.home.isWelcomeInterstitialDisplayed()).to.be(true);
     });
 

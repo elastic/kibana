@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'timePicker',
     'settings',
@@ -34,12 +35,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('context link in discover', () => {
+  describe('context link in discover', function () {
+    // flaky on MKI, see https://github.com/elastic/kibana/issues/191237
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -57,6 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.uiSettings.replace({});
+    });
+
+    it('should open the context view with the same columns', async () => {
+      const columnNames = await dataGrid.getHeaderFields();
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the selected document as anchor and allows selecting next anchor', async () => {
@@ -94,11 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const anchorTimestamp = await getTimestamp(true);
         return anchorTimestamp === firstContextTimestamp;
       });
-    });
-
-    it('should open the context view with the same columns', async () => {
-      const columnNames = await dataGrid.getHeaderFields();
-      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {

@@ -22,9 +22,7 @@ import {
 
 export const setEndDateNow = (container: string = GLOBAL_FILTERS_CONTAINER) => {
   cy.get(GET_DATE_PICKER_END_DATE_POPOVER_BUTTON(container)).click();
-
   cy.get(DATE_PICKER_NOW_TAB).first().click();
-
   cy.get(DATE_PICKER_NOW_BUTTON).click();
 };
 
@@ -62,7 +60,7 @@ export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
 };
 
 export const updateTimelineDates = () => {
-  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().click({ force: true });
+  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().click();
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().should('not.have.text', 'Updating');
 };
 
@@ -76,7 +74,7 @@ export const updateDateRangeInLocalDatePickers = (
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(startDate);
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${startDate}{enter}`);
   cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
   cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).should(
     'not.have.text',
@@ -89,13 +87,11 @@ export const updateDateRangeInLocalDatePickers = (
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(endDate);
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${endDate}{enter}`);
   cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
 };
 
 export const showStartEndDate = (container: string = GLOBAL_FILTERS_CONTAINER) => {
-  cy.get(GET_LOCAL_SHOW_DATES_BUTTON(container)).trigger('click');
-  cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(container)).should('be.visible');
-  // close date Popover
-  cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(container)).trigger('click');
+  cy.get(GET_LOCAL_SHOW_DATES_BUTTON(container)).click();
+  cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(container)).click();
 };

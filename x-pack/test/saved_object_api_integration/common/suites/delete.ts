@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
@@ -38,7 +38,7 @@ export const TEST_CASES: Record<string, DeleteTestCase> = Object.freeze({
  */
 const createRequest = ({ type, id, force }: DeleteTestCase) => ({ type, id, force });
 
-export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
+export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('delete');
   const expectResponseBody =
     (testCase: DeleteTestCase): ExpectResponseBody =>
@@ -118,7 +118,7 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             await supertest
               .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
               .query({ ...(force && { force }) })
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
           });

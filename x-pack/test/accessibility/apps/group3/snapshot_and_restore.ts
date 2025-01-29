@@ -16,15 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await es.snapshot.createRepository({
       name: repoName,
       verify: true,
-      type: 'fs',
       repository: {
         type: 'fs',
         settings: {
           location: 'temp',
         },
-      },
-      settings: {
-        location: 'temp',
       },
     });
   }
@@ -35,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickSnapshotRestore();
     });
 
-    describe('empty state', async () => {
+    describe('empty state', () => {
       it('empty snapshots table', async () => {
         await a11y.testAppSnapshot();
       });
@@ -56,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('table views with data', async () => {
+    describe('table views with data', () => {
       const testRepoName = 'testrepo';
       const snapshotName = `testsnapshot${Date.now().toString()}`;
       before(async () => {
@@ -84,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('create policy wizard', async () => {
+    describe('create policy wizard', () => {
       const testRepoName = 'policyrepo';
       before(async () => {
         await createRepo(testRepoName);

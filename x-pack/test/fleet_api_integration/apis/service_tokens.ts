@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
@@ -15,7 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esClient = getService('es');
 
-  describe('fleet_service_tokens', async () => {
+  describe('fleet_service_tokens', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -44,14 +43,6 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(tokensResponse.tokens).have.property(apiResponse.name);
       });
-    });
-
-    it('should work with deprecated api', async () => {
-      await supertest
-        .post(`/api/fleet/service-tokens`)
-        .set('kbn-xsrf', 'xxxx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
-        .expect(200);
     });
 
     it('should create a valid remote service account token', async () => {

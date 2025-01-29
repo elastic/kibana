@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/core-security-server",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

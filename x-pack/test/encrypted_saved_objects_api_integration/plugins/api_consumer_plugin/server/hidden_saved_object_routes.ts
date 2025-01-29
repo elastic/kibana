@@ -6,8 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, CoreSetup, SavedObject } from '@kbn/core/server';
-import { PluginsSetup, PluginsStart } from '.';
+import type { CoreSetup, IRouter, SavedObject } from '@kbn/core/server';
+
+import type { PluginsSetup, PluginsStart } from '.';
 
 export function registerHiddenSORoutes(
   router: IRouter,
@@ -34,7 +35,7 @@ export function registerHiddenSORoutes(
         });
       } catch (err) {
         if (encryptedSavedObjects.isEncryptionError(err)) {
-          return response.badRequest({ body: 'Failed to encrypt attributes' });
+          return response.badRequest({ body: 'Failed to decrypt attributes' });
         }
 
         return response.customError({ body: err, statusCode: 500 });

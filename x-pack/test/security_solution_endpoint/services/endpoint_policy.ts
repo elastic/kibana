@@ -25,21 +25,21 @@ import { Immutable } from '@kbn/security-solution-plugin/common/endpoint/types';
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public/services/pkg_key_from_package_info';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
-const INGEST_API_ROOT = '/api/fleet';
-const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
-const INGEST_API_AGENT_POLICIES_DELETE = `${INGEST_API_AGENT_POLICIES}/delete`;
-const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
-const INGEST_API_PACKAGE_POLICIES_DELETE = `${INGEST_API_PACKAGE_POLICIES}/delete`;
+const FLEET_API_ROOT = '/api/fleet';
+const FLEET_API_AGENT_POLICIES = `${FLEET_API_ROOT}/agent_policies`;
+const FLEET_API_AGENT_POLICIES_DELETE = `${FLEET_API_AGENT_POLICIES}/delete`;
+const FLEET_API_PACKAGE_POLICIES = `${FLEET_API_ROOT}/package_policies`;
+const FLEET_API_PACKAGE_POLICIES_DELETE = `${FLEET_API_PACKAGE_POLICIES}/delete`;
 
 /**
  * Holds information about the test resources created to support an Endpoint Policy
  */
 export interface PolicyTestResourceInfo {
-  /** The Ingest agent policy created */
+  /** The Fleet agent policy created */
   agentPolicy: Immutable<CreateAgentPolicyResponse['item']>;
-  /** The Ingest Package Policy created and added to agent policy.
+  /** The Fleet Package Policy created and added to agent policy.
    * This is where Endpoint Policy is stored.
    */
   packagePolicy: Immutable<CreatePackagePolicyResponse['item']>;
@@ -87,7 +87,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             .expect(200)
             .catch((error) => {
               return logSupertestApiErrorAndThrow(
-                `Unable to retrieve Endpoint package via Ingest!`,
+                `Unable to retrieve Endpoint package via Fleet!`,
                 error
               );
             })
@@ -139,7 +139,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let fullAgentPolicy: GetFullAgentPolicyResponse['item'];
       try {
         const apiResponse: { body: GetFullAgentPolicyResponse } = await supertest
-          .get(`${INGEST_API_AGENT_POLICIES}/${agentPolicyId}/full`)
+          .get(`${FLEET_API_AGENT_POLICIES}/${agentPolicyId}/full`)
           .expect(200);
 
         fullAgentPolicy = apiResponse.body.item;
@@ -151,10 +151,16 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     },
 
     /**
-     * Creates an Ingest Agent policy and adds to it the Endpoint Package Policy that
+     * Creates a Fleet Agent policy and adds to it the Endpoint Package Policy that
      * stores the Policy configuration data
      */
-    async createPolicy(): Promise<PolicyTestResourceInfo> {
+    async createPolicy({
+      agentPolicyOverrides = {},
+      integrationPolicyOverrides = {},
+    }: Partial<{
+      agentPolicyOverrides: Partial<CreateAgentPolicyRequest['body']>;
+      integrationPolicyOverrides: Partial<CreatePackagePolicyRequest['body']>;
+    }> = {}): Promise<PolicyTestResourceInfo> {
       // create Agent Policy
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
@@ -162,15 +168,16 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           name: `East Coast ${uuidv4()}`,
           description: 'East Coast call center',
           namespace: 'default',
+          ...agentPolicyOverrides,
         };
         const { body: createResponse }: { body: CreateAgentPolicyResponse } = await supertest
-          .post(INGEST_API_AGENT_POLICIES)
+          .post(FLEET_API_AGENT_POLICIES)
           .set('kbn-xsrf', 'xxx')
           .send(newAgentPolicyData)
           .expect(200);
         agentPolicy = createResponse.item;
       } catch (error) {
-        return logSupertestApiErrorAndThrow(`Unable to create Agent Policy via Ingest!`, error);
+        return logSupertestApiErrorAndThrow(`Unable to create Agent Policy via Fleet!`, error);
       }
 
       // Retrieve the Endpoint package information
@@ -182,7 +189,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
           name: `Protect East Coast ${uuidv4()}`,
           description: 'Protect the worlds data - but in the East Coast',
-          policy_id: agentPolicy!.id,
+          policy_ids: [agentPolicy!.id],
           enabled: true,
           inputs: [
             {
@@ -210,15 +217,16 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             title: endpointPackageInfo?.title ?? '',
             version: endpointPackageInfo?.version ?? '',
           },
+          ...integrationPolicyOverrides,
         };
         const { body: createResponse }: { body: CreatePackagePolicyResponse } = await supertest
-          .post(INGEST_API_PACKAGE_POLICIES)
+          .post(FLEET_API_PACKAGE_POLICIES)
           .set('kbn-xsrf', 'xxx')
           .send(newPackagePolicyData)
           .expect(200);
         packagePolicy = createResponse.item;
       } catch (error) {
-        return logSupertestApiErrorAndThrow(`Unable to create Package Policy via Ingest!`, error);
+        return logSupertestApiErrorAndThrow(`Unable to create Package Policy via Fleet!`, error);
       }
 
       log.info(
@@ -237,12 +245,16 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               packagePolicyIds: [packagePolicy.id],
             };
             await supertest
-              .post(INGEST_API_PACKAGE_POLICIES_DELETE)
+              .post(FLEET_API_PACKAGE_POLICIES_DELETE)
               .set('kbn-xsrf', 'xxx')
               .send(deletePackagePolicyData)
               .expect(200);
+            log.info(`Fleet Endpoint integration policy deleted: ${packagePolicy.id}`);
           } catch (error) {
-            logSupertestApiErrorAndThrow('Unable to delete Package Policy via Ingest!', error);
+            logSupertestApiErrorAndThrow(
+              `Unable to delete Endpoint Integration Policy [${packagePolicy.id}] via Fleet!`,
+              error
+            );
           }
 
           // Delete Agent Policy
@@ -251,12 +263,16 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               agentPolicyId: agentPolicy.id,
             };
             await supertest
-              .post(INGEST_API_AGENT_POLICIES_DELETE)
+              .post(FLEET_API_AGENT_POLICIES_DELETE)
               .set('kbn-xsrf', 'xxx')
               .send(deleteAgentPolicyData)
               .expect(200);
+            log.info(`Fleet Agent policy deleted: ${agentPolicy.id}`);
           } catch (error) {
-            logSupertestApiErrorAndThrow('Unable to delete Agent Policy via Ingest!', error);
+            logSupertestApiErrorAndThrow(
+              `Unable to delete Agent Policy [${agentPolicy.id}] via Fleet!`,
+              error
+            );
           }
         },
       };
@@ -271,7 +287,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       try {
         const { body: packagePoliciesResponse }: { body: GetPackagePoliciesResponse } =
           await supertest
-            .get(INGEST_API_PACKAGE_POLICIES)
+            .get(FLEET_API_PACKAGE_POLICIES)
             .set('kbn-xsrf', 'xxx')
             .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
             .send()
@@ -297,12 +313,12 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           packagePolicyIds: [packagePolicyList[0].id],
         };
         await supertest
-          .post(INGEST_API_PACKAGE_POLICIES_DELETE)
+          .post(FLEET_API_PACKAGE_POLICIES_DELETE)
           .set('kbn-xsrf', 'xxx')
           .send(deletePackagePolicyData)
           .expect(200);
       } catch (error) {
-        logSupertestApiErrorAndThrow('Unable to delete Package Policy via Ingest!', error);
+        logSupertestApiErrorAndThrow('Unable to delete Package Policy via Fleet!', error);
       }
     },
   };

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { API_BASE_PATH, ROLLUP_INDEX_NAME } from './constants';
+import { API_BASE_PATH, INDEX_TO_ROLLUP_MAPPINGS, ROLLUP_INDEX_NAME } from './constants';
 
 import { registerHelpers } from './rollup.test_helpers';
 
@@ -15,6 +15,7 @@ export default function ({ getService }) {
 
   const {
     createIndexWithMappings,
+    createMockRollupIndex,
     getJobPayload,
     loadJobs,
     createJob,
@@ -83,211 +84,231 @@ export default function ({ getService }) {
       });
     });
 
-    describe('crud', () => {
-      describe('list', () => {
-        it('should return an empty array when there are no jobs', async () => {
-          const { body } = await loadJobs().expect(200);
+    describe('with no rollup usage in the cluster', () => {
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // The test cluster doesn't currently have any rollup usage so creation of a rollup job should fail
+      it('should throw a 400 error when trying to create a rollup job', async () => {
+        const indexName = await createIndexWithMappings();
 
-          expect(body).to.eql({ jobs: [] });
-        });
+        const payload = getJobPayload(indexName);
+
+        return createJob(payload).expect(400);
+      });
+    });
+
+    describe('with existing rollup usage in the cluster', () => {
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      before(async () => {
+        await createMockRollupIndex();
       });
 
-      describe('create', () => {
-        let indexName;
+      describe('crud', () => {
+        describe('list', () => {
+          it('should return an empty array when there are no jobs', async () => {
+            const { body } = await loadJobs().expect(200);
 
-        beforeEach(async () => {
-          indexName = await createIndexWithMappings();
+            expect(body).to.eql({ jobs: [] });
+          });
         });
 
-        it('should create a rollup job', async () => {
-          const payload = getJobPayload(indexName);
+        describe('create', () => {
+          let indexName;
 
-          return createJob(payload).expect(200);
-        });
+          beforeEach(async () => {
+            indexName = await createIndexWithMappings(undefined, INDEX_TO_ROLLUP_MAPPINGS);
+          });
 
-        it('should throw a 409 conflict when trying to create 2 jobs with the same id', async () => {
-          const payload = getJobPayload(indexName);
+          it('should create a rollup job', async () => {
+            const payload = getJobPayload(indexName);
 
-          await createJob(payload);
+            return createJob(payload).expect(200);
+          });
 
-          return createJob(payload).expect(409);
-        });
+          it('should throw a 409 conflict when trying to create 2 jobs with the same id', async () => {
+            const payload = getJobPayload(indexName);
 
-        it('should handle ES errors', async () => {
-          const payload = { job: { id: 'abc', invalid: 'property' } };
+            await createJob(payload);
 
-          const { body } = await createJob(payload);
-          expect(body.message).to.contain('unknown field [invalid]');
-        });
+            return createJob(payload).expect(409);
+          });
 
-        it('should list the newly created job', async () => {
-          const payload = getJobPayload(indexName);
-          await createJob(payload);
+          it('should handle ES errors', async () => {
+            const payload = { job: { id: 'abc', invalid: 'property' } };
 
-          const {
-            body: { jobs },
-          } = await loadJobs();
-          const job = jobs.find((job) => job.config.id === payload.job.id);
+            const { body } = await createJob(payload);
+            expect(body.message).to.contain('unknown field [invalid]');
+          });
 
-          expect(job).not.be(undefined);
-          expect(job.config.index_pattern).to.eql(payload.job.index_pattern);
-          expect(job.config.rollup_index).to.eql(payload.job.rollup_index);
-        });
+          it('should list the newly created job', async () => {
+            const payload = getJobPayload(indexName);
+            await createJob(payload);
 
-        it('should create the underlying rollup index with the correct aggregations', async () => {
-          await createJob(getJobPayload(indexName));
+            const {
+              body: { jobs },
+            } = await loadJobs();
+            const job = jobs.find((job) => job.config.id === payload.job.id);
 
-          const { body } = await supertest.get(`${API_BASE_PATH}/indices`);
+            expect(job).not.be(undefined);
+            expect(job.config.index_pattern).to.eql(payload.job.index_pattern);
+            expect(job.config.rollup_index).to.eql(payload.job.rollup_index);
+          });
 
-          expect(body[ROLLUP_INDEX_NAME]).to.not.be(undefined);
+          it('should create the underlying rollup index with the correct aggregations', async () => {
+            await createJob(getJobPayload(indexName));
 
-          expect(body).to.eql({
-            rollup_index: {
-              aggs: {
-                date_histogram: {
-                  testCreatedField: {
-                    agg: 'date_histogram',
-                    delay: '1d',
-                    // TODO: Note that we created the job with `interval`, but ES has coerced this to
-                    // `fixed_interval` based on the value we provided. Once we update the UI and
-                    // tests to no longer use the deprecated `interval` property, we can remove
-                    // this comment.
-                    fixed_interval: '24h',
-                    time_zone: 'UTC',
+            const { body } = await supertest.get(`${API_BASE_PATH}/indices`);
+
+            expect(body[ROLLUP_INDEX_NAME]).to.not.be(undefined);
+
+            expect(body).to.eql({
+              rollup_index: {
+                aggs: {
+                  date_histogram: {
+                    testCreatedField: {
+                      agg: 'date_histogram',
+                      delay: '1d',
+                      // TODO: Note that we created the job with `interval`, but ES has coerced this to
+                      // `fixed_interval` based on the value we provided. Once we update the UI and
+                      // tests to no longer use the deprecated `interval` property, we can remove
+                      // this comment.
+                      fixed_interval: '24h',
+                      time_zone: 'UTC',
+                    },
                   },
-                },
-                max: {
-                  testCreatedField: {
-                    agg: 'max',
+                  max: {
+                    testCreatedField: {
+                      agg: 'max',
+                    },
                   },
-                },
-                min: {
-                  testCreatedField: {
-                    agg: 'min',
+                  min: {
+                    testCreatedField: {
+                      agg: 'min',
+                    },
                   },
-                },
-                terms: {
-                  testTagField: {
-                    agg: 'terms',
+                  terms: {
+                    testTagField: {
+                      agg: 'terms',
+                    },
+                    testTotalField: {
+                      agg: 'terms',
+                    },
                   },
-                  testTotalField: {
-                    agg: 'terms',
+                  histogram: {
+                    testTotalField: {
+                      agg: 'histogram',
+                      interval: 7,
+                    },
                   },
-                },
-                histogram: {
-                  testTotalField: {
-                    agg: 'histogram',
-                    interval: 7,
+                  avg: {
+                    testTotalField: {
+                      agg: 'avg',
+                    },
                   },
-                },
-                avg: {
-                  testTotalField: {
-                    agg: 'avg',
-                  },
-                },
-                value_count: {
-                  testTotalField: {
-                    agg: 'value_count',
+                  value_count: {
+                    testTotalField: {
+                      agg: 'value_count',
+                    },
                   },
                 },
               },
-            },
+            });
+          });
+        });
+
+        describe('delete', () => {
+          let jobId;
+
+          beforeEach(async () => {
+            const indexName = await createIndexWithMappings(undefined, INDEX_TO_ROLLUP_MAPPINGS);
+            const payload = getJobPayload(indexName);
+            jobId = payload.job.id;
+            await createJob(payload);
+          });
+
+          it('should delete a job that has been stopped', async () => {
+            await stopJob(jobId);
+            const { body } = await deleteJob(jobId).expect(200);
+            expect(body).to.eql({ success: true });
+          });
+
+          it('should throw a 400 error if trying to delete a job that is started', async () => {
+            await startJob(jobId);
+            const { body } = await deleteJob(jobId).expect(400);
+            expect(body.message).to.contain('Job must be [STOPPED] before deletion');
           });
         });
       });
 
-      describe('delete', () => {
-        let jobId;
+      describe('actions', () => {
+        describe('start', () => {
+          let job;
 
-        beforeEach(async () => {
-          const indexName = await createIndexWithMappings();
-          const payload = getJobPayload(indexName);
-          jobId = payload.job.id;
-          await createJob(payload);
+          beforeEach(async () => {
+            const indexName = await createIndexWithMappings(undefined, INDEX_TO_ROLLUP_MAPPINGS);
+            const payload = getJobPayload(indexName);
+            await createJob(payload);
+
+            const {
+              body: { jobs },
+            } = await loadJobs();
+            job = jobs.find((job) => job.config.id === payload.job.id);
+          });
+
+          it('should start the job', async () => {
+            expect(job.status.job_state).to.eql('stopped');
+
+            const { body } = await startJob(job.config.id).expect(200);
+
+            expect(body).to.eql({ success: true });
+
+            // Fetch the job to make sure it has been started
+            const jobId = job.config.id;
+            const {
+              body: { jobs },
+            } = await loadJobs();
+            job = jobs.find((job) => job.config.id === jobId);
+            expect(job.status.job_state).to.eql('started');
+          });
+
+          it('should return 200 if the job is already started', async () => {
+            await startJob(job.config.id); // Start the job
+            await startJob(job.config.id).expect(200);
+          });
         });
 
-        it('should delete a job that has been stopped', async () => {
-          await stopJob(jobId);
-          const { body } = await deleteJob(jobId).expect(200);
-          expect(body).to.eql({ success: true });
-        });
+        describe('stop', () => {
+          let job;
 
-        it('should throw a 400 error if trying to delete a job that is started', async () => {
-          await startJob(jobId);
-          const { body } = await deleteJob(jobId).expect(400);
-          expect(body.message).to.contain('Job must be [STOPPED] before deletion');
-        });
-      });
-    });
+          beforeEach(async () => {
+            const indexName = await createIndexWithMappings(undefined, INDEX_TO_ROLLUP_MAPPINGS);
+            const payload = getJobPayload(indexName);
+            await createJob(payload);
 
-    describe('actions', () => {
-      describe('start', () => {
-        let job;
+            const {
+              body: { jobs },
+            } = await loadJobs();
+            job = jobs.find((job) => job.config.id === payload.job.id);
+          });
 
-        beforeEach(async () => {
-          const indexName = await createIndexWithMappings();
-          const payload = getJobPayload(indexName);
-          await createJob(payload);
+          it('should stop the job', async () => {
+            await startJob(job.config.id);
+            const { body } = await stopJob(job.config.id).expect(200);
 
-          const {
-            body: { jobs },
-          } = await loadJobs();
-          job = jobs.find((job) => job.config.id === payload.job.id);
-        });
+            expect(body).to.eql({ success: true });
 
-        it('should start the job', async () => {
-          expect(job.status.job_state).to.eql('stopped');
+            // Fetch the job to make sure it has been stopped
+            const jobId = job.config.id;
+            const {
+              body: { jobs },
+            } = await loadJobs();
+            job = jobs.find((job) => job.config.id === jobId);
+            expect(job.status.job_state).to.eql('stopped');
+          });
 
-          const { body } = await startJob(job.config.id).expect(200);
-
-          expect(body).to.eql({ success: true });
-
-          // Fetch the job to make sure it has been started
-          const jobId = job.config.id;
-          const {
-            body: { jobs },
-          } = await loadJobs();
-          job = jobs.find((job) => job.config.id === jobId);
-          expect(job.status.job_state).to.eql('started');
-        });
-
-        it('should return 200 if the job is already started', async () => {
-          await startJob(job.config.id); // Start the job
-          await startJob(job.config.id).expect(200);
-        });
-      });
-
-      describe('stop', () => {
-        let job;
-
-        beforeEach(async () => {
-          const indexName = await createIndexWithMappings();
-          const payload = getJobPayload(indexName);
-          await createJob(payload);
-
-          const {
-            body: { jobs },
-          } = await loadJobs();
-          job = jobs.find((job) => job.config.id === payload.job.id);
-        });
-
-        it('should stop the job', async () => {
-          await startJob(job.config.id);
-          const { body } = await stopJob(job.config.id).expect(200);
-
-          expect(body).to.eql({ success: true });
-
-          // Fetch the job to make sure it has been stopped
-          const jobId = job.config.id;
-          const {
-            body: { jobs },
-          } = await loadJobs();
-          job = jobs.find((job) => job.config.id === jobId);
-          expect(job.status.job_state).to.eql('stopped');
-        });
-
-        it('should return 200 if the job is already stopped', async () => {
-          await stopJob(job.config.id).expect(200);
+          it('should return 200 if the job is already stopped', async () => {
+            await stopJob(job.config.id).expect(200);
+          });
         });
       });
     });
