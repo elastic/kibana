@@ -106,7 +106,6 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/utils",
     "@kbn/journeys",
-    "@kbn/stdio-dev-helpers",
     "@kbn/alerting-api-integration-helpers",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
