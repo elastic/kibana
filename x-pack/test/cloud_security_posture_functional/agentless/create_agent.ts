@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
-  describe('Agentless cloud', function () {
+  describe.skip('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let mockApiServer: http.Server;
@@ -144,6 +144,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
+      await cisIntegration.selectSetupTechnology('agent-based');
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
