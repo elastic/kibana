@@ -146,7 +146,7 @@ src/dev/packages/get-repo-files @elastic/kibana-operations
 src/dev/packages/import-locator @elastic/kibana-operations
 src/dev/packages/import-resolver @elastic/kibana-operations
 src/dev/packages/jest-serializers @elastic/kibana-operations
-packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 packages/kbn-lint-packages-cli @elastic/kibana-operations

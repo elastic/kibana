@@ -6080,7 +6080,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/journeys@link:packages/kbn-journeys":
+"@kbn/journeys@link:src/dev/packages/journeys":
   version "0.0.0"
   uid ""
 
