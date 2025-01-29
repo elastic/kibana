@@ -321,3 +321,25 @@ Verify that TLS is properly configured by enabling it and providing valid certif
 
 If your Kibana server is hosted behind a load balancer or reverse proxy we recommend testing your deployment configuration before upgrading to 9.0. 
 ====
+
+
+[discrete]
+[[known-issue-206998]]
+.Search sessions disabled by default (9.0.0)
+[%collapsible]
+====
+*Details* +
+Starting from version 9.0.0, search sessions are disabled by default. To view, manage, and restore search sessions, the feature needs to be explicitly re-enabled. 
+
+*Impact* +
+Search sessions will be disabled unless they are explicitly enabled in config.yml.
+
+*Action* +
+If you would like to continue using, managing, and restoring search sessions in 9.0, you'll need to re-enable the feature in your kibana.yml configuration file. If not, no action is necessary.
+
+To re-enable search sessions, add the following in your config.yml:
+
+```
+data.search.sessions.enabled: true
+``` 
+====

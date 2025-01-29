@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { fetchSyncJobsStats } from '../../lib/stats/get_sync_jobs';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 export function registerStatsRoutes({
