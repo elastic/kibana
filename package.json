@@ -1459,7 +1459,7 @@
     "@kbn/kibana-manifest-schema": "link:src/dev/packages/kibana-manifest-schema",
     "@kbn/lint-packages-cli": "link:src/dev/packages/lint-packages-cli",
     "@kbn/lint-ts-projects-cli": "link:src/dev/packages/lint-ts-projects-cli",
-    "@kbn/managed-vscode-config": "link:packages/kbn-managed-vscode-config",
+    "@kbn/managed-vscode-config": "link:src/dev/packages/managed-vscode-config",
     "@kbn/managed-vscode-config-cli": "link:packages/kbn-managed-vscode-config-cli",
     "@kbn/management-storybook-config": "link:packages/kbn-management/storybook/config",
     "@kbn/manifest": "link:packages/kbn-manifest",

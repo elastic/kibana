@@ -151,7 +151,7 @@ src/dev/packages/json-ast @elastic/kibana-operations
 src/dev/packages/kibana-manifest-schema @elastic/kibana-operations
 src/dev/packages/lint-packages-cli @elastic/kibana-operations
 src/dev/packages/lint-ts-projects-cli @elastic/kibana-operations
-packages/kbn-managed-vscode-config @elastic/kibana-operations
+src/dev/packages/managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/storybook/config @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core

@@ -6240,7 +6240,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/managed-vscode-config@link:packages/kbn-managed-vscode-config":
+"@kbn/managed-vscode-config@link:src/dev/packages/managed-vscode-config":
   version "0.0.0"
   uid ""
 
