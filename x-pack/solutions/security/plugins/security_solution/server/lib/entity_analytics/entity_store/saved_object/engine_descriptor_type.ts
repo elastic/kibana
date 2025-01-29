@@ -42,6 +42,7 @@ const version1: SavedObjectsModelVersion = {
       type: 'mappings_addition',
       addedMappings: {
         fieldHistoryLength: { type: 'integer', index: false },
+        timestampField: { type: 'keyword' },
       },
     },
     {
