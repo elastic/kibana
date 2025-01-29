@@ -1467,7 +1467,7 @@
     "@kbn/mock-idp-utils": "link:src/dev/packages/mock-idp-utils",
     "@kbn/openapi-bundler": "link:src/dev/packages/openapi-bundler",
     "@kbn/openapi-generator": "link:src/dev/packages/openapi-generator",
-    "@kbn/optimizer": "link:packages/kbn-optimizer",
+    "@kbn/optimizer": "link:src/dev/packages/optimizer",
     "@kbn/optimizer-webpack-helpers": "link:packages/kbn-optimizer-webpack-helpers",
     "@kbn/peggy": "link:packages/kbn-peggy",
     "@kbn/peggy-loader": "link:packages/kbn-peggy-loader",

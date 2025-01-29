@@ -6608,7 +6608,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer@link:packages/kbn-optimizer":
+"@kbn/optimizer@link:src/dev/packages/optimizer":
   version "0.0.0"
   uid ""
 

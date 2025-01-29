@@ -82,7 +82,7 @@ const log = new ToolingLog({
 })
 
 const config = OptimizerConfig.create({
-  repoRoot: Path.resolve(__dirname, '../../..'),
+  repoRoot: Path.resolve(__dirname, '../../../../..'),
   watch: false,
   dist: true
 });
@@ -131,15 +131,15 @@ Workers have several error message they may emit which indicate unrecoverable er
 For an example of how to handle these states checkout the [`logOptimizerState()`][LogOptimizerState] helper.
 
 [PostCss]: https://postcss.org/
-[Cli]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/cli.ts
-[runOptimizer]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/run_optimizer.ts
-[ObserveWorker]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/optimizer/observe_worker.ts
-[CompilerMsg]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/common/compiler_messages.ts
-[WorkerMsg]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/common/worker_messages.ts
-[Bundle]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/common/bundle.ts
-[WebpackConfig]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/worker/webpack.config.ts
-[WorkerConfig]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/common/worker_config.ts
-[OptimizerConfig]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/optimizer/optimizer_config.ts
-[LogOptimizerState]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/log_optimizer_state.ts
-[AssignBundlesToWorkers]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/optimizer/assign_bundles_to_workers.ts
+[Cli]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/cli.ts
+[runOptimizer]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/run_optimizer.ts
+[ObserveWorker]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/optimizer/observe_worker.ts
+[CompilerMsg]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/common/compiler_messages.ts
+[WorkerMsg]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/common/worker_messages.ts
+[Bundle]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/common/bundle.ts
+[WebpackConfig]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/worker/webpack.config.ts
+[WorkerConfig]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/common/worker_config.ts
+[OptimizerConfig]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/optimizer/optimizer_config.ts
+[LogOptimizerState]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/log_optimizer_state.ts
+[AssignBundlesToWorkers]: https://github.com/elastic/kibana/blob/main/src/dev/packages/optimizer/src/optimizer/assign_bundles_to_workers.ts
 [BuildTask]: https://github.com/elastic/kibana/blob/main/src/dev/build/tasks/build_kibana_platform_plugins.ts

@@ -59,7 +59,7 @@ paths-ignore:
   - src/dev/packages/kibana-manifest-schema
   - src/dev/packages/managed-vscode-config
   - src/dev/packages/managed-vscode-config-cli
-  - packages/kbn-optimizer
+  - src/dev/packages/optimizer
   - packages/kbn-optimizer-*
   - packages/kbn-peggy
   - packages/kbn-peggy-loader

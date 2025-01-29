@@ -84,7 +84,7 @@ export class BundleMetricsPlugin {
           id: bundle.id,
           value: entry.size,
           limit: bundle.pageLoadAssetSizeLimit,
-          limitConfigPath: `packages/kbn-optimizer/limits.yml`,
+          limitConfigPath: `src/dev/packages/optimizer/limits.yml`,
         },
         {
           group: `async chunks size`,

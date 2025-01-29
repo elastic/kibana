@@ -31,7 +31,7 @@ export const canvasWebpack = {
             loader: 'postcss-loader',
             options: {
               postcssOptions: {
-                config: resolve(KIBANA_ROOT, 'packages/kbn-optimizer/postcss.config.js'),
+                config: resolve(KIBANA_ROOT, 'src/dev/packages/optimizer/postcss.config.js'),
               },
             },
           },

@@ -56,7 +56,7 @@ export function validateLimitsForAllBundles(
   if (issues.length) {
     throw createFailError(
       dedent`
-        The limits defined in packages/kbn-optimizer/limits.yml are outdated. Please update
+        The limits defined in src/dev/packages/optimizer/limits.yml are outdated. Please update
         this file with a limit (in bytes) for every production bundle.
 
           ${issues.join('\n          ')}
@@ -79,7 +79,7 @@ export function validateLimitsForAllBundles(
   if (!sorted) {
     throw createFailError(
       dedent`
-        The limits defined in packages/kbn-optimizer/limits.yml are not sorted correctly. To make
+        The limits defined in src/dev/packages/optimizer/limits.yml are not sorted correctly. To make
         sure the file is automatically updatedable without dozens of extra changes, the keys in this
         file must be sorted.
 

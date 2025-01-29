@@ -14,6 +14,6 @@ var Path = require('path');
 require('@kbn/optimizer').runKbnOptimizerCli({
   defaultLimitsPath: Path.resolve(
     require('@kbn/repo-info').REPO_ROOT,
-    'packages/kbn-optimizer/limits.yml'
+    'src/dev/packages/optimizer/limits.yml'
   ),
 });
