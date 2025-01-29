@@ -187,7 +187,7 @@ src/dev/packages/telemetry-tools @elastic/kibana-core
 src/dev/packages/test @elastic/kibana-operations @elastic/appex-qa
 src/dev/packages/test-eui-helpers @elastic/kibana-visualizations
 src/dev/packages/test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-tooling-log @elastic/kibana-operations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
