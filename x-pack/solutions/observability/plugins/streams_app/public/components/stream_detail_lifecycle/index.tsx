@@ -547,7 +547,6 @@ function RetentionChanges() {
         Data retention changes will apply to dependant streams unless they already have custom
         retention settings in place.
       </p>
-      <p>The following streams will inherit the new retention: foo, bar</p>
     </EuiCallOut>
   );
 }
