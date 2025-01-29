@@ -61,6 +61,7 @@ export const StopBackfill = ({ backfill }: { backfill: BackfillRow }) => {
           confirmButtonText={i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_STOP_RUNS}
           defaultFocusedButton="confirm"
           buttonColor="danger"
+          isLoading={deleteBackfillMutation.isLoading}
         >
           <p>{i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_BODY}</p>
         </EuiConfirmModal>

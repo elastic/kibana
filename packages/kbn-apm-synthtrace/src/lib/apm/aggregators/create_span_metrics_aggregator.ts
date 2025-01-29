@@ -28,7 +28,7 @@ export function createSpanMetricsAggregator(flushInterval: string) {
       filter: (event) =>
         event['processor.event'] === 'span' && !!event['span.destination.service.resource'],
       getAggregateKey: (event) => {
-        // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/spanmetrics/aggregator.go
+        // see https://github.com/elastic/apm-server/blob/8.10/x-pack/apm-server/aggregation/spanmetrics/aggregator.go
         const key = hashKeysOf(event, KEY_FIELDS);
         return key;
       },

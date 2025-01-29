@@ -46,7 +46,11 @@ const DeleteProcessorButton = ({ onDeleteProcessor }: DeleteProcessorButtonProps
 
   return (
     <>
-      <EuiButton color="danger" onClick={openConfirmModal}>
+      <EuiButton
+        data-test-subj="streamsAppDeleteProcessorButtonDeleteProcessorButton"
+        color="danger"
+        onClick={openConfirmModal}
+      >
         {i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dangerAreaTitle',
           { defaultMessage: 'Delete processor' }

@@ -62,6 +62,7 @@ const AuthB64 = Buffer.from(Auth).toString('base64');
 describe('axios connections', () => {
   let testServer: http.Server | https.Server | null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let savedAxiosDefaultsAdapter: any;
 
   beforeEach(() => {
