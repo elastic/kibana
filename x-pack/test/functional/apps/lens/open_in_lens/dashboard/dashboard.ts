@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
 
-  describe.only('Convert to Lens action on dashboard', function describeIndexTests() {
+  describe('Convert to Lens action on dashboard', function describeIndexTests() {
     before(async () => {
       await dashboard.initTests();
       await dashboard.gotoDashboardEditMode('legacy visualizations');
