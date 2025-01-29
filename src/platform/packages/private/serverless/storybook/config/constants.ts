@@ -11,5 +11,5 @@
 export const TITLE = 'Serverless Storybook';
 
 /** The remote URL of the root from which Storybook loads stories for Serverless. */
-// FIXME revert serverless-storybook-config
-export const URL = 'https://github.com/elastic/kibana/tree/main/packages/serverless';
+export const URL =
+  'https://github.com/elastic/kibana/tree/main/src/platform/packages/private/serverless';
