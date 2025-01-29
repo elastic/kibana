@@ -76,7 +76,9 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
 `;
 
 exports[`Logs should render a reason if the logs are disabled 1`] = `
-<div data-test-subj="monitoringLogs">
+<div
+  data-test-subj="monitoringLogs"
+>
   <EuiTitle>
     <h1>
       Recent Log Entries
@@ -134,7 +136,9 @@ Array [
 `;
 
 exports[`Logs should render normally 1`] = `
-<div data-test-subj="monitoringLogs">
+<div
+  data-test-subj="monitoringLogs"
+>
   <EuiTitle>
     <h1>
       Recent Log Entries
