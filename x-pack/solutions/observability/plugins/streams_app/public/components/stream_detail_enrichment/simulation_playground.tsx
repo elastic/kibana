@@ -13,23 +13,7 @@ import { css } from '@emotion/react';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
 
-const tabs = [
-  {
-    id: 'dataPreview',
-    name: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
-      { defaultMessage: 'Data preview' }
-    ),
-  },
-  {
-    id: 'detectedFields',
-    name: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-      { defaultMessage: 'Detected fields' }
-    ),
-    append: null, // TODO: Add badge for detected fields
-  },
-];
+type TabId = 'dataPreview' | 'detectedFields';
 
 interface SimulationPlaygroundProps {
   definition: IngestStreamGetResponse;
@@ -44,34 +28,45 @@ interface SimulationPlaygroundProps {
 export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
   const { definition, columns, isLoading, simulation, samples, onRefreshSamples, simulationError } =
     props;
-  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+
+  const [selectedTabId, setSelectedTabId] = useState<TabId>('dataPreview');
   // This map allow to keep track of which tabs content have been rendered the first time.
   // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
   const renderedTabsSet = useRef(new Set([selectedTabId]));
 
-  const tabEntries = tabs.map((tab, index) => (
-    <EuiTab
-      {...tab}
-      key={index}
-      onClick={() => {
-        renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
-        setSelectedTabId(tab.id);
-      }}
-      isSelected={tab.id === selectedTabId}
-      append={tab.append}
-    >
-      {tab.name}
-    </EuiTab>
-  ));
+  const handleTabClick = (tabId: TabId) => {
+    renderedTabsSet.current.add(tabId); // On a tab click, mark the tab content as allowed to be rendered
+    setSelectedTabId(tabId);
+  };
 
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiTabs bottomBorder={false}>{tabEntries}</EuiTabs>
+        <EuiTabs bottomBorder={false}>
+          <EuiTab
+            isSelected={selectedTabId === 'dataPreview'}
+            onClick={() => handleTabClick('dataPreview')}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
+              { defaultMessage: 'Data preview' }
+            )}
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTabId === 'detectedFields'}
+            onClick={() => handleTabClick('detectedFields')}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
+              { defaultMessage: 'Detected fields' }
+            )}
+          </EuiTab>
+        </EuiTabs>
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {renderedTabsSet.current.has('dataPreview') && (
         <EuiFlexItem
+          /* The EuiFlexItem doesn't support the hidden prop, so we need to use the css display property to hide the component */
           css={css`
             display: ${selectedTabId !== 'dataPreview' ? 'none' : 'flex'};
           `}
