@@ -24,10 +24,9 @@ import { AGENTS_PREFIX } from '../constants';
 import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../services/agents';
 import { agentlessAgentService } from '../services/agents/agentless_agent';
 
-export const UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE =
-  'cloud-security:upgrade-agentless-deployments-task';
+export const UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE = 'fleet:upgrade-agentless-deployments-task';
 export const UPGRADE_AGENT_DEPLOYMENTS_TASK_VERSION = '1.0.0';
-const TITLE = 'Cloud Security upgrade agentless deployments Task';
+const TITLE = 'Fleet upgrade agentless deployments Task';
 const TIMEOUT = '2m';
 const INTERVAL = '1m';
 const LOGGER_SUBJECT = '[UpgradeAgentlessDeploymentsTask]';
