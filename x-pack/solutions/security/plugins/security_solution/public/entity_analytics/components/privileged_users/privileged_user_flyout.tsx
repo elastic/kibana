@@ -38,8 +38,6 @@ const useMatchingUsers = (privilegedUser: PrivilegedUserDoc): PrivilegedUserDoc[
   return [];
 };
 
-const;
-
 export const PrivilegedUserFlyout: React.FC<{
   privilegedUser: PrivilegedUserDoc;
   closeFlyout: () => void;

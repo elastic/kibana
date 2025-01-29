@@ -6,12 +6,17 @@
  */
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import objectHash from 'object-hash';
 import type { DataViewsService } from '@kbn/data-plugin/common';
 import type {
   InitPrivmonResult,
   PrivilegedUserDoc,
+  PrivilegedUserIdentityFields,
   PrivmonLoginDoc,
   PrivmonPrivilegeDoc,
 } from '../../../../common/api/entity_analytics/privmon';
@@ -254,6 +259,109 @@ export class PrivmonDataClient {
       index: getPrivmonUsersIndex(this.options.namespace),
       ...opts,
     });
+  }
+
+  public async findSimilarUsers(
+    user: PrivilegedUserIdentityFields
+  ): Promise<{ users: PrivilegedUserDoc[] }> {
+    const { logger } = this.options;
+
+    const mustNotQuery: QueryDslQueryContainer[] = [
+      {
+        term: {
+          'user.name': user.name,
+        },
+      },
+    ];
+
+    const shouldQuery: QueryDslQueryContainer[] = [
+      {
+        wildcard: {
+          'user.name': {
+            value: `*${user.name}*`,
+          },
+        },
+      },
+      {
+        wildcard: {
+          'user.id': {
+            value: `*${user.name}*`,
+          },
+        },
+      },
+      {
+        match: {
+          'user.name.text': {
+            query: user.name,
+            fuzziness: 'AUTO',
+          },
+        },
+      },
+      {
+        match: {
+          'user.id.text': {
+            query: user.name,
+            fuzziness: 'AUTO',
+          },
+        },
+      },
+    ];
+
+    if (user.id) {
+      shouldQuery.push(
+        {
+          wildcard: {
+            'user.id': {
+              value: `*${user.id}*`,
+            },
+          },
+        },
+        {
+          wildcard: {
+            'user.name': {
+              value: `*${user.id}*`,
+            },
+          },
+        },
+        {
+          match: {
+            'user.id.text': {
+              query: user.id,
+              fuzziness: 'AUTO',
+            },
+          },
+        },
+        {
+          match: {
+            'user.name.text': {
+              query: user.id,
+              fuzziness: 'AUTO',
+            },
+          },
+        }
+      );
+
+      mustNotQuery.push({
+        term: {
+          'user.id': user.id,
+        },
+      });
+    }
+
+    const { records: users } = await this.searchUsers({
+      query: {
+        bool: {
+          should: shouldQuery,
+          must_not: mustNotQuery,
+        },
+      },
+    });
+
+    logger.debug(
+      `[PrivmonDataClient] Found ${users.length} similar users for ${JSON.stringify(user)}`
+    );
+
+    return { users };
   }
 
   public async bulkUpsertUsers(users: PrivilegedUserDoc[]): Promise<{

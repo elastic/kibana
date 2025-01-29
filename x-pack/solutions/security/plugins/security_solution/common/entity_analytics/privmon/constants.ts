@@ -6,6 +6,7 @@
  */
 export const PRIVMON_URL = `/api/privmon` as const;
 export const PRIVMON_INIT_URL = `${PRIVMON_URL}/init` as const;
+export const PRIVMON_SIMILAR_USERS_URL = `${PRIVMON_URL}/similar_users` as const;
 
 export const PRIVMON_INDEX_PREFIX = 'risk-score.risk-monitoring';
 export const PRIVMON_INDEX_PATTERN = `${PRIVMON_INDEX_PREFIX}.*`;

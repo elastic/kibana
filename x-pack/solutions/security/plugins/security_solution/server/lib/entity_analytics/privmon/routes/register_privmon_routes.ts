@@ -6,6 +6,7 @@
  */
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { privmonInitRoute } from './init';
+import { privmonGetSimilarUsersRoute } from './get_similar_users';
 
 export const registerPrivmonRoutes = ({
   router,
@@ -13,4 +14,5 @@ export const registerPrivmonRoutes = ({
   config,
 }: EntityAnalyticsRoutesDeps) => {
   privmonInitRoute(router, getStartServices, config);
+  privmonGetSimilarUsersRoute(router, getStartServices, config);
 };

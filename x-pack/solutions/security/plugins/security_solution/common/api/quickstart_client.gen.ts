@@ -279,6 +279,10 @@ import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type {
+  PrivmonGetSimilarUsersRequestBodyInput,
+  PrivmonGetSimilarUsersResponse,
+} from './entity_analytics/privmon/privmon_get_similar_users_route.gen';
 import type { InitPrivmonResponse } from './entity_analytics/privmon/privmon_init_route.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
@@ -1905,6 +1909,22 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get similar users based on the provided user
+   */
+  async privmonGetSimilarUsers(props: PrivmonGetSimilarUsersProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PrivmonGetSimilarUsers`);
+    return this.kbnClient
+      .request<PrivmonGetSimilarUsersResponse>({
+        path: '/api/privmon/init',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async readAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API ReadAlertsIndex`);
     return this.kbnClient
@@ -2564,6 +2584,9 @@ export interface PersistPinnedEventRouteProps {
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
+}
+export interface PrivmonGetSimilarUsersProps {
+  body: PrivmonGetSimilarUsersRequestBodyInput;
 }
 export interface ReadAlertsMigrationStatusProps {
   query: ReadAlertsMigrationStatusRequestQueryInput;

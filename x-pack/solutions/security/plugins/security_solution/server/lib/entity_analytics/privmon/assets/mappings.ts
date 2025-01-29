@@ -42,9 +42,19 @@ export const PRIVILEGED_USER_MAPPING: MappingTypeMapping = {
       properties: {
         id: {
           type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
         },
         name: {
           type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
         },
       },
     },

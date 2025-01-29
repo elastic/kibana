@@ -7,3 +7,4 @@
 
 export * from './common.gen';
 export * from './privmon_init_route.gen';
+export * from './privmon_get_similar_users_route.gen';

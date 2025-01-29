@@ -6,6 +6,15 @@ info:
 paths: {}
 components:
   schemas:
+    PrivilegedUserIdentityFields:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
     PrivmonDoc:
       # either login doc or privilege doc
       oneOf:
@@ -61,16 +70,16 @@ components:
               type: string
             name:
               type: string
-        # linked_identities:
-        #   type: array
-        #   items:
-        #     type: object
-        #     properties:
-        #       user:
-        #         type: object
-        #         properties:
-        #           email:
-        #             type: string
+    PrivilegedUserWithScore:
+      type: object
+      required:
+        - user
+        - score
+      properties:
+        user:
+          $ref: '#/components/schemas/PrivilegedUserDoc'
+        score:
+          type: number
     PrivmonLoginDoc:
       type: object
       required:
@@ -222,16 +231,7 @@ components:
             ingested:
               type: string
         user:
-          type: object
-          required:
-            - name
-          properties:
-            id:
-              type: string
-            name:
-              type: string
-            type:
-              type: string
+          $ref: '#/components/schemas/PrivilegedUserIdentityFields'
         target:
           type: object
           required:

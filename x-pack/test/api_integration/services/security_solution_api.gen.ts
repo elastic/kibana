@@ -134,6 +134,7 @@ import { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plu
 import { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
 import { PersistPinnedEventRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
 import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
+import { PrivmonGetSimilarUsersRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/privmon/privmon_get_similar_users_route.gen';
 import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
@@ -1320,6 +1321,17 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Get similar users based on the provided user
+     */
+    privmonGetSimilarUsers(props: PrivmonGetSimilarUsersProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/privmon/init', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     readAlertsIndex(kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/detection_engine/index', kibanaSpace))
@@ -1872,6 +1884,9 @@ export interface PersistPinnedEventRouteProps {
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
+}
+export interface PrivmonGetSimilarUsersProps {
+  body: PrivmonGetSimilarUsersRequestBodyInput;
 }
 export interface ReadAlertsMigrationStatusProps {
   query: ReadAlertsMigrationStatusRequestQueryInput;

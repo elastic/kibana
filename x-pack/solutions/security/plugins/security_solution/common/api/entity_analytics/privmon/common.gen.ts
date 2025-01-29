@@ -16,6 +16,12 @@
 
 import { z } from '@kbn/zod';
 
+export type PrivilegedUserIdentityFields = z.infer<typeof PrivilegedUserIdentityFields>;
+export const PrivilegedUserIdentityFields = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+});
+
 export type PrivmonLoginDoc = z.infer<typeof PrivmonLoginDoc>;
 export const PrivmonLoginDoc = z.object({
   '@timestamp': z.string(),
@@ -96,11 +102,7 @@ export const PrivmonPrivilegeDoc = z.object({
     provider: z.string().optional(),
     ingested: z.string(),
   }),
-  user: z.object({
-    id: z.string().optional(),
-    name: z.string(),
-    type: z.string().optional(),
-  }),
+  user: PrivilegedUserIdentityFields,
   target: z.object({
     user: z.object({
       id: z.string().optional(),
@@ -158,4 +160,10 @@ export const PrivilegedUserDoc = z.object({
     id: z.string().optional(),
     name: z.string(),
   }),
+});
+
+export type PrivilegedUserWithScore = z.infer<typeof PrivilegedUserWithScore>;
+export const PrivilegedUserWithScore = z.object({
+  user: PrivilegedUserDoc,
+  score: z.number(),
 });
