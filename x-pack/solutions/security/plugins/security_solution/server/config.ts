@@ -181,7 +181,6 @@ export const configSchema = schema.object({
       developer: schema.object({
         pipelineDebugMode: schema.boolean({ defaultValue: false }),
       }),
-      timestampField: schema.string({ defaultValue: '@timestamp' }),
     }),
   }),
 });

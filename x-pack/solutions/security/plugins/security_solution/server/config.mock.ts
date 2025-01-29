@@ -46,7 +46,6 @@ export const createMockConfig = (): ConfigType => {
         },
       },
       entityStore: {
-        timestampField: '@timestamp',
         frequency: duration('1m'),
         syncDelay: duration('5m'),
         developer: {
