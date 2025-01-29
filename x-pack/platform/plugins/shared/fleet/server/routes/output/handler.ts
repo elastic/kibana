@@ -44,11 +44,7 @@ function ensureNoDuplicateSecrets(output: Partial<Output>) {
   ) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
   }
-  if (
-    output.type === outputType.RemoteElasticsearch &&
-    output.service_token &&
-    output.secrets?.service_token
-  ) {
+  if (output.type === outputType.RemoteElasticsearch) {
     if (output.service_token && output.secrets?.service_token) {
       throw Boom.badRequest('Cannot specify both service_token and secrets.service_token');
     }

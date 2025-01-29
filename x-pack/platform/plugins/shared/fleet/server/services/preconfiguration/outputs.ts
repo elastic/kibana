@@ -359,10 +359,17 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     ) {
       return false;
     }
-    const serviceTokenIsDifferent = await isSecretDifferent(
-      preconfiguredOutput.secrets?.service_token,
-      existingOutput.secrets?.service_token
-    );
+    const serviceTokenIsDifferent =
+      (await isSecretDifferent(
+        preconfiguredOutput.secrets?.service_token,
+        existingOutput.secrets?.service_token
+      )) ||
+      (await isSecretDifferent(
+        preconfiguredOutput.secrets?.kibana_api_key,
+        existingOutput.secrets?.kibana_api_key
+      )) ||
+      isDifferent(existingOutput.kibana_url, preconfiguredOutput.kibana_url) ||
+      isDifferent(existingOutput.sync_integrations, preconfiguredOutput.sync_integrations);
 
     return serviceTokenIsDifferent;
   };
