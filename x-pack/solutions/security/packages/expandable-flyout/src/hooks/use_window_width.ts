@@ -11,13 +11,13 @@ import { setDefaultWidthsAction } from '../store/actions';
 
 export const RESOLUTION_BREAKPOINTS = {
   RIGHT_SECTION: {
-    MIN: 992, // resolution below which the width is fixed to its SECTION_WIDTHS.RIGHT.MIN value
-    OVERLAY_MAX: 1920, // resolution above which the overlay width is fixed to its SECTION_WIDTHS.RIGHT.MAX_OVERLAY value
-    PUSH_MIN: 1600, // resolution below which the push width is fixed to its SECTION_WIDTHS.RIGHT.MIN value
-    PUSH_MAX: 2560, // resolution above which the push width is fixed to its SECTION_WIDTHS.RIGHT.MAX_PUSH value
+    MIN: 992, // resolution below which the width is fixed to 380px
+    OVERLAY_MAX: 1920, // resolution above which the overlay width is fixed to 750px
+    PUSH_MIN: 1600, // resolution below which the push width is fixed to 380px
+    PUSH_MAX: 2560, // resolution above which the push width is fixed to 600px
   },
   LEFT_SECTION: {
-    MIN: 1600, // resolution below which the overlay width goes full width (minus the padding) and the push width goes to its fixed SECTION_WIDTHS.LEFT.PUSH.MIN value
+    MIN: 1600, // resolution below which the overlay width goes full width (minus the padding) and the push width goes to its fixed 380px
   },
 };
 export const FULL_WIDTH_PADDING = 48;
@@ -45,13 +45,13 @@ export const SECTION_WIDTHS = {
  *
  * For overlay mode, the flyout right section scales as follows:
  *  - for window widths below 380px, we make sure that the width is identical to the window width
- *  - for window widths below 992px, the width is fixed at 380px
+ *  - for window widths between 380px and 992px, the width is fixed at 380px
  *  - for window widths between 992px and 1920px, the width scales linearly between 380px and 750px
  *  - for window widths above 1920px, the width is fixed at 750px
  *
  *  For push mode, the flyout right section scales as follows:
  *  - for window widths below 380px, we make sure that the flyout width is identical to the window width (also, EUI actually automatically switches the flyout to overlay mode)
- *  - for window widths below 1600px, the width is fixed at 380px
+ *  - for window widths between 380px and 1600px, the width is fixed at 380px
  *  - for window widths between 1600x and 2560px, the width scales linearly between 380px and 600px
  *  - for window widths above 2560px, the width is fixed at 600px
  */

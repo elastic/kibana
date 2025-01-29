@@ -181,14 +181,14 @@ export const uiReducer = createReducer(initialUiState, (builder) => {
       state.defaultWidths.overlay.leftPercentage =
         (leftOverlay / (rightOverlay + leftOverlay)) * 100;
       state.defaultWidths.overlay.previewPercentage =
-        (rightOverlay / (rightOverlay + leftOverlay)) * 100;
+        (previewOverlay / (previewOverlay + leftOverlay)) * 100;
 
       state.defaultWidths.push.rightWidth = rightPush;
       state.defaultWidths.push.leftWidth = leftPush;
       state.defaultWidths.push.previewWidth = previewPush;
       state.defaultWidths.push.rightPercentage = (rightPush / (rightPush + leftPush)) * 100;
       state.defaultWidths.push.leftPercentage = (leftPush / (rightPush + leftPush)) * 100;
-      state.defaultWidths.push.previewPercentage = (rightPush / (rightPush + leftPush)) * 100;
+      state.defaultWidths.push.previewPercentage = (previewPush / (previewPush + leftPush)) * 100;
     }
   );
 
