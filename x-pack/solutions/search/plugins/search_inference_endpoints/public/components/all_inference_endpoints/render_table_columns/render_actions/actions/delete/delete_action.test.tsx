@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
@@ -33,27 +33,13 @@ describe('Delete Action', () => {
     const queryClient = new QueryClient();
     return (
       <QueryClientProvider client={queryClient}>
-        <DeleteAction selectedEndpoint={item} />
+        <DeleteAction selectedEndpoint={item} onCancel={jest.fn()} displayModal={true} />
       </QueryClientProvider>
     );
   };
-  it('renders', () => {
-    render(<Wrapper item={mockItem} />);
-
-    expect(screen.getByTestId(/inferenceUIDeleteAction/)).toBeEnabled();
-  });
-
-  it('disable the delete action for preconfigured endpoint', () => {
-    const preconfiguredMockItem = { ...mockItem, endpoint: '.multilingual-e5-small-elasticsearch' };
-    render(<Wrapper item={preconfiguredMockItem} />);
-
-    expect(screen.getByTestId(/inferenceUIDeleteAction/)).toBeDisabled();
-  });
 
   it('loads confirm delete modal', () => {
     render(<Wrapper item={mockItem} />);
-
-    fireEvent.click(screen.getByTestId(/inferenceUIDeleteAction/));
     expect(screen.getByTestId('deleteModalForInferenceUI')).toBeInTheDocument();
   });
 });
