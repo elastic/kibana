@@ -39,7 +39,7 @@ paths-ignore:
   - packages/kbn-ci-*
   - src/dev/packages/cli-dev-mode
   - packages/kbn-cypress-*
-  - packages/kbn-dev-cli-errors
+  - src/dev/packages/dev-cli-errors
   - packages/kbn-dev-cli-runner
   - packages/kbn-dev-proc-runner
   - packages/kbn-dev-utils

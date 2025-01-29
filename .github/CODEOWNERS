@@ -119,7 +119,7 @@ src/dev/packages/code-owners @elastic/appex-qa
 src/dev/packages/cypress-config @elastic/kibana-operations
 src/dev/packages/dependency-ownership @elastic/kibana-security
 src/dev/packages/dependency-usage @elastic/kibana-security
-packages/kbn-dev-cli-errors @elastic/kibana-operations
+src/dev/packages/dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations
 packages/kbn-dev-utils @elastic/kibana-operations
