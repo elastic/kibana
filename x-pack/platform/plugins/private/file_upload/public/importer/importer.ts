@@ -130,7 +130,7 @@ export abstract class Importer implements IImporter {
     this._initialized = true;
 
     return await callImportRoute({
-      id: undefined, // / id, index and pipelineId should be remembered locally and used when import is called!!!!!!!!!!!!!!!!!!!!!!
+      id: undefined,
       index,
       data: [],
       settings,
