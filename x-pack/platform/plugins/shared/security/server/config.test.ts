@@ -25,6 +25,7 @@ describe('config schema', () => {
       Object {
         "audit": Object {
           "enabled": false,
+          "include_saved_object_names": true,
         },
         "authc": Object {
           "http": Object {
@@ -82,6 +83,7 @@ describe('config schema', () => {
       Object {
         "audit": Object {
           "enabled": false,
+          "include_saved_object_names": true,
         },
         "authc": Object {
           "http": Object {
@@ -139,6 +141,7 @@ describe('config schema', () => {
       Object {
         "audit": Object {
           "enabled": false,
+          "include_saved_object_names": true,
         },
         "authc": Object {
           "http": Object {
@@ -195,6 +198,7 @@ describe('config schema', () => {
       Object {
         "audit": Object {
           "enabled": false,
+          "include_saved_object_names": true,
         },
         "authc": Object {
           "http": Object {

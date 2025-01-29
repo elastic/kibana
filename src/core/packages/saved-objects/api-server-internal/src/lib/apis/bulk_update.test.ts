@@ -54,6 +54,8 @@ import {
   createBadRequestErrorPayload,
   expectUpdateResult,
 } from '../../test_helpers/repository.test.common';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 interface ExpectedErrorResult {
   type: string;
@@ -67,6 +69,7 @@ describe('#bulkUpdate', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -95,6 +98,7 @@ describe('#bulkUpdate', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -112,6 +116,9 @@ describe('#bulkUpdate', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -704,6 +711,27 @@ describe('#bulkUpdate', () => {
             expect.objectContaining({ originId }),
           ],
         });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeBulkUpdate', async () => {
+        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+
+        expect(securityExtension.authorizeBulkUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: expect.arrayContaining([
+              expect.objectContaining({
+                id: '6.0.0-alpha1',
+                name: 'Test One',
+              }),
+              expect.objectContaining({
+                id: 'logstash-*',
+                name: 'Test Two',
+              }),
+            ]),
+          })
+        );
       });
     });
   });

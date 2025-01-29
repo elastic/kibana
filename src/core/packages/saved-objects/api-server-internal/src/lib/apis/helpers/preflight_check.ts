@@ -81,14 +81,17 @@ export class PreflightCheckHelper {
     const bulkGetMultiNamespaceDocs = expectedBulkGetResults
       .filter(isRight)
       .filter(({ value }) => value.esRequestIndex !== undefined)
-      .map(({ value: { type, id } }) => ({
+      .map(({ value: { type, id, fields } }) => ({
         _id: this.serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
+        _source: ['type', 'namespaces', ...(fields ?? [])],
       }));
 
     const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length
-      ? await this.client.mget({ docs: bulkGetMultiNamespaceDocs }, { ignore: [404], meta: true })
+      ? await this.client.mget<SavedObjectsRawDocSource>(
+          { docs: bulkGetMultiNamespaceDocs },
+          { ignore: [404], meta: true }
+        )
       : undefined;
     // fail fast if we can't verify a 404 response is from Elasticsearch
     if (
