@@ -68,7 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      loc = await testPrivateLocations.addPrivateLocation();
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
