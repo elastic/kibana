@@ -10,13 +10,16 @@
 import { UserInteractionEvent } from '../types';
 import { isMouseEvent } from './mouse';
 import { isTouchEvent } from './touch';
+import { isKeyboardEvent } from './keyboard';
 
 export { isMouseEvent, startMouseInteraction } from './mouse';
 export { isTouchEvent, startTouchInteraction } from './touch';
+export { isKeyboardEvent, startKeyboardInteraction } from './keyboard';
 
 export function getPointerPosition(e: UserInteractionEvent) {
   if (!isMouseEvent(e) && !isTouchEvent(e)) {
-    throw new Error('Invalid event type');
+    return { clientX: 0, clientY: 0 };
+    // throw new Error('Invalid event type');
   }
   return isTouchEvent(e) ? e.touches[0] : e;
 }

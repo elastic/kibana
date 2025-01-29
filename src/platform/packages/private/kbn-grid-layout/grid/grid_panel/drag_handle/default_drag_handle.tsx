@@ -23,6 +23,7 @@ export const DefaultDragHandle = ({
     <button
       onMouseDown={onDragStart}
       onTouchStart={onDragStart}
+      onKeyDown={onDragStart}
       aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
         defaultMessage: 'Drag to move',
       })}

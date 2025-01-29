@@ -8,13 +8,10 @@
  */
 
 import { PanelInteractionEvent, RuntimeGridSettings } from '../types';
-import { getPointerPosition } from './sensors';
+import { getGridWidth } from './math_utils';
+import { getPointerPosition, isMouseEvent, isTouchEvent } from './sensors';
+import { isKeyboardEvent } from './sensors/keyboard/keyboard';
 import { UserInteractionEvent } from './types';
-
-const getGridWidth = (runtimeSettings: RuntimeGridSettings) => {
-  const { columnCount, gutterSize, columnPixelWidth } = runtimeSettings;
-  return (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
-};
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
@@ -56,12 +53,17 @@ export const getDragPreviewRect = ({
 
 // Calculates the cursor's offset relative to the active panel's edges (top, left, right, bottom).
 // This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
-export function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
-  const { clientX, clientY } = getPointerPosition(e);
-  return {
-    top: clientY - panelRect.top,
-    left: clientX - panelRect.left,
-    right: clientX - panelRect.right,
-    bottom: clientY - panelRect.bottom,
-  };
+export function getPointerOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
+  if (isTouchEvent(e) || isMouseEvent(e)) {
+    const { clientX, clientY } = getPointerPosition(e);
+    return {
+      top: clientY - top,
+      left: clientX - left,
+      right: clientX - right,
+      bottom: clientY - bottom,
+    };
+  } else if (isKeyboardEvent(e)) {
+    return { top, left, right, bottom };
+  }
+  throw new Error('Invalid event type');
 }

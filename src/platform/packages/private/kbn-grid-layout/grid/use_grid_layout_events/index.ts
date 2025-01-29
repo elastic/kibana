@@ -16,8 +16,9 @@ import {
   startMouseInteraction,
   startTouchInteraction,
 } from './sensors';
-import { commitAction, moveAction, startAction } from './state_manager_actions';
+import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { UserInteractionEvent } from './types';
+import { isKeyboardEvent, startKeyboardInteraction } from './sensors/keyboard/keyboard';
 
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
@@ -51,10 +52,23 @@ export const useGridLayoutEvents = ({
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getPointerPosition(ev);
         }
-        moveAction(gridLayoutStateManager, pointerPixel.current, lastRequestedPanelPosition);
+        moveAction(ev, gridLayoutStateManager, pointerPixel.current, lastRequestedPanelPosition);
       };
 
       const onEnd = () => commitAction(gridLayoutStateManager);
+
+      const onBlur = () => {
+        console.log('onBlur');
+        const {
+          interactionEvent$: { value: { id, type, targetRowIndex } = {} },
+        } = gridLayoutStateManager;
+        // make sure the user hasn't started another interaction in the meantime
+        if (id === panelId && rowIndex === targetRowIndex && type === interactionType) {
+          cancelAction(gridLayoutStateManager);
+        }
+      };
+
+      const onCancel = () => cancelAction(gridLayoutStateManager);
 
       if (isMouseEvent(e)) {
         e.stopPropagation();
@@ -70,6 +84,16 @@ export const useGridLayoutEvents = ({
           onStart,
           onMove,
           onEnd,
+        });
+      } else if (isKeyboardEvent(e)) {
+        startKeyboardInteraction({
+          e,
+          gridLayoutStateManager,
+          onStart,
+          onMove,
+          onEnd,
+          onBlur,
+          onCancel,
         });
       }
     },

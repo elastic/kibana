@@ -15,6 +15,8 @@ import { getDragPreviewRect, getPointerOffsets, getResizePreviewRect } from './p
 import { resolveGridRow } from '../utils/resolve_grid_row';
 import { isGridDataEqual } from '../utils/equality_checks';
 import { UserInteractionEvent } from './types';
+import { isKeyboardEvent } from './sensors';
+import { getKeyboardDragPreviewRect, getKeyboardResizePreviewRect } from './sensors/keyboard/utils';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -23,6 +25,7 @@ export const startAction = (
   rowIndex: number,
   panelId: string
 ) => {
+  console.log('startAction');
   const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
   if (!panelRef) return;
 
@@ -36,29 +39,18 @@ export const startAction = (
     pointerOffsets: getPointerOffsets(e, panelRect),
   });
 
-  gridLayoutStateManager.proposedGridLayout$.next(gridLayoutStateManager.gridLayout$.value);
-};
-
-export const commitAction = ({
-  activePanel$,
-  interactionEvent$,
-  gridLayout$,
-  proposedGridLayout$,
-}: GridLayoutStateManager) => {
-  activePanel$.next(undefined);
-  interactionEvent$.next(undefined);
-  const proposedGridLayoutValue = proposedGridLayout$.getValue();
-  if (proposedGridLayoutValue && !deepEqual(proposedGridLayoutValue, gridLayout$.getValue())) {
-    gridLayout$.next(cloneDeep(proposedGridLayoutValue));
-  }
-  proposedGridLayout$.next(undefined);
+  gridLayoutStateManager.proposedGridLayout$.next(
+    cloneDeep(gridLayoutStateManager.gridLayout$.value)
+  );
 };
 
 export const moveAction = (
+  e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   pointerPixel: { clientX: number; clientY: number },
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
 ) => {
+  console.log('moveAction');
   const {
     runtimeSettings$: { value: runtimeSettings },
     interactionEvent$,
@@ -84,16 +76,24 @@ export const moveAction = (
   const isResize = interactionEvent.type === 'resize';
 
   const previewRect = (() => {
+    if (isKeyboardEvent(e)) {
+      return isResize
+        ? getKeyboardResizePreviewRect({
+            e,
+            interactionEvent,
+            runtimeSettings,
+            activePanel: activePanel$.value,
+          })
+        : getKeyboardDragPreviewRect({
+            e,
+            interactionEvent,
+            runtimeSettings,
+            activePanel: activePanel$.value,
+          });
+    }
     return isResize
-      ? getResizePreviewRect({
-          interactionEvent,
-          pointerPixel,
-          runtimeSettings,
-        })
-      : getDragPreviewRect({
-          interactionEvent,
-          pointerPixel,
-        });
+      ? getResizePreviewRect({ interactionEvent, pointerPixel, runtimeSettings })
+      : getDragPreviewRect({ interactionEvent, pointerPixel });
   })();
 
   activePanel$.next({ id: interactionEvent.id, position: previewRect });
@@ -103,7 +103,8 @@ export const moveAction = (
   // find the grid that the preview rect is over
   const lastRowIndex = interactionEvent.targetRowIndex;
   const targetRowIndex = (() => {
-    if (isResize) return lastRowIndex;
+    // temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
+    if (isResize || isKeyboardEvent(e)) return lastRowIndex;
     const previewBottom = previewRect.top + rowHeight;
 
     let highestOverlap = -Infinity;
@@ -187,4 +188,34 @@ export const moveAction = (
       proposedGridLayout$.next(nextLayout);
     }
   }
+};
+
+export const commitAction = ({
+  activePanel$,
+  interactionEvent$,
+  gridLayout$,
+  proposedGridLayout$,
+}: GridLayoutStateManager) => {
+  console.log('commitAction');
+  activePanel$.next(undefined);
+  interactionEvent$.next(undefined);
+  if (proposedGridLayout$.value && !deepEqual(proposedGridLayout$.value, gridLayout$.getValue())) {
+    gridLayout$.next(cloneDeep(proposedGridLayout$.value));
+  }
+  proposedGridLayout$.next(undefined);
+};
+
+export const cancelAction = ({
+  activePanel$,
+  interactionEvent$,
+  gridLayout$,
+  proposedGridLayout$,
+}: GridLayoutStateManager) => {
+  console.log('cancelAction');
+  activePanel$.next(undefined);
+  interactionEvent$.next(undefined);
+  // if (proposedGridLayout$.value) {
+  //   gridLayout$.next(proposedGridLayout$.value);
+  // }
+  proposedGridLayout$.next(undefined);
 };
