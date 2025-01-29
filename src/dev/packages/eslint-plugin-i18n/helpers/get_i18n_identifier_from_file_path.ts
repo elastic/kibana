@@ -30,8 +30,8 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
 
   const path = relativePathArray.slice(0, pluginNameIndex).join('/').replace('x-pack/', '');
 
-  const xpackRC = resolve(join(__dirname, '../../../'), 'x-pack/.i18nrc.json');
-  const rootRC = resolve(join(__dirname, '../../../'), '.i18nrc.json');
+  const xpackRC = resolve(join(__dirname, '../../../../../'), 'x-pack/.i18nrc.json');
+  const rootRC = resolve(join(__dirname, '../../../../../'), '.i18nrc.json');
 
   const xpackI18nrcFile = fs.readFileSync(xpackRC, 'utf8');
   const xpackI18nrc = JSON.parse(xpackI18nrcFile);
