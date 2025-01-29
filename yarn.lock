@@ -8024,7 +8024,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/yarn-lock-validator@link:packages/kbn-yarn-lock-validator":
+"@kbn/yarn-lock-validator@link:src/dev/packages/yarn-lock-validator":
   version "0.0.0"
   uid ""
 

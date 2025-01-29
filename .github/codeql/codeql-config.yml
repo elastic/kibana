@@ -82,7 +82,7 @@ paths-ignore:
   - src/dev/packages/tooling-log
   - packages/kbn-ts-*
   - src/dev/packages/web-worker-stub
-  - packages/kbn-yarn-lock-validator
+  - src/dev/packages/yarn-lock-validator
   - scripts
   - test
   - typings

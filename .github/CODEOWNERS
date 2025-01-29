@@ -194,7 +194,7 @@ src/dev/packages/ts-type-check-cli @elastic/kibana-operations
 src/dev/packages/validate-next-docs-cli @elastic/kibana-operations
 src/dev/packages/web-worker-stub @elastic/kibana-operations
 src/dev/packages/whereis-pkg-cli @elastic/kibana-operations
-packages/kbn-yarn-lock-validator @elastic/kibana-operations
+src/dev/packages/yarn-lock-validator @elastic/kibana-operations
 packages/serverless/storybook/config @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core

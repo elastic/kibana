@@ -188,7 +188,7 @@
   "src/dev/packages/validate-next-docs-cli/tsconfig.json",
   "src/dev/packages/web-worker-stub/tsconfig.json",
   "src/dev/packages/whereis-pkg-cli/tsconfig.json",
-  "packages/kbn-yarn-lock-validator/tsconfig.json",
+  "src/dev/packages/yarn-lock-validator/tsconfig.json",
   "packages/serverless/storybook/config/tsconfig.json",
   "src/cli_encryption_keys/tsconfig.json",
   "src/cli_health_gateway/tsconfig.json",
