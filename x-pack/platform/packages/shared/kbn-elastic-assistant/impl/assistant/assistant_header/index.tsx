@@ -68,8 +68,6 @@ export const AssistantHeader: React.FC<Props> = ({
   isAssistantEnabled,
   refetchPrompts,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const selectedConnectorId = useMemo(
     () => selectedConversation?.apiConfig?.connectorId,
     [selectedConversation?.apiConfig?.connectorId]
