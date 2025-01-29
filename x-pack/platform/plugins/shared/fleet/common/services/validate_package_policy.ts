@@ -370,7 +370,8 @@ export const validatePackagePolicyConfig = (
     }
     if (varDef.required && Array.isArray(parsedValue)) {
       const hasEmptyString =
-        varDef.type === 'text' && parsedValue.some((item) => item.trim() === '');
+        varDef.type === 'text' &&
+        parsedValue.some((item) => typeof item === 'string' && item.trim() === '');
 
       if (hasEmptyString || parsedValue.length === 0) {
         errors.push(
