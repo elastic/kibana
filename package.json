@@ -1473,7 +1473,7 @@
     "@kbn/peggy-loader": "link:src/dev/packages/peggy-loader",
     "@kbn/performance-testing-dataset-extractor": "link:src/dev/packages/performance-testing-dataset-extractor",
     "@kbn/picomatcher": "link:src/dev/packages/picomatcher",
-    "@kbn/plugin-check": "link:packages/kbn-plugin-check",
+    "@kbn/plugin-check": "link:src/dev/packages/plugin-check",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
     "@kbn/product-doc-artifact-builder": "link:x-pack/packages/ai-infra/product-doc-artifact-builder",

@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-plugin-check'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/plugin-check'],
 };

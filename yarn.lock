@@ -6652,7 +6652,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-check@link:packages/kbn-plugin-check":
+"@kbn/plugin-check@link:src/dev/packages/plugin-check":
   version "0.0.0"
   uid ""
 
