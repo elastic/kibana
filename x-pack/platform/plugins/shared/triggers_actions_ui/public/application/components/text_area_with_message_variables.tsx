@@ -68,7 +68,7 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
           return (
             <EuiText size="xs" color="subdued">
               {i18n.translate(
-                'xpack.triggerActionsUI.components.textAreaWithMessageVariables.optionalFieldLabel',
+                'xpack.triggersActionsUI.components.textAreaWithMessageVariables.optionalFieldLabel',
                 {
                   defaultMessage: 'Optional',
                 }
@@ -82,7 +82,7 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {i18n.translate(
-                    'xpack.triggerActionsUI.components.textAreaWithMessageVariables.optionalFieldLabel',
+                    'xpack.triggersActionsUI.components.textAreaWithMessageVariables.optionalFieldLabel',
                     {
                       defaultMessage: 'Optional',
                     }
