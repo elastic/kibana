@@ -8,6 +8,7 @@
  */
 
 import type { ReporterDescription } from 'playwright/test';
+import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
 
 export * from './report';
@@ -16,7 +17,9 @@ export * from './report';
 export const scoutPlaywrightReporter = (
   options?: ScoutPlaywrightReporterOptions
 ): ReporterDescription => {
-  return ['@kbn/scout-reporting/src/reporting/playwright/events', options];
+  return SCOUT_REPORTER_ENABLED
+    ? ['@kbn/scout-reporting/src/reporting/playwright/events', options]
+    : ['null'];
 };
 
 // Playwright failed test reporting
@@ -25,5 +28,3 @@ export const scoutFailedTestsReporter = (
 ): ReporterDescription => {
   return ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options];
 };
-
-export { generateTestRunId, getTestIDForTitle } from '../helpers';

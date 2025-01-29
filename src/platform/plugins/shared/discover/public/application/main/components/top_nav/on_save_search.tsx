@@ -255,7 +255,7 @@ const SaveSearchObjectModal: React.FC<{
       helpText={
         <FormattedMessage
           id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
-          defaultMessage="Update the time filter and refresh interval to the current selection when using this search."
+          defaultMessage="Update the time filter and refresh interval to the current selection when using this session."
         />
       }
     >

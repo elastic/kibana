@@ -48,7 +48,7 @@ import {
   transformToCreateSchema,
   transformToUpdateSchema,
 } from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
-import { getKBUserFilter } from './utils';
+import { validateDocumentsModification } from './utils';
 
 export interface BulkOperationError {
   message: string;
@@ -167,7 +167,7 @@ const buildBulkResponse = (
 export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
       security: {
         authz: {
@@ -182,7 +182,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformKnowledgeBaseEntryBulkActionRequestBody),
@@ -235,7 +235,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
           const authenticatedUser = checkResponse.currentUser;
-          const userFilter = getKBUserFilter(authenticatedUser);
           const manageGlobalKnowledgeBaseAIAssistant =
             kbDataClient?.options.manageGlobalKnowledgeBaseAIAssistant;
 
@@ -266,39 +265,15 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             }
           }
 
-          const validateDocumentsModification = async (
-            documentIds: string[],
-            operation: 'delete' | 'update'
-          ) => {
-            if (!documentIds.length) {
-              return;
-            }
-            const documentsFilter = documentIds.map((id) => `_id:${id}`).join(' OR ');
-            const entries = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
-              page: 1,
-              perPage: 100,
-              filter: `${documentsFilter} AND ${userFilter}`,
-            });
-            const availableEntries = entries
-              ? transformESSearchToKnowledgeBaseEntry(entries.data)
-              : [];
-            availableEntries.forEach((entry) => {
-              // RBAC validation
-              const isGlobal = entry.users != null && entry.users.length === 0;
-              if (isGlobal && !manageGlobalKnowledgeBaseAIAssistant) {
-                throw new Error(
-                  `User lacks privileges to ${operation} global knowledge base entries`
-                );
-              }
-            });
-            const availableIds = availableEntries.map((doc) => doc.id);
-            const nonAvailableIds = documentIds.filter((id) => !availableIds.includes(id));
-            if (nonAvailableIds.length > 0) {
-              throw new Error(`Could not find documents to ${operation}: ${nonAvailableIds}.`);
-            }
-          };
-          await validateDocumentsModification(body.delete?.ids ?? [], 'delete');
           await validateDocumentsModification(
+            kbDataClient,
+            authenticatedUser,
+            body.delete?.ids ?? [],
+            'delete'
+          );
+          await validateDocumentsModification(
+            kbDataClient,
+            authenticatedUser,
             body.update?.map((entry) => entry.id) ?? [],
             'update'
           );

@@ -55,6 +55,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",
     "@kbn/core-application-browser",
+    "@kbn/delete-managed-asset-callout",
     "@kbn/inference-endpoint-ui-common",
   ],
   "exclude": ["target/**/*"]

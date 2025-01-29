@@ -2011,11 +2011,11 @@
   integrity sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==
 
 "@bundled-es-modules/cookie@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@bundled-es-modules/cookie/-/cookie-2.0.0.tgz#c3b82703969a61cf6a46e959a012b2c257f6b164"
-  integrity sha512-Or6YHg/kamKHpxULAdSqhGqnWFneIXu1NKvvfBBzKGwpVsYuFIQ5aBPHDnnoR3ghW1nvSkALd+EF9iMtY7Vjxw==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@bundled-es-modules/cookie/-/cookie-2.0.1.tgz#b41376af6a06b3e32a15241d927b840a9b4de507"
+  integrity sha512-8o+5fRPLNbjbdGRRmJj3h6Hh1AQJf2dk3qQ/5ZFb+PXkRNiSoMGGUKlsgLfrxneb72axVJyIYji64E2+nNfYyw==
   dependencies:
-    cookie "^0.5.0"
+    cookie "^0.7.2"
 
 "@bundled-es-modules/statuses@^1.0.1":
   version "1.0.1"
@@ -2233,10 +2233,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@68.1.0":
-  version "68.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.1.0.tgz#7c2e471e984cb8cfe9a05dba8eda19ff26a880e7"
-  integrity sha512-4Wb0g9lgEpsgKJgdV6uqmY444elBJ5VhVJQ0ZUpnn8CV9mzEz8HqXAanpfqG9NTGca8C/EnwlSeQEgF+9orU4A==
+"@elastic/charts@69.0.0":
+  version "69.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-69.0.0.tgz#c38531e6474ee64ebbad6d19b94fb543e5ee0033"
+  integrity sha512-TE7iRiGgLhYVImMpCFJleH91GinBlhbQKnVXtnjm+G8nYnvf6mA6Po7XViqKnEAUduAOVX8FJJJCL2/JWqRSJA==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -2304,10 +2304,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.16.0":
-  version "8.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.16.0.tgz#35c6729e15684154b8b3c391cfad34877d771cf0"
-  integrity sha512-uiPC6AePESl/jakx+ZLarLsLdxDHiCSrpAkkXJ5Q8A78vadEQsTGXRUVFwWWkS8gfGthnT3O+QK6BHXuszd0KQ==
+"@elastic/elasticsearch@^8.17.0":
+  version "8.17.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.17.0.tgz#0214265bc04a3fe0d23a410b8d08b28217aac540"
+  integrity sha512-FZ+gQUrPsMpQ2RRIXwTmCoUeFCEausMhp4eQOyxT9j1cwGXHJrhelR6jffM1SC95kQUkB7+TcTq7oQ+bG2BQ9g==
   dependencies:
     "@elastic/transport" "^8.9.1"
     apache-arrow "^18.0.0"
@@ -4060,6 +4060,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/automatic-import-plugin@link:x-pack/platform/plugins/shared/automatic_import":
+  version "0.0.0"
+  uid ""
+
 "@kbn/avc-banner@link:src/platform/packages/shared/kbn-avc-banner":
   version "0.0.0"
   uid ""
@@ -4320,7 +4324,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser-mocks@link:packages/core/analytics/core-analytics-browser-mocks":
+"@kbn/core-analytics-browser-mocks@link:src/core/packages/analytics/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4332,7 +4336,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-mocks@link:packages/core/analytics/core-analytics-server-mocks":
+"@kbn/core-analytics-server-mocks@link:src/core/packages/analytics/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4348,7 +4352,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser-mocks@link:packages/core/application/core-application-browser-mocks":
+"@kbn/core-application-browser-mocks@link:src/core/packages/application/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4364,7 +4368,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-mocks@link:packages/core/apps/core-apps-browser-mocks":
+"@kbn/core-apps-browser-mocks@link:src/core/packages/apps/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4376,7 +4380,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-browser-mocks@link:packages/core/base/core-base-browser-mocks":
+"@kbn/core-base-browser-mocks@link:src/core/packages/base/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4392,7 +4396,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-server-mocks@link:packages/core/base/core-base-server-mocks":
+"@kbn/core-base-server-mocks@link:src/core/packages/base/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4400,7 +4404,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-browser-mocks@link:packages/core/capabilities/core-capabilities-browser-mocks":
+"@kbn/core-capabilities-browser-mocks@link:src/core/packages/capabilities/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4412,7 +4416,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server-mocks@link:packages/core/capabilities/core-capabilities-server-mocks":
+"@kbn/core-capabilities-server-mocks@link:src/core/packages/capabilities/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4424,7 +4428,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser-mocks@link:packages/core/chrome/core-chrome-browser-mocks":
+"@kbn/core-chrome-browser-mocks@link:src/core/packages/chrome/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4468,7 +4472,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser-mocks@link:packages/core/deprecations/core-deprecations-browser-mocks":
+"@kbn/core-deprecations-browser-mocks@link:src/core/packages/deprecations/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4484,7 +4488,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server-mocks@link:packages/core/deprecations/core-deprecations-server-mocks":
+"@kbn/core-deprecations-server-mocks@link:src/core/packages/deprecations/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4496,7 +4500,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser-mocks@link:packages/core/doc-links/core-doc-links-browser-mocks":
+"@kbn/core-doc-links-browser-mocks@link:src/core/packages/doc-links/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4508,7 +4512,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server-mocks@link:packages/core/doc-links/core-doc-links-server-mocks":
+"@kbn/core-doc-links-server-mocks@link:src/core/packages/doc-links/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4520,7 +4524,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-client-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-client-server-mocks":
+"@kbn/core-elasticsearch-client-server-mocks@link:src/core/packages/elasticsearch/client-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4528,7 +4532,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-server-mocks":
+"@kbn/core-elasticsearch-server-mocks@link:src/core/packages/elasticsearch/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4540,7 +4544,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-environment-server-mocks@link:packages/core/environment/core-environment-server-mocks":
+"@kbn/core-environment-server-mocks@link:src/core/packages/environment/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4548,7 +4552,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser-mocks@link:packages/core/execution-context/core-execution-context-browser-mocks":
+"@kbn/core-execution-context-browser-mocks@link:src/core/packages/execution-context/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4564,7 +4568,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server-mocks@link:packages/core/execution-context/core-execution-context-server-mocks":
+"@kbn/core-execution-context-server-mocks@link:src/core/packages/execution-context/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4576,7 +4580,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser-mocks@link:packages/core/fatal-errors/core-fatal-errors-browser-mocks":
+"@kbn/core-fatal-errors-browser-mocks@link:src/core/packages/fatal-errors/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4616,7 +4620,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser-mocks@link:packages/core/http/core-http-browser-mocks":
+"@kbn/core-http-browser-mocks@link:src/core/packages/http/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4632,11 +4636,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-context-server-mocks@link:packages/core/http/core-http-context-server-mocks":
+"@kbn/core-http-context-server-mocks@link:src/core/packages/http/context-server-mocks":
   version "0.0.0"
   uid ""
 
 "@kbn/core-http-plugin@link:test/plugin_functional/plugins/core_http":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-rate-limiter-internal@link:src/core/packages/http/rate-limiter-internal":
   version "0.0.0"
   uid ""
 
@@ -4652,7 +4660,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server-mocks@link:packages/core/http/core-http-resources-server-mocks":
+"@kbn/core-http-resources-server-mocks@link:src/core/packages/http/resources-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4664,7 +4672,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-router-server-mocks@link:packages/core/http/core-http-router-server-mocks":
+"@kbn/core-http-router-server-mocks@link:src/core/packages/http/router-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4672,7 +4680,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-mocks@link:packages/core/http/core-http-server-mocks":
+"@kbn/core-http-server-mocks@link:src/core/packages/http/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4688,7 +4696,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser-mocks@link:packages/core/i18n/core-i18n-browser-mocks":
+"@kbn/core-i18n-browser-mocks@link:src/core/packages/i18n/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4700,7 +4708,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server-mocks@link:packages/core/i18n/core-i18n-server-mocks":
+"@kbn/core-i18n-server-mocks@link:src/core/packages/i18n/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4712,7 +4720,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser-mocks@link:packages/core/injected-metadata/core-injected-metadata-browser-mocks":
+"@kbn/core-injected-metadata-browser-mocks@link:src/core/packages/injected-metadata/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4724,7 +4732,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-integrations-browser-mocks@link:packages/core/integrations/core-integrations-browser-mocks":
+"@kbn/core-integrations-browser-mocks@link:src/core/packages/integrations/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4732,7 +4740,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser-mocks@link:packages/core/lifecycle/core-lifecycle-browser-mocks":
+"@kbn/core-lifecycle-browser-mocks@link:src/core/packages/lifecycle/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4744,7 +4752,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server-mocks@link:packages/core/lifecycle/core-lifecycle-server-mocks":
+"@kbn/core-lifecycle-server-mocks@link:src/core/packages/lifecycle/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4756,7 +4764,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-browser-mocks@link:packages/core/logging/core-logging-browser-mocks":
+"@kbn/core-logging-browser-mocks@link:src/core/packages/logging/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4768,7 +4776,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server-mocks@link:packages/core/logging/core-logging-server-mocks":
+"@kbn/core-logging-server-mocks@link:src/core/packages/logging/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4780,7 +4788,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-collectors-server-mocks@link:packages/core/metrics/core-metrics-collectors-server-mocks":
+"@kbn/core-metrics-collectors-server-mocks@link:src/core/packages/metrics/collectors-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4788,7 +4796,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-server-mocks@link:packages/core/metrics/core-metrics-server-mocks":
+"@kbn/core-metrics-server-mocks@link:src/core/packages/metrics/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4808,7 +4816,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server-mocks@link:packages/core/node/core-node-server-mocks":
+"@kbn/core-node-server-mocks@link:src/core/packages/node/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4820,7 +4828,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser-mocks@link:packages/core/notifications/core-notifications-browser-mocks":
+"@kbn/core-notifications-browser-mocks@link:src/core/packages/notifications/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4832,7 +4840,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser-mocks@link:packages/core/overlays/core-overlays-browser-mocks":
+"@kbn/core-overlays-browser-mocks@link:src/core/packages/overlays/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4900,7 +4908,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser-mocks@link:packages/core/plugins/core-plugins-browser-mocks":
+"@kbn/core-plugins-browser-mocks@link:src/core/packages/plugins/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4920,7 +4928,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server-mocks@link:packages/core/plugins/core-plugins-server-mocks":
+"@kbn/core-plugins-server-mocks@link:src/core/packages/plugins/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4932,7 +4940,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server-mocks@link:packages/core/preboot/core-preboot-server-mocks":
+"@kbn/core-preboot-server-mocks@link:src/core/packages/preboot/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4948,7 +4956,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser-mocks@link:packages/core/rendering/core-rendering-browser-mocks":
+"@kbn/core-rendering-browser-mocks@link:src/core/packages/rendering/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4960,7 +4968,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-server-mocks@link:packages/core/rendering/core-rendering-server-mocks":
+"@kbn/core-rendering-server-mocks@link:src/core/packages/rendering/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4980,7 +4988,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server-mocks@link:packages/core/saved-objects/core-saved-objects-api-server-mocks":
+"@kbn/core-saved-objects-api-server-mocks@link:src/core/packages/saved-objects/api-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4992,7 +5000,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-base-server-mocks@link:packages/core/saved-objects/core-saved-objects-base-server-mocks":
+"@kbn/core-saved-objects-base-server-mocks@link:src/core/packages/saved-objects/base-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5000,7 +5008,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser-mocks@link:packages/core/saved-objects/core-saved-objects-browser-mocks":
+"@kbn/core-saved-objects-browser-mocks@link:src/core/packages/saved-objects/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -5016,7 +5024,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-import-export-server-mocks@link:packages/core/saved-objects/core-saved-objects-import-export-server-mocks":
+"@kbn/core-saved-objects-import-export-server-mocks@link:src/core/packages/saved-objects/import-export-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5024,7 +5032,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-migration-server-mocks@link:packages/core/saved-objects/core-saved-objects-migration-server-mocks":
+"@kbn/core-saved-objects-migration-server-mocks@link:src/core/packages/saved-objects/migration-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5032,7 +5040,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-server-mocks@link:packages/core/saved-objects/core-saved-objects-server-mocks":
+"@kbn/core-saved-objects-server-mocks@link:src/core/packages/saved-objects/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5080,7 +5088,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-server-mocks@link:packages/core/status/core-status-server-mocks":
+"@kbn/core-status-server-mocks@link:src/core/packages/status/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5096,11 +5104,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-kbn-server@link:packages/core/test-helpers/core-test-helpers-kbn-server":
+"@kbn/core-test-helpers-kbn-server@link:src/dev/packages/core-test-helpers-kbn-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-model-versions@link:packages/core/test-helpers/core-test-helpers-model-versions":
+"@kbn/core-test-helpers-model-versions@link:src/dev/packages/core-test-helpers-model-versions":
   version "0.0.0"
   uid ""
 
@@ -5116,7 +5124,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser-mocks@link:packages/core/theme/core-theme-browser-mocks":
+"@kbn/core-theme-browser-mocks@link:src/core/packages/theme/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -5128,7 +5136,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser-mocks@link:packages/core/ui-settings/core-ui-settings-browser-mocks":
+"@kbn/core-ui-settings-browser-mocks@link:src/core/packages/ui-settings/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -5144,7 +5152,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server-mocks@link:packages/core/ui-settings/core-ui-settings-server-mocks":
+"@kbn/core-ui-settings-server-mocks@link:src/core/packages/ui-settings/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5160,7 +5168,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-server-mocks@link:packages/core/usage-data/core-usage-data-server-mocks":
+"@kbn/core-usage-data-server-mocks@link:src/core/packages/usage-data/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5365,6 +5373,10 @@
   uid ""
 
 "@kbn/default-nav-ml@link:src/platform/packages/private/default-nav/ml":
+  version "0.0.0"
+  uid ""
+
+"@kbn/delete-managed-asset-callout@link:src/platform/packages/shared/kbn-management/delete_managed_assets_callout":
   version "0.0.0"
   uid ""
 
@@ -6020,10 +6032,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/integration-assistant-plugin@link:x-pack/platform/plugins/shared/integration_assistant":
-  version "0.0.0"
-  uid ""
-
 "@kbn/interactive-setup-plugin@link:src/platform/plugins/private/interactive_setup":
   version "0.0.0"
   uid ""
@@ -6129,10 +6137,6 @@
   uid ""
 
 "@kbn/kibana-utils-plugin@link:src/platform/plugins/shared/kibana_utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
   version "0.0.0"
   uid ""
 
@@ -6512,7 +6516,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
@@ -7068,7 +7072,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/search/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared_ui":
   version "0.0.0"
   uid ""
 
@@ -8547,7 +8551,7 @@
   resolved "https://registry.yarnpkg.com/@msgpackr-extract/msgpackr-extract-win32-x64/-/msgpackr-extract-win32-x64-3.0.2.tgz#0f164b726869f71da3c594171df5ebc1c4b0a407"
   integrity sha512-O+6Gs8UeDbyFpbSh2CPEz/UOrrdWPTBYNblZK5CxxLisYt4kGX3Sc+czffFonyjiGSq3jWLwJS/CCJc7tBr4sQ==
 
-"@mswjs/http-middleware@^0.10.1":
+"@mswjs/http-middleware@0.10.1":
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@mswjs/http-middleware/-/http-middleware-0.10.1.tgz#7ff38c5398ba01efe98e16a0da24d612ffd69ccc"
   integrity sha512-I58RDHXzwKjMjaSO7aV7X0zUzbAvUEEDYsL9+I6Ro0zF5LgjnNdpZoMufG/WoYEenhDCgv7K+HMpLxGuhlfjKA==
@@ -11303,10 +11307,10 @@
   resolved "https://registry.yarnpkg.com/@types/braces/-/braces-3.0.0.tgz#7da1c0d44ff1c7eb660a36ec078ea61ba7eb42cb"
   integrity sha512-TbH79tcyi9FHwbyboOKeRachRq63mSuWYXOflsNO9ZyE5ClQ/JaozNKl+aWUq87qPNsXasXxi2AbgfwIJ+8GQw==
 
-"@types/byte-size@^8.1.0":
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/@types/byte-size/-/byte-size-8.1.0.tgz#013a3995d1ff2d85ad27da0801029f13328bd91b"
-  integrity sha512-LCIlZh8vyx+I2fgRycE1D34c33QDppYY6quBYYoaOpQ1nGhJ/avSP2VlrAefVotjJxgSk6WkKo0rTcCJwGG7vA==
+"@types/byte-size@^8.1.2":
+  version "8.1.2"
+  resolved "https://registry.yarnpkg.com/@types/byte-size/-/byte-size-8.1.2.tgz#abb3d70ab62c400d8753bed1ff2aa315ef9ff7f5"
+  integrity sha512-jGyVzYu6avI8yuqQCNTZd65tzI8HZrLjKX9sdMqZrGWVlNChu0rf6p368oVEDCYJe5BMx2Ov04tD1wqtgTwGSA==
 
 "@types/cacheable-request@^6.0.1":
   version "6.0.1"
@@ -12243,10 +12247,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-is@^17.0.3":
-  version "17.0.3"
-  resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-17.0.3.tgz#2d855ba575f2fc8d17ef9861f084acc4b90a137a"
-  integrity sha512-aBTIWg1emtu95bLTLx0cpkxwGW3ueZv71nE2YFBpL8k/z5czEW8yYpOo8Dp+UUAFAtKwNaOsh/ioSeQnWlZcfw==
+"@types/react-is@~18.2.0":
+  version "18.2.4"
+  resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-18.2.4.tgz#95a92829de452662348ce08349ca65623c50daf7"
+  integrity sha512-wBc7HgmbCcrvw0fZjxbgz/xrrlZKzEqmABBMeSvpTvdm25u6KI6xdIi9pRE2G0C1Lw5ETFdcn4UbYZ4/rpqUYw==
   dependencies:
     "@types/react" "*"
 
@@ -12380,10 +12384,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.27":
-  version "4.1.27"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.27.tgz#e08000d649df6f099b4099432bd2fece9f50ea7b"
-  integrity sha512-ALqsj8D7Swb6MnBQuAQ58J3KC3yh6fLGtAmpBmnZX8j+0kmP7NaLt56CuzBw2W2bXPrvHFTgn8iekOQFUKXEQA==
+"@types/selenium-webdriver@^4.1.28":
+  version "4.1.28"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.28.tgz#7b4f3c50a67494f8fd6d396a2eaab7d9df1f9f34"
+  integrity sha512-Au7CXegiS7oapbB16zxPToY4Cjzi9UQQMf3W2ZZM8PigMLTGR3iUAHjPUTddyE5g1SBjT/qpmvlsAQLBfNAdKg==
   dependencies:
     "@types/node" "*"
     "@types/ws" "*"
@@ -12421,10 +12425,10 @@
     "@types/mime" "^1"
     "@types/node" "*"
 
-"@types/set-value@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/set-value/-/set-value-2.0.0.tgz#63d386b103926dcf49b50e16e0f6dd49983046be"
-  integrity sha512-k8dCJEC80F/mbsIOZ5Hj3YSzTVVVBwMdtP/M9Rtc2TM4F5etVd+2UG8QUiAUfbXm4fABedL2tBZnrBheY7UwpA==
+"@types/set-value@^4.0.3":
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/@types/set-value/-/set-value-4.0.3.tgz#ac7f5f9715c95c7351e02832df672a112428e587"
+  integrity sha512-tSuUcLl6kMzI+l0gG7FZ04xbIcynxNIYgWFj91LPAvRcn7W3L1EveXNdVjqFDgAZPjY1qCOsm8Sb1C70SxAPHw==
 
 "@types/sinon@^7.0.13":
   version "7.0.13"
@@ -13162,7 +13166,7 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.4.0":
+"@xyflow/react@^12.4.1":
   version "12.4.2"
   resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.4.2.tgz#669ab18923d93a8d8fb526241a2affc0d50abf9d"
   integrity sha512-AFJKVc/fCPtgSOnRst3xdYJwiEcUN9lDY7EO/YiRvFHYCJGgfzg+jpvZjkTOnBLGyrMJre9378pRxAc3fsR06A==
@@ -13992,13 +13996,6 @@ atomic-sleep@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/atomic-sleep/-/atomic-sleep-1.0.0.tgz#eb85b77a601fc932cfe432c5acd364a9e2c9075b"
   integrity sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==
-
-attr-accept@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-1.1.3.tgz#48230c79f93790ef2775fcec4f0db0f5db41ca52"
-  integrity sha512-iT40nudw8zmCweivz6j58g+RT33I4KbaIvRUhjNmDwO2WmsQUxFEZZYZ5w3vXe5x5MX9D7mfvA/XaLOZYFR9EQ==
-  dependencies:
-    core-js "^2.5.0"
 
 attr-accept@^2.2.2:
   version "2.2.2"
@@ -14840,10 +14837,10 @@ builtin-status-codes@^3.0.0:
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
   integrity sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
 
-byte-size@^8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-8.1.0.tgz#6353d0bc14ab7a69abcefbf11f8db0145a862cb5"
-  integrity sha512-FkgMTAg44I0JtEaUAvuZTtU2a2YDmBRbQxdsQNSMtLCjhG0hMcF5b1IMN9UjSCJaU4nvlj/GER7B9sI4nKdCgA==
+byte-size@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-9.0.1.tgz#7014b9f0e11ea732a8f2c21bef1cb8a78c6c55ff"
+  integrity sha512-YLe9x3rabBrcI0cueCdLS2l5ONUKywcRpTs02B8KP9/Cimhj7o3ZccGrPnRvcbyHMbb7W79/3MUJl7iGgTXKEw==
 
 bytes@3.0.0:
   version "3.0.0"
@@ -15275,10 +15272,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^131.0.1:
-  version "131.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-131.0.1.tgz#bfbf47f6c2ad7a65c154ff47d321bd8c33b52a77"
-  integrity sha512-LHRh+oaNU1WowJjAkWsviN8pTzQYJDbv/FvJyrQ7XhjKdIzVh/s3GV1iU7IjMTsxIQnBsTjx+9jWjzCWIXC7ug==
+chromedriver@^132.0.0:
+  version "132.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-132.0.1.tgz#55f288943ac68ad262b3267e7696538d4bda918a"
+  integrity sha512-M3XyeyOdYfEiw3plMeEvF/iMwluOH9+8K5mJwFmxllFBPfHvDGX1Oeys3GNzMyhqQ1lJbRX7B6bp+323LLd5lg==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -15951,12 +15948,7 @@ cookie@0.7.1:
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.7.1.tgz#2f73c42142d5d5cf71310a74fc4ae61670e5dbc9"
   integrity sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==
 
-cookie@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
-  integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
-
-cookie@^0.7.1:
+cookie@^0.7.1, cookie@^0.7.2:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.7.2.tgz#556369c472a2ba910f2979891b526b3436237ed7"
   integrity sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==
@@ -24811,7 +24803,7 @@ msgpackr@^1.9.9:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@^2.4.12:
+msw@~2.5.2:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/msw/-/msw-2.5.2.tgz#dfce10b68dbabc2d5dafeb6d7fb82c3c7073a4d1"
   integrity sha512-eBsFgU30NYtrfC62XzS1rdAzFK+Br0zKU4ORqD9Qliq86362DWZyPiD6FLfMgy0Ktik83DPTXmqPMz2bqwmJdA==
@@ -27544,14 +27536,6 @@ react-dropzone@^11.7.1:
     file-selector "^0.4.0"
     prop-types "^15.8.1"
 
-react-dropzone@^4.2.9:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-4.3.0.tgz#facdd7db16509772633c9f5200621ac01aa6706f"
-  integrity sha512-ULfrLaTSsd8BDa9KVAGCueuq1AN3L14dtMsGGqtP0UwYyjG4Vhf158f/ITSHuSPYkZXbvfcIiOlZsH+e3QWm+Q==
-  dependencies:
-    attr-accept "^1.1.3"
-    prop-types "^15.5.7"
-
 react-element-to-jsx-string@^14.3.4:
   version "14.3.4"
   resolved "https://registry.yarnpkg.com/react-element-to-jsx-string/-/react-element-to-jsx-string-14.3.4.tgz#709125bc72f06800b68f9f4db485f2c7d31218a8"
@@ -27668,6 +27652,11 @@ react-is@^16.12.0, react-is@^16.13.1, react-is@^16.6.0, react-is@^16.7.0, react-
   version "18.3.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.3.1.tgz#e83557dc12eae63a99e003a46388b1dcbb44db7e"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
+
+react-is@~18.2.0:
+  version "18.2.0"
+  resolved "https://registry.npmjs.org/react-is/-/react-is-18.2.0.tgz"
+  integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
 
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
@@ -29272,10 +29261,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.27.0:
-  version "4.27.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.27.0.tgz#f0f26ce453805e7dc77151040442c67e441dbe7a"
-  integrity sha512-LkTJrNz5socxpPnWPODQ2bQ65eYx9JK+DQMYNihpTjMCqHwgWGYQnQTCAAche2W3ZP87alA+1zYPvgS8tHNzMQ==
+selenium-webdriver@^4.28.0:
+  version "4.28.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.28.1.tgz#0f6cc4fbc83cee3fdf8b116257656892957b72da"
+  integrity sha512-TwbTpu/NUQkorBODGAkGowJ8sar63bvqi66/tjqhS05rBl34HkVp8DoRg1cOv2iSnNonVSbkxazS3wjbc+NRtg==
   dependencies:
     "@bazel/runfiles" "^6.3.1"
     jszip "^3.10.1"
@@ -33625,10 +33614,10 @@ xtend@~2.1.1:
   dependencies:
     object-keys "~0.4.0"
 
-xterm@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/xterm/-/xterm-5.1.0.tgz#3e160d60e6801c864b55adf19171c49d2ff2b4fc"
-  integrity sha512-LovENH4WDzpwynj+OTkLyZgJPeDom9Gra4DMlGAgz6pZhIDCQ+YuO7yfwanY+gVbn/mmZIStNOnVRU/ikQuAEQ==
+xterm@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/xterm/-/xterm-5.3.0.tgz#867daf9cc826f3d45b5377320aabd996cb0fce46"
+  integrity sha512-8QqjlekLUFTrU6x7xck1MsPzPA571K5zNqWm0M0oroYEWVOptZ0+ubQSkQ3uxIEhcIHRujJy6emDWX4A7qyFzg==
 
 y18n@^3.2.0:
   version "3.2.2"
