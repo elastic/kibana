@@ -29,7 +29,7 @@ interface IntroductionUiProps {
   exportedFieldUrl?: string;
   iconType?: string;
   isBeta?: boolean;
-  notices?: unknown; // PropTypes.node
+  notices?: unknown; // PropTypes.node could it be an Observable? console showed it has $$typeof Symbol(react element) key, props, ref, type, _owner and _store
   exportedFieldsUrl?: string;
   intl: InjectedIntl;
   basePath: IBasePath;
@@ -141,5 +141,5 @@ function IntroductionUI({
     </>
   );
 }
-
+// because description above is "Automatically get wrapped in a single paragraph tag inside an EuiText block" - lines 135-140 show an error about dom nesting because we have divs inside <p></p>
 export const Introduction = injectI18n(IntroductionUI);

@@ -41,7 +41,7 @@ interface SavedObjectInstallerProps {
     options?: SavedObjectsBulkCreateOptions | undefined
   ) => Promise<SavedObjectsBatchResponse<unknown>>; // is there anything to do with deprecated things?
   savedObjects: SavedObjectShape[];
-  installMsg: string;
+  installMsg?: string;
 }
 interface SavedObjectInstallerState {
   isInstalling: boolean;
