@@ -45,7 +45,8 @@ describe('common', () => {
               preventInitialBackfill: true,
             },
           }),
-          '@timestamp'
+          '@timestamp',
+          false
         )
       ).toEqual({
         range: {
@@ -67,7 +68,8 @@ describe('common', () => {
               preventInitialBackfill: false,
             },
           }),
-          '@timestamp'
+          '@timestamp',
+          false
         )
       ).toEqual({
         range: {
