@@ -18,7 +18,7 @@ import { REPO_ROOT } from '../../lib/paths.mjs';
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
  */
 export async function regenerateTsconfigPaths(tsConfigRepoRels, log) {
-  const path = Path.resolve(REPO_ROOT, 'packages/kbn-ts-projects/config-paths.json');
+  const path = Path.resolve(REPO_ROOT, 'src/dev/packages/ts-projects/config-paths.json');
   const existingContent = Fs.existsSync(path) ? await Fsp.readFile(path, 'utf8') : undefined;
 
   const entries = Array.from(tsConfigRepoRels).sort((a, b) => a.localeCompare(b));

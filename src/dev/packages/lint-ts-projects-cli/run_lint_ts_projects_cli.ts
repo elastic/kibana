@@ -80,7 +80,7 @@ function validateProjectOwnership(
       .join('\n');
 
     log.error(
-      `The following files belong to multiple tsconfig.json files listed in packages/kbn-ts-projects/projects.ts\n${details}`
+      `The following files belong to multiple tsconfig.json files listed in src/dev/packages/ts-projects/projects.ts\n${details}`
     );
   }
 

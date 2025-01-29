@@ -7788,7 +7788,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ts-projects@link:packages/kbn-ts-projects":
+"@kbn/ts-projects@link:src/dev/packages/ts-projects":
   version "0.0.0"
   uid ""
 
