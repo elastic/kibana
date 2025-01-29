@@ -313,7 +313,7 @@ export const setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess = (
 ) => {
   mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
     (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => {
-      return Promise.resolve(params.objects);
+      return Promise.resolve(params.objects.map(({ name, ...rest }) => ({ ...rest })));
     }
   );
 };

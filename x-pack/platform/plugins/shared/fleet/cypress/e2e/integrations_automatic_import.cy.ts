@@ -79,7 +79,7 @@ describe('Add Integration - Automatic Import', () => {
     cy.getBySel(UPLOAD_PACKAGE_LINK).should('exist');
     cy.getBySel(TECH_PREVIEW_BADGE).should('exist');
 
-    // Create Integration Assistant Page
+    // Create Automatic Import Page
     cy.getBySel(ASSISTANT_BUTTON).click();
     cy.getBySel(BUTTON_FOOTER_NEXT).click();
 
