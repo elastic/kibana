@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SPAN_DURATION, TRANSACTION_DURATION } from '../../../../common/es_fields/apm';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';

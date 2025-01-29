@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core/server';

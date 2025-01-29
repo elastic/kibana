@@ -7,7 +7,7 @@
 
 import sortBy from 'lodash/sortBy';
 import dateMath from '@elastic/datemath';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { chunk, partition } from 'lodash';
 import {

@@ -9,7 +9,7 @@ import { groupBy, keyBy, memoize, partition } from 'lodash';
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';

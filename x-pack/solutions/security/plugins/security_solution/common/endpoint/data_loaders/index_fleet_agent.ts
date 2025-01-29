@@ -7,12 +7,12 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type {
+  BulkRequest,
   DeleteByQueryResponse,
   IndexRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { DeepPartial } from 'utility-types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';

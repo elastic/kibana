@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { isArray } from 'lodash';
 import { http, HttpResponse } from 'msw';

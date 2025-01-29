@@ -8,7 +8,7 @@ import { setTimeout as setTimeoutPromise } from 'timers/promises';
 import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   TermsEnumRequest,
   MsearchMultisearchBody,

@@ -6,7 +6,7 @@
  */
 
 import { each, get, sortedIndex } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ISearchOptions } from '@kbn/search-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

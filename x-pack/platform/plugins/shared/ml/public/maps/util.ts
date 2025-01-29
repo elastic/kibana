@@ -6,7 +6,7 @@
  */
 
 import type { FeatureCollection, Feature, Geometry } from 'geojson';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { htmlIdGenerator, type EuiThemeComputed } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';

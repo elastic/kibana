@@ -10,7 +10,7 @@
 import { ReactText } from 'react';
 import { Query } from '@kbn/es-query';
 import { HttpStart } from '@kbn/core/public';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 export type SampleInput = ReactText | ReactText[] | Record<string, ReactText | ReactText[]>;
 export interface Sample {

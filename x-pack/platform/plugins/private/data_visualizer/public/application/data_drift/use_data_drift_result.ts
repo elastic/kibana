@@ -10,11 +10,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  MappingRuntimeFields,
-  QueryDslBoolQuery,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
+import type { MappingRuntimeFields, QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
 import type { IKibanaSearchRequest } from '@kbn/search-types';

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {

@@ -7,7 +7,7 @@
 
 import { sum } from 'lodash';
 import objectHash from 'object-hash';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';

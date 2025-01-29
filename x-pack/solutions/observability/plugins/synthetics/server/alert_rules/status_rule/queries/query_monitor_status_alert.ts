@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import times from 'lodash/times';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intersection } from 'lodash';
 import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
 import {

@@ -19,7 +19,7 @@ import type {
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
 import { Comparator } from '../../../../common/alerting/logs/log_threshold';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   positiveComparators,
   negativeComparators,

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { Assign } from '@kbn/utility-types';
 import { isRangeFilter, TimeRange, RangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';

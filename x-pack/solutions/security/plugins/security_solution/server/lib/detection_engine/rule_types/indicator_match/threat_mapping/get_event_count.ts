@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EventCountOptions, EventsOptions, EventDoc } from './types';
 import { getQueryFilter } from '../../utils/get_query_filter';
 import { singleSearchAfter } from '../../utils/single_search_after';

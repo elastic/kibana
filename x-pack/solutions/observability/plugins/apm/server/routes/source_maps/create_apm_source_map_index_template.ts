@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createOrUpdateIndexTemplate } from '@kbn/observability-plugin/server';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';

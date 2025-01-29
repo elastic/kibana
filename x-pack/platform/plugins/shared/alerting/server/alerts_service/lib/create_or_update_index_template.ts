@@ -9,7 +9,7 @@ import {
   IndicesPutIndexTemplateRequest,
   MappingTypeMapping,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';

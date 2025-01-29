@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { Config, Secrets } from '@kbn/inference-endpoint-ui-common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { unflattenObject } from '../utils/unflatten_object';
@@ -15,7 +15,7 @@ export const addInferenceEndpoint = async (
   config: Config,
   secrets: Secrets
 ) => {
-  /* task settings property is required in the API call 
+  /* task settings property is required in the API call
     but no needed for inference or connector creation
     */
   const taskSettings = {};

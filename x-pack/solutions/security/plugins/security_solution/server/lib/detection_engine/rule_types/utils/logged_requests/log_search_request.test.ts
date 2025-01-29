@@ -6,7 +6,7 @@
  */
 
 import { logSearchRequest } from './log_search_request';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 describe('logSearchRequest', () => {
   it('should match inline snapshot when deprecated search request used', () => {

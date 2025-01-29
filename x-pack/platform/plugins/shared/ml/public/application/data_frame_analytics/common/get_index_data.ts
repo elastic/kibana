@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { EsSorting, UseDataGridReturnType } from '@kbn/ml-data-grid';

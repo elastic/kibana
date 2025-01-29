@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
-import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { lastValueFrom } from 'rxjs';
 import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';

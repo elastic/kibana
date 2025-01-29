@@ -8,8 +8,6 @@
 import type {
   IndicesPutIndexTemplateRequest,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
   ClusterPutComponentTemplateRequest,
   IndicesIndexSettings,
   IndicesPutIndexTemplateIndexTemplateMapping,

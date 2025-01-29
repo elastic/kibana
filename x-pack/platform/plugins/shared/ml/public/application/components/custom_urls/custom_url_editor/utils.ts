@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import moment, { type Moment } from 'moment';
 import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';

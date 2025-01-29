@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';

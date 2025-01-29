@@ -6,7 +6,7 @@
  */
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 
 // elasticsearch index.max_result_window default value

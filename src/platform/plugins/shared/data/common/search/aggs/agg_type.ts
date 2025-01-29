@@ -14,7 +14,7 @@ import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';

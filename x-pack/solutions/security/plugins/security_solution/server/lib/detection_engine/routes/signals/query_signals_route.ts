@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  AggregationsAggregationContainer,
+  MappingRuntimeFields,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';

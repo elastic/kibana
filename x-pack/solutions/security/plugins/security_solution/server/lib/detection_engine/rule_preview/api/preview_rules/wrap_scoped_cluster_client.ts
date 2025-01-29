@@ -15,11 +15,8 @@ import type {
   SearchRequest,
   SearchResponse,
   AggregateName,
-} from '@elastic/elasticsearch/lib/api/types';
-import type {
-  SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, ElasticsearchClient } from '@kbn/core/server';
 
 interface WrapScopedClusterClientOpts {

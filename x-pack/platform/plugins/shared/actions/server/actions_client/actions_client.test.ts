@@ -50,7 +50,7 @@ import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_cr
 import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { DEFAULT_USAGE_API_URL } from '../config';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {

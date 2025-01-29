@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { catchError, map } from 'rxjs';

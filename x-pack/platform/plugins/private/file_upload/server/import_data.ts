@@ -11,7 +11,7 @@ import type {
   IndicesCreateRequest,
   IndicesIndexSettings,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import { ImportResponse, ImportFailure, InputData, IngestPipelineWrapper } from '../common/types';
 

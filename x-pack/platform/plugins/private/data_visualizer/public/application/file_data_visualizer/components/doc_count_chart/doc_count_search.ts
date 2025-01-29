@@ -7,7 +7,7 @@
 
 import { lastValueFrom } from 'rxjs';
 
-import type estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type estypes from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';

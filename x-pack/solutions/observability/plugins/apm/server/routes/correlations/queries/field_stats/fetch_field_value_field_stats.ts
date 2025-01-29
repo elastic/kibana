@@ -10,7 +10,7 @@ import type {
   AggregationsAggregationContainer,
   AggregationsSamplerAggregate,
   AggregationsSingleBucketAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   CommonCorrelationsQueryParams,
   FieldValuePair,

@@ -16,7 +16,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { createTopNFunctions } from '@kbn/profiling-utils';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { percentToFactor } from '../../utils/percent_to_factor';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
 import type { RegisterServicesParams } from '../register_services';

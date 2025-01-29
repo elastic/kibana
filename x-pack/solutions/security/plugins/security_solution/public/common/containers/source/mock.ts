@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import { flatten } from 'lodash';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 

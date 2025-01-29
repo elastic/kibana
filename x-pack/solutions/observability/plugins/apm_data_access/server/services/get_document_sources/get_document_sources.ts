@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { RollupInterval } from '../../../common/rollup';
 import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { isDurationSummaryNotSupportedFilter } from '../../lib/helpers/transactions';
