@@ -7616,7 +7616,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stdio-dev-helpers@link:packages/kbn-stdio-dev-helpers":
+"@kbn/stdio-dev-helpers@link:src/dev/packages/stdio-dev-helpers":
   version "0.0.0"
   uid ""
 
