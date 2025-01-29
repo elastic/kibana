@@ -93,7 +93,7 @@ export const knowledgeBaseFieldMap: FieldMap = {
     type: 'semantic_text',
     array: false,
     required: false,
-    // inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+    inference_id: ASSISTANT_ELSER_INFERENCE_ID,
   },
   vector: {
     type: 'object',

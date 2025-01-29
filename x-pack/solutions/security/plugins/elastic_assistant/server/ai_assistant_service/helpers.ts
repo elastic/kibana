@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { getResourceName } from '.';
+import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
 import { GetElser } from '../types';
 
 /**
@@ -27,6 +28,79 @@ export const createGetElserId =
     // Force check to happen as internal user
     (await trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract).getELSER())
       .model_id;
+
+interface PipelineExistsParams {
+  esClient: ElasticsearchClient;
+  id: string;
+}
+
+/**
+ * Checks if the provided ingest pipeline exists in Elasticsearch
+ *
+ * @param params params
+ * @param params.esClient Elasticsearch client with privileges to check for ingest pipelines
+ * @param params.id ID of the ingest pipeline to check
+ *
+ * @returns Promise<boolean> indicating whether the pipeline exists
+ */
+export const pipelineExists = async ({ esClient, id }: PipelineExistsParams): Promise<boolean> => {
+  try {
+    const response = await esClient.ingest.getPipeline({
+      id,
+    });
+    return Object.keys(response).length > 0;
+  } catch (e) {
+    // The GET /_ingest/pipeline/{pipelineId} API returns an empty object w/ 404 Not Found.
+    return false;
+  }
+};
+
+interface CreatePipelineParams {
+  esClient: ElasticsearchClient;
+  id: string;
+}
+
+/**
+ * Create ingest pipeline for ELSER in Elasticsearch
+ *
+ * @param params params
+ * @param params.esClient Elasticsearch client with privileges to check for ingest pipelines
+ * @param params.id ID of the ingest pipeline
+ *
+ * @returns Promise<boolean> indicating whether the pipeline was created
+ */
+export const createPipeline = async ({ esClient, id }: CreatePipelineParams): Promise<boolean> => {
+  try {
+    const response = await esClient.ingest.putPipeline(
+      knowledgeBaseIngestPipeline({
+        id,
+      })
+    );
+
+    return response.acknowledged;
+  } catch (e) {
+    // TODO: log error or just use semantic_text already
+    return false;
+  }
+};
+
+interface DeletePipelineParams {
+  esClient: ElasticsearchClient;
+  id: string;
+}
+
+/**
+ * Delete ingest pipeline for ELSER in Elasticsearch
+ *
+ * @returns Promise<boolean> indicating whether the pipeline was created
+ */
+export const deletePipeline = async ({ esClient, id }: DeletePipelineParams): Promise<boolean> => {
+  const response = await esClient.ingest.deletePipeline({
+    id,
+  });
+
+  return response.acknowledged;
+};
 
 export const removeLegacyQuickPrompt = async (esClient: ElasticsearchClient) => {
   try {

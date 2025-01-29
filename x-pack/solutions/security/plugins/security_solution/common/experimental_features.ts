@@ -125,6 +125,11 @@ export const allowedExperimentalValues = Object.freeze({
   contentReferencesEnabled: false,
 
   /**
+   * Enables default inference endpoint for the AI Assistant
+   */
+  assistantDefaultInferenceEndpoint: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,

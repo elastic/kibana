@@ -590,6 +590,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
       attackDiscoveryAlertFiltering: config.experimentalFeatures.attackDiscoveryAlertFiltering,
       contentReferencesEnabled: config.experimentalFeatures.contentReferencesEnabled,
+      assistantDefaultInferenceEndpoint:
+        config.experimentalFeatures.assistantDefaultInferenceEndpoint,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

@@ -86,7 +86,7 @@ const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: Up
       { logger }
     );
   } catch (err) {
-    logger.error(`DATA STREAM Failed to PUT mapping for ${indexName}: ${err.message}`);
+    logger.error(`Failed to PUT mapping for ${indexName}: ${err.message}`);
     throw err;
   }
 };
