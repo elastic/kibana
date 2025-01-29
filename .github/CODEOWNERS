@@ -170,7 +170,7 @@ src/dev/packages/plugin-generator @elastic/kibana-operations
 src/dev/packages/plugin-helpers @elastic/kibana-operations
 src/dev/packages/relocate @elastic/kibana-core
 src/dev/packages/repo-file-maps @elastic/kibana-operations
-packages/kbn-repo-linter @elastic/kibana-operations
+src/dev/packages/repo-linter @elastic/kibana-operations
 packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations

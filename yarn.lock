@@ -6776,7 +6776,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-linter@link:packages/kbn-repo-linter":
+"@kbn/repo-linter@link:src/dev/packages/repo-linter":
   version "0.0.0"
   uid ""
 
