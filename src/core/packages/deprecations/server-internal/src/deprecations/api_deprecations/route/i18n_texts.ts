@@ -10,6 +10,7 @@
 import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 import type { DocLinksServiceSetup } from '@kbn/core/server';
+import type { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
@@ -40,7 +41,7 @@ export const getApiDeprecationMessage = (
   details: RouterDeprecatedApiDetails,
   apiUsageStats: CoreDeprecatedApiUsageStats,
   docLinks: DocLinksServiceSetup
-): string[] => {
+): Array<string | DeprecationDetailsMessage> => {
   const { routePath, routeMethod, routeDeprecationOptions } = details;
   if (!routeDeprecationOptions) {
     throw new Error(`Router "deprecated" param is missing for path "${routePath}".`);
@@ -52,7 +53,7 @@ export const getApiDeprecationMessage = (
   const wasResolvedBefore = totalMarkedAsResolved > 0;
   const routeWithMethod = `${routeMethod.toUpperCase()} ${routePath}`;
 
-  const messages = [
+  const messages: Array<string | DeprecationDetailsMessage> = [
     i18n.translate('core.deprecations.apiRouteDeprecation.apiCallsDetailsMessage', {
       defaultMessage:
         'The API "{routeWithMethod}" has been called {apiTotalCalls} times. The last call was on {apiLastCalledAt}.',
@@ -62,13 +63,16 @@ export const getApiDeprecationMessage = (
         apiLastCalledAt: moment(apiLastCalledAt).format('LLLL Z'),
       },
     }),
-    i18n.translate('core.deprecations.apiRouteDeprecation.enableDebugLogsMessage', {
-      defaultMessage:
-        'To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, see {enableDeprecationHttpDebugLogsLink}.',
-      values: {
-        enableDeprecationHttpDebugLogsLink: docLinks.links.logging.enableDeprecationHttpDebugLogs,
-      },
-    }),
+    {
+      type: 'markdown',
+      content: i18n.translate('core.deprecations.apiRouteDeprecation.enableDebugLogsMessage', {
+        defaultMessage:
+          'To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, [follow this link]({enableDeprecationHttpDebugLogsLink}).',
+        values: {
+          enableDeprecationHttpDebugLogsLink: docLinks.links.logging.enableDeprecationHttpDebugLogs,
+        },
+      }),
+    },
   ];
 
   if (wasResolvedBefore) {
