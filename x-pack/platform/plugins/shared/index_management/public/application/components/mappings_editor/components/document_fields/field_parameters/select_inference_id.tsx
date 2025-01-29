@@ -27,7 +27,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 
-import { useAddEndpoint } from '../../../../../hooks/use_add_endpoint';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
@@ -75,7 +74,6 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     docLinks,
     plugins: { share },
   } = useAppContext();
-  const { addInferenceEndpoint } = useAddEndpoint();
   const config = getFieldConfig('inference_id');
 
   const inferenceEndpointsPageLink = share?.url.locators
@@ -93,10 +91,8 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     (newEndpointId: string) => {
       resendRequest();
       setValue(newEndpointId);
-
-      setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
     },
-    [isInferenceFlyoutVisible, resendRequest, setValue]
+    [resendRequest, setValue]
   );
 
   const options: EuiSelectableOption[] = useMemo(() => {
@@ -282,11 +278,10 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
             <Suspense fallback={<EuiLoadingSpinner size="l" />}>
               <InferenceFlyoutWrapper
                 onFlyoutClose={onFlyoutClose}
-                onSubmitSuccess={onSubmitSuccess}
-                isEdit={false}
                 http={http}
                 toasts={toasts}
-                addInferenceEndpoint={addInferenceEndpoint}
+                isEdit={false}
+                onSubmitSuccess={onSubmitSuccess}
               />
             </Suspense>
           ) : null}

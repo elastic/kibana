@@ -7200,22 +7200,8 @@
             "text": "ObservabilityAIAssistantTelemetryEventType"
           },
           ".UserSentPromptInChat; payload: ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
-          },
-          " & { scopes: ",
-          {
-            "pluginId": "@kbn/ai-assistant-common",
-            "scope": "common",
-            "docId": "kibKbnAiAssistantCommonPluginApi",
-            "section": "def-common.AssistantScope",
-            "text": "AssistantScope"
-          },
-          "[]; }; } | { type: ",
+          "UserSentPrompt",
+          "; } | { type: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "public",
