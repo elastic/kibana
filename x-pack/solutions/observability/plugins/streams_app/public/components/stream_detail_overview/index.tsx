@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { isWiredStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isWiredStreamDefinition } from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
@@ -32,7 +32,6 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
 import { AssetImage } from '../asset_image';
-import { IngestStreamGetResponseWithName } from '../../types';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -40,11 +39,7 @@ const formatNumber = (val: number) => {
   });
 };
 
-export function StreamDetailOverview({
-  definition,
-}: {
-  definition?: IngestStreamGetResponseWithName;
-}) {
+export function StreamDetailOverview({ definition }: { definition?: IngestStreamGetResponse }) {
   const {
     dependencies: {
       start: {
@@ -274,7 +269,7 @@ export function StreamDetailOverview({
 
 const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
 
-function QuickLinks({ definition }: { definition?: IngestStreamGetResponseWithName }) {
+function QuickLinks({ definition }: { definition?: IngestStreamGetResponse }) {
   const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
 
   return (
@@ -285,7 +280,7 @@ function QuickLinks({ definition }: { definition?: IngestStreamGetResponseWithNa
   );
 }
 
-function ChildStreamList({ definition }: { definition?: IngestStreamGetResponseWithName }) {
+function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse }) {
   const {
     dependencies: {
       start: {

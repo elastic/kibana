@@ -10,6 +10,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
+  IngestStreamGetResponse,
   IngestStreamLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
@@ -23,7 +24,6 @@ import { StreamsAppPageBody } from '../streams_app_page_body';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 import { useKibana } from '../../hooks/use_kibana';
-import { IngestStreamGetResponseWithName } from '../../types';
 
 export interface EntityViewTab {
   name: string;
@@ -43,7 +43,7 @@ export function EntityDetailViewWithoutParams({
     displayName?: string;
     id: string;
   };
-  definition?: IngestStreamGetResponseWithName;
+  definition?: IngestStreamGetResponse;
 }) {
   const router = useStreamsAppRouter();
   useStreamsAppBreadcrumbs(() => {

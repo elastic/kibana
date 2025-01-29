@@ -8,16 +8,16 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
-import { IngestStreamGetResponseWithName } from '../../types';
 
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition?: IngestStreamGetResponseWithName;
+  definition?: IngestStreamGetResponse;
 }) {
   const [query, setQuery] = useState('');
 
