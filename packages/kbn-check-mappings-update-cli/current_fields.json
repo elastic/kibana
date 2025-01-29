@@ -317,15 +317,10 @@
     "apiKey"
   ],
   "entity-engine-status": [
-    "delay",
-    "docsPerSecond",
     "fieldHistoryLength",
     "filter",
-    "frequency",
     "indexPattern",
-    "lookbackPeriod",
     "status",
-    "timeout",
     "type"
   ],
   "epm-packages": [
