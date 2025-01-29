@@ -1440,7 +1440,7 @@
     "@kbn/eslint-plugin-i18n": "link:src/dev/packages/eslint-plugin-i18n",
     "@kbn/eslint-plugin-imports": "link:src/dev/packages/eslint-plugin-imports",
     "@kbn/eslint-plugin-telemetry": "link:src/dev/packages/eslint-plugin-telemetry",
-    "@kbn/expect": "link:packages/kbn-expect",
+    "@kbn/expect": "link:src/dev/packages/expect",
     "@kbn/failed-test-reporter-cli": "link:packages/kbn-failed-test-reporter-cli",
     "@kbn/find-used-node-modules": "link:packages/kbn-find-used-node-modules",
     "@kbn/ftr-common-functional-services": "link:packages/kbn-ftr-common-functional-services",

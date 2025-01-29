@@ -47,7 +47,7 @@ paths-ignore:
   - src/dev/packages/es
   - src/dev/packages/es-archiver
   - packages/kbn-eslint-*
-  - packages/kbn-expect
+  - src/dev/packages/expect
   - packages/kbn-failed-test-reporter-cli
   - packages/kbn-find-used-node-modules
   - packages/kbn-ftr-*

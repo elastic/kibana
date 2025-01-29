@@ -133,7 +133,7 @@ src/dev/packages/eslint-plugin-eslint @elastic/kibana-operations
 src/dev/packages/eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
 src/dev/packages/eslint-plugin-imports @elastic/kibana-operations
 src/dev/packages/eslint-plugin-telemetry @elastic/obs-knowledge-team
-packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/expect @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa

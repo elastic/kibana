@@ -5664,7 +5664,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expect@link:packages/kbn-expect":
+"@kbn/expect@link:src/dev/packages/expect":
   version "0.0.0"
   uid ""
 
