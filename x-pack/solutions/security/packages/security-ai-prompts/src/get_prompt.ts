@@ -19,6 +19,7 @@ import { promptSavedObjectType } from './saved_object_mappings';
  * @param actionsClient - actions client
  * @param connector - connector, provide if available. No need to provide model and provider in this case
  * @param connectorId - connector id
+ * @param localPrompts - local prompts object
  * @param model - model. No need to provide if connector provided
  * @param promptGroupId - feature id, should be common across promptIds
  * @param promptIds - prompt ids with shared promptGroupId
@@ -79,6 +80,7 @@ export const getPromptsByGroupId = async ({
  * @param actionsClient - actions client
  * @param connector - connector, provide if available. No need to provide model and provider in this case
  * @param connectorId - connector id
+ * @param localPrompts - local prompts object
  * @param model - model. No need to provide if connector provided
  * @param promptId - prompt id
  * @param promptGroupId - feature id, should be common across promptIds
