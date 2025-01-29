@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -30,8 +31,9 @@ export async function snoozeRule(
 ): Promise<void> {
   try {
     snoozeRuleParamsSchema.validate({ id });
+    ruleSnoozeScheduleSchema.validate({ ...snoozeSchedule });
   } catch (error) {
-    throw Boom.badRequest(`Error validating snooze params - ${error.message}`);
+    throw Boom.badRequest(`Error validating snooze - ${error.message}`);
   }
   const snoozeDateValidationMsg = validateSnoozeStartDate(snoozeSchedule.rRule.dtstart);
   if (snoozeDateValidationMsg) {

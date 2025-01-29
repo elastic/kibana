@@ -14,6 +14,8 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
@@ -28,6 +30,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 import {
   NAMESPACE_AGNOSTIC_TYPE,
@@ -61,6 +64,7 @@ describe('#bulkGet', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -89,6 +93,7 @@ describe('#bulkGet', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -106,6 +111,9 @@ describe('#bulkGet', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -413,6 +421,32 @@ describe('#bulkGet', () => {
         expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
         expectMigrationArgs({ id: obj1.id }, true, 1);
         expectMigrationArgs({ id: obj2.id }, true, 2);
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeBulkGet', async () => {
+        const response = getMockMgetResponse(registry, [obj1, obj2]);
+        client.mget.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+
+        await bulkGet(repository, [obj1, obj2]);
+
+        expect(securityExtension.authorizeBulkGet).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: expect.arrayContaining([
+              expect.objectContaining({
+                id: '6.0.0-alpha1',
+                name: 'Testing',
+              }),
+              expect.objectContaining({
+                id: 'logstash-*',
+                name: 'Testing',
+              }),
+            ]),
+          })
+        );
       });
     });
   });

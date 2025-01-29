@@ -8,5 +8,5 @@
 export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_store:field_retention:enrichment';
 export const VERSION = '1.0.0';
-export const INTERVAL = '1h';
+export const DEFAULT_INTERVAL = '1h';
 export const TIMEOUT = '10m';
