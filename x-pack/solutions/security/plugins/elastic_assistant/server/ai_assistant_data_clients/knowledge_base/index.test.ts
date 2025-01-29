@@ -69,7 +69,6 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       ml,
       getElserId: getElserId.mockResolvedValue('elser-id'),
       getIsKBSetupInProgress: mockGetIsKBSetupInProgress.mockReturnValue(false),
-      ingestPipelineResourceName: 'something',
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
     };

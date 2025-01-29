@@ -59,7 +59,6 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   ml: MlPluginSetup;
   getElserId: GetElser;
   getIsKBSetupInProgress: () => boolean;
-  ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
 }

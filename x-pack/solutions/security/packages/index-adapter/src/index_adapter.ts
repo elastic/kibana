@@ -25,6 +25,7 @@ import {
 export interface IndexAdapterParams {
   kibanaVersion: string;
   totalFieldsLimit?: number;
+  writeIndexOnly?: boolean;
 }
 export type SetComponentTemplateParams = GetComponentTemplateOpts;
 export type SetIndexTemplateParams = Omit<
@@ -98,7 +99,7 @@ export class IndexAdapter {
     };
   }
 
-  protected async installTemplates(params: InstallParams) {
+  public async installTemplates(params: InstallParams) {
     const { logger, pluginStop$, tasksTimeoutMs } = params;
     const esClient = await params.esClient;
     const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });

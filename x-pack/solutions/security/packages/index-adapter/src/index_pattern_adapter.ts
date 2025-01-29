@@ -13,10 +13,12 @@ export type InstallIndex = (indexSuffix: string) => Promise<void>;
 export class IndexPatternAdapter extends IndexAdapter {
   protected installationPromises: Map<string, Promise<void>>;
   protected installIndexPromise?: Promise<InstallIndex>;
+  protected writeIndexOnly: boolean;
 
   constructor(protected readonly prefix: string, options: IndexAdapterParams) {
     super(`${prefix}-*`, options); // make indexTemplate `indexPatterns` match all index names
     this.installationPromises = new Map();
+    this.writeIndexOnly = options.writeIndexOnly ?? false;
   }
 
   /** Method to create/update the templates, update existing indices and setup internal state for the adapter. */
@@ -40,6 +42,7 @@ export class IndexPatternAdapter extends IndexAdapter {
         esClient,
         logger,
         totalFieldsLimit: this.totalFieldsLimit,
+        writeIndexOnly: this.writeIndexOnly,
       }),
       `update specific indices`
     );

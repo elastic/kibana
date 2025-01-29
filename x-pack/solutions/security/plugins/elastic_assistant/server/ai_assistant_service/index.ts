@@ -13,6 +13,11 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import {
+  IndicesGetFieldMappingResponse,
+  IndicesIndexSettings,
+} from '@elastic/elasticsearch/lib/api/types';
+import { omit } from 'lodash';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -29,19 +34,18 @@ import { conversationsFieldMap } from '../ai_assistant_data_clients/conversation
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import {
+  ASSISTANT_ELSER_INFERENCE_ID,
+  ELASTICSEARCH_ELSER_INFERENCE_ID,
+  knowledgeBaseFieldMap,
+} from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
-import {
-  createGetElserId,
-  createPipeline,
-  ensureProductDocumentationInstalled,
-  pipelineExists,
-} from './helpers';
+import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -78,6 +82,8 @@ export type CreateDataStream = (params: {
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
+  settings?: IndicesIndexSettings;
+  writeIndexOnly?: boolean;
 }) => DataStreamSpacesAdapter;
 
 export class AIAssistantService {
@@ -108,6 +114,11 @@ export class AIAssistantService {
       resource: 'knowledgeBase',
       kibanaVersion: options.kibanaVersion,
       fieldMap: knowledgeBaseFieldMap,
+      settings: {
+        // force new semantic_text field behavior
+        'index.mapping.semantic_text.use_legacy_format': false,
+      },
+      writeIndexOnly: true,
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
@@ -158,35 +169,28 @@ export class AIAssistantService {
     this.isKBSetupInProgress = isInProgress;
   }
 
-  private createDataStream: CreateDataStream = ({ resource, kibanaVersion, fieldMap }) => {
+  private createDataStream: CreateDataStream = ({
+    resource,
+    kibanaVersion,
+    fieldMap,
+    settings,
+    writeIndexOnly,
+  }) => {
     const newDataStream = new DataStreamSpacesAdapter(this.resourceNames.aliases[resource], {
       kibanaVersion,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+      writeIndexOnly,
     });
 
     newDataStream.setComponentTemplate({
       name: this.resourceNames.componentTemplate[resource],
       fieldMap,
+      settings,
     });
 
     newDataStream.setIndexTemplate({
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
-      // Apply `default_pipeline` if pipeline exists for resource
-      ...(resource in this.resourceNames.pipelines &&
-      // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
-      !(resource === 'knowledgeBase')
-        ? {
-            template: {
-              settings: {
-                'index.default_pipeline':
-                  this.resourceNames.pipelines[
-                    resource as keyof typeof this.resourceNames.pipelines
-                  ],
-              },
-            },
-          }
-        : {}),
     });
 
     return newDataStream;
@@ -209,29 +213,85 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
-      await this.knowledgeBaseDataStream.install({
-        esClient,
-        logger: this.options.logger,
-        pluginStop$: this.options.pluginStop$,
+      const knowledgeBaseDataStreamExists = await esClient.indices.getDataStream({
+        name: this.knowledgeBaseDataStream.name,
       });
 
-      // Note: Pipeline creation can be removed in favor of semantic_text
-      const pipelineCreated = await pipelineExists({
-        esClient,
-        id: this.resourceNames.pipelines.knowledgeBase,
-      });
-      // ensure pipeline is re-created for those upgrading
-      // pipeline is noop now, so if one does not exist we do not need one
-      if (pipelineCreated) {
-        this.options.logger.debug(
-          `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
-        );
-        const response = await createPipeline({
-          esClient,
-          id: this.resourceNames.pipelines.knowledgeBase,
+      console.error('knowledgeBaseDataStreamExists', knowledgeBaseDataStreamExists);
+
+      // update component template for semantic_text field
+      // rollover
+      let mappings: IndicesGetFieldMappingResponse = {};
+      try {
+        mappings = await esClient.indices.getFieldMapping({
+          index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+          fields: ['semantic_text'],
+        });
+      } catch (error) {}
+
+      const isUsingDedicatedInferenceEndpoint =
+        Object.values(mappings)[0]?.mappings?.semantic_text?.mapping?.semantic_text
+          ?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
+
+      console.error('isUsingDedicatedInferenceEndpoint', isUsingDedicatedInferenceEndpoint);
+
+      if (isUsingDedicatedInferenceEndpoint) {
+        const currentDataStream = this.createDataStream({
+          resource: 'knowledgeBase',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: {
+            ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+            semantic_text: {
+              type: 'semantic_text',
+              array: false,
+              required: false,
+              inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+              search_inference_id: ELASTICSEARCH_ELSER_INFERENCE_ID,
+            },
+          },
         });
 
-        this.options.logger.debug(`Installed ingest pipeline: ${response}`);
+        await currentDataStream.install({
+          esClient,
+          logger: this.options.logger,
+          pluginStop$: this.options.pluginStop$,
+        });
+
+        const newDS = this.createDataStream({
+          resource: 'knowledgeBase',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: {
+            ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+            semantic_text: {
+              type: 'semantic_text',
+              array: false,
+              required: false,
+            },
+          },
+        });
+
+        await newDS.installTemplates({
+          esClient,
+          logger: this.options.logger,
+          pluginStop$: this.options.pluginStop$,
+        });
+
+        const indexNames = (
+          await esClient.indices.getDataStream({ name: newDS.name })
+        ).data_streams.map((ds) => ds.name);
+
+        try {
+          const rollover = await Promise.all(
+            indexNames.map((indexName) => esClient.indices.rollover({ alias: indexName }))
+          );
+          console.error('rollover', rollover);
+        } catch (e) {}
+      } else {
+        await this.knowledgeBaseDataStream.install({
+          esClient,
+          logger: this.options.logger,
+          pluginStop$: this.options.pluginStop$,
+        });
       }
 
       await this.promptsDataStream.install({
@@ -300,9 +360,6 @@ export class AIAssistantService {
       anonymizationFields: getResourceName('index-template-anonymization-fields'),
       attackDiscovery: getResourceName('index-template-attack-discovery'),
       defendInsights: getResourceName('index-template-defend-insights'),
-    },
-    pipelines: {
-      knowledgeBase: getResourceName('ingest-pipeline-knowledge-base'),
     },
   };
 
@@ -402,7 +459,6 @@ export class AIAssistantService {
       currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       indexPatternsResourceName: this.resourceNames.aliases.knowledgeBase,
-      ingestPipelineResourceName: this.resourceNames.pipelines.knowledgeBase,
       getElserId: this.getElserId,
       getIsKBSetupInProgress: this.getIsKBSetupInProgress.bind(this),
       kibanaVersion: this.options.kibanaVersion,
