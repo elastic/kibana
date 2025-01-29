@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment-timezone';
 import type { Options } from './types';
 
 export function sanitizeOptions(opts: Options) {
@@ -25,6 +26,10 @@ export function sanitizeOptions(opts: Options) {
     throw new Error('Cannot create RRule: dtstart is an invalid date');
   }
 
+  if (moment.tz.zone(options.tzid) == null) {
+    throw new Error('Cannot create RRule: tzid is invalid');
+  }
+
   if (options.until && isNaN(options.until.getTime())) {
     throw new Error('Cannot create RRule: until is an invalid date');
   }
@@ -39,7 +44,6 @@ export function sanitizeOptions(opts: Options) {
     }
   }
 
-  // Omit invalid options
   if (options.bymonth) {
     // Only months between 1 and 12 are valid
     options.bymonth = options.bymonth.filter(

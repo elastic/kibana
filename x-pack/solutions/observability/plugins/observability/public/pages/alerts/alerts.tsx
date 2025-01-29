@@ -9,8 +9,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BoolQuery, Filter } from '@kbn/es-query';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TableUpdateHandlerArgs } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
@@ -77,6 +79,7 @@ function InternalAlertsPage() {
     },
     uiSettings,
   } = kibanaServices;
+  const { onPageReady } = usePerformanceContext();
   const { toasts } = notifications;
   const {
     query: {
@@ -93,6 +96,21 @@ function InternalAlertsPage() {
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
   const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
+
+  const onUpdate = ({ isLoading, totalCount }: TableUpdateHandlerArgs) => {
+    if (!isLoading) {
+      onPageReady({
+        customMetrics: {
+          key1: 'total_alert_count',
+          value1: totalCount,
+        },
+        meta: {
+          rangeFrom: alertSearchBarStateProps.rangeFrom,
+          rangeTo: alertSearchBarStateProps.rangeTo,
+        },
+      });
+    }
+  };
 
   useEffect(() => {
     return setScreenContext?.({
@@ -299,6 +317,7 @@ function InternalAlertsPage() {
                       initialPageSize={ALERTS_PER_PAGE}
                       cellContext={{ observabilityRuleTypeRegistry }}
                       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                      onUpdate={onUpdate}
                     />
                   );
                 }}

@@ -150,7 +150,10 @@ export async function fetchTriggeredAlertsHistory({
                 : []),
               {
                 range: {
-                  [ALERT_TIME_RANGE]: dateRange,
+                  [ALERT_TIME_RANGE]: {
+                    gte: dateRange.from,
+                    lte: dateRange.to,
+                  },
                 },
               },
             ],
