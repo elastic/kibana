@@ -8,7 +8,7 @@
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { NetworkOverviewStrategyResponse } from '../../../../common/search_strategy';
 import type { FormattedStat, StatGroup } from '../types';
@@ -160,7 +160,7 @@ const NetworkStatsContainer = styled.div`
 `;
 const MoveItLeftTitle = styled.div`
   margin-left: 24px;
-  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+  @media only screen and (min-width: ${({ theme: { euiTheme } }) => euiTheme.breakpoint.m}) {
     max-width: 40px;
   }
 `;
@@ -169,7 +169,7 @@ const MoveItLeft = styled.div`
 `;
 
 const NoMarginTopFlexItem = styled(EuiFlexItem)`
-  @media only screen and (max-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+  @media only screen and (max-width: ${({ theme: { euiTheme } }) => euiTheme.breakpoint.m}) {
     margin-top: -10px !important;
   }
 `;
