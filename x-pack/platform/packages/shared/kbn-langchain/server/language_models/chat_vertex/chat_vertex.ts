@@ -56,7 +56,6 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
     const client = this.buildClient(props);
-    this.telemetryMetadata = props.telemetryMetadata;
     this.connection = new ActionsClientChatConnection(
       {
         ...this,
@@ -65,7 +64,8 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
       client,
       false,
       actionsClient,
-      connectorId
+      connectorId,
+      props?.telemetryMetadata
     );
   }
 
