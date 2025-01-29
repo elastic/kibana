@@ -7,20 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage, expect } from '..';
+import { ScoutPage } from '..';
 
 export class MapsPage {
+  // see: https://github.com/elastic/kibana/pull/204607/files#r1932558888
+  readonly directNavigationOrigin = 'maps/map';
+
   constructor(private readonly page: ScoutPage) {}
 
   async gotoNewMap() {
-    await this.page.gotoApp('maps/map');
-    await this.expectMapsListingPage(false);
-  }
-
-  async expectMapsListingPage(visible: boolean = true) {
-    const listingPage = this.page.getByTestId(`MapsLandingPage`);
-
-    if (visible) await expect(listingPage, 'Maps Landing page should be displayed').toBeVisible();
-    else await expect(listingPage, 'Maps Landing page should NOT be displayed').not.toBeVisible();
+    await this.page.gotoApp(this.directNavigationOrigin);
   }
 }
