@@ -22,8 +22,6 @@ import {
   EuiSwitch,
   EuiHealth,
   EuiLoadingSpinner,
-  EuiToolTip,
-  EuiBetaBadge,
   EuiTabs,
   EuiTab,
   EuiButtonEmpty,
@@ -46,7 +44,7 @@ import {
   useEntityStoreStatus,
   useStopEntityEngineMutation,
 } from '../components/entity_store/hooks/use_entity_store';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
+
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
@@ -150,15 +148,10 @@ export const EntityStoreManagementPage = () => {
       <EuiPageHeader
         data-test-subj="entityStoreManagementPage"
         pageTitle={
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title"
-              defaultMessage="Entity Store"
-            />{' '}
-            <EuiToolTip content={TECHNICAL_PREVIEW_TOOLTIP}>
-              <EuiBetaBadge label={TECHNICAL_PREVIEW} />
-            </EuiToolTip>
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title"
+            defaultMessage="Entity Store"
+          />
         }
         alignItems="center"
         rightSideItems={
