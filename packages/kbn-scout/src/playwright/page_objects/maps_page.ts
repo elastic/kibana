@@ -13,7 +13,7 @@ export class MapsPage {
   constructor(private readonly page: ScoutPage) {}
 
   async gotoNewMap() {
-    await this.page.gotoApp('maps');
+    await this.page.gotoApp('maps/map');
     await this.expectMapsListingPage(false);
   }
 
