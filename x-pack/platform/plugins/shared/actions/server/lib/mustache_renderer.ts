@@ -114,6 +114,7 @@ function addToStringDeep(object: unknown): void {
   if (Array.isArray(object)) {
     // instead, add an asJSON()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (object as any).asJSON = () => JSON.stringify(object);
     object.forEach((element) => addToStringDeep(element));
     return;

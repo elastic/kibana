@@ -21,9 +21,14 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import ESQLEditor from '@kbn/esql-editor';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { getIndexPatternFromESQLQuery, getESQLResults } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getESQLResults,
+  appendStatsByToQuery,
+  getValuesFromQueryField,
+} from '@kbn/esql-utils';
+import { ESQLLangEditor } from '../../../create_editor';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
   Header,
@@ -35,9 +40,7 @@ import {
 } from './shared_form_components';
 import {
   getRecurrentVariableName,
-  getValuesFromQueryField,
   getFlyoutStyling,
-  appendStatsByToQuery,
   areValuesIntervalsValid,
   validateVariableName,
 } from './helpers';
@@ -366,7 +369,7 @@ export function ValueControlForm({
               })}
               fullWidth
             >
-              <ESQLEditor
+              <ESQLLangEditor
                 query={{ esql: valuesQuery }}
                 onTextLangQueryChange={(q) => {
                   setValuesQuery(q.esql);
