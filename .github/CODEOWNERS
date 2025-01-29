@@ -98,7 +98,7 @@ packages/core/ui-settings/core-ui-settings-server-mocks @elastic/appex-sharedux
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
 src/dev/packages/ambient-common-types @elastic/kibana-operations
 src/dev/packages/ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-ambient-storybook-types @elastic/kibana-operations
+src/dev/packages/ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
