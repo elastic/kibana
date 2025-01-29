@@ -66,7 +66,7 @@
     "xpack.logsShared": "platform/plugins/shared/logs_shared",
     "xpack.fleet": "platform/plugins/shared/fleet",
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
-    "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
+    "xpack.automaticImport": "platform/plugins/shared/automatic_import",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.investigate": "solutions/observability/plugins/investigate",
