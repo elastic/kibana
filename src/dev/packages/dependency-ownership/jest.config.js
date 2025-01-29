@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-dependency-ownership'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/dependency-ownership'],
 };

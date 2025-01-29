@@ -5380,7 +5380,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dependency-ownership@link:packages/kbn-dependency-ownership":
+"@kbn/dependency-ownership@link:src/dev/packages/dependency-ownership":
   version "0.0.0"
   uid ""
 

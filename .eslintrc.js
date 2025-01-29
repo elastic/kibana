@@ -2055,7 +2055,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-dependency-ownership/**/*.{ts,tsx}'],
+      files: ['src/dev/packages/dependency-ownership/**/*.{ts,tsx}'],
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',
