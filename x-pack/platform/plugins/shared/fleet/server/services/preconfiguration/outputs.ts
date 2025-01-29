@@ -204,6 +204,14 @@ async function hashSecrets(output: PreconfiguredOutput) {
         service_token: serviceToken,
       };
     }
+    if (typeof remoteESOutput.secrets?.ssl?.key === 'string') {
+      const key = await hashSecret(remoteESOutput.secrets?.ssl?.key);
+      return {
+        ssl: {
+          key,
+        },
+      };
+    }
   }
 
   return undefined;

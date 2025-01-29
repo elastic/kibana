@@ -38,7 +38,9 @@ function ensureNoDuplicateSecrets(output: Partial<Output>) {
     throw Boom.badRequest('Cannot specify both password and secrets.password');
   }
   if (
-    (output.type === outputType.Kafka || output.type === outputType.Logstash) &&
+    (output.type === outputType.Kafka ||
+      output.type === outputType.Logstash ||
+      output.type === outputType.RemoteElasticsearch) &&
     output.ssl?.key &&
     output.secrets?.ssl?.key
   ) {
@@ -67,7 +69,7 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   return response.ok({ body });
 };
 
-export const getOneOuputHandler: RequestHandler<
+export const getOneOutputHandler: RequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;

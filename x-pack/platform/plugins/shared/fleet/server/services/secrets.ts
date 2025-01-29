@@ -333,6 +333,12 @@ function getOutputSecretPaths(
         value: remoteESOutput.secrets.service_token,
       });
     }
+    if (remoteESOutput?.secrets?.ssl?.key) {
+      outputSecretPaths.push({
+        path: 'secrets.ssl.key',
+        value: remoteESOutput.secrets.ssl.key,
+      });
+    }
   }
 
   return outputSecretPaths;
@@ -364,7 +370,9 @@ export function getOutputSecretReferences(output: Output): PolicySecretReference
   const outputSecretPaths: PolicySecretReference[] = [];
 
   if (
-    (output.type === 'kafka' || output.type === 'logstash') &&
+    (output.type === 'kafka' ||
+      output.type === 'logstash' ||
+      output.type === 'remote_elasticsearch') &&
     typeof output.secrets?.ssl?.key === 'object'
   ) {
     outputSecretPaths.push({

@@ -65,6 +65,9 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   service_token?: string | null;
   secrets?: {
     service_token?: OutputSecret;
+    ssl?: {
+      key?: OutputSecret;
+    };
   };
 }
 

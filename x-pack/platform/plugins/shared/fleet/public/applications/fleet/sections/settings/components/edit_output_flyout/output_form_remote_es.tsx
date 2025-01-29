@@ -6,7 +6,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiCallOut, EuiCodeBlock, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiFieldText,
+  EuiSpacer,
+  EuiTextArea,
+  EuiFormRow,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -25,6 +32,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     serviceToken: false,
+    sslKey: false,
   });
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
@@ -37,7 +45,12 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
         inputs.serviceTokenSecretInput.setValue(inputs.serviceTokenInput.value);
         inputs.serviceTokenInput.clear();
-        setIsConvertedToSecret({ serviceToken: true });
+        setIsConvertedToSecret({ ...isConvertedToSecret, serviceToken: true });
+      }
+      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+        inputs.sslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
       }
     }
   }, [
@@ -47,15 +60,27 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     isFirstLoad,
     setIsFirstLoad,
     isConvertedToSecret,
+    inputs.sslKeyInput,
+    inputs.sslKeySecretInput,
   ]);
 
-  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+  const onToggleServiceTokenSecretAndClearValue = (secretEnabled: boolean) => {
     if (secretEnabled) {
       inputs.serviceTokenInput.clear();
     } else {
       inputs.serviceTokenSecretInput.setValue('');
     }
     setIsConvertedToSecret({ ...isConvertedToSecret, serviceToken: false });
+    onToggleSecretStorage(secretEnabled);
+  };
+
+  const onToggleSSLSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.sslKeyInput.clear();
+    } else {
+      inputs.sslKeySecretInput.setValue('');
+    }
+    setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: false });
     onToggleSecretStorage(secretEnabled);
   };
 
@@ -87,7 +112,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           }
           {...inputs.serviceTokenInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
+          onToggleSecretStorage={onToggleServiceTokenSecretAndClearValue}
         >
           <EuiFieldText
             fullWidth
@@ -111,7 +136,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           cancelEdit={inputs.serviceTokenSecretInput.cancelEdit}
           useSecretsStorage={useSecretsStorage}
           isConvertedToSecret={isConvertedToSecret.serviceToken}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
+          onToggleSecretStorage={onToggleServiceTokenSecretAndClearValue}
         >
           <EuiFieldText
             data-test-subj="serviceTokenSecretInput"
@@ -121,6 +146,97 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
               {
                 defaultMessage: 'Specify service token',
+              }
+            )}
+          />
+        </SecretFormRow>
+      )}
+      <EuiSpacer size="m" />
+      <MultiRowInput
+        placeholder={i18n.translate(
+          'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
+          {
+            defaultMessage: 'Specify certificate authority',
+          }
+        )}
+        label={i18n.translate(
+          'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+          {
+            defaultMessage: 'Server SSL certificate authorities (optional)',
+          }
+        )}
+        multiline={true}
+        sortable={false}
+        {...inputs.sslCertificateAuthoritiesInput.props}
+      />
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.sslCertificateInputLabel"
+            defaultMessage="Client SSL certificate"
+          />
+        }
+        {...inputs.sslCertificateInput.formRowProps}
+      >
+        <EuiTextArea
+          fullWidth
+          rows={5}
+          {...inputs.sslCertificateInput.props}
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
+            {
+              defaultMessage: 'Specify ssl certificate',
+            }
+          )}
+        />
+      </EuiFormRow>
+      {!useSecretsStorage ? (
+        <SecretFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
+              defaultMessage="Client SSL certificate key"
+            />
+          }
+          {...inputs.sslKeyInput.formRowProps}
+          useSecretsStorage={useSecretsStorage}
+          onToggleSecretStorage={onToggleSSLSecretAndClearValue}
+        >
+          <EuiTextArea
+            fullWidth
+            rows={5}
+            {...inputs.sslKeyInput.props}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+              {
+                defaultMessage: 'Specify certificate key',
+              }
+            )}
+          />
+        </SecretFormRow>
+      ) : (
+        <SecretFormRow
+          fullWidth
+          title={i18n.translate('xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle', {
+            defaultMessage: 'Client SSL certificate key',
+          })}
+          {...inputs.sslKeySecretInput.formRowProps}
+          useSecretsStorage={useSecretsStorage}
+          isConvertedToSecret={isConvertedToSecret?.sslKey}
+          onToggleSecretStorage={onToggleSSLSecretAndClearValue}
+          cancelEdit={inputs.sslKeySecretInput.cancelEdit}
+        >
+          <EuiTextArea
+            fullWidth
+            rows={5}
+            {...inputs.sslKeySecretInput.props}
+            data-test-subj="sslKeySecretInput"
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',
+              {
+                defaultMessage: 'Specify certificate key',
               }
             )}
           />

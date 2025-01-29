@@ -666,7 +666,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         additionalYamlConfigValid &&
         nameInputValid &&
         ((serviceTokenInput.value && serviceTokenValid) ||
-          (serviceTokenSecretInput.value && serviceTokenSecretValid))
+          (serviceTokenSecretInput.value && serviceTokenSecretValid)) &&
+        sslCertificateValid &&
+        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
       );
     } else {
       // validate ES
@@ -929,6 +931,21 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 }),
               proxy_id: proxyIdValue,
               ...shipperParams,
+              ssl: {
+                certificate: sslCertificateInput.value,
+                key: sslKeyInput.value || undefined,
+                certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                  (val) => val !== ''
+                ),
+              },
+              ...(!sslKeyInput.value &&
+                sslKeySecretInput.value && {
+                  secrets: {
+                    ssl: {
+                      key: sslKeySecretInput.value,
+                    },
+                  },
+                }),
             } as NewRemoteElasticsearchOutput;
           case outputType.Elasticsearch:
           default:
