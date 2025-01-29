@@ -9,6 +9,7 @@
 
 import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
@@ -37,7 +38,8 @@ export const getApiDeprecationTitle = (details: RouterDeprecatedApiDetails) => {
 
 export const getApiDeprecationMessage = (
   details: RouterDeprecatedApiDetails,
-  apiUsageStats: CoreDeprecatedApiUsageStats
+  apiUsageStats: CoreDeprecatedApiUsageStats,
+  docLinks: DocLinksServiceSetup
 ): string[] => {
   const { routePath, routeMethod, routeDeprecationOptions } = details;
   if (!routeDeprecationOptions) {
@@ -58,6 +60,13 @@ export const getApiDeprecationMessage = (
         routeWithMethod,
         apiTotalCalls,
         apiLastCalledAt: moment(apiLastCalledAt).format('LLLL Z'),
+      },
+    }),
+    i18n.translate('core.deprecations.apiRouteDeprecation.enableDebugLogsMessage', {
+      defaultMessage:
+        'To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, see {enableDeprecationHttpDebugLogsLink}.',
+      values: {
+        enableDeprecationHttpDebugLogsLink: docLinks.links.logging.enableDeprecationHttpDebugLogs,
       },
     }),
   ];
