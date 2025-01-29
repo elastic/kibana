@@ -79,7 +79,7 @@ paths-ignore:
   - src/dev/packages/telemetry-tools
   - src/dev/packages/test
   - packages/kbn-test-*
-  - packages/kbn-tooling-log
+  - src/dev/packages/tooling-log
   - packages/kbn-ts-*
   - packages/kbn-web-worker-stub
   - packages/kbn-yarn-lock-validator

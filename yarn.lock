@@ -7756,7 +7756,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tooling-log@link:packages/kbn-tooling-log":
+"@kbn/tooling-log@link:src/dev/packages/tooling-log":
   version "0.0.0"
   uid ""
 
