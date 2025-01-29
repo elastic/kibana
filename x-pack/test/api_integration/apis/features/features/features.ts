@@ -131,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
             'rulesSettings',
             'uptime',
             'searchInferenceEndpoints',
+            'searchSynonyms',
             'searchPlayground',
             'siemV2',
             'slo',

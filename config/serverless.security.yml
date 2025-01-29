@@ -10,6 +10,7 @@ xpack.observabilityAIAssistant.enabled: false
 xpack.search.notebooks.enabled: false
 xpack.searchPlayground.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
+xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -154,6 +155,6 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 # Experimental Security Solution features
 
 # These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental: 
+xpack.securitySolution.enableExperimental:
   - entityStoreDisabled
   - siemMigrationsDisabled
