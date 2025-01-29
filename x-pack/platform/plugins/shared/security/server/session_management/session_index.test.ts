@@ -127,12 +127,9 @@ describe('Session index', () => {
     it('does not create index if index exists', async () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
-      mockElasticsearchClient.indices.exists.mockImplementation(async ({ index }) => {
-        if (index === indexName) {
-          return true;
-        }
-        return false;
-      });
+      mockElasticsearchClient.indices.exists.mockImplementation(
+        async ({ index }) => index === indexName
+      );
 
       await sessionIndex.initialize();
 
