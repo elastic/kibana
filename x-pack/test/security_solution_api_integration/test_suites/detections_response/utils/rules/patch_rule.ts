@@ -21,7 +21,7 @@ import {
  * @param rule The rule to create
  */
 export const patchRule = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   patchedRule: RulePatchProps
 ): Promise<RuleResponse> => {

@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext): void => {
     // it's been skipped since it was originally introduced in
     // https://github.com/elastic/kibana/pull/85690. Created ticket to track skip.
     // https://github.com/elastic/kibana/issues/179593
-    it.skip('deletes the underlying migration task', async () => {
+    it('deletes the underlying migration task', async () => {
       await waitFor(
         async () => {
           const {

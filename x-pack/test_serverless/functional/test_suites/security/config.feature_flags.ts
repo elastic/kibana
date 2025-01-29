@@ -18,11 +18,7 @@ export default createTestConfig({
   },
   suiteTags: { exclude: ['skipSvlSec'] },
   // add feature flags
-  kbnServerArgs: [
-    `--xpack.security.roleManagementEnabled=true`,
-    `--xpack.cloud.base_url='https://cloud.elastic.co'`,
-    `--xpack.cloud.organization_url='/account/members'`,
-  ],
+  kbnServerArgs: [],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 

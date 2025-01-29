@@ -48,6 +48,15 @@ export default function ({ getService }: FtrProviderContext) {
       );
     };
 
+    before(async () => {
+      // clean up all api keys
+      const { body } = await esSupertest.get(`/_security/api_key`).query({ with_limited_by: true });
+      const apiKeys = body.api_keys || [];
+      for (const apiKey of apiKeys) {
+        await esSupertest.delete(`/_security/api_key`).send({ ids: [apiKey.id] });
+      }
+    });
+
     describe('[PUT] /internal/uptime/service/enablement', () => {
       beforeEach(async () => {
         const apiKeys = await getApiKeys();
@@ -96,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
               canEnable: false,
               isEnabled: false,
               isValidApiKey: false,
+              isServiceAllowed: true,
             });
           } finally {
             await security.user.delete(username);
@@ -142,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
           const validApiKeys = await getApiKeys();
           expect(validApiKeys.length).eql(1);
@@ -190,6 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys = await getApiKeys();
@@ -209,6 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys2 = await getApiKeys();
@@ -244,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          kibanaServer.savedObjects.create({
+          await kibanaServer.savedObjects.create({
             id: syntheticsApiKeyID,
             type: syntheticsApiKeyObjectType,
             overwrite: true,
@@ -292,6 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys2 = await getApiKeys();
@@ -341,6 +355,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys = await getApiKeys();
@@ -371,6 +386,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           const validApiKeys2 = await getApiKeys();
@@ -417,6 +433,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: false,
             isEnabled: false,
             isValidApiKey: false,
+            isServiceAllowed: true,
           });
         } finally {
           await security.role.delete(roleName);
@@ -483,6 +500,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
         } finally {
           await security.user.delete(username);
@@ -533,6 +551,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: false,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
         } finally {
           await supertestWithAuth
@@ -586,6 +605,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           await supertest
@@ -610,6 +630,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
 
           // can disable synthetics in non default space when enabled in default space
@@ -635,6 +656,7 @@ export default function ({ getService }: FtrProviderContext) {
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
+            isServiceAllowed: true,
           });
         } finally {
           await security.user.delete(username);

@@ -22,7 +22,6 @@ import {
   RULE_INTERVAL_MILLIS,
   RULE_INTERVAL_SECONDS,
   RULE_TYPE_ID,
-  SourceField,
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
@@ -39,13 +38,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     getAllAADDocs,
   } = getRuleServices(getService);
 
-  const sourceFields = [
-    { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
-    { label: 'host.id', searchPath: 'host.id' },
-    { label: 'host.name', searchPath: 'host.name' },
-  ];
-
-  describe('rule', async () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -81,17 +74,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         name: 'never fire',
         esqlQuery:
           'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
-        sourceFields,
       });
       await createRule({
         name: 'always fire',
         esqlQuery:
           'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
-        sourceFields,
       });
 
       const docs = await waitForDocs(2);
-      const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+      const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
 
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
@@ -145,7 +136,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+        const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -165,7 +156,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+        const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -195,7 +186,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
       expect(activeValue).to.be('1');
       expect(activeMessage).to.match(
-        /Document count is \d+ in the last 4s. Alert when greater than 0./
+        /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
       await createEsDocumentsInGroups(1, endDate);
       docs = await waitForDocs(2);
@@ -209,7 +200,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(recoveredName).to.be('fire then recovers');
       expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
       expect(recoveredMessage).to.match(
-        /Document count is \d+ in the last 4s. Alert when greater than 0./
+        /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
     });
 
@@ -225,16 +216,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         name: 'never fire',
         esqlQuery:
           'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c < 0',
-        sourceFields,
       });
       await createRule({
         name: 'always fire',
         esqlQuery:
           'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c > -1',
-        sourceFields,
       });
 
-      const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
+      const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
 
       const docs = await waitForDocs(2);
       for (let i = 0; i < docs.length; i++) {
@@ -397,7 +386,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       groupBy?: string;
       termField?: string;
       termSize?: number;
-      sourceFields?: SourceField[];
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -469,7 +457,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             termSize: params.termSize,
             timeField: params.timeField || 'date',
             esqlQuery: { esql: params.esqlQuery },
-            sourceFields: params.sourceFields,
+            sourceFields: [],
           },
         })
         .expect(200);

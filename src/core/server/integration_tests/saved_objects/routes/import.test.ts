@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('uuid');
@@ -26,6 +27,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -39,6 +41,7 @@ describe(`POST ${URL}`, () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let mockLogger: MockedLogger;
 
   const emptyResponse = { saved_objects: [], total: 0, per_page: 0, page: 0 };
   const mockIndexPattern = {
@@ -58,6 +61,7 @@ describe(`POST ${URL}`, () => {
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
+    mockLogger = loggerMock.create();
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
     );
@@ -75,6 +79,7 @@ describe(`POST ${URL}`, () => {
       savedObjectsClient,
       typeRegistry: handlerContext.savedObjects.typeRegistry,
       importSizeLimit: 10000,
+      logger: mockLogger,
     });
     handlerContext.savedObjects.getImporter = jest
       .fn()

@@ -18,7 +18,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./builtin_alert_types'));
     loadTestFile(require.resolve('./mustache_templates.ts'));
     loadTestFile(require.resolve('./notify_when'));
-    loadTestFile(require.resolve('./ephemeral'));
+    loadTestFile(require.resolve('./muted_alerts'));
     loadTestFile(require.resolve('./event_log_alerts'));
     loadTestFile(require.resolve('./snooze'));
     loadTestFile(require.resolve('./unsnooze'));
@@ -30,6 +30,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./flapping_history'));
     loadTestFile(require.resolve('./check_registered_rule_types'));
     loadTestFile(require.resolve('./alert_delay'));
+    loadTestFile(require.resolve('./alert_severity'));
     loadTestFile(require.resolve('./generate_alert_schemas'));
     // Do not place test files here, due to https://github.com/elastic/kibana/issues/123059
 

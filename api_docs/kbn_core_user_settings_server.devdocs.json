@@ -11,7 +11,21 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-settings-server",
+        "id": "def-server.UserSettingsServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserSettingsServiceSetup",
+        "description": [],
+        "path": "src/core/packages/user-settings/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []
@@ -19,21 +33,7 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "@kbn/core-user-settings-server",
-        "id": "def-common.UserSettingsServiceSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "UserSettingsServiceSetup",
-        "description": [],
-        "path": "packages/core/user-settings/core-user-settings-server/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

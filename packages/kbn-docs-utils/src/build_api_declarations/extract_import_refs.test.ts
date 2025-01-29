@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -108,14 +109,14 @@ it('test extractImportReference with unknown imports', () => {
 
 it('test full file imports with no matching plugin', () => {
   const refs = extractImportReferences(
-    `typeof import("${REPO_ROOT}/src/plugins/data/common/es_query/kuery/node_types/function")`,
+    `typeof import("${REPO_ROOT}/src/platform/plugins/shared/data/common/es_query/kuery/node_types/function")`,
     plugins,
     log
   );
   expect(refs).toMatchInlineSnapshot(`
     Array [
       "typeof ",
-      "src/plugins/data/common/es_query/kuery/node_types/function",
+      "src/platform/plugins/shared/data/common/es_query/kuery/node_types/function",
     ]
   `);
   expect(refs.length).toBe(2);

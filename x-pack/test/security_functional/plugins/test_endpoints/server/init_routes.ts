@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
-import type {
-  TaskManagerStartContract,
-  ConcreteTaskInstance,
-  BulkUpdateTaskResult,
-} from '@kbn/task-manager-plugin/server';
-import { restApiKeySchema } from '@kbn/security-plugin-types-server';
+
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
-import { PluginStartDependencies } from '.';
+import { restApiKeySchema } from '@kbn/security-plugin-types-server';
+import type {
+  BulkUpdateTaskResult,
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+
+import type { PluginStartDependencies } from '.';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
 

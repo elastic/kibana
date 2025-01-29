@@ -1,0 +1,85 @@
+{{~#if type~}}
+  {{~> (concat "type_" type)~}}
+{{~/if~}}
+
+{{~#if $ref~}}
+  {{referenceName}}
+  {{~#if (isCircularRef $ref)}}Input{{/if~}}
+  {{~#if nullable}} | null {{/if~}}
+{{~/if~}}
+
+{{~#if allOf~}}
+  {{~#each allOf~}}
+    {{~> ts_input_type ~}}
+    {{~#unless @last~}}&{{~/unless~}} 
+  {{~/each~}}
+{{~/if~}}
+
+{{~#if anyOf~}}
+  {{~#each anyOf~}}
+    {{~> ts_input_type ~}}
+    {{~#unless @last~}}|{{~/unless~}} 
+  {{~/each~}}
+{{~/if~}}
+
+{{~#if oneOf~}}
+  {{~#each oneOf~}}
+    {{~> ts_input_type ~}}
+    {{~#unless @last~}}|{{~/unless~}} 
+  {{~/each~}}
+{{~/if~}}
+
+{{#if (isUnknown .)}}
+unknown
+{{/if}}
+
+{{~#*inline "type_array"~}}
+  ({{~> ts_input_type items ~}})[]
+{{~/inline~}}
+
+{{~#*inline "type_boolean"~}}
+  boolean
+{{~/inline~}}
+
+{{~#*inline "type_integer"~}}
+  number
+{{~/inline~}}
+
+{{~#*inline "type_number"~}}
+  number
+{{~/inline~}}
+
+{{~#*inline "type_object"~}}
+  {{~#if (eq x-modify "required")}} Required< {{/if~}}
+  {{~#if (eq x-modify "partial")}} Partial< {{/if~}}
+  {
+    {{#each properties}}
+      {{#if description}}
+      /** 
+      * {{{description}}} 
+      */
+      {{/if}}
+      '{{@key}}'{{~#unless (includes ../required @key)}}?{{/unless~}}: {{> ts_input_type }};
+    {{/each}}
+    {{~#if additionalProperties}}
+      {{~#if (eq additionalProperties true)~}}
+        [key: string]: unknown;
+      {{~else~}}
+        [key: string]: {{> ts_input_type additionalProperties}};
+      {{~/if~}}
+    {{~/if~}}
+  }
+  {{~#if (eq x-modify "partial")}} > {{/if~}}
+  {{~#if (eq x-modify "required")}} > {{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_string"~}}
+  {{~#if enum~}}
+    {{~#each enum~}}
+      '{{.}}'
+      {{~#unless @last~}}|{{~/unless~}} 
+    {{~/each~}}
+  {{~else~}}
+  string
+  {{~/if~}}
+{{~/inline~}}

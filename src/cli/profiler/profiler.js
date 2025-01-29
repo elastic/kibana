@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { writeFile } from 'fs';
@@ -12,16 +13,19 @@ import { join } from 'path';
 import { Session } from 'node:inspector';
 import { threadId } from 'node:worker_threads';
 import { promisify } from 'util';
+import { Logger } from '../logger';
 
 class Profiler {
   #counter = 0;
+  #logger;
   #path;
   #session;
 
-  constructor() {
+  constructor(logger) {
     const execOpts = getopts(process.execArgv);
     const envOpts = getopts(process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s+/) : []);
     this.#path = execOpts['diagnostic-dir'] || envOpts['diagnostic-dir'] || process.cwd();
+    this.#logger = logger;
   }
 
   #getPath() {
@@ -50,13 +54,17 @@ class Profiler {
 
     await promisify(this.#session.post)('Profiler.enable');
     await promisify(this.#session.post)('Profiler.start');
+    this.#logger.log(`CPU profiling is started for process '${process.pid}'.`);
   }
 
   async #stop() {
     try {
       const { profile } = await promisify(this.#session.post)('Profiler.stop');
+      this.#logger.log(`CPU profiling is stopped for process '${process.pid}'.`);
+
       const path = this.#getPath();
       await promisify(writeFile)(path, JSON.stringify(profile));
+      this.#logger.log(`Saved CPU profile to '${path}'.`);
     } finally {
       this.#session.disconnect();
       this.#session = undefined;
@@ -80,8 +88,10 @@ export default function (program) {
         return;
       }
 
-      const profiler = new Profiler();
+      const logger = new Logger();
+      const profiler = new Profiler(logger);
       process.removeAllListeners(signal);
       process.on(signal, profiler.toggle.bind(profiler));
+      logger.log(`CPU profiling is enabled on '${signal}' for process '${process.pid}'.`);
     });
 }

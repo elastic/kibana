@@ -108,16 +108,39 @@ model, the number of forecasts, and the node that runs the job.
 == CCR
 
 To view {ccr} metrics, click **CCR**. For each follower index on the cluster, it 
-shows information such as the leader index, an indication of how much the
-follower index is lagging behind the leader index, the last fetch time, the
-number of operations synced, and error messages. If you select a follower index,
-you can view the same information for each shard.
+shows the following information:
+
+- **Index**: The name of the follower index.
+- **Follows**: The name of the leader index.
+- **Alerts**: Any read exceptions that have been triggered for the index or its 
+shards.
+- **Sync Lag (ops)**: How many operations the follower index is lagging behind the 
+leader index. 
++
+This is calculated by finding the difference between the minimum and maximum operation 
+sequence number on the leader (`leader_max_seq_no`) and the difference between the minimum 
+and maximum global sequence number checkpoint on the follower (`follower_global_checkpoint`) 
+for each shard over the selected time period. The difference in `follower_global_checkpoint` 
+is subtracted from the difference in `leader_max_seq_no` for each shard, and the highest result 
+across all shards is displayed.
+- **Last fetch time**: The time elapsed since the last successful fetch from the leader index. 
+Represents the longest time elapsed across all of the shards in the follower index.
+- **Ops synced**: The number of operations indexed (replicated) into the follower index from 
+the leader index in the selected time period. 
++
+This metric is a sum of the number of operations indexed across all shards over the selected 
+time period.
+- **Error**: Any exceptions returned for the most recent document in the selected time period.
+
+If you select a follower index, you can view the same information for each shard. 
+For more information on the properties used to calculate these metrics, refer to the 
+{ref}/ccr-get-follow-stats.html[get follower stats API] documentation.
 
 If you select a shard, you can see graphs for the fetch and operation delays. 
-You can also see advanced information, which contains the results from the 
+You can also see advanced information, which contains additional stats from the 
 {ref}/ccr-get-follow-stats.html[get follower stats API].
 
-For more information, refer to {ref}/xpack-ccr.html[{ccr-cap}].
+Learn more about {ref}/xpack-ccr.html[{ccr-cap}].
 
 [float]
 [[logs-monitor-page]]

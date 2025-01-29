@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('uuid', () => ({
@@ -427,6 +428,7 @@ describe('KibanaRequest', () => {
       expect(resp3.body).toEqual({ requestId: 'gamma' });
     });
   });
+
   describe('request uuid', () => {
     it('generates a UUID', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
@@ -440,6 +442,25 @@ describe('KibanaRequest', () => {
 
       const resp1 = await st.get('/').expect(200);
       expect(resp1.body.requestUuid).toBe('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    });
+  });
+
+  describe('httpVersion and protocol', () => {
+    it('returns the correct values', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({ body: { httpVersion: req.httpVersion, protocol: req.protocol } });
+      });
+      await server.start();
+
+      const st = supertest(innerServer.listener);
+
+      const resp1 = await st.get('/').expect(200);
+      expect(resp1.body).toEqual({
+        httpVersion: '1.1',
+        protocol: 'http1',
+      });
     });
   });
 });

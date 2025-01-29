@@ -10,8 +10,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-    require.resolve('../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-xpack/functional/config.base')
   );
 
   return {

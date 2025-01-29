@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const TASK_ID = 'serverless-security:nlp-cleanup-task:1.0.0';
 
-  describe('@serverless NLP Cleanup Task in Complete Tier', async () => {
+  describe('@serverless NLP Cleanup Task in Complete Tier', () => {
     describe('New Complete Deployment', () => {
       it('registers, runs and immediately deletes NLP Cleanup Task', async () => {
         try {

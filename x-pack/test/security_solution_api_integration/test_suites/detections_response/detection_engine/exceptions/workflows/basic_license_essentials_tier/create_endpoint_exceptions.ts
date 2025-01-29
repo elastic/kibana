@@ -43,7 +43,7 @@ interface Host {
  * @returns The array of hosts sorted
  */
 export const getHostHits = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   id: string
 ): Promise<Host[]> => {

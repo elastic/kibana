@@ -9,10 +9,10 @@ import expect from '@kbn/expect';
 
 import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
-import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/common/api_schemas/update_transforms';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/update_transforms';
 import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
-import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export async function asyncForEach(array: any[], callback: Function) {
@@ -217,7 +217,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         );
         const { body, status } = await esSupertest
           .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
-          .set(headers)
+          .set(headers as Record<string, string>)
           .send(transformConfig);
         this.assertResponseStatusCode(200, status, body);
       } else {

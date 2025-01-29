@@ -24,7 +24,7 @@ export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> = ClientRequ
   TEndpoint
 >;
 
-export function createObsApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createObsApiClient(st: supertest.Agent) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       type?: 'form-data';
@@ -60,7 +60,7 @@ export function createObsApiClient(st: supertest.SuperTest<supertest.Test>) {
         .set('Content-type', 'multipart/form-data');
 
       for (const field of fields) {
-        formDataRequest.field(field[0], field[1]);
+        void formDataRequest.field(field[0], field[1]);
       }
 
       res = await formDataRequest;

@@ -44,9 +44,9 @@ export default function preconfiguredAlertHistoryConnectorTests({
     }
 
     const objectRemover = new ObjectRemover(supertest);
-    beforeEach(() => {
-      esDeleteAllIndices(AlertHistoryDefaultIndexName);
-      esDeleteAllIndices(ALERT_HISTORY_OVERRIDE_INDEX);
+    beforeEach(async () => {
+      await esDeleteAllIndices(AlertHistoryDefaultIndexName);
+      await esDeleteAllIndices(ALERT_HISTORY_OVERRIDE_INDEX);
     });
     after(() => objectRemover.removeAll());
 
@@ -137,10 +137,10 @@ export default function preconfiguredAlertHistoryConnectorTests({
       expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
     }
 
-    const response = await supertest.get(`/api/alerts/alert/${id}`);
+    const response = await supertest.get(`/api/alerting/rule/${id}`);
     expect(response.status).to.eql(200);
 
-    const { executionStatus } = response.body || {};
+    const { execution_status: executionStatus } = response.body || {};
     const { status } = executionStatus || {};
 
     const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(

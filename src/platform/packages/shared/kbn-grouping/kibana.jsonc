@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/grouping",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "shared"
+}

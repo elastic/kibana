@@ -42,6 +42,7 @@ import {
   THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
   SUPPRESS_FOR_DETAILS,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -57,14 +58,12 @@ import {
   fillScheduleRuleAndContinue,
   selectThresholdRuleType,
   waitForAlertsToPopulate,
+  fillDefineThresholdRule,
+  continueFromDefineStep,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import {
-  getDetails,
-  assertDetailsNotExist,
-  waitForTheRuleToBeExecuted,
-} from '../../../../tasks/rule_details';
+import { getDetails, assertDetailsNotExist } from '../../../../tasks/rule_details';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
@@ -134,15 +133,18 @@ describe(
         assertDetailsNotExist(SUPPRESS_FOR_DETAILS);
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        getDetails(RUNS_EVERY_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${rule.interval}`);
         const humanizedDuration = getHumanizedDuration(
           rule.from ?? 'now-6m',
           rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${humanizedDuration}`);
       });
 
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
@@ -152,8 +154,10 @@ describe(
     it('Creates a new threshold rule with suppression enabled', () => {
       selectThresholdRuleType();
 
+      fillDefineThresholdRule(rule);
       enablesAndPopulatesThresholdSuppression(5, 'h');
-      fillDefineThresholdRuleAndContinue(rule);
+      continueFromDefineStep();
+
       // ensures duration displayed on define step in preview mode
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '5h');

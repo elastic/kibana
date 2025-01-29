@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: Create Rule API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: CreateRule
+      summary: Create a detection rule
+      description: Create a new detection rule.
+      tags:
+        - Rules API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleCreateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'

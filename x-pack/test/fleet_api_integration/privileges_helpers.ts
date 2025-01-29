@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import supertest, { type SuperTest } from 'supertest';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import supertest from 'supertest';
 
 interface PrivilegeTestScenario {
   user: {
@@ -26,7 +27,7 @@ interface PrivilegeTestRoute {
 
 export function runPrivilegeTests(
   routes: PrivilegeTestRoute[],
-  supertestWithoutAuth: SuperTest<supertest.Test>
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) {
   for (const route of routes) {
     describe(`${route.method} ${route.path}`, () => {

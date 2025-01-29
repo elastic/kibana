@@ -21,12 +21,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('navigation', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
       await svlSecNavigation.navigateToLandingPage();
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
     });
 
     it('has security serverless side nav', async () => {
@@ -77,6 +73,17 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         expect(await browser.getCurrentUrl()).contain('/app/security/cases');
         await testSubjects.existOrFail('cases-all-title');
       });
+    });
+    it('navigates to maintenance windows', async () => {
+      await svlCommonPage.loginAsAdmin();
+      await svlSecNavigation.navigateToLandingPage();
+      await svlCommonNavigation.sidenav.openSection('category-management');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+      await testSubjects.click('app-card-maintenanceWindows');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Stack Management',
+        'Maintenance Windows',
+      ]);
     });
   });
 }

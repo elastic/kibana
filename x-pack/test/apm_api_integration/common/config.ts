@@ -11,7 +11,7 @@ import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
   LogsSynthtraceEsClient,
-  AssetsSynthtraceEsClient,
+  EntitiesSynthtraceEsClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
@@ -21,7 +21,7 @@ import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
-import { bootstrapApmSynthtrace, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
+import { getApmSynthtraceEsClient, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
@@ -52,7 +52,7 @@ async function getApmApiClient({
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-type ApmApiClientKey =
+export type ApmApiClientKey =
   | 'noAccessUser'
   | 'readUser'
   | 'adminUser'
@@ -62,7 +62,13 @@ type ApmApiClientKey =
   | 'manageOwnAgentKeysUser'
   | 'createAndAllAgentKeysUser'
   | 'monitorClusterAndIndicesUser'
-  | 'manageServiceAccount';
+  | 'manageServiceAccount'
+  | 'apmAllPrivilegesWithoutWriteSettingsUser'
+  | 'apmReadPrivilegesWithWriteSettingsUser';
+
+export interface UserApiClient {
+  user: ApmApiClientKey;
+}
 
 export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
 
@@ -77,9 +83,9 @@ export interface CreateTest {
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    assetsSynthtraceEsClient: (
+    entitiesSynthtraceEsClient: (
       context: InheritedFtrProviderContext
-    ) => Promise<AssetsSynthtraceEsClient>;
+    ) => Promise<EntitiesSynthtraceEsClient>;
     apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     synthtraceKibanaClient: (
       context: InheritedFtrProviderContext
@@ -118,7 +124,7 @@ export function createTestConfig(
         apmFtrConfig: () => config,
         registry: RegistryProvider,
         apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
+          return getApmSynthtraceEsClient(context, synthtraceKibanaClient);
         },
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
           new LogsSynthtraceEsClient({
@@ -126,8 +132,8 @@ export function createTestConfig(
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
           }),
-        assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-          new AssetsSynthtraceEsClient({
+        entitiesSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new EntitiesSynthtraceEsClient({
             client: context.getService('es'),
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
@@ -183,6 +189,14 @@ export function createTestConfig(
             manageServiceAccount: await getApmApiClient({
               kibanaServer,
               username: ApmUsername.apmManageServiceAccount,
+            }),
+            apmAllPrivilegesWithoutWriteSettingsUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmAllPrivilegesWithoutWriteSettings,
+            }),
+            apmReadPrivilegesWithWriteSettingsUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmReadPrivilegesWithWriteSettings,
             }),
           };
         },

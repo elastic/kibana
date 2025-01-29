@@ -24,7 +24,7 @@ const roleToAccessSecuritySolution = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
         },
         spaces: ['*'],
       },
@@ -47,7 +47,7 @@ const roleToAccessSecuritySolutionWithDls = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
         },
         spaces: ['*'],
       },
@@ -73,8 +73,9 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-
-  describe('@ess @serverless @skipInServerless find alert with/without doc level security', () => {
+  // Notes: Similar tests should be added for serverless once infrastructure
+  // is in place to test roles in MKI enviornment.
+  describe('@ess @skipInServerless find alert with/without doc level security', () => {
     before(async () => {
       await security.role.create(
         roleToAccessSecuritySolution.name,

@@ -4,27 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-common';
-import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
 import { Response } from 'supertest';
+import { indexTimestamp } from './index_timestamp';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function createUsageServices({ getService }: FtrProviderContext) {
   const log = getService('log');
   const esSupertest = getService('esSupertest');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
-    async waitForJobToFinish(downloadReportPath: string, ignoreFailure = false) {
+    async waitForJobToFinish(
+      downloadReportPath: string,
+      ignoreFailure = false,
+      username = 'elastic',
+      password = process.env.TEST_KIBANA_PASS || 'changeme'
+    ) {
       log.debug(`Waiting for job to finish: ${downloadReportPath}`);
       const JOB_IS_PENDING_CODE = 503;
       let response: Response & { statusCode?: number };
 
       const statusCode = await new Promise((resolve) => {
         const intervalId = setInterval(async () => {
-          response = await supertest.get(downloadReportPath).responseType('blob');
+          response = await supertestWithoutAuth
+            .get(downloadReportPath)
+            .auth(username, password)
+            .responseType('blob');
           if (response.statusCode === 503) {
             log.debug(`Report at path ${downloadReportPath} is pending`);
           } else if (response.statusCode === 200) {
@@ -39,12 +46,14 @@ export function createUsageServices({ getService }: FtrProviderContext) {
         }, 1500);
       });
       if (!ignoreFailure) {
-        const jobInfo = await supertest.get(
-          downloadReportPath.replace(
-            PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX,
-            INTERNAL_ROUTES.JOBS.INFO_PREFIX
+        const jobInfo = await supertestWithoutAuth
+          .get(
+            downloadReportPath.replace(
+              PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX,
+              INTERNAL_ROUTES.JOBS.INFO_PREFIX
+            )
           )
-        );
+          .auth(username, password);
         expect(jobInfo.body.output.warnings).to.be(undefined); // expect no failure message to be present in job info
         expect(statusCode).to.be(200);
       }

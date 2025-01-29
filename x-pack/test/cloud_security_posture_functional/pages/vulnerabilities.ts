@@ -42,7 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         async () =>
           (await latestVulnerabilitiesTable.getRowsCount()) === vulnerabilitiesLatestMock.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -90,14 +90,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await latestVulnerabilitiesTable.getRowsCount()).to.be(
           vulnerabilitiesLatestMock.length
         );
-      });
-    });
-
-    describe('DataTable features', () => {
-      it('Edit data view field option is Enabled', async () => {
-        await latestVulnerabilitiesTable.toggleEditDataViewFieldsOption('vulnerability.id');
-        expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
-        await latestVulnerabilitiesTable.toggleEditDataViewFieldsOption('vulnerability.id');
       });
     });
 

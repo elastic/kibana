@@ -4,6 +4,6 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

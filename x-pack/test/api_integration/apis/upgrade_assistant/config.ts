@@ -13,5 +13,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseIntegrationTestsConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...baseIntegrationTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.upgrade_assistant.featureSet.mlSnapshots=true',
+        '--xpack.upgrade_assistant.featureSet.migrateSystemIndices=true',
+        '--xpack.upgrade_assistant.featureSet.migrateDataStreams=true',
+        '--xpack.upgrade_assistant.featureSet.reindexCorrectiveActions=true',
+      ],
+    },
   };
 }

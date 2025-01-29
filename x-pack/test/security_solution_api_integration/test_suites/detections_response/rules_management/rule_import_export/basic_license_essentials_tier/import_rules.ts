@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
 
-  describe('@ess @serverless import_rules', () => {
+  describe('@ess @serverless @serverlessQA import_rules', () => {
     describe('importing rules with an index', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);
@@ -125,11 +125,25 @@ export default ({ getService }: FtrProviderContext): void => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'my-non-ecs-field', type: 'keyword' },
+          ],
         };
+
         const ruleToImport = getCustomQueryRuleParams({
           ...defaultableFields,
           rule_id: 'rule-1',
         });
+
+        const expectedRule = {
+          ...ruleToImport,
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
+        };
+
         const ndjson = combineToNdJson(ruleToImport);
 
         await securitySolutionApi
@@ -143,7 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(importedRule).toMatchObject(ruleToImport);
+        expect(importedRule).toMatchObject(expectedRule);
       });
 
       it('should be able to import two rules', async () => {
@@ -199,7 +213,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // it('should be able to import 10000 rules', async () => {
       //   const ruleIds = new Array(10000).fill(undefined).map((_, index) => `rule-${index}`);
       //   const { body } = await supertest
-      //     .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+      //     .post(DETECTION_ENGINE_RULES_IMPORT_URL)
       //     .set('kbn-xsrf', 'true')
       //     .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
       //     .expect(200);

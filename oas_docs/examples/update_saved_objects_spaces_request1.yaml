@@ -1,0 +1,9 @@
+summary: Update saved object spaces
+description: Update the spaces of each saved object and all its references.
+value:
+  objects:
+    - type: index-pattern
+      id: 90943e30-9a47-11e8-b64d-95841ca0b247
+  spacesToAdd:
+    - test
+  spacesToRemove: []

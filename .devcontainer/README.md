@@ -1,0 +1,1 @@
+See the [dev docs](https://github.com/elastic/kibana/blob/main/dev_docs/getting_started/setting_up_a_development_env.mdx#using-the-kibana-dev-container-optional) for information on using the Kibana Dev Container.

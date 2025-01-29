@@ -18,5 +18,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./user_email'));
     loadTestFile(require.resolve('./role_mappings'));
     loadTestFile(require.resolve('./remote_cluster_security_roles'));
+    loadTestFile(require.resolve('./role_description'));
   });
 }

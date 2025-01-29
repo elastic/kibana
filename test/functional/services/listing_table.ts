@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -53,14 +54,14 @@ export class ListingTableService extends FtrService {
    */
   public async setSearchFilterValue(value: string) {
     const searchFilter = await this.getSearchFilter();
-    searchFilter.type(value);
+    await searchFilter.type(value);
   }
 
   /**
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
-    this.testSubjects.click('clearSearchButton');
+    await this.testSubjects.click('clearSearchButton');
   }
 
   private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
@@ -85,7 +86,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async waitUntilTableIsLoaded() {
-    return this.retry.try(async () => {
+    await this.retry.try(async () => {
       const isLoaded = await this.find.existsByDisplayedByCssSelector(
         '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
       );
@@ -264,6 +265,10 @@ export class ListingTableService extends FtrService {
 
       await searchFilter.type(name);
       await this.common.pressEnterKey();
+      const filterValue = await this.getSearchFilterValue();
+      if (filterValue !== name) {
+        throw new Error(`the input value has not updated properly`);
+      }
     });
 
     await this.waitUntilTableIsLoaded();

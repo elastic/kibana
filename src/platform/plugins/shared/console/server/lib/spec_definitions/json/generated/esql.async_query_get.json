@@ -1,0 +1,15 @@
+{
+  "esql.async_query_get": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_query/async/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-async-query-get-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

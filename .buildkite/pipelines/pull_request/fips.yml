@@ -2,10 +2,16 @@ steps:
   - command: .buildkite/scripts/steps/fips/build.sh
     label: 'Build FIPS Image'
     agents:
-      queue: n2-2-spot
+      machineType: n2-standard-2
+      preemptible: true
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
     soft_fail: true
     retry:

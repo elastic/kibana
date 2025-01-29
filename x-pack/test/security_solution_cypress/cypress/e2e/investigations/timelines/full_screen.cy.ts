@@ -9,11 +9,8 @@ import { TIMELINE_HEADER, TIMELINE_TABS } from '../../../screens/timeline';
 
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-import {
-  openTimelineUsingToggle,
-  enterFullScreenMode,
-  exitFullScreenMode,
-} from '../../../tasks/security_main';
+import { openTimelineUsingToggle } from '../../../tasks/security_main';
+import { executeTimelineSearch, toggleFullScreen } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
@@ -22,18 +19,19 @@ describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
+    executeTimelineSearch('*');
   });
 
   it('Should hide timeline header and tab list area', () => {
-    enterFullScreenMode();
+    toggleFullScreen();
 
     cy.get(TIMELINE_TABS).should('not.exist');
     cy.get(TIMELINE_HEADER).should('not.be.visible');
   });
 
   it('Should show timeline header and tab list area', () => {
-    enterFullScreenMode();
-    exitFullScreenMode();
+    toggleFullScreen();
+    toggleFullScreen();
     cy.get(TIMELINE_TABS).should('exist');
     cy.get(TIMELINE_HEADER).should('be.visible');
   });

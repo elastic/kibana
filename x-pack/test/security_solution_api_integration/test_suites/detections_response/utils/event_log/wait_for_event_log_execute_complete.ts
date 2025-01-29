@@ -23,11 +23,12 @@ export const waitForEventLogExecuteComplete = async (
   es: Client,
   log: ToolingLog,
   ruleId: string,
-  totalExecutions = 1
+  totalExecutions = 1,
+  executionType = 'execute'
 ): Promise<void> => {
   await waitFor(
     async () => {
-      const executionCount = await getEventLogExecuteCompleteById(es, log, ruleId);
+      const executionCount = await getEventLogExecuteCompleteById(es, log, ruleId, executionType);
       return executionCount >= totalExecutions;
     },
     'waitForEventLogExecuteComplete',

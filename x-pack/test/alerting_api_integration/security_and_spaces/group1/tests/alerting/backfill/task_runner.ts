@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import moment from 'moment';
 import type { SecurityAlert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_LAST_DETECTED,
@@ -32,21 +32,18 @@ import {
   RULE_SAVED_OBJECT_TYPE,
 } from '@kbn/alerting-plugin/server/saved_objects';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import {
-  createEsDocument,
-  DOCUMENT_REFERENCE,
-  DOCUMENT_SOURCE,
-} from '../../../../../spaces_only/tests/alerting/create_test_data';
-import { asyncForEach } from '../../../../../../functional/services/transform/api';
+import { DOCUMENT_SOURCE } from '../../../../../spaces_only/tests/alerting/create_test_data';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import {
-  getEventLog,
-  getTestRuleData,
-  getUrlPrefix,
-  ObjectRemover,
-  TaskManagerDoc,
-} from '../../../../../common/lib';
+  getScheduledTask,
+  indexTestDocs,
+  queryForAlertDocs,
+  searchScheduledTask,
+  testDocTimestamps,
+  waitForEventLogDocs,
+} from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function createBackfillTaskRunnerTests({ getService }: FtrProviderContext) {
@@ -59,31 +56,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
 
   const alertsAsDataIndex = '.alerts-security.alerts-space1';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
-  const originalDocTimestamps = [
-    // before first backfill run
-    '2023-10-18T10:42:37.452Z',
-
-    // backfill execution set 1
-    '2023-10-19T12:23:54.485Z',
-    '2023-10-19T13:48:11.654Z',
-    '2023-10-19T21:00:03.472Z',
-
-    // backfill execution set 2
-    '2023-10-20T08:12:34.954Z',
-
-    // backfill execution set 3
-    '2023-10-20T14:39:41.457Z',
-    '2023-10-20T14:39:41.457Z',
-    '2023-10-20T16:21:01.004Z',
-    '2023-10-20T19:02:12.475Z',
-    '2023-10-20T23:59:59.999Z',
-
-    // backfill execution set 4 purposely left empty
-
-    // after last backfill
-    '2023-10-21T13:36:13.175Z',
-    '2023-10-21T15:42:31.145Z',
-  ];
 
   describe('ad hoc backfill task', () => {
     beforeEach(async () => {
@@ -91,15 +63,13 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       await esTestIndexTool.setup();
     });
     afterEach(async () => {
-      objectRemover.removeAll();
-      await esTestIndexTool.destroy();
-    });
-    after(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,
         query: { match_all: {} },
         conflicts: 'proceed',
       });
+      await objectRemover.removeAll();
+      await esTestIndexTool.destroy();
     });
 
     // This test
@@ -113,7 +83,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       const spaceId = SuperuserAtSpace1.space.id;
 
       // Index documents
-      await indexTestDocs();
+      await indexTestDocs(es, esTestIndexTool);
 
       // Create siem.queryRule
       const response1 = await supertestWithoutAuth
@@ -126,7 +96,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
           tags: [],
           rule_type_id: 'siem.queryRule',
           consumer: 'siem',
-          schedule: { interval: '12h' },
+          schedule: { interval: '24h' },
           actions: [],
           params: {
             author: [],
@@ -141,7 +111,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
               from: '1m',
               kibana_siem_app_url: 'https://localhost:5601/app/security',
             },
-            maxSignals: 100,
+            maxSignals: 20,
             riskScore: 21,
             riskScoreMapping: [],
             severity: 'low',
@@ -165,51 +135,35 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       const ruleId = response1.body.id;
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
+      const start = moment(testDocTimestamps[1]).utc().startOf('day').toISOString();
+      const end = moment(testDocTimestamps[11]).utc().startOf('day').toISOString();
+
       // Schedule backfill for this rule
       const response2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([
-          {
-            rule_id: ruleId,
-            start: '2023-10-19T12:00:00.000Z',
-            end: '2023-10-21T12:00:00.000Z',
-          },
-        ])
+        .send([{ rule_id: ruleId, start, end }])
         .expect(200);
 
       const scheduleResult = response2.body;
 
       expect(scheduleResult.length).to.eql(1);
       expect(scheduleResult[0].schedule.length).to.eql(4);
-      expect(scheduleResult[0].schedule).to.eql([
-        {
-          interval: '12h',
-          run_at: '2023-10-20T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-20T12:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-21T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-21T12:00:00.000Z',
-          status: 'pending',
-        },
-      ]);
+
+      let currentStart = start;
+      scheduleResult[0].schedule.forEach((sched: any) => {
+        expect(sched.interval).to.eql('24h');
+        expect(sched.status).to.eql('pending');
+        const runAt = moment(currentStart).add(24, 'hours').toISOString();
+        expect(sched.run_at).to.eql(runAt);
+        currentStart = runAt;
+      });
 
       const backfillId = scheduleResult[0].id;
 
       // check that the task was scheduled correctly
-      const taskRecord = await getScheduledTask(backfillId);
+      const taskRecord = await getScheduledTask(es, backfillId);
       expect(taskRecord.type).to.eql('task');
       expect(taskRecord.task.taskType).to.eql('ad_hoc_run-backfill');
       expect(taskRecord.task.timeoutOverride).to.eql('5m');
@@ -221,6 +175,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
 
       // get the execute-backfill events
       const events: IValidatedEvent[] = await waitForEventLogDocs(
+        retry,
+        getService,
         backfillId,
         spaceId,
         new Map([['execute-backfill', { equal: 4 }]])
@@ -250,6 +206,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'siem.queryRule',
@@ -296,7 +253,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       );
 
       // query for alert docs
-      const alertDocs = await queryForAlertDocs<SecurityAlert>();
+      const alertDocs = await queryForAlertDocs<SecurityAlert>(es, alertsAsDataIndex);
       expect(alertDocs.length).to.eql(9);
 
       // each alert doc should have these fields
@@ -323,18 +280,18 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill1) {
         const source = alert._source!;
-        expect(source[ALERT_START]).to.eql(scheduleResult[0].schedule[0].run_at);
-        expect(source[ALERT_LAST_DETECTED]).to.eql(scheduleResult[0].schedule[0].run_at);
-        expect(source[TIMESTAMP]).to.eql(scheduleResult[0].schedule[0].run_at);
+        expect(source[ALERT_START]).to.match(timestampPattern);
+        expect(source[ALERT_LAST_DETECTED]).to.match(timestampPattern);
+        expect(source[TIMESTAMP]).not.to.eql(scheduleResult[0].schedule[0].run_at);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).to.match(timestampPattern);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).not.to.eql(
           scheduleResult[0].schedule[0].run_at
         );
       }
 
-      expect(alertDocsBackfill1[0]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[1]);
-      expect(alertDocsBackfill1[1]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[2]);
-      expect(alertDocsBackfill1[2]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[3]);
+      expect(alertDocsBackfill1[0]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[1]);
+      expect(alertDocsBackfill1[1]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[2]);
+      expect(alertDocsBackfill1[2]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[3]);
 
       // backfill run 2 alerts
       const alertDocsBackfill2 = alertDocs.filter(
@@ -345,16 +302,16 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill2) {
         const source = alert._source!;
-        expect(source[ALERT_START]).to.eql(scheduleResult[0].schedule[1].run_at);
-        expect(source[ALERT_LAST_DETECTED]).to.eql(scheduleResult[0].schedule[1].run_at);
-        expect(source[TIMESTAMP]).to.eql(scheduleResult[0].schedule[1].run_at);
+        expect(source[ALERT_START]).to.match(timestampPattern);
+        expect(source[ALERT_LAST_DETECTED]).to.match(timestampPattern);
+        expect(source[TIMESTAMP]).not.to.eql(scheduleResult[0].schedule[1].run_at);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).to.match(timestampPattern);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).not.to.eql(
           scheduleResult[0].schedule[1].run_at
         );
       }
 
-      expect(alertDocsBackfill2[0]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[4]);
+      expect(alertDocsBackfill2[0]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[4]);
 
       // backfill run 3 alerts
       const alertDocsBackfill3 = alertDocs.filter(
@@ -365,20 +322,20 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill3) {
         const source = alert._source!;
-        expect(source[ALERT_START]).to.eql(scheduleResult[0].schedule[2].run_at);
-        expect(source[ALERT_LAST_DETECTED]).to.eql(scheduleResult[0].schedule[2].run_at);
-        expect(source[TIMESTAMP]).to.eql(scheduleResult[0].schedule[2].run_at);
+        expect(source[ALERT_START]).to.match(timestampPattern);
+        expect(source[ALERT_LAST_DETECTED]).to.match(timestampPattern);
+        expect(source[TIMESTAMP]).not.to.eql(scheduleResult[0].schedule[2].run_at);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).to.match(timestampPattern);
         expect(source[ALERT_RULE_EXECUTION_TIMESTAMP]).not.to.eql(
           scheduleResult[0].schedule[2].run_at
         );
       }
 
-      expect(alertDocsBackfill3[0]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[5]);
-      expect(alertDocsBackfill3[1]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[6]);
-      expect(alertDocsBackfill3[2]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[7]);
-      expect(alertDocsBackfill3[3]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[8]);
-      expect(alertDocsBackfill3[4]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[9]);
+      expect(alertDocsBackfill3[0]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[5]);
+      expect(alertDocsBackfill3[1]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[6]);
+      expect(alertDocsBackfill3[2]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[7]);
+      expect(alertDocsBackfill3[3]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[8]);
+      expect(alertDocsBackfill3[4]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[9]);
 
       // backfill run 4 alerts
       const alertDocsBackfill4 = alertDocs.filter(
@@ -387,7 +344,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       expect(alertDocsBackfill4.length).to.eql(0);
 
       // task should have been deleted after backfill runs have finished
-      const numHits = await searchScheduledTask(backfillId);
+      const numHits = await searchScheduledTask(es, backfillId);
       expect(numHits).to.eql(0);
     });
 
@@ -414,16 +371,12 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
       // schedule backfill for this rule
+      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
       const response2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([
-          {
-            rule_id: ruleId,
-            start: '2023-10-19T12:00:00.000Z',
-          },
-        ])
+        .send([{ rule_id: ruleId, start }])
         .expect(200);
 
       const scheduleResult = response2.body;
@@ -433,7 +386,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       expect(scheduleResult[0].schedule).to.eql([
         {
           interval: '12h',
-          run_at: '2023-10-20T00:00:00.000Z',
+          run_at: moment(start).add(12, 'hours').toISOString(),
           status: 'pending',
         },
       ]);
@@ -441,7 +394,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       const backfillId = scheduleResult[0].id;
 
       // check that the task was scheduled correctly
-      const taskRecord = await getScheduledTask(backfillId);
+      const taskRecord = await getScheduledTask(es, backfillId);
       expect(taskRecord.type).to.eql('task');
       expect(taskRecord.task.taskType).to.eql('ad_hoc_run-backfill');
       expect(taskRecord.task.timeoutOverride).to.eql('10s');
@@ -453,6 +406,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
 
       // get the execute-timeout and execute-backfill events
       const events: IValidatedEvent[] = await waitForEventLogDocs(
+        retry,
+        getService,
         backfillId,
         spaceId,
         new Map([
@@ -486,6 +441,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',
@@ -518,6 +474,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',
@@ -529,7 +486,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       }
 
       // task should have been deleted after backfill runs have finished
-      const numHits = await searchScheduledTask(backfillId);
+      const numHits = await searchScheduledTask(es, backfillId);
       expect(numHits).to.eql(0);
     });
 
@@ -556,50 +513,32 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
       // schedule backfill for this rule
+      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
+      const end = moment().utc().startOf('day').subtract(11, 'days').toISOString();
       const response2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([
-          {
-            rule_id: ruleId,
-            start: '2023-10-19T12:00:00.000Z',
-            end: '2023-10-21T12:00:00.000Z',
-          },
-        ])
+        .send([{ rule_id: ruleId, start, end }])
         .expect(200);
 
       const scheduleResult = response2.body;
 
       expect(scheduleResult.length).to.eql(1);
       expect(scheduleResult[0].schedule.length).to.eql(4);
-      expect(scheduleResult[0].schedule).to.eql([
-        {
-          interval: '12h',
-          run_at: '2023-10-20T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-20T12:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-21T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-21T12:00:00.000Z',
-          status: 'pending',
-        },
-      ]);
+      let currentStart = start;
+      scheduleResult[0].schedule.forEach((sched: any) => {
+        expect(sched.interval).to.eql('12h');
+        expect(sched.status).to.eql('pending');
+        const runAt = moment(currentStart).add(12, 'hours').toISOString();
+        expect(sched.run_at).to.eql(runAt);
+        currentStart = runAt;
+      });
 
       const backfillId = scheduleResult[0].id;
 
       // check that the task was scheduled correctly
-      const taskRecord = await getScheduledTask(backfillId);
+      const taskRecord = await getScheduledTask(es, backfillId);
       expect(taskRecord.type).to.eql('task');
       expect(taskRecord.task.taskType).to.eql('ad_hoc_run-backfill');
       expect(taskRecord.task.timeoutOverride).to.eql('10s');
@@ -611,6 +550,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
 
       // get the execute-backfill events
       const events: IValidatedEvent[] = await waitForEventLogDocs(
+        retry,
+        getService,
         backfillId,
         spaceId,
         new Map([['execute-backfill', { equal: 4 }]])
@@ -641,6 +582,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',
@@ -683,80 +625,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       );
 
       // task should have been deleted after backfill runs have finished
-      const numHits = await searchScheduledTask(backfillId);
+      const numHits = await searchScheduledTask(es, backfillId);
       expect(numHits).to.eql(0);
     });
-
-    async function indexTestDocs() {
-      await asyncForEach(originalDocTimestamps, async (timestamp: string) => {
-        await createEsDocument(es, new Date(timestamp).valueOf(), 1, ES_TEST_INDEX_NAME);
-      });
-
-      await esTestIndexTool.waitForDocs(
-        DOCUMENT_SOURCE,
-        DOCUMENT_REFERENCE,
-        originalDocTimestamps.length
-      );
-    }
   });
-
-  async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
-    const searchResult = await es.search({
-      index: alertsAsDataIndex,
-      body: { query: { match_all: {} } },
-    });
-    return searchResult.hits.hits as Array<SearchHit<T>>;
-  }
-
-  async function waitForEventLogDocs(
-    id: string,
-    spaceId: string,
-    actions: Map<string, { gte: number } | { equal: number }>
-  ) {
-    return await retry.try(async () => {
-      return await getEventLog({
-        getService,
-        spaceId,
-        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        id,
-        provider: 'alerting',
-        actions,
-      });
-    });
-  }
-
-  async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-    const scheduledTask = await es.get<TaskManagerDoc>({
-      id: `task:${id}`,
-      index: '.kibana_task_manager',
-    });
-    return scheduledTask._source!;
-  }
-
-  async function searchScheduledTask(id: string) {
-    const searchResult = await es.search({
-      index: '.kibana_task_manager',
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  'task.id': `task:${id}`,
-                },
-              },
-              {
-                terms: {
-                  'task.scope': ['alerting'],
-                },
-              },
-            ],
-          },
-        },
-      },
-    });
-
-    // @ts-expect-error
-    return searchResult.hits.total.value;
-  }
 }

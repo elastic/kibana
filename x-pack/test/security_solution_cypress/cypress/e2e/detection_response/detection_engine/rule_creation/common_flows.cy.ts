@@ -8,7 +8,6 @@
 import { ruleFields } from '../../../../data/detection_engine';
 import {
   ABOUT_CONTINUE_BTN,
-  ABOUT_EDIT_BUTTON,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_BUTTON,
@@ -34,6 +33,7 @@ import {
   fillNote,
   fillReferenceUrls,
   fillRelatedIntegrations,
+  fillRequiredFields,
   fillRiskScore,
   fillRuleName,
   fillRuleTags,
@@ -52,13 +52,14 @@ import { visit } from '../../../../tasks/navigation';
 // to ensure we don't miss any changes that maybe affect one of these more obscure UI components
 // in the creation form. For any rule type specific functionalities, please include
 // them in the relevant /rule_creation/[RULE_TYPE].cy.ts test.
+
 describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
     createTimeline()
       .then((response) => {
-        return response.body.data.persistTimeline.timeline.savedObjectId;
+        return response.body.savedObjectId;
       })
       .as('timelineId');
     visit(CREATE_RULE_URL);
@@ -67,6 +68,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
   it('Creates and enables a rule', function () {
     cy.log('Filling define section');
     importSavedQuery(this.timelineId);
+    fillRequiredFields();
     fillRelatedIntegrations();
     cy.get(DEFINE_CONTINUE_BUTTON).click();
 
@@ -97,7 +99,6 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
 
     // expect about step to populate
-    cy.get(ABOUT_EDIT_BUTTON).click();
     cy.get(RULE_NAME_INPUT).invoke('val').should('eql', ruleFields.ruleName);
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
     cy.get(SCHEDULE_CONTINUE_BUTTON).click();

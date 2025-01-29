@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Rule } from 'eslint';
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES, TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
 
 import { checkNodeForExistingDataTestSubjProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
@@ -33,7 +34,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
     fixable: 'code',
   },
   create(context) {
-    const { getCwd, getFilename, getScope, report } = context;
+    const { getCwd, getFilename, sourceCode, report } = context;
 
     return {
       JSXIdentifier: (node: TSESTree.Node) => {
@@ -52,7 +53,10 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
           return;
         }
 
-        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, getScope);
+        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, () =>
+          // @ts-expect-error upgrade typescript v5.1.6
+          sourceCode.getScope(node as TSNode)
+        );
 
         if (hasDataTestSubjProp) {
           // JSXOpeningElement already has a prop for data-test-subj. Bail.
@@ -67,7 +71,9 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const appName = getAppName(fileName, cwd);
 
         // 2. Component name
-        const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
+        // @ts-expect-error upgrade typescript v5.1.6
+        const functionDeclaration = sourceCode.getScope(node as TSNode)
+          .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
         const componentName = `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}`;
 

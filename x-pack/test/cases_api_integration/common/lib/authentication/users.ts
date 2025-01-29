@@ -23,6 +23,9 @@ import {
   securitySolutionOnlyReadDelete,
   noCasesConnectors as noCasesConnectorRole,
   onlyActions as onlyActionsRole,
+  securitySolutionOnlyCreateComment,
+  securitySolutionOnlyNoCreateComment,
+  securitySolutionOnlyReadCreateComment,
 } from './roles';
 import { User } from './types';
 
@@ -60,6 +63,24 @@ export const secOnlyNoDelete: User = {
   username: 'sec_only_no_delete',
   password: 'sec_only_no_delete',
   roles: [securitySolutionOnlyNoDelete.name],
+};
+
+export const secOnlyCreateComment: User = {
+  username: 'sec_only_create_comment',
+  password: 'sec_only_create_comment',
+  roles: [securitySolutionOnlyCreateComment.name],
+};
+
+export const secOnlyReadCreateComment: User = {
+  username: 'sec_only_read_create_comment',
+  password: 'sec_only_read_create_comment',
+  roles: [securitySolutionOnlyReadCreateComment.name],
+};
+
+export const secOnlyNoCreateComment: User = {
+  username: 'sec_only_no_create_comment',
+  password: 'sec_only_no_create_comment',
+  roles: [securitySolutionOnlyNoCreateComment.name],
 };
 
 export const secOnlyRead: User = {
@@ -159,6 +180,9 @@ export const users = [
   secOnlyDelete,
   secOnlyReadDelete,
   secOnlyNoDelete,
+  secOnlyCreateComment,
+  secOnlyReadCreateComment,
+  secOnlyNoCreateComment,
   obsOnly,
   obsOnlyRead,
   obsOnlyReadAlerts,

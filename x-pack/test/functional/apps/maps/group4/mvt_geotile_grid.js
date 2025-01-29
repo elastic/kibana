@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 const MB_VECTOR_SOURCE_ID = 'g1xkv';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
@@ -28,8 +28,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render with mvt-source (style meta from ES)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from ES)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from ES)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const tileUrl = new URL(
         mapboxStyle.sources[MB_VECTOR_SOURCE_ID].tiles[0],
@@ -78,29 +78,29 @@ export default function ({ getPageObjects, getService }) {
           1622,
           'rgba(0,0,0,0)',
           1623,
-          '#ecf1f7',
+          '#d8e7ff',
           2643.875,
-          '#d9e3ef',
+          '#c8ddff',
           3664.75,
-          '#c5d5e7',
+          '#b8d4ff',
           4685.625,
-          '#b2c7df',
+          '#a8caff',
           5706.5,
-          '#9eb9d8',
+          '#98c0ff',
           6727.375,
-          '#8bacd0',
+          '#87b6ff',
           7748.25,
-          '#769fc8',
+          '#75acff',
           8769.125,
-          '#6092c0',
+          '#61a2ff',
         ],
         'fill-opacity': 0.75,
       });
     });
 
     it('should render with mvt-source (style meta from local - count)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
         (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
@@ -123,29 +123,29 @@ export default function ({ getPageObjects, getService }) {
           0,
           'rgba(0,0,0,0)',
           1,
-          '#ecf1f7',
+          '#d8e7ff',
           1.875,
-          '#d9e3ef',
+          '#c8ddff',
           2.75,
-          '#c5d5e7',
+          '#b8d4ff',
           3.625,
-          '#b2c7df',
+          '#a8caff',
           4.5,
-          '#9eb9d8',
+          '#98c0ff',
           5.375,
-          '#8bacd0',
+          '#87b6ff',
           6.25,
-          '#769fc8',
+          '#75acff',
           7.125,
-          '#6092c0',
+          '#61a2ff',
         ],
         'fill-opacity': 0.75,
       });
     });
 
     it('should render with mvt-source (style meta from local - metric)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
         (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
@@ -168,29 +168,29 @@ export default function ({ getPageObjects, getService }) {
           -1,
           'rgba(0,0,0,0)',
           0,
-          '#ecf1f7',
+          '#d8e7ff',
           1867.625,
-          '#d9e3ef',
+          '#c8ddff',
           3735.25,
-          '#c5d5e7',
+          '#b8d4ff',
           5602.875,
-          '#b2c7df',
+          '#a8caff',
           7470.5,
-          '#9eb9d8',
+          '#98c0ff',
           9338.125,
-          '#8bacd0',
+          '#87b6ff',
           11205.75,
-          '#769fc8',
+          '#75acff',
           13073.375,
-          '#6092c0',
+          '#61a2ff',
         ],
         'fill-opacity': 0.75,
       });
     });
 
     it('should render heatmap layer', async () => {
-      await PageObjects.maps.loadSavedMap('geo grid heatmap example');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('geo grid heatmap example');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const heatmapLayer = mapboxStyle.layers.find((layer) => layer.id === '3xlvm_heatmap');
 

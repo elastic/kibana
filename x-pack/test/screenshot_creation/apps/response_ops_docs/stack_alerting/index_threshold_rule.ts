@@ -60,10 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1300
       );
       await ofComboBox.type('bytes');
-      const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
       const ofOptions = ofOptionsString.trim().split('\n');
       expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
 
       await testSubjects.click('groupByExpression');
       await testSubjects.click('overExpressionSelect');
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await nameInput1.click();
 
       await testSubjects.click('thresholdPopover');
-      await testSubjects.setValue('alertThresholdInput', '420000');
+      await testSubjects.setValue('alertThresholdInput0', '420000');
       await testSubjects.click('forLastExpression');
       await testSubjects.setValue('timeWindowSizeNumber', '24');
       await testSubjects.setValue('timeWindowUnitSelect', 'hours');

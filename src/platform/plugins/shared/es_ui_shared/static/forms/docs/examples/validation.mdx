@@ -1,0 +1,411 @@
+---
+id: formLibExampleValidation
+slug: /form-lib/examples/validation
+title: Validation
+description: Don't let invalid data leak out of your form!
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+## Basic
+
+```js
+import React from 'react';
+import {
+  useForm,
+  Form,
+  UseField,
+  FieldConfig,
+} from '<path-to-form-lib>';
+
+interface MyForm {
+  name: string;
+}
+
+const nameConfig: FieldConfig<MyForm, string> = {
+  validations: [
+    {
+      validator: ({ value }) => {
+        if (value.trim() === '') {
+          return {
+            message: 'The name cannot be empty.',
+          };
+        }
+      },
+    },
+    // ...
+    // You can add as many validations as you need.
+
+    // It is a good practice to keep validators single purposed,
+    // and compose them in the "validations" array.
+    // This way if any other field has the same validation we can easily
+    // copy it over or extract it and import it in multiple places.
+  ],
+};
+
+export const MyComponent = () => {
+  const { form } = useForm<MyForm>();
+
+  return (
+    <Form form={form}>
+      <UseField<string> path="name" config={nameConfig}>
+        {(field) => {
+          const isInvalid = !field.isChangingValue && field.errors.length > 0;
+          const errorMessage = !isChangingValue && errors.length ? errors[0].message : null;
+
+          return (
+            <EuiFormRow
+              label={field.label}
+              helpText={helpText}
+              error={errorMessage}
+              isInvalid={isInvalid}
+            >
+              <EuiFieldText
+                isInvalid={isInvalid}
+                value={field.value}
+                onChange={field.onChange}
+                fullWidth
+              />
+            </EuiFormRow>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+**Note:** Before creating your own validator, verify that it does not exist already in our <DocLink id="formLibHelpersValidators" text="reusable field validators"/>.
+
+## Asynchronous validation
+
+You can mix synchronous and asynchronous validations. Although it is usually better to first declare the synchronous one(s), this way if any of those fail, the asynchronous validation is not executed.
+
+In the example below, if you enter "bad" in the field, the asynchronous validation will fail.
+
+```js
+const nameConfig: FieldConfig<MyForm, string> = {
+  validations: [
+    {
+      validator: emptyField('The name cannot be empty,'),
+    },
+    {
+      validator: indexNameField(i18n),
+    },
+    {
+      validator: ({ value }) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            if (value === 'bad') {
+              resolve({ message: 'This index already exists' });
+            }
+            resolve();
+          }, 2000);
+        });
+      },
+    },
+  ],
+};
+```
+
+### Cancel asynchronous validation
+
+If you need to cancel the previous asynchronous validation before calling the new one, you can do it by adding a `cancel()` handler to the Promise returned.
+
+**Note:** Make sure **to not** use an `async/await` validator function when returning your Promise, or the `cancel` handler will be stripped out.
+
+```js
+const nameConfig: FieldConfig<MyForm, string> = {
+  validations: [
+    {
+      validator: ({ value }) => {
+        let isCanceled = false;
+        const promise: Promise<ValidationError | void | undefined> & { cancel?(): void } = new Promise((resolve) => {
+          setTimeout(() => {
+            if (isCanceled) {
+              console.log('This promise has been canceled, skipping');
+              return resolve();
+            }
+
+            if (value === 'bad') {
+              resolve({ message: 'This index already exists' });
+            }
+            resolve();
+          }, 2000);
+        });
+
+        promise.cancel = () => {
+          isCanceled = true;
+        };
+
+        return promise;
+      },
+    },
+  ],
+};
+
+export const CancelAsyncValidation = () => {
+  const { form } = useForm<MyForm>();
+  return (
+    <Form form={form}>
+      <UseField<string> path="name" config={nameConfig}>
+        {(field) => {
+          const isInvalid = !field.isChangingValue && field.errors.length > 0;
+          return (
+            <>
+              <EuiFieldText
+                isInvalid={isInvalid}
+                value={field.value}
+                onChange={field.onChange}
+                isLoading={field.isValidating}
+                fullWidth
+              />
+              {isInvalid && <div>{field.getErrorsMessages()}</div>}
+            </>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+## Validating arrays of items
+
+When validating an array of items we might have to handle **two types of validations**: one to make sure the array is valid (e.g. it is not empty or it contains X number of items), and another one to make sure that each item in the array is valid.
+
+To solve that problem, you can give a `type` to a validation to distinguish between different validations.
+
+Let's go through an example. Imagine that we have a form field to enter "tags" (an array of string). The array cannot be left empty and the tags cannot contain the "?" and "/" characters.
+
+The form field `value` is an array of string, and the default validation(s) (those without a `type` defined) will run against this **array**. For the validation of the items we will use a **typed** validation.
+
+**Note:** Typed validation are not executed when the field value changes, we need to manually validate the field with `field.validate(...)`.
+
+```js
+const tagsConfig: FieldConfig<MyForm, string[]> = {
+  defaultValue: [],
+  validations: [
+    // Validator for the Array
+    { validator: emptyField('You need to add at least one tag') },
+    {
+      // Validator for the items
+      validator: containsCharsField({
+        message: ({ charsFound }) => {
+          return `Remove the char ${charsFound.join(', ')} from the field.`;
+        },
+        chars: ['?', '/'],
+      }),
+      // We give a custom type to this validation.
+      // This validation won't be executed when the field value changes
+      // (when items are added or removed from the array).
+      // This means that we will need to manually call:
+      // field.validate({ validationType: 'arrayItem' })
+      // to run this validation.
+      type: 'arrayItem',
+    },
+  ],
+};
+
+export const MyComponent = () => {
+  const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
+    console.log('Is form valid:', isValid);
+    console.log('Form data', data);
+  };
+
+  const { form } = useForm<MyForm>({ onSubmit });
+
+  return (
+    <Form form={form}>
+      <UseField<string[]> path="tags" config={tagsConfig}>
+        {(field) => {
+          // Check for error messages on **both** the default validation and the "arrayItem" type
+          const errorMessage =
+            field.getErrorsMessages() ?? field.getErrorsMessages({ validationType: 'arrayItem' });
+
+          const onCreateOption = (value: string) => {
+            const { isValid } = field.validate({
+              value: value,
+              validationType: 'arrayItem', // Validate  **only** this validation type against the value provided
+            }) as { isValid: boolean };
+
+            if (!isValid) {
+              // Reject the user's input.
+              return false;
+            }
+
+            // Add the tag to the array
+            field.setValue([...field.value, value]);
+          };
+
+          const onChange = (options: EuiComboBoxOptionOption[]) => {
+            field.setValue(options.map((option) => option.label));
+          };
+
+          const onSearchChange = (value: string) => {
+            if (value !== undefined) {
+              // Clear immediately the "arrayItem" validation type
+              field.clearErrors('arrayItem');
+            }
+          };
+
+          return (
+            <>
+              <EuiComboBox
+                noSuggestions
+                placeholder="Type and then hit ENTER"
+                selectedOptions={field.value.map((v) => ({ label: v }))}
+                onCreateOption={onCreateOption}
+                onChange={onChange}
+                onSearchChange={onSearchChange}
+                fullWidth
+              />
+              {!field.isValid && <div>{errorMessage}</div>}
+              <button onClick={form.submit}>Submit</button>
+            </>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+Great, but that's **a lot** of code for a simple tags field input. Fortunatelly the `<ComboBoxField />` helper component takes care of all the heavy lifting for us. <DocLink id="formLibHelpersComponents" section="comboboxfield" text="Have a look at the example" />.
+
+## Dynamic data inside your validation
+
+If your validator requires dynamic data you can provide it through the `validationData` prop on the `<UseField />` component. The data is then available in the validator through the `customData.value` property.
+
+```typescript
+// Form schema
+const schema = {
+  name: {
+    validations: [{
+      validator: ({ customData: { value } }) => {
+        // value === [1, 2 ,3] as passed below
+      }
+    }]
+  }
+};
+
+// Component JSX
+<UseField path="name" validationData={[1, 2, 3]} />
+```
+
+### Asynchronous dynamic data in the validator
+
+There might be times where you validator requires dynamic data asynchronously that is not immediately available when the field value changes (and the validation is triggered) but at a later stage.
+
+Let's imagine that you have a form with an `indexName` text field and that you want to display below the form the list of indices in your cluster that match the index name entered by the user.
+
+You would probably have something like this
+
+```js
+const MyForm = () => {
+  const { form } = useForm();
+  const [{ indexName }] = useFormData({ watch: 'indexName' });
+  const [indices, setIndices] = useState([]);
+
+  const fetchIndices = useCallback(async () => {
+    const result = await httpClient.get(`/api/search/${indexName}`);
+    setIndices(result);
+  }, [indexName]);
+
+  // Whenever the indexName changes we fetch the indices
+  useEffet(() => {
+    fetchIndices();
+  }, [fetchIndices]);
+
+  return (
+    <>
+      <Form form={form}>
+        <UseField path="indexName" />
+      </Form>
+
+      /* Display the list of indices that match the index name entered */
+      <ul>
+        {indices.map((index, i) => <li key={i}>{index}</li>)}
+      </ul>
+    <>
+  );
+}
+```
+
+Great. Now let's imagine that you want to add a validation to the `indexName` field and mark it as invalid if it does not match at least one index in the cluster. For that you need to provide dynamic data (the list of indices fetched) which is not immediately accesible when the field value changes (and the validation kicks in). We need to ask the validation to **wait** until we have fetched the indices and then have access to the dynamic data.
+
+For that we will use the `validationDataProvider` prop that you can pass to the field. This data provider will be available in the validator through the `customData.provider()` handler.
+
+```js
+// form.schema.ts
+const schema = {
+  indexName: {
+    validations: [{
+      validator: async ({ value, customData: { provider } }) => {
+        // Whenever a new value is sent to the `validationData$` Observable
+        // the Promise will resolve with that value
+        const indices = await provider();
+
+        if (!indices.include(value)) {
+          return {
+            message: `This index does not match any of your indices`
+          }
+        }
+      }
+    }]
+  } as FieldConfig
+}
+
+// myform.tsx
+import { firstValueFrom } from 'rxjs';
+
+const MyForm = () => {
+  const { form } = useForm();
+  const [indices, setIndices] = useState([]);
+  const [indices$, nextIndices] = useBehaviorSubject(null); // Use the provided util hook to create an observable
+
+  const onIndexNameChange = useCallback(({ indexName }) => {
+    // Whenever the indexName changes reset the subject to not send stale data to the validator
+    nextIndices(null);
+  }, []);
+
+  const [{ indexName }] = useFormData({
+    form,
+    watch: 'indexName',
+    onChange: onIndexNameChange, // React to changes before any validation is executed
+  });
+
+  const indicesProvider = useCallback(() => {
+    // Wait until we have fetched the indices.
+    // The result will then be sent to the field validator(s) (when calling await provider(););
+    return await firstValueFrom(indices$.pipe(first((data) => data !== null)));
+  }, [indices$, nextIndices]);
+
+  const fetchIndices = useCallback(async () => {
+    const result = await httpClient.get(`/api/search/${indexName}`);
+    // update the component state
+    setIndices(result);
+
+    // Send the indices to the BehaviorSubject to resolve the "indicesProvider()" promise
+    nextIndices(result);
+  }, [indexName]);
+
+  // Whenever the indexName changes we fetch the indices
+  useEffet(() => {
+    fetchIndices();
+  }, [fetchIndices]);
+
+  return (
+    <>
+      <Form form={form}>
+        /* Pass the Observable to your field */
+        <UseField path="indexName" validationDataProvider={indicesProvider} />
+      </Form>
+
+      ...
+    <>
+  );
+}
+```
+
+Et voilà! We have provided dynamic data asynchronously to our validator.

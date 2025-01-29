@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "conflicts-0002",
+    "index": "auditbeat-conflicts-0002",
     "mappings": {
       "dynamic": false,
       "properties": {

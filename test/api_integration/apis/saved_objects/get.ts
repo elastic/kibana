@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -36,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200', async () =>
       await supertest
         .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({
@@ -73,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
     it("should return an object's managed property", async () => {
       await supertest
         .get(`/api/saved_objects/dashboard/11fb046d-0e50-48a0-a410-a744b82cbffd`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({
@@ -125,7 +129,10 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const { body } = await supertest.get(`/api/saved_objects/config/7.0.0-alpha1`).expect(200);
+      const { body } = await supertest
+        .get(`/api/saved_objects/config/7.0.0-alpha1`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
 
       expect(body.coreMigrationVersion).to.be.ok();
       expect(body.coreMigrationVersion).not.to.be('7.0.0');
@@ -137,6 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return same generic error as when index does not exist', async () =>
         await supertest
           .get(`/api/saved_objects/visualization/foobar`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(404)
           .then((resp) => {
             expect(resp.body).to.eql({

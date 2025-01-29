@@ -5,38 +5,31 @@
  * 2.0.
  */
 
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
-import { generateNPolicies } from '../../helpers';
+import { generateNAgentPolicies } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_uninstall_token_privileges', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await generateNAgentPolicies(supertest, 2);
+      await fleetAndAgents.setup();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
-    let generatedPolicies: Map<string, AgentPolicy>;
-    before(async () => {
-      const generatedPoliciesArray = await generateNPolicies(supertest, 2);
-
-      generatedPolicies = new Map();
-      generatedPoliciesArray.forEach((policy) => generatedPolicies.set(policy.id, policy));
-    });
 
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     const SCENARIOS = [
       {
@@ -80,7 +73,6 @@ export default function (providerContext: FtrProviderContext) {
         scenarios: SCENARIOS,
       },
     ];
-    before(async () => {});
     runPrivilegeTests(ROUTES, supertestWithoutAuth);
   });
 }

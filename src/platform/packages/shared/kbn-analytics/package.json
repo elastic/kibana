@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/analytics",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Kibana Analytics tool",
+  "author": "Kibana Core",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "sideEffects": false
+}

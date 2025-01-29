@@ -300,9 +300,11 @@ export default ({ getService }: FtrProviderContext) => {
             type: 'logs',
             dataset: 'elastic_agent.filebeat',
           },
-          'event.agent_id_status': 'verified',
-          'event.ingested': '2022-03-23T16:50:28.994Z',
-          'event.dataset': 'elastic_agent.filebeat',
+          event: {
+            agent_id_status: 'verified',
+            ingested: '2022-03-23T16:50:28.994Z',
+            dataset: 'elastic_agent.filebeat',
+          },
           'event.kind': 'signal',
           'kibana.alert.ancestors': [
             {
@@ -345,6 +347,9 @@ export default ({ getService }: FtrProviderContext) => {
             version: 1,
             exceptions_list: [],
             immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
             type: 'query',
             language: 'kuery',
             index: ['.siem-signals-*'],
@@ -382,6 +387,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
           'kibana.alert.original_event.dataset': 'elastic_agent.filebeat',
           'kibana.alert.original_event.kind': 'signal',
+          'kibana.alert.rule.execution.type': 'scheduled',
         });
       });
 
@@ -463,9 +469,11 @@ export default ({ getService }: FtrProviderContext) => {
             type: 'logs',
             dataset: 'elastic_agent.filebeat',
           },
-          'event.agent_id_status': 'verified',
-          'event.ingested': '2022-03-23T16:50:28.994Z',
-          'event.dataset': 'elastic_agent.filebeat',
+          event: {
+            agent_id_status: 'verified',
+            ingested: '2022-03-23T16:50:28.994Z',
+            dataset: 'elastic_agent.filebeat',
+          },
           'event.kind': 'signal',
           'kibana.alert.ancestors': [
             {
@@ -508,6 +516,9 @@ export default ({ getService }: FtrProviderContext) => {
             version: 1,
             exceptions_list: [],
             immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
             type: 'query',
             language: 'kuery',
             index: ['.alerts-security.alerts-default'],
@@ -545,6 +556,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
           'kibana.alert.original_event.dataset': 'elastic_agent.filebeat',
           'kibana.alert.original_event.kind': 'signal',
+          'kibana.alert.rule.execution.type': 'scheduled',
         });
       });
     });

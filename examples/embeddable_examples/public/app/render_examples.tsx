@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useState } from 'react';
@@ -27,19 +28,14 @@ import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
 import type { SearchApi, SearchSerializedState } from '../react_embeddables/search/types';
 
 export const RenderExamples = () => {
-  const initialState = useMemo(() => {
-    return {
-      rawState: {
-        timeRange: undefined,
-      },
-      references: [],
-    };
-    // only run onMount
-  }, []);
-
   const parentApi = useMemo(() => {
     return {
       reload$: new Subject<void>(),
+      getSerializedStateForChild: () => ({
+        rawState: {
+          timeRange: undefined,
+        },
+      }),
       timeRange$: new BehaviorSubject<TimeRange>({
         from: 'now-24h',
         to: 'now',
@@ -51,7 +47,7 @@ export const RenderExamples = () => {
   const [api, setApi] = useState<SearchApi | null>(null);
   const [hidePanelChrome, setHidePanelChrome] = useState<boolean>(false);
   const [dataLoading, timeRange] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading,
+    api?.dataLoading$,
     parentApi.timeRange$
   );
 
@@ -85,8 +81,7 @@ export const RenderExamples = () => {
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
             {`<ReactEmbeddableRenderer<State, Api>
   type={SEARCH_EMBEDDABLE_ID}
-  state={initialState}
-  parentApi={parentApi}
+  getParentApi={() => parentApi}
   onApiAvailable={(newApi) => {
     setApi(newApi);
   }}
@@ -104,11 +99,10 @@ export const RenderExamples = () => {
 
           <EuiSpacer size="s" />
 
-          <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
+          <ReactEmbeddableRenderer<SearchSerializedState, SearchSerializedState, SearchApi>
             key={hidePanelChrome ? 'hideChrome' : 'showChrome'}
             type={SEARCH_EMBEDDABLE_ID}
-            state={initialState}
-            parentApi={parentApi}
+            getParentApi={() => parentApi}
             onApiAvailable={(newApi) => {
               setApi(newApi);
             }}

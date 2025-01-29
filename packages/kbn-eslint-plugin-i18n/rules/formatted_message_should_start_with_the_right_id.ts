@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
@@ -22,7 +23,7 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
     fixable: 'code',
   },
   create(context) {
-    const { cwd, filename, getScope, sourceCode, report } = context;
+    const { cwd, filename, sourceCode, report } = context;
 
     return {
       JSXElement: (node: TSESTree.JSXElement) => {
@@ -45,7 +46,9 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
           idAttribute.value.value;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
+        // @ts-expect-error upgrade typescript v5.1.6
+        const functionDeclaration = sourceCode.getScope(node as TSNode)
+          .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
 
         // Check if i18n has already been imported into the file

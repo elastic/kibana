@@ -28,8 +28,6 @@ export default function ({ getService }: FtrProviderContext) {
       },
     };
 
-    after(async () => await deleteAllIndices());
-
     before(async () => {
       log.debug('Creating index');
       try {
@@ -50,13 +48,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should get the index mappings', async () => {
-      const { body } = await getMapping(indexName).expect(200);
+      const { status, body } = await getMapping(indexName);
+      expect(status).to.eql(200);
 
       expect(body.mappings).to.eql(mappings);
     });
     it('show update the index mappings', async () => {
-      await updateMappings(indexName).expect(200);
-      const { body } = await getMapping(indexName).expect(200);
+      const { status } = await updateMappings(indexName);
+      expect(status).to.eql(200);
+      const { status: getStatus, body } = await getMapping(indexName);
+      expect(getStatus).to.eql(200);
+
       expect(body.mappings).to.eql({
         ...mappings,
         properties: { ...mappings.properties, name: { type: 'text' } },

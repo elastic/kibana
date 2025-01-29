@@ -13,14 +13,23 @@ import { stringify } from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
 import { getRandomString } from './lib';
 import { DataViewType } from '@kbn/data-views-plugin/common';
+import { INDEX_TO_ROLLUP_MAPPINGS } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
+  const { createIndexWithMappings, createMockRollupIndex, getJobPayload, createJob, cleanUp } =
     registerHelpers(getService);
 
   describe('index patterns extension', () => {
+    // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+    // We will simulate rollup usage by creating a mock-up rollup index
+    before(async () => {
+      await createMockRollupIndex();
+    });
+
+    after(() => cleanUp());
+
     describe('Fields for wildcards', () => {
       describe('query params validation', () => {
         let uri;
@@ -56,7 +65,7 @@ export default function ({ getService }) {
 
       it('should return the correct fields', async () => {
         // Create a Rollup job on an index with the INDEX_TO_ROLLUP_MAPPINGS
-        const indexName = await createIndexWithMappings();
+        const indexName = await createIndexWithMappings(undefined, INDEX_TO_ROLLUP_MAPPINGS);
         const rollupIndex = getRandomString();
         const payload = getJobPayload(indexName, undefined, rollupIndex);
         await createJob(payload);
@@ -64,7 +73,6 @@ export default function ({ getService }) {
         // Query for wildcard
         const params = {
           pattern: indexName,
-          type: DataViewType.ROLLUP,
           rollup_index: rollupIndex,
         };
         const uri = `${BASE_URI}?${stringify(params, { sort: false })}`;
@@ -74,12 +82,12 @@ export default function ({ getService }) {
           .expect(200);
 
         // Verify that the fields for wildcard correspond to our declared mappings
-        // noting that testTotalField and testTagField are not shown in the field caps results
         const fieldsForWildcard = body.fields.map((field) => field.name);
-        expect(fieldsForWildcard.sort()).eql(['testCreatedField']);
-
-        // Cleanup
-        await cleanUp();
+        expect(fieldsForWildcard.sort()).eql([
+          'testCreatedField',
+          'testTagField',
+          'testTotalField',
+        ]);
       });
     });
   });

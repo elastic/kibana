@@ -6,10 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
 import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
+import {
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from '@kbn/alerting-plugin/server/saved_objects';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import {
@@ -34,7 +38,9 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
       await runInvalidateTask();
     });
 
-    after(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     async function getAdHocRunSO(id: string) {
       const result = await es.get({
@@ -119,6 +125,8 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     }
 
     it('should wait to invalidate API key until backfill for rule is complete', async () => {
+      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
+      const end = moment().utc().startOf('day').subtract(4, 'day').toISOString();
       const spaceId = SuperuserAtSpace1.space.id;
 
       // create 2 rules
@@ -129,6 +137,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         .send(getRule())
         .expect(200);
       const ruleId1 = rresponse1.body.id;
+      objectRemover.add(spaceId, ruleId1, 'rule', 'alerting');
 
       const rresponse2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
@@ -137,78 +146,74 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         .send(getRule())
         .expect(200);
       const ruleId2 = rresponse2.body.id;
+      objectRemover.add(spaceId, ruleId2, 'rule', 'alerting');
+
+      // wait for each rule to run once
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: ruleId1,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
+      });
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: ruleId2,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
+      });
 
       // schedule backfill for rule 1
       const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([
-          {
-            rule_id: ruleId1,
-            start: '2023-10-19T12:00:00.000Z',
-            end: '2023-10-22T12:00:00.000Z',
-          },
-        ])
+        .send([{ rule_id: ruleId1, start, end }])
         .expect(200);
+
       const result = response.body;
       const backfillId = result[0].id;
       const schedule = result[0].schedule;
 
       // check that the ad hoc run SO was created
       const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-      const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+      const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
       expect(typeof adHocRun1.apiKeyId).to.be('string');
       expect(typeof adHocRun1.apiKeyToUse).to.be('string');
       expect(typeof adHocRun1.createdAt).to.be('string');
       expect(adHocRun1.duration).to.eql('12h');
       expect(adHocRun1.enabled).to.eql(true);
-      expect(adHocRun1.start).to.eql('2023-10-19T12:00:00.000Z');
-      expect(adHocRun1.end).to.eql('2023-10-22T12:00:00.000Z');
+      expect(adHocRun1.start).to.eql(start);
+      expect(adHocRun1.end).to.eql(end);
       expect(adHocRun1.status).to.eql('pending');
       expect(adHocRun1.spaceId).to.eql(spaceId);
       testExpectedRule(adHocRun1, undefined, true);
-      expect(adHocRun1.schedule).to.eql([
-        {
-          runAt: '2023-10-20T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          runAt: '2023-10-20T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          runAt: '2023-10-21T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          runAt: '2023-10-21T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          runAt: '2023-10-22T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          runAt: '2023-10-22T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-      ]);
 
-      // delete both rules which will mark the api keys for invalidation
+      let currentStart = start;
+      adHocRun1.schedule.forEach((sched: any) => {
+        expect(sched.interval).to.eql('12h');
+        expect(sched.status).to.eql('pending');
+        const runAt = moment(currentStart).add(12, 'hours').toISOString();
+        expect(sched.runAt).to.eql(runAt);
+        currentStart = runAt;
+      });
+
+      // update API key both rules which will mark the api keys for invalidation
       await supertestWithoutAuth
-        .delete(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId1}`)
+        .post(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId1}/_update_api_key`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
         .expect(204);
+
       await supertestWithoutAuth
-        .delete(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId2}`)
+        .post(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId2}/_update_api_key`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
         .expect(204);
@@ -247,11 +252,22 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         expect(e?.event?.outcome).to.eql('success');
       }
 
-      // invoke the invalidate task
-      await runInvalidateTask();
+      // wait for all the ad hoc run SO to be deleted
+      await retry.try(async () => {
+        try {
+          // throws when not found
+          await getAdHocRunSO(backfillId);
+          throw new Error('should have thrown');
+        } catch (e) {
+          expect(e.message).not.to.eql('should have thrown');
+        }
+      });
 
       // pending API key should now be deleted because backfill is done
       await retry.try(async () => {
+        // invoke the invalidate task
+        await runInvalidateTask();
+
         const results = await getApiKeysPendingInvalidation();
         expect(results.length).to.eql(0);
         return results;

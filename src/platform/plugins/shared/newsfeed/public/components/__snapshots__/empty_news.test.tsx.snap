@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`empty_news rendering renders the default Empty News 1`] = `
+<EuiEmptyPrompt
+  body={
+    <p>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="If your Kibana instance doesn’t have internet access, ask your administrator to disable this feature. Otherwise, we’ll keep trying to fetch the news."
+        id="newsfeed.emptyPrompt.noNewsText"
+      />
+    </p>
+  }
+  data-test-subj="emptyNewsfeed"
+  iconType="documents"
+  title={
+    <h2>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="No news?"
+        id="newsfeed.emptyPrompt.noNewsTitle"
+      />
+    </h2>
+  }
+  titleSize="s"
+/>
+`;

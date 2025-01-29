@@ -11,6 +11,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { omit } from 'lodash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { verifyErrorResponse } from '../search_oss/verify_error';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -18,6 +19,9 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const security = getService('security');
+
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
   // TODO: `supertestWithoutAuth` is typed as `any` in `x-pack/test/api_integration/apis/search/search.ts`,
   // but within Serverless tests it's typed as `supertest.SuperTest<supertest.Test>`. This causes TS errors
   // when accessing `loginResponse.headers`, so we cast it as `any` here to match the original tests.
@@ -44,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('search', () => {
     before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       // ensure es not empty
       await es.index({
         index: 'search-api-test',
@@ -56,16 +61,18 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.delete({
         index: 'search-api-test',
       });
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('post', () => {
       it('should return 200 with final response without search id if wait_for_completion_timeout is long enough', async function () {
-        const resp = await supertest
+        const resp = await supertestNoAuth
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
+          .set(roleAuthc.apiKeyHeader)
           .send({
             params: {
               body: {
@@ -88,12 +95,13 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with search id and partial response if wait_for_completion_timeout is not long enough', async function () {
         await markRequiresShardDelayAgg(this);
 
-        const resp = await supertest
+        const resp = await supertestNoAuth
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
+          .set(roleAuthc.apiKeyHeader)
           .send({
             params: {
               body: {

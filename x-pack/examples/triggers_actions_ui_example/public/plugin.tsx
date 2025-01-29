@@ -8,7 +8,11 @@
 import React from 'react';
 import { Plugin, CoreSetup, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { get } from 'lodash';
 import {
@@ -35,6 +39,10 @@ export interface TriggersActionsUiExamplePublicStartDeps {
   alerting: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  charts: ChartsPluginSetup;
+  dataViews: DataViewsPublicPluginStart;
+  dataViewsEditor: DataViewEditorStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export class TriggersActionsUiExamplePlugin

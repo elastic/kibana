@@ -14,10 +14,14 @@ import {
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
   const title = 'logs-*';
   const prevDataViewId = '91200a00-9efd-11e7-acb3-3dab96693fab';
   const PREVIEW_PATH = `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`;
@@ -26,20 +30,23 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     const kibanaServer = getService('kibanaServer');
     before(async () => {
-      const result = await supertest
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      const result = await supertestWithoutAuth
         .post(DATA_VIEW_PATH)
         .send({ data_view: { title } })
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
       dataViewId = result.body.data_view.id;
     });
     after(async () => {
-      await supertest
+      await supertestWithoutAuth
         .delete(SPECIFIC_DATA_VIEW_PATH.replace('{id}', dataViewId))
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     beforeEach(async () => {
       await kibanaServer.importExport.load(
@@ -53,11 +60,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can preview', async () => {
-      const res = await supertest
+      const res = await supertestWithoutAuth
         .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fromId: prevDataViewId,
           toId: dataViewId,
@@ -66,11 +73,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can preview specifying type', async () => {
-      const res = await supertest
+      const res = await supertestWithoutAuth
         .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fromId: prevDataViewId,
           fromType: 'index-pattern',
@@ -80,11 +87,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can save changes', async () => {
-      const res = await supertest
+      const res = await supertestWithoutAuth
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fromId: prevDataViewId,
           toId: dataViewId,
@@ -96,11 +103,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can save changes and remove old saved object', async () => {
-      const res = await supertest
+      const res = await supertestWithoutAuth
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fromId: prevDataViewId,
           toId: dataViewId,
@@ -111,11 +118,11 @@ export default function ({ getService }: FtrProviderContext) {
       expect(res.body.deleteStatus.remainingRefs).to.equal(0);
       expect(res.body.deleteStatus.deletePerformed).to.equal(true);
 
-      const res2 = await supertest
+      const res2 = await supertestWithoutAuth
         .get(SPECIFIC_DATA_VIEW_PATH.replace('{id}', prevDataViewId))
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
 
       expect(res2).to.have.property('statusCode', 404);
     });
@@ -133,11 +140,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it("won't delete if reference remains", async () => {
-        const res = await supertest
+        const res = await supertestWithoutAuth
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -152,20 +159,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('can limit by id', async () => {
         // confirm this will find two items
-        const res = await supertest
+        const res = await supertestWithoutAuth
           .post(PREVIEW_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(res).to.have.property('status', 200);
         expect(res.body.result.length).to.equal(2);
 
         // limit to one item
-        const res2 = await supertest
+        const res2 = await supertestWithoutAuth
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
@@ -173,28 +180,28 @@ export default function ({ getService }: FtrProviderContext) {
             forId: ['960372e0-3224-11e8-a572-ffca06da1357'],
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(res2).to.have.property('status', 200);
         expect(res2.body.result.length).to.equal(1);
       });
 
       it('can limit by type', async () => {
         // confirm this will find two items
-        const res = await supertest
+        const res = await supertestWithoutAuth
           .post(PREVIEW_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(res).to.have.property('status', 200);
         expect(res.body.result.length).to.equal(2);
 
         // limit to one item
-        const res2 = await supertest
+        const res2 = await supertestWithoutAuth
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
@@ -202,8 +209,8 @@ export default function ({ getService }: FtrProviderContext) {
             forType: 'search',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(res2).to.have.property('status', 200);
         expect(res2.body.result.length).to.equal(1);
       });

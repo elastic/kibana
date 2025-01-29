@@ -18,6 +18,9 @@ import {
   getSimpleMlRuleUpdate,
   getSimpleRule,
   updateUsername,
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  installPrebuiltRules,
+  createRuleAssetSavedObject,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -31,10 +34,9 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless update_rules', () => {
+  describe('@ess @serverless @serverlessQA update_rules', () => {
     describe('update rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -59,14 +61,14 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should update a rule with defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const ruleUpdateProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
           setup: '# some setup markdown',
@@ -74,7 +76,13 @@ export default ({ getService }: FtrProviderContext) => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
         });
+
+        const expectedRule = {
+          ...ruleUpdateProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
 
         await securitySolutionApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
@@ -82,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body: updatedRuleResponse } = await securitySolutionApi
           .updateRule({
-            body: expectedRule,
+            body: ruleUpdateProperties,
           })
           .expect(200);
 
@@ -97,20 +105,24 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedRule).toMatchObject(expectedRule);
       });
 
-      it('@skipInServerless should return a 403 forbidden if it is a machine learning job', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+      describe('@skipInServerless', function () {
+        /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
+        this.tags('skipFIPS');
+        it('should return a 403 forbidden if it is a machine learning job', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
 
-        // update a simple rule's type to try to be a machine learning job type
-        const updatedRule = getSimpleMlRuleUpdate('rule-1');
-        updatedRule.rule_id = 'rule-1';
-        updatedRule.name = 'some other name';
-        delete updatedRule.id;
+          // update a simple rule's type to try to be a machine learning job type
+          const updatedRule = getSimpleMlRuleUpdate('rule-1');
+          updatedRule.rule_id = 'rule-1';
+          updatedRule.name = 'some other name';
+          delete updatedRule.id;
 
-        const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(403);
+          const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(403);
 
-        expect(body).toEqual({
-          message: 'Your license does not support machine learning. Please upgrade your license.',
-          status_code: 403,
+          expect(body).toEqual({
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 403,
+          });
         });
       });
 
@@ -130,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -150,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -170,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -195,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 2;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -272,6 +284,61 @@ export default ({ getService }: FtrProviderContext) => {
             '[request body]: max_signals: Number must be greater than or equal to 1'
           );
         });
+      });
+
+      describe('required_fields', () => {
+        it('should reset required fields field to default value on update when not present', async () => {
+          const expectedRule = getCustomQueryRuleParams({
+            rule_id: 'required-fields-default-value-test',
+            required_fields: [],
+          });
+
+          await securitySolutionApi.createRule({
+            body: getCustomQueryRuleParams({
+              rule_id: 'required-fields-default-value-test',
+              required_fields: [{ name: 'host.name', type: 'keyword' }],
+            }),
+          });
+
+          const { body: updatedRuleResponse } = await securitySolutionApi
+            .updateRule({
+              body: getCustomQueryRuleParams({
+                rule_id: 'required-fields-default-value-test',
+                required_fields: undefined,
+              }),
+            })
+            .expect(200);
+
+          expect(updatedRuleResponse).toMatchObject(expectedRule);
+        });
+      });
+
+      // Unskip: https://github.com/elastic/kibana/issues/195921
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        // Install base prebuilt detection rule
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', license: 'elastic' }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+
+        const { body: existingRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        const { body } = await securitySolutionApi
+          .updateRule({
+            body: getCustomQueryRuleParams({
+              ...existingRule,
+              rule_id: 'rule-1',
+              id: undefined,
+              license: 'new license',
+            }),
+          })
+          .expect(400);
+
+        expect(body.message).toEqual('Cannot update "license" field for prebuilt rules');
       });
     });
   });

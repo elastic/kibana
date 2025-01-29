@@ -1,0 +1,47 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-artifacts-container-image
+  description: Kibana container image artifact builds
+  links:
+    - url: https://buildkite.com/elastic/kibana-artifacts-container-image
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: group:kibana-operations
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / artifacts container image
+      description: Kibana container image artifact builds
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-serverless-test-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/artifacts_container_image.yml
+      skip_intermediate_builds: false
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        build_tags: false
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana
+        - kibana-serverless-release

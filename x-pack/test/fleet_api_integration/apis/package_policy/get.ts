@@ -8,18 +8,16 @@
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const superTestWithoutAuth = getService('supertestWithoutAuth');
-  const dockerServers = getService('dockerServers');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  const server = dockerServers.get('registry');
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
@@ -45,13 +43,13 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('get by id', async function () {
+    describe('get by id', function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let endpointPackagePolicyId: string;
 
       before(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -103,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -183,13 +181,13 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/fleet/package_policies/_bulk_get', async function () {
+    describe('POST /api/fleet/package_policies/_bulk_get', function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let endpointPackagePolicyId: string;
 
       before(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -241,7 +239,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -361,7 +359,7 @@ export default function (providerContext: FtrProviderContext) {
       let packagePolicyId: string;
 
       before(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -404,7 +402,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -425,12 +423,12 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('get by kuery', async function () {
+    describe('get by kuery', function () {
       let agentPolicyId: string;
       let endpointPackagePolicyId: string;
 
       before(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -464,7 +462,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 

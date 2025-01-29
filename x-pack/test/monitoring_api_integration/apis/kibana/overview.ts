@@ -28,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   testRunner(() => {
-    it('should get kibana rules at cluster level', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/184853
+    it.skip('should get kibana rules at cluster level', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/rSEDbJNIQmOE-v9n2rV5cA')
         .set('kbn-xsrf', 'xxx')

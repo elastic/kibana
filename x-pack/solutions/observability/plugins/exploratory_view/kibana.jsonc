@@ -1,0 +1,56 @@
+{
+  "type": "plugin",
+  "id": "@kbn/exploratory-view-plugin",
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "exploratoryView",
+    "browser": true,
+    "server": false,
+    "configPath": [
+      "xpack",
+      "exploratory_view"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "cases",
+      "charts",
+      "data",
+      "dataViews",
+      "features",
+      "files",
+      "inspector",
+      "lens",
+      "observabilityShared",
+      "security",
+      "share",
+      "triggersActionsUi",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": [
+      "discover",
+      "embeddable",
+      "home",
+      "licensing",
+      "spaces",
+      "usageCollection",
+      "observabilityAIAssistant"
+    ],
+    "requiredBundles": [
+      "dataViews",
+      "embeddable",
+      "data",
+      "kibanaReact",
+      "kibanaUtils",
+      "lens",
+      "unifiedSearch",
+      "visualizations"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}
