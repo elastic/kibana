@@ -124,7 +124,7 @@ src/dev/packages/dev-cli-runner @elastic/kibana-operations
 src/dev/packages/dev-proc-runner @elastic/kibana-operations
 src/dev/packages/dev-utils @elastic/kibana-operations
 src/dev/packages/docs-utils @elastic/kibana-operations
-packages/kbn-es @elastic/kibana-operations
+src/dev/packages/es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-css @elastic/appex-sharedux
@@ -1782,7 +1782,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/security/ftr/ @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
 /x-pack/test_serverless/**/services/ @elastic/appex-qa
-/packages/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
+/src/dev/packages/es/src/stateful_resources/roles.yml @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/README.md @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/*configs/ @elastic/appex-qa

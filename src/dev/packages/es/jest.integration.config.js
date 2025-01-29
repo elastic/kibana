@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-es'],
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/es'],
 };

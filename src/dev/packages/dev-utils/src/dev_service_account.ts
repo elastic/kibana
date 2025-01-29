@@ -11,7 +11,7 @@ const env = process.env;
 
 /**
  * `kibana-dev` service account token for connecting to ESS
- * See packages/kbn-es/src/serverless_resources/README.md
+ * See src/dev/packages/es/src/serverless_resources/README.md
  */
 export const kibanaDevServiceAccount = {
   token:

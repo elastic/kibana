@@ -1431,7 +1431,7 @@
     "@kbn/dev-proc-runner": "link:src/dev/packages/dev-proc-runner",
     "@kbn/dev-utils": "link:src/dev/packages/dev-utils",
     "@kbn/docs-utils": "link:src/dev/packages/docs-utils",
-    "@kbn/es": "link:packages/kbn-es",
+    "@kbn/es": "link:src/dev/packages/es",
     "@kbn/es-archiver": "link:packages/kbn-es-archiver",
     "@kbn/eslint-config": "link:packages/kbn-eslint-config",
     "@kbn/eslint-plugin-css": "link:packages/kbn-eslint-plugin-css",

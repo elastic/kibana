@@ -44,7 +44,7 @@ paths-ignore:
   - src/dev/packages/dev-proc-runner
   - src/dev/packages/dev-utils
   - src/dev/packages/docs-utils
-  - packages/kbn-es
+  - src/dev/packages/es
   - packages/kbn-es-archiver
   - packages/kbn-eslint-*
   - packages/kbn-expect
