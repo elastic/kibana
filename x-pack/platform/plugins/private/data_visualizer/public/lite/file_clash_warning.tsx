@@ -75,7 +75,7 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
         <p>{description}</p>
         <EuiButton onClick={() => removeClashingFiles()} color="danger" size="s" fill>
           <FormattedMessage
-            id="xpack.ml.dataVisualizer.file.fileClashWarning.deleteAllButtonLabel"
+            id="xpack.dataVisualizer.file.fileClashWarning.deleteAllButtonLabel"
             defaultMessage="Delete all"
           />
         </EuiButton>

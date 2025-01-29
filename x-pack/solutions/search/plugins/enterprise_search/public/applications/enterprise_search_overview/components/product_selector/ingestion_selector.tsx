@@ -197,7 +197,6 @@ export const IngestionSelector: React.FC = () => {
               }
             )}
             onClick={() => showFileUploadFlyout()}
-            // onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
           />
         </EuiFlexItem>
         <EuiFlexItem>
