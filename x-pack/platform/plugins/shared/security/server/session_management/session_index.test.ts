@@ -103,6 +103,70 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
     });
 
+    it('does not create index if alias exists', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.exists.mockImplementation(async ({ index }) => {
+        if (index === aliasName) {
+          return true;
+        }
+        return false;
+      });
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+    });
+
+    it('does not create index if index exists', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.exists.mockImplementation(async ({ index }) => {
+        if (index === indexName) {
+          return true;
+        }
+        return false;
+      });
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+    });
+
+    it('creates index if neither index or alias exists', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalled();
+    });
+
     it('does not delete legacy index template if the legacy template API is not available (410)', async () => {
       const goneError = new errors.ResponseError(
         securityMock.createApiResponse(

@@ -646,22 +646,14 @@ export class SessionIndex {
    */
   private async ensureSessionIndexExists() {
     // Check if required index exists.
+    // It is possible for users to migrate from older versions of Kibana where the session index was created without
+    // an alias (pre-8.4). In this case, we need to check if the index exists under the alias name, or the index name.
+    // If the index exists under the alias name, we can assume that the alias is already attached.
     let indexExists = false;
-    let indexNameExists = false;
     try {
-      // It is possible for users to migrate from older versions of Kibana where the session index was created without an alias.
-      // In this case, we need to check if the index exists under the alias name, or the index name.
-      // If the index exists under the alias name, we can assume that the alias is already attached.
-      const aliasNameExists = await this.options.elasticsearchClient.indices.exists({
-        index: this.aliasName,
-      });
-
-      if (!aliasNameExists) {
-        indexNameExists = await this.options.elasticsearchClient.indices.exists({
-          index: this.indexName,
-        });
-      }
-      indexExists = aliasNameExists || indexNameExists;
+      indexExists =
+        (await this.options.elasticsearchClient.indices.exists({ index: this.aliasName })) ||
+        (await this.options.elasticsearchClient.indices.exists({ index: this.indexName }));
     } catch (err) {
       this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
       throw err;
