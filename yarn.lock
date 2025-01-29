@@ -6636,7 +6636,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/peggy-loader@link:packages/kbn-peggy-loader":
+"@kbn/peggy-loader@link:src/dev/packages/peggy-loader":
   version "0.0.0"
   uid ""
 

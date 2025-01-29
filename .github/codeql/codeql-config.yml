@@ -62,7 +62,7 @@ paths-ignore:
   - src/dev/packages/optimizer
   - packages/kbn-optimizer-*
   - src/dev/packages/peggy
-  - packages/kbn-peggy-loader
+  - src/dev/packages/peggy-loader
   - packages/kbn-performance-testing-dataset-extractor
   - packages/kbn-plugin-generator
   - packages/kbn-plugin-helpers
