@@ -8,8 +8,7 @@
 import { getPrompt, getPromptsByGroupId } from './get_prompt';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
-import { BEDROCK_SYSTEM_PROMPT, DEFAULT_SYSTEM_PROMPT, GEMINI_USER_PROMPT } from './prompts';
-import { promptDictionary, promptGroupId } from './local_prompt_object';
+import { localPrompts, promptDictionary, promptGroupId } from './mock_prompts';
 
 jest.mock('@kbn/core-saved-objects-api-server');
 jest.mock('@kbn/actions-plugin/server');
@@ -161,6 +160,7 @@ describe('get_prompt', () => {
     it('returns the prompt matching provider and model', async () => {
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
@@ -176,6 +176,7 @@ describe('get_prompt', () => {
     it('returns the prompt matching provider when model does not have a match', async () => {
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
@@ -191,6 +192,7 @@ describe('get_prompt', () => {
     it('returns the prompt matching provider when model is not provided', async () => {
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
@@ -205,6 +207,7 @@ describe('get_prompt', () => {
     it('returns the default prompt when there is no match on provider', async () => {
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'badone',
@@ -220,6 +223,7 @@ describe('get_prompt', () => {
 
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
@@ -242,6 +246,7 @@ describe('get_prompt', () => {
 
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
@@ -263,6 +268,7 @@ describe('get_prompt', () => {
 
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
@@ -283,6 +289,7 @@ describe('get_prompt', () => {
 
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         actionsClient,
@@ -290,7 +297,7 @@ describe('get_prompt', () => {
         connectorId: 'connector-123',
       });
 
-      expect(result).toBe(BEDROCK_SYSTEM_PROMPT);
+      expect(result).toBe('BEDROCK_SYSTEM_PROMPT');
     });
 
     it('returns the default prompt when no prompts are found', async () => {
@@ -303,13 +310,14 @@ describe('get_prompt', () => {
 
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         actionsClient,
         connectorId: 'connector-123',
       });
 
-      expect(result).toBe(DEFAULT_SYSTEM_PROMPT);
+      expect(result).toBe('DEFAULT_SYSTEM_PROMPT');
     });
 
     it('throws an error when no prompts are found', async () => {
@@ -323,6 +331,7 @@ describe('get_prompt', () => {
       await expect(
         getPrompt({
           savedObjectsClient,
+          localPrompts,
           promptId: 'nonexistent-prompt',
           promptGroupId: 'nonexistent-group',
           actionsClient,
@@ -340,6 +349,7 @@ describe('get_prompt', () => {
       });
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
@@ -360,6 +370,7 @@ describe('get_prompt', () => {
       });
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         actionsClient,
@@ -380,6 +391,7 @@ describe('get_prompt', () => {
       });
       const result = await getPrompt({
         savedObjectsClient,
+        localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'bedrock',
@@ -396,6 +408,7 @@ describe('get_prompt', () => {
     it('returns prompts matching the provided promptIds', async () => {
       const result = await getPromptsByGroupId({
         savedObjectsClient,
+        localPrompts,
         promptIds: [promptDictionary.systemPrompt],
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
@@ -420,6 +433,7 @@ describe('get_prompt', () => {
     it('returns prompts matching the provided promptIds for gemini', async () => {
       const result = await getPromptsByGroupId({
         savedObjectsClient,
+        localPrompts,
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'gemini',
@@ -434,7 +448,7 @@ describe('get_prompt', () => {
         },
         {
           promptId: promptDictionary.userPrompt,
-          prompt: GEMINI_USER_PROMPT,
+          prompt: 'GEMINI_USER_PROMPT',
         },
       ]);
     });
@@ -442,6 +456,7 @@ describe('get_prompt', () => {
     it('returns prompts matching the provided promptIds when connector is given', async () => {
       const result = await getPromptsByGroupId({
         savedObjectsClient,
+        localPrompts,
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
         promptGroupId: promptGroupId.aiAssistant,
         connector: {
@@ -466,13 +481,14 @@ describe('get_prompt', () => {
         },
         {
           promptId: promptDictionary.userPrompt,
-          prompt: GEMINI_USER_PROMPT,
+          prompt: 'GEMINI_USER_PROMPT',
         },
       ]);
     });
     it('returns prompts matching the provided promptIds when inference connector is given', async () => {
       const result = await getPromptsByGroupId({
         savedObjectsClient,
+        localPrompts,
         promptIds: [promptDictionary.systemPrompt],
         promptGroupId: promptGroupId.aiAssistant,
         connector: {
@@ -509,6 +525,7 @@ describe('get_prompt', () => {
       await expect(
         getPromptsByGroupId({
           savedObjectsClient,
+          localPrompts,
           promptIds: [promptDictionary.systemPrompt, 'fake-id'],
           promptGroupId: promptGroupId.aiAssistant,
           actionsClient,
