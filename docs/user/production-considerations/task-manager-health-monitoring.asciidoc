@@ -29,7 +29,7 @@ Monitoring the `_health` endpoint of each {kib} instance in the cluster is the r
 
 The health monitoring API monitors the performance of Task Manager out of the box.  However, certain performance considerations are deployment specific and you can configure them.
 
-A health threshold is the threshold for failed task executions.  Once a task exceeds this threshold, a status of `warn` or `error` is set on the task type execution. To configure a health threshold, use the <<task-manager-health-settings,`xpack.task_manager.monitored_task_execution_thresholds`>> setting.  You can apply this this setting to all task types in the system, or to a custom task type. 
+A health threshold is the threshold for failed task executions.  Once a task exceeds this threshold, a status of `warn` or `error` is set on the task type execution. To configure a health threshold, use the <<task-manager-health-settings,`xpack.task_manager.monitored_task_execution_thresholds`>> setting.  You can apply this this setting to all task types in the system, or to a custom task type.
 
 By default, this setting marks the health of every task type as `warning` when it exceeds 80% failed executions, and as `error` at 90%.
 Set this value to a number between 0 to 100. The threshold is hit when the value *exceeds* this number.
@@ -99,21 +99,16 @@ The health monitoring API exposes three sections: `configuration`, `workload` an
 [cols="2"]
 |===
 
-a| Configuration
-
+| Configuration
 | This section summarizes the current configuration of Task Manager.  This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.
 
-a| Workload
-
+| Workload
 | This section summarizes the work load across the cluster, including the tasks in the system, their types, and current status.
 
-a| Runtime
-
+| Runtime
 | This section tracks execution performance of Task Manager, tracking task _drift_, worker _load_, and execution stats broken down by type, including duration and execution results.
 
-
-a| Capacity Estimation
-
+| Capacity Estimation
 | This section provides a rough estimate about the sufficiency of its capacity. As the name suggests, these are estimates based on historical data and should not be used as predictions. Use these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
 
 |===

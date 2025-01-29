@@ -160,23 +160,15 @@ export const DiscoverTopNav = ({
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
-  const topNavProps = useMemo(() => {
-    if (stateContainer.customizationContext.inlineTopNav.enabled) {
-      return undefined;
-    }
-
-    return {
+  const topNavProps = useMemo(
+    () => ({
       badges: topNavBadges,
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
       className: 'dscTopNav', // FIXME: Delete the scss file and pass `gutterSize="xxs"` instead (after next Eui release)
-    };
-  }, [
-    setHeaderActionMenu,
-    stateContainer.customizationContext.inlineTopNav.enabled,
-    topNavBadges,
-    topNavMenu,
-  ]);
+    }),
+    [setHeaderActionMenu, topNavBadges, topNavMenu]
+  );
 
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     const isESQLModeEnabled = uiSettings.get(ENABLE_ESQL);

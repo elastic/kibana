@@ -255,22 +255,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       return cachedEntry;
     }
 
-    let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
-
-    try {
-      const response = await this.sendAction<
-        SentinelOneGetAgentsResponse,
-        SentinelOneGetAgentsParams
-      >(SUB_ACTION.GET_AGENTS, { ids: agentId });
-
-      s1ApiResponse = response.data;
-    } catch (err) {
-      throw new ResponseActionsClientError(
-        `Error while attempting to retrieve SentinelOne host with agent id [${agentId}]: ${err.message}`,
-        500,
-        err
-      );
-    }
+    const s1ApiResponse = (
+      await this.sendAction<SentinelOneGetAgentsResponse, SentinelOneGetAgentsParams>(
+        SUB_ACTION.GET_AGENTS,
+        { ids: agentId }
+      )
+    ).data;
 
     if (!s1ApiResponse || !s1ApiResponse.data[0]) {
       throw new ResponseActionsClientError(`SentinelOne agent id [${agentId}] not found`, 404);

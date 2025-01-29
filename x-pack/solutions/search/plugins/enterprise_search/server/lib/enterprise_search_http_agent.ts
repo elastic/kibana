@@ -59,7 +59,6 @@ class EnterpriseSearchHttpAgent {
   /*
    * Convert verificationMode to rejectUnauthorized for more consistent config settings
    * with the rest of Kibana
-   * @see https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/server/builtin_action_types/lib/get_node_tls_options.ts
    */
   getAgentOptions(verificationMode: 'full' | 'certificate' | 'none') {
     const agentOptions: AgentOptions = {};

@@ -64,6 +64,7 @@ export async function timeSeriesQuery(
   // core query
   // Constructing a typesafe ES query in JS is problematic, use any escapehatch for now
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const esQuery: any = {
     index,
     body: {
