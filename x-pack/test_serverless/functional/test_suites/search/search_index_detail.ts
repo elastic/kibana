@@ -27,6 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const indexName = 'test-my-index';
 
   describe('index details page - search solution', function () {
+    // see details: https://github.com/elastic/kibana/issues/208695
+    this.tags(['failsOnMKI']);
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
