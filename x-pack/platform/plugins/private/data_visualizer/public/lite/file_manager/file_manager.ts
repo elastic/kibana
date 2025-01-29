@@ -411,7 +411,6 @@ export class FileManager {
     return {
       index: indexName,
       dataView: dataViewResp ? { id: dataViewResp.id!, title: dataView! } : undefined,
-      pipelineId: initializeImportResp.pipelineId,
       inferenceId: this.inferenceId ?? undefined,
       files: this.getFiles().map((file) => {
         const status = file.getStatus();
