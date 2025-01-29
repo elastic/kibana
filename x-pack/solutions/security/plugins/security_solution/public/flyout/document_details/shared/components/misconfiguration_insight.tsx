@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
+import { type EuiFlexGroupProps, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
@@ -64,21 +64,23 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     pageSize: 1,
   });
 
-  useEffect(() => {
-    uiMetricService.trackUiMetric(
-      METRIC_TYPE.COUNT,
-      `${MISCONFIGURATION_INSIGHT}-${telemetrySuffix}`
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
   const totalFindings = useMemo(
     () => passedFindings + failedFindings,
     [passedFindings, failedFindings]
   );
-  const hasMisconfigurationFindings = totalFindings > 0;
+  const shouldRender = totalFindings > 0; // this component only renders if there are findings
+
+  useEffect(() => {
+    if (shouldRender) {
+      uiMetricService.trackUiMetric(
+        METRIC_TYPE.COUNT,
+        `${MISCONFIGURATION_INSIGHT}-${telemetrySuffix}`
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldRender]);
 
   const misconfigurationsStats = useMemo(
     () => getFindingsStats(passedFindings, failedFindings),
@@ -107,7 +109,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     [totalFindings, fieldName, name, scopeId, isPreview, dataTestSubj, euiTheme.size]
   );
 
-  if (!hasMisconfigurationFindings) return null;
+  if (!shouldRender) return null;
 
   return (
     <EuiFlexItem data-test-subj={dataTestSubj}>

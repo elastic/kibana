@@ -61,21 +61,14 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     pageSize: 1,
   });
 
-  useEffect(() => {
-    uiMetricService.trackUiMetric(
-      METRIC_TYPE.COUNT,
-      `${VULNERABILITIES_INSIGHT}-${telemetrySuffix}`
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
   const totalVulnerabilities = useMemo(
     () => CRITICAL + HIGH + MEDIUM + LOW + NONE,
     [CRITICAL, HIGH, MEDIUM, LOW, NONE]
   );
 
-  const hasVulnerabilitiesFindings = useMemo(
+  // this component only renders if there are findings
+  const shouldRender = useMemo(
     () =>
       hasVulnerabilitiesData({
         critical: CRITICAL,
@@ -86,6 +79,16 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
       }),
     [CRITICAL, HIGH, MEDIUM, LOW, NONE]
   );
+
+  useEffect(() => {
+    if (shouldRender) {
+      uiMetricService.trackUiMetric(
+        METRIC_TYPE.COUNT,
+        `${VULNERABILITIES_INSIGHT}-${telemetrySuffix}`
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldRender]);
 
   const vulnerabilitiesStats = useMemo(
     () =>
@@ -124,7 +127,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     [totalVulnerabilities, hostName, scopeId, isPreview, dataTestSubj, euiTheme.size]
   );
 
-  if (!hasVulnerabilitiesFindings) return null;
+  if (!shouldRender) return null;
 
   return (
     <EuiFlexItem data-test-subj={dataTestSubj}>
