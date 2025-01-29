@@ -67,7 +67,7 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
         clearTimeout(timer);
       }
     };
-  }, [conversation, tourCompleted, setShowTour]);
+  }, [conversation, tourCompleted, setShowTour, showTour]);
 
   const finishTour = useCallback(() => {
     setTourCompleted(true);
@@ -93,7 +93,7 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
         anchorPosition="rightUp"
       />
     ),
-    [showTour, setShowTour, finishTour]
+    [showTour, finishTour]
   );
 
   return tourElement;
