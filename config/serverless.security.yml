@@ -21,7 +21,7 @@ xpack.features.overrides:
   discover.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
-    category: "security"
+    category: 'security'
     order: 1101
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siemV2:
@@ -29,26 +29,26 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover"
-          privileges: [ "all" ]
-        - feature: "dashboard"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
-        - feature: "maps"
-          privileges: [ "all" ]
+        - feature: 'discover'
+          privileges: ['all']
+        - feature: 'dashboard'
+          privileges: ['all']
+        - feature: 'visualize'
+          privileges: ['all']
+        - feature: 'maps'
+          privileges: ['all']
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover"
-          privileges: [ "read" ]
-        - feature: "dashboard"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
-        - feature: "maps"
-          privileges: [ "read" ]
+        - feature: 'discover'
+          privileges: ['read']
+        - feature: 'dashboard'
+          privileges: ['read']
+        - feature: 'visualize'
+          privileges: ['read']
+        - feature: 'maps'
+          privileges: ['read']
 
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siem:
@@ -56,26 +56,26 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover"
-          privileges: [ "all" ]
-        - feature: "dashboard"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
-        - feature: "maps"
-          privileges: [ "all" ]
+        - feature: 'discover'
+          privileges: ['all']
+        - feature: 'dashboard'
+          privileges: ['all']
+        - feature: 'visualize'
+          privileges: ['all']
+        - feature: 'maps'
+          privileges: ['all']
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover"
-          privileges: [ "read" ]
-        - feature: "dashboard"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
-        - feature: "maps"
-          privileges: [ "read" ]
+        - feature: 'discover'
+          privileges: ['read']
+        - feature: 'dashboard'
+          privileges: ['read']
+        - feature: 'visualize'
+          privileges: ['read']
+        - feature: 'maps'
+          privileges: ['read']
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
@@ -90,8 +90,8 @@ xpack.securitySolutionServerless.productTypes:
   ]
 
 xpack.securitySolution.offeringSettings: {
-  ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
-}
+    ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+  }
 
 newsfeed.enabled: true
 
@@ -135,6 +135,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Unsupported in serverless
     'cloud_defend',
+
+    # Search connectors
+    'elastic_connectors',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
