@@ -97,11 +97,6 @@ import {
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
-import {
-  createKeywordBuilderPipeline,
-  deleteKeywordBuilderPipeline,
-} from '../../asset_inventory/ingest_pipelines';
-
 import type { ApiKeyManager } from './auth/api_key';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
