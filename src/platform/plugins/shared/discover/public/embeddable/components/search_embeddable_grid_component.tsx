@@ -70,9 +70,9 @@ export function SearchEmbeddableGridComponent({
     columnsMeta,
     grid,
   ] = useBatchedPublishingSubjects(
-    api.dataLoading,
+    api.dataLoading$,
     api.savedSearch$,
-    api.savedObjectId,
+    api.savedObjectId$,
     api.fetchWarnings$,
     api.query$,
     api.filters$,
@@ -91,10 +91,10 @@ export function SearchEmbeddableGridComponent({
 
   const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
     useBatchedOptionalPublishingSubjects(
-      api.panelTitle,
-      api.panelDescription,
-      api.defaultPanelTitle,
-      api.defaultPanelDescription
+      api.title$,
+      api.description$,
+      api.defaultTitle$,
+      api.defaultDescription$
     );
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);

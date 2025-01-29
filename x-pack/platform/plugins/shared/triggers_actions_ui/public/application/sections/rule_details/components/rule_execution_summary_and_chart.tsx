@@ -192,7 +192,7 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} data-test-subj="ruleEventLogListAvgDuration">
-              <EuiText size="m" color={euiTheme.colors.text}>
+              <EuiText size="m" color={euiTheme.colors.textParagraph}>
                 <strong>
                   {formatMillisForDisplay(computedRuleSummary.executionDuration.average)}
                 </strong>

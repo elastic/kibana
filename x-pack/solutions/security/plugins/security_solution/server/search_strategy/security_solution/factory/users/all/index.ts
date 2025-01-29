@@ -25,10 +25,9 @@ import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 import type { RiskSeverity, UserRiskScore } from '../../../../../../common/search_strategy';
 import {
+  EntityType,
   buildUserNamesFilter,
-  getUserRiskIndex,
-  RiskScoreEntity,
-  RiskQueries,
+  getRiskIndex,
 } from '../../../../../../common/search_strategy';
 import { buildAssetCriticalityQuery } from '../../asset_criticality/query.asset_criticality.dsl';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
@@ -127,10 +126,9 @@ export async function getUserRiskData(
   try {
     const userRiskResponse = await esClient.asCurrentUser.search<UserRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getUserRiskIndex(spaceId, true)],
+        defaultIndex: [getRiskIndex(spaceId, true)],
         filterQuery: buildUserNamesFilter(userNames),
-        riskScoreEntity: RiskScoreEntity.user,
-        factoryQueryType: RiskQueries.usersRiskScore,
+        riskScoreEntity: EntityType.user,
       })
     );
     return userRiskResponse;

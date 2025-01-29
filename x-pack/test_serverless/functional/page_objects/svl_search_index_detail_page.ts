@@ -221,20 +221,6 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       );
     },
 
-    async expectSampleDocumentsWithCustomMappings() {
-      await browser.refresh();
-      await testSubjects.existOrFail('ingestDataCodeExample-code-block');
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Example text 1'
-      );
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Example text 2'
-      );
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Example text 3'
-      );
-    },
-
     async clickFirstDocumentDeleteAction() {
       await testSubjects.existOrFail('documentMetadataButton');
       await testSubjects.click('documentMetadataButton');

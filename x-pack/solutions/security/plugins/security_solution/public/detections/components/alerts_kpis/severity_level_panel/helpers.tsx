@@ -6,17 +6,19 @@
  */
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { has } from 'lodash';
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { AlertsBySeverityAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
-import * as i18n from './translations';
+import { getRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
-export const getSeverityColor = (severity: string) => {
-  return SEVERITY_COLOR[severity.toLocaleLowerCase() as Severity] ?? emptyDonutColor;
+const SEVERITY_ORDER: Severity[] = ['critical', 'high', 'medium', 'low'];
+
+export const getSeverityColor = (severity: string, euiTheme: EuiThemeComputed) => {
+  const palette = getRiskSeverityColors(euiTheme);
+  return palette[severity.toLocaleLowerCase() as Severity] ?? euiTheme.colors.textSubdued;
 };
 
 export const parseSeverityData = (
@@ -26,13 +28,19 @@ export const parseSeverityData = (
 
   return severityBuckets.length === 0
     ? []
-    : severityBuckets.map((severity) => {
-        return {
-          key: severity.key,
-          value: severity.doc_count,
-          label: severityLabels[severity.key] ?? i18n.UNKNOWN_SEVERITY,
-        };
-      });
+    : severityBuckets
+        .map((severity) => {
+          return {
+            key: severity.key,
+            value: severity.doc_count,
+            label: severityLabels[severity.key],
+          };
+        })
+        .sort((a, b) => {
+          const aIndex = SEVERITY_ORDER.indexOf(a.key);
+          const bIndex = SEVERITY_ORDER.indexOf(b.key);
+          return aIndex - bIndex;
+        });
 };
 
 export const getIsAlertsBySeverityData = (data: SummaryChartsData[]): data is SeverityData[] => {

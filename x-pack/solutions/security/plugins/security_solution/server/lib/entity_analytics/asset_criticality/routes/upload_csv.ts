@@ -96,7 +96,9 @@ export const assetCriticalityPublicCSVUploadRoute = (
             skipEmptyLines: true,
           });
 
-          const recordsStream = fileStream.pipe(csvStream).pipe(transformCSVToUpsertRecords());
+          const recordsStream = fileStream
+            .pipe(csvStream)
+            .pipe(transformCSVToUpsertRecords(config.experimentalFeatures));
 
           const { errors, stats } = await assetCriticalityClient.bulkUpsertFromStream({
             recordsStream,

@@ -49,18 +49,14 @@ export const getFleetDeepLinks: (
       path: FLEET_ROUTING_PATHS.enrollment_tokens,
       visibleIn: !authz?.fleet.allAgents ? [] : ['globalSearch'],
     },
-    ...((experimentalFeatures.agentTamperProtectionEnabled
-      ? [
-          {
-            id: FleetDeepLinkId.uninstallTokens,
-            title: i18n.translate('xpack.fleet.deepLinks.uninstallTokens.title', {
-              defaultMessage: 'Uninstall tokens',
-            }),
-            path: FLEET_ROUTING_PATHS.uninstall_tokens,
-            visibleIn: !authz?.fleet.allAgents ? [] : ['globalSearch'],
-          },
-        ]
-      : []) as AppDeepLink[]),
+    {
+      id: FleetDeepLinkId.uninstallTokens,
+      title: i18n.translate('xpack.fleet.deepLinks.uninstallTokens.title', {
+        defaultMessage: 'Uninstall tokens',
+      }),
+      path: FLEET_ROUTING_PATHS.uninstall_tokens,
+      visibleIn: !authz?.fleet.allAgents ? [] : ['globalSearch'],
+    },
     {
       id: FleetDeepLinkId.dataStreams,
       title: i18n.translate('xpack.fleet.deepLinks.dataStreams.title', {

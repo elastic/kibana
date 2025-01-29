@@ -31,7 +31,7 @@ describe.skip(
   () => {
     const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
       return cy
-        .get('#featurePrivilegeControls_siem')
+        .get('#featurePrivilegeControls_siemV2')
         .findByTestSubj('mutexSubFeaturePrivilegeControl')
         .closest('.euiFlexGroup');
     };

@@ -9,7 +9,8 @@
 
 import moment from 'moment';
 import { merge } from 'lodash';
-import { take } from 'rxjs';
+import { set } from '@kbn/safer-lodash-set';
+import { lastValueFrom, take, toArray } from 'rxjs';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -187,6 +188,39 @@ describe('MetricsService', () => {
       const opsLogs = loggingSystemMock.collect(opsLogger).debug;
       expect(opsLogs.length).toEqual(2);
       expect(opsLogs[0][1]).not.toEqual(opsLogs[1][1]);
+    });
+
+    it('emits average ELU values on getEluMetrics$ call', async () => {
+      mockOpsCollector.collect
+        .mockImplementationOnce(() => set({}, 'process.event_loop_utilization.utilization', 0.1))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 0.9))
+        .mockResolvedValueOnce(set({}, 'process.event_loop_utilization.utilization', 0.9));
+
+      await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
+      const { getEluMetrics$ } = await metricsService.start();
+      const eluMetricsPromise = lastValueFrom(getEluMetrics$().pipe(toArray()));
+
+      jest.advanceTimersByTime(testInterval * 2);
+      await new Promise((resolve) => process.nextTick(resolve));
+      await metricsService.stop();
+
+      await expect(eluMetricsPromise).resolves.toEqual([
+        expect.objectContaining({
+          short: expect.closeTo(0.1),
+          medium: expect.closeTo(0.1),
+          long: expect.closeTo(0.1),
+        }),
+        expect.objectContaining({
+          short: expect.closeTo(0.11),
+          medium: expect.closeTo(0.1),
+          long: expect.closeTo(0.1),
+        }),
+        expect.objectContaining({
+          short: expect.closeTo(0.11),
+          medium: expect.closeTo(0.11),
+          long: expect.closeTo(0.1),
+        }),
+      ]);
     });
 
     it('omits metrics from log message if they are missing or malformed', async () => {

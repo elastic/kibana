@@ -10,7 +10,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { Observable } from 'rxjs';
 import type { ExperimentalFeatures } from '../../server/config';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
@@ -19,14 +18,14 @@ import type { DiscoverCustomizationContext } from '../customizations';
 export interface RenderAppProps {
   element: HTMLElement;
   services: DiscoverServices;
-  customizationContext$: Observable<DiscoverCustomizationContext>;
+  customizationContext: DiscoverCustomizationContext;
   experimentalFeatures: ExperimentalFeatures;
 }
 
 export const renderApp = ({
   element,
   services,
-  customizationContext$,
+  customizationContext,
   experimentalFeatures,
 }: RenderAppProps) => {
   const { history, capabilities, chrome, data, core } = services;
@@ -45,7 +44,7 @@ export const renderApp = ({
   const unmount = toMountPoint(
     <DiscoverRouter
       services={services}
-      customizationContext$={customizationContext$}
+      customizationContext={customizationContext}
       experimentalFeatures={experimentalFeatures}
       history={history}
     />,

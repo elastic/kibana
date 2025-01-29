@@ -27,7 +27,7 @@ const DashboardToolBarComponent = ({
 }) => {
   const { setHeaderActionMenu } = useKibana().services;
 
-  const viewMode = useStateFromPublishingSubject(dashboardContainer.viewMode);
+  const viewMode = useStateFromPublishingSubject(dashboardContainer.viewMode$);
 
   const { navigateTo, getAppUrl } = useNavigation();
   const redirectTo = useCallback(

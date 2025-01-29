@@ -285,7 +285,12 @@ const kibanaFeatureSchema = schema.object({
       ),
     })
   ),
-  deprecated: schema.maybe(schema.object({ notice: schema.string() })),
+  deprecated: schema.maybe(
+    schema.object({
+      notice: schema.string(),
+      replacedBy: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
 });
 
 const elasticsearchPrivilegeSchema = schema.object({

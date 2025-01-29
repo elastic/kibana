@@ -12,15 +12,25 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { StreamsServer } from '../types';
 import { AssetService } from '../lib/streams/assets/asset_service';
 import { AssetClient } from '../lib/streams/assets/asset_client';
+import { StreamsClient } from '../lib/streams/client';
+
+type GetScopedClients = ({
+  request,
+}: {
+  request: KibanaRequest;
+}) => Promise<RouteHandlerScopedClients>;
+
+export interface RouteHandlerScopedClients {
+  scopedClusterClient: IScopedClusterClient;
+  soClient: SavedObjectsClientContract;
+  assetClient: AssetClient;
+  streamsClient: StreamsClient;
+}
 
 export interface RouteDependencies {
   assets: AssetService;
   server: StreamsServer;
-  getScopedClients: ({ request }: { request: KibanaRequest }) => Promise<{
-    scopedClusterClient: IScopedClusterClient;
-    soClient: SavedObjectsClientContract;
-    assetClient: AssetClient;
-  }>;
+  getScopedClients: GetScopedClients;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

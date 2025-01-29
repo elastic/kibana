@@ -96,7 +96,7 @@
         "label": "parseThemeNameValue",
         "description": [],
         "signature": [
-          "(value: unknown) => string"
+          "(value: unknown) => \"amsterdam\" | \"borealis\""
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -644,7 +644,7 @@
         "label": "DEFAULT_THEME_NAME",
         "description": [],
         "signature": [
-          "\"amsterdam\""
+          "\"borealis\""
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -685,28 +685,13 @@
       },
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
-        "id": "def-common.SUPPORTED_THEME_NAMES",
-        "type": "Array",
-        "tags": [],
-        "label": "SUPPORTED_THEME_NAMES",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "path": "src/core/packages/ui-settings/common/src/theme.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-ui-settings-common",
         "id": "def-common.ThemeName",
         "type": "Type",
         "tags": [],
         "label": "ThemeName",
         "description": [],
         "signature": [
-          "string"
+          "\"amsterdam\" | \"borealis\""
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
@@ -805,6 +790,21 @@
         ],
         "signature": [
           "readonly (\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\")[]"
+        ],
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.SUPPORTED_THEME_NAMES",
+        "type": "Object",
+        "tags": [],
+        "label": "SUPPORTED_THEME_NAMES",
+        "description": [],
+        "signature": [
+          "readonly [\"amsterdam\", \"borealis\"]"
         ],
         "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,

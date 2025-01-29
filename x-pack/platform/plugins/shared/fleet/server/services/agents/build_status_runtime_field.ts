@@ -91,45 +91,52 @@ function _buildSource(
   });
 
   return `
-    long lastCheckinMillis = ${field('last_checkin')}.size() > 0 
-      ? ${field('last_checkin')}.value.toInstant().toEpochMilli() 
+    long lastCheckinMillis = ${field('last_checkin')}.size() > 0
+      ? ${field('last_checkin')}.value.toInstant().toEpochMilli()
       : (
-          ${field('enrolled_at')}.size() > 0 
-          ? ${field('enrolled_at')}.value.toInstant().toEpochMilli() 
+          ${field('enrolled_at')}.size() > 0
+          ? ${field('enrolled_at')}.value.toInstant().toEpochMilli()
           : -1
         );
     if (${field('active')}.size() > 0 && ${field('active')}.value == false) {
-      emit('unenrolled'); 
-    } ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}
-      else if (
-        lastCheckinMillis > 0 
-        && lastCheckinMillis 
+      emit('unenrolled');
+    }
+    ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}
+    else if (doc.containsKey('audit_unenrolled_reason') && ${field(
+      'audit_unenrolled_reason'
+    )}.size() > 0 && ${field('audit_unenrolled_reason')}.value == 'uninstall'){emit('uninstalled');}
+    else if (doc.containsKey('audit_unenrolled_reason') && ${field(
+      'audit_unenrolled_reason'
+    )}.size() > 0 && ${field('audit_unenrolled_reason')}.value == 'orphaned'){emit('orphaned');}
+    else if (
+        lastCheckinMillis > 0
+        && lastCheckinMillis
         < ${now - MS_BEFORE_OFFLINE}L
-    ) { 
-      emit('offline'); 
+    ) {
+      emit('offline');
     } else if (
       ${field('policy_revision_idx')}.size() == 0 || (
         ${field('upgrade_started_at')}.size() > 0 &&
         ${field('upgraded_at')}.size() == 0
       )
-    ) { 
-      emit('updating'); 
+    ) {
+      emit('updating');
     } else if (${field('last_checkin')}.size() == 0) {
-      emit('enrolling'); 
+      emit('enrolling');
     } else if (${field('unenrollment_started_at')}.size() > 0) {
-      emit('unenrolling'); 
+      emit('unenrolling');
     } else if (
       ${field('last_checkin_status')}.size() > 0 &&
       ${field('last_checkin_status')}.value.toLowerCase() == 'error'
-    ) { 
+    ) {
         emit('error');
     } else if (
       ${field('last_checkin_status')}.size() > 0 &&
       ${field('last_checkin_status')}.value.toLowerCase() == 'degraded'
-    ) { 
+    ) {
       emit('degraded');
-    } else { 
-      emit('online'); 
+    } else {
+      emit('online');
     }`.replace(/\s{2,}/g, ' '); // replace newlines and double spaces to save characters
 }
 

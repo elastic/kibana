@@ -65,6 +65,8 @@ export interface OnPreResponseExtensions {
  */
 export interface OnPreResponseInfo {
   statusCode: number;
+  /** So any pre response handler can check the headers if needed, to avoid an overwrite for example */
+  headers?: ResponseHeaders;
 }
 
 /**

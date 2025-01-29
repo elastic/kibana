@@ -2,20 +2,20 @@
 [[drilldowns]]
 === Add drilldowns
 
-Panels have built-in interactive capabilities that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction. 
+Panels have built-in interactive capabilities that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction.
 
 There are three types of drilldowns you can add to dashboards:
 
 * *Dashboard* &mdash; Navigates you from one dashboard to another dashboard. For example, create a drilldown for a *Lens* panel that navigates you from a summary dashboard to a dashboard with a filter for a specific host name.
 
-* *URL* &mdash; Navigates you from a dashboard to an external website. For example, a website with the specific host name as a parameter. 
+* *URL* &mdash; Navigates you from a dashboard to an external website. For example, a website with the specific host name as a parameter.
 
-* *Discover* &mdash; Navigates you from a *Lens* dashboard panel to *Discover*. For example, create a drilldown for a *Lens* visualization that opens the visualization data in *Discover* for further exploration. 
+* *Discover* &mdash; Navigates you from a *Lens* dashboard panel to *Discover*. For example, create a drilldown for a *Lens* visualization that opens the visualization data in *Discover* for further exploration.
 
 Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
 
 ++++
-<script type="text/javascript" async 
+<script type="text/javascript" async
 src="https://play.vidyard.com/embed/v4.js"></script>
 <img
 style="width: 100%; margin: auto; display: block;"
@@ -104,7 +104,7 @@ URL drilldowns enable you to navigate from a dashboard to external websites. Des
 [role="screenshot"]
 image:images/dashboard_urlDrilldownGoToGitHub_8.3.gif[Drilldown on pie chart that navigates to Github]
 
-Some panels support multiple interactions, also known as triggers. 
+Some panels support multiple interactions, also known as triggers.
 The <<url-template-variable,variables>> you use to create a <<url-templating-language, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
 
 * *Single click* &mdash; A single data point in the panel.
@@ -171,7 +171,7 @@ image:images/dashboard_urlDrilldownGithub_8.3.png[Open ios issues in the elastic
 
 Discover drilldowns enable you to open *Discover* from a *Lens* dashboard panel, taking the time range, filters, and other parameters with you so the context remains the same.
 
-For example, when you create a Discover drilldown for a pie chart, you can click a slice in the pie chart, and only the documents for the slice appear in *Discover*. 
+For example, when you create a Discover drilldown for a pie chart, you can click a slice in the pie chart, and only the documents for the slice appear in *Discover*.
 
 [role="screenshot"]
 image:images/dashboard_discoverDrilldown_8.3.gif[Drilldown on bar vertical stacked chart that navigates to Discover]
@@ -204,7 +204,7 @@ image::images/dashboard_discoverDrilldown_8.3.png[Drilldown on bar vertical stac
 [[manage-drilldowns]]
 ==== Manage drilldowns
 
-Make changes to your drilldowns, make a copy of your drilldowns for another panel, and delete drilldowns. 
+Make changes to your drilldowns, make a copy of your drilldowns for another panel, and delete drilldowns.
 
 . Open the panel menu that includes the drilldown, then click *Manage drilldowns*.
 
@@ -212,7 +212,7 @@ Make changes to your drilldowns, make a copy of your drilldowns for another pane
 
 * To change drilldowns, click *Edit* next to the drilldown you want to change, make your changes, then click *Save*.
 
-* To make a copy, click *Copy* next to the drilldown you want to change, enter the drilldown name, then click *Create drilldown*. 
+* To make a copy, click *Copy* next to the drilldown you want to change, enter the drilldown name, then click *Create drilldown*.
 
 * To delete a drilldown, select the drilldown you want to delete, then click *Delete*.
 
@@ -236,11 +236,12 @@ In addition to  https://ela.st/handlebars-helpers[built-in] Handlebars helpers, 
 
 Refer to Handlebars https://ela.st/handlebars-docs#expressions[documentation] to learn about advanced use cases.
 
-|===
-|Custom helper |Use case
+[float]
+==== Custom helpers
 
-|json
-a|Serialize variables in JSON format.
+**json**
+
+Serialize variables in JSON format.
 
 Example:
 
@@ -249,8 +250,9 @@ Example:
 `{{json filters=context.panel.filters}}`
 
 
-|rison
-a|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
+**rison**
+
+Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
 
 Example:
 
@@ -258,107 +260,121 @@ Example:
 `{{rison event.key event.value}}` +
 `{{rison filters=context.panel.filters}}`
 
+**date**
 
-|date
-a|Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the https://momentjs.com/docs/#/displaying/format/[moment] docs for different formatting options.
+Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the https://momentjs.com/docs/#/displaying/format/[moment] docs for different formatting options.
 
 Example:
 
 `{{date event.from “YYYY MM DD”}}` +
 `{{date “now-15”}}`
 
-|formatNumber
-a|Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.
-Refer to the http://numeraljs.com/#format[numeral.js] for different formatting options. 
+**formatNumber**
+
+Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.
+Refer to the http://numeraljs.com/#format[numeral.js] for different formatting options.
 
 Example:
 
 `{{formatNumber event.value "0.0"}}`
 
-|lowercase
-a|Converts a string to lower case.
+**lowercase**
+
+Converts a string to lower case.
 
 Example:
 
 `{{lowercase event.value}}`
 
-|uppercase
-a|Converts a string to upper case.
+**uppercase**
+
+Converts a string to upper case.
 
 Example:
 
 `{{uppercase event.value}}`
 
-|trim
-a|Removes leading and trailing spaces from a string.
+**trim**
+
+Removes leading and trailing spaces from a string.
 
 Example:
 
 `{{trim event.value}}`
 
-|trimLeft
-a|Removes leading spaces from a string.
+**trimLeft**
+
+Removes leading spaces from a string.
 
 Example:
 
 `{{trimLeft event.value}}`
 
-|trimRight
-a|Removes trailing spaces from a string.
+**trimRight**
+
+Removes trailing spaces from a string.
 
 Example:
 
 `{{trimRight event.value}}`
 
-|mid
-a|Extracts a substring from a string by start position and number of characters to extract.
+**mid**
+
+Extracts a substring from a string by start position and number of characters to extract.
 
 Example:
 
-`{{mid event.value 3 5}}` - extracts five characters starting from a third character. 
+`{{mid event.value 3 5}}` - extracts five characters starting from a third character.
 
-|left
-a|Extracts a number of characters from a string (starting from left).
+**left**
+
+Extracts a number of characters from a string (starting from left).
 
 Example:
 
 `{{left event.value 3}}`
 
-|right
-a|Extracts a number of characters from a string (starting from right).
+**right**
+
+Extracts a number of characters from a string (starting from right).
 
 Example:
 
 `{{right event.value 3}}`
 
-|concat
-a|Concatenates two or more strings.
+**concat**
+
+Concatenates two or more strings.
 
 Example:
 
 `{{concat event.value "," event.key}}`
 
-|replace
-a|Replaces all substrings within a string.
+**replace**
+
+Replaces all substrings within a string.
 
 Example:
 
 `{{replace event.value "stringToReplace" "stringToReplaceWith"}}`
 
-|split
-a|Splits a string using a provided splitter.
+**split**
+
+Splits a string using a provided splitter.
 
 Example:
 
 `{{split event.value ","}}`
 
-|encodeURIComponent
-a|Escapes string using built in `encodeURIComponent` function.
+**encodeURIComponent**
 
-|encodeURIQuery
-a|Escapes string using built in `encodeURIComponent` function, while keeping "@", ":", "$", ",", and ";" characters as is.
+Escapes string using built in `encodeURIComponent` function.
 
-|===
+**encodeURIQuery**
+
+Escapes string using built in `encodeURIComponent` function, while keeping "@", ":", "$", ",", and ";" characters as is.
+
+
 
 
 [float]
@@ -453,7 +469,7 @@ Example:
 
 Note:
 
-`{{event.value}}` is a shorthand for `{{event.points.[0].value}}` + 
+`{{event.value}}` is a shorthand for `{{event.points.[0].value}}` +
 `{{event.key}}` is a shorthand for `{{event.points.[0].key}}`
 
 | *Row click*

@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useParams } from 'react-router-dom';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
@@ -18,6 +19,8 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
 } from './translations';
 import { RuleFormPlugins } from './types';
+import './rule_form.scss';
+import { RuleFormScreenContextProvider } from './rule_form_screen_context';
 
 const queryClient = new QueryClient();
 
@@ -25,10 +28,20 @@ export interface RuleFormProps {
   plugins: RuleFormPlugins;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  validConsumers?: RuleCreationValidConsumer[];
+  multiConsumerSelection?: RuleCreationValidConsumer | null;
+  isServerless?: boolean;
 }
 
 export const RuleForm = (props: RuleFormProps) => {
-  const { plugins: _plugins, onCancel, onSubmit } = props;
+  const {
+    plugins: _plugins,
+    onCancel,
+    onSubmit,
+    validConsumers,
+    multiConsumerSelection,
+    isServerless,
+  } = props;
   const { id, ruleTypeId } = useParams<{
     id?: string;
     ruleTypeId?: string;
@@ -78,6 +91,9 @@ export const RuleForm = (props: RuleFormProps) => {
           plugins={plugins}
           onCancel={onCancel}
           onSubmit={onSubmit}
+          validConsumers={validConsumers}
+          multiConsumerSelection={multiConsumerSelection}
+          isServerless={isServerless}
         />
       );
     }
@@ -110,9 +126,18 @@ export const RuleForm = (props: RuleFormProps) => {
     actionTypeRegistry,
     id,
     ruleTypeId,
+    validConsumers,
+    multiConsumerSelection,
+    isServerless,
     onCancel,
     onSubmit,
   ]);
 
-  return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RuleFormScreenContextProvider>
+        <div className="ruleForm__container">{ruleFormComponent}</div>
+      </RuleFormScreenContextProvider>
+    </QueryClientProvider>
+  );
 };

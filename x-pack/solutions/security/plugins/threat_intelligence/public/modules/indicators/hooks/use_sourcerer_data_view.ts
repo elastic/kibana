@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { SecuritySolutionDataViewBase } from '../../../types';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import { DESCRIPTION } from './translations';
 
@@ -27,17 +26,6 @@ const indicatorNameField = {
 export const useSourcererDataView = () => {
   const { sourcererDataView } = useSecurityContext();
 
-  const updatedPattern = useMemo(() => {
-    const fields = [...sourcererDataView.indexPattern.fields, indicatorNameField];
-
-    return {
-      ...sourcererDataView.indexPattern,
-      fields,
-    } as SecuritySolutionDataViewBase;
-  }, [sourcererDataView.indexPattern]);
-
-  const indexPatterns = useMemo(() => [updatedPattern], [updatedPattern]);
-
   const browserFields = useMemo(() => {
     const { threat = { fields: {} } } = sourcererDataView.browserFields;
 
@@ -55,10 +43,9 @@ export const useSourcererDataView = () => {
   return useMemo(
     () => ({
       ...sourcererDataView,
-      indexPatterns,
-      indexPattern: updatedPattern,
       browserFields,
+      patternList: sourcererDataView.selectedPatterns,
     }),
-    [browserFields, indexPatterns, sourcererDataView, updatedPattern]
+    [browserFields, sourcererDataView]
   );
 };

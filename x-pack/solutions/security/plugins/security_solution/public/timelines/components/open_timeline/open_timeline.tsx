@@ -78,9 +78,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       onCompleteEditTimelineAction,
     } = useEditTimelineActions();
     const tableRef = useRef<EuiBasicTable<OpenTimelineResult> | null>(null);
-    const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+    const { timelinePrivileges } = useUserPrivileges();
     const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
-      deleteTimelines: kibanaSecuritySolutionsPrivileges.crud ? deleteTimelines : undefined,
+      deleteTimelines: timelinePrivileges.crud ? deleteTimelines : undefined,
       selectedItems,
       tableRef,
       timelineType,
@@ -156,7 +156,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      if (kibanaSecuritySolutionsPrivileges.crud) {
+      if (timelinePrivileges.crud) {
         const createRule: ActionTimelineToShow[] = ['createRule'];
         const createRuleFromEql: ActionTimelineToShow[] = ['createRuleFromEql'];
         const timelineActions: ActionTimelineToShow[] = [
@@ -192,7 +192,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       timelineStatus,
       onDeleteSelected,
       deleteTimelines,
-      kibanaSecuritySolutionsPrivileges,
+      timelinePrivileges,
     ]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);

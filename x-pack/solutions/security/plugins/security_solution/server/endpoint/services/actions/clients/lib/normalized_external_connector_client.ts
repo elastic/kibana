@@ -115,22 +115,38 @@ export class NormalizedExternalConnectorClient {
     ActionTypeExecutorResult<TResponse>
   > {
     this.ensureSetupDone();
-    const { id: connectorId } = await this.getConnectorInstance();
+    const {
+      id: connectorId,
+      name: connectorName,
+      actionTypeId: connectorTypeId,
+    } = await this.getConnectorInstance();
+
+    const catchAndThrow = (err: Error) => {
+      throw new ResponseActionsClientError(
+        `Attempt to execute [${params.subAction}] with connector [Name: ${connectorName} | Type: ${connectorTypeId} | ID: ${connectorId})] failed with : ${err.message}`,
+        500,
+        err
+      );
+    };
 
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
-      return this.connectorsClient.execute({
-        requesterId: 'background_task',
-        id: connectorId,
-        spaceId,
-        params,
-        relatedSavedObjects: this.options?.relatedSavedObjects,
-      }) as Promise<ActionTypeExecutorResult<TResponse>>;
+      return this.connectorsClient
+        .execute({
+          requesterId: 'background_task',
+          id: connectorId,
+          spaceId,
+          params,
+          relatedSavedObjects: this.options?.relatedSavedObjects,
+        })
+        .catch(catchAndThrow) as Promise<ActionTypeExecutorResult<TResponse>>;
     }
 
-    return this.connectorsClient.execute({
-      actionId: connectorId,
-      params,
-    }) as Promise<ActionTypeExecutorResult<TResponse>>;
+    return this.connectorsClient
+      .execute({
+        actionId: connectorId,
+        params,
+      })
+      .catch(catchAndThrow) as Promise<ActionTypeExecutorResult<TResponse>>;
   }
 
   protected async getAll(spaceId: string = 'default'): ReturnType<ActionsClient['getAll']> {

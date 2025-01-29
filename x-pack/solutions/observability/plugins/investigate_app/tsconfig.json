@@ -10,6 +10,7 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
+    "scripts/**/*",
     ".storybook/**/*"
   ],
   "exclude": [
@@ -80,5 +81,10 @@
     "@kbn/utility-types-jest",
     "@kbn/visualization-utils",
     "@kbn/zod",
+    "@kbn/babel-register",
+    "@kbn/tooling-log",
+    "@kbn/dev-cli-runner",
+    "@kbn/datemath",
+    "@kbn/sse-utils-client",
   ],
 }

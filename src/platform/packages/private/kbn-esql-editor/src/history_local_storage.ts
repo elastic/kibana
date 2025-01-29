@@ -29,7 +29,7 @@ export const getTrimmedQuery = (queryString: string) => {
 
 const sortDates = (date1?: string, date2?: string) => {
   if (!date1 || !date2) return 0;
-  return date1 < date2 ? 1 : date1 > date2 ? -1 : 0;
+  return date1 < date2 ? -1 : date1 > date2 ? 1 : 0;
 };
 
 export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem[] => {
@@ -59,7 +59,7 @@ export const getCachedQueries = (): QueryHistoryItem[] => {
 
 // Adding the maxQueriesAllowed here for testing purposes
 export const addQueriesToCache = (
-  item: QueryHistoryItem,
+  itemToAddOrUpdate: QueryHistoryItem,
   maxQueriesAllowed = MAX_HISTORY_QUERIES_NUMBER
 ) => {
   // if the user is working on multiple tabs
@@ -71,13 +71,12 @@ export const addQueriesToCache = (
     const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
     cachedQueries.set(trimmedQueryString, queryItem);
   });
-  const trimmedQueryString = getTrimmedQuery(item.queryString);
+  const trimmedQueryString = getTrimmedQuery(itemToAddOrUpdate.queryString);
 
-  if (item.queryString) {
+  if (itemToAddOrUpdate.queryString) {
     cachedQueries.set(trimmedQueryString, {
-      ...item,
+      ...itemToAddOrUpdate,
       timeRan: new Date().toISOString(),
-      status: item.status,
     });
   }
 

@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import type { APMConfig } from '../../..';
 import {
   FAAS_BILLED_DURATION,
@@ -115,7 +114,6 @@ export async function getComputeUsageChart({
                   computeUsageBytesMs: aggregations?.avgComputeUsageBytesMs.value,
                   countInvocations: aggregations?.countInvocations.value,
                 }) ?? 0,
-              color: theme.euiColorVis0,
               data: timeseriesData.buckets.map((bucket) => {
                 const computeUsage =
                   convertComputeUsageToGbSec({

@@ -14,12 +14,13 @@ import { DashboardCreationOptions, DashboardState } from './types';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from '../dashboard_container/embeddable/create/performance/query_performance_tracking';
 import { coreServices } from '../services/kibana_services';
+import { logger } from '../services/logger';
 import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
 import { UnsavedPanelState } from '../dashboard_container/types';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -65,6 +66,9 @@ export async function loadDashboardApi({
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
   };
+  combinedSessionState.references = sessionStorageInput?.references?.length
+    ? sessionStorageInput?.references
+    : savedObjectResult?.references;
 
   // --------------------------------------------------------------------------------------
   // Combine state with overrides.
@@ -123,7 +127,7 @@ export async function loadDashboardApi({
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling
     // TODO: this should be revisited by making embeddable transfer support canceling logic https://github.com/elastic/kibana/issues/190485
     const contentInsightsClient = new ContentInsightsClient(
-      { http: coreServices.http },
+      { http: coreServices.http, logger },
       { domainId: 'dashboard' }
     );
     contentInsightsClient.track(savedObjectId, 'viewed');

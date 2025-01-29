@@ -290,16 +290,20 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     onSelectionChange: setSelection,
   };
 
-  const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [
-    {
+  const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [];
+
+  if (
+    selection.every((dataStream: DataStream) => dataStream.privileges.manage_data_stream_lifecycle)
+  ) {
+    dataStreamActions.push({
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.bulkEditDataRetentionButtonLabel', {
         defaultMessage: 'Edit data retention',
       }),
       icon: 'pencil',
       onClick: () => setDataStreamsToEditDataRetention(selection),
       'data-test-subj': 'bulkEditDataRetentionButton',
-    },
-  ];
+    });
+  }
 
   if (selection.every((dataStream: DataStream) => dataStream.privileges.delete_index)) {
     dataStreamActions.push({
@@ -319,7 +323,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       incremental: true,
     },
     toolsLeft:
-      selection.length > 0 ? (
+      selection.length > 0 && dataStreamActions.length > 0 ? (
         <DataStreamActionsMenu
           dataStreamActions={dataStreamActions}
           selectedDataStreamsCount={selection.length}

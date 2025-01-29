@@ -10,7 +10,7 @@ import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import {
   TINY_ELSER,
   clearKnowledgeBase,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from '../../../observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
@@ -53,7 +53,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await clearKnowledgeBase(es);
 
       // create a knowledge base model
-      await createKnowledgeBaseModel(ml);
+      await importTinyElserModel(ml);
 
       await Promise.all([
         // setup the knowledge base

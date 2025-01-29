@@ -38,6 +38,7 @@ export class SearchConnectorsPlugin
   private log: Logger;
   private readonly config: SearchConnectorsConfig;
   private agentlessConnectorDeploymentsSyncService: AgentlessConnectorDeploymentsSyncService;
+  private isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.connectors = [];
@@ -46,6 +47,7 @@ export class SearchConnectorsPlugin
     this.agentlessConnectorDeploymentsSyncService = new AgentlessConnectorDeploymentsSyncService(
       this.log
     );
+    this.isServerless = false;
   }
 
   public setup(
@@ -55,6 +57,7 @@ export class SearchConnectorsPlugin
     const http = coreSetup.http;
 
     this.connectors = getConnectorTypes(http.staticAssets);
+    this.isServerless = plugins.cloud && plugins.cloud.isServerlessEnabled;
     const coreStartServices = coreSetup.getStartServices();
 
     // There seems to be no way to check for agentless here
@@ -79,7 +82,11 @@ export class SearchConnectorsPlugin
   }
 
   public start(coreStart: CoreStart, plugins: SearchConnectorsPluginStartDependencies) {
-    if (isAgentlessEnabled()) {
+    if (this.isServerless) {
+      this.log.info(
+        'Serverless is not supported, skipping agentless connectors infrastructure watcher task'
+      );
+    } else if (isAgentlessEnabled()) {
       this.log.info(
         'Agentless is supported, scheduling initial agentless connectors infrastructure watcher task'
       );

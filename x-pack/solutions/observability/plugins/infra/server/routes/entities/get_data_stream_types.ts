@@ -67,5 +67,5 @@ export async function getDataStreamTypes({
     });
   }
 
-  return Array.from(sourceDataStreams);
+  return Array.from(sourceDataStreams).filter(Boolean);
 }

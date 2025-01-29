@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  initializeTitles,
+  initializeTitleManager,
   useInheritedViewMode,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -40,7 +40,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
     /**
      * initialize state (source of truth)
      */
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const titleManager = initializeTitleManager(state);
     const content$ = new BehaviorSubject(state.content);
 
     /**
@@ -50,11 +50,11 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
      */
     const api = buildApi(
       {
-        ...titlesApi,
+        ...titleManager.api,
         serializeState: () => {
           return {
             rawState: {
-              ...serializeTitles(),
+              ...titleManager.serialize(),
               content: content$.getValue(),
             },
           };
@@ -69,7 +69,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
        */
       {
         content: [content$, (value) => content$.next(value)],
-        ...titleComparators,
+        ...titleManager.comparators,
       }
     );
 

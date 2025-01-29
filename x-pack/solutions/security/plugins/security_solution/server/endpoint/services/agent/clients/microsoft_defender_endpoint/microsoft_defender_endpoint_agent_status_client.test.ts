@@ -12,6 +12,8 @@ import { microsoftDefenderMock } from '../../../actions/clients/microsoft/defend
 import type { AgentStatusClientOptions } from '../lib/base_agent_status_client';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import { responseActionsClientMock } from '../../../actions/clients/mocks';
+import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('../../../actions/pending_actions_summary', () => {
   const realModule = jest.requireActual('../../../actions/pending_actions_summary');
@@ -94,7 +96,7 @@ describe('Microsoft Defender Agent Status client', () => {
         agentId: '1-2-3',
         agentType: 'microsoft_defender_endpoint',
         found: true,
-        isolated: false,
+        isolated: true,
         lastSeen: '2018-08-02T14:55:03.7791856Z',
         pendingActions: {
           isolate: 1,
@@ -105,7 +107,7 @@ describe('Microsoft Defender Agent Status client', () => {
         agentId: 'foo',
         agentType: 'microsoft_defender_endpoint',
         found: false,
-        isolated: false,
+        isolated: true, // << This is only true because of the way the default mock is setup. The important value for this test data `found: false`
         lastSeen: '',
         pendingActions: {},
         status: 'unenrolled',
@@ -124,31 +126,64 @@ describe('Microsoft Defender Agent Status client', () => {
   `(
     'should correctly map MS machine healthStatus of $msHealthStatus to agent status $expectedAgentStatus',
     async ({ msHealthStatus, expectedAgentStatus }) => {
-      const priorExecuteMock = (
-        clientConstructorOptions.connectorActionsClient?.execute as jest.Mock
-      ).getMockImplementation();
-      (clientConstructorOptions.connectorActionsClient?.execute as jest.Mock).mockImplementation(
-        async (options) => {
-          if (options.params.subAction === 'getAgentList') {
-            const machineListResponse =
-              microsoftDefenderMock.createMicrosoftGetMachineListApiResponse();
-            machineListResponse.value[0].healthStatus = msHealthStatus;
-
-            return responseActionsClientMock.createConnectorActionExecuteResponse({
-              data: machineListResponse,
-            });
-          }
-
-          if (priorExecuteMock) {
-            return priorExecuteMock(options);
-          }
-        }
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        clientConstructorOptions.connectorActionsClient! as ActionsClientMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST,
+        microsoftDefenderMock.createMicrosoftGetMachineListApiResponse({
+          healthStatus: msHealthStatus,
+        })
       );
 
       await expect(msAgentStatusClientMock.getAgentStatuses(['1-2-3'])).resolves.toEqual({
         '1-2-3': expect.objectContaining({
           status: expectedAgentStatus,
         }),
+      });
+    }
+  );
+
+  it('should retrieve the last successful isolate/release action from MS', async () => {
+    await msAgentStatusClientMock.getAgentStatuses(['1-2-3']);
+
+    expect(clientConstructorOptions.connectorActionsClient?.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: {
+          subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+          subActionParams: {
+            status: 'Succeeded',
+            type: ['Isolate', 'Unisolate'],
+            machineId: '1-2-3',
+            pageSize: 1,
+            sortField: 'lastUpdateDateTimeUtc',
+            sortDirection: 'desc',
+          },
+        },
+      })
+    );
+  });
+
+  it.each`
+    title                                  | msMachineActionsResponse                                                    | expectedIsolatedValue
+    ${'last success action was Isolate'}   | ${microsoftDefenderMock.createGetActionsApiResponse({ type: 'Isolate' })}   | ${true}
+    ${'last success action was Unisolate'} | ${microsoftDefenderMock.createGetActionsApiResponse({ type: 'Unisolate' })} | ${false}
+    ${'no isolation records are found'}    | ${{ value: [] }}                                                            | ${false}
+    ${'when ms API throws an error'}       | ${new Error('foo')}                                                         | ${false}
+  `(
+    `should display isolated:$expectedIsolatedValue when $title`,
+    async ({ msMachineActionsResponse, expectedIsolatedValue }) => {
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        clientConstructorOptions.connectorActionsClient! as ActionsClientMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+        () => {
+          if (msMachineActionsResponse instanceof Error) {
+            throw msMachineActionsResponse;
+          }
+          return msMachineActionsResponse;
+        }
+      );
+
+      await expect(msAgentStatusClientMock.getAgentStatuses(['1-2-3'])).resolves.toEqual({
+        '1-2-3': expect.objectContaining({ isolated: expectedIsolatedValue }),
       });
     }
   );
