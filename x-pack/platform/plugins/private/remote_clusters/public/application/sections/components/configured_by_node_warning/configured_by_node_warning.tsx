@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React from 'react';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-
-export function ConfiguredByNodeWarning() {
+export const ConfiguredByNodeWarning: React.FC = () => {
   return (
     <EuiCallOut
       title={
@@ -26,4 +23,4 @@ export function ConfiguredByNodeWarning() {
       data-test-subj="remoteClusterConfiguredByNodeWarning"
     />
   );
-}
+};

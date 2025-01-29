@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { SetupGuideLayout } from './setup_guide';
-export { SETUP_GUIDE_TITLE } from './constants';
+export { RemoteClusterReview } from './remote_cluster_review';

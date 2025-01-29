@@ -19,14 +19,11 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  indices:
-                    type: array
-                    description: List of indices with at least one field of a `sematic_text` type.
-                    items:
-                      type: string
-                required:
-                  - indices
+                additionalProperties:
+                  type: array
+                  description: List of indices with at least one field of a `sematic_text` type.
+                  items:
+                    type: string
         400:
           description: Generic Error
           content:

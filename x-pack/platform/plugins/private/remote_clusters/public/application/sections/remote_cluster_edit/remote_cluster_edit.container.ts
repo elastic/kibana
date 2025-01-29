@@ -6,6 +6,7 @@
  */
 
 import { connect } from 'react-redux';
+import { Cluster, ClusterPayload } from '../../../../common/lib';
 import { RemoteClusterEdit as RemoteClusterEditView } from './remote_cluster_edit';
 
 import {
@@ -23,7 +24,7 @@ import {
   openDetailPanel,
 } from '../../store/actions';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     isLoading: isLoading(state),
     cluster: getEditedCluster(state),
@@ -32,27 +33,39 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: (action: any) => void) => {
   return {
-    startEditingCluster: (clusterName) => {
+    startEditingCluster: (clusterName: string) => {
       dispatch(startEditingCluster({ clusterName }));
     },
     stopEditingCluster: () => {
       dispatch(stopEditingCluster());
     },
-    editCluster: (cluster) => {
+    editCluster: (cluster: ClusterPayload) => {
       dispatch(editCluster(cluster));
     },
     clearEditClusterErrors: () => {
       dispatch(clearEditClusterErrors());
     },
-    openDetailPanel: (clusterName) => {
+    openDetailPanel: (clusterName: string) => {
       dispatch(openDetailPanel({ name: clusterName }));
     },
   };
 };
 
-export const RemoteClusterEdit = connect(
+interface Props {
+  isLoading: boolean;
+  cluster: Cluster;
+  startEditingCluster: (clusterName: string) => void;
+  stopEditingCluster: () => void;
+  editCluster: (cluster: ClusterPayload) => void;
+  isEditingCluster: boolean;
+  getEditClusterError?: object;
+  clearEditClusterErrors: () => void;
+  openDetailPanel: (clusterName: string) => void;
+}
+
+export const RemoteClusterEdit: React.FC<Props> = connect(
   mapStateToProps,
   mapDispatchToProps
 )(RemoteClusterEditView);

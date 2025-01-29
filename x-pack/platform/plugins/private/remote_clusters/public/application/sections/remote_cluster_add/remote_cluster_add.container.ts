@@ -6,22 +6,23 @@
  */
 
 import { connect } from 'react-redux';
+import { ClusterPayload } from '../../../../common/lib';
 import { RemoteClusterAdd as RemoteClusterAddView } from './remote_cluster_add';
 
 import { isAddingCluster, getAddClusterError } from '../../store/selectors';
 
 import { addCluster, clearAddClusterErrors } from '../../store/actions';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: any) => {
   return {
     isAddingCluster: isAddingCluster(state),
     addClusterError: getAddClusterError(state),
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: (action: any) => void) => {
   return {
-    addCluster: (cluster) => {
+    addCluster: (cluster: ClusterPayload) => {
       dispatch(addCluster(cluster));
     },
     clearAddClusterErrors: () => {
@@ -30,4 +31,14 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export const RemoteClusterAdd = connect(mapStateToProps, mapDispatchToProps)(RemoteClusterAddView);
+interface Props {
+  addCluster: (cluster: ClusterPayload) => void;
+  isAddingCluster: boolean;
+  addClusterError?: { message: string };
+  clearAddClusterErrors: () => void;
+}
+
+export const RemoteClusterAdd: React.FC<Props> = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(RemoteClusterAddView);
