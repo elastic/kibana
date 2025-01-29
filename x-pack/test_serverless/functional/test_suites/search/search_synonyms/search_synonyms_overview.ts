@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
       it('loads successfully', async () => {
-        browser.refresh();
+        await browser.refresh();
         await pageObjects.searchSynonyms.SynonymsSetsListPage.expectSynonymsSetsListPageComponentsToExist();
       });
       after(async () => {
