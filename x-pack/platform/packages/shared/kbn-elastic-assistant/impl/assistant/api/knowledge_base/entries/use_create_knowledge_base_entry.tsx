@@ -20,7 +20,7 @@ import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries'
 
 const CREATE_KNOWLEDGE_BASE_ENTRY_MUTATION_KEY = [
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
-  API_VERSIONS.internal.v1,
+  API_VERSIONS.public.v1,
 ];
 
 export interface UseCreateKnowledgeBaseEntryParams {
@@ -54,7 +54,7 @@ export const useCreateKnowledgeBaseEntry = ({
         ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
         {
           body: JSON.stringify(entry),
-          version: API_VERSIONS.internal.v1,
+          version: API_VERSIONS.public.v1,
           signal,
         }
       );
