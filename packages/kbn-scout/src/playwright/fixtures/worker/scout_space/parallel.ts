@@ -8,7 +8,7 @@
  */
 
 import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
-import { formatTime, isValidUTCDate, serviceLoadedMsg } from '../../../utils';
+import { formatTime, isValidUTCDate } from '../../../utils';
 import { coreWorkerFixtures } from '..';
 import { ImportSavedObjects, ScoutSpaceParallelFixture } from '.';
 import { measurePerformanceAsync } from '../../../../common';
@@ -130,7 +130,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         setDefaultTime,
       };
 
-      log.debug(serviceLoadedMsg(`scoutSpace:${spaceId}`));
+      log.serviceLoaded(`scoutSpace:${spaceId}`);
       await use({ savedObjects, uiSettings, id: spaceId });
 
       // Cleanup space after tests via API call
