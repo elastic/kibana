@@ -54,6 +54,14 @@ export interface StreamsAppPublicSetup {}
 
 export interface StreamsAppPublicStart {}
 
+export type WiredStreamGetResponseWithName = WiredStreamGetResponse & {
+  stream: WiredStreamDefinition;
+};
+
+export type UnwiredStreamGetResponseWithName = UnwiredStreamGetResponse & {
+  stream: UnwiredStreamDefinition;
+};
+
 export type IngestStreamGetResponseWithName =
-  | (WiredStreamGetResponse & { stream: WiredStreamDefinition })
-  | (UnwiredStreamGetResponse & { stream: UnwiredStreamDefinition });
+  | WiredStreamGetResponseWithName
+  | UnwiredStreamGetResponseWithName;

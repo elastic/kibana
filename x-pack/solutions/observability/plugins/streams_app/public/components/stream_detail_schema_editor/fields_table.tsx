@@ -23,20 +23,17 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import {
-  isRootStreamDefinition,
-  isWiredReadStream,
-  ReadStreamDefinition,
-} from '@kbn/streams-schema';
+import { isRootStreamDefinition } from '@kbn/streams-schema';
 import { FieldType } from './field_type';
 import { FieldStatusBadge } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
 import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 import { FieldParent } from './field_parent';
 import { SchemaEditorQueryAndFiltersState } from './hooks/use_query_and_filters';
+import { WiredStreamGetResponseWithName } from '../../types';
 
 interface FieldsTableContainerProps {
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponseWithName;
   unmappedFieldsResult?: string[];
   isLoadingUnmappedFields: boolean;
   query?: Query;
@@ -101,15 +98,13 @@ export const FieldsTableContainer = ({
   }, [inheritedFields, query]);
 
   const mappedFields = useMemo(() => {
-    if (isWiredReadStream(definition)) {
-      return Object.entries(definition.stream.ingest.wired.fields).map(([name, field]) => ({
-        name,
-        type: field.type,
-        format: field.format,
-        parent: definition.name,
-        status: 'mapped' as const,
-      }));
-    }
+    return Object.entries(definition.stream.ingest.wired.fields).map(([name, field]) => ({
+      name,
+      type: field.type,
+      format: field.format,
+      parent: definition.stream.name,
+      status: 'mapped' as const,
+    }));
     return [];
   }, [definition]);
 
@@ -124,11 +119,11 @@ export const FieldsTableContainer = ({
     return unmappedFieldsResult
       ? unmappedFieldsResult.map((field) => ({
           name: field,
-          parent: definition.name,
+          parent: definition.stream.name,
           status: 'unmapped' as const,
         }))
       : [];
-  }, [definition.name, unmappedFieldsResult]);
+  }, [definition.stream.name, unmappedFieldsResult]);
 
   const filteredUnmappedFields = useMemo(() => {
     if (!unmappedFieldsResult) return [];
@@ -172,7 +167,7 @@ export const FieldsTableContainer = ({
 };
 
 interface FieldsTableProps {
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponseWithName;
   fields: FieldEntry[];
   editingState: SchemaEditorEditingState;
   unpromotingState: SchemaEditorUnpromotingState;
@@ -326,7 +321,10 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
           return <FieldType type={fieldType} />;
         } else if (columnId === 'parent') {
           return (
-            <FieldParent parent={field.parent} linkEnabled={field.parent !== definition.name} />
+            <FieldParent
+              parent={field.parent}
+              linkEnabled={field.parent !== definition.stream.name}
+            />
           );
         } else if (columnId === 'status') {
           return <FieldStatusBadge status={field.status} />;

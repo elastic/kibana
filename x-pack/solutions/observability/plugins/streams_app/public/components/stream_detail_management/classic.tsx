@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { useKibana } from '../../hooks/use_kibana';
 import { Wrapper } from './wrapper';
+import { UnwiredStreamGetResponseWithName } from '../../types';
 
 type ManagementSubTabs = 'enrich' | 'overview';
 
@@ -24,12 +24,28 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: ReadStreamDefinition;
+  definition: UnwiredStreamGetResponseWithName;
   refreshDefinition: () => void;
 }) {
   const {
     path: { key, subtab },
   } = useStreamsAppParams('/{key}/management/{subtab}');
+
+  const legacyDefinition = useMemo(() => {
+    if (!definition) {
+      return undefined;
+    }
+    return {
+      dashboards: definition.dashboards,
+      elasticsearch_assets: definition.elasticsearch_assets,
+      inherited_fields: {},
+      effective_lifecycle: definition.effective_lifecycle,
+      name: definition.stream.name,
+      stream: {
+        ...definition.stream,
+      },
+    };
+  }, [definition]);
 
   const tabs = {
     overview: {
@@ -40,7 +56,10 @@ export function ClassicStreamDetailManagement({
     },
     enrich: {
       content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+        <StreamDetailEnrichment
+          definition={legacyDefinition}
+          refreshDefinition={refreshDefinition}
+        />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
         defaultMessage: 'Extract field',
@@ -60,7 +79,7 @@ export function ClassicStreamDetailManagement({
   return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
 }
 
-function UnmanagedStreamOverview({ definition }: { definition: ReadStreamDefinition }) {
+function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetResponseWithName }) {
   const {
     core: {
       http: { basePath },

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  ReadStreamDefinition,
-  NamedFieldDefinitionConfig,
-  isWiredReadStream,
-} from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig } from '@kbn/streams-schema';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useCallback, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -17,6 +13,7 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
+import { WiredStreamGetResponseWithName } from '../../../types';
 import { FieldStatus } from '../configuration_maps';
 
 export type SchemaEditorEditingState = ReturnType<typeof useEditingState>;
@@ -39,7 +36,7 @@ export const useEditingState = ({
   toastsService,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponseWithName;
   refreshDefinition: () => void;
   refreshUnmappedFields: () => void;
   toastsService: ToastsStart;
@@ -95,8 +92,7 @@ export const useEditingState = ({
   const saveChanges = useMemo(() => {
     return selectedField &&
       isFullFieldDefinition(nextFieldDefinition) &&
-      hasChanges(selectedField, nextFieldDefinition) &&
-      isWiredReadStream(definition)
+      hasChanges(selectedField, nextFieldDefinition)
       ? async () => {
           toggleIsSaving(true);
           try {
@@ -104,7 +100,7 @@ export const useEditingState = ({
               signal: abortController.signal,
               params: {
                 path: {
-                  id: definition.name,
+                  id: definition.stream.name,
                 },
                 body: {
                   ingest: {
