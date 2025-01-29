@@ -4232,7 +4232,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-owners@link:packages/kbn-code-owners":
+"@kbn/code-owners@link:src/dev/packages/code-owners":
   version "0.0.0"
   uid ""
 

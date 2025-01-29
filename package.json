@@ -1365,7 +1365,7 @@
     "@kbn/ci-stats-shipper-cli": "link:src/dev/packages/ci-stats-shipper-cli",
     "@kbn/cli-dev-mode": "link:src/dev/packages/cli-dev-mode",
     "@kbn/code-editor-mock": "link:src/platform/packages/shared/shared-ux/code_editor/mocks",
-    "@kbn/code-owners": "link:packages/kbn-code-owners",
+    "@kbn/code-owners": "link:src/dev/packages/code-owners",
     "@kbn/core-analytics-browser-mocks": "link:src/core/packages/analytics/browser-mocks",
     "@kbn/core-analytics-server-mocks": "link:src/core/packages/analytics/server-mocks",
     "@kbn/core-application-browser-mocks": "link:src/core/packages/application/browser-mocks",
