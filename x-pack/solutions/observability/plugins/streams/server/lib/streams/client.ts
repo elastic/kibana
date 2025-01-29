@@ -21,11 +21,13 @@ import {
   StreamUpsertRequest,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
+  asIngestStreamDefinition,
   assertsSchema,
   getAncestors,
   getParentId,
   isChildOf,
   isGroupedStreamDefinition,
+  isIngestStreamDefinition,
   isInheritLifecycle,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
@@ -474,7 +476,7 @@ export class StreamsClient {
     name: string;
     if: Condition;
   }): Promise<ForkStreamResponse> {
-    const parentDefinition = (await this.getStream(parent)) as WiredStreamDefinition;
+    const parentDefinition = asIngestStreamDefinition(await this.getStream(parent));
 
     const childDefinition: WiredStreamDefinition = {
       name,
@@ -528,7 +530,7 @@ export class StreamsClient {
       const streamDefinition = response._source;
       assertsSchema(streamDefinitionSchema, streamDefinition);
 
-      if (isWiredStreamDefinition(streamDefinition)) {
+      if (isIngestStreamDefinition(streamDefinition)) {
         const privileges = await checkAccess({
           id: name,
           scopedClusterClient: this.dependencies.scopedClusterClient,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { createIsNarrowSchema } from '../helpers';
+import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 import { streamDefinitionSchema } from './core';
 import { groupedStreamDefinitionBaseSchema, groupedStreamDefinitionSchema } from './grouped';
 import {
@@ -22,6 +22,11 @@ export const isIngestStreamDefinition = createIsNarrowSchema(
 export const isWiredStreamDefinition = createIsNarrowSchema(
   streamDefinitionSchema,
   wiredStreamDefinitionSchema
+);
+
+export const asIngestStreamDefinition = createAsSchemaOrThrow(
+  streamDefinitionSchema,
+  ingestStreamDefinitionSchema
 );
 
 export const isUnwiredStreamDefinition = createIsNarrowSchema(
