@@ -3023,6 +3023,33 @@
     "dynamic": false,
     "properties": {}
   },
+  "security-ai-prompt": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "model": {
+        "type": "keyword"
+      },
+      "prompt": {
+        "properties": {
+          "default": {
+            "type": "text"
+          }
+        }
+      },
+      "promptGroupId": {
+        "type": "keyword"
+      },
+      "promptId": {
+        "type": "keyword"
+      },
+      "provider": {
+        "type": "keyword"
+      }
+    }
+  },
   "security-rule": {
     "dynamic": false,
     "properties": {

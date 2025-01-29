@@ -54,6 +54,18 @@ paths:
             type: integer
             minimum: 0
             default: 20
+        - name: gaps_range_start
+          in: query
+          description: Gaps range start
+          required: false
+          schema:
+            type: string
+        - name: gaps_range_end
+          in: query
+          description: Gaps range end
+          required: false
+          schema:
+            type: string
 
       responses:
         '200':

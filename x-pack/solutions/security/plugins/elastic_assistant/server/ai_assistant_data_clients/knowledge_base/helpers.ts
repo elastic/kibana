@@ -10,7 +10,12 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AuthenticatedUser } from '@kbn/core-security-common';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import {
+  contentReferenceBlock,
+  ContentReferencesStore,
+  esqlQueryReference,
+  IndexEntry,
+} from '@kbn/elastic-assistant-common';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export const isModelAlreadyExistsError = (error: Error) => {
@@ -138,10 +143,12 @@ export const getKBVectorSearchQuery = ({
 export const getStructuredToolForIndexEntry = ({
   indexEntry,
   esClient,
+  contentReferencesStore,
   logger,
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
+  contentReferencesStore: ContentReferencesStore | false;
   logger: Logger;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
@@ -210,15 +217,27 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
+          const esqlQuery = `FROM ${hit._index} ${
+            hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''
+          }`;
+
+          const reference =
+            contentReferencesStore &&
+            contentReferencesStore.add((p) => esqlQueryReference(p.id, esqlQuery, hit._index));
+
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
-            return indexEntry.outputFields.reduce((prev, field) => {
-              // @ts-expect-error
-              return { ...prev, [field]: hit._source[field] };
-            }, {});
+            return indexEntry.outputFields.reduce(
+              (prev, field) => {
+                // @ts-expect-error
+                return { ...prev, [field]: hit._source[field] };
+              },
+              reference ? { citation: contentReferenceBlock(reference) } : {}
+            );
           }
 
           return {
             text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
+            ...(reference ? { citation: contentReferenceBlock(reference) } : {}),
           };
         });
 
@@ -228,7 +247,7 @@ export const getStructuredToolForIndexEntry = ({
 
         return `###\nBelow are all relevant documents in JSON format:\n${JSON.stringify(
           kbDocs
-        )}\n###`;
+        )}###`;
       } catch (e) {
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;
