@@ -55,7 +55,7 @@
     "@kbn/search-types",
     "@kbn/safer-lodash-set",
     "@kbn/esql-utils",
-    "@kbn/shared-ux-table-persist"
+    "@kbn/shared-ux-table-persist",
   ],
   "exclude": [
     "target/**/*",

@@ -415,18 +415,20 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.endpointContext
     );
 
-    registerEndpointRoutes(router, this.endpointContext);
+    registerEndpointRoutes(router, this.endpointContext, core.docLinks);
     registerEndpointSuggestionsRoutes(
       router,
       plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
-      this.endpointContext
+      this.endpointContext,
+      core.docLinks
     );
     registerLimitedConcurrencyRoutes(core);
-    registerPolicyRoutes(router, this.endpointContext);
+    registerPolicyRoutes(router, this.endpointContext, core.docLinks);
     registerProtectionUpdatesNoteRoutes(router, this.endpointContext);
     registerActionRoutes(
       router,
       this.endpointContext,
+      core.docLinks,
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
@@ -594,6 +596,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
       attackDiscoveryAlertFiltering: config.experimentalFeatures.attackDiscoveryAlertFiltering,
+      contentReferencesEnabled: config.experimentalFeatures.contentReferencesEnabled,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

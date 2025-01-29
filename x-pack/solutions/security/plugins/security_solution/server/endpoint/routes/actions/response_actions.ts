@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { DocLinksServiceSetup, RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { i18n } from '@kbn/i18n';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -71,7 +72,8 @@ import { responseActionsWithLegacyActionProperty } from '../../services/actions/
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  docLinks: DocLinksServiceSetup
 ) {
   const logger = endpointContext.logFactory.get('hostIsolation');
 
@@ -94,6 +96,24 @@ export function registerResponseActionRoutes(
         version: '2023-10-31',
         validate: {
           request: IsolateRouteRequestSchema,
+        },
+        options: {
+          deprecated: {
+            documentationUrl:
+              docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
+            severity: 'critical',
+            message: i18n.translate(
+              'xpack.securitySolution.deprecations.endpoint.response_actions.isolate',
+              {
+                defaultMessage:
+                  'The "{path}" URL is deprecated and will be removed in the next major version.',
+                values: { path: ISOLATE_HOST_ROUTE },
+              }
+            ),
+            reason: {
+              type: 'remove',
+            },
+          },
         },
       },
       withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
@@ -118,6 +138,24 @@ export function registerResponseActionRoutes(
         version: '2023-10-31',
         validate: {
           request: UnisolateRouteRequestSchema,
+        },
+        options: {
+          deprecated: {
+            documentationUrl:
+              docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
+            severity: 'critical',
+            message: i18n.translate(
+              'xpack.securitySolution.deprecations.endpoint.response_actions.unisolate',
+              {
+                defaultMessage:
+                  'The "{path}" URL is deprecated and will be removed in the next major version.',
+                values: { path: UNISOLATE_HOST_ROUTE },
+              }
+            ),
+            reason: {
+              type: 'remove',
+            },
+          },
         },
       },
       withEndpointAuthz(

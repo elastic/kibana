@@ -20,7 +20,8 @@
       "fieldsMetadata"
     ],
     "requiredBundles": [
-      "kibanaUtils"
+      "kibanaUtils",
+      "kibanaReact"
     ]
   }
 }

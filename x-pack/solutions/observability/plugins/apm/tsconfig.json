@@ -132,7 +132,10 @@
     "@kbn/charts-theme",
     "@kbn/entityManager-plugin",
     "@kbn/response-ops-rule-params",
-    "@kbn/core-http-server-utils"
+    "@kbn/entityManager-plugin",
+    "@kbn/core-http-server-utils",
+    "@kbn/key-value-metadata-table",
+    "@kbn/event-stacktrace"
   ],
   "exclude": ["target/**/*"]
 }

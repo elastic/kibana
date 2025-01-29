@@ -25,6 +25,7 @@ import {
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
 import { PermissionsPolicyConfigType } from './permissions_policy';
+import { type RateLimiterConfig, rateLimiterConfigSchema } from './rate_limiter';
 
 const SECOND = 1000;
 
@@ -192,6 +193,7 @@ const configSchema = schema.object(
         }),
       }),
     }),
+    rateLimiter: rateLimiterConfigSchema,
     requestId: schema.object(
       {
         allowFromAnyIp: schema.boolean({ defaultValue: false }),
@@ -337,6 +339,7 @@ export class HttpConfig implements IHttpConfig {
   };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
+  public rateLimiter: RateLimiterConfig;
 
   public eluMonitor: IHttpEluMonitorConfig;
 
@@ -384,6 +387,7 @@ export class HttpConfig implements IHttpConfig {
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
+    this.rateLimiter = rawHttpConfig.rateLimiter;
 
     // default to `false` to prevent breaking changes in current offerings
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
