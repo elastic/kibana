@@ -12,6 +12,7 @@ import {
   StorageSettings,
   types,
 } from '@kbn/observability-utils-server/es/storage';
+import { StreamDefinition } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { StreamsClient } from './client';
 import { AssetClient } from './assets/asset_client';
@@ -28,7 +29,7 @@ export const streamsStorageSettings = {
 } satisfies StorageSettings;
 
 export type StreamsStorageSettings = typeof streamsStorageSettings;
-export type StreamsStorageClient = IStorageClient<StreamsStorageSettings>;
+export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, StreamDefinition>;
 
 export class StreamsService {
   constructor(

@@ -787,13 +787,7 @@ export class StreamsClient {
   private async updateStoredStream(definition: StreamDefinition) {
     return this.dependencies.storageClient.index({
       id: definition.name,
-      document: omit(
-        definition,
-        'elasticsearch_assets',
-        'dashboards',
-        'inherited_fields',
-        'lifecycle'
-      ),
+      document: definition,
     });
   }
 
