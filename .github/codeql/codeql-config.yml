@@ -70,7 +70,7 @@ paths-ignore:
   - src/dev/packages/repo-path
   - src/dev/packages/repo-source-classifier
   - src/dev/packages/repo-source-classifier-cli
-  - packages/kbn-scout
+  - src/dev/packages/scout
   - packages/kbn-scout-*
   - packages/kbn-some-dev-log
   - packages/kbn-sort-package-json
