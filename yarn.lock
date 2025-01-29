@@ -7328,7 +7328,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/set-map@link:packages/kbn-set-map":
+"@kbn/set-map@link:src/dev/packages/set-map":
   version "0.0.0"
   uid ""
 

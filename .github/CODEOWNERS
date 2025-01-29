@@ -177,7 +177,7 @@ src/dev/packages/repo-source-classifier-cli @elastic/kibana-operations
 src/dev/packages/scout @elastic/appex-qa
 src/dev/packages/scout-info @elastic/appex-qa
 src/dev/packages/scout-reporting @elastic/appex-qa
-packages/kbn-set-map @elastic/kibana-operations
+src/dev/packages/set-map @elastic/kibana-operations
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
