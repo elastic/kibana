@@ -22,10 +22,12 @@ export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 
 export const SetupTechnologySelector = ({
   disabled,
+  allowedSetupTechnologies,
   setupTechnology,
   onSetupTechnologyChange,
 }: {
   disabled: boolean;
+  allowedSetupTechnologies: SetupTechnology[];
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
@@ -54,6 +56,7 @@ export const SetupTechnologySelector = ({
           {
             id: `SetupTechnologySelector_${SetupTechnology.AGENTLESS}`,
             value: SetupTechnology.AGENTLESS,
+            disabled: !allowedSetupTechnologies.includes(SetupTechnology.AGENTLESS),
             label: (
               <>
                 <strong>
@@ -83,6 +86,7 @@ export const SetupTechnologySelector = ({
           {
             id: `SetupTechnologySelector_${SetupTechnology.AGENT_BASED}`,
             value: SetupTechnology.AGENT_BASED,
+            disabled: !allowedSetupTechnologies.includes(SetupTechnology.AGENT_BASED),
             label: (
               <>
                 <strong>
