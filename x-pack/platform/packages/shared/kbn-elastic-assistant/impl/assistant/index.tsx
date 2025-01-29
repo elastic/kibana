@@ -428,7 +428,6 @@ const AssistantComponent: React.FC<Props> = ({
       currentUserAvatar,
       currentSystemPrompt?.content,
       contentReferencesVisible,
-      euiThemeVars.euiSizeL,
       selectedPromptContextsCount,
       contentReferencesEnabled,
     ]
