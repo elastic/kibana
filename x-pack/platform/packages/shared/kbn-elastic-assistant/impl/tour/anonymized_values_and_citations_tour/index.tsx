@@ -83,7 +83,7 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
             subtitle={anonymizedValuesAndCitationsTourStep1.subTitle}
             anchorPosition="rightUp"
         />
-    ), [showTour, setShowTour])
+    ), [showTour, setShowTour, finishTour])
 
     return tourElement
 }
