@@ -40,6 +40,10 @@ export type UnwiredIngestStreamEffectiveLifecycle =
   | IngestStreamLifecycle
   | IngestStreamLifecycleDisabled;
 
+export type IngestStreamEffectiveLifecycle =
+  | WiredIngestStreamEffectiveLifecycle
+  | UnwiredIngestStreamEffectiveLifecycle;
+
 const dslLifecycleSchema = z.object({
   dsl: z.object({ data_retention: z.optional(NonEmptyString) }),
 });
@@ -59,16 +63,25 @@ export const unwiredIngestStreamEffectiveLifecycleSchema: z.Schema<UnwiredIngest
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
   ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));
 
-export const isDslLifecycle = createIsNarrowSchema(ingestStreamLifecycleSchema, dslLifecycleSchema);
+export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
+  z.union([unwiredIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);
 
-export const isIlmLifecycle = createIsNarrowSchema(ingestStreamLifecycleSchema, ilmLifecycleSchema);
+export const isDslLifecycle = createIsNarrowSchema(
+  ingestStreamEffectiveLifecycleSchema,
+  dslLifecycleSchema
+);
+
+export const isIlmLifecycle = createIsNarrowSchema(
+  ingestStreamEffectiveLifecycleSchema,
+  ilmLifecycleSchema
+);
 
 export const isInheritLifecycle = createIsNarrowSchema(
-  ingestStreamLifecycleSchema,
+  ingestStreamEffectiveLifecycleSchema,
   inheritLifecycleSchema
 );
 
 export const isDisabledLifecycle = createIsNarrowSchema(
-  ingestStreamLifecycleSchema,
+  ingestStreamEffectiveLifecycleSchema,
   disabledLifecycleSchema
 );

@@ -7,10 +7,9 @@
 
 import expect from '@kbn/expect';
 import {
+  IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
   IngestStreamUpsertRequest,
-  UnwiredIngestStreamEffectiveLifecycle,
-  WiredIngestStreamEffectiveLifecycle,
   WiredReadStreamDefinition,
   WiredStreamGetResponse,
   isDslLifecycle,
@@ -32,7 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   async function expectLifecycle(
     streams: string[],
-    expectedLifecycle: WiredIngestStreamEffectiveLifecycle | UnwiredIngestStreamEffectiveLifecycle
+    expectedLifecycle: IngestStreamEffectiveLifecycle
   ) {
     const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
     for (const definition of definitions) {
@@ -41,10 +40,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
     for (const dataStream of dataStreams.data_streams) {
-      const lifecycle = expectedLifecycle as IngestStreamLifecycle;
-
-      if (isDslLifecycle(lifecycle)) {
-        expect(dataStream.lifecycle?.data_retention).to.eql(lifecycle.dsl.data_retention);
+      if (isDslLifecycle(expectedLifecycle)) {
+        expect(dataStream.lifecycle?.data_retention).to.eql(expectedLifecycle.dsl.data_retention);
         expect(dataStream.indices.every((index) => !index.ilm_policy)).to.eql(
           true,
           'backing indices should not specify an ilm_policy'
@@ -56,12 +53,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'backing indices should not specify prefer_ilm'
           );
         }
-      } else if (isIlmLifecycle(lifecycle)) {
+      } else if (isIlmLifecycle(expectedLifecycle)) {
         expect(dataStream.prefer_ilm).to.eql(true, 'data stream should specify prefer_ilm');
-        expect(dataStream.ilm_policy).to.eql(lifecycle.ilm.policy);
+        expect(dataStream.ilm_policy).to.eql(expectedLifecycle.ilm.policy);
         expect(
           dataStream.indices.every(
-            (index) => index.prefer_ilm && index.ilm_policy === lifecycle.ilm.policy
+            (index) => index.prefer_ilm && index.ilm_policy === expectedLifecycle.ilm.policy
           )
         ).to.eql(true, 'backing indices should specify prefer_ilm and ilm_policy');
       }
