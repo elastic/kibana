@@ -4088,7 +4088,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-runner@link:packages/kbn-bazel-runner":
+"@kbn/bazel-runner@link:src/dev/packages/bazel-runner":
   version "0.0.0"
   uid ""
 

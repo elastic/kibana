@@ -1355,7 +1355,7 @@
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/babel-register": "link:packages/kbn-babel-register",
     "@kbn/babel-transform": "link:packages/kbn-babel-transform",
-    "@kbn/bazel-runner": "link:packages/kbn-bazel-runner",
+    "@kbn/bazel-runner": "link:src/dev/packages/bazel-runner",
     "@kbn/capture-oas-snapshot-cli": "link:packages/kbn-capture-oas-snapshot-cli",
     "@kbn/check-mappings-update-cli": "link:packages/kbn-check-mappings-update-cli",
     "@kbn/check-prod-native-modules-cli": "link:packages/kbn-check-prod-native-modules-cli",
