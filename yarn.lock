@@ -5836,7 +5836,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/gen-ai-functional-testing@link:packages/kbn-gen-ai-functional-testing":
+"@kbn/gen-ai-functional-testing@link:src/dev/packages/gen-ai-functional-testing":
   version "0.0.0"
   uid ""
 
