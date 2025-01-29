@@ -120,6 +120,11 @@ export const allowedExperimentalValues = Object.freeze({
   attackDiscoveryAlertFiltering: false,
 
   /**
+   * Enables content references (citations) in the AI Assistant
+   */
+  contentReferencesEnabled: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -185,11 +190,6 @@ export const allowedExperimentalValues = Object.freeze({
   jamfDataInAnalyzerEnabled: true,
 
   /**
-   * Enables graph visualization in alerts flyout
-   */
-  graphVisualizationInFlyoutEnabled: false,
-
-  /**
    * Enables an ability to customize Elastic prebuilt rules.
    *
    * Ticket: https://github.com/elastic/kibana/issues/174168
@@ -218,12 +218,8 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the storing of gaps in the event log
    */
-  manualRuleRunEnabled: false,
-
-  /**
-   * Enables the storing of gaps in the event log
-   */
   storeGapsInEventLogEnabled: false,
+
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
@@ -253,7 +249,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Defend Insights feature
    */
-  defendInsights: false,
+  defendInsights: true,
 
   /**
    * Enables flyout history and new preview navigation
@@ -282,6 +278,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.18/9.0
    */
   responseActionsMSDefenderEndpointEnabled: true,
+
+  /**
+   * Enables banner for informing users about changes in data collection.
+   */
+  eventCollectionDataReductionBannerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

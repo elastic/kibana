@@ -8295,6 +8295,18 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: Gaps range start
+          in: query
+          name: gaps_range_start
+          required: false
+          schema:
+            type: string
+        - description: Gaps range end
+          in: query
+          name: gaps_range_end
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -37315,6 +37327,349 @@ paths:
       tags:
         - Security AI Assistant API
       x-beta: true
+  /api/security_ai_assistant/knowledge_base/{resource}:
+    get:
+      description: Read a single KB
+      operationId: ReadKnowledgeBase
+      parameters:
+        - description: The KnowledgeBase `resource` value.
+          in: path
+          name: resource
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  elser_exists:
+                    type: boolean
+                  index_exists:
+                    type: boolean
+                  is_setup_available:
+                    type: boolean
+                  is_setup_in_progress:
+                    type: boolean
+                  pipeline_exists:
+                    type: boolean
+                  security_labs_exists:
+                    type: boolean
+                  user_data_exists:
+                    type: boolean
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Read a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+      x-beta: true
+    post:
+      description: Create a KnowledgeBase
+      operationId: CreateKnowledgeBase
+      parameters:
+        - description: The KnowledgeBase `resource` value.
+          in: path
+          name: resource
+          schema:
+            type: string
+        - description: Optional ELSER modelId to use when setting up the Knowledge Base
+          in: query
+          name: modelId
+          required: false
+          schema:
+            type: string
+        - description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+          in: query
+          name: ignoreSecurityLabs
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Create a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+      x-beta: true
+  /api/security_ai_assistant/knowledge_base/entries:
+    post:
+      description: Create a Knowledge Base Entry
+      operationId: CreateKnowledgeBaseEntry
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
+          description: Successful request returning Knowledge Base Entries
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Create a Knowledge Base Entry
+      tags:
+        - Security AI Assistant API
+      x-beta: true
+  /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
+    post:
+      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs
+      operationId: PerformKnowledgeBaseEntryBulkAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                create:
+                  items:
+                    $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps'
+                  type: array
+                delete:
+                  type: object
+                  properties:
+                    ids:
+                      description: Array of Knowledge base Entry IDs
+                      items:
+                        type: string
+                      minItems: 1
+                      type: array
+                    query:
+                      description: Query to filter Knowledge Base Entries
+                      type: string
+                update:
+                  items:
+                    $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps'
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResponse'
+          description: Successful bulk operation request
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Applies a bulk action to multiple Knowledge Base Entries
+      tags:
+        - Security AI Assistant API
+      x-beta: true
+  /api/security_ai_assistant/knowledge_base/entries/_find:
+    get:
+      description: Finds Knowledge Base Entries that match the given query.
+      operationId: FindKnowledgeBaseEntries
+      parameters:
+        - in: query
+          name: fields
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Search query
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - description: Field to sort by
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_FindKnowledgeBaseEntriesSortField'
+        - description: Sort order
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_SortOrder'
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: Knowledge Base Entries per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
+                    type: array
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Finds Knowledge Base Entries that match the given query.
+      tags:
+        - Security AI Assistant API
+      x-beta: true
+  /api/security_ai_assistant/knowledge_base/entries/{id}:
+    delete:
+      description: Deletes a single Knowledge Base Entry using the `id` field
+      operationId: DeleteKnowledgeBaseEntry
+      parameters:
+        - description: The Knowledge Base Entry's `id` value
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_DeleteResponseFields'
+          description: Successful request returning the deleted Knowledge Base Entry's ID
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Deletes a single Knowledge Base Entry using the `id` field
+      tags:
+        - Security AI Assistant API
+      x-beta: true
+    get:
+      description: Read a Knowledge Base Entry
+      operationId: ReadKnowledgeBaseEntry
+      parameters:
+        - description: The Knowledge Base Entry's `id` value.
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
+          description: Successful request returning a Knowledge Base Entry
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Read a Knowledge Base Entry
+      tags:
+        - Security AI Assistant API
+      x-beta: true
+    put:
+      description: Update a Knowledge Base Entry
+      operationId: UpdateKnowledgeBaseEntry
+      parameters:
+        - description: The Knowledge Base Entry's `id` value
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
+          description: Successful request returning the updated Knowledge Base Entry
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
+          description: Generic Error
+      summary: Update a Knowledge Base Entry
+      tags:
+        - Security AI Assistant API
+      x-beta: true
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
       description: Apply a bulk action to multiple prompts. The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs.
@@ -43306,6 +43661,19 @@ components:
       required:
         - connectorId
         - actionTypeId
+    Security_AI_Assistant_API_BaseContentReference:
+      description: The basis of a content reference
+      type: object
+      properties:
+        id:
+          description: Id of the content reference
+          type: string
+        type:
+          description: Type of the content reference
+          type: string
+      required:
+        - id
+        - type
     Security_AI_Assistant_API_BulkCrudActionSummary:
       type: object
       properties:
@@ -43377,6 +43745,17 @@ components:
         - user
         - assistant
       type: string
+    Security_AI_Assistant_API_ContentReferences:
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertsPageContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_ProductDocumentationContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_EsqlContentReference'
+            additionalProperties: false
+      description: A union of all content reference types
+      type: object
     Security_AI_Assistant_API_ConversationCategory:
       description: The conversation category.
       enum:
@@ -43514,6 +43893,127 @@ components:
           type: string
       required:
         - id
+    Security_AI_Assistant_API_DeleteResponseFields:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+      required:
+        - id
+    Security_AI_Assistant_API_DocumentEntry:
+      allOf:
+        - type: object
+          properties:
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              type: array
+          required:
+            - name
+            - namespace
+            - users
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryResponseFields'
+    Security_AI_Assistant_API_DocumentEntryCreateFields:
+      allOf:
+        - type: object
+          properties:
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              type: array
+          required:
+            - name
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryRequiredFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryOptionalFields'
+    Security_AI_Assistant_API_DocumentEntryOptionalFields:
+      type: object
+      properties:
+        required:
+          description: Whether this resource should always be included, defaults to false
+          type: boolean
+        vector:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_Vector'
+    Security_AI_Assistant_API_DocumentEntryRequiredFields:
+      type: object
+      properties:
+        kbResource:
+          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+          type: string
+        source:
+          description: Source document name or filepath
+          type: string
+        text:
+          description: Knowledge Base Entry content
+          type: string
+        type:
+          description: Entry type
+          enum:
+            - document
+          type: string
+      required:
+        - type
+        - kbResource
+        - source
+        - text
+    Security_AI_Assistant_API_DocumentEntryResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryRequiredFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryOptionalFields'
+    Security_AI_Assistant_API_DocumentEntryUpdateFields:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              type: array
+          required:
+            - id
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+    Security_AI_Assistant_API_EsqlContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            label:
+              description: Label of the query
+              type: string
+            query:
+              description: An ESQL query
+              type: string
+            type:
+              enum:
+                - EsqlQuery
+              type: string
+          required:
+            - type
+            - query
+            - label
+      description: References an ESQL query
     Security_AI_Assistant_API_FindAnonymizationFieldsSortField:
       enum:
         - created_at
@@ -43529,6 +44029,13 @@ components:
         - title
         - updated_at
       type: string
+    Security_AI_Assistant_API_FindKnowledgeBaseEntriesSortField:
+      enum:
+        - created_at
+        - is_default
+        - title
+        - updated_at
+      type: string
     Security_AI_Assistant_API_FindPromptsSortField:
       enum:
         - created_at
@@ -43536,6 +44043,276 @@ components:
         - name
         - updated_at
       type: string
+    Security_AI_Assistant_API_IndexEntry:
+      allOf:
+        - type: object
+          properties:
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              type: array
+          required:
+            - name
+            - namespace
+            - users
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryResponseFields'
+    Security_AI_Assistant_API_IndexEntryCreateFields:
+      allOf:
+        - type: object
+          properties:
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              type: array
+          required:
+            - name
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryRequiredFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryOptionalFields'
+    Security_AI_Assistant_API_IndexEntryOptionalFields:
+      type: object
+      properties:
+        inputSchema:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InputSchema'
+        outputFields:
+          description: Fields to extract from the query result, defaults to all fields if not provided or empty
+          items:
+            type: string
+          type: array
+    Security_AI_Assistant_API_IndexEntryRequiredFields:
+      type: object
+      properties:
+        description:
+          description: Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description
+          type: string
+        field:
+          description: Field to query for Knowledge Base content
+          type: string
+        index:
+          description: Index or Data Stream to query for Knowledge Base content
+          type: string
+        queryDescription:
+          description: Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema
+          type: string
+        type:
+          description: Entry type
+          enum:
+            - index
+          type: string
+      required:
+        - type
+        - index
+        - field
+        - description
+        - queryDescription
+    Security_AI_Assistant_API_IndexEntryResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryRequiredFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryOptionalFields'
+    Security_AI_Assistant_API_IndexEntryUpdateFields:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            name:
+              description: Name of the Knowledge Base Entry
+              type: string
+            namespace:
+              description: Kibana Space, defaults to 'default' space
+              type: string
+            users:
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              type: array
+          required:
+            - id
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
+    Security_AI_Assistant_API_InputSchema:
+      description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
+      items:
+        type: object
+        properties:
+          description:
+            description: Description of the field
+            type: string
+          fieldName:
+            description: Name of the field
+            type: string
+          fieldType:
+            description: Type of the field
+            type: string
+        required:
+          - fieldName
+          - fieldType
+          - description
+      type: array
+    Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
+      enum:
+        - KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
+      type: string
+    Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason'
+      required:
+        - id
+        - skip_reason
+    Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResponse:
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            errors:
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError'
+              type: array
+            results:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResults'
+            summary:
+              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionSummary'
+          required:
+            - results
+            - summary
+        knowledgeBaseEntriesCount:
+          type: integer
+        message:
+          type: string
+        statusCode:
+          type: integer
+        success:
+          type: boolean
+      required:
+        - attributes
+    Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResults:
+      type: object
+      properties:
+        created:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
+          type: array
+        deleted:
+          items:
+            type: string
+          type: array
+        skipped:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult'
+          type: array
+        updated:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
+          type: array
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+    Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+        skipped:
+          type: integer
+        succeeded:
+          type: integer
+        total:
+          type: integer
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+    Security_AI_Assistant_API_KnowledgeBaseEntryContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            knowledgeBaseEntryId:
+              description: Id of the Knowledge Base Entry
+              type: string
+            knowledgeBaseEntryName:
+              description: Name of the knowledge base entry
+              type: string
+            type:
+              enum:
+                - KnowledgeBaseEntry
+              type: string
+          required:
+            - type
+            - knowledgeBaseEntryId
+            - knowledgeBaseEntryName
+      description: References a knowledge base entry
+    Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps:
+      anyOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
+      discriminator:
+        propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+    Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema:
+      additionalProperties: false
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: number
+      required:
+        - statusCode
+        - error
+        - message
+    Security_AI_Assistant_API_KnowledgeBaseEntryResponse:
+      anyOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntry'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntry'
+      discriminator:
+        propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps:
+      anyOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
+      discriminator:
+        propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseResponse:
+      description: AI assistant KnowledgeBase.
+      type: object
+      properties:
+        success:
+          description: Identify the success of the method execution.
+          type: boolean
     Security_AI_Assistant_API_Message:
       description: AI assistant conversation message.
       type: object
@@ -43546,6 +44323,9 @@ components:
         isError:
           description: Is error message.
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_MessageMetadata'
+          description: metadata
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
@@ -43565,6 +44345,13 @@ components:
     Security_AI_Assistant_API_MessageData:
       additionalProperties: true
       type: object
+    Security_AI_Assistant_API_MessageMetadata:
+      description: Message metadata
+      type: object
+      properties:
+        contentReferences:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_ContentReferences'
+          description: Data refered to by the message content.
     Security_AI_Assistant_API_MessageRole:
       description: Message role.
       enum:
@@ -43594,6 +44381,23 @@ components:
         - message
         - status_code
         - anonymization_fields
+    Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError:
+      type: object
+      properties:
+        err_code:
+          type: string
+        knowledgeBaseEntries:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError'
+          type: array
+        message:
+          type: string
+        statusCode:
+          type: integer
+      required:
+        - message
+        - statusCode
+        - knowledgeBaseEntries
     Security_AI_Assistant_API_NormalizedPromptError:
       type: object
       properties:
@@ -43611,6 +44415,26 @@ components:
         - message
         - status_code
         - prompts
+    Security_AI_Assistant_API_ProductDocumentationContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            title:
+              description: Title of the documentation
+              type: string
+            type:
+              enum:
+                - ProductDocumentation
+              type: string
+            url:
+              description: URL to the documentation
+              type: string
+          required:
+            - type
+            - title
+            - url
+      description: References the product documentation
     Security_AI_Assistant_API_PromptCreateProps:
       type: object
       properties:
@@ -43799,6 +44623,57 @@ components:
         type: string
       description: Replacements object used to anonymize/deanomymize messsages
       type: object
+    Security_AI_Assistant_API_ResponseFields:
+      type: object
+      properties:
+        createdAt:
+          description: Time the Knowledge Base Entry was created
+          type: string
+        createdBy:
+          description: User who created the Knowledge Base Entry
+          type: string
+        id:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+        updatedAt:
+          description: Time the Knowledge Base Entry was last updated
+          type: string
+        updatedBy:
+          description: User who last updated the Knowledge Base Entry
+          type: string
+      required:
+        - id
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+    Security_AI_Assistant_API_SecurityAlertContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            alertId:
+              description: ID of the Alert
+              type: string
+            type:
+              enum:
+                - SecurityAlert
+              type: string
+          required:
+            - type
+            - alertId
+      description: References a security alert
+    Security_AI_Assistant_API_SecurityAlertsPageContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SecurityAlertsPage
+              type: string
+          required:
+            - type
+      description: References the security alerts page
     Security_AI_Assistant_API_SortOrder:
       enum:
         - asc
@@ -43824,6 +44699,21 @@ components:
         name:
           description: User name
           type: string
+    Security_AI_Assistant_API_Vector:
+      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings
+      type: object
+      properties:
+        modelId:
+          description: ID of the model used to create the embeddings
+          type: string
+        tokens:
+          additionalProperties:
+            type: number
+          description: Tokens with their corresponding values
+          type: object
+      required:
+        - modelId
+        - tokens
     Security_Detections_API_AlertAssignees:
       type: object
       properties:

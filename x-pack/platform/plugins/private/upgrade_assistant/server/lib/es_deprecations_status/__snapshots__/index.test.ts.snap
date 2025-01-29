@@ -2,7 +2,8 @@
 
 exports[`getESUpgradeStatus returns the correct shape of data 1`] = `
 Object {
-  "deprecations": Array [
+  "enrichedHealthIndicators": Array [],
+  "migrationsDeprecations": Array [
     Object {
       "correctiveAction": undefined,
       "details": "templates using \`template\` field: security_audit_log,watches,.monitoring-alerts,triggered_watches,.ml-anomalies-,.ml-notifications,.ml-meta,.monitoring-kibana,.monitoring-es,.monitoring-logstash,.watch-history-6,.ml-state,security-index-template",
@@ -183,5 +184,6 @@ Object {
     },
   ],
   "totalCriticalDeprecations": 6,
+  "totalCriticalHealthIssues": 0,
 }
 `;
