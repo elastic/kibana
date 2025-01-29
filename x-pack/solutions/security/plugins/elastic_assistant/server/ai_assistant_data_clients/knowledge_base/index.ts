@@ -208,7 +208,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           (node) => node.routing_state.routing_state === 'started'
         );
 
-      return getResponse.trained_model_stats?.some(
+      return !!getResponse.trained_model_stats?.some(
         (stats) => isReadyESS(stats) || isReadyServerless(stats)
       );
     } catch (error) {
