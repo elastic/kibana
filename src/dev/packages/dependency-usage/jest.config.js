@@ -10,6 +10,6 @@
 /* eslint-disable no-restricted-syntax */
 export default {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-dependency-usage'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/dependency-usage'],
 };

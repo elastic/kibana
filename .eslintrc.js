@@ -2046,7 +2046,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
+      files: ['src/dev/packages/dependency-usage/**/*.{ts,tsx}'],
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',

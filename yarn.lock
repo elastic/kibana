@@ -5384,7 +5384,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dependency-usage@link:packages/kbn-dependency-usage":
+"@kbn/dependency-usage@link:src/dev/packages/dependency-usage":
   version "0.0.0"
   uid ""
 

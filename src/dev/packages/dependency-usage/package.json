@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "name": "@kbn/dependency-usage",
   "private": true,
   "version": "1.0.0",
