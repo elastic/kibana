@@ -371,7 +371,7 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
+        'src/dev/packages/eslint-config/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {

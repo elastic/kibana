@@ -11,7 +11,7 @@
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "bugs": {
-    "url": "https://github.com/elastic/kibana/tree/main/packages/kbn-eslint-config"
+    "url": "https://github.com/elastic/kibana/tree/main/src/dev/packages/eslint-config"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/main/packages/kbn-eslint-config"
+  "homepage": "https://github.com/elastic/kibana/tree/main/src/dev/packages/eslint-config"
 }

@@ -5556,7 +5556,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-config@link:packages/kbn-eslint-config":
+"@kbn/eslint-config@link:src/dev/packages/eslint-config":
   version "0.0.0"
   uid ""
 

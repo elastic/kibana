@@ -29,7 +29,7 @@ snapshots.js
 /x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/assets/**
 
 # package overrides
-/packages/kbn-eslint-config
+/src/dev/packages/eslint-config
 /packages/kbn-plugin-generator/template
 /packages/kbn-generate/templates
 /packages/kbn-test/src/functional_test_runner/__tests__/fixtures/

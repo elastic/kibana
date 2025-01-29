@@ -1433,7 +1433,7 @@
     "@kbn/docs-utils": "link:src/dev/packages/docs-utils",
     "@kbn/es": "link:src/dev/packages/es",
     "@kbn/es-archiver": "link:src/dev/packages/es-archiver",
-    "@kbn/eslint-config": "link:packages/kbn-eslint-config",
+    "@kbn/eslint-config": "link:src/dev/packages/eslint-config",
     "@kbn/eslint-plugin-css": "link:packages/kbn-eslint-plugin-css",
     "@kbn/eslint-plugin-disable": "link:packages/kbn-eslint-plugin-disable",
     "@kbn/eslint-plugin-eslint": "link:packages/kbn-eslint-plugin-eslint",
