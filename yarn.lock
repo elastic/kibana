@@ -6756,7 +6756,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/relocate@link:packages/kbn-relocate":
+"@kbn/relocate@link:src/dev/packages/relocate":
   version "0.0.0"
   uid ""
 

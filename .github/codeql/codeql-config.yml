@@ -66,7 +66,7 @@ paths-ignore:
   - src/dev/packages/performance-testing-dataset-extractor
   - src/dev/packages/plugin-generator
   - src/dev/packages/plugin-helpers
-  - packages/kbn-relocate
+  - src/dev/packages/relocate
   - packages/kbn-repo-path
   - packages/kbn-repo-source-classifier
   - packages/kbn-repo-source-classifier-cli
