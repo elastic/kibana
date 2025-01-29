@@ -610,12 +610,10 @@ export function trainedModelsRoutes(
           const body = await mlClient.inferTrainedModel({
             model_id: modelId,
             deployment_id: deploymentId,
-            body: {
-              docs: request.body.docs,
-              ...(request.body.inference_config
-                ? { inference_config: request.body.inference_config }
-                : {}),
-            },
+            docs: request.body.docs,
+            ...(request.body.inference_config
+              ? { inference_config: request.body.inference_config }
+              : {}),
             ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
           });
           return response.ok({

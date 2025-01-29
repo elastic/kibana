@@ -240,9 +240,7 @@ async function getActions(
     from: 0,
     size: getPerPage(options),
     query: await addNamespaceFilteringToQuery(query, namespace),
-    body: {
-      sort: [{ '@timestamp': 'desc' }],
-    },
+    sort: [{ '@timestamp': 'desc' }],
   });
 
   return Object.values(

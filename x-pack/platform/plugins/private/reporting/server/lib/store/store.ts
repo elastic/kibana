@@ -141,7 +141,7 @@ export class ReportingStore {
       id: report._id,
       refresh: 'wait_for' as estypes.Refresh,
       op_type: 'create' as const,
-      body: {
+      document: {
         ...report.toReportSource(),
         ...sourceDoc({
           process_expiration: new Date(0).toISOString(),

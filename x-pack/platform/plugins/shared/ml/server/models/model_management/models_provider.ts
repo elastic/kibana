@@ -12,6 +12,7 @@ import { flatten, groupBy, isEmpty } from 'lodash';
 import type {
   InferenceInferenceEndpoint,
   InferenceTaskType,
+  IngestDocument,
   MlGetTrainedModelsRequest,
   TasksTaskInfo,
   TransformGetTransformTransformSummary,
@@ -19,7 +20,6 @@ import type {
 import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IngestPipeline,
-  IngestSimulateDocument,
   IngestSimulateRequest,
   NodesInfoResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -432,7 +432,7 @@ export class ModelsProvider {
    * Simulates the effect of the pipeline on given document.
    *
    */
-  async simulatePipeline(docs: IngestSimulateDocument[], pipelineConfig: IngestPipeline) {
+  async simulatePipeline(docs: IngestDocument[], pipelineConfig: IngestPipeline) {
     const simulateRequest: IngestSimulateRequest = {
       docs,
       pipeline: pipelineConfig,

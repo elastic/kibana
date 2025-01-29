@@ -21,30 +21,28 @@ export const createGetLogEntryQuery = (
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.AsyncSearchSubmitRequest => ({
   index: logEntryIndex,
-  body: {
-    size: 1,
-    terminate_after: 1,
-    track_scores: false,
-    track_total_hits: false,
-    query: {
-      ids: {
-        values: [logEntryId],
+  size: 1,
+  terminate_after: 1,
+  track_scores: false,
+  track_total_hits: false,
+  query: {
+    ids: {
+      values: [logEntryId],
+    },
+  },
+  fields: ['*'],
+  runtime_mappings: runtimeMappings,
+  sort: [
+    {
+      [timestampField]: {
+        order: 'desc',
+        format: 'strict_date_optional_time_nanos',
+        numeric_type: 'date_nanos',
       },
     },
-    fields: ['*'],
-    runtime_mappings: runtimeMappings,
-    sort: [
-      {
-        [timestampField]: {
-          order: 'desc',
-          format: 'strict_date_optional_time_nanos',
-          numeric_type: 'date_nanos',
-        },
-      },
-      { [tiebreakerField]: 'desc' },
-    ],
-    _source: false,
-  },
+    { [tiebreakerField]: 'desc' },
+  ],
+  _source: false,
 });
 
 export const logEntryHitRT = rt.intersection([

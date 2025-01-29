@@ -155,10 +155,8 @@ export function jobAuditMessagesProvider(
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         size: SIZE,
-        body: {
-          sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
-          query,
-        },
+        sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
+        query,
       },
       { maxRetries: 0 }
     );

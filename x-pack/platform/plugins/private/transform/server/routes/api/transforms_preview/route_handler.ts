@@ -23,12 +23,9 @@ export const routeHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const esClient = (await ctx.core).elasticsearch.client;
-    const body = await esClient.asCurrentUser.transform.previewTransform(
-      {
-        body: reqBody,
-      },
-      { maxRetries: 0 }
-    );
+    const body = await esClient.asCurrentUser.transform.previewTransform(reqBody, {
+      maxRetries: 0,
+    });
     if (isLatestTransform(reqBody)) {
       // for the latest transform mappings properties have to be retrieved from the source
       const fieldCapsResponse = await esClient.asCurrentUser.fieldCaps(

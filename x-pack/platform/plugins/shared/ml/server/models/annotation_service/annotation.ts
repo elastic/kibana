@@ -81,12 +81,10 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   async function fetchAnnotationIndex(id: string) {
     const searchParams: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      body: {
-        size: 1,
-        query: {
-          ids: {
-            values: [id],
-          },
+      size: 1,
+      query: {
+        ids: {
+          values: [id],
         },
       },
     };
@@ -365,34 +363,32 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   }): Promise<Annotation[]> {
     const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...(earliestMs ? [{ range: { end_timestamp: { gte: earliestMs } } }] : []),
-              {
-                term: { event: { value: 'delayed_data' } },
-              },
-              { terms: { job_id: jobIds } },
-            ],
-          },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...(earliestMs ? [{ range: { end_timestamp: { gte: earliestMs } } }] : []),
+            {
+              term: { event: { value: 'delayed_data' } },
+            },
+            { terms: { job_id: jobIds } },
+          ],
         },
-        aggs: {
-          by_job: {
-            terms: { field: 'job_id', size: jobIds.length },
-            aggs: {
-              latest_delayed: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      end_timestamp: {
-                        order: 'desc',
-                      },
+      },
+      aggs: {
+        by_job: {
+          terms: { field: 'job_id', size: jobIds.length },
+          aggs: {
+            latest_delayed: {
+              top_hits: {
+                size: 1,
+                sort: [
+                  {
+                    end_timestamp: {
+                      order: 'desc',
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },

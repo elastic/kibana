@@ -102,14 +102,12 @@ export function dataFrameAnalyticsRoutes(
     }
 
     const body = await client.asCurrentUser.security.hasPrivileges({
-      body: {
-        index: [
-          {
-            names: [destinationIndex], // uses wildcard
-            privileges: ['delete_index'],
-          },
-        ],
-      },
+      index: [
+        {
+          names: [destinationIndex], // uses wildcard
+          privileges: ['delete_index'],
+        },
+      ],
     });
 
     return body?.has_all_requested === true;
@@ -399,9 +397,7 @@ export function dataFrameAnalyticsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const body = await mlClient.explainDataFrameAnalytics(
-            {
-              body: request.body,
-            },
+            request.body,
             getAuthorizationHeader(request)
           );
           return response.ok({
@@ -620,7 +616,7 @@ export function dataFrameAnalyticsRoutes(
           const body = await mlClient.updateDataFrameAnalytics(
             {
               id: analyticsId,
-              body: request.body,
+              ...request.body,
             },
             getAuthorizationHeader(request)
           );

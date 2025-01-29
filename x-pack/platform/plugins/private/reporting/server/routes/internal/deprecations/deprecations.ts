@@ -26,15 +26,13 @@ const getAuthzWrapper =
 
       try {
         const body = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
-          body: {
-            index: [
-              {
-                privileges: ['manage'], // required to do anything with the reporting indices
-                names: [REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY],
-                allow_restricted_indices: true,
-              },
-            ],
-          },
+          index: [
+            {
+              privileges: ['manage'], // required to do anything with the reporting indices
+              names: [REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY],
+              allow_restricted_indices: true,
+            },
+          ],
         });
 
         if (!body.has_all_requested) {

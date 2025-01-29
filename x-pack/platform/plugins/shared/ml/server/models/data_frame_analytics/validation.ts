@@ -264,11 +264,9 @@ async function getValidationCheckMessages(
         index,
         size: 0,
         track_total_hits: true,
-        body: {
-          ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
-          query,
-          aggs,
-        },
+        ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
+        query,
+        aggs,
       },
       { maxRetries: 0 }
     );

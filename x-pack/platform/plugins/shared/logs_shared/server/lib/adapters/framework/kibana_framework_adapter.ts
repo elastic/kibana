@@ -139,7 +139,7 @@ export class KibanaFramework {
         apiResult = elasticsearch.client.asCurrentUser.search({
           ...params,
           ...frozenIndicesParams,
-        });
+        } as estypes.SearchRequest);
         break;
       case 'msearch':
         apiResult = elasticsearch.client.asCurrentUser.msearch({

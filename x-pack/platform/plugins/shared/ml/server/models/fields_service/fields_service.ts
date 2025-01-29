@@ -242,22 +242,20 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       {
         index,
         size: 0,
-        body: {
-          ...(query ? { query } : {}),
-          aggs: {
-            earliest: {
-              min: {
-                field: timeFieldName,
-              },
-            },
-            latest: {
-              max: {
-                field: timeFieldName,
-              },
+        ...(query ? { query } : {}),
+        aggs: {
+          earliest: {
+            min: {
+              field: timeFieldName,
             },
           },
-          ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+          latest: {
+            max: {
+              field: timeFieldName,
+            },
+          },
         },
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
         ...(indicesOptions ?? {}),
       },
       { maxRetries: 0 }
@@ -417,7 +415,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     const { aggregations } = await asCurrentUser.search(
       {
         index,
-        body,
+        ...body,
         ...getIndicesOptions(datafeedConfig),
       },
       { maxRetries: 0 }

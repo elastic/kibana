@@ -107,7 +107,7 @@ export class FilterManager {
     const { filterId, ...body } = filter;
 
     // Returns the newly created filter.
-    return await this._mlClient.putFilter({ filter_id: filterId, body });
+    return await this._mlClient.putFilter({ filter_id: filterId, ...body });
   }
 
   async updateFilter(filterId: string, filter: UpdateFilter) {
@@ -123,10 +123,7 @@ export class FilterManager {
     }
 
     // Returns the newly updated filter.
-    const resp = await this._mlClient.updateFilter({
-      filter_id: filterId,
-      body,
-    });
+    const resp = await this._mlClient.updateFilter(body);
     return resp;
   }
 
