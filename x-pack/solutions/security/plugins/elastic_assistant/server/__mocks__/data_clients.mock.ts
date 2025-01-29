@@ -60,6 +60,8 @@ const createKnowledgeBaseDataClientMock = () => {
     addKnowledgeBaseDocuments: jest.fn(),
     createInferenceEndpoint: jest.fn(),
     createKnowledgeBaseEntry: jest.fn(),
+    updateKnowledgeBaseEntry: jest.fn(),
+    deleteKnowledgeBaseEntry: jest.fn(),
     findDocuments: jest.fn(),
     getAssistantTools: jest.fn(),
     getKnowledgeBaseDocumentEntries: jest.fn(),

@@ -14,7 +14,7 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/esql-validation-autocomplete",
     "@kbn/presentation-publishing",
+    "@kbn/esql-validation-autocomplete",
   ]
 }

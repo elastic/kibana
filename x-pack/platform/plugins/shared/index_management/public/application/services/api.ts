@@ -10,7 +10,6 @@ import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types'
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { InferenceEndpoint } from '@kbn/inference-endpoint-ui-common';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -436,12 +435,13 @@ export function useLoadIndexSettings(indexName: string) {
   });
 }
 
-export function createIndex(indexName: string) {
+export function createIndex(indexName: string, indexMode: string) {
   return sendRequest({
     path: `${INTERNAL_API_BASE_PATH}/indices/create`,
     method: 'put',
     body: JSON.stringify({
       indexName,
+      indexMode,
     }),
   });
 }
@@ -458,18 +458,6 @@ export function getInferenceEndpoints() {
   return sendRequest<InferenceAPIConfigResponse[]>({
     path: `${API_BASE_PATH}/inference/all`,
     method: 'get',
-  });
-}
-
-export function createInferenceEndpoint(
-  taskType: string,
-  inferenceId: string,
-  inferenceEndpoint: InferenceEndpoint
-) {
-  return sendRequest<InferenceAPIConfigResponse>({
-    path: `/internal/inference_endpoint/endpoints/${taskType}/${inferenceId}`,
-    method: 'put',
-    body: JSON.stringify(inferenceEndpoint),
   });
 }
 

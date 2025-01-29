@@ -9,6 +9,9 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
+import { Document } from 'langchain/document';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import { knowledgeBaseReference, contentReferenceBlock } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
 
 export interface KnowledgeBaseRetrievalToolParams extends AssistantToolParams {
@@ -31,7 +34,8 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { kbDataClient, logger } = params as KnowledgeBaseRetrievalToolParams;
+    const { kbDataClient, logger, contentReferencesStore } =
+      params as KnowledgeBaseRetrievalToolParams;
     if (kbDataClient == null) return null;
 
     return new DynamicStructuredTool({
@@ -51,6 +55,10 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           required: false,
         });
 
+        if (contentReferencesStore) {
+          return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
+        }
+
         return JSON.stringify(docs);
       },
       tags: ['knowledge-base'],
@@ -58,3 +66,22 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
     }) as unknown as DynamicStructuredTool;
   },
 };
+
+function enrichDocument(contentReferencesStore: ContentReferencesStore) {
+  return (document: Document<Record<string, string>>) => {
+    if (document.id == null) {
+      return document;
+    }
+    const documentId = document.id;
+    const reference = contentReferencesStore.add((p) =>
+      knowledgeBaseReference(p.id, document.metadata.name, documentId)
+    );
+    return new Document({
+      ...document,
+      metadata: {
+        ...document.metadata,
+        citation: contentReferenceBlock(reference),
+      },
+    });
+  };
+}

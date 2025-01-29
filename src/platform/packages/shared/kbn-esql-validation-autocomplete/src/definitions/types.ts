@@ -93,6 +93,13 @@ const arrayTypes = [
   'any[]',
   'date[]',
   'date_period[]',
+  'ip[]',
+  'cartesian_point[]',
+  'cartesian_shape[]',
+  'geo_point[]',
+  'geo_shape[]',
+  'version[]',
+  'date_nanos[]',
 ] as const;
 
 export type ArrayType = (typeof arrayTypes)[number];
@@ -118,8 +125,50 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
   str !== 'unsupported' &&
   (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
+export interface Signature {
+  params: Array<{
+    name: string;
+    type: FunctionParameterType;
+    optional?: boolean;
+    supportsWildcard?: boolean;
+    /**
+     * If set, this parameter does not accept a field. It only accepts a constant,
+     * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
+     */
+    constantOnly?: boolean;
+    /**
+     * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+     */
+    fieldsOnly?: boolean;
+    /**
+     * if provided this means that the value must be one
+     * of the options in the array iff the value is a literal.
+     *
+     * String values are case insensitive.
+     *
+     * If the value is not a literal, this field is ignored because
+     * we can't check the return value of a function to see if it
+     * matches one of the options prior to runtime.
+     */
+    acceptedValues?: string[];
+    /**
+     * Must only be included _in addition to_ literalOptions.
+     *
+     * If provided this is the list of suggested values that
+     * will show up in the autocomplete. If omitted, the literalOptions
+     * will be used as suggestions.
+     *
+     * This is useful for functions that accept
+     * values that we don't want to show as suggestions.
+     */
+    literalSuggestions?: string[];
+  }>;
+  minParams?: number;
+  returnType: FunctionReturnType;
+}
+
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval';
+  type: 'builtin' | 'agg' | 'eval' | 'operator';
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -127,49 +176,10 @@ export interface FunctionDefinition {
   description: string;
   supportedCommands: string[];
   supportedOptions?: string[];
-  signatures: Array<{
-    params: Array<{
-      name: string;
-      type: FunctionParameterType;
-      optional?: boolean;
-      supportsWildcard?: boolean;
-      /**
-       * If set, this parameter does not accept a field. It only accepts a constant,
-       * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
-       */
-      constantOnly?: boolean;
-      /**
-       * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-       */
-      fieldsOnly?: boolean;
-      /**
-       * if provided this means that the value must be one
-       * of the options in the array iff the value is a literal.
-       *
-       * String values are case insensitive.
-       *
-       * If the value is not a literal, this field is ignored because
-       * we can't check the return value of a function to see if it
-       * matches one of the options prior to runtime.
-       */
-      acceptedValues?: string[];
-      /**
-       * Must only be included _in addition to_ literalOptions.
-       *
-       * If provided this is the list of suggested values that
-       * will show up in the autocomplete. If omitted, the literalOptions
-       * will be used as suggestions.
-       *
-       * This is useful for functions that accept
-       * values that we don't want to show as suggestions.
-       */
-      literalSuggestions?: string[];
-    }>;
-    minParams?: number;
-    returnType: FunctionReturnType;
-  }>;
+  signatures: Signature[];
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
+  operator?: string;
 }
 
 export interface CommandBaseDefinition<CommandName extends string> {
