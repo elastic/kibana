@@ -1486,7 +1486,7 @@
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",
     "@kbn/scout": "link:src/dev/packages/scout",
     "@kbn/scout-info": "link:src/dev/packages/scout-info",
-    "@kbn/scout-reporting": "link:packages/kbn-scout-reporting",
+    "@kbn/scout-reporting": "link:src/dev/packages/scout-reporting",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
     "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
     "@kbn/set-map": "link:packages/kbn-set-map",

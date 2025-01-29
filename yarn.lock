@@ -6980,7 +6980,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-reporting@link:packages/kbn-scout-reporting":
+"@kbn/scout-reporting@link:src/dev/packages/scout-reporting":
   version "0.0.0"
   uid ""
 
