@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
-import type { FileUploadResults } from './create_flyout';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import { getFileDataVisualizerLiteWrapper } from './component_wrapper';
 
 interface Props {

@@ -8,13 +8,13 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../../common/app';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_data_visualizer_view';
 import type { GetAdditionalLinks } from '../common/components/results_links';
-import type { FileUploadResults } from '../../lite/flyout/create_flyout';
 
 export interface Props {
   resultLinks?: ResultLinks;
