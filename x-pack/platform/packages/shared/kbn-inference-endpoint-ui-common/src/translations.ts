@@ -149,3 +149,31 @@ export const CANCEL = i18n.translate('xpack.inferenceEndpointUICommon.components
 export const SAVE = i18n.translate('xpack.inferenceEndpointUICommon.components.saveBtnLabel', {
   defaultMessage: 'Save',
 });
+
+export const ENDPOINT_ADDED_SUCCESS = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointAddedSuccess',
+  {
+    defaultMessage: 'Inference endpoint added',
+  }
+);
+
+export const ENDPOINT_CREATION_FAILED = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointAddedFailure',
+  {
+    defaultMessage: 'Inference endpoint creation failed',
+  }
+);
+
+export const ENDPOINT_UPDATE_SUCCESS = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointUpdateSuccess',
+  {
+    defaultMessage: 'Inference endpoint updated successfully',
+  }
+);
+
+export const ENDPOINT_UPDATE_FAILED = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointUpdateFailure',
+  {
+    defaultMessage: 'Inference endpoint update failed',
+  }
+);

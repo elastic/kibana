@@ -7,7 +7,6 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
@@ -16,6 +15,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AlertsLocatorParams, observabilityPaths } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { sloBurnRateParamsSchema } from '@kbn/response-ops-rule-params/slo_burn_rate';
 import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
@@ -30,34 +30,10 @@ import {
 import { getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
 
-const durationSchema = schema.object({
-  value: schema.number(),
-  unit: schema.string(),
-});
-
-const windowSchema = schema.object({
-  id: schema.string(),
-  burnRateThreshold: schema.number(),
-  maxBurnRateThreshold: schema.nullable(schema.number()),
-  longWindow: durationSchema,
-  shortWindow: durationSchema,
-  actionGroup: schema.string(),
-});
-
-const dependency = schema.object({
-  ruleId: schema.string(),
-  actionGroupsToSuppressOn: schema.arrayOf(schema.string()),
-});
-
 export function sloBurnRateRuleType(
   basePath: IBasePath,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
-  const paramsSchema = schema.object({
-    sloId: schema.string(),
-    windows: schema.arrayOf(windowSchema),
-    dependencies: schema.maybe(schema.arrayOf(dependency)),
-  });
   return {
     id: SLO_BURN_RATE_RULE_TYPE_ID,
     name: i18n.translate('xpack.slo.rules.burnRate.name', {
@@ -65,12 +41,12 @@ export function sloBurnRateRuleType(
     }),
     fieldsForAAD: SLO_BURN_RATE_AAD_FIELDS,
     validate: {
-      params: paramsSchema,
+      params: sloBurnRateParamsSchema,
     },
     schemas: {
       params: {
         type: 'config-schema' as const,
-        schema: paramsSchema,
+        schema: sloBurnRateParamsSchema,
       },
     },
     defaultActionGroupId: ALERT_ACTION.id,
