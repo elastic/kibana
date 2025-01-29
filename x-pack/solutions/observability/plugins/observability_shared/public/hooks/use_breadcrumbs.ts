@@ -116,13 +116,11 @@ export const useBreadcrumbs = (
 
   useEffect(() => {
     if (breadcrumbsAppendExtension) {
-      setBreadcrumbsAppendExtension(breadcrumbsAppendExtension);
+      const unset = setBreadcrumbsAppendExtension(breadcrumbsAppendExtension);
+      return () => {
+        unset();
+      };
     }
-    return () => {
-      if (breadcrumbsAppendExtension) {
-        setBreadcrumbsAppendExtension(undefined);
-      }
-    };
   }, [breadcrumbsAppendExtension, setBreadcrumbsAppendExtension]);
 
   useEffect(() => {

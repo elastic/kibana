@@ -236,11 +236,16 @@ export function InternalDashboardTopNav({
 
   useEffect(() => {
     if (lastSavedId) {
-      coreServices.chrome.setBreadcrumbsAppendExtension({
+      const unset1 = coreServices.chrome.setBreadcrumbsAppendExtension({
+        content: toMountPoint(<DashboardFavoriteButton dashboardId={lastSavedId} />, coreServices),
+        order: 0,
+      });
+      const unset2 = coreServices.chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(<DashboardFavoriteButton dashboardId={lastSavedId} />, coreServices),
       });
       return () => {
-        coreServices.chrome.setBreadcrumbsAppendExtension(undefined);
+        unset1();
+        unset2();
       };
     }
   }, [lastSavedId]);
