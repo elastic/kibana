@@ -72,14 +72,14 @@ export const localPrompts: Prompt[] = [
     promptId: promptDictionary.attackDiscoveryDefault,
     promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
-      default: 'provider:default attack discovery default prompt',
+      default: 'attack discovery default prompt',
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryRefine,
     promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
-      default: 'provider:default attack discovery refine prompt',
+      default: 'attack discovery refine prompt',
     },
   },
 ];
