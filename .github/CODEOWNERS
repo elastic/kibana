@@ -160,7 +160,7 @@ src/dev/packages/mock-idp-utils @elastic/kibana-security
 src/dev/packages/openapi-bundler @elastic/security-detection-rule-management
 src/dev/packages/openapi-generator @elastic/security-detection-rule-management
 src/dev/packages/optimizer @elastic/kibana-operations
-packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
+src/dev/packages/optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing

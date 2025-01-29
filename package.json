@@ -1468,7 +1468,7 @@
     "@kbn/openapi-bundler": "link:src/dev/packages/openapi-bundler",
     "@kbn/openapi-generator": "link:src/dev/packages/openapi-generator",
     "@kbn/optimizer": "link:src/dev/packages/optimizer",
-    "@kbn/optimizer-webpack-helpers": "link:packages/kbn-optimizer-webpack-helpers",
+    "@kbn/optimizer-webpack-helpers": "link:src/dev/packages/optimizer-webpack-helpers",
     "@kbn/peggy": "link:packages/kbn-peggy",
     "@kbn/peggy-loader": "link:packages/kbn-peggy-loader",
     "@kbn/performance-testing-dataset-extractor": "link:packages/kbn-performance-testing-dataset-extractor",
