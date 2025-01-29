@@ -10,15 +10,24 @@
 import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
-export const parsedIndexedInterfaceWithNoMatchingSchema: ParsedUsageCollection = [
-  'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/indexed_interface_with_not_matching_schema.ts',
+export const parsedSchemaDefinedWithSpreadsCollector: ParsedUsageCollection = [
+  'src/dev/packages/telemetry-tools/src/tools/__fixture__/telemetry_collectors/schema_defined_with_spreads_collector.ts',
   {
-    collectorName: 'indexed_interface_with_not_matching_schema',
+    collectorName: 'schema_defined_with_spreads',
     schema: {
       value: {
-        something: {
-          count_1: {
+        flat: {
+          type: 'keyword',
+        },
+        my_str: {
+          type: 'text',
+        },
+        my_objects: {
+          total: {
             type: 'long',
+          },
+          type: {
+            type: 'boolean',
           },
         },
       },
@@ -26,14 +35,22 @@ export const parsedIndexedInterfaceWithNoMatchingSchema: ParsedUsageCollection =
     fetch: {
       typeName: 'Usage',
       typeDescriptor: {
-        '@@INDEX@@': {
-          count_1: {
+        flat: {
+          kind: SyntaxKind.StringKeyword,
+          type: 'StringKeyword',
+        },
+        my_str: {
+          kind: SyntaxKind.StringKeyword,
+          type: 'StringKeyword',
+        },
+        my_objects: {
+          total: {
             kind: SyntaxKind.NumberKeyword,
             type: 'NumberKeyword',
           },
-          count_2: {
-            kind: SyntaxKind.NumberKeyword,
-            type: 'NumberKeyword',
+          type: {
+            kind: SyntaxKind.BooleanKeyword,
+            type: 'BooleanKeyword',
           },
         },
       },

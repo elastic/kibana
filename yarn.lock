@@ -7684,7 +7684,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
+"@kbn/telemetry-tools@link:src/dev/packages/telemetry-tools":
   version "0.0.0"
   uid ""
 
