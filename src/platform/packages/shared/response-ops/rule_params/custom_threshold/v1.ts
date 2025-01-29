@@ -12,25 +12,21 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { dataViewSpecSchema } from '../common';
 import { oneOfLiterals, validateKQLStringFilter, LEGACY_COMPARATORS } from '../common/utils';
 
-enum Aggregators {
-  COUNT = 'count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  CARDINALITY = 'cardinality',
-  RATE = 'rate',
-  P95 = 'p95',
-  P99 = 'p99',
-  LAST_VALUE = 'last_value',
-}
+const allowedAggregators = [
+  'avg',
+  'sum',
+  'min',
+  'max',
+  'cardinality',
+  'rate',
+  'p95',
+  'p99',
+  'last_value',
+];
 
 const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
 
-const allowedAggregators = Object.values(Aggregators);
-allowedAggregators.splice(Object.values(Aggregators).indexOf(Aggregators.COUNT), 1);
-
-export const searchConfigurationSchema = schema.object({
+const searchConfigSchema = schema.object({
   index: schema.oneOf([schema.string(), dataViewSpecSchema]),
   query: schema.object({
     language: schema.string(),
@@ -48,15 +44,11 @@ export const searchConfigurationSchema = schema.object({
   ),
 });
 
-const baseCriterion = {
+const customCriterion = schema.object({
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(comparators),
   timeUnit: schema.string(),
   timeSize: schema.number(),
-};
-
-const customCriterion = schema.object({
-  ...baseCriterion,
   aggType: schema.maybe(schema.literal('custom')),
   metric: schema.never(),
   metrics: schema.arrayOf(
@@ -89,7 +81,7 @@ export const customThresholdParamsSchema = schema.object(
     groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
     alertOnNoData: schema.maybe(schema.boolean()),
     alertOnGroupDisappear: schema.maybe(schema.boolean()),
-    searchConfiguration: searchConfigurationSchema,
+    searchConfiguration: searchConfigSchema,
   },
   { unknowns: 'allow' }
 );
