@@ -303,6 +303,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
     if (adhocDataView && adhocDataView.id) {
       const patterns = adhocDataView.getIndexPattern().split(',');
+      console.info('[adhoc] adhoc dataview created', adhocDataView);
       dispatchChangeDataView(adhocDataView.id, patterns, false);
     }
   }, [createAdhocDataView, missingPatterns, dispatchChangeDataView]);

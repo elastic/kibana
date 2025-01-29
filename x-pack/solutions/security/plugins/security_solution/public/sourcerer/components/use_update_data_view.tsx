@@ -38,7 +38,7 @@ export const useCreateAdhocDataView = (
         const validatedPatterns = ensurePatternFormat(combinedPatterns);
         const patternsString = validatedPatterns.join(',');
         const adHocDataView = await dataViews.create({
-          id: `adhoc_sourcerer_${Date.now()}`,
+          id: `adhoc_sourcerer_${patternsString}`,
           title: patternsString,
         });
 
