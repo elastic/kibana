@@ -6,19 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiCodeBlock,
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import type { PrivilegedUserDoc } from '../../../../common/api/entity_analytics/privmon';
+import { PrivilegedUserFlyout } from './privileged_user_flyout';
 
-export const PrivilegedUserName: React.FC<{ userName: string; objects: object[] }> = ({
-  userName,
-  objects,
+export const PrivilegedUserName: React.FC<{ privilegedUser: PrivilegedUserDoc }> = ({
+  privilegedUser,
 }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const showFlyout = () => setIsFlyoutVisible(true);
@@ -26,25 +19,9 @@ export const PrivilegedUserName: React.FC<{ userName: string; objects: object[] 
 
   return (
     <>
-      <EuiButtonEmpty onClick={showFlyout}>{userName}</EuiButtonEmpty>
+      <EuiButtonEmpty onClick={showFlyout}>{privilegedUser.user.name}</EuiButtonEmpty>
       {isFlyoutVisible && (
-        <EuiFlyout onClose={closeFlyout}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>{userName}</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            {objects.map((obj) => (
-              <>
-                <EuiCodeBlock language="json" isCopyable>
-                  {JSON.stringify(obj, null, 2)}
-                </EuiCodeBlock>
-                <EuiSpacer size="m" />
-              </>
-            ))}
-          </EuiFlyoutBody>
-        </EuiFlyout>
+        <PrivilegedUserFlyout privilegedUser={privilegedUser} closeFlyout={closeFlyout} />
       )}
     </>
   );

@@ -48,12 +48,15 @@ const getTableColumns = (privilegedUsers: PrivilegedUserDoc[]) => [
   {
     field: 'user.name',
     name: 'User',
-    render: (name: string, data: EntityRiskScore<EntityType.user>) => (
-      <PrivilegedUserName
-        userName={name}
-        objects={[privilegedUsers.find(({ user }) => user.name === name) || {}, data]}
-      />
-    ),
+    render: (name: string, data: EntityRiskScore<EntityType.user>) => {
+      const privilegedUser = privilegedUsers.find(({ user }) => user.name === name);
+
+      if (!privilegedUser) {
+        return name;
+      }
+
+      return <PrivilegedUserName privilegedUser={privilegedUser} />;
+    },
   },
   {
     field: 'user.risk.calculated_level',

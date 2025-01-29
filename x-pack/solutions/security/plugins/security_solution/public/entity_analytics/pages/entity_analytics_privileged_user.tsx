@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import type { Alert } from '@kbn/alerting-types';
 import type { EntityRiskScore, EntityType } from '../../../common/search_strategy';
 import type {
   PrivilegedUserDoc,
@@ -28,7 +29,7 @@ interface PrivilegedUserResponse {
   successfulPrivilegedAccess: PrivmonLoginDoc[];
   newPrivilegedUsers: PrivilegedUserDoc[];
   riskPrivilegedUsers: Array<EntityRiskScore<EntityType.user>>;
-  unusualAccessPatterns: Event[];
+  unusualAccessPatterns: Alert[];
 }
 
 const fetchPrivilegedUsersData = (): Promise<PrivilegedUserResponse> =>
@@ -60,7 +61,12 @@ const EntityAnalyticsPrivilegedUserComponent = () => {
     <>
       <SecuritySolutionPageWrapper noPadding={false}>
         <HeaderPage title={PRIVILEGED_USER_MONITORING} />
-        <EuiCallOut title="This page is a POC" color="warning" iconType="alert" size="s" />
+        <EuiCallOut
+          title="This page is a proof of concept only!"
+          color="warning"
+          iconType="alert"
+          size="s"
+        />
         <EuiSpacer size="l" />
         {isSourcererLoading ? (
           <EuiLoadingSpinner size="l" />
@@ -88,7 +94,7 @@ const EntityAnalyticsPrivilegedUserComponent = () => {
             <EuiFlexItem style={{ minWidth: 600 }}>
               <UnusualAccessPatterns
                 isLoading={isLoading}
-                data={data.unusualAccessPatterns}
+                alerts={data.unusualAccessPatterns}
                 privilegedUsers={data.newPrivilegedUsers}
               />
             </EuiFlexItem>

@@ -41,9 +41,7 @@ const getTableColumns = () => [
   {
     field: 'user.name',
     name: 'User',
-    render: (name: string, data: PrivilegedUserDoc) => (
-      <PrivilegedUserName userName={name} objects={[data]} />
-    ),
+    render: (name: string, data: PrivilegedUserDoc) => <PrivilegedUserName privilegedUser={data} />,
   },
   {
     field: 'user.id',

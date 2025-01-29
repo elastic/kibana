@@ -50,12 +50,15 @@ const getTableColumns = (privilegedUsers: PrivilegedUserDoc[]) => [
   {
     field: 'user.name',
     name: 'User',
-    render: (name: string, data: PrivmonLoginDoc) => (
-      <PrivilegedUserName
-        userName={name}
-        objects={[privilegedUsers.find(({ user }) => user.name === name) || {}, data]}
-      />
-    ),
+    render: (name: string, data: PrivmonLoginDoc) => {
+      const privilegedUser = privilegedUsers.find(({ user }) => user.name === name);
+
+      if (!privilegedUser) {
+        return name;
+      }
+
+      return <PrivilegedUserName privilegedUser={privilegedUser} />;
+    },
   },
   {
     field: 'host.hostname',

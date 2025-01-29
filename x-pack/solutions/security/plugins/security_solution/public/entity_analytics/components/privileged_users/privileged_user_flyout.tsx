@@ -1,0 +1,174 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiTabbedContent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
+import React from 'react';
+import { EntityType } from '../../../../common/search_strategy';
+import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import type { PrivilegedUserDoc } from '../../../../common/api/entity_analytics/privmon';
+import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { FlyoutRiskSummary } from '../risk_summary_flyout/risk_summary';
+import type { ESQuery } from '../../../../common/typed_json';
+
+const buildFilter = (userNames: string[]) => ({
+  bool: {
+    should: userNames.map((userName) => ({
+      term: { 'user.name': userName },
+    })),
+    minimum_should_match: 1,
+  },
+});
+
+const useMatchingUsers = (privilegedUser: PrivilegedUserDoc): PrivilegedUserDoc[] => {
+  return [];
+};
+
+const;
+
+export const PrivilegedUserFlyout: React.FC<{
+  privilegedUser: PrivilegedUserDoc;
+  closeFlyout: () => void;
+}> = ({ privilegedUser, closeFlyout }) => {
+  const [userQuery, setUserQuery] = React.useState<ESQuery>(
+    buildFilter([privilegedUser.user.name])
+  );
+
+  const tabs = getTabs({ privilegedUser, setUserQuery, userQuery });
+
+  return (
+    <EuiFlyout onClose={closeFlyout}>
+      <SummaryHeader privilegedUser={privilegedUser} />
+      <EuiFlyoutBody>
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
+
+const SummaryHeader: React.FC<{ privilegedUser: PrivilegedUserDoc }> = ({ privilegedUser }) => (
+  <EuiFlyoutHeader>
+    <EuiTitle size="m">
+      <h2>{`Privileged user ${privilegedUser.user.name}`}</h2>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <strong>{'Created:'}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <FormattedRelativePreferenceDate value={privilegedUser.created_at} />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <strong>{'Updated:'}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <FormattedRelativePreferenceDate value={privilegedUser['@timestamp']} />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+);
+
+const JsonViewer: React.FC<{
+  privilegedUser: PrivilegedUserDoc;
+}> = ({ privilegedUser }) => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiCodeBlock language="json" fontSize="m" paddingSize="m">
+      {JSON.stringify(privilegedUser, null, 2)}
+    </EuiCodeBlock>
+  </>
+);
+
+const Overview: React.FC<{
+  privilegedUser: PrivilegedUserDoc;
+  userQuery: ESQuery;
+  setUserQuery: (query: ESQuery) => void;
+}> = ({ privilegedUser, userQuery, setUserQuery }) => {
+  const riskScoreState = useRiskScore({
+    riskEntity: EntityType.user,
+    filterQuery: userQuery,
+    onlyLatest: false,
+    pagination: {
+      cursorStart: 0,
+      querySize: 1,
+    },
+  });
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <FlyoutRiskSummary
+        riskScoreData={riskScoreState}
+        queryId={'hello'}
+        recalculatingScore={false}
+        isLinkEnabled={false}
+        entityType={EntityType.user}
+        openDetailsPanel={() => {}}
+      />
+      <>
+        {'Logins table here'}
+        {'Privileges table here'}
+        {'Alerts table here'}
+      </>
+    </>
+  );
+};
+
+const getTabs = ({
+  privilegedUser,
+  setUserQuery,
+  userQuery,
+}: {
+  privilegedUser: PrivilegedUserDoc;
+  setUserQuery: (query: ESQuery) => void;
+  userQuery: ESQuery; // addUserQuery
+}) => [
+  {
+    id: 'overview',
+    name: 'Overview',
+    content: (
+      <Overview privilegedUser={privilegedUser} userQuery={userQuery} setUserQuery={setUserQuery} />
+    ),
+  },
+  {
+    id: 'json',
+    name: 'JSON',
+    content: JsonViewer({ privilegedUser }),
+  },
+  {
+    id: 'related',
+    name: 'Related Users',
+    content: <>{'Pick related users table here'}</>,
+  },
+];
