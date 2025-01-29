@@ -135,7 +135,6 @@ export const startEntityStoreDataViewRefreshTask = async ({
 }) => {
   const taskId = getTaskId(namespace);
   const log = entityStoreTaskLogFactory(logger, taskId);
-  log('starting task');
 
   log('attempting to schedule');
   try {
