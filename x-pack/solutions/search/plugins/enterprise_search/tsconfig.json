@@ -87,5 +87,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
+    "@kbn/file-upload-common",
   ]
 }
