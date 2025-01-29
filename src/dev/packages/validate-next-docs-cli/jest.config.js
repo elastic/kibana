@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-validate-next-docs-cli'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/validate-next-docs-cli'],
 };

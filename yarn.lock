@@ -7940,7 +7940,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/validate-next-docs-cli@link:packages/kbn-validate-next-docs-cli":
+"@kbn/validate-next-docs-cli@link:src/dev/packages/validate-next-docs-cli":
   version "0.0.0"
   uid ""
 
