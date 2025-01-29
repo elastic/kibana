@@ -28,6 +28,7 @@ export function resolvable<T>(): Promise<T> & Resolvable<T> {
 // Used to convert a raw Rule's UUID to something that can be used
 // to compare with a jest snapshot.
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function alertWithAnyUUID(rawAlert: Record<string, any>): Record<string, any> {
   if (!rawAlert?.meta?.uuid) return rawAlert;
 
@@ -37,6 +38,7 @@ export function alertWithAnyUUID(rawAlert: Record<string, any>): Record<string, 
 }
 
 export function alertsWithAnyUUID(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rawAlerts: Record<string, any>
 ): Record<string, RawAlertInstance> {
   const newAlerts: Record<string, RawAlertInstance> = {};

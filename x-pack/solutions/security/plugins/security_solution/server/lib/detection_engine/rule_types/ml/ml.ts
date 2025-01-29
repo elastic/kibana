@@ -17,6 +17,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { Filter } from '@kbn/es-query';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
@@ -61,6 +62,7 @@ interface MachineLearningRuleExecutorParams {
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  isLoggedRequestsEnabled?: boolean;
 }
 
 export const mlExecutor = async ({
@@ -80,9 +82,11 @@ export const mlExecutor = async ({
   alertWithSuppression,
   experimentalFeatures,
   scheduleNotificationResponseActionsService,
+  isLoggedRequestsEnabled = false,
 }: MachineLearningRuleExecutorParams) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
+  const loggedRequests: RulePreviewLoggedRequest[] = [];
 
   return withSecuritySpan('mlExecutor', async () => {
     if (ml == null) {
@@ -122,7 +126,7 @@ export const mlExecutor = async ({
 
     let anomalyResults: AnomalyResults;
     try {
-      anomalyResults = await findMlSignals({
+      const searchResults = await findMlSignals({
         ml,
         // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
         // currently unused by the mlAnomalySearch function.
@@ -134,14 +138,17 @@ export const mlExecutor = async ({
         to: tuple.to.toISOString(),
         maxSignals: tuple.maxSignals,
         exceptionFilter,
+        isLoggedRequestsEnabled,
       });
+      anomalyResults = searchResults.anomalyResults;
+      loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
       if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
         result.userError = true;
       }
       result.errors.push(error.message);
       result.success = false;
-      return result;
+      return { result };
     }
 
     // TODO we add the max_signals warning _before_ filtering the anomalies against the exceptions list. Is that correct?
@@ -204,12 +211,15 @@ export const mlExecutor = async ({
       signalsCount: result.createdSignalsCount,
       responseActions: completeRule.ruleParams.responseActions,
     });
-    return mergeReturns([
-      result,
-      createSearchAfterReturnType({
-        success: anomalyResults._shards.failed === 0,
-        errors: searchErrors,
-      }),
-    ]);
+    return {
+      result: mergeReturns([
+        result,
+        createSearchAfterReturnType({
+          success: anomalyResults._shards.failed === 0,
+          errors: searchErrors,
+        }),
+      ]),
+      ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
+    };
   });
 };
