@@ -12035,24 +12035,12 @@ paths:
     post:
       operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine
           in: path
           name: entityType
           required: true
           schema:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                timestampField:
-                  default: '@timestamp'
-                  description: The field to use as the timestamp for the entity type.
-                  type: string
-        description: Schema for the engine start
-        required: false
       responses:
         '200':
           content:
