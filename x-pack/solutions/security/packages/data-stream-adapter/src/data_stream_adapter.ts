@@ -10,11 +10,8 @@ import { IndexAdapter, type InstallParams, type IndexAdapterParams } from '@kbn/
 import { createOrUpdateDataStream } from './create_or_update_data_stream';
 
 export class DataStreamAdapter extends IndexAdapter {
-  protected writeIndexOnly: boolean;
-
   constructor(protected readonly name: string, options: IndexAdapterParams) {
     super(name, options);
-    this.writeIndexOnly = options.writeIndexOnly ?? false;
   }
   public setIndexTemplate(params: SetIndexTemplateParams) {
     super.setIndexTemplate({ ...params, isDataStream: true });

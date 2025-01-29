@@ -246,10 +246,11 @@ export class AIAssistantService {
       });
 
       if (this.assistantDefaultInferenceEndpoint) {
-        const knowledgeBaseDataStreamExists = await esClient.indices.getDataStream({
-          // @ts-expect-error
-          name: this.knowledgeBaseDataStream.name,
-        });
+        const knowledgeBaseDataStreamExists = (
+          await esClient.indices.getDataStream({
+            name: this.knowledgeBaseDataStream.name,
+          })
+        )?.data_streams?.length;
 
         // update component template for semantic_text field
         // rollover
@@ -319,10 +320,9 @@ export class AIAssistantService {
             pluginStop$: this.options.pluginStop$,
           });
 
-          const indexNames = // @ts-expect-error
-            (await esClient.indices.getDataStream({ name: newDS.name })).data_streams.map(
-              (ds) => ds.name
-            );
+          const indexNames = (
+            await esClient.indices.getDataStream({ name: newDS.name })
+          ).data_streams.map((ds) => ds.name);
 
           try {
             await Promise.all(

@@ -52,11 +52,13 @@ export class IndexAdapter {
   protected componentTemplates: ClusterPutComponentTemplateRequest[] = [];
   protected indexTemplates: IndicesPutIndexTemplateRequest[] = [];
   protected installed: boolean;
+  protected writeIndexOnly: boolean;
 
-  constructor(protected readonly name: string, options: IndexAdapterParams) {
+  constructor(public readonly name: string, options: IndexAdapterParams) {
     this.installed = false;
     this.kibanaVersion = options.kibanaVersion;
     this.totalFieldsLimit = options.totalFieldsLimit ?? DEFAULT_FIELDS_LIMIT;
+    this.writeIndexOnly = options.writeIndexOnly ?? false;
   }
 
   public setComponentTemplate(params: SetComponentTemplateParams) {
