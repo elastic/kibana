@@ -353,7 +353,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]exceptions_list_card[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]exceptions_utility[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]shared_list_utilty_bar[\/\\]index.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]exceptions[\/\\]pages[\/\\]shared_lists[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]paginated_table[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]explore[\/\\]components[\/\\]stat_items[\/\\]utils.tsx/,
