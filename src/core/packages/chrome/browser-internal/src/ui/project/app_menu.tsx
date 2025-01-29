@@ -29,14 +29,13 @@ export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={css`
         z-index: ${zIndex};
-        background: ${euiTheme.colors.body};
-        border-bottom: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius.medium};
         display: flex;
         justify-content: end;
         align-items: center;
         padding: 0 ${euiTheme.size.s};
+        margin: 0 ${euiTheme.size.s};
         height: var(--kbnProjectHeaderAppActionMenuHeight, ${euiTheme.size.xxxl});
-        margin-bottom: -${euiTheme.border.width.thin};
         /* fixates the elements position in the viewport, removes the element from the flow of the page */
         position: sticky;
         /* position below the primary fixed EuiHeader in the viewport */

@@ -39,10 +39,22 @@ export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
     flex-grow: 1;
     z-index: 0; // This effectively puts every high z-index inside the scope of this wrapper to it doesn't interfere with the header and/or overlay mask
     position: relative; // This is temporary for apps that relied on this being present on \`.application\`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border: ${euiTheme.border.thin};
+    border-radius: ${euiTheme.border.radius.medium};
+    margin: ${euiTheme.size.s};
+
+    .kbnAppWrapper {
+      // There is a kbnAppWrapper inside of kbnAppWrapper
+      background-color: transparent;
+      border: none;
+      border-radius: none;
+      margin: 0;
+    }
   }
 
   .kbnBody {
-    padding-top: var(--euiFixedHeadersOffset, 0);
+    padding-top: 64px;
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
@@ -87,6 +99,15 @@ export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
     &.kbnBody--hasProjectActionMenu {
       --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0);
     }
+  }
+
+  // REMOVE THIS - CHANGE IN EUI
+  .euiPageTemplate {
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border-radius: ${euiTheme.border.radius.medium};
+  }
+  .euiPageHeader {
+    background-color: ${euiTheme.colors.backgroundBasePlain};
   }
 `;
 

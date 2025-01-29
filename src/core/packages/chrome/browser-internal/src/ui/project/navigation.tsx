@@ -35,10 +35,18 @@ export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
       css={{
         overflow: 'visible',
         clipPath: `polygon(0 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 100%, 0 100%)`,
+        backgroundColor: 'transparent',
+        boxShadow: 'none',
+        border: 'none',
+        marginTop: '8px',
       }}
       className={css`
         .euiFlyoutBody__overflowContent {
           height: 100%;
+        }
+
+        .euiFlyoutFooter {
+          background-color: transparent;
         }
       `}
     >

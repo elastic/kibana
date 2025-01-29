@@ -47,7 +47,16 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/scr
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 
-const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
+const getHeaderCss = ({ size, colors, border }: EuiThemeComputed) => ({
+  headerFirstBar: css`
+    background-color: ${colors.backgroundBaseFormsPrepend};
+    // background-color: rgb(255,255,255, .8);
+    // backdrop-filter: blur(15px);
+    box-shadow: none;
+    border: none;
+    border-radius: ${border.radius.medium};
+    margin: ${size.s};
+  `,
   logo: {
     container: css`
       display: flex;
@@ -70,6 +79,11 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
     // needed to enable breadcrumbs truncation
     min-width: 0;
     flex-shrink: 1;
+
+    .euiCollapsibleNavButtonWrapper {
+      border: none;
+      margin-inline-end: 0;
+    }
   `,
   breadcrumbsSectionItem: css`
     min-width: 0; // needed to enable breadcrumbs truncation
@@ -247,7 +261,7 @@ export const ProjectHeader = ({
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
-          <EuiHeader position="fixed" className="header__firstBar">
+          <EuiHeader position="fixed" className="header__firstBar" css={headerCss.headerFirstBar}>
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <Router history={application.history}>
                 <ProjectNavigation
