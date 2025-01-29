@@ -4148,7 +4148,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
+"@kbn/check-prod-native-modules-cli@link:src/dev/packages/check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
 
