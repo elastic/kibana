@@ -146,6 +146,14 @@ async function _verifyPackageSignature({
     },
   });
 
+  if (
+    verificationResult.data &&
+    'close' in verificationResult.data &&
+    typeof verificationResult.data.close === 'function'
+  ) {
+    await verificationResult.data.close();
+  }
+
   const signatureVerificationResult = verificationResult.signatures[0];
 
   let isVerified = false;
