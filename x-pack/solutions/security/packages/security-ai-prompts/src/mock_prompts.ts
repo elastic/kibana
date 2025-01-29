@@ -32,7 +32,7 @@ export const localPrompts: Prompt[] = [
     promptId: promptDictionary.systemPrompt,
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
-      default: 'provider:default default system prompt',
+      default: 'default system prompt',
     },
   },
   {

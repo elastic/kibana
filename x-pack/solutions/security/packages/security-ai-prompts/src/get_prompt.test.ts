@@ -317,7 +317,7 @@ describe('get_prompt', () => {
         connectorId: 'connector-123',
       });
 
-      expect(result).toBe('provider:default default system prompt');
+      expect(result).toBe('default system prompt');
     });
 
     it('throws an error when no prompts are found', async () => {
