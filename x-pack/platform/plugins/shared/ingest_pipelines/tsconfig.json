@@ -38,7 +38,8 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/shared-ux-table-persist",
     "@kbn/core-http-browser",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/delete-managed-asset-callout"
   ],
   "exclude": [
     "target/**/*",

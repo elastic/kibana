@@ -8,7 +8,15 @@
 import React, { useMemo } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
@@ -31,7 +39,40 @@ export const SearchSynonymsOverview = () => {
       grow={false}
       data-test-subj="searchSynonymsOverviewPage"
       solutionNav={searchNavigation?.useClassicNavigation(history)}
+      color="primary"
     >
+      <KibanaPageTemplate.Header
+        pageTitle="Synonyms"
+        restrictWidth
+        color="primary"
+        rightSideItems={[
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiLink>
+                <FormattedMessage
+                  id="xpack.searchSynonyms.synonymsSetDetail.documentationLink"
+                  defaultMessage="API Documentation"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill iconType="plusInCircle">
+                <FormattedMessage
+                  id="xpack.searchSynonyms.synonymsSetDetail.createButton"
+                  defaultMessage="Create"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+        ]}
+      >
+        <EuiText>
+          <FormattedMessage
+            id="xpack.searchSynonyms.synonymsSetDetail.description"
+            defaultMessage="Create and manage synonym sets and synonym rules."
+          />
+        </EuiText>
+      </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section restrictWidth>
         {isInitialLoading && <EuiLoadingSpinner />}
 

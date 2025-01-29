@@ -27,3 +27,90 @@ export const EQL_SEARCH_REQUEST_DESCRIPTION = i18n.translate(
     defaultMessage: 'EQL request to find all matches',
   }
 );
+
+export const FIND_THRESHOLD_BUCKETS_DESCRIPTION = (afterBucket?: string) =>
+  afterBucket
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.esqlRuleType.findThresholdRuleBucketsAfterDescription',
+        {
+          defaultMessage: 'Find all terms that exceeds threshold value after {afterBucket}',
+          values: { afterBucket },
+        }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.esqlRuleType.findThresholdRuleBucketsDescription',
+        {
+          defaultMessage: 'Find all terms that exceeds threshold value',
+        }
+      );
+
+export const ML_SEARCH_ANOMALIES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.esqlRuleType.mlSearchAnomaliesRequestDescription',
+  {
+    defaultMessage: 'Find all anomalies',
+  }
+);
+
+export const FIND_EVENTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryRuleType.findEventsDescription',
+  {
+    defaultMessage: 'Find events',
+  }
+);
+
+export const FIND_EVENTS_AFTER_CURSOR_DESCRIPTION = (cursor?: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.queryRuleType.findEventsAfterCursorDescription',
+    {
+      defaultMessage: 'Find events after cursor {cursor}',
+      values: { cursor },
+    }
+  );
+
+export const FIND_ALL_NEW_TERMS_FIELDS_DESCRIPTION = (afterKey?: string) =>
+  afterKey
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findAllNewTermsFieldsAfterDescription',
+        {
+          defaultMessage: 'Find all values after {afterKey}',
+          values: { afterKey },
+        }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findAllNewTermsFieldsDescription',
+        {
+          defaultMessage: 'Find all values',
+        }
+      );
+
+export const FIND_NEW_TERMS_VALUES_DESCRIPTION = (afterKey?: string) =>
+  afterKey
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findNewTermsValuesAfterDescription',
+        {
+          defaultMessage: 'Find new values after {afterKey}',
+          values: { afterKey },
+        }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findNewTermsValuesDescription',
+        {
+          defaultMessage: 'Find new values',
+        }
+      );
+
+export const FIND_NEW_TERMS_EVENTS_DESCRIPTION = (afterKey?: string) =>
+  afterKey
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findNewTermsEventsAfterDescription',
+        {
+          defaultMessage: 'Find documents associated with new values after {afterKey}',
+          values: { afterKey },
+        }
+      )
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.newTermsRuleType.findNewTermsEventsDescription',
+        {
+          defaultMessage: 'Find documents associated with new values',
+        }
+      );
