@@ -6768,7 +6768,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-file-maps@link:packages/kbn-repo-file-maps":
+"@kbn/repo-file-maps@link:src/dev/packages/repo-file-maps":
   version "0.0.0"
   uid ""
 
