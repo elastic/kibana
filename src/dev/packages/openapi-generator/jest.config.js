@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-openapi-generator'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/openapi-generator'],
 };

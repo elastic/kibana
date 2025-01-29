@@ -6600,7 +6600,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-generator@link:packages/kbn-openapi-generator":
+"@kbn/openapi-generator@link:src/dev/packages/openapi-generator":
   version "0.0.0"
   uid ""
 
