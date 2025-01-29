@@ -32,7 +32,7 @@ export const getOptionsListMocks = () => {
       availableOptions$: new BehaviorSubject<OptionsListSuggestions | undefined>(undefined),
       invalidSelections$: new BehaviorSubject<Set<OptionsListSelection>>(new Set([])),
       totalCardinality$: new BehaviorSubject<number>(0),
-      dataLoading$: new BehaviorSubject<boolean>(false),
+      dataLoading: new BehaviorSubject<boolean>(false),
       parentApi: {
         allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
       },
