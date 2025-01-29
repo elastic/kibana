@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/public';
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
-import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
+import type { CoreStart } from '@kbn/core/public';
+import {
+  OPEN_FILE_UPLOAD_LITE_ACTION,
+  OPEN_FILE_UPLOAD_LITE_TRIGGER,
+} from '@kbn/file-upload-common';
+// import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
 import {
   createOpenFileUploadLiteAction,
   createOpenFileUploadLiteTrigger,
 } from './lite/file_upload_lite_action';
+import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
 
-export function registerUiActions(
-  uiActions: UiActionsSetup,
-  core: CoreSetup<DataVisualizerStartDependencies>
-) {
-  const categorizationADJobAction = createOpenFileUploadLiteAction(core.getStartServices);
+export function registerUiActions(coreStart: CoreStart, plugins: DataVisualizerStartDependencies) {
+  const { uiActions } = plugins;
+  if (uiActions === undefined) {
+    return;
+  }
+
+  const categorizationADJobAction = createOpenFileUploadLiteAction(coreStart, plugins);
   uiActions.registerTrigger(createOpenFileUploadLiteTrigger);
-  uiActions.registerAction(categorizationADJobAction);
-  uiActions.addTriggerAction(OPEN_FILE_UPLOAD_LITE_TRIGGER, categorizationADJobAction);
+  uiActions.addTriggerActionAsync(
+    OPEN_FILE_UPLOAD_LITE_TRIGGER,
+    OPEN_FILE_UPLOAD_LITE_ACTION,
+    async () => categorizationADJobAction
+  );
 }

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import type { CoreSetup } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   OPEN_FILE_UPLOAD_LITE_ACTION,
   OPEN_FILE_UPLOAD_LITE_TRIGGER,
@@ -27,7 +27,8 @@ export const createOpenFileUploadLiteTrigger: Trigger = {
 };
 
 export function createOpenFileUploadLiteAction(
-  getStartServices: CoreSetup<DataVisualizerStartDependencies>['getStartServices']
+  coreStart: CoreStart,
+  plugins: DataVisualizerStartDependencies
 ): UiActionsActionDefinition<OpenFileUploadLiteContext> {
   return {
     id: 'create-open-file-upload-lite-action',
@@ -45,10 +46,8 @@ export function createOpenFileUploadLiteAction(
       indexSettings,
     }: OpenFileUploadLiteContext) {
       try {
-        const [{ showFlyout }, [coreStart, { share, data }]] = await Promise.all([
-          import('./flyout/show_flyout'),
-          getStartServices(),
-        ]);
+        const { share, data } = plugins;
+        const { showFlyout } = await import('./flyout/show_flyout');
 
         await showFlyout(coreStart, share, data, {
           onUploadComplete,

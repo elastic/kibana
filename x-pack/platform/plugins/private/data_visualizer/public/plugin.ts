@@ -62,15 +62,16 @@ export class DataVisualizerPlugin
       registerHomeFeatureCatalogue(plugins.home);
     }
 
-    if (plugins.uiActions) {
-      registerUiActions(plugins.uiActions, core);
-    }
-
     plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
   }
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
+
+    if (plugins.uiActions) {
+      registerUiActions(core, plugins);
+    }
+
     const {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
