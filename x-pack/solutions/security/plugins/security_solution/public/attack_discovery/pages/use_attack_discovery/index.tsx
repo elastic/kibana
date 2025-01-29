@@ -12,10 +12,7 @@ import type {
   GenerationInterval,
   AttackDiscoveryStats,
 } from '@kbn/elastic-assistant-common';
-import {
-  AttackDiscoveryPostResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-} from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryPostResponse, API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
@@ -193,7 +190,7 @@ export const useAttackDiscovery = ({
         // call the internal API to generate attack discoveries:
         const rawResponse = await http.post('/internal/elastic_assistant/attack_discovery', {
           body: JSON.stringify(bodyWithOverrides),
-          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+          version: API_VERSIONS.internal.v1,
         });
         setIsLoadingPost(false);
         const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);

@@ -411,6 +411,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             direction="column"
             items={requiredProviderFormFields}
             setConfigEntry={onSetProviderConfigEntry}
+            isEdit={isEdit}
           />
           <EuiSpacer size="m" />
           <AdditionalOptionsFields
