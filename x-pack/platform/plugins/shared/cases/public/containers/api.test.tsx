@@ -151,6 +151,9 @@ describe('Cases API', () => {
       await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
         method: 'GET',
+        query: {
+          includeComments: true,
+        },
         signal: abortCtrl.signal,
       });
     });
