@@ -47,11 +47,9 @@ export const getCategoryCountRequest = (
 
   return {
     index,
-    body: {
-      query,
-      size: 0,
-      track_total_hits: true,
-    },
+    query,
+    size: 0,
+    track_total_hits: true,
   };
 };
 

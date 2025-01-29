@@ -107,12 +107,10 @@ describe('RuleDataClient', () => {
 
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader();
-          await reader.search({
-            body: query,
-          });
+          await reader.search(query);
 
           expect(scopedClusterClient.search).toHaveBeenCalledWith({
-            body: query,
+            ...query,
             ignore_unavailable: true,
             index: `.alerts-observability.apm.alerts*`,
             seq_no_primary_term: true,
@@ -131,12 +129,10 @@ describe('RuleDataClient', () => {
 
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader({ namespace: 'test' });
-          await reader.search({
-            body: query,
-          });
+          await reader.search(query);
 
           expect(scopedClusterClient.search).toHaveBeenCalledWith({
-            body: query,
+            ...query,
             ignore_unavailable: true,
             index: `.alerts-observability.apm.alerts-test`,
             seq_no_primary_term: true,
@@ -151,11 +147,9 @@ describe('RuleDataClient', () => {
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader();
 
-          await expect(
-            reader.search({
-              body: query,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+          await expect(reader.search(query)).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"something went wrong!"`
+          );
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error performing search in RuleDataClient - something went wrong!`
@@ -224,11 +218,9 @@ describe('RuleDataClient', () => {
 
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader();
-          await expect(
-            reader.search({
-              body: query,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`"could not get cluster client"`);
+          await expect(reader.search(query)).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"could not get cluster client"`
+          );
 
           await expect(reader.getDynamicIndexPattern()).rejects.toThrowErrorMatchingInlineSnapshot(
             `"could not get cluster client"`

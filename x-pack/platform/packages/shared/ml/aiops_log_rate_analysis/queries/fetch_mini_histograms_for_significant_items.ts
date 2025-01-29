@@ -81,12 +81,9 @@ export const fetchMiniHistogramsForSignificantItems = async (
   const resp = await esClient.search(
     {
       index: params.index,
+      query: histogramQuery,
+      aggs: wrap(histogramAggs),
       size: 0,
-      body: {
-        query: histogramQuery,
-        aggs: wrap(histogramAggs),
-        size: 0,
-      },
     },
     { signal: abortSignal, maxRetries: 0 }
   );

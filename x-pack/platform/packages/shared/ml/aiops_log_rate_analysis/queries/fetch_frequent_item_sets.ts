@@ -164,8 +164,7 @@ export async function fetchFrequentItemSets({
   >(
     {
       index,
-      size: 0,
-      body: esBody,
+      ...esBody,
     },
     { signal: abortSignal, maxRetries: 0 }
   );

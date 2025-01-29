@@ -22,6 +22,8 @@ import {
 } from '../../common/constants';
 import { getAggsTileRequest, getHitsTileRequest } from '../../common/mvt_request_body';
 
+type SearchMvtRequestBody = Omit<SearchMvtRequest, 'index' | 'x' | 'y' | 'field' | 'zoom'>;
+
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
 
 export function initMVTRoutes({
@@ -77,7 +79,10 @@ export function initMVTRoutes({
         const y = parseInt((params as any).y, 10) as number;
         const z = parseInt((params as any).z, 10) as number;
 
-        let tileRequest: { path: string; body: SearchMvtRequest['body'] } = {
+        let tileRequest: {
+          path: string;
+          body: SearchMvtRequestBody;
+        } = {
           path: '',
           body: {},
         };
@@ -162,7 +167,7 @@ export function initMVTRoutes({
         const y = parseInt((params as any).y, 10) as number;
         const z = parseInt((params as any).z, 10) as number;
 
-        let tileRequest: { path: string; body: SearchMvtRequest['body'] } = {
+        let tileRequest: { path: string; body: SearchMvtRequestBody } = {
           path: '',
           body: {},
         };
@@ -214,7 +219,7 @@ async function getTile({
   path,
 }: {
   abortController: AbortController;
-  body: SearchMvtRequest['body'];
+  body: SearchMvtRequestBody;
   context: DataRequestHandlerContext;
   core: CoreStart;
   executionContext: KibanaExecutionContext;

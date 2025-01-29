@@ -11,7 +11,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 
 const esQuery = {
-  body: { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } },
+  query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } },
 };
 const eqlQuery = {
   index: 'foo',

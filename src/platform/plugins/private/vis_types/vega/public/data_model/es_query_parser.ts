@@ -231,7 +231,7 @@ export class EsQueryParser {
    */
   _injectContextVars(
     obj: Assign<
-      Query | estypes.SearchRequest['body']['aggs'],
+      Query | estypes.SearchRequest['aggs'],
       {
         interval?: { '%autointerval%': true | number } | string;
       }

@@ -279,7 +279,7 @@ const getDataComparisonQuery = ({
   searchQuery?: estypes.QueryDslQueryContainer;
   datetimeField?: string;
   timeRange?: TimeRange;
-}): NonNullable<estypes.SearchRequest['body']> => {
+}): NonNullable<estypes.SearchRequest> => {
   let rangeFilter;
   if (timeRange && datetimeField !== undefined && isPopulatedObject(timeRange, ['start', 'end'])) {
     rangeFilter = {
@@ -307,7 +307,7 @@ const getDataComparisonQuery = ({
     }
   }
 
-  const queryAndRuntimeMappings: NonNullable<estypes.SearchRequest['body']> = {
+  const queryAndRuntimeMappings: NonNullable<estypes.SearchRequest> = {
     query,
   };
   if (runtimeFields) {
@@ -362,7 +362,7 @@ const fetchReferenceBaselineData = async ({
   const baselineResponse = await dataSearch(
     {
       ...baselineRequest,
-      body: { ...baselineRequest.body, aggs: randomSamplerWrapper.wrap(baselineRequestAggs) },
+      aggs: randomSamplerWrapper.wrap(baselineRequestAggs),
     },
     signal
   );
@@ -449,7 +449,7 @@ const fetchComparisonDriftedData = async ({
   const rangesResp = await dataSearch(
     {
       ...baselineRequest,
-      body: { ...baselineRequest.body, aggs: randomSamplerWrapper.wrap(rangesRequestAggs) },
+      aggs: randomSamplerWrapper.wrap(rangesRequestAggs),
     },
     signal
   );
@@ -497,7 +497,7 @@ const fetchComparisonDriftedData = async ({
   const driftedResp = await dataSearch(
     {
       ...driftedRequest,
-      body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(driftedRequestAggs) },
+      aggs: randomSamplerWrapper.wrap(driftedRequestAggs),
     },
     signal
   );
@@ -574,10 +574,7 @@ const fetchHistogramData = async ({
   if (isPopulatedObject(histogramRequestAggs)) {
     const histogramRequest = {
       ...baseRequest,
-      body: {
-        ...baseRequest.body,
-        aggs: randomSamplerWrapper.wrap(histogramRequestAggs),
-      },
+      aggs: randomSamplerWrapper.wrap(histogramRequestAggs),
     };
 
     return dataSearch(histogramRequest, signal);
@@ -783,11 +780,9 @@ export const useFetchDataComparisonResult = (
 
           const baselineRequest: EsRequestParams = {
             index: referenceIndex,
-            body: {
-              size: 0,
-              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-              ...refDataQuery,
-            },
+            size: 0,
+            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+            ...refDataQuery,
           };
 
           const baselineResponseAggs = await fetchInParallelChunks({
@@ -846,11 +841,9 @@ export const useFetchDataComparisonResult = (
 
           const driftedRequest: EsRequestParams = {
             index: comparisonIndex,
-            body: {
-              size: 0,
-              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-              ...prodDataQuery,
-            },
+            size: 0,
+            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+            ...prodDataQuery,
           };
 
           const driftedRespAggs = await fetchInParallelChunks({
@@ -889,11 +882,9 @@ export const useFetchDataComparisonResult = (
 
           const referenceHistogramRequest: EsRequestParams = {
             index: referenceIndex,
-            body: {
-              size: 0,
-              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-              ...refDataQuery,
-            },
+            size: 0,
+            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+            ...refDataQuery,
           };
 
           const referenceHistogramRespAggs = await fetchInParallelChunks({
@@ -934,11 +925,9 @@ export const useFetchDataComparisonResult = (
 
           const comparisonHistogramRequest: EsRequestParams = {
             index: comparisonIndex,
-            body: {
-              size: 0,
-              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-              ...prodDataQuery,
-            },
+            size: 0,
+            aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+            ...prodDataQuery,
           };
 
           const comparisonHistogramRespAggs = await fetchInParallelChunks({

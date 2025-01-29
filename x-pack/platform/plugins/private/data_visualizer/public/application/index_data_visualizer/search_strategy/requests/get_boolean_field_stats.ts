@@ -58,7 +58,7 @@ export const getBooleanFieldsStatsRequest = (
   return {
     index,
     size,
-    body: searchBody,
+    ...searchBody,
   };
 };
 

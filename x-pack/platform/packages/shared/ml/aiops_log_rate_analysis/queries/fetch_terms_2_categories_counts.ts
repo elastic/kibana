@@ -33,7 +33,7 @@ const getTerm2CategoryCountRequest = (
   category: Category,
   from: number | undefined,
   to: number | undefined
-): estypes.SearchRequest['body'] => {
+): estypes.SearchRequest => {
   const query = getQueryWithParams({
     params,
   });

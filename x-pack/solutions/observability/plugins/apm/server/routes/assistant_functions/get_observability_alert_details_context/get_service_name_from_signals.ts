@@ -45,7 +45,7 @@ export async function getServiceNameFromSignals({
   const start = moment(query.alert_started_at).subtract(30, 'minutes').valueOf();
   const end = moment(query.alert_started_at).valueOf();
 
-  const params: APMEventESSearchRequest['body'] = {
+  const params: APMEventESSearchRequest = {
     _source: ['service.name'],
     terminate_after: 1,
     size: 1,
@@ -86,7 +86,7 @@ async function getServiceNameFromLogs({
   esClient,
   logSourcesService,
 }: {
-  params: ESSearchRequest['body'];
+  params: ESSearchRequest;
   esClient: ElasticsearchClient;
   logSourcesService: LogSourcesService;
 }) {
@@ -103,7 +103,7 @@ async function getServiceNameFromTraces({
   params,
   apmEventClient,
 }: {
-  params: APMEventESSearchRequest['body'];
+  params: APMEventESSearchRequest;
   apmEventClient: APMEventClient;
 }) {
   const requiredFields = asMutableArray([SERVICE_NAME] as const);

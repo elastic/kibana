@@ -16,11 +16,9 @@ export const getTotalDocCountRequest = (
   params: AiopsLogRateAnalysisSchema
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
-  body: {
-    fields: ['*'],
-    _source: false,
-    query: getQueryWithParams({ params }),
-    size: 0,
-    track_total_hits: true,
-  },
+  fields: ['*'],
+  _source: false,
+  query: getQueryWithParams({ params }),
+  size: 0,
+  track_total_hits: true,
 });

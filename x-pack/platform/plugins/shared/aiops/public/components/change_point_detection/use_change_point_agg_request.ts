@@ -105,11 +105,9 @@ function getChangePointDetectionRequestBody(
   return {
     index,
     size: 0,
-    body: {
-      ...(query ? { query } : {}),
-      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
-      aggregations,
-    },
+    ...(query ? { query } : {}),
+    ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+    aggregations,
   } as SearchRequest;
 }
 

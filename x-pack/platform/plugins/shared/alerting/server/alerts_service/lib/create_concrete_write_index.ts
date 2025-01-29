@@ -90,7 +90,7 @@ const updateUnderlyingMapping = async ({
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, body: simulatedMapping }),
+      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
       { logger }
     );
 
@@ -183,18 +183,16 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
     await retryTransientEsErrors(
       () =>
         esClient.indices.updateAliases({
-          body: {
-            actions: [
-              { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
-              {
-                add: {
-                  index: concreteIndex.index,
-                  alias: concreteIndex.alias,
-                  is_write_index: true,
-                },
+          actions: [
+            { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
+            {
+              add: {
+                index: concreteIndex.index,
+                alias: concreteIndex.alias,
+                is_write_index: true,
               },
-            ],
-          },
+            },
+          ],
         }),
       { logger }
     );

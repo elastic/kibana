@@ -199,7 +199,7 @@ export async function getResultsForJobId(
   }
 
   // Query to look for the highest scoring anomaly.
-  const body: estypes.SearchRequest['body'] = {
+  const body: estypes.SearchRequest = {
     query: {
       bool,
     },

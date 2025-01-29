@@ -112,7 +112,9 @@ export async function updateDataStreamsLifecycle({
       () =>
         esClient.indices.putDataLifecycle({
           name: names,
-          data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
+          lifecycle: {
+            data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
+          },
         }),
       { logger }
     );

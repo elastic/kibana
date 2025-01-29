@@ -62,7 +62,7 @@ export const getStringFieldStatsRequest = (
   return {
     index,
     size,
-    body: searchBody,
+    ...searchBody,
   };
 };
 

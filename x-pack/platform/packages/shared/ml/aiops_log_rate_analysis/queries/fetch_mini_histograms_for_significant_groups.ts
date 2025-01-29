@@ -64,11 +64,8 @@ export const fetchMiniHistogramsForSignificantGroups = async (
     {
       index: params.index,
       size: 0,
-      body: {
-        query: histogramQuery,
-        aggs: wrap(histogramAggs),
-        size: 0,
-      },
+      query: histogramQuery,
+      aggs: wrap(histogramAggs),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

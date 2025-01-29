@@ -32,7 +32,7 @@ export function getAggsTileRequest({
   y: number;
   z: number;
 }) {
-  const requestBody = rison.decode(risonRequestBody) as SearchRequest['body'];
+  const requestBody = rison.decode(risonRequestBody) as SearchRequest;
   if (!requestBody) {
     throw new Error('Required requestBody parameter not provided');
   }
@@ -52,7 +52,7 @@ export function getAggsTileRequest({
       aggs: requestBody.aggs,
       runtime_mappings: requestBody.runtime_mappings,
       with_labels: hasLabels,
-    } as SearchMvtRequest['body'],
+    } as SearchMvtRequest,
   };
 }
 
@@ -75,7 +75,7 @@ export function getHitsTileRequest({
   y: number;
   z: number;
 }) {
-  const requestBody = rison.decode(risonRequestBody) as SearchRequest['body'];
+  const requestBody = rison.decode(risonRequestBody) as SearchRequest;
   if (!requestBody) {
     throw new Error('Required requestBody parameter not provided');
   }
@@ -94,9 +94,9 @@ export function getHitsTileRequest({
     // Used to fetch number of hits that correspondes with track_total_hits
     size,
     with_labels: hasLabels,
-  } as SearchMvtRequest['body'];
+  } as SearchMvtRequest;
   if (requestBody.fields) {
-    // @ts-expect-error SearchRequest['body'].fields and SearchMvtRequest['body'].fields types do not allign, even though they do in implemenation
+    // @ts-expect-error SearchRequest.fields and SearchMvtRequest.fields types do not align, even though they do in implementation
     tileRequestBody.fields = requestBody.fields;
   }
   if (requestBody.sort) {

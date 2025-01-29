@@ -28,7 +28,7 @@ export const extendSearchParamsWithRuntimeFields = async (
   indexPatternString?: string
 ) => {
   if (indexPatternString) {
-    let runtimeMappings = requestParams.body?.runtime_mappings;
+    let runtimeMappings = requestParams.runtime_mappings;
 
     if (!runtimeMappings) {
       const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
@@ -39,7 +39,7 @@ export const extendSearchParamsWithRuntimeFields = async (
 
     return {
       ...requestParams,
-      body: { ...requestParams.body, runtime_mappings: runtimeMappings },
+      runtime_mappings: runtimeMappings,
     };
   }
 

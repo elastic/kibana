@@ -58,7 +58,7 @@ export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, f
   return {
     index,
     size,
-    body: searchBody,
+    ...searchBody,
   };
 };
 

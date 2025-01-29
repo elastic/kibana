@@ -1135,7 +1135,7 @@ async function getSignalDocs(es: ElasticsearchClient, source: string, reference:
     index: ES_TEST_INDEX_NAME,
     size: 1000,
     _source: false,
-    body,
+    ...body,
   };
   const result = await es.search(params, { meta: true });
   return result?.body?.hits?.hits || [];

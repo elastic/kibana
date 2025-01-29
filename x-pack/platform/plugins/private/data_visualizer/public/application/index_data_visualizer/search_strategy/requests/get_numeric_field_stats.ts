@@ -122,7 +122,7 @@ export const getNumericFieldsStatsRequest = (
   return {
     index,
     size,
-    body: searchBody,
+    ...searchBody,
   };
 };
 

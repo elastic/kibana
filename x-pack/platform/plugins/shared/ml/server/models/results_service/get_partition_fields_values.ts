@@ -205,7 +205,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
     // it includes the records that occurred as anomalies historically
     const searchAllTime = !isModelPlotEnabled && !applyTimeRange;
 
-    const requestBody: estypes.SearchRequest['body'] = {
+    const requestBody: estypes.SearchRequest = {
       query: {
         bool: {
           filter: [

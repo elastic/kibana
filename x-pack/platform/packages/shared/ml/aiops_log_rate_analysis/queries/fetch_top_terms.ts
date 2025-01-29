@@ -79,7 +79,7 @@ export const getTopTermRequest = (
 
   return {
     ...getRequestBase(params),
-    body,
+    ...body,
   };
 };
 

@@ -104,7 +104,7 @@ export const getSignificantTermRequest = (
 
   return {
     ...getRequestBase(params),
-    body,
+    ...body,
   };
 };
 

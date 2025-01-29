@@ -231,7 +231,7 @@ export class AlertsClient<
   }
 
   public async search<Aggregation = unknown>(
-    queryBody: SearchRequest['body']
+    queryBody: SearchRequest
   ): Promise<SearchResult<AlertData, Aggregation>> {
     const esClient = await this.options.elasticsearchClientPromise;
     const index = this.isUsingDataStreams()
@@ -242,7 +242,7 @@ export class AlertsClient<
       aggregations,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
-      body: queryBody,
+      ...queryBody,
       ignore_unavailable: true,
     });
 

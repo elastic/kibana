@@ -47,7 +47,7 @@ export async function getContainerIdFromSignals({
   const start = moment(query.alert_started_at).subtract(30, 'minutes').valueOf();
   const end = moment(query.alert_started_at).valueOf();
 
-  const params: APMEventESSearchRequest['body'] = {
+  const params: APMEventESSearchRequest = {
     _source: ['container.id'],
     terminate_after: 1,
     size: 1,
@@ -79,7 +79,7 @@ async function getContainerIdFromLogs({
   esClient,
   logSourcesService,
 }: {
-  params: ESSearchRequest['body'];
+  params: ESSearchRequest;
   esClient: ElasticsearchClient;
   logSourcesService: LogSourcesService;
 }) {
@@ -100,7 +100,7 @@ async function getContainerIdFromTraces({
   params,
   apmEventClient,
 }: {
-  params: APMEventESSearchRequest['body'];
+  params: APMEventESSearchRequest;
   apmEventClient: APMEventClient;
 }) {
   const requiredFields = asMutableArray([CONTAINER_ID] as const);

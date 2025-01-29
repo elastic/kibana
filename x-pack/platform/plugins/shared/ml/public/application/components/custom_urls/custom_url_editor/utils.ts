@@ -439,7 +439,7 @@ async function getAnomalyDetectionJobTestUrl(
   let testUrl = customUrl.url_value;
 
   // Query to look for the highest scoring anomaly.
-  const body: estypes.SearchRequest['body'] = {
+  const body: estypes.SearchRequest = {
     query: {
       bool: {
         must: [{ term: { job_id: job.job_id } }, { term: { result_type: 'record' } }],

@@ -19,7 +19,7 @@ export const getLastSuccessfulStepParams = ({
   monitorId,
   timestamp,
   location,
-}: GetStepScreenshotParams): estypes.SearchRequest['body'] => {
+}: GetStepScreenshotParams): estypes.SearchRequest => {
   return {
     size: 1,
     sort: [

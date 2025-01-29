@@ -17,7 +17,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../plugin';
 
-type RequestBody = Pick<estypes.SearchRequest, 'body'>;
+type RequestBody = estypes.SearchRequest;
 
 export interface EsDocSearchProps {
   /**
@@ -133,19 +133,17 @@ export function buildSearchBody(id: string, index: string, dataView: DataView): 
   const computedFields = dataView.getComputedFields();
   const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
   const request: RequestBody = {
-    body: {
-      query: {
-        bool: {
-          filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
-        },
+    query: {
+      bool: {
+        filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
       },
-      stored_fields: ['*'],
-      script_fields: computedFields.scriptFields,
-      version: true,
-      _source: true,
-      runtime_mappings: runtimeFields ? runtimeFields : {},
-      fields: [{ field: '*', include_unmapped: true }, ...(computedFields.docvalueFields || [])],
     },
+    stored_fields: ['*'],
+    script_fields: computedFields.scriptFields,
+    version: true,
+    _source: true,
+    runtime_mappings: runtimeFields ? runtimeFields : {},
+    fields: [{ field: '*', include_unmapped: true }, ...(computedFields.docvalueFields || [])],
   };
   return request;
 }
