@@ -138,7 +138,7 @@ src/dev/packages/failed-test-reporter-cli @elastic/kibana-operations @elastic/ap
 src/dev/packages/find-used-node-modules @elastic/kibana-operations
 src/dev/packages/ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/dev/packages/ftr-common-functional-ui-services @elastic/appex-qa
-packages/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management

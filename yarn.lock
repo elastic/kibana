@@ -5828,7 +5828,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-screenshot-filename@link:packages/kbn-ftr-screenshot-filename":
+"@kbn/ftr-screenshot-filename@link:src/dev/packages/ftr-screenshot-filename":
   version "0.0.0"
   uid ""
 
