@@ -406,13 +406,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const colInfo = getDatatableColumn(firstLocalTable, originalId);
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
+      const categoryRows = (untransposedDataRef.current ?? firstLocalTable)?.rows;
 
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
             categories: colorMapping
-              ? getColorCategories(untransposedDataRef.current?.rows, originalId, [null])
-              : getLegacyColorCategories(untransposedDataRef.current?.rows, originalId, [null]),
+              ? getColorCategories(categoryRows, originalId, [null])
+              : getLegacyColorCategories(categoryRows, originalId, [null]),
           }
         : {
             type: 'ranges',
