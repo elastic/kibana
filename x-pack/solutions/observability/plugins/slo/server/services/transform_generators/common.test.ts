@@ -7,7 +7,7 @@
 
 import { fiveMinute, twoMinute } from '../fixtures/duration';
 import { createSLO } from '../fixtures/slo';
-import { sevenDaysRolling, thirtyDaysRolling } from '../fixtures/time_window';
+import { thirtyDaysRolling } from '../fixtures/time_window';
 import { getTimesliceTargetComparator, parseIndex, getFilterRange } from './common';
 
 describe('common', () => {
@@ -84,7 +84,7 @@ describe('common', () => {
       expect(
         getFilterRange(
           createSLO({
-            timeWindow: sevenDaysRolling(),
+            timeWindow: thirtyDaysRolling(),
             settings: {
               frequency: twoMinute(),
               syncDelay: fiveMinute(),
