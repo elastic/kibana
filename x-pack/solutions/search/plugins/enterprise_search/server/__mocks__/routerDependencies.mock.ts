@@ -50,8 +50,10 @@ export const mockConfig: ConfigType = {
 export const mockDependencies = {
   // Mock router should be handled on a per-test basis
   config: mockConfig,
+  enterpriseSearchRequestHandler: mockRequestHandler as any,
+  getSavedObjectsService: jest.fn(),
+  getStartServices: jest.fn(),
   globalConfigService: new GlobalConfigService(),
   log: mockLogger,
-  enterpriseSearchRequestHandler: mockRequestHandler as any,
   ml: mockMl,
 };

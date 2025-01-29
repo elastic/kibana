@@ -17,3 +17,5 @@ export const SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY =
   'securitySolution.graphInvestigation:showSearchBarButtonTour' as const;
 export const TOGGLE_SEARCH_BAR_STORAGE_KEY =
   'securitySolution.graphInvestigation:toggleSearchBarState' as const;
+
+export const GRAPH_NODES_LIMIT = 100;
