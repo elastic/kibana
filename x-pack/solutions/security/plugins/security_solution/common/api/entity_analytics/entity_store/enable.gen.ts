@@ -24,6 +24,14 @@ export const InitEntityStoreRequestBody = z.object({
    * The number of historical values to keep for each field.
    */
   fieldHistoryLength: z.number().int().optional().default(10),
+  /**
+   * The lookback period for the entity store
+   */
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('24h'),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
   entityTypes: z.array(EntityType).optional(),
