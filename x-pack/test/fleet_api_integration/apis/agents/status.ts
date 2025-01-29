@@ -206,6 +206,40 @@ export default function ({ getService }: FtrProviderContext) {
           enrolled_at: new Date().toISOString(),
         },
       });
+      // 1 uninstalled agent
+      await es.create({
+        id: 'agent12',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy-inactivity-timeout',
+          type: 'PERMANENT',
+          policy_revision_idx: 1,
+          local_metadata: { host: { hostname: 'host6' } },
+          user_provided_metadata: {},
+          enrolled_at: new Date().toISOString(),
+          audit_unenrolled_reason: 'uninstall',
+        },
+      });
+      // 1 orphaned agent
+      await es.create({
+        id: 'agent13',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy-inactivity-timeout',
+          type: 'PERMANENT',
+          policy_revision_idx: 1,
+          local_metadata: { host: { hostname: 'host6' } },
+          user_provided_metadata: {},
+          enrolled_at: new Date().toISOString(),
+          audit_unenrolled_reason: 'orphaned',
+        },
+      });
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
@@ -217,21 +251,18 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 8,
           online: 2,
-          active: 8,
-          all: 11,
+          active: 10,
+          all: 13,
           error: 2,
           offline: 1,
           updating: 3,
           inactive: 2,
           unenrolled: 1,
+          orphaned: 1,
+          uninstalled: 1,
         },
       });
-    });
-
-    it('should work with deprecated api', async () => {
-      await supertest.get(`/api/fleet/agent-status`).set('kbn-xsrf', 'xxxx').expect(200);
     });
 
     it('should work with adequate package privileges', async () => {
@@ -296,15 +327,16 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 10,
           online: 3,
-          active: 10,
-          all: 11,
+          active: 12,
+          all: 13,
           error: 2,
           offline: 1,
           updating: 4,
           inactive: 0,
           unenrolled: 1,
+          orphaned: 1,
+          uninstalled: 1,
         },
       });
     });
@@ -339,6 +371,32 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/api/fleet/agent_status?kuery='test%3A'`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
+    });
+
+    it('should return incoming data status for specified agents', async () => {
+      // force install the system package to override package verification
+      await supertest
+        .post(`/api/fleet/epm/packages/system/1.50.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      const { body: apiResponse1 } = await supertest
+        .get(`/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2`)
+        .expect(200);
+      const { body: apiResponse2 } = await supertest
+        .get(
+          `/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2&pkgName=system&pkgVersion=1.50.0`
+        )
+        .expect(200);
+      expect(apiResponse1).to.eql({
+        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        dataPreview: [],
+      });
+      expect(apiResponse2).to.eql({
+        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        dataPreview: [],
+      });
     });
   });
 }

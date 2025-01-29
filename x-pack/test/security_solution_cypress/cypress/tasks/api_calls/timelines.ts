@@ -6,8 +6,8 @@
  */
 
 import type {
-  AllTimelinesResponse,
-  TimelineResponse,
+  GetTimelinesResponse,
+  PatchTimelineResponse,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import type { CompleteTimeline } from '../../objects/timeline';
 import { getTimeline } from '../../objects/timeline';
@@ -21,7 +21,7 @@ const mockTimeline = getTimeline();
  * @returns undefined
  */
 export const createTimeline = (timeline: CompleteTimeline = mockTimeline) =>
-  rootRequest<TimelineResponse>({
+  rootRequest<PatchTimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -75,7 +75,7 @@ export const createTimeline = (timeline: CompleteTimeline = mockTimeline) =>
  * @returns undefined
  */
 export const createTimelineTemplate = (timeline: CompleteTimeline = mockTimeline) =>
-  rootRequest<TimelineResponse>({
+  rootRequest<PatchTimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -159,7 +159,7 @@ export const favoriteTimeline = ({
   });
 
 export const getAllTimelines = () =>
-  rootRequest<AllTimelinesResponse>({
+  rootRequest<GetTimelinesResponse>({
     method: 'GET',
     url: 'api/timelines?page_size=100&page_index=1&sort_field=updated&sort_order=desc&timeline_type=default',
   });
@@ -167,7 +167,7 @@ export const getAllTimelines = () =>
 export const deleteTimelines = () => {
   getAllTimelines().then(($timelines) => {
     const savedObjectIds = $timelines.body.timeline.map((timeline) => timeline.savedObjectId);
-    rootRequest<AllTimelinesResponse>({
+    rootRequest({
       method: 'DELETE',
       url: 'api/timeline',
       body: {

@@ -1,0 +1,17 @@
+{
+  "index_patterns": ["kbn-data-forge-fake_hosts.fake_hosts-*"],
+  "priority": 1,
+  "template": {
+    "settings": {
+      "index": {
+        "final_pipeline": "logs@custom",
+        "codec" : "best_compression",
+        "mapping": {
+          "total_fields": {
+            "limit": 2000
+          }
+        }
+      }
+    }
+  }
+}

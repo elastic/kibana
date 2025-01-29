@@ -1,0 +1,61 @@
+{
+  "name": "EQL sequence no duration",
+  "description": "Rule with an eql query",
+  "false_positives": ["https://www.example.com/some-article-about-a-false-positive"],
+  "rule_id": "rule-id-eql-2",
+  "enabled": true,
+  "index": ["auditbeat*", "packetbeat*"],
+  "interval": "30s",
+  "query": "sequence with maxspan=10m [any where agent.type == \"auditbeat\"] [any where event.category == \"network_traffic\"]",
+  "meta": {
+    "anything_you_want_ui_related_or_otherwise": {
+      "as_deep_structured_as_you_need": {
+        "any_data_type": {}
+      }
+    }
+  },
+  "risk_score": 99,
+  "to": "now",
+  "from": "now-120s",
+  "severity": "high",
+  "type": "eql",
+  "language": "eql",
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1499",
+          "name": "endpoint denial of service",
+          "reference": "https://attack.mitre.org/techniques/T1499/"
+        }
+      ]
+    },
+    {
+      "framework": "Some other Framework you want",
+      "tactic": {
+        "id": "some-other-id",
+        "name": "Some other name",
+        "reference": "https://example.com"
+      },
+      "technique": [
+        {
+          "id": "some-other-id",
+          "name": "some other technique name",
+          "reference": "https://example.com"
+        }
+      ]
+    }
+  ],
+  "references": ["http://www.example.com/some-article-about-attack"],
+  "alert_suppression": {
+    "group_by": ["agent.name"],
+    "missing_fields_strategy": "suppress"
+  },
+  "version": 1
+}

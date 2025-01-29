@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import ts from 'typescript';
@@ -103,6 +104,13 @@ describe('getDescriptor', () => {
       },
       mappedTypeWithOneInlineProp: {
         prop3: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+      },
+      mappedTypeWithLiteralTemplates: {
+        prop1: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+        prop2: { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
+        // ideally, it'd be `templated_prop/@@INDEX@@` to be more explicit. But we're going with the fuzzier approach
+        // for now as it may require more changes downstream that are not worth it.
+        '@@INDEX@@': { kind: ts.SyntaxKind.NumberKeyword, type: 'NumberKeyword' },
       },
     });
   });

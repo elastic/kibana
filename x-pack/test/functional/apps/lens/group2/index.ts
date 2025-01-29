@@ -13,7 +13,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker']);
+  const { timePicker } = getPageObjects(['timePicker']);
 
   describe('lens app - group 2', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
@@ -36,22 +36,21 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       fixtureDirs = localFixtures;
       indexPatternString = localIndexPatternString;
       await esNode.load(esArchive);
-      // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await esNode.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     // total run time ~ 16m 20s

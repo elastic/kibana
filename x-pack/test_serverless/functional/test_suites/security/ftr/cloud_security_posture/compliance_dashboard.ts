@@ -33,6 +33,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       },
       cluster_id: 'Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
   ];
 
@@ -43,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
 
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsViewer();
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
       await cspDashboard.waitForPluginInitialized();
@@ -58,7 +61,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await cspDashboard.index.remove();
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('Kubernetes Dashboard', () => {

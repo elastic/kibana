@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ChildProcess from 'child_process';
+import ChildProcess, { type ForkOptions } from 'child_process';
 import { Readable } from 'stream';
 import * as Rx from 'rxjs';
 
@@ -16,23 +17,29 @@ import { observeLines } from '@kbn/stdio-dev-helpers';
 
 // import type { Result } from './kibana_worker';
 
-interface StartTSWorkerArgs {
+interface StartTSWorkerArgs extends ForkOptions {
   log: SomeDevLog;
-  /** Path to worker source */
+  /** Path to worker source. Best practice to `require.resolve('../relative/paths')` */
   src: string;
-  /** Defaults to repo root */
-  cwd?: string;
 }
 
 /**
  * Provide a TS file as the src of a NodeJS Worker with some built-in handling
  * of std streams and debugging.
  */
-export function startTSWorker<Message>({ log, src, cwd = REPO_ROOT }: StartTSWorkerArgs) {
-  const fork = ChildProcess.fork(require.resolve(src), {
-    execArgv: ['--require=@kbn/babel-register/install'],
+export function startTSWorker<Message>({
+  log,
+  src,
+  cwd = REPO_ROOT,
+  execArgv = [],
+  stdio = ['ignore', 'pipe', 'pipe', 'ipc'],
+  ...forkOptions
+}: StartTSWorkerArgs) {
+  const fork = ChildProcess.fork(src, {
+    execArgv: ['--require=@kbn/babel-register/install', ...execArgv],
     cwd,
-    stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+    stdio,
+    ...forkOptions,
   });
 
   const msg$ = Rx.merge(

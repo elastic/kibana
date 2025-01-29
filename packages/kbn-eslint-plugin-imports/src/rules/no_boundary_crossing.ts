@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -11,13 +12,14 @@ import Path from 'path';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 import * as Bt from '@babel/types';
 import type { Rule } from 'eslint';
-import ESTree from 'estree';
-import { ModuleType } from '@kbn/repo-source-classifier';
+import type { Node } from 'estree';
+import type { ModuleType } from '@kbn/repo-source-classifier';
 
 import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
 import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
+import { formatSuggestions, toList } from '../helpers/report';
 
 const ANY = Symbol();
 
@@ -30,22 +32,6 @@ const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | typeof ANY> = {
   static: [],
   'tests or mocks': ANY,
   tooling: ANY,
-};
-
-const toList = (strings: string[]) => {
-  const items = strings.map((s) => `"${s}"`);
-  const list = items.slice(0, -1).join(', ');
-  const last = items.at(-1);
-  return !list.length ? last ?? '' : `${list} or ${last}`;
-};
-
-const formatSuggestions = (suggestions: string[]) => {
-  const s = suggestions.map((l) => l.trim()).filter(Boolean);
-  if (!s.length) {
-    return '';
-  }
-
-  return ` Suggestions:\n - ${s.join('\n - ')}`;
 };
 
 const isTypeOnlyImport = (importer: Importer) => {
@@ -124,7 +110,7 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
 
       if (!importable.includes(imported.type)) {
         context.report({
-          node: node as ESTree.Node,
+          node: node as Node,
           messageId: 'TYPE_MISMATCH',
           data: {
             ownType: self.type,

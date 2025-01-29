@@ -88,7 +88,8 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Forbidden',
+                message:
+                  'API [POST /internal/alerting/rules/maintenance_window] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]',
                 statusCode: 403,
               });
               break;
@@ -108,6 +109,71 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         });
       });
     }
+
+    describe('rRuleSchema validation', () => {
+      it('should create maintenance window with byweekday', async () => {
+        const rrule = {
+          dtstart: new Date().toISOString(),
+          tzid: 'UTC',
+          byweekday: ['+1MO', 'TH'],
+        };
+
+        const response = await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ...createParams,
+            r_rule: rrule,
+          })
+          .expect(200);
+
+        objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
+
+        expect(response.body.r_rule.byweekday).to.eql(rrule.byweekday);
+      });
+
+      it('should create maintenance window with bymonth', async () => {
+        const rrule = {
+          dtstart: new Date().toISOString(),
+          tzid: 'UTC',
+          bymonth: [9, 4],
+        };
+
+        const response = await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ...createParams,
+            r_rule: rrule,
+          })
+          .expect(200);
+
+        objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
+
+        expect(response.body.r_rule.bymonth).to.eql(rrule.bymonth);
+      });
+
+      it('should create maintenance window with bymonthday', async () => {
+        const rrule = {
+          dtstart: new Date().toISOString(),
+          tzid: 'UTC',
+          bymonthday: [1, 30],
+        };
+
+        const response = await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ...createParams,
+            r_rule: rrule,
+          })
+          .expect(200);
+
+        objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
+
+        expect(response.body.r_rule.bymonthday).to.eql(rrule.bymonthday);
+      });
+    });
 
     it('should create maintenance window with category ids', async () => {
       const response = await supertest
@@ -147,6 +213,52 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
           },
         })
         .expect(400);
+    });
+
+    describe('validation', () => {
+      it('should return 400 if the timezone is not valid', async () => {
+        await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ...createParams,
+            r_rule: { ...createParams.r_rule, tzid: 'invalid' },
+          })
+          .expect(400);
+      });
+
+      it('should return 400 if the byweekday is not valid', async () => {
+        await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ...createParams,
+            r_rule: { ...createParams.r_rule, byweekday: ['invalid'] },
+          })
+          .expect(400);
+      });
+
+      it('should return 400 if the bymonthday is not valid', async () => {
+        await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ...createParams,
+            r_rule: { ...createParams.r_rule, bymonthday: [35] },
+          })
+          .expect(400);
+      });
+
+      it('should return 400 if the bymonth is not valid', async () => {
+        await supertest
+          .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ...createParams,
+            r_rule: { ...createParams.r_rule, bymonth: [14] },
+          })
+          .expect(400);
+      });
     });
   });
 }

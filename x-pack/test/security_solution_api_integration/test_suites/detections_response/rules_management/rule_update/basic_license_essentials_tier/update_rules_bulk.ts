@@ -17,6 +17,9 @@ import {
   getSimpleRuleUpdate,
   getSimpleRule,
   updateUsername,
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  installPrebuiltRules,
+  createRuleAssetSavedObject,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -30,10 +33,10 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless update_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Delete this file and clean up the code
+  describe.skip('@ess @serverless @skipInServerlessMKI update_rules_bulk', () => {
     describe('update rules bulk', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -58,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -119,15 +122,16 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
+        const username = await utils.getUsername();
         const outputRule1 = getSimpleRuleOutput();
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
-        const expectedRule = updateUsername(outputRule1, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule1, username);
 
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
-        const expectedRule2 = updateUsername(outputRule2, ELASTICSEARCH_USERNAME);
+        const expectedRule2 = updateUsername(outputRule2, username);
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
@@ -151,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -176,15 +180,16 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
+        const username = await utils.getUsername();
         const outputRule1 = getSimpleRuleOutputWithoutRuleId('rule-1');
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
-        const expectedRule = updateUsername(outputRule1, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule1, username);
 
         const outputRule2 = getSimpleRuleOutputWithoutRuleId('rule-2');
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
-        const expectedRule2 = updateUsername(outputRule2, ELASTICSEARCH_USERNAME);
+        const expectedRule2 = updateUsername(outputRule2, username);
 
         const bodyToCompare1 = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const bodyToCompare2 = removeServerGeneratedPropertiesIncludingRuleId(body[1]);
@@ -208,7 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -230,7 +235,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -257,7 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 2;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -319,7 +324,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect([bodyToCompare, body[1]]).toEqual([
@@ -355,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect([bodyToCompare, body[1]]).toEqual([
@@ -366,6 +371,31 @@ export default ({ getService }: FtrProviderContext) => {
               status_code: 404,
             },
             id: 'b3aa019a-656c-4311-b13b-4d9852e24347',
+          },
+        ]);
+      });
+
+      // Unskip: https://github.com/elastic/kibana/issues/195921
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        // Install base prebuilt detection rule
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', author: ['elastic'] }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({
+            body: [getCustomQueryRuleParams({ rule_id: 'rule-1', author: ['new user'] })],
+          })
+          .expect(200);
+
+        expect([body[0]]).toEqual([
+          {
+            error: {
+              message: 'Cannot update "author" field for prebuilt rules',
+              status_code: 400,
+            },
+            rule_id: 'rule-1',
           },
         ]);
       });

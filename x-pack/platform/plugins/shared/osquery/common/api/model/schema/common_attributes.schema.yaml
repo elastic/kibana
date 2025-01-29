@@ -1,0 +1,255 @@
+openapi: 3.0.0
+info:
+  title: Common Osquery Attributes
+  version: '2023-10-31'
+paths: { }
+components:
+  schemas:
+    Id:
+      type: string
+    IdOrUndefined:
+      $ref: '#/components/schemas/Id'
+      nullable: true
+
+    AgentSelection:
+      type: object
+      properties:
+        agents:
+          type: array
+          items:
+            type: string
+        allAgentsSelected:
+          type: boolean
+        platformsSelected:
+          type: array
+          items:
+            type: string
+        policiesSelected:
+          type: array
+          items:
+            type: string
+
+    AgentSelectionOrUndefined:
+      $ref: '#/components/schemas/AgentSelection'
+      nullable: true
+
+
+    Description:
+      type: string
+
+    DescriptionOrUndefined:
+      $ref: '#/components/schemas/Description'
+      nullable: true
+
+
+    Platform:
+      type: string
+
+    PlatformOrUndefined:
+      $ref: '#/components/schemas/Platform'
+      nullable: true
+
+
+    Query:
+      type: string
+
+    QueryOrUndefined:
+      $ref: '#/components/schemas/Query'
+      nullable: true
+
+    Version:
+      type: string
+
+    VersionOrUndefined:
+      $ref: '#/components/schemas/Version'
+      nullable: true
+
+    Interval:
+      type: string
+
+    IntervalOrUndefined:
+      $ref: '#/components/schemas/Interval'
+      nullable: true
+
+    Snapshot:
+      type: boolean
+
+    SnapshotOrUndefined:
+      $ref: '#/components/schemas/Snapshot'
+      nullable: true
+
+    Removed:
+      type: boolean
+
+    RemovedOrUndefined:
+      $ref: '#/components/schemas/Removed'
+      nullable: true
+
+    PackName:
+      type: string
+
+    SavedQueryId:
+      type: string
+
+    SavedQueryIdOrUndefined:
+      $ref: '#/components/schemas/SavedQueryId'
+      nullable: true
+
+
+    PackId:
+      type: string
+
+    PackIdOrUndefined:
+      $ref: '#/components/schemas/PackId'
+      nullable: true
+
+    Enabled:
+      type: boolean
+
+    EnabledOrUndefined:
+      $ref: '#/components/schemas/Enabled'
+      nullable: true
+
+    PolicyIds:
+      type: array
+      items:
+        type: string
+
+    PolicyIdsOrUndefined:
+      $ref: '#/components/schemas/PolicyIds'
+      nullable: true
+
+    ExecutionContext:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+
+
+    ExecutionContextOrUndefined:
+      $ref: '#/components/schemas/ExecutionContext'
+      nullable: true
+
+
+    ECSMappingItem:
+      type: object
+      properties:
+        field:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+
+    ECSMapping:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/ECSMappingItem'
+
+    ECSMappingOrUndefined:
+      $ref: '#/components/schemas/ECSMapping'
+      nullable: true
+
+
+    StringArrayOrUndefined:
+      type: array
+      items:
+        type: string
+        nullable: true
+
+
+    ArrayQueriesItem:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        query:
+          $ref: '#/components/schemas/Query'
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        version:
+          $ref: '#/components/schemas/VersionOrUndefined'
+        platform:
+          $ref: '#/components/schemas/PlatformOrUndefined'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+
+    ArrayQueries:
+      type: array
+      items:
+        $ref: '#/components/schemas/ArrayQueriesItem'
+
+    ObjectQueriesItem:
+      type: object
+      properties:
+        query:
+          $ref: '#/components/schemas/Query'
+        id:
+          $ref: '#/components/schemas/Id'
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        version:
+          $ref: '#/components/schemas/VersionOrUndefined'
+        platform:
+          $ref: '#/components/schemas/PlatformOrUndefined'
+        saved_query_id:
+          $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+
+    ObjectQueries:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/ObjectQueriesItem'
+
+    Queries:
+      oneOf:
+        - $ref: '#/components/schemas/ArrayQueries'
+        - $ref: '#/components/schemas/ObjectQueries'
+
+
+    QueriesOrUndefined:
+      $ref: '#/components/schemas/Queries'
+      nullable: true
+
+    KueryOrUndefined:
+      type: string
+      nullable: true
+
+    PageOrUndefined:
+      type: integer
+      nullable: true
+
+    PageSizeOrUndefined:
+      type: integer
+      nullable: true
+
+    SortOrUndefined:
+      type: string
+      nullable: true
+
+    SortOrderOrUndefined:
+      oneOf:
+
+        - type: string
+          nullable: true
+        - enum: [ asc, desc ]
+
+    Shards:
+      type: object
+      additionalProperties:
+        type: number
+
+    DefaultSuccessResponse:
+      type: object
+      properties: { }

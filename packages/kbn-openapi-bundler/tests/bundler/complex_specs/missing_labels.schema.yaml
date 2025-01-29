@@ -1,0 +1,16 @@
+openapi: 3.0.3
+info:
+  title: Test endpoint
+  version: '2023-10-31'
+paths:
+  /api/missing_label_should_not_be_in_bundle:
+    post:
+      operationId: AnotherTestEndpointPost
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './common.schema.yaml#/components/schemas/SharedSchema'
+                x-modify: partial

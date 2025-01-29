@@ -9,12 +9,17 @@ import expect from '@kbn/expect';
 import type { SortDirection } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
+import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
+  const svlCommonApi = getService('svlCommonApi');
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   /*
    * Helper function to decorate with common fields needed in the API call
@@ -68,10 +73,17 @@ export default function ({ getService }: FtrProviderContext) {
    * Tests
    */
   describe('Generate CSV from SearchSource', function () {
-    // 7 minutes timeout for each test in serverless
-    // This is because it may take up to 5 minutes to generate the CSV
+    // 12 minutes timeout for each test in serverless
+    // This is because it may take up to 10 minutes to generate the CSV
     // see kibanaReportCompletion config
-    this.timeout(7 * 60 * 1000);
+    this.timeout(12 * 60 * 1000);
+
+    before(async () => {
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin', {
+        forceNewSession: true,
+      });
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
 
     beforeEach(async () => {
       await kibanaServer.uiSettings.update({
@@ -87,7 +99,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reportingAPI.deleteAllReports();
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });
@@ -155,10 +166,16 @@ export default function ({ getService }: FtrProviderContext) {
             },
             title: 'Ecommerce Data',
             version: '8.14.0',
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
         expect((csvFile as string).length).to.be(124183);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -192,27 +209,29 @@ export default function ({ getService }: FtrProviderContext) {
             },
             title: 'Untitled discover search',
             version: '8.14.0',
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        return reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        return reportingAPI.getCompletedJobOutput(res.path, cookieCredentials, internalReqHeader);
       }
 
       it('includes an unmapped field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'unmapped']);
-        expect((csvFile as string).length).to.be(92);
+        expect((csvFile as string).length).to.be(111);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('includes an unmapped nested field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'nested.unmapped']);
-        expect((csvFile as string).length).to.be(101);
+        expect((csvFile as string).length).to.be(120);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('includes all unmapped fields to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['*']);
-        expect((csvFile as string).length).to.be(124);
+        expect((csvFile as string).length).to.be(143);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
@@ -337,11 +356,17 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             },
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expect((csvFile as string).length).to.be(1267140);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
+        expect((csvFile as string).length).to.be(1270683);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
@@ -383,11 +408,17 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             },
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expect((csvFile as string).length).to.be(914755);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
+        expect((csvFile as string).length).to.be(918298);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
@@ -435,10 +466,16 @@ export default function ({ getService }: FtrProviderContext) {
               sort: [{ '@timestamp': 'desc' as SortDirection }],
             },
             columns: ['@timestamp', 'clientip', 'extension'],
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
         expect((csvFile as string).length).to.be(3020);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -475,10 +512,16 @@ export default function ({ getService }: FtrProviderContext) {
               sort: [{ '@timestamp': 'desc' as SortDirection }],
             },
             columns: ['@timestamp', 'clientip', 'extension'],
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
         expect((csvFile as string).length).to.be(3020);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -509,10 +552,16 @@ export default function ({ getService }: FtrProviderContext) {
               filter: [],
             },
             columns: ['date', 'message'],
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
         expect((csvFile as string).length).to.be(103);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -532,10 +581,16 @@ export default function ({ getService }: FtrProviderContext) {
               filter: [],
             },
             columns: ['date', 'message'],
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
         expect((csvFile as string).length).to.be(103);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -569,10 +624,16 @@ export default function ({ getService }: FtrProviderContext) {
               filter: [],
             },
             columns: ['date', 'message', '_id', '_index'],
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
         expect((csvFile as string).length).to.be(134);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -595,10 +656,16 @@ export default function ({ getService }: FtrProviderContext) {
               ] as unknown as Filter[],
             },
             columns: ['name', 'power'],
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
         expect((csvFile as string).length).to.be(274);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -673,11 +740,17 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             columns: [],
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expect((csvFile as string).length).to.be(329);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
+        expect((csvFile as string).length).to.be(356);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
@@ -733,11 +806,17 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             },
-          })
+          }),
+          cookieCredentials,
+          internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expect((csvFile as string).length).to.be(4826973);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        const csvFile = await reportingAPI.getCompletedJobOutput(
+          res.path,
+          cookieCredentials,
+          internalReqHeader
+        );
+        expect((csvFile as string).length).to.be(4845684);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });

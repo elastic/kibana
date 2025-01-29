@@ -239,7 +239,7 @@ This query returns the following:
 <1> Most run durations fall within the first bucket (0 - 1 seconds).
 <2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 31 seconds to run.
 
-Use the <<get-rule-api,get rule API>> to retrieve additional information about rules that take a long time to run.
+Use the get rule API to retrieve additional information about rules that take a long time to run.
 
 [float]
 [[rule-cannot-decrypt-api-key]]

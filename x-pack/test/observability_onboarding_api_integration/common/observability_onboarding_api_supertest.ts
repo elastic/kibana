@@ -43,7 +43,7 @@ export function createObservabilityOnboardingApiClient(st: supertest.Agent) {
         .set('Content-type', 'multipart/form-data');
 
       for (const field of fields) {
-        formDataRequest.field(field[0], field[1]);
+        void formDataRequest.field(field[0], field[1]);
       }
 
       res = await formDataRequest;

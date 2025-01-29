@@ -13,7 +13,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { BUNDLED_PACKAGE_DIR } from '../../config.base';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 const BUNDLED_PACKAGE_FIXTURES_DIR = path.join(
   path.dirname(__filename),
@@ -55,10 +54,14 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const log = getService('log');
+  const fleetAndAgents = getService('fleetAndAgents');
 
-  describe('Installing bundled packages', async () => {
+  describe('Installing bundled packages', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     afterEach(async () => {
       await removeBundledPackages(log);

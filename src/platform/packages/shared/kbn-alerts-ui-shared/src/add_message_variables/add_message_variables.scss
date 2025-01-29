@@ -1,0 +1,6 @@
+.messageVariablesPanel {
+  max-height: $euiSize * 20;
+  max-width: $euiSize * 20;
+
+  @include euiYScrollWithShadows;
+}

@@ -8,11 +8,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const pkgName = 'multiple_versions';
   const pkgOlderVersion = '0.1.0';
@@ -22,9 +22,12 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('bulk package install api', async () => {
+  describe('bulk package install api', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     it('should install the latest version by default', async () => {
       const response = await supertest

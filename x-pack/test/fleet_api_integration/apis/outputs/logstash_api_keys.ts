@@ -15,7 +15,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('fleet_output_logstash_api_keys', async function () {
+  describe('fleet_output_logstash_api_keys', function () {
     describe('POST /logstash_api_keys', () => {
       it('should allow to create an api key with the right permissions', async () => {
         const { body: apiKeyRes } = await supertest

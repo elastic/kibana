@@ -212,7 +212,7 @@
           "\nProvide a TS file as the src of a NodeJS Worker with some built-in handling\nof std streams and debugging."
         ],
         "signature": [
-          "({ log, src, cwd = REPO_ROOT }: StartTSWorkerArgs) => { msg$: ",
+          "({\n  log,\n  src,\n  cwd = REPO_ROOT,\n  execArgv = [],\n  stdio = ['ignore', 'pipe', 'pipe', 'ipc'],\n  ...forkOptions\n}: StartTSWorkerArgs) => { msg$: ",
           "Observable",
           "<Message>; proc: ",
           "ChildProcess",
@@ -227,7 +227,7 @@
             "id": "def-common.startTSWorker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ log, src, cwd = REPO_ROOT }",
+            "label": "{\n  log,\n  src,\n  cwd = REPO_ROOT,\n  execArgv = [],\n  stdio = ['ignore', 'pipe', 'pipe', 'ipc'],\n  ...forkOptions\n}",
             "description": [],
             "signature": [
               "StartTSWorkerArgs"

@@ -13,6 +13,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -38,25 +39,21 @@ import {
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createEsQueryRule } from './helpers/alerting_api_helper';
-import { waitForAlertInIndex, waitForNumRuleRuns } from './helpers/alerting_wait_for_helpers';
 import { ObjectRemover } from '../../../../shared/lib';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { RoleCredentials } from '../../../../shared/services';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAdmin: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
   const supertest = getService('supertest');
-
   const esClient = getService('es');
   const objectRemover = new ObjectRemover(supertest);
+  const alertingApi = getService('alertingApi');
 
   describe('Alert documents', function () {
     // Timeout of 360000ms exceeded
@@ -66,23 +63,20 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
-      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);
     });
 
     it('should generate an alert document for an active alert', async () => {
-      const createdRule = await createEsQueryRule({
-        supertestWithoutAuth,
+      const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
-        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -102,17 +96,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // get the first alert document written
       const testStart1 = new Date();
-      await waitForNumRuleRuns({
-        supertestWithoutAuth,
+      await alertingApi.helpers.waitForNumRuleRuns({
         roleAuthc: roleAdmin,
-        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart1,
       });
 
-      const alResp1 = await waitForAlertInIndex({
+      const alResp1 = await alertingApi.helpers.waitForAlertInIndex({
         esClient,
         filter: testStart1,
         indexName: ALERT_INDEX,
@@ -156,6 +148,8 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.url',
         'kibana.version',
         'kibana.alert.consecutive_matches',
+        'kibana.alert.severity_improving',
+        'kibana.alert.previous_action_group',
       ];
 
       for (const field of fields) {
@@ -203,10 +197,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should update an alert document for an ongoing alert', async () => {
-      const createdRule = await createEsQueryRule({
-        supertestWithoutAuth,
+      const createdRule = await alertingApi.helpers.createEsQueryRule({
         roleAuthc: roleAdmin,
-        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -226,17 +218,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // get the first alert document written
       const testStart1 = new Date();
-      await waitForNumRuleRuns({
-        supertestWithoutAuth,
+      await alertingApi.helpers.waitForNumRuleRuns({
         roleAuthc: roleAdmin,
-        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart1,
       });
 
-      const alResp1 = await waitForAlertInIndex({
+      const alResp1 = await alertingApi.helpers.waitForAlertInIndex({
         esClient,
         filter: testStart1,
         indexName: ALERT_INDEX,
@@ -246,17 +236,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // wait for another run, get the updated alert document
       const testStart2 = new Date();
-      await waitForNumRuleRuns({
-        supertestWithoutAuth,
+      await alertingApi.helpers.waitForNumRuleRuns({
         roleAuthc: roleAdmin,
-        internalReqHeader,
         numOfRuns: 1,
         ruleId,
         esClient,
         testStart: testStart2,
       });
 
-      const alResp2 = await waitForAlertInIndex({
+      const alResp2 = await alertingApi.helpers.waitForAlertInIndex({
         esClient,
         filter: testStart2,
         indexName: ALERT_INDEX,
@@ -275,6 +263,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2[ALERT_DURATION]).not.to.be(0);
       expect(hits2[ALERT_RULE_EXECUTION_TIMESTAMP]).to.eql(hits2['@timestamp']);
       expect(hits2[ALERT_CONSECUTIVE_MATCHES]).to.be.greaterThan(hits1[ALERT_CONSECUTIVE_MATCHES]);
+      expect(hits2[ALERT_PREVIOUS_ACTION_GROUP]).to.be('query matched');
+      expect(hits2[ALERT_SEVERITY_IMPROVING]).to.be(undefined);
 
       // remove fields we know will be different
       const fields = [
@@ -286,6 +276,8 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.rule.execution.uuid',
         'kibana.alert.rule.execution.timestamp',
         'kibana.alert.consecutive_matches',
+        'kibana.alert.severity_improving',
+        'kibana.alert.previous_action_group',
       ];
 
       for (const field of fields) {

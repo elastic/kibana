@@ -1,0 +1,40 @@
+title: Email connector parameters
+description: >
+  Test an action that sends an email message.
+  There must be at least one recipient in `to`, `cc`, or `bcc`.
+type: object
+required:
+  - message
+  - subject
+  - anyOf:
+      - to
+      - cc
+      - bcc
+properties:
+  bcc:
+    type: array
+    items:
+      type: string
+    description: >
+      A list of "blind carbon copy" email addresses.
+      Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+  cc:
+    type: array
+    items:
+      type: string
+    description: >
+      A list of "carbon copy" email addresses.
+      Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
+  message:
+    type: string
+    description: The email message text. Markdown format is supported.
+  subject:
+    type: string
+    description: The subject line of the email.
+  to:
+    type: array
+    description: >
+      A list of email addresses.
+      Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format.
+    items:
+      type: string

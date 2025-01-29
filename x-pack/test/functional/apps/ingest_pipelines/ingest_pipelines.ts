@@ -77,6 +77,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).not.to.contain(`pipeline=${pipelinesList[0]}`);
       });
 
+      it('shows warning callout when deleting a managed pipeline', async () => {
+        // Filter results by managed pipelines
+        await testSubjects.click('filtersDropdown');
+        await testSubjects.click('managedFilter');
+
+        // Open the flyout for the first pipeline
+        await pageObjects.ingestPipelines.clickPipelineLink(0);
+
+        // Open the manage context menu
+        await testSubjects.click('managePipelineButton');
+        // Click the delete button
+        await testSubjects.click('deletePipelineButton');
+
+        // Check if the callout is displayed
+        const calloutExists = await testSubjects.exists('deleteManagedAssetsCallout');
+        expect(calloutExists).to.be(true);
+      });
+
       it('sets query params for search and filters when changed', async () => {
         // Set the search input with a test search
         await testSubjects.setValue('pipelineTableSearch', 'test');
@@ -131,6 +149,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
         expect(flyoutExists).to.be(true);
       });
+    });
+
+    it('Shows a prompt when trying to navigate away from the creation form when the form is dirty', async () => {
+      // Navigate to creation flow
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createNewPipeline');
+
+      // Fill in the form with some data
+      await testSubjects.setValue('nameField > input', 'test_name');
+      await testSubjects.setValue('descriptionField > input', 'test_description');
+
+      // Try to navigate to another page
+      await testSubjects.click('logo');
+
+      // Since the form is now dirty it should trigger a confirmation prompt
+      expect(await testSubjects.exists('navigationBlockConfirmModal')).to.be(true);
     });
 
     describe('Create pipeline', () => {

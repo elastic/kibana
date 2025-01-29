@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PointOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <SwitchOption
+    label="Show dots"
+    paramName="showCircles"
+    setValue={[MockFunction]}
+    value={true}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    display="rowCompressed"
+    fullWidth={true}
+    label="Dots size"
+  >
+    <EuiRangeClass
+      compressed={true}
+      data-test-subj="circlesRadius"
+      disabled={false}
+      fullWidth={true}
+      max={10}
+      min={1}
+      onChange={[Function]}
+      showInput={true}
+      step={1}
+      value={3}
+    />
+  </EuiFormRow>
+</Fragment>
+`;

@@ -29,7 +29,6 @@ import {
   markAcknowledgedFirstAlert,
   openPageFilterPopover,
   resetFilters,
-  selectCountTable,
   selectPageFilterValue,
   togglePageFilterPopover,
   visitAlertsPageWithCustomFilters,
@@ -99,7 +98,7 @@ const assertFilterControlsWithFilterObject = (
     cy.get(OPTION_LIST_VALUES(idx)).should((sub) => {
       const controlText = sub.text();
       filter.selectedOptions?.forEach((option) => {
-        expect(controlText).to.have.string(option);
+        expect(controlText).to.have.string(String(option));
       });
     });
   });
@@ -119,7 +118,8 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('Alert Page Filters Customization ', () => {
-    it('should be able to customize Controls', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/167914
+    it.skip('should be able to customize Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
       switchFilterGroupControlsToEditMode();
@@ -217,8 +217,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  // Flaky: https://github.com/elastic/kibana/issues/181977
-  context.skip('with data modification', () => {
+  context('with data modification', () => {
     /*
      *
      * default scrollBehavior is true, which scrolls the element into view automatically without any scroll Margin
@@ -235,18 +234,16 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       },
       () => {
         // mark status of one alert to be acknowledged
-        selectCountTable();
         cy.get(ALERTS_COUNT)
           .invoke('text')
-          .then((noOfAlerts) => {
-            const originalAlertCount = noOfAlerts.split(' ')[0];
+          .then(() => {
             markAcknowledgedFirstAlert();
             waitForAlerts();
             selectPageFilterValue(0, 'acknowledged');
             cy.get(ALERTS_COUNT)
               .invoke('text')
               .should((newAlertCount) => {
-                expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
+                expect(newAlertCount.split(' ')[0]).eq('1');
               });
           });
       }
@@ -316,7 +313,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('Impact of inputs', () => {
-    it('should recover from invalid kql Query result', () => {
+    it('should recover from invalid kql query result', () => {
       // do an invalid search
       kqlSearch('\\');
       refreshPage();

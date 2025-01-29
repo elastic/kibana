@@ -19,7 +19,7 @@ download_artifact "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBA
 echo "--- Build Cloud Distribution"
 ELASTICSEARCH_MANIFEST_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(jq -r '.version' package.json)/manifest-latest-verified.json"
 ELASTICSEARCH_SHA=$(curl -s $ELASTICSEARCH_MANIFEST_URL | jq -r '.sha')
-ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$VERSION-$ELASTICSEARCH_SHA"
+ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:$VERSION-$ELASTICSEARCH_SHA"
 
 KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
@@ -43,7 +43,7 @@ else
     --skip-docker-ubi \
     --skip-docker-fips \
     --skip-docker-ubuntu \
-    --skip-docker-chainguard \
+    --skip-docker-wolfi \
     --skip-docker-serverless \
     --skip-docker-contexts
 fi
@@ -51,7 +51,7 @@ fi
 if is_pr_with_label "ci:cloud-redeploy"; then
   echo "--- Shutdown Previous Deployment"
   CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
-  if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
+  if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" == "null" ]; then
     echo "No deployment to remove"
   else
     echo "Shutting down previous deployment..."
@@ -68,7 +68,6 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     .name = "'$CLOUD_DEPLOYMENT_NAME'" |
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
-    .resources.enterprise_search[0].plan.enterprise_search.version = "'$VERSION'" |
     .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
@@ -82,7 +81,9 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 
   echo "Writing to vault..."
 
-  vault_kv_set "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+  set_in_legacy_vault "$CLOUD_DEPLOYMENT_NAME" \
+    username="$CLOUD_DEPLOYMENT_USERNAME" \
+    password="$CLOUD_DEPLOYMENT_PASSWORD"
 
   echo "Enabling Stack Monitoring..."
   jq '
@@ -114,6 +115,7 @@ else
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 fi
 
+VAULT_READ_COMMAND=$(print_legacy_vault_read "$CLOUD_DEPLOYMENT_NAME")
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
@@ -125,9 +127,7 @@ Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
 
 Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-Credentials: \`vault kv get $VAULT_KV_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
-
-(Stored in the production vault: VAULT_ADDR=https://vault-ci-prod.elastic.dev, more info: https://docs.elastic.dev/ci/using-secrets)
+Credentials: \`$VAULT_READ_COMMAND\`
 
 Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 

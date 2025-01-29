@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Info', () => {
-    describe('GET /api/licensing/info', () => {
+    describe('GET /api/licensing/info', function () {
+      this.tags('skipFIPS');
       it('returns licensing information', async () => {
         const response = await supertest.get('/api/licensing/info').expect(200);
 

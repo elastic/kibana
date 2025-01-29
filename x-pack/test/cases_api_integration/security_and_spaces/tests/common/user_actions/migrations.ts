@@ -7,11 +7,10 @@
 
 import expect from '@kbn/expect';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { CaseUserActionsDeprecatedResponse } from '@kbn/cases-plugin/common/types/api';
+import { AttachmentType, UserActions } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/api';
+import { deleteAllCaseItems, findCaseUserActions } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -38,16 +37,20 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('migrates user actions correctly', async () => {
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: CASE_ID,
         });
 
-        expect(userActions).to.eql([
+        const userActionsWithoutVersion = userActions.map((userAction) => {
+          const { version, ...rest } = userAction;
+          return rest;
+        });
+
+        expect(userActionsWithoutVersion).to.eql([
           {
             action: 'create',
-            action_id: '70306700-7abd-11eb-9ca6-83ec5acb735f',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '70306700-7abd-11eb-9ca6-83ec5acb735f',
             comment_id: null,
             created_at: '2023-05-23T08:06:06.216Z',
             created_by: {
@@ -78,8 +81,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'create',
-            action_id: '23332380-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '23332380-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:49:40.055Z',
             created_by: {
@@ -99,8 +101,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '29743e50-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '29743e50-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:49:50.132Z',
             created_by: {
@@ -116,8 +117,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '2b40e800-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '2b40e800-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:49:53.378Z',
             created_by: {
@@ -133,8 +133,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'add',
-            action_id: '30a22a20-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '30a22a20-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:50:02.565Z',
             created_by: {
@@ -150,8 +149,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'delete',
-            action_id: '335451d0-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '335451d0-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:50:06.959Z',
             created_by: {
@@ -167,8 +165,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '37837c90-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '37837c90-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:50:13.728Z',
             created_by: {
@@ -184,8 +181,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '3c4dfcf0-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '3c4dfcf0-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:50:22.092Z',
             created_by: {
@@ -205,8 +201,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '3f49b0c0-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '3f49b0c0-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:50:27.117Z',
             created_by: {
@@ -222,8 +217,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'push_to_service',
-            action_id: '8b93df50-f94f-11ed-84eb-d959d286ba88',
-            case_id: '2ea28c10-7855-11eb-9ca6-83ec5acb735f',
+            id: '8b93df50-f94f-11ed-84eb-d959d286ba88',
             comment_id: null,
             created_at: '2023-05-23T09:52:35.744Z',
             created_by: {
@@ -271,7 +265,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('7.10.0 migrates user actions connector', async () => {
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: CASE_ID,
         });
@@ -290,12 +284,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('7.10.0 migrates user actions correctly', async () => {
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: CASE_ID,
         });
 
-        expect(userActions).to.eql([
+        const userActionsWithoutVersion = userActions.map((userAction) => {
+          const { version, ...rest } = userAction;
+          return rest;
+        });
+
+        expect(userActionsWithoutVersion).to.eql([
           {
             owner: 'securitySolution',
             action: 'create',
@@ -322,8 +321,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               settings: { syncAlerts: true },
             },
             type: 'create_case',
-            action_id: 'e22a7600-017f-11eb-93f8-d161651bf509',
-            case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+            id: 'e22a7600-017f-11eb-93f8-d161651bf509',
             comment_id: null,
           },
           {
@@ -344,8 +342,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'connector',
-            action_id: 'a22a7600-017f-11eb-93f8-d161651bf509',
-            case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+            id: 'a22a7600-017f-11eb-93f8-d161651bf509',
             comment_id: null,
           },
           {
@@ -365,8 +362,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'comment',
-            action_id: 'db027ec0-1ac7-11eb-b5a3-25ee88122510',
-            case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+            id: 'db027ec0-1ac7-11eb-b5a3-25ee88122510',
             comment_id: 'da677740-1ac7-11eb-b5a3-25ee88122510',
           },
         ]);
@@ -385,7 +381,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('adds the owner field', async () => {
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: CASE_ID,
         });
@@ -397,12 +393,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('7.13.2 migrates user actions correctly', async () => {
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: CASE_ID,
         });
 
-        expect(userActions).to.eql([
+        const userActionsWithoutVersion = userActions.map((userAction) => {
+          const { version, ...rest } = userAction;
+          return rest;
+        });
+
+        expect(userActionsWithoutVersion).to.eql([
           {
             owner: 'securitySolution',
             action: 'create',
@@ -435,8 +436,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               owner: 'securitySolution',
             },
             type: 'create_case',
-            action_id: 'e5509250-cf9d-11eb-a603-13e7747d215c',
-            case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+            id: 'e5509250-cf9d-11eb-a603-13e7747d215c',
             comment_id: null,
           },
           {
@@ -464,8 +464,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'pushed',
-            action_id: 'e6e0f650-cf9d-11eb-a603-13e7747d215c',
-            case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+            id: 'e6e0f650-cf9d-11eb-a603-13e7747d215c',
             comment_id: null,
           },
           {
@@ -485,8 +484,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'comment',
-            action_id: 'eee3be50-cf9d-11eb-a603-13e7747d215c',
-            case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+            id: 'eee3be50-cf9d-11eb-a603-13e7747d215c',
             comment_id: 'ee59cdd0-cf9d-11eb-a603-13e7747d215c',
           },
         ]);
@@ -494,8 +492,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     describe('7.13 connector id extraction', () => {
-      let userActions: CaseUserActionsDeprecatedResponse;
-
+      let userActions: UserActions;
       before(async () => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/cases/migrations/7.13_user_actions'
@@ -509,12 +506,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('7.13 migrates user actions correctly for case with ID aa8ac630-005e-11ec-91f1-6daf2ab59fb5', async () => {
-        userActions = await getCaseUserActions({
+        const result = await findCaseUserActions({
           supertest,
           caseID: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
         });
 
-        expect(userActions).to.eql([
+        const userActionsWithoutVersion = result.userActions.map((userAction) => {
+          const { version, ...rest } = userAction;
+          return rest;
+        });
+
+        expect(userActionsWithoutVersion).to.eql([
           {
             owner: 'securitySolution',
             action: 'create',
@@ -543,8 +545,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               owner: 'securitySolution',
             },
             type: 'create_case',
-            action_id: 'ab43b5f0-005e-11ec-91f1-6daf2ab59fb5',
-            case_id: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
+            id: 'ab43b5f0-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
           },
           {
@@ -575,20 +576,23 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               assignees: [],
             },
             type: 'create_case',
-            action_id: 'b3094de0-005e-11ec-91f1-6daf2ab59fb5',
-            case_id: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
+            id: 'b3094de0-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
           },
         ]);
       });
 
       it('7.13 migrates user actions correctly for case with ID e6fa9370-005e-11ec-91f1-6daf2ab59fb5', async () => {
-        userActions = await getCaseUserActions({
+        const result = await findCaseUserActions({
           supertest,
           caseID: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
         });
+        const userActionsWithoutVersion = result.userActions.map((userAction) => {
+          const { version, ...rest } = userAction;
+          return rest;
+        });
 
-        expect(userActions).to.eql([
+        expect(userActionsWithoutVersion).to.eql([
           {
             owner: 'securitySolution',
             action: 'create',
@@ -621,8 +625,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               assignees: [],
             },
             type: 'create_case',
-            action_id: 'e7882d70-005e-11ec-91f1-6daf2ab59fb5',
-            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            id: 'e7882d70-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
           },
           {
@@ -650,8 +653,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'pushed',
-            action_id: 'e9471b80-005e-11ec-91f1-6daf2ab59fb5',
-            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            id: 'e9471b80-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
           },
           {
@@ -671,8 +673,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'comment',
-            action_id: 'efe9de50-005e-11ec-91f1-6daf2ab59fb5',
-            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            id: 'efe9de50-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: 'ef5f0370-005e-11ec-91f1-6daf2ab59fb5',
           },
           {
@@ -697,8 +698,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'connector',
-            action_id: '16cd9e30-005f-11ec-91f1-6daf2ab59fb5',
-            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            id: '16cd9e30-005f-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
           },
           {
@@ -726,8 +726,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'pushed',
-            action_id: '1ea33bb0-005f-11ec-91f1-6daf2ab59fb5',
-            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            id: '1ea33bb0-005f-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
           },
           {
@@ -747,8 +746,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'comment',
-            action_id: '29c98ad0-005f-11ec-91f1-6daf2ab59fb5',
-            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            id: '29c98ad0-005f-11ec-91f1-6daf2ab59fb5',
             comment_id: '29351300-005f-11ec-91f1-6daf2ab59fb5',
           },
           {
@@ -773,8 +771,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'connector',
-            action_id: '2f6e65a0-005f-11ec-91f1-6daf2ab59fb5',
-            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            id: '2f6e65a0-005f-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
           },
           {
@@ -802,8 +799,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
             },
             type: 'pushed',
-            action_id: '32a351e0-005f-11ec-91f1-6daf2ab59fb5',
-            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            id: '32a351e0-005f-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
           },
         ]);
@@ -811,10 +807,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('none connector case', () => {
         it('removes the connector id from the case create user action and sets the ids to null', async () => {
-          userActions = await getCaseUserActions({
+          const result = await findCaseUserActions({
             supertest,
             caseID: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
           });
+          userActions = result.userActions;
 
           const userAction = getUserActionById(
             userActions,
@@ -840,10 +837,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('case with many user actions', () => {
         before(async () => {
-          userActions = await getCaseUserActions({
+          const result = await findCaseUserActions({
             supertest,
             caseID: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
           });
+          userActions = result.userActions;
         });
 
         it('adds the connector id field for a created case user action', async () => {
@@ -908,7 +906,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('removes the rule information from alert user action', async () => {
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
         });
@@ -927,7 +925,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('does not modify non-alert attachments', async () => {
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
         });
@@ -957,16 +955,20 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('migrates the user actions correctly', async () => {
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: CASE_ID,
         });
 
-        expect(userActions).to.eql([
+        const userActionsWithoutVersion = userActions.map((userAction) => {
+          const { version, ...rest } = userAction;
+          return rest;
+        });
+
+        expect(userActionsWithoutVersion).to.eql([
           {
             action: 'create',
-            action_id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:34:48.709Z',
             created_by: {
@@ -997,8 +999,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'create',
-            action_id: '72e73240-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '72e73240-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: '72a03e30-5e7d-11ec-9ee9-cd64f0b77b3c',
             created_at: '2021-12-16T14:35:42.872Z',
             created_by: {
@@ -1018,8 +1019,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '7685b5c0-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '7685b5c0-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:35:48.826Z',
             created_by: {
@@ -1035,8 +1035,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '7a2d8810-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '7a2d8810-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:35:55.421Z',
             created_by: {
@@ -1052,8 +1051,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '7f942160-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '7f942160-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: '72a03e30-5e7d-11ec-9ee9-cd64f0b77b3c',
             created_at: '2021-12-16T14:36:04.120Z',
             created_by: {
@@ -1073,8 +1071,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'add',
-            action_id: '8591a380-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '8591a380-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:36:13.840Z',
             created_by: {
@@ -1090,8 +1087,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'delete',
-            action_id: '8591a381-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '8591a381-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:36:13.840Z',
             created_by: {
@@ -1107,8 +1103,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '87fadb50-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '87fadb50-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:36:17.764Z',
             created_by: {
@@ -1126,8 +1121,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '89ca4420-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '89ca4420-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:36:21.509Z',
             created_by: {
@@ -1143,8 +1137,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: '9060aae0-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '9060aae0-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:36:32.716Z',
             created_by: {
@@ -1169,8 +1162,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'push_to_service',
-            action_id: '988579d0-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '988579d0-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:36:46.443Z',
             created_by: {
@@ -1198,8 +1190,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: 'bcb76020-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: 'bcb76020-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:37:46.863Z',
             created_by: {
@@ -1223,8 +1214,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'push_to_service',
-            action_id: 'c0338e90-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: 'c0338e90-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:37:53.016Z',
             created_by: {
@@ -1252,8 +1242,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'update',
-            action_id: 'c5b6d7a0-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: 'c5b6d7a0-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:38:01.895Z',
             created_by: {
@@ -1278,8 +1267,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           {
             action: 'create',
-            action_id: 'ca8f61c0-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: 'ca8f61c0-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: 'ca1d17f0-5e7d-11ec-9ee9-cd64f0b77b3c',
             created_at: '2021-12-16T14:38:09.649Z',
             created_by: {
@@ -1320,19 +1308,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('add severity', () => {
         it('adds the severity field to the create case user action', async () => {
-          const userActions = await getCaseUserActions({
+          const { userActions } = await findCaseUserActions({
             supertest,
             caseID: CASE_ID,
           });
 
-          const createUserAction = userActions.find(
-            (userAction) => userAction.action_id === CREATE_UA_ID
-          );
+          const createUserAction = userActions.find((userAction) => userAction.id === CREATE_UA_ID);
+          const { version, ...createUserActionWithoutVersion } = createUserAction ?? {};
 
-          expect(createUserAction).to.eql({
+          expect(createUserActionWithoutVersion).to.eql({
             action: 'create',
-            action_id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:34:48.709Z',
             created_by: {
@@ -1364,7 +1350,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
 
         it('does NOT add the severity field to the other user actions', async () => {
-          const userActions = await getCaseUserActions({
+          const { userActions } = await findCaseUserActions({
             supertest,
             caseID: CASE_ID,
           });
@@ -1399,19 +1385,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('assignees', () => {
         it('adds the assignees field to the create case user action', async () => {
-          const userActions = await getCaseUserActions({
+          const { userActions } = await findCaseUserActions({
             supertest,
             caseID: CASE_ID,
           });
 
-          const createUserAction = userActions.find(
-            (userAction) => userAction.action_id === CREATE_UA_ID
-          );
+          const createUserAction = userActions.find((userAction) => userAction.id === CREATE_UA_ID);
+          const { version, ...createUserActionWithoutVersion } = createUserAction ?? {};
 
-          expect(createUserAction).to.eql({
+          expect(createUserActionWithoutVersion).to.eql({
             action: 'create',
-            action_id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
-            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
             created_at: '2021-12-16T14:34:48.709Z',
             created_by: {
@@ -1443,7 +1427,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
 
         it('does NOT add the assignees field to the other user actions', async () => {
-          const userActions = await getCaseUserActions({
+          const { userActions } = await findCaseUserActions({
             supertest,
             caseID: CASE_ID,
           });
@@ -1461,6 +1445,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   });
 }
 
-function getUserActionById(userActions: CaseUserActionsDeprecatedResponse, id: string): any {
-  return userActions.find((userAction) => userAction.action_id === id);
+function getUserActionById(userActions: UserActions, id: string): any {
+  return userActions.find((userAction) => userAction.id === id);
 }

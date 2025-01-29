@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-data-migration-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud",
+  "plugin": {
+    "id": "cloudDataMigration",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "cloud_integrations",
+      "data_migration"
+    ],
+    "requiredPlugins": [
+      "cloud",
+      "management",
+      "kibanaReact",
+      "features"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

@@ -11,6 +11,7 @@ import {
   Aggregators,
   CountMetricExpressionParams,
   CustomMetricExpressionParams,
+  MetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
 import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
@@ -19,11 +20,13 @@ import {
   evaluateRule,
 } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
-import { createFakeLogger } from './create_fake_logger';
+import { getElasticsearchMetricQuery } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/metric_query';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { DATES } from './utils/constants';
+import { createFakeLogger } from './utils/create_fake_logger';
 
 const { gauge, rate } = DATES['alert-test-data'];
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
@@ -1338,6 +1341,120 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           ]);
+        });
+      });
+    });
+    describe('getElasticsearchMetricQuery', () => {
+      const index = 'test-index';
+      const getSearchParams = (aggType: string) =>
+        ({
+          aggType,
+          timeUnit: 'm',
+          threshold: [0],
+          comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
+          timeSize: 5,
+          ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
+        } as MetricExpressionParams);
+
+      before(async () => {
+        await esClient.index({
+          index,
+          body: {},
+        });
+      });
+      const aggs = ['avg', 'min', 'max', 'rate', 'cardinality', 'count'];
+
+      describe('querying the entire infrastructure', () => {
+        for (const aggType of aggs) {
+          it(`should work with the ${aggType} aggregator`, async () => {
+            const timeframe = {
+              start: moment().subtract(25, 'minutes').valueOf(),
+              end: moment().valueOf(),
+            };
+            const searchBody = getElasticsearchMetricQuery(
+              getSearchParams(aggType),
+              timeframe,
+              100,
+              true
+            );
+            const result = await esClient.search({
+              index,
+              body: searchBody,
+            });
+
+            expect(result.hits).to.be.ok();
+            if (aggType !== 'count') {
+              expect(result.aggregations).to.be.ok();
+            }
+          });
+        }
+        it('should work with a filterQuery', async () => {
+          const timeframe = {
+            start: moment().subtract(25, 'minutes').valueOf(),
+            end: moment().valueOf(),
+          };
+          const searchBody = getElasticsearchMetricQuery(
+            getSearchParams('avg'),
+            timeframe,
+            100,
+            true,
+            void 0,
+            '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
+          );
+          const result = await esClient.search({
+            index,
+            body: searchBody,
+          });
+
+          expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
+        });
+      });
+      describe('querying with a groupBy parameter', () => {
+        for (const aggType of aggs) {
+          it(`should work with the ${aggType} aggregator`, async () => {
+            const timeframe = {
+              start: moment().subtract(25, 'minutes').valueOf(),
+              end: moment().valueOf(),
+            };
+            const searchBody = getElasticsearchMetricQuery(
+              getSearchParams(aggType),
+              timeframe,
+              100,
+              true,
+              void 0,
+              'agent.id'
+            );
+            const result = await esClient.search({
+              index,
+              body: searchBody,
+            });
+
+            expect(result.hits).to.be.ok();
+            expect(result.aggregations).to.be.ok();
+          });
+        }
+        it('should work with a filterQuery', async () => {
+          const timeframe = {
+            start: moment().subtract(25, 'minutes').valueOf(),
+            end: moment().valueOf(),
+          };
+          const searchBody = getElasticsearchMetricQuery(
+            getSearchParams('avg'),
+            timeframe,
+            100,
+            true,
+            void 0,
+            'agent.id',
+            '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
+          );
+          const result = await esClient.search({
+            index,
+            body: searchBody,
+          });
+
+          expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
         });
       });
     });

@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'lens']);
+  const { common, visualize, lens } = getPageObjects(['common', 'visualize', 'lens']);
   const filterBar = getService('filterBar');
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
@@ -33,23 +33,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   function assertMatchesExpectedData(
     state: DebugState,
-    expectedData: Array<Array<{ x: number; y: number }>>
+    expectedData: Array<Array<{ x: number; y: number }>>,
+    chartType: 'bars' | 'lines' = 'bars'
   ) {
-    expect(
-      state?.bars?.map(({ bars }) =>
-        bars.map((bar) => ({
-          x: bar.x,
-          y: Math.floor(bar.y * 100) / 100,
-        }))
-      )
-    ).to.eql(expectedData);
+    if (chartType === 'lines') {
+      expect(
+        state?.lines
+          ?.map(({ points }) =>
+            points
+              .map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
+              .sort(({ x }, { x: x2 }) => x - x2)
+          )
+          .filter((a) => a.length > 0)
+      ).to.eql(expectedData);
+    } else {
+      expect(
+        state?.bars?.map(({ bars }) =>
+          bars.map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
+        )
+      ).to.eql(expectedData);
+    }
   }
 
   describe('lens with multiple data views', () => {
     const visTitle = 'xyChart with multiple data views';
 
     before(async () => {
-      await PageObjects.common.setTime({
+      await common.setTime({
         from: 'Oct 23, 2018 @ 07:00:00.000',
         to: 'Oct 23, 2018 @ 08:00:00.000',
       });
@@ -65,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
-      await PageObjects.common.navigateToApp('lens');
+      await common.navigateToApp('lens');
     });
 
     after(async () => {
@@ -84,32 +94,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       // Logstash layer
-      await PageObjects.lens.switchDataPanelIndexPattern('long-window-logstash-*');
+      await lens.switchDataPanelIndexPattern('long-window-logstash-*');
       await testSubjects.click('fieldToggle-bytes');
 
       // Flights layer
-      await PageObjects.lens.switchDataPanelIndexPattern('kibana_sample_data_flights');
-      await PageObjects.lens.createLayer('data');
+      await lens.switchDataPanelIndexPattern('kibana_sample_data_flights');
+      await lens.createLayer('data');
       await testSubjects.click('fieldToggle-DistanceKilometers');
 
-      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      const data = await lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
     });
 
     it('ignores global filters on layers using a data view without the filter field', async () => {
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
-      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      const data = await lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
-      await PageObjects.lens.save(visTitle);
+      await lens.save(visTitle);
     });
 
     it('applies global filters on layers using data view a without the filter field', async () => {
       await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': false });
-      await PageObjects.common.navigateToApp('visualize');
+      await common.navigateToApp('visualize');
       await elasticChart.setNewChartUiDebugFlag(true);
 
-      await PageObjects.visualize.openSavedVisualization(visTitle);
-      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      await visualize.openSavedVisualization(visTitle);
+      const data = await lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data, [expectedFlightsData]);
     });
   });

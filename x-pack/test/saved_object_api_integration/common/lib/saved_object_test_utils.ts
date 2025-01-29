@@ -140,7 +140,7 @@ export const expectResponses = {
   permitted: async (object: Record<string, any>, testCase: TestCase) => {
     const { type, id, failure } = testCase;
     if (failure) {
-      let error: ReturnType<typeof SavedObjectsErrorHelpers['decorateGeneralError']>;
+      let error: ReturnType<(typeof SavedObjectsErrorHelpers)['decorateGeneralError']>;
       if (failure === 400) {
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
       } else if (failure === 404) {

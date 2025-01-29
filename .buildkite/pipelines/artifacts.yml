@@ -3,10 +3,11 @@ steps:
     label: Build Kibana Artifacts
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
-    timeout_in_minutes: 75
+      diskSizeGb: 150
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '*'
@@ -18,11 +19,9 @@ steps:
     label: Artifact Testing
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
@@ -34,11 +33,9 @@ steps:
     label: Artifact Testing
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
@@ -50,11 +47,9 @@ steps:
     label: Artifact Testing
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
@@ -66,10 +61,8 @@ steps:
     label: 'Docker Context Verification'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
@@ -81,10 +74,8 @@ steps:
     label: 'Docker Context Verification'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
@@ -92,11 +83,11 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: KIBANA_DOCKER_CONTEXT=chainguard .buildkite/scripts/steps/artifacts/docker_context.sh
+  - command: KIBANA_DOCKER_CONTEXT=wolfi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 30
@@ -109,10 +100,8 @@ steps:
     label: 'Docker Context Verification'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
@@ -127,10 +116,8 @@ steps:
       - exit_status: -1
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 60
     if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
@@ -154,9 +141,7 @@ steps:
     label: 'Publish Kibana Artifacts'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 30

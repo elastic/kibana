@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function canvasFiltersTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['canvas', 'common']);
+  const { common } = getPageObjects(['common']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
@@ -82,7 +82,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     });
 
     it('redirects an alias match', async () => {
-      await PageObjects.common.navigateToUrl(
+      await common.navigateToUrl(
         'canvas',
         'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-old-id/page/1',
         {
@@ -115,7 +115,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     });
 
     it('handles a conflict match', async () => {
-      await PageObjects.common.navigateToUrl(
+      await common.navigateToUrl(
         'canvas',
         'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
         {

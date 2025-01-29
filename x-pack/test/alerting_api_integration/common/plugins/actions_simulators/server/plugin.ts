@@ -10,12 +10,13 @@ import https from 'https';
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server/plugin';
 import { ActionType } from '@kbn/actions-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
@@ -46,6 +47,8 @@ export enum ExternalServiceSimulator {
   TORQ = 'torq',
   TINES = 'tines',
   SENTINELONE = 'sentinelone',
+  CROWDSTRIKE = 'crowdstrike',
+  THEHIVE = 'thehive',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -65,6 +68,8 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SENTINELONE}/web/api/v2.1/`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.CROWDSTRIKE}`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.THEHIVE}`);
   return allPaths;
 }
 
@@ -123,6 +128,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'actionsSimulators',
       app: ['actions', 'kibana'],
       category: { id: 'foo', label: 'foo' },
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['actions', 'kibana'],
@@ -158,6 +164,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
     );
     initTines(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES));
+    initTines(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.THEHIVE));
     initUnsecuredAction(router, core);
   }
 

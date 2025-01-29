@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
@@ -94,6 +95,8 @@ describe('simple trace', () => {
       'container.id': 'instance-1',
       'event.outcome': 'success',
       'host.name': 'instance-1',
+      'http.request.method': 'GET',
+      'http.response.status_code': 200,
       'processor.event': 'transaction',
       'processor.name': 'transaction',
       'service.environment': 'production',
@@ -106,6 +109,7 @@ describe('simple trace', () => {
       'transaction.name': 'GET /api/product/list',
       'transaction.type': 'request',
       'transaction.sampled': true,
+      'url.full': 'elastic.co',
     });
   });
 

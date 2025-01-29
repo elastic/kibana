@@ -9,6 +9,7 @@ Array [
         "bar",
         "baz",
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "debug",
@@ -24,6 +25,7 @@ Array [
       "args": Array [
         [Error: error message],
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "error",
@@ -34,6 +36,7 @@ Array [
       "args": Array [
         "string message",
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "error",
@@ -52,6 +55,7 @@ Array [
     "args": Array [
       "foo",
     ],
+    "context": undefined,
     "indent": 0,
     "source": undefined,
     "type": "debug",
@@ -60,6 +64,7 @@ Array [
     "args": Array [
       "bar",
     ],
+    "context": undefined,
     "indent": 0,
     "source": undefined,
     "type": "info",
@@ -68,6 +73,7 @@ Array [
     "args": Array [
       "baz",
     ],
+    "context": undefined,
     "indent": 0,
     "source": undefined,
     "type": "verbose",
@@ -81,6 +87,7 @@ Array [
     "args": Array [
       "foo",
     ],
+    "context": undefined,
     "indent": 0,
     "source": undefined,
     "type": "debug",
@@ -89,6 +96,7 @@ Array [
     "args": Array [
       "bar",
     ],
+    "context": undefined,
     "indent": 0,
     "source": undefined,
     "type": "info",
@@ -97,6 +105,7 @@ Array [
     "args": Array [
       "baz",
     ],
+    "context": undefined,
     "indent": 0,
     "source": undefined,
     "type": "verbose",
@@ -111,6 +120,7 @@ Array [
       "args": Array [
         "foo",
       ],
+      "context": undefined,
       "indent": 1,
       "source": undefined,
       "type": "debug",
@@ -121,6 +131,7 @@ Array [
       "args": Array [
         "bar",
       ],
+      "context": undefined,
       "indent": 3,
       "source": undefined,
       "type": "debug",
@@ -131,6 +142,7 @@ Array [
       "args": Array [
         "baz",
       ],
+      "context": undefined,
       "indent": 6,
       "source": undefined,
       "type": "debug",
@@ -141,6 +153,7 @@ Array [
       "args": Array [
         "box",
       ],
+      "context": undefined,
       "indent": 4,
       "source": undefined,
       "type": "debug",
@@ -151,6 +164,7 @@ Array [
       "args": Array [
         "foo",
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "debug",
@@ -168,6 +182,7 @@ Array [
         "bar",
         "baz",
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "info",
@@ -185,6 +200,7 @@ Array [
         "bar",
         "baz",
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "success",
@@ -202,6 +218,7 @@ Array [
         "bar",
         "baz",
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "verbose",
@@ -219,6 +236,7 @@ Array [
         "bar",
         "baz",
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "warning",
@@ -236,6 +254,7 @@ Array [
         "bar",
         "baz",
       ],
+      "context": undefined,
       "indent": 0,
       "source": undefined,
       "type": "write",

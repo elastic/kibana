@@ -27,13 +27,6 @@ describe.skip(
   'Event log',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['manualRuleRunEnabled'])}`,
-        ],
-      },
-    },
   },
   function () {
     before(() => {
@@ -61,7 +54,7 @@ describe.skip(
 
       cy.waitUntil(
         () => {
-          cy.log('Waiting for assignees to appear in popover');
+          cy.log('Waiting for execution logs to appear in execution log table');
           refreshRuleExecutionTable();
           return getExecutionLogTableRow().then((rows) => {
             return rows.length === 2;

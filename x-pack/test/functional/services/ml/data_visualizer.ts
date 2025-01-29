@@ -99,14 +99,14 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       await testSubjects.existOrFail(`dvESQLLimitSize-${size}`, { timeout: 1000 });
     },
 
-    async setLimitSize(size: 5000 | 10000 | 100000) {
+    async setLimitSize(size: 5000 | 10000) {
       await retry.tryForTime(5000, async () => {
         // escape popover
         await browser.pressKeys(browser.keys.ESCAPE);
 
         // Once clicked, show list of options
         await testSubjects.clickWhenNotDisabled('dvESQLLimitSizeSelect');
-        for (const option of [5000, 10000, 100000]) {
+        for (const option of [5000, 10000]) {
           await testSubjects.existOrFail(`dvESQLLimitSize-${option}`, { timeout: 1000 });
         }
 

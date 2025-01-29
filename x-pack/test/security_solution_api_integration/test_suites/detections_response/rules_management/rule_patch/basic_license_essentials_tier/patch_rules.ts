@@ -7,39 +7,32 @@
 
 import expect from 'expect';
 
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  createRuleAssetSavedObject,
+  deleteAllPrebuiltRuleAssets,
+  getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
-  getCustomQueryRuleParams,
+  getSimpleRuleOutputWithoutRuleId,
+  installPrebuiltRules,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  getSimpleRuleOutputWithoutRuleId,
   updateUsername,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  createRule,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless patch_rules', () => {
+  describe('@ess @serverless @serverlessQA patch_rules', () => {
     describe('patch rules', () => {
       beforeEach(async () => {
-        await createAlertsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -54,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -100,17 +93,21 @@ export default ({ getService }: FtrProviderContext) => {
         expect(patchedRule).toMatchObject(expectedRule);
       });
 
-      it('@skipInServerless should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+      describe('@skipInServerless ', function () {
+        /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
+        this.tags('skipFIPS');
+        it('should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
 
-        // patch a simple rule's type to machine learning
-        const { body } = await securitySolutionApi
-          .patchRule({ body: { rule_id: 'rule-1', type: 'machine_learning' } })
-          .expect(403);
+          // patch a simple rule's type to machine learning
+          const { body } = await securitySolutionApi
+            .patchRule({ body: { rule_id: 'rule-1', type: 'machine_learning' } })
+            .expect(403);
 
-        expect(body).toEqual({
-          message: 'Your license does not support machine learning. Please upgrade your license.',
-          status_code: 403,
+          expect(body).toEqual({
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 403,
+          });
         });
       });
 
@@ -128,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -145,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -161,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -179,7 +176,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -205,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.timeline_title = 'some title';
         outputRule.timeline_id = 'some id';
         outputRule.revision = 2;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -235,11 +232,27 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('max signals', () => {
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-        });
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        await deleteAllPrebuiltRuleAssets(es, log);
+        // Install base prebuilt detection rule
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', author: ['elastic'] }),
+        ]);
+        await installPrebuiltRules(es, supertest);
 
+        const { body } = await securitySolutionApi
+          .patchRule({
+            body: {
+              rule_id: 'rule-1',
+              author: ['new user'],
+            },
+          })
+          .expect(400);
+
+        expect(body.message).toEqual('Cannot update "author" field for prebuilt rules');
+      });
+
+      describe('max signals', () => {
         it('does NOT patch a rule when max_signals is less than 1', async () => {
           await securitySolutionApi.createRule({
             body: getCustomQueryRuleParams({ rule_id: 'rule-1', max_signals: 100 }),
@@ -258,6 +271,33 @@ export default ({ getService }: FtrProviderContext) => {
             '[request body]: max_signals: Number must be greater than or equal to 1'
           );
         });
+      });
+
+      it('should not change required_fields when not present in patch body', async () => {
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            required_fields: [
+              {
+                name: 'event.action',
+                type: 'keyword',
+              },
+            ],
+          }),
+        });
+
+        // patch a simple rule's name
+        const { body: patchedRule } = await securitySolutionApi
+          .patchRule({ body: { rule_id: 'rule-1', name: 'some other name' } })
+          .expect(200);
+
+        expect(patchedRule.required_fields).toEqual([
+          {
+            name: 'event.action',
+            type: 'keyword',
+            ecs: true,
+          },
+        ]);
       });
     });
   });

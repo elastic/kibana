@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { Key } from 'selenium-webdriver';
 import moment from 'moment';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -25,15 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'timePicker',
     'share',
+    'unifiedFieldList',
+    'timePicker',
   ]);
   const filterBar = getService('filterBar');
-  const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
-
-  const setFieldsFromSource = async (setValue: boolean) => {
-    await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
-    await browser.refresh();
-  };
 
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
@@ -60,25 +55,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return res;
   };
 
-  describe('Discover CSV Export', () => {
+  describe('Discover CSV Export', function () {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
+      // TODO: emptyKibanaIndex fails in Serverless with
+      // "index_not_found_exception: no such index [.kibana_ingest]",
+      // so it was switched to `savedObjects.cleanStandardList()`
+      await kibanaServer.savedObjects.cleanStandardList();
+      await reportingAPI.initEcommerce({
+        batchSize: 5000,
+        concurrency: 4,
+      });
+      await PageObjects.common.navigateToApp('discover');
+    });
+
+    after(async () => {
+      await reportingAPI.teardownEcommerce();
+      // TODO: emptyKibanaIndex fails in Serverless with
+      // "index_not_found_exception: no such index [.kibana_ingest]",
+      // so it was switched to `savedObjects.cleanStandardList()`
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
     describe('Check Available', () => {
       before(async () => {
-        await PageObjects.svlCommonPage.loginAsAdmin();
-        // TODO: emptyKibanaIndex fails in Serverless with
-        // "index_not_found_exception: no such index [.kibana_ingest]",
-        // so it was switched to `savedObjects.cleanStandardList()`
-        await kibanaServer.savedObjects.cleanStandardList();
-        await reportingAPI.initEcommerce();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
-      });
-
-      after(async () => {
-        await reportingAPI.teardownEcommerce();
-        // TODO: emptyKibanaIndex fails in Serverless with
-        // "index_not_found_exception: no such index [.kibana_ingest]",
-        // so it was switched to `savedObjects.cleanStandardList()`
-        await kibanaServer.savedObjects.cleanStandardList();
+        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
       });
 
       afterEach(async () => {
@@ -91,70 +92,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
-        await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
+        await PageObjects.discover.saveSearch(
+          'my search - expectEnabledGenerateReportButton',
+          true
+        );
         await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
 
     describe('Generate CSV: new search', () => {
-      before(async () => {
-        await reportingAPI.initEcommerce();
-      });
-
-      after(async () => {
-        await reportingAPI.teardownEcommerce();
-        // TODO: emptyKibanaIndex fails in Serverless with
-        // "index_not_found_exception: no such index [.kibana_ingest]",
-        // so it was switched to `savedObjects.cleanStandardList()`
-        await kibanaServer.savedObjects.cleanStandardList();
-      });
-
-      beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
-      });
-
-      // this test does not pass because of discover using short urls - investigate in separate PR
-      xit('generates a report with single timefilter', async () => {
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
-        await PageObjects.discover.saveSearch('single-timefilter-search');
-
-        // get shared URL value
-        const sharedURL = await browser.getCurrentUrl();
-
-        // click 'Copy POST URL'
-        await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.reporting.openExportTab();
-        const copyButton = await testSubjects.find('shareReportingCopyURL');
-        const reportURL = (await copyButton.getAttribute('data-share-url')) ?? '';
-
-        // get number of filters in URLs
-        const timeFiltersNumberInReportURL =
-          decodeURIComponent(reportURL).split(
-            'query:(range:(order_date:(format:strict_date_optional_time'
-          ).length - 1;
-        const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
-
-        expect(timeFiltersNumberInSharedURL).to.be(1);
-        expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
-
-        expect(timeFiltersNumberInReportURL).to.be(1);
-        expect(
-          decodeURIComponent(reportURL).includes(
-            'query:(range:(order_date:(format:strict_date_optional_time'
-          )
-        ).to.be(true);
-
-        // return keyboard state
-        await browser.getActions().keyUp(Key.CONTROL).perform();
-        await browser.getActions().keyUp('v').perform();
-      });
       it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.reporting.setTimepickerInEcommerceDataRange();
-
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
+        await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
         await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
 
         const res = await getReport();
@@ -167,6 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a report with no data', async () => {
         await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
+        await PageObjects.discover.clickNewSearchButton();
         await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
 
         const res = await getReport();
@@ -174,10 +127,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a large export', async () => {
+        await PageObjects.discover.clickNewSearchButton();
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.clickNewSearchButton();
+
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
         });
@@ -185,9 +139,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
-        expect(csvFile.length).to.be(4826973);
-        expectSnapshot(csvFile.slice(0, 5000)).toMatch();
-        expectSnapshot(csvFile.slice(-5000)).toMatch();
+        expect(csvFile.length).to.be(4845684);
+
+        // to make sure the order of records is stable we need to sort by the unique Order Id
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
+        await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
+        const { text: csvFileOrderId } = await getReport({ timeout: 80 * 1000 });
+        expectSnapshot(csvFileOrderId.slice(0, 5000)).toMatch();
+        expectSnapshot(csvFileOrderId.slice(-5000)).toMatch();
       });
     });
 
@@ -292,13 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       before(async () => {
-        await reportingAPI.initEcommerce();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
-      });
-
-      after(async () => {
-        await reportingAPI.teardownEcommerce();
+        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
       });
 
       beforeEach(async () => {
@@ -340,24 +293,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const { text: csvFile } = await getReport();
         expectSnapshot(csvFile).toMatch();
-      });
-
-      it('generates a report with discover:searchFieldsFromSource = true', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('740');
-        });
-
-        await setFieldsFromSource(true);
-
-        const { text: csvFile } = await getReport();
-        expectSnapshot(csvFile).toMatch();
-
-        await setFieldsFromSource(false);
-        // TODO: We refreshed the page in `setFieldsFromSource`,
-        // so no toast will be shown
-        checkForReportingToasts = false;
       });
     });
   });

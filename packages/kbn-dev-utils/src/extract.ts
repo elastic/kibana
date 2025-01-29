@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fs from 'fs/promises';
@@ -12,7 +13,7 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import Tar from 'tar';
+import * as tar from 'tar';
 import Yauzl, { ZipFile, Entry } from 'yauzl';
 import * as Rx from 'rxjs';
 import { map, mergeMap, takeUntil } from 'rxjs';
@@ -61,7 +62,7 @@ export async function extract({
   await Fs.mkdir(targetDir, { recursive: true });
 
   if (archivePath.endsWith('.tar') || archivePath.endsWith('.tar.gz')) {
-    return await Tar.x({
+    return await tar.extract({
       file: archivePath,
       cwd: targetDir,
       stripComponents,

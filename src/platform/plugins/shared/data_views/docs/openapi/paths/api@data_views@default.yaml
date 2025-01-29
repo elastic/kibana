@@ -1,0 +1,70 @@
+get:
+  summary: Get the default data view
+  operationId: getDefaultDataViewDefault
+  tags:
+    - data views
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data_view_id:
+                type: string
+          examples:
+            getDefaultDataViewResponse:
+              $ref: '../components/examples/get_default_data_view_response.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+post:
+  summary: Set the default data view
+  operationId: setDefaultDatailViewDefault
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - data_view_id
+          properties:
+            data_view_id:
+              type: string
+              nullable: true
+              description: >
+                The data view identifier.
+                NOTE: The API does not validate whether it is a valid identifier.
+                Use `null` to unset the default data view.
+            force:
+              type: boolean
+              description: Update an existing default data view identifier.
+              default: false
+        examples:
+          setDefaultDataViewRequest:
+            $ref: '../components/examples/set_default_data_view_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              acknowledged:
+                type: boolean
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

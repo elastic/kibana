@@ -9,24 +9,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'timeToVisualize',
-    'timePicker',
-    'dashboard',
-    'visEditor',
-    'visualize',
-    'security',
-    'common',
-    'header',
-    'lens',
-  ]);
+  const { timeToVisualize, timePicker, dashboard, visEditor, visualize, security, header, lens } =
+    getPageObjects([
+      'timeToVisualize',
+      'timePicker',
+      'dashboard',
+      'visEditor',
+      'visualize',
+      'security',
+      'header',
+      'lens',
+    ]);
 
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardExpect = getService('dashboardExpect');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const security = getService('security');
+  const securityService = getService('security');
   const find = getService('find');
   const kbnServer = getService('kibanaServer');
 
@@ -42,9 +42,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
 
-      await security.role.create('dashboard_write_vis_read', {
+      await securityService.role.create('dashboard_write_vis_read', {
         elasticsearch: {
           indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
         },
@@ -59,13 +59,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ],
       });
 
-      await security.user.create('dashboard_write_vis_read_user', {
+      await securityService.user.create('dashboard_write_vis_read_user', {
         password: 'dashboard_write_vis_read_user-password',
         roles: ['dashboard_write_vis_read'],
         full_name: 'test user',
       });
 
-      await PageObjects.security.login(
+      await security.login(
         'dashboard_write_vis_read_user',
         'dashboard_write_vis_read_user-password',
         {
@@ -77,10 +77,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
 
-      await security.role.delete('dashboard_write_vis_read');
-      await security.user.delete('dashboard_write_vis_read_user');
+      await securityService.role.delete('dashboard_write_vis_read');
+      await securityService.user.delete('dashboard_write_vis_read_user');
 
       await kbnServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
@@ -88,79 +88,73 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('lens by value works without library save permissions', () => {
       before(async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.preserveCrossAppState();
-        await PageObjects.dashboard.clickNewDashboard();
+        await dashboard.navigateToApp();
+        await dashboard.preserveCrossAppState();
+        await dashboard.clickNewDashboard();
       });
 
       it('can add a lens panel by value', async () => {
-        await PageObjects.lens.createAndAddLensFromDashboard({});
-        const newPanelCount = await PageObjects.dashboard.getPanelCount();
+        await lens.createAndAddLensFromDashboard({});
+        const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
       });
 
       it('edits to a by value lens panel are properly applied', async () => {
-        await PageObjects.dashboard.waitForRenderComplete();
-        await dashboardPanelActions.openContextMenu();
-        await dashboardPanelActions.clickEdit();
-        await PageObjects.lens.switchToVisualization('donut');
-        await PageObjects.lens.saveAndReturn();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
+        await dashboardPanelActions.navigateToEditorFromFlyout();
+        await lens.switchToVisualization('pie');
+        await lens.saveAndReturn();
+        await dashboard.waitForRenderComplete();
 
         const partitionVisExists = await testSubjects.exists('partitionVisChart');
         expect(partitionVisExists).to.be(true);
       });
 
       it('disables save to library button without visualize save permissions', async () => {
-        await PageObjects.dashboard.waitForRenderComplete();
-        await dashboardPanelActions.openContextMenu();
-        await dashboardPanelActions.clickEdit();
+        await dashboard.waitForRenderComplete();
+        await dashboardPanelActions.navigateToEditorFromFlyout();
         const saveButton = await testSubjects.find('lnsApp_saveButton');
         expect(await saveButton.getAttribute('disabled')).to.equal('true');
-        await PageObjects.lens.saveAndReturn();
-        await PageObjects.timeToVisualize.resetNewDashboard();
+        await lens.saveAndReturn();
+        await timeToVisualize.resetNewDashboard();
       });
 
       it('should allow new lens to be added by value, but not by reference', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVisType('lens');
-        await PageObjects.lens.goToTimeRange();
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
+        await lens.goToTimeRange();
 
-        await PageObjects.lens.configureDimension({
+        await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           operation: 'average',
           field: 'bytes',
         });
 
-        await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+        await lens.switchToVisualization('lnsLegacyMetric');
 
-        await PageObjects.lens.waitForVisualization('legacyMtrVis');
-        await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
+        await lens.waitForVisualization('legacyMtrVis');
+        await lens.assertLegacyMetric('Average of bytes', '5,727.322');
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.click('lnsApp_saveButton');
 
         const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
         expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
 
-        await PageObjects.timeToVisualize.saveFromModal('New Lens from Modal', {
+        await timeToVisualize.saveFromModal('New Lens from Modal', {
           addToDashboard: 'new',
           saveAsNew: true,
           saveToLibrary: false,
         });
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
 
-        await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
-        const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
-          'New Lens from Modal'
-        );
-        expect(isLinked).to.be(false);
+        await lens.assertLegacyMetric('Average of bytes', '5,727.322');
 
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
 
-        await PageObjects.timeToVisualize.resetNewDashboard();
+        await timeToVisualize.resetNewDashboard();
       });
     });
 
@@ -169,69 +163,67 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const modifiedMarkdownText = 'Modified markdown text';
 
       before(async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.preserveCrossAppState();
-        await PageObjects.dashboard.clickNewDashboard();
+        await dashboard.navigateToApp();
+        await dashboard.preserveCrossAppState();
+        await dashboard.clickNewDashboard();
       });
 
       it('can add a markdown panel by value', async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await dashboard.waitForRenderComplete();
 
         await dashboardAddPanel.clickMarkdownQuickButton();
-        await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
-        await PageObjects.visEditor.clickGo();
+        await visEditor.setMarkdownTxt(originalMarkdownText);
+        await visEditor.clickGo();
 
-        await PageObjects.visualize.saveVisualizationAndReturn();
-        const newPanelCount = await PageObjects.dashboard.getPanelCount();
+        await visualize.saveVisualizationAndReturn();
+        const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
       });
 
       it('edits to a by value visualize panel are properly applied', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visEditor.setMarkdownTxt(modifiedMarkdownText);
-        await PageObjects.visEditor.clickGo();
-        await PageObjects.visualize.saveVisualizationAndReturn();
+        await header.waitUntilLoadingHasFinished();
+        await visEditor.setMarkdownTxt(modifiedMarkdownText);
+        await visEditor.clickGo();
+        await visualize.saveVisualizationAndReturn();
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         const markdownText = await testSubjects.find('markdownBody');
         expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
 
-        const newPanelCount = PageObjects.dashboard.getPanelCount();
+        const newPanelCount = dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
       });
 
       it('disables save to library button without visualize save permissions', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('visualizeSaveButton');
-        await PageObjects.visualize.saveVisualizationAndReturn();
-        await PageObjects.timeToVisualize.resetNewDashboard();
+        await visualize.saveVisualizationAndReturn();
+        await timeToVisualize.resetNewDashboard();
       });
 
       it('should allow new visualization to be added by value, but not by reference', async function () {
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickMetric();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickMetric();
+        await visualize.clickNewSearch();
+        await timePicker.setDefaultAbsoluteRange();
 
         await testSubjects.click('visualizeSaveButton');
 
-        await PageObjects.visualize.ensureSavePanelOpen();
+        await visualize.ensureSavePanelOpen();
         const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
         expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
 
-        await PageObjects.timeToVisualize.saveFromModal('My New Vis 1', {
+        await timeToVisualize.saveFromModal('My New Vis 1', {
           addToDashboard: 'new',
         });
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         await dashboardExpect.metricValuesExist(['14,005']);
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });
     });

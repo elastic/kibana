@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/security-solution-distribution-bar",
+  "owner": [
+    "@elastic/kibana-cloud-security-posture"
+  ],
+  "group": "security",
+  "visibility": "private"
+}
