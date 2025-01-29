@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useInternalStateSelector } from '../state_management/discover_internal_state_container';
 import { DataSourceType, isDataSourceType } from '../../../../common/data_sources';
-import { useAppStateSelector } from '../state_management/discover_app_state_container';
 
 export const useIsEsqlMode = () => {
-  const dataSource = useAppStateSelector((state) => state.dataSource);
+  const dataSource = useInternalStateSelector((state) => state.appState?.dataSource);
   return isDataSourceType(dataSource, DataSourceType.Esql);
 };

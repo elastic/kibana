@@ -11,7 +11,6 @@ import React, { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { InternalStateProvider } from './discover_internal_state_container';
-import { DiscoverAppStateProvider } from './discover_app_state_container';
 import { DiscoverStateContainer } from './discover_state';
 
 function createStateHelpers() {
@@ -62,9 +61,7 @@ export const DiscoverMainProvider = ({
 }>) => {
   return (
     <DiscoverStateProvider value={value}>
-      <DiscoverAppStateProvider value={value.appState}>
-        <InternalStateProvider value={value.internalState}>{children}</InternalStateProvider>
-      </DiscoverAppStateProvider>
+      <InternalStateProvider value={value.internalState}>{children}</InternalStateProvider>
     </DiscoverStateProvider>
   );
 };

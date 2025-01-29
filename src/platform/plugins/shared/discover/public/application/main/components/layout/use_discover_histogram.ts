@@ -45,10 +45,7 @@ import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_message
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import {
-  useAppStateSelector,
-  type DiscoverAppState,
-} from '../../state_management/discover_app_state_container';
+import { type DiscoverAppState } from '../../state_management/discover_app_state_container';
 import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
@@ -359,7 +356,7 @@ export const useDiscoverHistogram = ({
     [stateContainer]
   );
 
-  const breakdownField = useAppStateSelector((state) => state.breakdownField);
+  const breakdownField = useInternalStateSelector((state) => state.appState?.breakdownField);
 
   const onBreakdownFieldChange = useCallback<
     NonNullable<UnifiedHistogramContainerProps['onBreakdownFieldChange']>

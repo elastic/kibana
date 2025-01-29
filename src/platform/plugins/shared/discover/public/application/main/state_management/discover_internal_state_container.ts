@@ -17,6 +17,7 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { DiscoverAppState } from '../../..';
 
 interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
@@ -24,6 +25,7 @@ interface InternalStateDataRequestParams {
 }
 
 export interface InternalState {
+  appState: DiscoverAppState | undefined;
   dataView: DataView | undefined;
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
@@ -42,6 +44,7 @@ export interface InternalState {
 }
 
 export interface InternalStateTransitions {
+  setAppState: (state: InternalState) => (appState: DiscoverAppState) => InternalState;
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
   setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
@@ -87,6 +90,7 @@ export const { Provider: InternalStateProvider, useSelector: useInternalStateSel
 export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
+      appState: undefined,
       dataView: undefined,
       isDataViewLoading: false,
       adHocDataViews: [],
@@ -103,6 +107,10 @@ export function getInternalStateContainer() {
       dataRequestParams: {},
     },
     {
+      setAppState: (prevState: InternalState) => (nextAppState: DiscoverAppState) => ({
+        ...prevState,
+        appState: nextAppState,
+      }),
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
         ...prevState,
         dataView: nextDataView,
