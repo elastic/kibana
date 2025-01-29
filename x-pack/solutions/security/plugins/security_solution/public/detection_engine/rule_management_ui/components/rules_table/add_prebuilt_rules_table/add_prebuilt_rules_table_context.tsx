@@ -253,6 +253,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
     rules: filteredRules,
+    rulesUpgradeState: undefined,
     ruleActionsFactory,
     flyoutProps: {
       id: PREBUILT_RULE_INSTALL_FLYOUT_ANCHOR,

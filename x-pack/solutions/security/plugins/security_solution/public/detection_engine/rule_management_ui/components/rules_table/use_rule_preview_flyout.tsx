@@ -30,7 +30,7 @@ interface UseRulePreviewFlyoutBaseParams {
 
 interface UseRulePreviewFlyoutParams extends UseRulePreviewFlyoutBaseParams {
   rules: RuleResponse[];
-  rulesUpgradeState: RulesUpgradeState;
+  rulesUpgradeState: RulesUpgradeState | undefined;
 }
 
 interface RulePreviewFlyoutProps {
@@ -68,7 +68,7 @@ export function useRulePreviewFlyout({
   );
   const rulePreviewFlyout = (
     <RulePreviewContextProvider
-      ruleUpgradeState={rule ? rulesUpgradeState[rule.rule_id] : undefined}
+      ruleUpgradeState={rule && rulesUpgradeState ? rulesUpgradeState[rule.rule_id] : undefined}
     >
       <RulePreviewFlyoutInternal
         rule={rule}
