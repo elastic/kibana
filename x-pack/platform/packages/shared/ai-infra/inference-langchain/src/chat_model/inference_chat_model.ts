@@ -57,12 +57,13 @@ import {
   responseToLangchainMessage,
 } from './from_inference';
 
-export interface InferenceChatModelParams
-  extends BaseChatModelParams,
-    Partial<InferenceChatModelCallOptions> {
+export interface InferenceChatModelParams extends BaseChatModelParams {
   connector: InferenceConnector;
   chatComplete: ChatCompleteAPI;
   logger: Logger;
+  functionCallingMode?: FunctionCallingMode;
+  temperature?: number;
+  model?: string;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -83,6 +84,7 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
  * const chatModel = new InferenceChatModel({
  *    chatComplete: inference.chatComplete,
  *    connector: someConnector,
+ *    logger: myPluginLogger
  * });
  *
  * // just use it as another langchain chatModel
@@ -97,8 +99,6 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
   protected model?: string;
-  protected tools?: BindToolsInput[];
-  protected tool_choice?: ToolChoice;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -109,8 +109,6 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
-    this.tools = args.tools;
-    this.tool_choice = args.tool_choice;
   }
 
   static lc_name() {
@@ -126,6 +124,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       'temperature',
       'model',
     ];
+  }
+
+  getConnector() {
+    return this.connector;
   }
 
   _llmType() {
@@ -175,9 +177,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
     return {
       connectorId: this.connector.connectorId,
-      functionCalling: options.functionCallingMode,
-      modelName: options.model,
-      temperature: options.temperature,
+      functionCalling: options.functionCallingMode ?? this.functionCallingMode,
+      modelName: options.model ?? this.model,
+      temperature: options.temperature ?? this.temperature,
       tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
       toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
       abortSignal: options.signal,

@@ -6,8 +6,9 @@
  */
 
 export const wrapInferenceError = (error: any) => {
-  // TODO: actually wrap the error
-  // https://github.com/langchain-ai/langchainjs/blob/ff0dc580a71268b098e5ac2ee68b7d98317727ed/libs/langchain-openai/src/utils/openai.ts
-  // https://github.com/langchain-ai/langchainjs/blob/ff0dc580a71268b098e5ac2ee68b7d98317727ed/libs/langchain-anthropic/src/utils/errors.ts
+  // TODO maybe at some point we may want to add the errors likes as done in the following models
+  //      however, only a very small subset of chat models are doing this, so I don't think it's strictly necessary.
+  //      https://github.com/langchain-ai/langchainjs/blob/ff0dc580a71268b098e5ac2ee68b7d98317727ed/libs/langchain-openai/src/utils/openai.ts
+  //      https://github.com/langchain-ai/langchainjs/blob/ff0dc580a71268b098e5ac2ee68b7d98317727ed/libs/langchain-anthropic/src/utils/errors.ts
   return error;
 };

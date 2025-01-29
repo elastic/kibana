@@ -32,7 +32,7 @@ export const messagesToInference = (messages: BaseMessage[]) => {
     (output, message) => {
       if (isSystemMessage(message)) {
         const content = extractMessageTextContent(message);
-        output.system += content;
+        output.system = output.system ? `${output.system}\n${content}` : content;
       }
       if (isHumanMessage(message)) {
         output.messages.push({
@@ -71,9 +71,9 @@ export const messagesToInference = (messages: BaseMessage[]) => {
 
       return output;
     },
-    { messages: [], system: '' } as {
+    { messages: [], system: undefined } as {
       messages: InferenceMessage[];
-      system: string;
+      system: string | undefined;
     }
   );
 };
