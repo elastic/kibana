@@ -18,12 +18,23 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
+
+import type { Alert } from '@kbn/alerting-types';
+import { KibanaServices } from '../../../common/lib/kibana/services';
 import { EntityType } from '../../../../common/search_strategy';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import type { PrivilegedUserDoc } from '../../../../common/api/entity_analytics/privmon';
+import type {
+  PrivilegedUserDoc,
+  PrivmonLoginDoc,
+  PrivmonPrivilegeDoc,
+} from '../../../../common/api/entity_analytics/privmon';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { FlyoutRiskSummary } from '../risk_summary_flyout/risk_summary';
 import type { ESQuery } from '../../../../common/typed_json';
+import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
+import { LoginsTable } from './logins_table';
+import { PrivilegesTable } from './privileges_table';
+import { AlertsTable } from './alerts_table';
 
 const buildFilter = (userNames: string[]) => ({
   bool: {
@@ -36,6 +47,23 @@ const buildFilter = (userNames: string[]) => ({
 
 const useMatchingUsers = (privilegedUser: PrivilegedUserDoc): PrivilegedUserDoc[] => {
   return [];
+};
+
+interface ResponseType {
+  logins: PrivmonLoginDoc[];
+  privileges: PrivmonPrivilegeDoc[];
+  alerts: Alert[];
+}
+
+const fetchFlyoutData = ({ userNames }: { userNames: string[] }): Promise<ResponseType> => {
+  return KibanaServices.get().http.fetch('/api/privileged_users_flyout', {
+    prependBasePath: true,
+    version: '2023-10-31',
+    method: 'POST',
+    body: JSON.stringify({
+      userNames,
+    }),
+  });
 };
 
 export const PrivilegedUserFlyout: React.FC<{
@@ -113,6 +141,21 @@ const Overview: React.FC<{
   userQuery: ESQuery;
   setUserQuery: (query: ESQuery) => void;
 }> = ({ privilegedUser, userQuery, setUserQuery }) => {
+  const matchingUsers = useMatchingUsers(privilegedUser);
+  const {
+    data = { logins: [], privileges: [], alerts: [] },
+    // fetch,
+    isLoading,
+  } = useFetch<{ userNames: string[] }, ResponseType, undefined>(
+    REQUEST_NAMES.PRIVILEGED_USER_FLYOUT_DATA,
+    fetchFlyoutData,
+    {
+      initialParameters: {
+        userNames: [privilegedUser.user.name].concat(matchingUsers.map(({ user }) => user.name)),
+      },
+    }
+  );
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
     filterQuery: userQuery,
@@ -135,9 +178,12 @@ const Overview: React.FC<{
         openDetailsPanel={() => {}}
       />
       <>
-        {'Logins table here'}
-        {'Privileges table here'}
-        {'Alerts table here'}
+        <EuiSpacer size="m" />
+        <LoginsTable data={data.logins ?? []} isLoading={isLoading} />
+        <EuiSpacer size="m" />
+        <PrivilegesTable data={data.privileges ?? []} isLoading={isLoading} />
+        <EuiSpacer size="m" />
+        <AlertsTable alerts={data.alerts ?? []} isLoading={isLoading} />
       </>
     </>
   );
