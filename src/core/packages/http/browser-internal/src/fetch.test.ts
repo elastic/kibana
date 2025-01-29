@@ -337,7 +337,7 @@ describe('Fetch', () => {
 
       const lastCall = fetchMock.lastCall();
 
-      expect(lastCall!.request.credentials).toBe('same-origin');
+      expect(lastCall!.request!.credentials).toBe('same-origin');
       expect(lastCall![1]).toMatchObject({
         method: 'GET',
         headers: {
@@ -753,7 +753,7 @@ describe('Fetch', () => {
       expect(createRequest.mock.calls[0][0].path).toContain('/my/route');
       expect(createRequest.mock.calls[1][0].path).toContain('/api/alpha');
       expect(createRequest.mock.calls[2][0].path).toContain('/api/beta');
-      expect(fetchMock.lastCall()!.request.url).toContain('/api/gamma');
+      expect(fetchMock.lastCall()!.request!.url).toContain('/api/gamma');
     });
 
     it('should accumulate response information', async () => {
