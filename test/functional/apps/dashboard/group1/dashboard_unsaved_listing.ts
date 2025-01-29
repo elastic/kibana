@@ -11,8 +11,6 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-
-
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header } = getPageObjects(['dashboard', 'header']);
   const kibanaServer = getService('kibanaServer');
