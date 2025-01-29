@@ -1507,7 +1507,7 @@
     "@kbn/some-dev-log": "link:src/dev/packages/some-dev-log",
     "@kbn/sort-package-json": "link:src/dev/packages/sort-package-json",
     "@kbn/stdio-dev-helpers": "link:src/dev/packages/stdio-dev-helpers",
-    "@kbn/storybook": "link:packages/kbn-storybook",
+    "@kbn/storybook": "link:src/dev/packages/storybook",
     "@kbn/styled-components-mapping-cli": "link:packages/kbn-styled-components-mapping-cli",
     "@kbn/synthetics-e2e": "link:x-pack/solutions/observability/plugins/synthetics/e2e",
     "@kbn/synthetics-private-location": "link:x-pack/packages/kbn-synthetics-private-location",

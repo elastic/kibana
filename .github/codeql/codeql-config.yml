@@ -75,7 +75,7 @@ paths-ignore:
   - src/dev/packages/some-dev-log
   - src/dev/packages/sort-package-json
   - src/dev/packages/stdio-dev-helpers
-  - packages/kbn-storybook
+  - src/dev/packages/storybook
   - packages/kbn-telemetry-tools
   - packages/kbn-test
   - packages/kbn-test-*

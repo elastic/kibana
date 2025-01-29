@@ -7620,7 +7620,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/storybook@link:packages/kbn-storybook":
+"@kbn/storybook@link:src/dev/packages/storybook":
   version "0.0.0"
   uid ""
 

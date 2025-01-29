@@ -181,7 +181,7 @@ src/dev/packages/set-map @elastic/kibana-operations
 src/dev/packages/some-dev-log @elastic/kibana-operations
 src/dev/packages/sort-package-json @elastic/kibana-operations
 src/dev/packages/stdio-dev-helpers @elastic/kibana-operations
-packages/kbn-storybook @elastic/kibana-operations
+src/dev/packages/storybook @elastic/kibana-operations
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 packages/kbn-telemetry-tools @elastic/kibana-core
 packages/kbn-test @elastic/kibana-operations @elastic/appex-qa
