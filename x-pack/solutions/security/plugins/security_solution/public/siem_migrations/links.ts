@@ -33,7 +33,7 @@ export const siemMigrationsLinks: LinkItem = {
       defaultMessage: 'SIEM Rule Migrations',
     }),
   ],
-  experimentalKey: 'siemMigrationsEnabled',
+  hideWhenExperimentalKey: 'siemMigrationsDisabled',
   isBeta: true,
   betaOptions: {
     text: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRulesTechnicalPreview', {

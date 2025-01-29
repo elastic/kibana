@@ -93,7 +93,7 @@ export class SiemRulesMigrationsService {
 
   public isAvailable() {
     return (
-      ExperimentalFeaturesService.get().siemMigrationsEnabled &&
+      !ExperimentalFeaturesService.get().siemMigrationsDisabled &&
       licenseService.isEnterprise() &&
       !this.hasMissingCapabilities('minimum')
     );
