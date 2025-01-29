@@ -11,7 +11,7 @@ import { ITelemetryClient } from '../../services/telemetry';
 export interface DatasetQualityContextValue {
   service: DatasetQualityControllerStateService;
   telemetryClient: ITelemetryClient;
-  isServerless: boolean;
+  isFailureStoreEnabled: boolean;
 }
 
 export const DatasetQualityContext = createContext({} as DatasetQualityContextValue);

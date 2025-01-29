@@ -46,23 +46,26 @@ export class DatasetQualityPlugin
       http: core.http,
     });
 
+    const isFailureStoreEnabled = !this.isServerless;
+
     const DatasetQuality = createDatasetQuality({
       core,
       plugins,
       telemetryClient,
-      isServerless: this.isServerless,
+      isFailureStoreEnabled,
     });
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
       dataStreamStatsService,
+      isFailureStoreEnabled,
     });
 
     const DatasetQualityDetails = createDatasetQualityDetails({
       core,
       plugins,
       telemetryClient,
-      isServerless: this.isServerless,
+      isFailureStoreEnabled,
     });
 
     const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
@@ -70,6 +73,7 @@ export class DatasetQualityPlugin
       plugins,
       dataStreamStatsService,
       dataStreamDetailsService,
+      isFailureStoreEnabled,
     });
 
     return {
