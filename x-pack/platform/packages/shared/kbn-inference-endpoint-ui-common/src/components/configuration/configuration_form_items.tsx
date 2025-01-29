@@ -25,6 +25,7 @@ interface ConfigurationFormItemsProps {
   items: ConfigEntryView[];
   setConfigEntry: (key: string, value: string | number | boolean | null) => void;
   direction?: 'column' | 'row' | 'rowReverse' | 'columnReverse' | undefined;
+  isEdit?: boolean;
 }
 
 export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
@@ -32,6 +33,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
   items,
   setConfigEntry,
   direction,
+  isEdit,
 }) => {
   return (
     <EuiFlexGroup direction={direction} data-test-subj="configuration-fields">
@@ -73,6 +75,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
                 setConfigValue={(value) => {
                   setConfigEntry(key, value);
                 }}
+                isEdit={isEdit}
               />
             </EuiFormRow>
             {sensitive ? (

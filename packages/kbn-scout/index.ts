@@ -28,4 +28,11 @@ export type {
   ScoutParallelWorkerFixtures,
 } from './src/playwright';
 
-export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
+export type {
+  EsClient,
+  KbnClient,
+  KibanaUrl,
+  ScoutLogger,
+  ScoutServerConfig,
+  ScoutTestConfig,
+} from './src/types';
