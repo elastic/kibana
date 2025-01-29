@@ -77,7 +77,9 @@ export class SiemRulesMigrationsService {
   }
 
   public isAvailable() {
-    return ExperimentalFeaturesService.get().siemMigrationsEnabled && licenseService.isEnterprise();
+    return (
+      !ExperimentalFeaturesService.get().siemMigrationsDisabled && licenseService.isEnterprise()
+    );
   }
 
   public startPolling() {
