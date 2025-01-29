@@ -17,6 +17,7 @@ to enable the {kib} server to have screenshotting capabilities.
 * <<securing-reporting>>
 * <<install-reporting-packages>>
 * <<set-reporting-server-host>>
+* <<reporting-elasticsearch-configuration>>
 
 [float]
 [[grant-user-access]]
@@ -246,3 +247,10 @@ address.
 
 For the most reliable configuration of PDF/PNG {report-features}, consider installing {kib} using <<docker, Docker>>, or
 using <<set-up-on-cloud, Elastic Cloud>>.
+
+[float]
+[[reporting-elasticsearch-configuration]]
+=== Ensure {es} allows built-in templates
+Reporting relies on {es} to install a mapping template for the data stream that stores reports. Ensure that {es} allows built-in
+templates to be installed by keeping the `stack.templates.enabled` setting at the default value of `true`. For more information, see
+{ref}/index-management-settings.html#stack-templates-enabled[Index management settings].
