@@ -14,6 +14,7 @@ import {
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
+import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt, promptDictionary } from '../../../prompt';
@@ -33,6 +34,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   alertsIndexPattern,
   assistantTools = [],
   connectorId,
+  contentReferencesStore,
   conversationId,
   dataClients,
   esClient,
@@ -107,6 +109,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     alertsIndexPattern,
     anonymizationFields,
     connectorId,
+    contentReferencesStore,
     esClient,
     inference,
     isEnabledKnowledgeBase,
@@ -128,6 +131,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   if (isEnabledKnowledgeBase) {
     const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
       esClient,
+      contentReferencesStore,
     });
     if (kbTools) {
       tools.push(...kbTools);
@@ -191,6 +195,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
+    contentReferencesEnabled: Boolean(contentReferencesStore),
   });
   const inputs: GraphInputs = {
     responseLanguage,
@@ -224,6 +229,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     traceOptions,
   });
 
+  const contentReferences =
+    contentReferencesStore && pruneContentReferences(graphResponse.output, contentReferencesStore);
+
+  const metadata: MessageMetadata = {
+    ...(contentReferences ? { contentReferences } : {}),
+  };
+
+  const isMetadataPopulated = !!contentReferences;
+
   return {
     body: {
       connector_id: connectorId,
@@ -231,6 +245,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       trace_data: graphResponse.traceData,
       replacements,
       status: 'ok',
+      ...(isMetadataPopulated ? { metadata } : {}),
       ...(graphResponse.conversationId ? { conversationId: graphResponse.conversationId } : {}),
     },
     headers: {

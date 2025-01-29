@@ -8,11 +8,13 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
+  securityAlertReference,
   getAnonymizedValue,
   getOpenAndAcknowledgedAlertsQuery,
   getRawDataOrDefault,
   sizeIsOutOfRange,
   transformRawData,
+  contentReferenceBlock,
 } from '@kbn/elastic-assistant-common';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
@@ -56,6 +58,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       onNewReplacements,
       replacements,
       size,
+      contentReferencesStore,
     } = params as OpenAndAcknowledgedAlertsToolParams;
     return new DynamicStructuredTool({
       name: 'OpenAndAcknowledgedAlertsTool',
@@ -80,15 +83,24 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
         };
 
         return JSON.stringify(
-          result.hits?.hits?.map((x) =>
-            transformRawData({
+          result.hits?.hits?.map((x) => {
+            const transformed = transformRawData({
               anonymizationFields,
               currentReplacements: localReplacements, // <-- the latest local replacements
               getAnonymizedValue,
               onNewReplacements: localOnNewReplacements, // <-- the local callback
               rawData: getRawDataOrDefault(x.fields),
-            })
-          )
+            });
+            const hitId = x._id;
+            const citation =
+              hitId &&
+              contentReferencesStore &&
+              `\nCitation,${contentReferenceBlock(
+                contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
+              )}`;
+
+            return `${transformed}${citation ?? ''}`;
+          })
         );
       },
       tags: ['alerts', 'open-and-acknowledged-alerts'],

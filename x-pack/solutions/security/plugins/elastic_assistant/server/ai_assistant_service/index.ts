@@ -17,7 +17,10 @@ import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/fie
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
-import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import {
+  AIAssistantConversationsDataClient,
+  GetAIAssistantConversationsDataClientParams,
+} from '../ai_assistant_data_clients/conversations';
 import {
   InitializationPromise,
   ResourceInstallationHelper,
@@ -25,7 +28,10 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import {
+  conversationsFieldMap,
+  conversationsContentReferencesFieldMap,
+} from '../ai_assistant_data_clients/conversations/field_maps_configuration';
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -95,6 +101,9 @@ export class AIAssistantService {
   private isKBSetupInProgress: boolean = false;
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
+  // Temporary 'feature flag' to determine if we should initialize the new message metadata mappings, toggled when citations should be enabled.
+  private contentReferencesEnabled: boolean = false;
+  private hasInitializedContentReferences: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -201,6 +210,17 @@ export class AIAssistantService {
       if (this.productDocManager) {
         // install product documentation without blocking other resources
         void ensureProductDocumentationInstalled(this.productDocManager, this.options.logger);
+      }
+
+      // If contentReferencesEnabled is true, re-install data stream resources for new mappings if it has not been done already
+      if (this.contentReferencesEnabled && !this.hasInitializedContentReferences) {
+        this.options.logger.debug(`Creating conversation datastream with content references`);
+        this.conversationsDataStream = this.createDataStream({
+          resource: 'conversations',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: conversationsContentReferencesFieldMap,
+        });
+        this.hasInitializedContentReferences = true;
       }
 
       await this.conversationsDataStream.install({
@@ -355,12 +375,25 @@ export class AIAssistantService {
   }
 
   public async createAIAssistantConversationsDataClient(
-    opts: CreateAIAssistantClientParams
+    opts: CreateAIAssistantClientParams & GetAIAssistantConversationsDataClientParams
   ): Promise<AIAssistantConversationsDataClient | null> {
     const res = await this.checkResourcesInstallation(opts);
 
     if (res === null) {
       return null;
+    }
+
+    // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
+    // Remove this param and initialization when the `contentReferencesEnabled` feature flag is removed
+    if (opts.contentReferencesEnabled) {
+      this.contentReferencesEnabled = true;
+    }
+
+    // If contentReferences are enable but the conversation field mappings with content references have not been initialized,
+    // then call initializeResources which will create the datastreams with content references field mappings. After they have
+    // been created, hasInitializedContentReferences will ensure they dont get created again.
+    if (this.contentReferencesEnabled && !this.hasInitializedContentReferences) {
+      await this.initializeResources();
     }
 
     return new AIAssistantConversationsDataClient({
