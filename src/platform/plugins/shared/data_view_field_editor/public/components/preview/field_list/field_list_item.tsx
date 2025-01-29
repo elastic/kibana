@@ -18,7 +18,9 @@ import {
   EuiButtonEmpty,
   EuiBadge,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { useFieldPreviewContext } from '../field_preview_context';
 import { IsUpdatingIndicator } from '../is_updating_indicator';
@@ -43,13 +45,13 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   hasScriptError,
   isFromScript = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { controller } = useFieldPreviewContext();
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
-    'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
     'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
   });
 
@@ -143,7 +145,16 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   return (
     <>
-      <EuiFlexGroup className={classes} gutterSize="none" data-test-subj="listItem">
+      <EuiFlexGroup
+        className={classes}
+        // highlights the field using token, TODO: migrate whole SCSS file to emotions
+        css={css`
+          background-color: ${isFromScript ? euiTheme.colors.backgroundBasePrimary : 'inherit'};
+          font-weight: ${isFromScript ? 'bold' : 'normal'};
+        `}
+        gutterSize="none"
+        data-test-subj="listItem"
+      >
         <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
           <div
             className="indexPatternFieldEditor__previewFieldList__item__key__wrapper"
