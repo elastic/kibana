@@ -159,7 +159,6 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           .startEntityEngine(
             {
               params: { entityType: 'host' },
-              body: {},
             },
             namespace
           )

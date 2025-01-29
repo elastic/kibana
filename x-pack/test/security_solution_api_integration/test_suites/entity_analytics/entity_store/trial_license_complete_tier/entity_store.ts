@@ -162,7 +162,6 @@ export default ({ getService }: FtrProviderContext) => {
         await api
           .startEntityEngine({
             params: { entityType: 'host' },
-            body: {},
           })
           .expect(200);
 
