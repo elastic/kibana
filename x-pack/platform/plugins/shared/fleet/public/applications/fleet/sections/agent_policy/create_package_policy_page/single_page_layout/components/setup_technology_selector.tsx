@@ -21,9 +21,11 @@ import { SetupTechnology } from '../../../../../types';
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 
 export const SetupTechnologySelector = ({
+  disabled,
   setupTechnology,
   onSetupTechnologyChange,
 }: {
+  disabled: boolean;
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
@@ -45,6 +47,7 @@ export const SetupTechnologySelector = ({
       }
     >
       <EuiRadioGroup
+        disabled={disabled}
         name="SetupTechnologySelector"
         data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
         options={[

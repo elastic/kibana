@@ -403,6 +403,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {/* TODO move SetupTechnologySelector out of extensionView */}
           {!extensionView && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
+              disabled={false}
               setupTechnology={selectedSetupTechnology}
               onSetupTechnologyChange={(value) => {
                 handleSetupTechnologyChange(value);
