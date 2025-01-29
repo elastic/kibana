@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @ts-expect-error
-import fetchMock from 'fetch-mock/es5/client';
+import fetchMock from 'fetch-mock';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { first } from 'rxjs';
@@ -215,7 +214,7 @@ describe('Fetch', () => {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.lastOptions()!.headers?.['kbn-system-request']).toBeUndefined();
     });
 
     it('should not set kbn-system-request header when asSystemRequest: false', async () => {
@@ -225,7 +224,7 @@ describe('Fetch', () => {
         asSystemRequest: false,
       });
 
-      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.lastOptions()!.headers?.['kbn-system-request']).toBeUndefined();
     });
 
     it('should set kbn-system-request header when asSystemRequest: true', async () => {

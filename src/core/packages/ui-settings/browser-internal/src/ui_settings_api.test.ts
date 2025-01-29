@@ -8,7 +8,7 @@
  */
 
 // @ts-expect-error
-import fetchMock from 'fetch-mock/es5/client';
+import fetchMock from 'fetch-mock';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs';
 
