@@ -6460,7 +6460,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mock-idp-utils@link:packages/kbn-mock-idp-utils":
+"@kbn/mock-idp-utils@link:src/dev/packages/mock-idp-utils":
   version "0.0.0"
   uid ""
 

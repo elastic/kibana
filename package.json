@@ -1464,7 +1464,7 @@
     "@kbn/management-storybook-config": "link:src/dev/packages/management-storybook-config",
     "@kbn/manifest": "link:src/dev/packages/manifest",
     "@kbn/mock-idp-plugin": "link:src/dev/packages/mock-idp-plugin",
-    "@kbn/mock-idp-utils": "link:packages/kbn-mock-idp-utils",
+    "@kbn/mock-idp-utils": "link:src/dev/packages/mock-idp-utils",
     "@kbn/openapi-bundler": "link:packages/kbn-openapi-bundler",
     "@kbn/openapi-generator": "link:packages/kbn-openapi-generator",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
