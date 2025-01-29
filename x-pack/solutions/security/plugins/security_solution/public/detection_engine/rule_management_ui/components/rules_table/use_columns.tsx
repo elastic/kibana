@@ -70,7 +70,7 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
 
   const loadingIds = useMemo(
     () =>
-      ['disable', 'enable', 'edit', 'delete'].includes(loadingRulesAction ?? '')
+      ['disable', 'enable', 'edit', 'delete', 'run'].includes(loadingRulesAction ?? '')
         ? loadingRuleIds
         : [],
     [loadingRuleIds, loadingRulesAction]
@@ -512,6 +512,20 @@ export const useMonitoringColumns = ({
           </EuiText>
         ),
         sortable: true,
+        truncateText: true,
+        width: '14%',
+      },
+      {
+        field: 'gap_info.total_unfilled_duration_ms',
+        name: i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION,
+        render: (value: number | undefined) => (
+          <EuiText data-test-subj="gap_info" size="s">
+            {value != null && value > 0
+              ? moment.duration(value, 'ms').humanize()
+              : getEmptyTagValue()}
+          </EuiText>
+        ),
+        sortable: false,
         truncateText: true,
         width: '14%',
       },
