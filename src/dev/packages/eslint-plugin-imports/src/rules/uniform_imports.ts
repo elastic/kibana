@@ -21,7 +21,7 @@ export const UniformImportsRule: Rule.RuleModule = {
   meta: {
     fixable: 'code',
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsuniform_imports',
+      url: 'https://github.com/elastic/kibana/blob/main/src/dev/packages/eslint-plugin-imports/README.mdx#kbnimportsuniform_imports',
     },
   },
 

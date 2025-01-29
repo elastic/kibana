@@ -5576,7 +5576,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-imports@link:packages/kbn-eslint-plugin-imports":
+"@kbn/eslint-plugin-imports@link:src/dev/packages/eslint-plugin-imports":
   version "0.0.0"
   uid ""
 

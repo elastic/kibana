@@ -71,7 +71,7 @@ const isTypeOnlyImport = (importer: Importer) => {
 export const NoBoundaryCrossingRule: Rule.RuleModule = {
   meta: {
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
+      url: 'https://github.com/elastic/kibana/blob/main/src/dev/packages/eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
     },
     messages: {
       TYPE_MISMATCH: `"{{importedType}}" code can not be imported from "{{ownType}}" code.{{suggestion}}`,

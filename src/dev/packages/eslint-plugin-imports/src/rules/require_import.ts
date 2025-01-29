@@ -28,7 +28,7 @@ export const RequireImportRule: Rule.RuleModule = {
     type: 'problem',
     fixable: 'code',
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsrequire_import',
+      url: 'https://github.com/elastic/kibana/blob/main/src/dev/packages/eslint-plugin-imports/README.mdx#kbnimportsrequire_import',
     },
     schema: {
       type: 'array',

@@ -82,7 +82,7 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
     hasSuggestions: true,
     fixable: 'code',
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
+      url: 'https://github.com/elastic/kibana/blob/main/src/dev/packages/eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
     },
   },
   create(context) {

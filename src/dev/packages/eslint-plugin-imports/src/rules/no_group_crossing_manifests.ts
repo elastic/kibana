@@ -32,7 +32,7 @@ interface PluginInfo {
 export const NoGroupCrossingManifestsRule: Rule.RuleModule = {
   meta: {
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
+      url: 'https://github.com/elastic/kibana/blob/main/src/dev/packages/eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
     },
     messages: {
       ILLEGAL_MANIFEST_DEPENDENCY: `{{violations}}\n{{suggestion}}`,

@@ -18,7 +18,7 @@ import { visitAllImportStatements } from '../helpers/visit_all_import_statements
 export const NoUnresolvableImportsRule: Rule.RuleModule = {
   meta: {
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unresolvable_imports',
+      url: 'https://github.com/elastic/kibana/blob/main/src/dev/packages/eslint-plugin-imports/README.mdx#kbnimportsno_unresolvable_imports',
     },
   },
   create(context) {
