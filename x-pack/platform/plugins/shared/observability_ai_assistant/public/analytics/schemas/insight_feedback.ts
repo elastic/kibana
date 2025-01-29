@@ -6,14 +6,11 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
-import type { Message } from '../../../common';
 import type { Feedback } from '../../components/buttons/feedback_buttons';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
-import { messageSchema } from './common';
 
 export interface InsightFeedback {
   feedback: Feedback;
-  message: Message;
 }
 
 export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
@@ -24,9 +21,6 @@ export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
       _meta: {
         description: 'Whether the user has deemed this response useful or not',
       },
-    },
-    message: {
-      properties: messageSchema,
     },
   },
 };
