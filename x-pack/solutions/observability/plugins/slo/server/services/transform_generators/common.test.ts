@@ -7,7 +7,7 @@
 
 import { fiveMinute, twoMinute } from '../fixtures/duration';
 import { createSLO } from '../fixtures/slo';
-import { thirtyDaysRolling } from '../fixtures/time_window';
+import { sevenDaysRolling, thirtyDaysRolling } from '../fixtures/time_window';
 import { getTimesliceTargetComparator, parseIndex, getFilterRange } from './common';
 
 describe('common', () => {
@@ -75,6 +75,29 @@ describe('common', () => {
         range: {
           '@timestamp': {
             gte: 'now-30d/d',
+          },
+        },
+      });
+    });
+
+    it('starts at now minus 7 days when preventInitialBackfill is false and serverless is true', () => {
+      expect(
+        getFilterRange(
+          createSLO({
+            timeWindow: sevenDaysRolling(),
+            settings: {
+              frequency: twoMinute(),
+              syncDelay: fiveMinute(),
+              preventInitialBackfill: false,
+            },
+          }),
+          '@timestamp',
+          true
+        )
+      ).toEqual({
+        range: {
+          '@timestamp': {
+            gte: 'now-7d',
           },
         },
       });
