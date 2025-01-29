@@ -91,7 +91,7 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
       return templatesDeprecations.flatMap((templatesDataa) =>
         createBaseMigrationDeprecation(templatesDataa, {
           indexName,
-          deprecationType: 'data_streams',
+          deprecationType: 'templates',
         })
       );
     }

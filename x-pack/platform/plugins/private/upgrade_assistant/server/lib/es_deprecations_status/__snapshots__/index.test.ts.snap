@@ -199,7 +199,7 @@ Object {
       "isCritical": true,
       "message": "Configuring source mode in mappings is deprecated and will be removed in future versions. Use [index.mapping.source.mode] index setting instead.",
       "resolveDuringUpgrade": false,
-      "type": "data_streams",
+      "type": "templates",
       "url": "https://github.com/elastic/elasticsearch/pull/117172",
     },
   ],
