@@ -180,6 +180,15 @@ export async function importData(props: Props, config: Config, setState: (state:
 
   const initializeImportResp = await importer.initializeImport(index, settings, mappings, pipeline);
 
+  if (initializeImportResp.success === false) {
+    errors.push(initializeImportResp.error);
+    setState({
+      initializeImportStatus: IMPORT_STATUS.FAILED,
+      errors,
+    });
+    return;
+  }
+
   const timeFieldName = importer.getTimeField();
   setState({ timeFieldName });
 
