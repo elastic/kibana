@@ -46,7 +46,8 @@ export class DatasetQualityPlugin
       http: core.http,
     });
 
-    const isFailureStoreEnabled = !this.isServerless;
+    // TODO: Remove first check once the failure store is enabled
+    const isFailureStoreEnabled = false && !this.isServerless;
 
     const DatasetQuality = createDatasetQuality({
       core,
