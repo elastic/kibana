@@ -5248,7 +5248,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cypress-config@link:packages/kbn-cypress-config":
+"@kbn/cypress-config@link:src/dev/packages/cypress-config":
   version "0.0.0"
   uid ""
 
