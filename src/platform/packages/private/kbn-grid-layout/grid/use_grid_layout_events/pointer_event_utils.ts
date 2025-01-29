@@ -27,13 +27,15 @@ export const getResizePreviewRect = ({
   runtimeSettings: RuntimeGridSettings;
 }) => {
   const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
+
   return {
     left: panelRect.left,
     top: panelRect.top,
     bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
     right: Math.min(
       pointerPixel.clientX - interactionEvent.pointerOffsets.right,
-      getGridWidth(runtimeSettings)
+      interactionEvent.panelDiv.parentElement?.getBoundingClientRect().right ??
+        getGridWidth(runtimeSettings)
     ),
   };
 };
