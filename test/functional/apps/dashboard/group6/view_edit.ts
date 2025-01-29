@@ -15,10 +15,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const { dashboard, common, visualize, timePicker } = getPageObjects([
+  const { dashboard, common, timePicker } = getPageObjects([
     'dashboard',
     'common',
-    'visualize',
     'timePicker',
   ]);
   const dashboardName = 'dashboard with filter';
