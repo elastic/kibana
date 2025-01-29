@@ -74,13 +74,22 @@ export const registerEntityStoreDataViewRefreshTask = ({
       namespace,
     });
 
-    const { clusterClient, soClient } = await apiKeyManager.getClientFromApiKey();
+    const apiKey = await apiKeyManager.getApiKey();
+
+    if (!apiKey) {
+      logger.info(
+        `[Entity Store] No API key found, skipping data view refresh in ${namespace} namespace`
+      );
+      return;
+    }
+
+    const { clusterClient, soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
 
     const internalUserClient = core.elasticsearch.client.asInternalUser;
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, internalUserClient);
 
-    const appClient = appClientFactory.create(await apiKeyManager.getRequestFromApiKey());
+    const appClient = appClientFactory.create(await apiKeyManager.getRequestFromApiKey(apiKey));
 
     const entityStoreClient: EntityStoreDataClient = new EntityStoreDataClient({
       namespace,

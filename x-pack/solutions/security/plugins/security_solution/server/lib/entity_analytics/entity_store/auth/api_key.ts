@@ -15,30 +15,11 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import type { EntityDiscoveryAPIKey } from '@kbn/entityManager-plugin/server/lib/auth/api_key/api_key';
 import { getSpaceAwareEntityDiscoverySavedObjectId } from '@kbn/entityManager-plugin/server/lib/auth/api_key/saved_object';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 export interface ApiKeyManager {
   generate: () => Promise<void>;
 }
-
-const getApiKey = async (
-  namespace: string,
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart
-) => {
-  if (!encryptedSavedObjects) {
-    throw Error(
-      'Unable to retrieve API key. Ensure encrypted Saved Object client is enabled in this environment.'
-    );
-  }
-  const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-    includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
-  });
-  return (
-    await encryptedSavedObjectsClient.getDecryptedAsInternalUser<EntityDiscoveryAPIKey>(
-      EntityDiscoveryApiKeyType.name,
-      getSpaceAwareEntityDiscoverySavedObjectId(namespace)
-    )
-  ).attributes;
-};
 
 export const getApiKeyManager = ({
   core,
@@ -85,15 +66,36 @@ export const getApiKeyManager = ({
       });
     }
   },
-  getRequestFromApiKey: async () => {
-    const apiKey = await getApiKey(namespace, encryptedSavedObjects);
+  getApiKey: async () => {
+    if (!encryptedSavedObjects) {
+      throw Error(
+        'Unable to retrieve API key. Ensure encrypted Saved Object client is enabled in this environment.'
+      );
+    }
+    try {
+      const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+        includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+      });
+      return (
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<EntityDiscoveryAPIKey>(
+          EntityDiscoveryApiKeyType.name,
+          getSpaceAwareEntityDiscoverySavedObjectId(namespace)
+        )
+      ).attributes;
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return undefined;
+      }
+      throw err;
+    }
+  },
+  getRequestFromApiKey: async (apiKey: EntityDiscoveryAPIKey) => {
     return getFakeKibanaRequest({
       id: apiKey.id,
       api_key: apiKey.apiKey,
     });
   },
-  getClientFromApiKey: async () => {
-    const apiKey = await getApiKey(namespace, encryptedSavedObjects);
+  getClientFromApiKey: async (apiKey: EntityDiscoveryAPIKey) => {
     const fakeRequest = getFakeKibanaRequest({
       id: apiKey.id,
       api_key: apiKey.apiKey,
