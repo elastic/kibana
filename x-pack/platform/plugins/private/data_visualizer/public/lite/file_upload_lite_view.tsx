@@ -126,7 +126,7 @@ export const FileUploadLiteView: FC<Props> = ({
                   <p>
                     <FormattedMessage
                       id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
-                      defaultMessage="Upload your file, analyze its data, and optionally import the data into an index. The data can also be automatically vectorized using semantic text."
+                      defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
                     />
                   </p>
                 </EuiText>
