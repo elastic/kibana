@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { isNativeFunctionCallingSupportedMock } from './openai_adapter.test.mocks';
 import OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
 import { pick } from 'lodash';
 import { lastValueFrom, Subject, toArray, filter } from 'rxjs';
-import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  ToolChoiceType,
   ChatCompletionEventType,
   isChatCompletionChunkEvent,
   MessageRole,
@@ -48,21 +49,23 @@ function createOpenAIChunk({
 
 describe('openAIAdapter', () => {
   const executorMock = {
+    getConnector: jest.fn(),
     invoke: jest.fn(),
-  } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
+  } as InferenceExecutor & {
+    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
+    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+  };
 
-  const logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-  } as unknown as Logger;
+  const logger = loggerMock.create();
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    isNativeFunctionCallingSupportedMock.mockReset().mockReturnValue(true);
   });
 
   const defaultArgs = {
     executor: executorMock,
-    logger: loggerMock.create(),
+    logger,
   };
 
   describe('when creating the request', () => {
@@ -357,6 +360,24 @@ describe('openAIAdapter', () => {
           signal: abortController.signal,
         }),
       });
+    });
+
+    it('uses the right value for functionCalling=auto', () => {
+      isNativeFunctionCallingSupportedMock.mockReturnValue(false);
+
+      openAIAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        tools: {
+          foo: { description: 'my tool' },
+        },
+        toolChoice: ToolChoiceType.auto,
+        functionCalling: 'auto',
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(getRequest().body.tools).toBeUndefined();
     });
 
     it('propagates the temperature parameter', () => {

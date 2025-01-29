@@ -9,12 +9,9 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 
 import {
   AccessForbidden,
-  CannotCreateIndex,
   IndexNotFound,
-  MultipleReindexJobsFound,
   ReindexAlreadyInProgress,
   ReindexCannotBeCancelled,
-  ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
 } from '../../lib/data_streams/error_symbols';
 import { ReindexError } from '../../lib/data_streams/error';
@@ -26,14 +23,10 @@ export const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         return kibanaResponseFactory.forbidden({ body: e.message });
       case IndexNotFound:
         return kibanaResponseFactory.notFound({ body: e.message });
-      case CannotCreateIndex:
-      case ReindexTaskCannotBeDeleted:
-        throw e;
       case ReindexTaskFailed:
         // Bad data
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
       case ReindexAlreadyInProgress:
-      case MultipleReindexJobsFound:
       case ReindexCannotBeCancelled:
         return kibanaResponseFactory.badRequest({ body: e.message });
       default:

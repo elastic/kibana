@@ -29,7 +29,7 @@ interface DataStreamActionMetadata {
   reindex_required: boolean;
 }
 
-type EsMetadata = Actions | MlActionMetadata | DataStreamActionMetadata;
+export type EsMetadata = Actions | MlActionMetadata | DataStreamActionMetadata;
 
 // TODO(jloleysens): Replace these regexes once this issue is addressed https://github.com/elastic/elasticsearch/issues/118062
 const ES_INDEX_MESSAGES_REQIURING_REINDEX = [

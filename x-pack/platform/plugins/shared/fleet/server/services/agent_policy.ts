@@ -33,7 +33,7 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { withSpan } from '@kbn/apm-utils';
 
 import {
-  getAllowedOutputTypeForPolicy,
+  getAllowedOutputTypesForAgentPolicy,
   packageToPackagePolicy,
   policyHasAPMIntegration,
   policyHasEndpointSecurity,
@@ -211,7 +211,7 @@ class AgentPolicyService {
         soClient,
         agentPolicy,
         existingAgentPolicy,
-        getAllowedOutputTypeForPolicy(existingAgentPolicy)
+        getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
     await soClient.update<AgentPolicySOAttributes>(savedObjectType, id, {
@@ -402,7 +402,12 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
     });
-    await validateOutputForPolicy(soClient, agentPolicy);
+    await validateOutputForPolicy(
+      soClient,
+      agentPolicy,
+      {},
+      getAllowedOutputTypesForAgentPolicy(agentPolicy)
+    );
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       savedObjectType,
@@ -949,7 +954,7 @@ class AgentPolicyService {
             soClient,
             getAgentPolicy(agentPolicy),
             existingAgentPolicy,
-            getAllowedOutputTypeForPolicy(existingAgentPolicy)
+            getAllowedOutputTypesForAgentPolicy(existingAgentPolicy)
           );
         },
         {

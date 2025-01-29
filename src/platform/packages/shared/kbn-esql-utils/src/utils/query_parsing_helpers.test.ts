@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
@@ -17,6 +18,8 @@ import {
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  mapVariableToColumn,
+  getValuesFromQueryField,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -271,6 +274,284 @@ describe('esql query helpers', () => {
         'field',
         'fieldb',
       ]);
+    });
+  });
+
+  describe('mapVariableToColumn', () => {
+    it('should return the columns as they are if no variables are defined', () => {
+      const esql = 'FROM a | EVAL b = 1';
+      const variables: ESQLControlVariable[] = [];
+      const columns = [{ id: 'b', name: 'b', meta: { type: 'number' } }] as DatatableColumn[];
+      expect(mapVariableToColumn(esql, variables, columns)).toStrictEqual(columns);
+    });
+
+    it('should return the columns as they are if variables do not match', () => {
+      const esql = 'FROM logstash-* | STATS COUNT(*) BY ?field | LIMIT 10';
+      const variables = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+      ];
+      const columns = [
+        {
+          id: 'COUNT(*)',
+          name: 'COUNT(*)',
+          meta: {
+            type: 'number',
+            esType: 'long',
+            sourceParams: {
+              indexPattern: 'logstash-*',
+            },
+          },
+          isNull: false,
+        },
+        {
+          id: 'clientip',
+          name: 'clientip',
+          meta: {
+            type: 'ip',
+            esType: 'ip',
+            sourceParams: {
+              indexPattern: 'logstash-*',
+            },
+          },
+          isNull: false,
+        },
+      ] as DatatableColumn[];
+      expect(mapVariableToColumn(esql, variables, columns)).toStrictEqual(columns);
+    });
+
+    it('should return the columns enhanced with the corresponsing variables for a field type variable', () => {
+      const esql = 'FROM logstash-* | STATS COUNT(*) BY ?field | LIMIT 10 ';
+      const variables = [
+        {
+          key: 'field',
+          value: 'clientip',
+          type: ESQLVariableType.FIELDS,
+        },
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      const columns = [
+        {
+          id: 'COUNT(*)',
+          name: 'COUNT(*)',
+          meta: {
+            type: 'number',
+            esType: 'long',
+            sourceParams: {
+              indexPattern: 'logstash-*',
+            },
+          },
+          isNull: false,
+        },
+        {
+          id: 'clientip',
+          name: 'clientip',
+          meta: {
+            type: 'ip',
+            esType: 'ip',
+            sourceParams: {
+              indexPattern: 'logstash-*',
+            },
+          },
+          isNull: false,
+        },
+      ] as DatatableColumn[];
+      const expectedColumns = columns;
+      expectedColumns[1].variable = 'field';
+      expect(mapVariableToColumn(esql, variables, columns)).toStrictEqual(expectedColumns);
+    });
+
+    it('should return the columns enhanced with the corresponsing variables for a time_literal type variable', () => {
+      const esql = 'FROM logs* | STATS COUNT(*) BY BUCKET(@timestamp, ?interval)';
+      const variables = [
+        {
+          key: 'field',
+          value: 'clientip',
+          type: ESQLVariableType.FIELDS,
+        },
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      const columns = [
+        {
+          id: 'COUNT(*)',
+          name: 'COUNT(*)',
+          meta: {
+            type: 'number',
+            esType: 'long',
+            sourceParams: {
+              indexPattern: 'logs*',
+            },
+          },
+          isNull: false,
+        },
+        {
+          id: 'BUCKET(@timestamp, ?interval)',
+          name: 'BUCKET(@timestamp, ?interval)',
+          meta: {
+            type: 'date',
+            esType: 'date',
+            sourceParams: {
+              appliedTimeRange: {
+                from: 'now-30d/d',
+                to: 'now',
+              },
+              params: {},
+              indexPattern: 'logs*',
+            },
+          },
+          isNull: false,
+        },
+      ] as DatatableColumn[];
+      const expectedColumns = columns;
+      expectedColumns[1].variable = 'interval';
+      expect(mapVariableToColumn(esql, variables, columns)).toStrictEqual(expectedColumns);
+    });
+
+    it('should return the columns enhanced with the corresponsing variables for a values type variable', () => {
+      const esql = 'FROM logs* | WHERE agent.name == ?agent_name';
+      const variables = [
+        {
+          key: 'field',
+          value: 'clientip',
+          type: ESQLVariableType.FIELDS,
+        },
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      const columns = [
+        {
+          id: '@timestamp',
+          isNull: false,
+          meta: { type: 'date', esType: 'date' },
+          name: '@timestamp',
+        },
+        {
+          id: 'agent.name',
+          isNull: false,
+          meta: { type: 'string', esType: 'keyword' },
+          name: 'agent.name',
+        },
+      ] as DatatableColumn[];
+      const expectedColumns = columns;
+      expectedColumns[1].variable = 'agent_name';
+      expect(mapVariableToColumn(esql, variables, columns)).toStrictEqual(expectedColumns);
+    });
+
+    it('should return the columns as they are if the variable field is dropped', () => {
+      const esql = 'FROM logs* | WHERE agent.name == ?agent_name | DROP agent.name';
+      const variables = [
+        {
+          key: 'field',
+          value: 'clientip',
+          type: ESQLVariableType.FIELDS,
+        },
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      const columns = [
+        {
+          id: '@timestamp',
+          isNull: false,
+          meta: { type: 'date', esType: 'date' },
+          name: '@timestamp',
+        },
+      ] as DatatableColumn[];
+      expect(mapVariableToColumn(esql, variables, columns)).toStrictEqual(columns);
+    });
+
+    it('should return the columns correctly if variable is used in KEEP', () => {
+      const esql = 'FROM logstash-* | KEEP bytes, ?field';
+      const variables = [
+        {
+          key: 'field',
+          value: 'clientip',
+          type: ESQLVariableType.FIELDS,
+        },
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      const columns = [
+        {
+          id: 'bytes',
+          isNull: false,
+          meta: { type: 'number', esType: 'long' },
+          name: 'bytes',
+        },
+        {
+          id: 'clientip',
+          name: 'clientip',
+          meta: {
+            type: 'ip',
+            esType: 'ip',
+            sourceParams: {
+              indexPattern: 'logstash-*',
+            },
+          },
+          isNull: false,
+        },
+      ] as DatatableColumn[];
+      const expectedColumns = columns;
+      expectedColumns[1].variable = 'field';
+      expect(mapVariableToColumn(esql, variables, columns)).toStrictEqual(expectedColumns);
+    });
+  });
+
+  describe('getValuesFromQueryField', () => {
+    it('should return the values from the query field', () => {
+      const queryString = 'FROM my_index | WHERE my_field ==';
+      const values = getValuesFromQueryField(queryString);
+      expect(values).toEqual('my_field');
+    });
+
+    it('should return the values from the query field with new lines', () => {
+      const queryString = 'FROM my_index \n| WHERE my_field >=';
+      const values = getValuesFromQueryField(queryString);
+      expect(values).toEqual('my_field');
     });
   });
 });

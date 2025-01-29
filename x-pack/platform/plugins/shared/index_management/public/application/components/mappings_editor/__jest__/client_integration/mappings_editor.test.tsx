@@ -29,7 +29,10 @@ describe('Mappings editor: core', () => {
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
   const appDependencies = {
-    core: { application: {} },
+    core: { application: {}, http: {} },
+    services: {
+      notificationService: { toasts: {} },
+    },
     docLinks: {
       links: {
         inferenceManagement: {

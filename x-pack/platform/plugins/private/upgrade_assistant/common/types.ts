@@ -7,7 +7,7 @@
 
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { SavedObject } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/types';
 import type { DataStreamsAction } from './data_stream_types';
 
 export * from './data_stream_types';
@@ -226,8 +226,16 @@ export interface HealthIndicatorAction {
 }
 
 export interface EnrichedDeprecationInfo
-  extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
-  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator' | 'data_streams';
+  extends Omit<
+    estypes.MigrationDeprecationsDeprecation,
+    'level' | 'resolve_during_rolling_upgrade'
+  > {
+  type:
+    | keyof estypes.MigrationDeprecationsResponse
+    | 'data_streams'
+    | 'health_indicator'
+    | 'ilm_policies'
+    | 'templates';
   isCritical: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
@@ -248,7 +256,9 @@ export interface CloudBackupStatus {
 
 export interface ESUpgradeStatus {
   totalCriticalDeprecations: number;
-  deprecations: EnrichedDeprecationInfo[];
+  migrationsDeprecations: EnrichedDeprecationInfo[];
+  totalCriticalHealthIssues: number;
+  enrichedHealthIndicators: EnrichedDeprecationInfo[];
 }
 
 export interface ResolveIndexResponseFromES {

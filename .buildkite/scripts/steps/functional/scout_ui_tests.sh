@@ -6,8 +6,28 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-scout-ui-tests
 
-TEST_CONFIG="x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts"
 KIBANA_DIR="$KIBANA_BUILD_LOCATION"
 
-echo "--- Stateful: 'discover_enhanced' plugin UI Tests"
-node scripts/scout run-tests --stateful --config "$TEST_CONFIG" --kibana-install-dir "$KIBANA_DIR"
+run_tests() {
+  local suit_name=$1
+  local config_path=$2
+  local run_mode=$3
+
+  echo "--- $suit_name ($run_mode) UI Tests"
+  if ! node scripts/scout run-tests "$run_mode" --config "$config_path" --kibana-install-dir "$KIBANA_DIR"; then
+    echo "$suit_name: failed"
+    EXIT_CODE=1
+  else
+    echo "$suit_name: passed"
+  fi
+}
+
+EXIT_CODE=0
+
+# Discovery Enhanced
+for run_mode in "--stateful"; do
+  run_tests "Discovery Enhanced: Parallel Workers" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts" "$run_mode"
+  run_tests "Discovery Enhanced" "x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts" "$run_mode"
+done
+
+exit $EXIT_CODE

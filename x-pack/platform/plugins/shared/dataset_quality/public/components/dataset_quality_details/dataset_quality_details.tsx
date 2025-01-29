@@ -13,12 +13,12 @@ import { Header } from './header';
 import { Overview } from './overview';
 import { Details } from './details';
 
-const DegradedFieldFlyout = dynamic(() => import('./degraded_field_flyout'));
+const QualityIssueFlyout = dynamic(() => import('./quality_issue_flyout'));
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DatasetQualityDetails() {
-  const { isIndexNotFoundError, dataStream, isDegradedFieldFlyoutOpen } =
+  const { isIndexNotFoundError, dataStream, isQualityIssueFlyoutOpen } =
     useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
 
@@ -38,7 +38,7 @@ export default function DatasetQualityDetails() {
           <Details />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isDegradedFieldFlyoutOpen && <DegradedFieldFlyout />}
+      {isQualityIssueFlyoutOpen && <QualityIssueFlyout />}
     </>
   );
 }

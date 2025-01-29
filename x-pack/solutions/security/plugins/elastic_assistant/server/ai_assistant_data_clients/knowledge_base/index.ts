@@ -22,6 +22,8 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   Metadata,
+  ContentReferencesStore,
+  KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { StructuredTool } from '@langchain/core/tools';
@@ -30,21 +32,36 @@ import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { GetElser } from '../../types';
-import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
-import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
-import { transformESSearchToKnowledgeBaseEntry } from './transforms';
+import {
+  createKnowledgeBaseEntry,
+  getUpdateScript,
+  transformToCreateSchema,
+  transformToUpdateSchema,
+} from './create_knowledge_base_entry';
+import {
+  EsDocumentEntry,
+  EsIndexEntry,
+  EsKnowledgeBaseEntrySchema,
+  UpdateKnowledgeBaseEntrySchema,
+} from './types';
+import { transformESSearchToKnowledgeBaseEntry, transformESToKnowledgeBase } from './transforms';
 import { SECURITY_LABS_RESOURCE, USER_RESOURCE } from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
   isModelAlreadyExistsError,
 } from './helpers';
-import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
+import {
+  getKBUserFilter,
+  validateDocumentsModification,
+} from '../../routes/knowledge_base/entries/utils';
 import {
   loadSecurityLabs,
   getSecurityLabsDocsCount,
 } from '../../lib/langchain/content_loaders/security_labs_loader';
 import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
+import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
+import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -515,11 +532,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       const results = result.hits.hits.map((hit) => {
         const metadata = {
+          name: hit?._source?.name,
+          index: hit?._index,
           source: hit?._source?.source,
           required: hit?._source?.required,
           kbResource: hit?._source?.kb_resource,
         };
         return new Document({
+          id: hit?._id,
           pageContent: hit?._source?.text ?? '',
           metadata,
         });
@@ -634,14 +654,128 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
+   * Updates a Knowledge Base Entry.
+   *
+   * @param auditLogger
+   * @param knowledgeBaseEntryId
+   */
+  public updateKnowledgeBaseEntry = async ({
+    auditLogger,
+    knowledgeBaseEntry,
+  }: {
+    auditLogger?: AuditLogger;
+    knowledgeBaseEntry: KnowledgeBaseEntryUpdateProps;
+  }): Promise<{
+    errors: BulkOperationError[];
+    updatedEntry: KnowledgeBaseEntryResponse;
+  }> => {
+    const authenticatedUser = this.options.currentUser;
+
+    if (authenticatedUser == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    await validateDocumentsModification(this, authenticatedUser, [knowledgeBaseEntry.id], 'update');
+
+    this.options.logger.debug(
+      () => `Updating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
+    );
+    this.options.logger.debug(`kbIndex: ${this.indexTemplateAndPattern.alias}`);
+
+    const writer = await this.getWriter();
+    const changedAt = new Date().toISOString();
+    const { errors, docs_updated: docsUpdated } = await writer.bulk({
+      documentsToUpdate: [
+        transformToUpdateSchema({
+          user: authenticatedUser,
+          updatedAt: changedAt,
+          entry: knowledgeBaseEntry,
+          global: knowledgeBaseEntry.users != null && knowledgeBaseEntry.users.length === 0,
+        }),
+      ],
+      getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),
+      authenticatedUser,
+    });
+
+    // @ts-ignore-next-line TS2322
+    const updatedEntry = transformESToKnowledgeBase(docsUpdated)?.[0];
+
+    if (updatedEntry) {
+      auditLogger?.log(
+        knowledgeBaseAuditEvent({
+          action: KnowledgeBaseAuditAction.UPDATE,
+          id: updatedEntry.id,
+          name: updatedEntry.name,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        })
+      );
+    }
+
+    return { errors, updatedEntry };
+  };
+
+  /**
+   * Deletes a new Knowledge Base Entry.
+   *
+   * @param auditLogger
+   * @param knowledgeBaseEntryId
+   */
+  public deleteKnowledgeBaseEntry = async ({
+    auditLogger,
+    knowledgeBaseEntryId,
+  }: {
+    auditLogger?: AuditLogger;
+    knowledgeBaseEntryId: string;
+  }): Promise<{ errors: BulkOperationError[]; docsDeleted: string[] } | null> => {
+    const authenticatedUser = this.options.currentUser;
+
+    if (authenticatedUser == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    await validateDocumentsModification(this, authenticatedUser, [knowledgeBaseEntryId], 'delete');
+
+    this.options.logger.debug(
+      () => `Deleting Knowledge Base Entry:\n ID: ${JSON.stringify(knowledgeBaseEntryId, null, 2)}`
+    );
+    this.options.logger.debug(`kbIndex: ${this.indexTemplateAndPattern.alias}`);
+
+    const writer = await this.getWriter();
+    const { errors, docs_deleted: docsDeleted } = await writer.bulk({
+      documentsToDelete: [knowledgeBaseEntryId],
+      authenticatedUser,
+    });
+
+    if (docsDeleted.length) {
+      docsDeleted.forEach((docsDeletedId) => {
+        auditLogger?.log(
+          knowledgeBaseAuditEvent({
+            action: KnowledgeBaseAuditAction.DELETE,
+            id: docsDeletedId,
+            outcome: AUDIT_OUTCOME.SUCCESS,
+          })
+        );
+      });
+    }
+
+    return { errors, docsDeleted };
+  };
+
+  /**
    * Returns AssistantTools for any 'relevant' KB IndexEntries that exist in the knowledge base.
    *
    * Note: Accepts esClient so retrieval can be scoped to the current user as esClient on kbDataClient
    * is scoped to system user.
    */
   public getAssistantTools = async ({
+    contentReferencesStore,
     esClient,
   }: {
+    contentReferencesStore: ContentReferencesStore | false;
     esClient: ElasticsearchClient;
   }): Promise<StructuredTool[]> => {
     const user = this.options.currentUser;
@@ -681,6 +815,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
                 indexEntry,
                 esClient,
                 logger: this.options.logger,
+                contentReferencesStore,
               });
             })
         );

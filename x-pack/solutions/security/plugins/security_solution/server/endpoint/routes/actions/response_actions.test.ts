@@ -15,6 +15,7 @@ import type { License } from '@kbn/licensing-plugin/common/license';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import {
+  docLinksServiceMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
@@ -106,6 +107,7 @@ interface CallRouteInterface {
 
 const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
 const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
+const docLinks = docLinksServiceMock.createSetupContract();
 
 describe('Response actions', () => {
   let getActionDetailsByIdSpy: jest.SpyInstance;
@@ -171,7 +173,7 @@ describe('Response actions', () => {
       });
 
       // add the host isolation route handlers to routerMock
-      registerResponseActionRoutes(routerMock, endpointContext);
+      registerResponseActionRoutes(routerMock, endpointContext, docLinks);
 
       // define a convenience function to execute an API call for a given route, body, and mocked response from ES
       // it returns the requestContext mock used in the call, to assert internal calls (e.g. the indexed document)
@@ -1108,7 +1110,11 @@ describe('Response actions', () => {
         .index.mockResolvedValue(responseActionsClientMock.createIndexedResponse());
 
       httpRequestMock = testSetup.createRequestMock({ body: reqBody });
-      registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+      registerResponseActionRoutes(
+        testSetup.routerMock,
+        testSetup.endpointAppContextMock,
+        docLinks
+      );
 
       const actionsGenerator = new EndpointActionGenerator('seed');
       createdUploadAction = actionsGenerator.generateActionDetails({
@@ -1241,7 +1247,11 @@ describe('Response actions', () => {
           endpoint_ids: ['123-456'],
         },
       });
-      registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+      registerResponseActionRoutes(
+        testSetup.routerMock,
+        testSetup.endpointAppContextMock,
+        docLinks
+      );
 
       (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
         .fn()
@@ -1340,7 +1350,11 @@ describe('Response actions', () => {
           agent_type: 'microsoft_defender_endpoint',
         },
       });
-      registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+      registerResponseActionRoutes(
+        testSetup.routerMock,
+        testSetup.endpointAppContextMock,
+        docLinks
+      );
 
       (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
         .fn()

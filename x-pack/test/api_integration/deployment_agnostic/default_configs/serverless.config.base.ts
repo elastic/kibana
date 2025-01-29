@@ -130,7 +130,10 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       },
       testFiles: options.testFiles,
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [...(options.suiteTags?.exclude || []), 'skipServerless'],
+      },
     };
   };
 }

@@ -33,7 +33,7 @@ export interface InferenceConnector {
    * configuration (without secrets) of the connector.
    * the list of properties depends on the connector type (and subtype for inference)
    */
-  config: Record<string, string>;
+  config: Record<string, any>;
 }
 
 /**
@@ -52,7 +52,7 @@ export function isSupportedConnectorType(id: string): id is InferenceConnectorTy
  *
  * A connector is compatible if:
  * 1. its type is in the list of allowed types
- * 2. for inference connectors, if its taskType is "completion"
+ * 2. for inference connectors, if its taskType is "chat_completion"
  */
 export function isSupportedConnector(connector: RawConnector): connector is RawInferenceConnector {
   if (!isSupportedConnectorType(connector.actionTypeId)) {
@@ -60,6 +60,7 @@ export function isSupportedConnector(connector: RawConnector): connector is RawI
   }
   if (connector.actionTypeId === InferenceConnectorType.Inference) {
     const config = connector.config ?? {};
+    // only chat_completion endpoint can be used for inference
     if (config.taskType !== COMPLETION_TASK_TYPE) {
       return false;
     }
