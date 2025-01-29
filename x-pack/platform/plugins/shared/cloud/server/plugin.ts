@@ -13,6 +13,7 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
 
+import camelcaseKeys from 'camelcase-keys';
 import type { CloudConfigType } from './config';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -255,8 +256,14 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // need to get reed of ../../ to make sure we will not be out of space basePath
         const normalizedRoute = new URL(route, 'https://localhost');
 
-        const queryOnboardingToken = request.url.searchParams.get('onboarding_token') ?? undefined;
-        const queryOnboardingSecurity = request.url.searchParams.get('security') ?? undefined;
+        const queryOnboardingToken = request.query?.onboarding_token ?? undefined;
+        const queryOnboardingSecurityRaw = request.query?.security ?? undefined;
+        const queryOnboardingSecurity = queryOnboardingSecurityRaw
+          ? camelcaseKeys(queryOnboardingSecurityRaw, {
+              deep: true,
+            })
+          : undefined;
+
         const solutionType = this.config.onboarding?.default_solution;
         if (queryOnboardingToken || queryOnboardingSecurity) {
           core
@@ -270,7 +277,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                 logger: this.logger,
                 onboardingToken: queryOnboardingToken,
                 solutionType,
-                // TODO create a isOnboardingSecurity
                 security: queryOnboardingSecurity,
               });
             })
