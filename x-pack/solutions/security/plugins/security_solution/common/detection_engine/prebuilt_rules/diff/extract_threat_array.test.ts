@@ -22,7 +22,7 @@ describe('extractThreatArray', () => {
         tactic: {
           id: 'TA0000',
           name: 'test tactic',
-          reference: 'https://attack.mitre.org/tactics/TA0000/',
+          reference: 'https://attack.mitre.org/tactics/TA0000',
         },
       },
     ]);
@@ -41,13 +41,13 @@ describe('extractThreatArray', () => {
         tactic: {
           id: 'TA0000',
           name: 'test tactic',
-          reference: 'https://attack.mitre.org/tactics/TA0000/',
+          reference: 'https://attack.mitre.org/tactics/TA0000',
         },
         technique: [
           {
             id: 'T0000',
             name: 'test technique',
-            reference: 'https://attack.mitre.org/techniques/T0000/',
+            reference: 'https://attack.mitre.org/techniques/T0000',
           },
         ],
       },
