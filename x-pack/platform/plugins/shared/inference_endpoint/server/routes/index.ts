@@ -8,10 +8,7 @@
 import type { IKibanaResponse, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
-import {
-  InferenceInferenceEndpointInfo,
-  InferenceTaskType,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
@@ -131,26 +128,30 @@ export const getInferenceServicesRoute = (
 
           const { config, secrets } = request.body;
 
-          let inferenceExists = false;
-          try {
-            await esClient?.inference.get({
-              inference_id: config?.inferenceId,
-              task_type: config?.taskType as InferenceTaskType,
-            });
-            inferenceExists = true;
-          } catch (e) {
-            /* throws error if inference endpoint by id does not exist */
-          }
+          // currently update api only allows api_key and num_allocations
+          const serviceSettings = {
+            service_settings: {
+              ...(secrets?.providerSecrets?.api_key && {
+                api_key: secrets.providerSecrets.api_key,
+              }),
+              ...(config?.providerConfig?.num_allocations !== undefined && {
+                num_allocations: config.providerConfig.num_allocations,
+              }),
+            },
+          };
 
-          if (inferenceExists) {
-            await esClient.inference.delete({
-              inference_id: config.inferenceId,
-              task_type: config.taskType as InferenceTaskType,
-              force: true,
-            });
-          }
-
-          const result = await addInferenceEndpoint(esClient, config, secrets);
+          const result = await esClient.transport.request<InferenceInferenceEndpointInfo>(
+            {
+              method: 'PUT',
+              path: `/_inference/${config.taskType}/${config.inferenceId}/_update`,
+              body: JSON.stringify(serviceSettings),
+            },
+            {
+              headers: {
+                'content-type': 'application/json',
+              },
+            }
+          );
 
           return response.ok({
             body: result,
