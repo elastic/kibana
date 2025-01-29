@@ -144,7 +144,7 @@ src/dev/packages/generate @elastic/kibana-operations
 src/dev/packages/generate-console-definitions @elastic/kibana-management
 src/dev/packages/get-repo-files @elastic/kibana-operations
 src/dev/packages/import-locator @elastic/kibana-operations
-packages/kbn-import-resolver @elastic/kibana-operations
+src/dev/packages/import-resolver @elastic/kibana-operations
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
