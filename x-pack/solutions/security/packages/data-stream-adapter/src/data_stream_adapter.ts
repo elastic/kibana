@@ -6,13 +6,10 @@
  */
 
 import type { SetIndexTemplateParams } from '@kbn/index-adapter';
-import { IndexAdapter, type InstallParams, type IndexAdapterParams } from '@kbn/index-adapter';
+import { IndexAdapter, type InstallParams } from '@kbn/index-adapter';
 import { createOrUpdateDataStream } from './create_or_update_data_stream';
 
 export class DataStreamAdapter extends IndexAdapter {
-  constructor(protected readonly name: string, options: IndexAdapterParams) {
-    super(name, options);
-  }
   public setIndexTemplate(params: SetIndexTemplateParams) {
     super.setIndexTemplate({ ...params, isDataStream: true });
   }
