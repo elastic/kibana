@@ -248,7 +248,7 @@ describe('getLinksEmbeddableFactory', () => {
               title: 'links 001',
               links: getLinks(),
               layout: 'vertical',
-              // textOverflow: 'textOverflowEllipsis',
+              textOverflow: 'textOverflowEllipsis',
             },
           },
           references,
@@ -262,7 +262,7 @@ describe('getLinksEmbeddableFactory', () => {
       attributes: {
         links: getLinks(),
         layout: 'horizontal',
-        // textOverflow: 'textOverflowEllipsis',
+        textOverflow: 'textOverflowEllipsis',
       },
       description: 'just a few links',
       title: 'my links',
@@ -273,7 +273,7 @@ describe('getLinksEmbeddableFactory', () => {
       defaultPanelTitle: undefined,
       defaultPanelDescription: undefined,
       layout: 'horizontal',
-      // textOverflow: 'textOverflowEllipsis',
+      textOverflow: 'textOverflowEllipsis',
       links: getResolvedLinks(),
       description: 'just a few links',
       title: 'my links',
@@ -295,7 +295,7 @@ describe('getLinksEmbeddableFactory', () => {
       expect(deserializedState).toEqual({
         ...expectedRuntimeState,
         layout: 'horizontal',
-        // textOverflow: 'textOverflowEllipsis',
+        textOverflow: 'textOverflowEllipsis',
       });
     });
 
@@ -331,6 +331,7 @@ describe('getLinksEmbeddableFactory', () => {
             attributes: {
               links: getLinks(),
               layout: 'horizontal',
+              textOverflow: 'textOverflowEllipsis',
             },
           },
           references,
@@ -358,7 +359,7 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'some new title',
             links: getLinks(),
             layout: 'horizontal',
-            // textOverflow: 'textOverflowEllipsis',
+            textOverflow: 'textOverflowEllipsis',
           },
           options: { references },
         });
