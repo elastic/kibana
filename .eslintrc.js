@@ -2030,8 +2030,8 @@ module.exports = {
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
-        // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
-        'x-pack/platform/plugins/shared/osquery/**',
+        // FIXME @kbn/osquery-plugin has cypress code depending on security-solution plugin cypress code
+        'x-pack/platform/plugins/shared/osquery/cypress/**',
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
