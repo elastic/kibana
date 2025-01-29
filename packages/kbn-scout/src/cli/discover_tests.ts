@@ -16,7 +16,13 @@ import { measurePerformance } from '../common';
  */
 export const discoverTests: Command<void> = {
   name: 'discover-tests',
-  description: 'Discover Playwright configuration files with Scout tests',
+  description: `
+  Discover Playwright configuration files with Scout tests.
+
+  Common usage:
+    node scripts/scout discover-tests --searchPaths <search_paths>
+    node scripts/scout discover-tests
+  `,
   flags: {
     string: ['searchPaths'],
     default: { searchPaths: DEFAULT_TEST_PATH_PATTERNS },
