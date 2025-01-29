@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponseWithName } from '../../../types';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { SchemaEditorEditingState } from '../hooks/use_editing_state';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { SamplePreviewTable } from './sample_preview_table';
@@ -27,7 +27,7 @@ import { FieldSummary } from './field_summary';
 
 export type SchemaEditorFlyoutProps = {
   streamsRepositoryClient: StreamsRepositoryClient;
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
 } & SchemaEditorEditingState;
 
 export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {

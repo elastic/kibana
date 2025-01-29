@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import {
   IngestStreamGetResponse,
   InheritedFieldDefinition,
@@ -45,7 +44,7 @@ export async function readStream({
 
   if (isUnwiredStreamDefinition(streamDefinition)) {
     return {
-      stream: omit(streamDefinition, 'name'),
+      stream: streamDefinition,
       elasticsearch_assets: await getUnmanagedElasticsearchAssets({
         dataStream,
         scopedClusterClient,
@@ -57,7 +56,7 @@ export async function readStream({
   }
 
   const body: WiredStreamGetResponse = {
-    stream: omit(streamDefinition, 'name'),
+    stream: streamDefinition,
     dashboards,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: ancestors.reduce((acc, def) => {

@@ -7,12 +7,12 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
+import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { useKibana } from '../../hooks/use_kibana';
 import { Wrapper } from './wrapper';
-import { UnwiredStreamGetResponseWithName } from '../../types';
 
 type ManagementSubTabs = 'enrich' | 'overview';
 
@@ -24,7 +24,7 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: UnwiredStreamGetResponseWithName;
+  definition: UnwiredStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -79,7 +79,7 @@ export function ClassicStreamDetailManagement({
   return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
 }
 
-function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetResponseWithName }) {
+function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetResponse }) {
   const {
     core: {
       http: { basePath },

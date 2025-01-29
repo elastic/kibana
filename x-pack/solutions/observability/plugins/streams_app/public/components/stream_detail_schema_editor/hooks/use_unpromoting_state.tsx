@@ -12,7 +12,7 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { WiredStreamGetResponseWithName } from '../../../types';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 
 export type SchemaEditorUnpromotingState = ReturnType<typeof useUnpromotingState>;
 
@@ -24,7 +24,7 @@ export const useUnpromotingState = ({
   toastsService,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
   refreshUnmappedFields: () => void;
   toastsService: ToastsStart;

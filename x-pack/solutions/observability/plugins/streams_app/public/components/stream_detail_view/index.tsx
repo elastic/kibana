@@ -13,7 +13,6 @@ import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_v
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../stream_detail_management';
 import { StreamDetailOverview } from '../stream_detail_overview';
-import { IngestStreamGetResponseWithName } from '../../types';
 
 export function StreamDetailView() {
   const params1 = useStreamsAppParams('/{key}/{tab}', true);
@@ -37,24 +36,14 @@ export function StreamDetailView() {
     loading,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient
-        .fetch('GET /api/streams/{id}', {
-          signal,
-          params: {
-            path: {
-              id: key,
-            },
+      return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
+        signal,
+        params: {
+          path: {
+            id: key,
           },
-        })
-        .then((response) => {
-          return {
-            ...response,
-            stream: {
-              ...response.stream,
-              name: key,
-            },
-          } as IngestStreamGetResponseWithName;
-        });
+        },
+      });
     },
     [streamsRepositoryClient, key]
   );

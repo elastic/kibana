@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiPortal } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useEditingState } from './hooks/use_editing_state';
 import { SchemaEditorFlyout } from './flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -18,10 +19,9 @@ import { FieldsTableContainer } from './fields_table';
 import { FieldTypeFilterGroup } from './filters/type_filter_group';
 import { useQueryAndFilters } from './hooks/use_query_and_filters';
 import { FieldStatusFilterGroup } from './filters/status_filter_group';
-import { WiredStreamGetResponseWithName } from '../../types';
 
 interface SchemaEditorProps {
-  definition?: WiredStreamGetResponseWithName;
+  definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
   isLoadingDefinition: boolean;
 }

@@ -23,17 +23,16 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { isRootStreamDefinition } from '@kbn/streams-schema';
+import { isRootStreamDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
 import { FieldType } from './field_type';
 import { FieldStatusBadge } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
 import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 import { FieldParent } from './field_parent';
 import { SchemaEditorQueryAndFiltersState } from './hooks/use_query_and_filters';
-import { WiredStreamGetResponseWithName } from '../../types';
 
 interface FieldsTableContainerProps {
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
   unmappedFieldsResult?: string[];
   isLoadingUnmappedFields: boolean;
   query?: Query;
@@ -167,7 +166,7 @@ export const FieldsTableContainer = ({
 };
 
 interface FieldsTableProps {
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
   fields: FieldEntry[];
   editingState: SchemaEditorEditingState;
   unpromotingState: SchemaEditorUnpromotingState;

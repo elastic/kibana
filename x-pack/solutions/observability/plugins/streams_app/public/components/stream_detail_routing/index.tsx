@@ -42,6 +42,7 @@ import {
   RoutingDefinition,
   IngestUpsertRequest,
   getAncestorsAndSelf,
+  WiredStreamGetResponse,
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
@@ -64,7 +65,6 @@ import {
   alwaysToEmptyEquals,
   emptyEqualsToAlways,
 } from '../../util/condition';
-import { WiredStreamGetResponseWithName } from '../../types';
 
 interface ChildUnderEdit {
   isNew: boolean;
@@ -75,7 +75,7 @@ function useRoutingState({
   definition,
   toasts,
 }: {
-  definition?: WiredStreamGetResponseWithName;
+  definition?: WiredStreamGetResponse;
   toasts: IToasts;
 }) {
   const [lastDisplayedToast, setLastDisplayedToast] = React.useState<Toast | undefined>();
@@ -158,7 +158,7 @@ export function StreamDetailRouting({
   definition,
   refreshDefinition,
 }: {
-  definition?: WiredStreamGetResponseWithName;
+  definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const { appParams, core } = useKibana();
@@ -288,7 +288,7 @@ function ControlBar({
   routingAppState,
   refreshDefinition,
 }: {
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
   refreshDefinition: () => void;
 }) {
@@ -484,7 +484,7 @@ function PreviewPanel({
   definition,
   routingAppState,
 }: {
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
 }) {
   const {
@@ -689,7 +689,7 @@ function ChildStreamList({
     draggingChildStream,
   },
 }: {
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
   availableStreams: string[];
 }) {
@@ -820,7 +820,7 @@ function ChildStreamList({
   );
 }
 
-function CurrentStreamEntry({ definition }: { definition: WiredStreamGetResponseWithName }) {
+function CurrentStreamEntry({ definition }: { definition: WiredStreamGetResponse }) {
   const router = useStreamsAppRouter();
   const breadcrumbs: EuiBreadcrumb[] = getAncestorsAndSelf(definition.stream.name).map(
     (parentId) => {

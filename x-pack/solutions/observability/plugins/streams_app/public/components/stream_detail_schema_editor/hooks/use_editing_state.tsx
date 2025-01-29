@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NamedFieldDefinitionConfig } from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useCallback, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -13,7 +13,6 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { WiredStreamGetResponseWithName } from '../../../types';
 import { FieldStatus } from '../configuration_maps';
 
 export type SchemaEditorEditingState = ReturnType<typeof useEditingState>;
@@ -36,7 +35,7 @@ export const useEditingState = ({
   toastsService,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
   refreshUnmappedFields: () => void;
   toastsService: ToastsStart;

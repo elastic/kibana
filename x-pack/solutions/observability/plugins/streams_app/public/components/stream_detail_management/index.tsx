@@ -5,23 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import { isWiredStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { WiredStreamDetailManagement } from './wired';
 import { ClassicStreamDetailManagement } from './classic';
-import { IngestStreamGetResponseWithName, WiredStreamGetResponseWithName } from '../../types';
-
-function isWiredStreamGetResponseWithName(
-  definition: IngestStreamGetResponseWithName
-): definition is WiredStreamGetResponseWithName {
-  return isWiredStreamDefinition(definition.stream);
-}
 
 export function StreamDetailManagement({
   definition,
   refreshDefinition,
   isLoadingDefinition,
 }: {
-  definition?: IngestStreamGetResponseWithName;
+  definition?: IngestStreamGetResponse;
   refreshDefinition: () => void;
   isLoadingDefinition: boolean;
 }) {
@@ -29,7 +22,7 @@ export function StreamDetailManagement({
     return null;
   }
 
-  if (isWiredStreamGetResponseWithName(definition)) {
+  if (isWiredStreamGetResponse(definition)) {
     return (
       <WiredStreamDetailManagement
         definition={definition}

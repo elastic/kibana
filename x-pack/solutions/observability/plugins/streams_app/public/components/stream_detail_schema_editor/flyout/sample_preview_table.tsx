@@ -10,8 +10,7 @@ import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { NamedFieldDefinitionConfig } from '@kbn/streams-schema';
-import { WiredStreamGetResponseWithName } from '../../../types';
+import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
 import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
@@ -19,7 +18,7 @@ import { isFullFieldDefinition } from '../hooks/use_editing_state';
 import { LoadingPanel } from '../../loading_panel';
 
 interface SamplePreviewTableProps {
-  definition: WiredStreamGetResponseWithName;
+  definition: WiredStreamGetResponse;
   nextFieldDefinition?: Partial<NamedFieldDefinitionConfig>;
   streamsRepositoryClient: StreamsRepositoryClient;
 }

@@ -6,13 +6,13 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { Wrapper } from './wrapper';
-import { WiredStreamGetResponseWithName } from '../../types';
 
 type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor';
 
@@ -25,7 +25,7 @@ export function WiredStreamDetailManagement({
   refreshDefinition,
   isLoadingDefinition,
 }: {
-  definition?: WiredStreamGetResponseWithName;
+  definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
   isLoadingDefinition: boolean;
 }) {
