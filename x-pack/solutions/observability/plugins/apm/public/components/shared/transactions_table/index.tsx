@@ -55,6 +55,7 @@ interface Props {
   end: string;
   saveTableOptionsToUrl?: boolean;
   showSparkPlots?: boolean;
+  onTableLoad?: () => void;
 }
 
 export function TransactionsTable({
@@ -69,6 +70,7 @@ export function TransactionsTable({
   start,
   end,
   saveTableOptionsToUrl = false,
+  onTableLoad,
   showSparkPlots,
 }: Props) {
   const { link } = useApmRouter();
@@ -89,7 +91,7 @@ export function TransactionsTable({
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
-
+  const [isTableLoaded, setIsTableLoaded] = useState(false);
   const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
@@ -106,6 +108,18 @@ export function TransactionsTable({
       start,
       transactionType,
     });
+
+  useEffect(() => {
+    if (
+      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      onTableLoad &&
+      !isTableLoaded
+    ) {
+      onTableLoad();
+      setIsTableLoaded(true);
+    }
+  }, [mainStatisticsStatus, detailedStatisticsStatus, onTableLoad, isTableLoaded]);
 
   const columns = useMemo(() => {
     return getColumns({

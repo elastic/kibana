@@ -8,9 +8,9 @@
 import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
-import { isPending } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -55,6 +55,7 @@ interface Props {
   comparisonEnabled?: boolean;
   saveTableOptionsToUrl?: boolean;
   showPerPageOptions?: boolean;
+  onTableLoad?: () => void;
 }
 
 const defaultSorting = {
@@ -69,6 +70,7 @@ export function ErrorGroupList({
   comparisonEnabled,
   saveTableOptionsToUrl,
   showPerPageOptions = true,
+  onTableLoad,
 }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -82,7 +84,7 @@ export function ErrorGroupList({
   const { offset } = query;
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
-
+  const [isTableLoaded, setIsTableLoaded] = useState(false);
   const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
 
   const {
@@ -95,6 +97,24 @@ export function ErrorGroupList({
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
   const isDetailedStatsLoading = isPending(detailedStatisticsStatus);
+
+  useEffect(() => {
+    if (
+      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      onTableLoad &&
+      !isTableLoaded
+    ) {
+      onTableLoad();
+      setIsTableLoaded(true);
+    }
+  }, [
+    mainStatisticsStatus,
+    detailedStatisticsStatus,
+    onTableLoad,
+    isTableLoaded,
+    setIsTableLoaded,
+  ]);
 
   const columns = useMemo(() => {
     const groupIdColumn: ITableColumn<ErrorGroupItem> = {

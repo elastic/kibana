@@ -9,8 +9,8 @@ import { EuiIconTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React from 'react';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React, { useEffect, useState } from 'react';
+import { FETCH_STATUS, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -26,6 +26,7 @@ interface ServiceOverviewDependenciesTableProps {
   link?: ReactNode;
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
+  onTableLoad?: () => void;
 }
 
 export function ServiceOverviewDependenciesTable({
@@ -33,6 +34,7 @@ export function ServiceOverviewDependenciesTable({
   link,
   showPerPageOptions = true,
   showSparkPlots,
+  onTableLoad,
 }: ServiceOverviewDependenciesTableProps) {
   const {
     query: {
@@ -52,7 +54,7 @@ export function ServiceOverviewDependenciesTable({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const trackEvent = useUiTracker();
-
+  const [isTableLoaded, setIsTableLoaded] = useState(false);
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -74,6 +76,13 @@ export function ServiceOverviewDependenciesTable({
     },
     [start, end, serviceName, environment, offset, comparisonEnabled]
   );
+
+  useEffect(() => {
+    if (status === FETCH_STATUS.SUCCESS && onTableLoad && !isTableLoaded) {
+      onTableLoad();
+      setIsTableLoaded(true);
+    }
+  }, [status, onTableLoad, isTableLoaded, setIsTableLoaded]);
 
   const dependencies =
     data?.serviceDependencies.map((dependency) => {
