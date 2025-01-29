@@ -38,7 +38,6 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { useRootProfile } from '../../context_awareness';
@@ -353,13 +352,7 @@ export function DiscoverMainRoute({
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <rootProfileState.AppWrapper>
-          <DiscoverTopNavInline
-            stateContainer={stateContainer}
-            hideNavMenuItems={loading || noDataState.showNoDataPage}
-          />
-          {mainContent}
-        </rootProfileState.AppWrapper>
+        <rootProfileState.AppWrapper>{mainContent}</rootProfileState.AppWrapper>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );

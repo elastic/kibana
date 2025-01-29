@@ -155,6 +155,7 @@ function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamLifecycle }) {
     return (
       <EuiBadge color="hollow">
         <EuiLink
+          data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
           href={ilmLocator?.getRedirectUrl({
             page: 'policy_edit',
