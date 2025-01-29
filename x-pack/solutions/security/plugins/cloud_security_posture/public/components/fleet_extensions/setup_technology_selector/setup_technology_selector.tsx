@@ -9,9 +9,7 @@ import React from 'react';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiBetaBadge,
   EuiAccordion,
   EuiFormRow,
   EuiLink,
@@ -19,9 +17,6 @@ import {
   EuiSuperSelect,
   EuiText,
   useGeneratedHtmlId,
-  EuiFlexItem,
-  EuiFlexGroup,
-  useEuiTheme,
 } from '@elastic/eui';
 import {
   SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
@@ -37,47 +32,6 @@ export const SetupTechnologySelector = ({
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const agentlessOptionBadge = (isDropDownDisplay: boolean) => {
-    const title = isDropDownDisplay ? (
-      <strong>
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay"
-          defaultMessage="Agentless"
-        />
-      </strong>
-    ) : (
-      <FormattedMessage
-        id="xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay"
-        defaultMessage="Agentless"
-      />
-    );
-    return (
-      <EuiFlexGroup alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-        <EuiFlexItem css={{ paddingTop: !isDropDownDisplay ? euiTheme.size.xs : undefined }}>
-          <EuiBetaBadge
-            label={i18n.translate(
-              'xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay.techPreviewBadge.label',
-              {
-                defaultMessage: 'Beta',
-              }
-            )}
-            size="m"
-            color="hollow"
-            tooltipContent={i18n.translate(
-              'xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay.techPreviewBadge.tooltip',
-              {
-                defaultMessage:
-                  'This functionality is in technical preview and may be changed in a future release. Please help us by reporting any bugs.',
-              }
-            )}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
   const options = [
     {
       value: SetupTechnology.AGENT_BASED,
@@ -109,11 +63,21 @@ export const SetupTechnologySelector = ({
     },
     {
       value: SetupTechnology.AGENTLESS,
-      inputDisplay: agentlessOptionBadge(false),
+      inputDisplay: (
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay"
+          defaultMessage="Agentless"
+        />
+      ),
       'data-test-subj': 'setup-technology-agentless-option',
       dropdownDisplay: (
         <>
-          {agentlessOptionBadge(true)}
+          <strong>
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay"
+              defaultMessage="Agentless"
+            />
+          </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage

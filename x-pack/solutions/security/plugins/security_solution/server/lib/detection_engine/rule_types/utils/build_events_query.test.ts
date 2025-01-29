@@ -531,7 +531,6 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      runtime_mappings: undefined,
       track_total_hits: undefined,
       ignore_unavailable: true,
       size: 100,
