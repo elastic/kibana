@@ -7560,7 +7560,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/sort-package-json@link:packages/kbn-sort-package-json":
+"@kbn/sort-package-json@link:src/dev/packages/sort-package-json":
   version "0.0.0"
   uid ""
 
