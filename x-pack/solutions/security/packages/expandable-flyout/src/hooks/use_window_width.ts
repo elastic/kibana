@@ -9,7 +9,7 @@ import { useLayoutEffect, useState } from 'react';
 import { useDispatch } from '../store/redux';
 import { setDefaultWidthsAction } from '../store/actions';
 
-export const RESOLUTION_BREAKPOINTS = {
+const RESOLUTION_BREAKPOINTS = {
   RIGHT_SECTION: {
     MIN: 992, // resolution below which the width is fixed to 380px
     OVERLAY_MAX: 1920, // resolution above which the overlay width is fixed to 750px
@@ -20,10 +20,10 @@ export const RESOLUTION_BREAKPOINTS = {
     MIN: 1600, // resolution below which the overlay width goes full width (minus the padding) and the push width goes to its fixed 380px
   },
 };
-export const FULL_WIDTH_PADDING = 48;
-export const NAVIGATION_WIDTH = 200;
+const FULL_WIDTH_PADDING = 48;
+const NAVIGATION_WIDTH = 200;
 
-export const SECTION_WIDTHS = {
+const SECTION_WIDTHS = {
   RIGHT: {
     MIN: 380,
     MAX_OVERLAY: 750,
@@ -121,8 +121,8 @@ const calculateRightSectionDefaultWidths = (
  */
 const calculateLeftSectionDefaultWidths = (
   windowWidth: number,
-  rightSectionWidthOverlayMode: number,
-  rightSectionWidthPushMode: number
+  rightSectionWidthOverlay: number,
+  rightSectionWidthPush: number
 ): {
   overlay: number;
   push: number;
@@ -131,9 +131,9 @@ const calculateLeftSectionDefaultWidths = (
   // for window widths above 1600px, the overlay width will use 80% of the remaining space, while never going bigger than 1500px
   const overlayWidth =
     windowWidth <= RESOLUTION_BREAKPOINTS.LEFT_SECTION.MIN
-      ? windowWidth - rightSectionWidthOverlayMode - FULL_WIDTH_PADDING
+      ? windowWidth - rightSectionWidthOverlay - FULL_WIDTH_PADDING
       : Math.min(
-          ((windowWidth - rightSectionWidthOverlayMode) * 80) / 100,
+          ((windowWidth - rightSectionWidthOverlay) * 80) / 100,
           SECTION_WIDTHS.LEFT.OVERLAY.MAX
         );
 
@@ -142,7 +142,7 @@ const calculateLeftSectionDefaultWidths = (
   const pushWidth =
     windowWidth <= RESOLUTION_BREAKPOINTS.LEFT_SECTION.MIN
       ? SECTION_WIDTHS.LEFT.PUSH.MIN
-      : ((windowWidth - rightSectionWidthPushMode - NAVIGATION_WIDTH) * 40) / 100;
+      : ((windowWidth - rightSectionWidthPush - NAVIGATION_WIDTH) * 40) / 100;
 
   return {
     overlay: overlayWidth,
@@ -167,27 +167,27 @@ export const useWindowWidth = (): number => {
 
       // if the browser's window width is 0 (which should only happen the very first time this hook is called) there is no point in calculating all the default flyout's widths
       if (windowWidth !== 0) {
-        const { overlay: rightSectionWidthOverlayMode, push: rightSectionWidthPushMode } =
+        const { overlay: rightSectionWidthOverlay, push: rightSectionWidthPush } =
           calculateRightSectionDefaultWidths(windowWidth);
 
-        const { overlay: leftSectionWidthOverlayMode, push: leftSectionWidthPushMode } =
+        const { overlay: leftSectionWidthOverlay, push: leftSectionWidthPush } =
           calculateLeftSectionDefaultWidths(
             windowWidth,
-            rightSectionWidthOverlayMode,
-            rightSectionWidthPushMode
+            rightSectionWidthOverlay,
+            rightSectionWidthPush
           );
 
-        const previewSectionWidthOverlayMode: number = rightSectionWidthOverlayMode;
-        const previewSectionWidthPushMode: number = rightSectionWidthPushMode;
+        const previewSectionWidthOverlay: number = rightSectionWidthOverlay;
+        const previewSectionWidthPush: number = rightSectionWidthPush;
 
         dispatch(
           setDefaultWidthsAction({
-            rightOverlay: rightSectionWidthOverlayMode,
-            leftOverlay: leftSectionWidthOverlayMode,
-            previewOverlay: previewSectionWidthOverlayMode,
-            rightPush: rightSectionWidthPushMode,
-            leftPush: leftSectionWidthPushMode,
-            previewPush: previewSectionWidthPushMode,
+            rightOverlay: rightSectionWidthOverlay,
+            leftOverlay: leftSectionWidthOverlay,
+            previewOverlay: previewSectionWidthOverlay,
+            rightPush: rightSectionWidthPush,
+            leftPush: leftSectionWidthPush,
+            previewPush: previewSectionWidthPush,
           })
         );
       }
