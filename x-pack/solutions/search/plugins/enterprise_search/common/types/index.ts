@@ -36,7 +36,6 @@ export interface Meta {
 }
 
 export interface ClientConfigType {
-  host?: string;
   ui: {
     enabled: boolean;
   };

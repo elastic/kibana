@@ -9,9 +9,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
-  accessCheckTimeout: schema.number({ defaultValue: 5000 }),
-  accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
-  customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   enabled: schema.boolean({ defaultValue: true }),
   hasConnectors: schema.boolean({ defaultValue: true }),
   hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
@@ -19,17 +16,6 @@ export const configSchema = schema.object({
   hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: false }),
-  host: schema.maybe(schema.string()),
-  isCloud: schema.boolean({ defaultValue: false }),
-  ssl: schema.object({
-    certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
-    ),
-    verificationMode: schema.oneOf(
-      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-      { defaultValue: 'full' }
-    ),
-  }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
@@ -38,9 +24,15 @@ export const configSchema = schema.object({
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ unused }) => [unused('canDeployEntSearch', { level: 'warning' })],
+  deprecations: ({ unusedFromRoot }) => [
+    unusedFromRoot('enterpriseSearch.host', { level: 'critical' }),
+    unusedFromRoot('enterpriseSearch.ssl', { level: 'critical' }),
+    unusedFromRoot('enterpriseSearch.accessCheckTimeout', { level: 'critical' }),
+    unusedFromRoot('enterpriseSearch.accessCheckTimeoutWarning', { level: 'critical' }),
+    unusedFromRoot('enterpriseSearch.customHeaders', { level: 'critical' }),
+    unusedFromRoot('enterpriseSearch.isCloud', { level: 'warning' }),
+  ],
   exposeToBrowser: {
-    host: true,
     ui: true,
   },
   schema: configSchema,
