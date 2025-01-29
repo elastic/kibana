@@ -6456,7 +6456,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mock-idp-plugin@link:packages/kbn-mock-idp-plugin":
+"@kbn/mock-idp-plugin@link:src/dev/packages/mock-idp-plugin":
   version "0.0.0"
   uid ""
 
