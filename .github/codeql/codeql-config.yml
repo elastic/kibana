@@ -41,7 +41,7 @@ paths-ignore:
   - packages/kbn-cypress-*
   - src/dev/packages/dev-cli-errors
   - src/dev/packages/dev-cli-runner
-  - packages/kbn-dev-proc-runner
+  - src/dev/packages/dev-proc-runner
   - packages/kbn-dev-utils
   - packages/kbn-docs-utils
   - packages/kbn-es

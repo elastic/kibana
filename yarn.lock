@@ -5396,7 +5396,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-proc-runner@link:packages/kbn-dev-proc-runner":
+"@kbn/dev-proc-runner@link:src/dev/packages/dev-proc-runner":
   version "0.0.0"
   uid ""
 
