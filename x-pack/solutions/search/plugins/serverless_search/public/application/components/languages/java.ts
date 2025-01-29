@@ -20,8 +20,8 @@ export const javaDefinition: LanguageDefinition = {
   },
   // Code Snippets,
   installClient: `dependencies {
-    implementation 'co.elastic.clients:elasticsearch-java:${elasticsearchVersion}'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}'
+    implementation 'co.elastic.clients:elasticsearch-java:$elasticsearchVersion'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:$jacksonVersion'
 }`,
   configureClient: ({ apiKey, url }) => `// URL and API key
 String serverUrl = "${url}";
