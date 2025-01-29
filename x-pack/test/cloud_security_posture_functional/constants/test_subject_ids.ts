@@ -36,7 +36,7 @@ export const testSubjectIds = {
     CLIENT_ID: 'cisAzureClientId',
     CLIENT_SECRET: 'passwordInput-client-secret',
     CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
-    CLIENT_CERTIFICATE_PASSWORD: 'cisAzureClientCertificatePassword',
+    CLIENT_CERTIFICATE_PASSWORD: 'passwordInput-client-certificate-password',
     CLIENT_USERNAME: 'cisAzureClientUsername',
     CLIENT_PASSWORD: 'cisAzureClientPassword',
   },
@@ -69,4 +69,6 @@ export const testSubjectIds = {
   SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ: 'setup-technology-selector-accordion',
   SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION: 'setup-technology-agentless-option',
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
+  SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO: 'setup-technology-agentless-radio',
+  SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_RADIO: 'setup-technology-agent-based-radio',
 };
