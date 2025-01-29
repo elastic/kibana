@@ -15,6 +15,7 @@ import {
 
 import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { DataVisualizerStartDependencies } from '../application/common/types/data_visualizer_plugin';
+import { createFlyout } from './flyout/create_flyout';
 
 export const createOpenFileUploadLiteTrigger: Trigger = {
   id: OPEN_FILE_UPLOAD_LITE_TRIGGER,
@@ -47,9 +48,8 @@ export function createOpenFileUploadLiteAction(
     }: OpenFileUploadLiteContext) {
       try {
         const { share, data } = plugins;
-        const { showFlyout } = await import('./flyout/show_flyout');
 
-        await showFlyout(coreStart, share, data, {
+        createFlyout(coreStart, share, data, {
           onUploadComplete,
           autoAddInference,
           indexSettings,

@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { FC } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
 import { from } from 'rxjs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
-import { FileUploadLiteFlyoutContents } from './flyout';
+import { EuiFlyoutHeader, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function createFlyout(
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
   props: OpenFileUploadLiteContext
-): Promise<void> {
+) {
   const {
     http,
     overlays,
@@ -29,62 +30,73 @@ export function createFlyout(
     ...startServices
   } = coreStart;
 
-  return new Promise(async (resolve, reject) => {
-    try {
-      let results: FileUploadResults | null = null;
-      const { onUploadComplete, autoAddInference, indexSettings } = props;
-      try {
-        const onFlyoutClose = () => {
-          flyoutSession.close();
-          if (results !== null && typeof onUploadComplete === 'function') {
-            onUploadComplete(results);
-          }
-          resolve();
-        };
-        const flyoutSession = overlays.openFlyout(
-          toMountPoint(
-            <KibanaContextProvider
-              services={{
-                ...coreStart,
-                share,
-                data,
-              }}
-            >
-              <FileUploadLiteFlyoutContents
-                autoAddInference={autoAddInference}
-                indexSettings={indexSettings}
-                onClose={() => {
-                  onFlyoutClose();
-                  resolve();
-                }}
-                setUploadResults={(res) => {
-                  if (res) {
-                    results = res;
-                  }
-                }}
-              />
-            </KibanaContextProvider>,
-            startServices
-          ),
-          {
-            'data-test-subj': 'mlFlyoutLayerSelector',
-            ownFocus: true,
-            onClose: onFlyoutClose,
-            size: '500px',
-          }
-        );
-
-        // Close the flyout when user navigates out of the current plugin
-        currentAppId$
-          .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-          .subscribe(() => {
-            flyoutSession.close();
-          });
-      } catch (error) {
-        reject(error);
-      }
-    } catch (error) {
-      reject(error);
-    }
+  const LazyFlyoutContents = lazy(async () => {
+    const { FlyoutContents } = await import('./flyout_contents');
+    return {
+      default: FlyoutContents,
+    };
   });
+
+  let results: FileUploadResults | null = null;
+  const { onUploadComplete, autoAddInference, indexSettings } = props;
+  try {
+    const onFlyoutClose = () => {
+      flyoutSession.close();
+      if (results !== null && typeof onUploadComplete === 'function') {
+        onUploadComplete(results);
+      }
+    };
+
+    const flyoutSession = overlays.openFlyout(
+      toMountPoint(
+        <Suspense fallback={<LoadingContents />}>
+          <LazyFlyoutContents
+            coreStart={coreStart}
+            share={share}
+            data={data}
+            props={{ autoAddInference, indexSettings }}
+            onFlyoutClose={onFlyoutClose}
+            setUploadResults={(res) => {
+              if (res) {
+                results = res;
+              }
+            }}
+          />
+        </Suspense>,
+        startServices
+      ),
+      {
+        'data-test-subj': 'mlFlyoutLayerSelector',
+        ownFocus: true,
+        onClose: onFlyoutClose,
+        size: '500px',
+      }
+    );
+
+    // Close the flyout when user navigates out of the current plugin
+    currentAppId$
+      .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
+      .subscribe(() => {
+        flyoutSession.close();
+      });
+  } catch (error) {
+    //
+  }
 }
+
+const LoadingContents: FC = () => (
+  <>
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+            defaultMessage="Upload a file"
+          />
+        </h3>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiSpacer />
+    <EuiSkeletonText />
+  </>
+);
