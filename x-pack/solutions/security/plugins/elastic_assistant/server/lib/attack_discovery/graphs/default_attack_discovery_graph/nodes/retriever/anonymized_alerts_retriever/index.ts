@@ -21,36 +21,48 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
 
   #alertsIndexPattern?: string;
   #anonymizationFields?: AnonymizationFieldResponse[];
+  #end?: string | null;
   #esClient: ElasticsearchClient;
+  #filter?: Record<string, unknown> | null;
   #onNewReplacements?: (newReplacements: Replacements) => void;
   #replacements?: Replacements;
   #size?: number;
+  #start?: string | null;
 
   constructor({
     alertsIndexPattern,
     anonymizationFields,
     fields,
+    end,
     esClient,
+    filter,
     onNewReplacements,
     replacements,
     size,
+    start,
   }: {
     alertsIndexPattern?: string;
     anonymizationFields?: AnonymizationFieldResponse[];
-    fields?: CustomRetrieverInput;
+    end?: string | null;
     esClient: ElasticsearchClient;
+    fields?: CustomRetrieverInput;
+    filter?: Record<string, unknown> | null;
     onNewReplacements?: (newReplacements: Replacements) => void;
     replacements?: Replacements;
     size?: number;
+    start?: string | null;
   }) {
     super(fields);
 
     this.#alertsIndexPattern = alertsIndexPattern;
     this.#anonymizationFields = anonymizationFields;
+    this.#end = end;
     this.#esClient = esClient;
+    this.#filter = filter;
     this.#onNewReplacements = onNewReplacements;
     this.#replacements = replacements;
     this.#size = size;
+    this.#start = start;
   }
 
   async _getRelevantDocuments(
@@ -60,10 +72,13 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
     const anonymizedAlerts = await getAnonymizedAlerts({
       alertsIndexPattern: this.#alertsIndexPattern,
       anonymizationFields: this.#anonymizationFields,
+      end: this.#end,
       esClient: this.#esClient,
+      filter: this.#filter,
       onNewReplacements: this.#onNewReplacements,
       replacements: this.#replacements,
       size: this.#size,
+      start: this.#start,
     });
 
     return anonymizedAlerts.map((alert) => ({

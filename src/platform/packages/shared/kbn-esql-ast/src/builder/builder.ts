@@ -32,12 +32,13 @@ import {
   ESQLParamLiteral,
   ESQLFunction,
   ESQLAstItem,
+  ESQLStringLiteral,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLTimeInterval,
-  ESQLStringLiteral,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
+  BinaryExpressionOperator,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -56,10 +57,10 @@ export namespace Builder {
     incomplete,
   });
 
-  export const command = (
-    template: PartialFields<AstNodeTemplate<ESQLCommand>, 'args'>,
+  export const command = <Name extends string>(
+    template: PartialFields<AstNodeTemplate<ESQLCommand<Name>>, 'args'>,
     fromParser?: Partial<AstNodeParserFields>
-  ): ESQLCommand => {
+  ): ESQLCommand<Name> => {
     return {
       ...template,
       ...Builder.parserFields(fromParser),
@@ -260,19 +261,25 @@ export namespace Builder {
         ) as ESQLUnaryExpression;
       };
 
-      export const binary = (
-        name: string,
+      export const binary = <Name extends BinaryExpressionOperator = BinaryExpressionOperator>(
+        name: Name,
         args: [left: ESQLAstItem, right: ESQLAstItem],
         template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
         fromParser?: Partial<AstNodeParserFields>
-      ): ESQLBinaryExpression => {
+      ): ESQLBinaryExpression<Name> => {
         const operator = Builder.identifier({ name });
         return Builder.expression.func.node(
           { ...template, name, operator, args, subtype: 'binary-expression' },
           fromParser
-        ) as ESQLBinaryExpression;
+        ) as ESQLBinaryExpression<Name>;
       };
     }
+
+    export const where = (
+      args: [left: ESQLAstItem, right: ESQLAstItem],
+      template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ) => Builder.expression.func.binary('where', args, template, fromParser);
 
     export namespace literal {
       /**
@@ -368,26 +375,6 @@ export namespace Builder {
         ) as ESQLDecimalLiteral;
       };
 
-      export const string = (
-        value: string,
-        template?: Omit<AstNodeTemplate<ESQLStringLiteral>, 'name' | 'literalType'>,
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLStringLiteral => {
-        // TODO: Once (https://github.com/elastic/kibana/issues/203445) do not use
-        //    triple quotes and escape the string.
-        const quotedValue = '"""' + value + '"""';
-        const node: ESQLStringLiteral = {
-          ...template,
-          ...Builder.parserFields(fromParser),
-          type: 'literal',
-          literalType: 'keyword',
-          name: quotedValue,
-          value: quotedValue,
-        };
-
-        return node;
-      };
-
       /**
        * Constructs "time interval" literal node.
        *
@@ -405,6 +392,38 @@ export namespace Builder {
           quantity,
           name: `${quantity} ${unit}`,
         };
+      };
+
+      export const string = (
+        valueUnquoted: string,
+        template?: Omit<
+          AstNodeTemplate<ESQLStringLiteral>,
+          'name' | 'literalType' | 'value' | 'valueUnquoted'
+        > &
+          Partial<Pick<ESQLStringLiteral, 'name'>>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLStringLiteral => {
+        const value =
+          '"' +
+          valueUnquoted
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t') +
+          '"';
+        const name = template?.name ?? value;
+        const node: ESQLStringLiteral = {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'literal',
+          literalType: 'keyword',
+          name,
+          value,
+          valueUnquoted,
+        };
+
+        return node;
       };
 
       export const list = (

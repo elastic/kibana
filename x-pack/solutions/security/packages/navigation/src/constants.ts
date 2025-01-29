@@ -63,7 +63,7 @@ export enum ExternalPageName {
   // Ref: src/platform/packages/private/default-nav/devtools/default_navigation.ts
   devTools = 'dev_tools:',
   // Fleet
-  // Ref: x-pack/plugins/fleet/public/deep_links.ts
+  // Ref: x-pack/platform/plugins/shared/fleet/public/deep_links.ts
   fleet = 'fleet:',
   fleetAgents = 'fleet:agents',
   fleetPolicies = 'fleet:policies',
@@ -97,7 +97,7 @@ export enum ExternalPageName {
   // Cloud UI
   // These are links to Cloud UI outside Kibana
   // Special Format: <cloud>:<cloudUrlKey>
-  // cloudUrlKey Ref: x-pack/plugins/security_solution_serverless/public/navigation/links/util.ts
+  // cloudUrlKey Ref: x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/links/util.ts
   cloudUsersAndRoles = 'cloud:usersAndRoles',
   cloudBilling = 'cloud:billing',
   cloudPerformance = 'cloud:performance',

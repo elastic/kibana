@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 
-import { AssistantAvatar } from './assistant_avatar/assistant_avatar';
 import * as i18n from './translations';
 
 interface Props {
@@ -30,7 +30,7 @@ const AttackDiscoveryUpsellingSectionComponent: React.FC<Props> = ({
     () => (
       <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
         <EuiFlexItem data-test-subj="assistantAvatar" grow={false}>
-          <AssistantAvatar size="m" />
+          <AssistantBeacon backgroundColor="emptyShade" />
           <EuiSpacer size="m" />
         </EuiFlexItem>
 

@@ -8,18 +8,18 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import type { AreaSeriesStyle, LineSeriesStyle, RecursivePartial } from '@elastic/charts';
-import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
+import { useEuiTheme } from '@elastic/eui';
 import type { JobCreatorType } from '../../../../common/job_creator';
 import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../common/job_creator';
 import { getTimeBucketsFromCache } from '../../../../../../util/get_time_buckets_from_cache';
 
 export function useChartColors() {
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
   return {
-    LINE_COLOR: euiTheme.euiColorPrimary,
-    MODEL_COLOR: euiTheme.euiColorPrimary,
-    EVENT_RATE_COLOR: euiTheme.euiColorPrimary,
-    EVENT_RATE_COLOR_WITH_ANOMALIES: euiTheme.euiColorLightShade,
+    LINE_COLOR: euiTheme.colors.primary,
+    MODEL_COLOR: euiTheme.colors.primary,
+    EVENT_RATE_COLOR: euiTheme.colors.primary,
+    EVENT_RATE_COLOR_WITH_ANOMALIES: euiTheme.colors.lightShade,
   };
 }
 

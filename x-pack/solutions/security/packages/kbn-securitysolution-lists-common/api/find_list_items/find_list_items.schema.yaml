@@ -1,0 +1,172 @@
+openapi: 3.0.0
+info:
+  title: Find list items API endpoint
+  version: '2023-10-31'
+paths:
+  /api/lists/items/_find:
+    get:
+      x-labels: [serverless, ess]
+      operationId: FindListItems
+      x-codegen-enabled: true
+      summary: Get value list items
+      description: Get all value list items in the specified list.
+      parameters:
+        - name: list_id
+          in: query
+          required: true
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+        - name: page
+          in: query
+          required: false
+          description: The page number to return.
+          schema:
+            type: integer
+            example: 1
+        - name: per_page
+          in: query
+          required: false
+          description: The number of list items to return per page.
+          schema:
+            type: integer
+            example: 20
+        - name: sort_field
+          in: query
+          required: false
+          description: Determines which field is used to sort the results.
+          schema:
+            type: string
+            minLength: 1
+            format: nonempty
+            example: value
+        - name: sort_order
+          in: query
+          required: false
+          description: Determines the sort order, which can be `desc` or `asc`
+          schema:
+            type: string
+            enum: [desc, asc]
+            example: asc
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindListItemsCursor'
+        - name: filter
+          in: query
+          required: false
+          description: |
+            Filters the returned results according to the value of the specified field,
+            using the <field name>:<field value> syntax.
+          schema:
+            $ref: '#/components/schemas/FindListItemsFilter'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '../model/list_schemas.schema.yaml#/components/schemas/ListItem'
+                  page:
+                    type: integer
+                    minimum: 0
+                  per_page:
+                    type: integer
+                    minimum: 0
+                  total:
+                    type: integer
+                    minimum: 0
+                  cursor:
+                    $ref: '#/components/schemas/FindListItemsCursor'
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+                  - cursor
+              examples:
+                ip:
+                  value:
+                    data:
+                      - id: 21b01cfb-058d-44b9-838c-282be16c91cc
+                        type: ip
+                        list_id: ip_list
+                        value: 127.0.0.1
+                        '@timestamp': 2025-01-08T04:59:06.154Z
+                        _version: WzAsMV0=
+                        tie_breaker_id: b57c762c-3036-465c-9bfb-7bfb5e6e515a
+                        created_at: 2025-01-08T04:59:06.154Z
+                        created_by: elastic
+                        updated_at: 2025-01-08T04:59:06.154Z
+                        updated_by: elastic
+                    page: 1
+                    per_page: 20
+                    total: 1
+                    cursor: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400,
+                    error: Bad Request,
+                    message: '[request query]: list_id: Required'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/lists/items/_find?list_id=ip_list&page=1&per_page=20] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+
+components:
+  schemas:
+    FindListItemsCursor:
+      type: string
+      minLength: 1
+      format: nonempty
+      description: 'Returns the items that come after the last item returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all items are sorted and returned correctly.'
+      example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
+
+    FindListItemsFilter:
+      type: string
+      example: 'value:127.0.0.1'

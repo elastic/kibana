@@ -43,7 +43,7 @@
           },
           "<Types[\"Item\"], Types[\"Attributes\"]>>"
         ],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,7 +78,7 @@
                   },
                   "<Types>"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -103,16 +103,10 @@
                 "text": "StorageContext"
               },
               ", savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindResult",
-                "text": "SavedObjectsFindResult"
-              },
+              "SavedObjectsFindResult",
               "<unknown>) => Types[\"Item\"]; additionalSearchFields?: string[] | undefined; } | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -134,7 +128,7 @@
               },
               ", id: string) => Promise<Types[\"GetOut\"]>"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -154,7 +148,7 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -169,7 +163,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -187,7 +181,7 @@
             "signature": [
               "() => Promise<never>"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -211,7 +205,7 @@
               },
               ", data: Types[\"Attributes\"], options: Types[\"CreateOptions\"]) => Promise<Types[\"CreateOut\"]>"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -231,7 +225,7 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -246,7 +240,7 @@
                 "signature": [
                   "Types[\"Attributes\"]"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -261,7 +255,7 @@
                 "signature": [
                   "Types[\"CreateOptions\"]"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -287,7 +281,7 @@
               },
               ", id: string, data: Types[\"Attributes\"], options: Types[\"UpdateOptions\"]) => Promise<Types[\"UpdateOut\"]>"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -307,7 +301,7 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -322,7 +316,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -337,7 +331,7 @@
                 "signature": [
                   "Types[\"Attributes\"]"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -352,7 +346,7 @@
                 "signature": [
                   "Types[\"UpdateOptions\"]"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -378,7 +372,7 @@
               },
               ", id: string, options?: { force: boolean; } | undefined) => Promise<Types[\"DeleteOut\"]>"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -398,7 +392,7 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -413,7 +407,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -425,7 +419,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -436,7 +430,7 @@
                     "tags": [],
                     "label": "force",
                     "description": [],
-                    "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                    "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -471,7 +465,7 @@
               },
               ", options?: Types[\"SearchOptions\"]) => Promise<Types[\"SearchOut\"]>"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -491,7 +485,7 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -512,7 +506,7 @@
                     "text": "SearchQuery"
                   }
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -527,7 +521,7 @@
                 "signature": [
                   "Types[\"SearchOptions\"]"
                 ],
-                "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -549,23 +543,11 @@
         "description": [],
         "signature": [
           "(params: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsCreateOptions",
-            "text": "SavedObjectsCreateOptions"
-          },
+          "SavedObjectsCreateOptions",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsCreateOptions",
-            "text": "SavedObjectsCreateOptions"
-          }
+          "SavedObjectsCreateOptions"
         ],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -577,15 +559,9 @@
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              }
+              "SavedObjectsCreateOptions"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -628,7 +604,7 @@
           },
           "<any>; }>"
         ],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -649,7 +625,7 @@
               },
               "<any>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -675,16 +651,10 @@
             "text": "StorageContext"
           },
           ", savedObject: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindResult",
-            "text": "SavedObjectsFindResult"
-          },
+          "SavedObjectsFindResult",
           "<unknown>) => ReturnItem; }"
         ],
-        "path": "packages/kbn-content-management-utils/src/msearch.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -698,7 +668,7 @@
             "signature": [
               "GetMSearchParams"
             ],
-            "path": "packages/kbn-content-management-utils/src/msearch.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -773,7 +743,7 @@
           },
           "<\"savedObjectConversion\" | \"savedObjectImport\" | undefined>; }>; }>"
         ],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -794,7 +764,7 @@
               },
               "<any>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -909,7 +879,7 @@
           },
           "<string | undefined>; }>"
         ],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -930,7 +900,7 @@
               },
               "<any>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -964,15 +934,9 @@
             "text": "SearchArgsToSOFindOptionsOptionsDefault"
           },
           ">) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
-          }
+          "SavedObjectsFindOptions"
         ],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1001,7 +965,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1019,24 +983,12 @@
         "description": [],
         "signature": [
           "({ included, excluded, }?: { included?: string[] | undefined; excluded?: string[] | undefined; }) => { hasReference: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptionsReference",
-            "text": "SavedObjectsFindOptionsReference"
-          },
+          "SavedObjectsFindOptionsReference",
           "[] | undefined; hasNoReference: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptionsReference",
-            "text": "SavedObjectsFindOptionsReference"
-          },
+          "SavedObjectsFindOptionsReference",
           "[] | undefined; }"
         ],
-        "path": "packages/kbn-content-management-utils/src/utils.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1047,7 +999,7 @@
             "tags": [],
             "label": "{\n  included,\n  excluded,\n}",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1061,7 +1013,7 @@
                 "signature": [
                   "string[] | undefined"
                 ],
-                "path": "packages/kbn-content-management-utils/src/utils.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1075,7 +1027,7 @@
                 "signature": [
                   "string[] | undefined"
                 ],
-                "path": "packages/kbn-content-management-utils/src/utils.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1102,24 +1054,12 @@
             "text": "CMCrudTypes"
           },
           ">(params: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsUpdateOptions",
-            "text": "SavedObjectsUpdateOptions"
-          },
+          "SavedObjectsUpdateOptions",
           "<Types[\"Attributes\"]>) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsUpdateOptions",
-            "text": "SavedObjectsUpdateOptions"
-          },
+          "SavedObjectsUpdateOptions",
           "<Types[\"Attributes\"]>"
         ],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1131,16 +1071,10 @@
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsUpdateOptions",
-                "text": "SavedObjectsUpdateOptions"
-              },
+              "SavedObjectsUpdateOptions",
               "<Types[\"Attributes\"]>"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1158,7 +1092,7 @@
         "tags": [],
         "label": "CMCrudTypes",
         "description": [],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1174,7 +1108,7 @@
             "signature": [
               "object"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1197,7 +1131,7 @@
               },
               "<object>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1229,7 +1163,7 @@
               },
               "[] | undefined; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1252,7 +1186,7 @@
               },
               "<string, object>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1276,7 +1210,7 @@
               },
               "<object>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1299,7 +1233,7 @@
               },
               "<string, object, object>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1323,7 +1257,7 @@
               },
               "<object>; meta?: undefined; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1339,7 +1273,7 @@
             "signature": [
               "object"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1362,7 +1296,7 @@
               },
               "<string, object>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1386,7 +1320,7 @@
               },
               "<object>[]; pagination: { total: number; cursor?: string | undefined; }; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1402,7 +1336,7 @@
             "signature": [
               "object"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1425,7 +1359,7 @@
               },
               "<string, object, object>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1449,7 +1383,7 @@
               },
               "<object>; meta?: undefined; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1465,7 +1399,7 @@
             "signature": [
               "object"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1488,7 +1422,7 @@
               },
               "<string, object>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1510,7 +1444,7 @@
                 "text": "DeleteResult"
               }
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1539,7 +1473,7 @@
           },
           "<ContentType, Attributes, CreateOptions, UpdateOptions, SearchOptions>"
         ],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1553,7 +1487,7 @@
             "signature": [
               "Attributes"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1576,7 +1510,7 @@
               },
               "<Attributes>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1608,7 +1542,7 @@
               },
               "[] | undefined; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1624,7 +1558,7 @@
             "signature": [
               "CreateOptions"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1640,7 +1574,7 @@
             "signature": [
               "UpdateOptions"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1656,7 +1590,7 @@
             "signature": [
               "SearchOptions"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1679,7 +1613,7 @@
               },
               "<ContentType, object>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1703,7 +1637,7 @@
               },
               "<Attributes>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1726,7 +1660,7 @@
               },
               "<ContentType, Attributes, CreateOptions>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1750,7 +1684,7 @@
               },
               "<Attributes>; meta?: undefined; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1773,7 +1707,7 @@
               },
               "<ContentType, SearchOptions>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1797,7 +1731,7 @@
               },
               "<Attributes>[]; pagination: { total: number; cursor?: string | undefined; }; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1820,7 +1754,7 @@
               },
               "<ContentType, Partial<Attributes>, UpdateOptions>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1844,7 +1778,7 @@
               },
               "<Attributes>; meta?: undefined; }"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1867,7 +1801,7 @@
               },
               "<ContentType, object>"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1889,7 +1823,7 @@
                 "text": "DeleteResult"
               }
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1913,7 +1847,7 @@
           },
           "<ReturnItem>"
         ],
-        "path": "packages/kbn-content-management-utils/src/msearch.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1924,7 +1858,7 @@
             "tags": [],
             "label": "savedObjectType",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/msearch.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1945,16 +1879,10 @@
                 "text": "StorageContext"
               },
               ", savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindResult",
-                "text": "SavedObjectsFindResult"
-              },
+              "SavedObjectsFindResult",
               "<unknown>) => ReturnItem"
             ],
-            "path": "packages/kbn-content-management-utils/src/msearch.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1974,7 +1902,7 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "packages/kbn-content-management-utils/src/msearch.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1987,16 +1915,10 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindResult",
-                    "text": "SavedObjectsFindResult"
-                  },
+                  "SavedObjectsFindResult",
                   "<unknown>"
                 ],
-                "path": "packages/kbn-content-management-utils/src/msearch.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2014,7 +1936,7 @@
         "tags": [],
         "label": "Reference",
         "description": [],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2025,7 +1947,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2036,7 +1958,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2047,7 +1969,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2063,7 +1985,7 @@
         "description": [
           "Saved Object create options - Pick and Omit to customize"
         ],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2079,7 +2001,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2095,7 +2017,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2111,7 +2033,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2134,7 +2056,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2150,7 +2072,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2166,7 +2088,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2182,7 +2104,7 @@
         "description": [
           "Saved Object search options - Pick and Omit to customize"
         ],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2198,7 +2120,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2214,7 +2136,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2230,7 +2152,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2247,7 +2169,7 @@
               "SortOrder",
               " | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2263,7 +2185,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2279,7 +2201,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2295,7 +2217,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2312,7 +2234,7 @@
               "SortResults",
               " | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2328,7 +2250,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2342,24 +2264,12 @@
               "\nSearch for documents having a reference to the specified objects.\nUse `hasReferenceOperator` to specify the operator to use when searching for multiple references."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               " | ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2375,7 +2285,7 @@
             "signature": [
               "\"AND\" | \"OR\" | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2389,24 +2299,12 @@
               "\nSearch for documents *not* having a reference to the specified objects.\nUse `hasNoReferenceOperator` to specify the operator to use when searching for multiple references."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               " | ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2422,7 +2320,7 @@
             "signature": [
               "\"AND\" | \"OR\" | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2438,7 +2336,7 @@
             "signature": [
               "\"AND\" | \"OR\" | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2454,7 +2352,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2474,7 +2372,7 @@
               "AggregationsAggregationContainer",
               "> | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2490,7 +2388,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2504,16 +2402,10 @@
               "\nSearch against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsPitParams",
-                "text": "SavedObjectsPitParams"
-              },
+              "SavedObjectsPitParams",
               " | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2539,7 +2431,7 @@
           },
           "<Attributes>"
         ],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2562,7 +2454,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2576,7 +2468,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2590,16 +2482,10 @@
               "The Elasticsearch Refresh setting for this operation"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.MutatingOperationRefreshSetting",
-                "text": "MutatingOperationRefreshSetting"
-              },
+              "MutatingOperationRefreshSetting",
               " | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2615,7 +2501,7 @@
             "signature": [
               "Attributes | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2631,7 +2517,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2647,7 +2533,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2661,7 +2547,7 @@
         "tags": [],
         "label": "SearchArgsToSOFindOptionsOptionsDefault",
         "description": [],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2675,7 +2561,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2689,7 +2575,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2703,7 +2589,7 @@
         "tags": [],
         "label": "ServicesDefinitionSet",
         "description": [],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2724,7 +2610,7 @@
                 "text": "ServicesDefinition"
               }
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2748,7 +2634,7 @@
           },
           "<Types>"
         ],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2759,7 +2645,7 @@
             "tags": [],
             "label": "savedObjectType",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2779,7 +2665,7 @@
                 "text": "ServicesDefinitionSet"
               }
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2793,7 +2679,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2814,7 +2700,7 @@
               },
               "<Types> | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2835,7 +2721,7 @@
               },
               "<Types> | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2856,7 +2742,7 @@
               },
               "<Types> | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2872,7 +2758,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2886,7 +2772,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2906,7 +2792,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2917,7 +2803,7 @@
             "tags": [],
             "label": "throwOnResultValidationError",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2943,7 +2829,7 @@
           },
           "<Attributes>"
         ],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2954,7 +2840,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2965,7 +2851,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2979,7 +2865,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2993,7 +2879,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3007,7 +2893,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3021,7 +2907,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3035,7 +2921,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3049,7 +2935,7 @@
             "signature": [
               "{ error: string; message: string; statusCode: number; metadata?: Record<string, unknown> | undefined; } | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3063,7 +2949,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3077,7 +2963,7 @@
             "signature": [
               "Attributes"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3098,7 +2984,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3112,7 +2998,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3126,7 +3012,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3145,15 +3031,9 @@
         "description": [],
         "signature": [
           "(params: Types[\"CreateOptions\"]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsCreateOptions",
-            "text": "SavedObjectsCreateOptions"
-          }
+          "SavedObjectsCreateOptions"
         ],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3168,7 +3048,7 @@
             "signature": [
               "Types[\"CreateOptions\"]"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3187,7 +3067,7 @@
         "signature": [
           "{ item: T; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
         ],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3201,15 +3081,9 @@
         "description": [],
         "signature": [
           "(params: Types[\"SearchIn\"]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
-          }
+          "SavedObjectsFindOptions"
         ],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3224,7 +3098,7 @@
             "signature": [
               "Types[\"SearchIn\"]"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3257,7 +3131,7 @@
           },
           "[] | undefined; }"
         ],
-        "path": "packages/kbn-content-management-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3271,16 +3145,10 @@
         "description": [],
         "signature": [
           "(params: Types[\"UpdateOptions\"]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsUpdateOptions",
-            "text": "SavedObjectsUpdateOptions"
-          },
+          "SavedObjectsUpdateOptions",
           "<Types[\"Attributes\"]>"
         ],
-        "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3295,7 +3163,7 @@
             "signature": [
               "Types[\"UpdateOptions\"]"
             ],
-            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3353,7 +3221,7 @@
           },
           "<{}>; }>"
         ],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3365,7 +3233,7 @@
         "tags": [],
         "label": "createOptionsSchemas",
         "description": [],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3386,7 +3254,7 @@
               },
               "<string | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3407,7 +3275,7 @@
               },
               "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3428,7 +3296,7 @@
               },
               "<boolean | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3449,7 +3317,7 @@
               },
               "<string | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3470,7 +3338,7 @@
               },
               "<boolean | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3491,7 +3359,7 @@
               },
               "<string[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3539,7 +3407,7 @@
           },
           "<string>; }>"
         ],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3561,7 +3429,7 @@
           },
           "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]>"
         ],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3583,7 +3451,7 @@
           },
           "<\"AND\" | \"OR\">"
         ],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3595,7 +3463,7 @@
         "tags": [],
         "label": "searchOptionsSchemas",
         "description": [],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3616,7 +3484,7 @@
               },
               "<number | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3637,7 +3505,7 @@
               },
               "<number | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3658,7 +3526,7 @@
               },
               "<string | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3679,7 +3547,7 @@
               },
               "<\"asc\" | \"desc\" | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3700,7 +3568,7 @@
               },
               "<string[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3721,7 +3589,7 @@
               },
               "<string | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3742,7 +3610,7 @@
               },
               "<string | string[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3763,7 +3631,7 @@
               },
               "<string[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3784,7 +3652,7 @@
               },
               "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }> | Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3805,7 +3673,7 @@
               },
               "<\"AND\" | \"OR\" | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3826,7 +3694,7 @@
               },
               "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }> | Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3847,7 +3715,7 @@
               },
               "<\"AND\" | \"OR\" | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3868,7 +3736,7 @@
               },
               "<\"AND\" | \"OR\" | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3889,7 +3757,7 @@
               },
               "<string[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3910,7 +3778,7 @@
               },
               "<string | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3931,7 +3799,7 @@
               },
               "<string | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3952,7 +3820,7 @@
               },
               "<Readonly<{ keepAlive?: string | undefined; } & { id: string; }> | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3966,7 +3834,7 @@
         "tags": [],
         "label": "updateOptionsSchema",
         "description": [],
-        "path": "packages/kbn-content-management-utils/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3987,7 +3855,7 @@
               },
               "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4008,7 +3876,7 @@
               },
               "<string | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4029,7 +3897,7 @@
               },
               "<boolean | \"wait_for\" | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4059,7 +3927,7 @@
               },
               "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ [x: string]: any; } & {}>; references: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]; }> | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4080,7 +3948,7 @@
                   },
                   "<any>"
                 ],
-                "path": "packages/kbn-content-management-utils/src/schema.ts",
+                "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4105,7 +3973,7 @@
               },
               "<number | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4126,7 +3994,7 @@
               },
               "<boolean | undefined>"
             ],
-            "path": "packages/kbn-content-management-utils/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false
           }

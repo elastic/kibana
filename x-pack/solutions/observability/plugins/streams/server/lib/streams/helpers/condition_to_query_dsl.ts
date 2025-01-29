@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { Condition, FilterCondition } from '../../../../common/types';
-import { isAndCondition, isFilterCondition, isOrCondition } from './condition_guards';
+import {
+  Condition,
+  FilterCondition,
+  isAndCondition,
+  isFilterCondition,
+  isOrCondition,
+} from '@kbn/streams-schema';
 
 function conditionToClause(condition: FilterCondition) {
   switch (condition.operator) {

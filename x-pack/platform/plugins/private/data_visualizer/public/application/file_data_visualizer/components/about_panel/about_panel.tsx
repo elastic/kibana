@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import React, { type FC, useMemo } from 'react';
+import { css } from '@emotion/react';
+
+import { useEuiTheme } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import type { FC } from 'react';
-import React from 'react';
 
 import {
   EuiFlexGroup,
@@ -30,14 +31,20 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
-const aboutPanelContentStyle = css({
-  '.euiFilePicker__icon': {
-    width: euiThemeVars.euiSizeXXL,
-    height: euiThemeVars.euiSizeXXL,
-  },
-});
-
 export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImport }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const aboutPanelContentStyle = useMemo(
+    () =>
+      css({
+        '.euiFilePicker__icon': {
+          width: euiTheme.size.xxl,
+          height: euiTheme.size.xxl,
+        },
+      }),
+    [euiTheme]
+  );
+
   return (
     <EuiPageTemplate.Section alignment="center" data-test-subj="dataVisualizerPageFileUpload">
       <EuiFlexGroup gutterSize="xl">

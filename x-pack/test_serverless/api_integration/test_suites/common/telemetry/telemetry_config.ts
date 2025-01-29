@@ -59,12 +59,12 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
         .send({ 'telemetry.labels.journeyName': 'my-ftr-test' })
         .expect(200, { ok: true });
 
-      await supertestAdminWithApiKey.get('/api/telemetry/v2/config').expect(200, {
-        ...initialConfig,
-        labels: {
-          ...initialConfig.labels,
-          journeyName: 'my-ftr-test',
-        },
+      await retry.tryForTime(retryTimeout, async function retryTelemetryConfigGetRequest() {
+        const { body } = await supertestAdminWithApiKey.get('/api/telemetry/v2/config').expect(200);
+        expect(body).to.eql(
+          { ...initialConfig, labels: { ...initialConfig.labels, journeyName: 'my-ftr-test' } },
+          `Expected the response body to include the dynamically set telemetry.labels.journeyName, but got: [${body}]`
+        );
       });
 
       // Sends "null" to remove the label
@@ -78,7 +78,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
         const { body } = await supertestAdminWithApiKey.get('/api/telemetry/v2/config').expect(200);
         expect(body).to.eql(
           initialConfig,
-          `Expected the response body to match the intitial config, but got: [${body}]`
+          `Expected the response body to match the initial config, but got: [${body}]`
         );
       });
     });

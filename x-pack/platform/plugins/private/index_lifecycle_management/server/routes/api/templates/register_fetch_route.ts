@@ -84,7 +84,16 @@ const querySchema = schema.object({
 
 export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/templates'), validate: { query: querySchema } },
+    {
+      path: addBasePath('/templates'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { query: querySchema },
+    },
     license.guardApiRoute(async (context, request, response) => {
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
       try {

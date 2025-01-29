@@ -17,17 +17,23 @@ import {
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiDataGridColumnSortingConfig,
   EuiDataGridProps,
   Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common/types';
+import {
+  isRootStreamDefinition,
+  isWiredReadStream,
+  ReadStreamDefinition,
+} from '@kbn/streams-schema';
 import { FieldType } from './field_type';
-import { FieldStatus } from './field_status';
+import { FieldStatusBadge } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
 import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 import { FieldParent } from './field_parent';
+import { SchemaEditorQueryAndFiltersState } from './hooks/use_query_and_filters';
 
 interface FieldsTableContainerProps {
   definition: ReadStreamDefinition;
@@ -36,6 +42,7 @@ interface FieldsTableContainerProps {
   query?: Query;
   editingState: SchemaEditorEditingState;
   unpromotingState: SchemaEditorUnpromotingState;
+  queryAndFiltersState: SchemaEditorQueryAndFiltersState;
 }
 
 const COLUMNS = {
@@ -71,14 +78,14 @@ export const EMPTY_CONTENT = '-----';
 export const FieldsTableContainer = ({
   definition,
   unmappedFieldsResult,
-  isLoadingUnmappedFields,
   query,
   editingState,
   unpromotingState,
+  queryAndFiltersState,
 }: FieldsTableContainerProps) => {
   const inheritedFields = useMemo(() => {
-    return definition.inheritedFields.map((field) => ({
-      name: field.name,
+    return Object.entries(definition.inherited_fields).map(([name, field]) => ({
+      name,
       type: field.type,
       format: field.format,
       parent: field.from,
@@ -94,13 +101,16 @@ export const FieldsTableContainer = ({
   }, [inheritedFields, query]);
 
   const mappedFields = useMemo(() => {
-    return definition.fields.map((field) => ({
-      name: field.name,
-      type: field.type,
-      format: field.format,
-      parent: definition.id,
-      status: 'mapped' as const,
-    }));
+    if (isWiredReadStream(definition)) {
+      return Object.entries(definition.stream.ingest.wired.fields).map(([name, field]) => ({
+        name,
+        type: field.type,
+        format: field.format,
+        parent: definition.name,
+        status: 'mapped' as const,
+      }));
+    }
+    return [];
   }, [definition]);
 
   const filteredMappedFields = useMemo(() => {
@@ -114,11 +124,11 @@ export const FieldsTableContainer = ({
     return unmappedFieldsResult
       ? unmappedFieldsResult.map((field) => ({
           name: field,
-          parent: definition.id,
+          parent: definition.name,
           status: 'unmapped' as const,
         }))
       : [];
-  }, [definition.id, unmappedFieldsResult]);
+  }, [definition.name, unmappedFieldsResult]);
 
   const filteredUnmappedFields = useMemo(() => {
     if (!unmappedFieldsResult) return [];
@@ -132,9 +142,28 @@ export const FieldsTableContainer = ({
     return [...filteredInheritedFields, ...filteredMappedFields, ...filteredUnmappedFields];
   }, [filteredInheritedFields, filteredMappedFields, filteredUnmappedFields]);
 
+  const filteredFieldsWithFilterGroupsApplied = useMemo(() => {
+    const filterGroups = queryAndFiltersState.filterGroups;
+    let fieldsWithFilterGroupsApplied = allFilteredFields;
+
+    if (filterGroups.type && filterGroups.type.length > 0) {
+      fieldsWithFilterGroupsApplied = fieldsWithFilterGroupsApplied.filter(
+        (field) => 'type' in field && filterGroups.type.includes(field.type)
+      );
+    }
+
+    if (filterGroups.status && filterGroups.status.length > 0) {
+      fieldsWithFilterGroupsApplied = fieldsWithFilterGroupsApplied.filter(
+        (field) => 'status' in field && filterGroups.status.includes(field.status)
+      );
+    }
+
+    return fieldsWithFilterGroupsApplied;
+  }, [allFilteredFields, queryAndFiltersState.filterGroups]);
+
   return (
     <FieldsTable
-      fields={allFilteredFields}
+      fields={filteredFieldsWithFilterGroupsApplied}
       editingState={editingState}
       unpromotingState={unpromotingState}
       definition={definition}
@@ -150,114 +179,122 @@ interface FieldsTableProps {
 }
 
 const FieldsTable = ({ definition, fields, editingState, unpromotingState }: FieldsTableProps) => {
+  // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(Object.keys(COLUMNS));
 
+  // Column sorting
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
+
   const trailingColumns = useMemo(() => {
-    return [
-      {
-        id: 'actions',
-        width: 40,
-        headerCellRender: () => null,
-        rowCellRender: ({ rowIndex }) => {
-          const field = fields[rowIndex];
+    return !isRootStreamDefinition(definition.stream)
+      ? ([
+          {
+            id: 'actions',
+            width: 40,
+            headerCellRender: () => null,
+            rowCellRender: ({ rowIndex }) => {
+              const field = fields[rowIndex];
 
-          let actions: ActionsCellActionsDescriptor[] = [];
+              if (!field) return null;
 
-          switch (field.status) {
-            case 'mapped':
-              actions = [
-                {
-                  name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                    defaultMessage: 'View field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, false);
-                  },
-                },
-                {
-                  name: i18n.translate('xpack.streams.actions.editFieldLabel', {
-                    defaultMessage: 'Edit field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, true);
-                  },
-                },
-                {
-                  name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
-                    defaultMessage: 'Unmap field',
-                  }),
-                  disabled: unpromotingState.isUnpromotingField,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    unpromotingState.setSelectedField(fieldEntry.name);
-                  },
-                },
-              ];
-              break;
-            case 'unmapped':
-              actions = [
-                {
-                  name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                    defaultMessage: 'View field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, false);
-                  },
-                },
-                {
-                  name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
-                    defaultMessage: 'Map field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, true);
-                  },
-                },
-              ];
-              break;
-            case 'inherited':
-              actions = [
-                {
-                  name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                    defaultMessage: 'View field',
-                  }),
-                  disabled: editingState.isSaving,
-                  onClick: (fieldEntry: FieldEntry) => {
-                    editingState.selectField(fieldEntry, false);
-                  },
-                },
-              ];
-              break;
-          }
+              let actions: ActionsCellActionsDescriptor[] = [];
 
-          return (
-            <ActionsCell
-              panels={[
-                {
-                  id: 0,
-                  title: i18n.translate(
-                    'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTitle',
+              switch (field.status) {
+                case 'mapped':
+                  actions = [
                     {
-                      defaultMessage: 'Actions',
-                    }
-                  ),
-                  items: actions.map((action) => ({
-                    name: action.name,
-                    icon: action.icon,
-                    onClick: (event) => {
-                      action.onClick(field);
+                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
+                        defaultMessage: 'View field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, false);
+                      },
                     },
-                  })),
-                },
-              ]}
-            />
-          );
-        },
-      },
-    ] as EuiDataGridProps['trailingControlColumns'];
-  }, [editingState, fields, unpromotingState]);
+                    {
+                      name: i18n.translate('xpack.streams.actions.editFieldLabel', {
+                        defaultMessage: 'Edit field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, true);
+                      },
+                    },
+                    {
+                      name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
+                        defaultMessage: 'Unmap field',
+                      }),
+                      disabled: unpromotingState.isUnpromotingField,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        unpromotingState.setSelectedField(fieldEntry.name);
+                      },
+                    },
+                  ];
+                  break;
+                case 'unmapped':
+                  actions = [
+                    {
+                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
+                        defaultMessage: 'View field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, false);
+                      },
+                    },
+                    {
+                      name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
+                        defaultMessage: 'Map field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, true);
+                      },
+                    },
+                  ];
+                  break;
+                case 'inherited':
+                  actions = [
+                    {
+                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
+                        defaultMessage: 'View field',
+                      }),
+                      disabled: editingState.isSaving,
+                      onClick: (fieldEntry: FieldEntry) => {
+                        editingState.selectField(fieldEntry, false);
+                      },
+                    },
+                  ];
+                  break;
+              }
+
+              return (
+                <ActionsCell
+                  panels={[
+                    {
+                      id: 0,
+                      title: i18n.translate(
+                        'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTitle',
+                        {
+                          defaultMessage: 'Actions',
+                        }
+                      ),
+                      items: actions.map((action) => ({
+                        name: action.name,
+                        icon: action.icon,
+                        onClick: (event) => {
+                          action.onClick(field);
+                        },
+                      })),
+                    },
+                  ]}
+                />
+              );
+            },
+          },
+        ] as EuiDataGridProps['trailingControlColumns'])
+      : undefined;
+  }, [definition, editingState, fields, unpromotingState]);
 
   return (
     <EuiDataGrid
@@ -267,27 +304,32 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
           defaultMessage: 'Preview',
         }
       )}
-      columns={visibleColumns.map((columnId) => ({
+      columns={Object.entries(COLUMNS).map(([columnId, value]) => ({
         id: columnId,
-        ...COLUMNS[columnId as keyof typeof COLUMNS],
+        ...value,
       }))}
       columnVisibility={{
         visibleColumns,
         setVisibleColumns,
         canDragAndDropColumns: false,
       }}
-      toolbarVisibility={false}
+      sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
+      toolbarVisibility={true}
       rowCount={fields.length}
       renderCellValue={({ rowIndex, columnId }) => {
         const field = fields[rowIndex];
+        if (!field) return null;
+
         if (columnId === 'type') {
           const fieldType = field.type;
           if (!fieldType) return EMPTY_CONTENT;
           return <FieldType type={fieldType} />;
         } else if (columnId === 'parent') {
-          return <FieldParent parent={field.parent} linkEnabled={field.parent !== definition.id} />;
+          return (
+            <FieldParent parent={field.parent} linkEnabled={field.parent !== definition.name} />
+          );
         } else if (columnId === 'status') {
-          return <FieldStatus status={field.status} />;
+          return <FieldStatusBadge status={field.status} />;
         } else {
           return field[columnId as keyof FieldEntry] || EMPTY_CONTENT;
         }
@@ -298,6 +340,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
         rowHover: 'none',
         header: 'underline',
       }}
+      inMemory={{ level: 'sorting' }}
     />
   );
 };

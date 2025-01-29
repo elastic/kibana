@@ -17,6 +17,12 @@ export const registerDeleteRoute = ({
   router.post(
     {
       path: addBasePath('/delete'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.object({
           jobIds: schema.arrayOf(schema.string()),

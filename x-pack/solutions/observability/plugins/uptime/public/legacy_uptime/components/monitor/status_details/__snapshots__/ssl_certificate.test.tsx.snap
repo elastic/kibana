@@ -65,39 +65,28 @@ Array [
 `;
 
 exports[`SSL Certificate component shallow renders 1`] = `
-<ContextProvider
-  value={
+<Router
+  history={
     Object {
-      "history": Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
           "hash": "",
           "key": "TestKeyForTesting",
           "pathname": "/",
           "search": "",
           "state": undefined,
         },
-        "push": [Function],
-        "replace": [Function],
-      },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
       "location": Object {
         "hash": "",
         "key": "TestKeyForTesting",
@@ -105,60 +94,18 @@ exports[`SSL Certificate component shallow renders 1`] = `
         "search": "",
         "state": undefined,
       },
-      "match": Object {
-        "isExact": true,
-        "params": Object {},
-        "path": "/",
-        "url": "/",
-      },
-      "staticContext": undefined,
+      "push": [Function],
+      "replace": [Function],
     }
   }
 >
-  <ContextProvider
-    value={
+  <MonitorSSLCertificate
+    tls={
       Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
-        },
-        "push": [Function],
-        "replace": [Function],
+        "certificate_not_valid_after": "2020-04-24T11:41:38.200Z",
+        "certificate_not_valid_before": "2019-04-24T11:41:38.200Z",
       }
     }
-  >
-    <CompatRouter>
-      <MonitorSSLCertificate
-        tls={
-          Object {
-            "certificate_not_valid_after": "2020-04-24T11:41:38.200Z",
-            "certificate_not_valid_before": "2019-04-24T11:41:38.200Z",
-          }
-        }
-      />
-    </CompatRouter>
-  </ContextProvider>
-</ContextProvider>
+  />
+</Router>
 `;

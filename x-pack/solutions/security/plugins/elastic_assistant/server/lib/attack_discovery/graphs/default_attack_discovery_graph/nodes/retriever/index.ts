@@ -36,17 +36,23 @@ export const getRetrieveAnonymizedAlertsNode = ({
     onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
   };
 
-  const retriever = new AnonymizedAlertsRetriever({
-    alertsIndexPattern,
-    anonymizationFields,
-    esClient,
-    onNewReplacements: localOnNewReplacements,
-    replacements,
-    size,
-  });
-
   const retrieveAnonymizedAlerts = async (state: GraphState): Promise<GraphState> => {
     logger?.debug(() => '---RETRIEVE ANONYMIZED ALERTS---');
+
+    const { end, filter, start } = state;
+
+    const retriever = new AnonymizedAlertsRetriever({
+      alertsIndexPattern,
+      anonymizationFields,
+      end,
+      esClient,
+      filter,
+      onNewReplacements: localOnNewReplacements,
+      replacements,
+      size,
+      start,
+    });
+
     const documents = await retriever
       .withConfig({ runName: 'runAnonymizedAlertsRetriever' })
       .invoke('');

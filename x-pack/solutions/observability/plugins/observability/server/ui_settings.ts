@@ -325,7 +325,7 @@ export const uiSettings: Record<string, UiSettings> = {
       },
     }),
     schema: schema.boolean(),
-    value: true,
+    value: false,
     requiresPageReload: true,
     type: 'boolean',
   },

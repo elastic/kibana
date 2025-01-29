@@ -39,7 +39,10 @@ export const itemsAndCurrentSpace = schema.object({
   ids: schema.arrayOf(schema.string()),
 });
 
-export const syncJobObjects = schema.object({ simulate: schema.maybe(schema.boolean()) });
+export const syncJobObjects = schema.object({
+  simulate: schema.maybe(schema.boolean()),
+  addToAllSpaces: schema.maybe(schema.boolean()),
+});
 
 export const syncCheckSchema = schema.object({ mlSavedObjectType: schema.maybe(schema.string()) });
 

@@ -7,13 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  useEuiTheme,
-  useEuiBackgroundColor,
-  EuiIcon,
-  EuiText,
-  EuiSkeletonRectangle,
-} from '@elastic/eui';
+import { useEuiTheme, EuiIcon, EuiText, EuiSkeletonRectangle } from '@elastic/eui';
 
 import {
   getConfinedScreenshotSize,
@@ -59,7 +53,7 @@ export const EmptyThumbnail = ({
         ...thumbnailStyle,
         width,
         height,
-        background: useEuiBackgroundColor('subdued'),
+        background: euiTheme.colors.backgroundBaseSubdued,
         border: euiTheme.border.thin,
         ...(borderRadius ? { borderRadius } : {}),
       }}
@@ -103,11 +97,11 @@ export const EmptyThumbnail = ({
           <EuiIcon
             data-test-subj="stepScreenshotNotAvailable"
             type="eyeClosed"
-            color={euiTheme.colors.disabledText}
+            color={euiTheme.colors.textDisabled}
           />
 
           {unavailableMessage ? (
-            <EuiText color={euiTheme.colors.disabledText}>{unavailableMessage}</EuiText>
+            <EuiText color={euiTheme.colors.textDisabled}>{unavailableMessage}</EuiText>
           ) : null}
         </div>
       )}

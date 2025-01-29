@@ -7,8 +7,10 @@
 
 import path from 'path';
 
-import { defineDockerServersConfig } from '@kbn/test';
-import { dockerImage as ingestDockerImage } from '../../../fleet_api_integration/config.base';
+import {
+  fleetPackageRegistryDockerImage as ingestDockerImage,
+  defineDockerServersConfig,
+} from '@kbn/test';
 
 export function SecuritySolutionEndpointRegistryHelpers() {
   /**

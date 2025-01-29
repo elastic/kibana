@@ -32,7 +32,7 @@
         "signature": [
           "HelperDelegate"
         ],
-        "path": "packages/kbn-handlebars/src/types.ts",
+        "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +46,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -74,7 +74,7 @@
           "HelperOptions",
           ", \"fn\" | \"inverse\">"
         ],
-        "path": "packages/kbn-handlebars/src/types.ts",
+        "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,7 +85,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,7 +100,7 @@
               "TemplateDelegate",
               "<any>"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -115,7 +115,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/kbn-handlebars/src/types.ts",
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -136,7 +136,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-handlebars/src/types.ts",
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -153,7 +153,7 @@
               "TemplateDelegate",
               "<any>"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -168,7 +168,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/kbn-handlebars/src/types.ts",
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -189,7 +189,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-handlebars/src/types.ts",
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -205,7 +205,7 @@
             "signature": [
               "{ start: hbs.AST.Position; end: hbs.AST.Position; }"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -219,7 +219,7 @@
             "signature": [
               "<T = any>(parent: Record<string, any>, propertyName: string) => T"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -234,7 +234,7 @@
                 "signature": [
                   "{ [x: string]: any; }"
                 ],
-                "path": "packages/kbn-handlebars/src/types.ts",
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -245,7 +245,7 @@
                 "tags": [],
                 "label": "propertyName",
                 "description": [],
-                "path": "packages/kbn-handlebars/src/types.ts",
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -275,7 +275,7 @@
           "RuntimeOptions",
           ", \"data\" | \"blockParams\">"
         ],
-        "path": "packages/kbn-handlebars/src/types.ts",
+        "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -290,7 +290,7 @@
               "HelpersHash",
               " | undefined"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -305,7 +305,7 @@
               "PartialsHash",
               " | undefined"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -320,7 +320,7 @@
               "DecoratorsHash",
               " | undefined"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -340,7 +340,7 @@
           "TemplateDelegate",
           "<T>"
         ],
-        "path": "packages/kbn-handlebars/src/types.ts",
+        "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -354,7 +354,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -368,7 +368,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -383,7 +383,7 @@
               "PartialsHash",
               " | undefined"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -405,7 +405,7 @@
         "signature": [
           "\"compile\" | \"compileAST\""
         ],
-        "path": "packages/kbn-handlebars/index.ts",
+        "path": "src/platform/packages/private/kbn-handlebars/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -422,7 +422,7 @@
         "signature": [
           "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; noEscape?: boolean | undefined; assumeObjects?: boolean | undefined; preventIndent?: boolean | undefined; explicitPartialContext?: boolean | undefined; }"
         ],
-        "path": "packages/kbn-handlebars/src/types.ts",
+        "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -443,7 +443,7 @@
           "Container",
           ", options: any) => any"
         ],
-        "path": "packages/kbn-handlebars/src/types.ts",
+        "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -459,7 +459,7 @@
               "TemplateDelegate",
               "<any>"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -474,7 +474,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/kbn-handlebars/src/types.ts",
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -495,7 +495,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-handlebars/src/types.ts",
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -511,7 +511,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -525,7 +525,7 @@
             "signature": [
               "Container"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,7 +539,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-handlebars/src/types.ts",
+            "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -561,7 +561,7 @@
           "typeof ",
           "node_modules/handlebars/types/index.d.ts"
         ],
-        "path": "packages/kbn-handlebars/src/types.ts",
+        "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -20,6 +20,12 @@ export const registerStatsRoute = ({
   router.get(
     {
       path: addBasePath('/stats/auto_follow'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {

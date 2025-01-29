@@ -7,7 +7,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { HISTORICAL_RESULTS_TOUR_SELECTOR_KEY } from '../constants';
 import { CLOSE, INTRODUCING_DATA_QUALITY_HISTORY, TRY_IT, VIEW_PAST_RESULTS } from './translations';
@@ -20,9 +20,11 @@ export interface Props {
   zIndex?: number;
 }
 
-const StyledText = styled(EuiText)`
-  margin-block-start: -10px;
-`;
+const styles = {
+  text: css({
+    marginBlockStart: '-10px',
+  }),
+};
 
 export const HistoricalResultsTour: FC<Props> = ({
   anchorSelectorValue,
@@ -52,9 +54,9 @@ export const HistoricalResultsTour: FC<Props> = ({
   return (
     <EuiTourStep
       content={
-        <StyledText size="s">
+        <EuiText css={styles.text} size="s">
           <p>{VIEW_PAST_RESULTS}</p>
-        </StyledText>
+        </EuiText>
       }
       data-test-subj="historicalResultsTour"
       isStepOpen={isOpen}

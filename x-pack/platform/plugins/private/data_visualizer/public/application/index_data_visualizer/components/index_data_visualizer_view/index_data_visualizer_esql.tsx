@@ -16,6 +16,7 @@ import { ESQLLangEditor } from '@kbn/esql/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
 import {
+  useEuiTheme,
   useEuiBreakpoint,
   useIsWithinMaxBreakpoint,
   EuiFlexGroup,
@@ -29,7 +30,6 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
@@ -58,7 +58,7 @@ const DEFAULT_ESQL_QUERY = { esql: '' };
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
   const { data } = services;
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   // Query that has been typed, but has not submitted with cmd + enter
   const [localQuery, setLocalQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
@@ -281,9 +281,9 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           grow={false}
           data-test-subj="DataVisualizerESQLEditor"
           css={css({
-            borderTop: euiTheme.euiBorderThin,
-            borderLeft: euiTheme.euiBorderThin,
-            borderRight: euiTheme.euiBorderThin,
+            borderTop: euiTheme.border.thin,
+            borderLeft: euiTheme.border.thin,
+            borderRight: euiTheme.border.thin,
           })}
         >
           <ESQLLangEditor

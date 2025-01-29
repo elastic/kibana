@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { EuiCode } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { UseEuiTheme } from '@elastic/eui';
 
-import styled from 'styled-components';
+import { CSSObject } from '@emotion/react';
 
-export const CodeDanger = styled(EuiCode)`
-  color: ${euiThemeVars.euiColorDanger};
-`;
+export const codeDangerCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
+  color: euiTheme.colors.danger,
+});
 
-export const CodeSuccess = styled(EuiCode)`
-  color: ${euiThemeVars.euiColorSuccess};
-`;
-
-export const CodeWarning = styled(EuiCode)`
-  color: ${euiThemeVars.euiColorWarning};
-`;
+export const codeSuccessCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
+  color: euiTheme.colors.success,
+});

@@ -22,7 +22,6 @@ import { UMUpdateBadge } from '../lib/lib';
 import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
-  UptimeThemeContextProvider,
   UptimeStartupPluginsContextProvider,
 } from '../contexts';
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
@@ -33,17 +32,6 @@ import { store, storage } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { UptimeDataViewContextProvider } from '../contexts/uptime_data_view_context';
-
-export interface UptimeAppColors {
-  danger: string;
-  dangerBehindText: string;
-  success: string;
-  gray: string;
-  range: string;
-  mean: string;
-  warning: string;
-  lightestShade: string;
-}
 
 export interface UptimeAppProps {
   basePath: string;
@@ -131,27 +119,25 @@ const Application = (props: UptimeAppProps) => {
               <EuiThemeProvider darkMode={darkMode}>
                 <UptimeRefreshContextProvider>
                   <UptimeSettingsContextProvider {...props}>
-                    <UptimeThemeContextProvider darkMode={darkMode}>
-                      <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
-                          <PerformanceContextProvider>
-                            <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
-                              <RedirectAppLinks
-                                coreStart={{
-                                  application: core.application,
-                                }}
-                              >
-                                <InspectorContextProvider>
-                                  <UptimeAlertsFlyoutWrapper />
-                                  <PageRouter />
-                                  <ActionMenu appMountParameters={appMountParameters} />
-                                </InspectorContextProvider>
-                              </RedirectAppLinks>
-                            </div>
-                          </PerformanceContextProvider>
-                        </UptimeDataViewContextProvider>
-                      </UptimeStartupPluginsContextProvider>
-                    </UptimeThemeContextProvider>
+                    <UptimeStartupPluginsContextProvider {...startPlugins}>
+                      <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
+                        <PerformanceContextProvider>
+                          <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
+                            <RedirectAppLinks
+                              coreStart={{
+                                application: core.application,
+                              }}
+                            >
+                              <InspectorContextProvider>
+                                <UptimeAlertsFlyoutWrapper />
+                                <PageRouter />
+                                <ActionMenu appMountParameters={appMountParameters} />
+                              </InspectorContextProvider>
+                            </RedirectAppLinks>
+                          </div>
+                        </PerformanceContextProvider>
+                      </UptimeDataViewContextProvider>
+                    </UptimeStartupPluginsContextProvider>
                   </UptimeSettingsContextProvider>
                 </UptimeRefreshContextProvider>
               </EuiThemeProvider>

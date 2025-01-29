@@ -140,6 +140,12 @@ export const register = (deps: RouteDependencies): void => {
   router.delete(
     {
       path: `${API_BASE_PATH}/{nameOrNames}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsValidation,
       },

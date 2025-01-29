@@ -281,7 +281,18 @@ export function AnalyticsIdSelector({
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>{renderTabs()}</EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              data-test-subj="mlFlyoutAnalyticsSelectorButtonClose"
+            >
+              {i18n.translate('xpack.ml.analyticsSelector.closeFlyoutButton', {
+                defaultMessage: 'Close',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={applySelection}
@@ -294,17 +305,6 @@ export function AnalyticsIdSelector({
                 defaultMessage="Apply"
               />
             </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="cross"
-              onClick={closeFlyout}
-              data-test-subj="mlFlyoutAnalyticsSelectorButtonClose"
-            >
-              {i18n.translate('xpack.ml.analyticsSelector.closeFlyoutButton', {
-                defaultMessage: 'Close',
-              })}
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

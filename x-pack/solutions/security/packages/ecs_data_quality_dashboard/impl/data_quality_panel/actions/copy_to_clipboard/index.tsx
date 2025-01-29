@@ -10,7 +10,7 @@ import { EuiIcon, EuiLink, copyToClipboard } from '@elastic/eui';
 
 import { useDataQualityContext } from '../../data_quality_context';
 import { COPIED_RESULTS_TOAST_TITLE, COPY_TO_CLIPBOARD } from '../../translations';
-import { StyledLinkText } from '../styles';
+import { linkTextCss } from '../styles';
 
 interface Props {
   markdownComment: string;
@@ -33,10 +33,10 @@ const CopyToClipboardActionComponent: React.FC<Props> = ({ markdownComment }) =>
       disabled={ilmPhases.length === 0}
       onClick={onCopy}
     >
-      <StyledLinkText>
+      <span css={linkTextCss}>
         <EuiIcon type="copyClipboard" />
         {COPY_TO_CLIPBOARD}
-      </StyledLinkText>
+      </span>
     </EuiLink>
   );
 };

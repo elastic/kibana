@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ScoutServerConfig } from '../../types';
+import { ScoutTestConfig } from '../../types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
 export interface PathOptions {
@@ -55,8 +55,9 @@ export class KibanaUrl {
    * @param appName name of the app to get the URL for
    * @param options optional modifications to apply to the URL
    */
-  app(appName: string, options?: PathOptions) {
-    return this.get(`/app/${appName}`, options);
+  app(appName: string, options?: { space?: string; pathOptions?: PathOptions }) {
+    const relPath = options?.space ? `s/${options.space}/app/${appName}` : `/app/${appName}`;
+    return this.get(relPath, options?.pathOptions);
   }
 
   toString() {
@@ -64,7 +65,7 @@ export class KibanaUrl {
   }
 }
 
-export function createKbnUrl(scoutConfig: ScoutServerConfig, log: ToolingLog) {
+export function createKbnUrl(scoutConfig: ScoutTestConfig, log: ToolingLog) {
   const kbnUrl = new KibanaUrl(new URL(scoutConfig.hosts.kibana));
 
   log.debug(serviceLoadedMsg('kbnUrl'));

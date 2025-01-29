@@ -14,7 +14,10 @@ export interface GraphState {
   anonymizedAlerts: Document[];
   combinedGenerations: string;
   combinedRefinements: string;
+  continuePrompt: string;
+  end?: string | null;
   errors: string[];
+  filter?: Record<string, unknown> | null;
   generationAttempts: number;
   generations: string[];
   hallucinationFailures: number;
@@ -24,5 +27,6 @@ export interface GraphState {
   refinements: string[];
   refinePrompt: string;
   replacements: Replacements;
+  start?: string | null;
   unrefinedResults: AttackDiscovery[] | null;
 }

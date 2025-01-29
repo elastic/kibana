@@ -120,7 +120,7 @@ export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ chil
           <h2>
             <FormattedMessage
               id="xpack.ml.dataSourceContext.errorTitle"
-              defaultMessage="Unable to fetch data view or saved search"
+              defaultMessage="Unable to fetch data view or saved Discover session"
             />
           </h2>
         }

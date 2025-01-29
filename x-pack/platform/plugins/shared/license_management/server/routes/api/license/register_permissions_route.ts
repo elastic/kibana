@@ -14,15 +14,27 @@ export function registerPermissionsRoute({
   lib: { handleEsError },
   config: { isSecurityEnabled },
 }: RouteDependencies) {
-  router.post({ path: addBasePath('/permissions'), validate: false }, async (ctx, req, res) => {
-    const { client } = (await ctx.core).elasticsearch;
+  router.post(
+    {
+      path: addBasePath('/permissions'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
+    async (ctx, req, res) => {
+      const { client } = (await ctx.core).elasticsearch;
 
-    try {
-      return res.ok({
-        body: await getPermissions({ client, isSecurityEnabled }),
-      });
-    } catch (error) {
-      return handleEsError({ error, response: res });
+      try {
+        return res.ok({
+          body: await getPermissions({ client, isSecurityEnabled }),
+        });
+      } catch (error) {
+        return handleEsError({ error, response: res });
+      }
     }
-  });
+  );
 }

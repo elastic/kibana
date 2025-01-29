@@ -48,7 +48,7 @@ describe('Add to Cases', () => {
 
     it('should add result a case and not have add to timeline in result', () => {
       addLiveQueryToCase(liveQueryId, caseId);
-      cy.contains(`${caseTitle} has been updated`);
+      cy.contains(`Case ${caseTitle} updated`);
       viewRecentCaseAndCheckResults();
 
       cy.contains(liveQueryQuery);
@@ -80,7 +80,7 @@ describe('Add to Cases', () => {
 
     it('should add result a case and have add to timeline in result', () => {
       addLiveQueryToCase(liveQueryId, caseId);
-      cy.contains(`${caseTitle} has been updated`);
+      cy.contains(`Case ${caseTitle} updated`);
       viewRecentCaseAndCheckResults();
 
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");

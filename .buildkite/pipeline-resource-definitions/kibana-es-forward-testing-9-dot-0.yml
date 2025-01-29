@@ -27,6 +27,7 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_forward_9_dot_0.yml # Note: this file exists in 8.x only and should be moved into 8.18 once the branch is cut
+      skip_intermediate_builds: false
       provider_settings:
         prefix_pull_request_fork_branch_names: false
         trigger_mode: none

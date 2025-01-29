@@ -1,9 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/xstate-utils",
-  "owner": [
-    "@elastic/obs-ux-logs-team"
-  ],
-  "group": "observability",
-  "visibility": "private"
-}

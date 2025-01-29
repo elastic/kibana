@@ -32,6 +32,7 @@ import {
   InputParamContext,
   InputNamedOrPositionalParamContext,
   IdentifierOrParameterContext,
+  StringContext,
 } from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
@@ -83,7 +84,7 @@ const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
   incomplete: Boolean(ctx.exception),
 });
 
-export const createCommand = (name: string, ctx: ParserRuleContext) =>
+export const createCommand = <Name extends string>(name: Name, ctx: ParserRuleContext) =>
   Builder.command({ name, args: [] }, createParserFields(ctx));
 
 export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['value']) =>
@@ -117,6 +118,29 @@ export function createFakeMultiplyLiteral(
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
   };
+}
+
+export function createLiteralString(ctx: StringContext): ESQLLiteral {
+  const quotedString = ctx.QUOTED_STRING()?.getText() ?? '""';
+  const isTripleQuoted = quotedString.startsWith('"""') && quotedString.endsWith('"""');
+  let valueUnquoted = isTripleQuoted ? quotedString.slice(3, -3) : quotedString.slice(1, -1);
+
+  if (!isTripleQuoted) {
+    valueUnquoted = valueUnquoted
+      .replace(/\\"/g, '"')
+      .replace(/\\r/g, '\r')
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .replace(/\\\\/g, '\\');
+  }
+
+  return Builder.expression.literal.string(
+    valueUnquoted,
+    {
+      name: quotedString,
+    },
+    createParserFields(ctx)
+  );
 }
 
 function isMissingText(text: string) {

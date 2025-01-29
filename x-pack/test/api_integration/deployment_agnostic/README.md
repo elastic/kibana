@@ -246,9 +246,27 @@ node scripts/functional_test_runner --config x-pack/test/api_integration/deploym
 ```
 
 ## Tagging and Skipping the Tests
-Since deployment-agnostic tests are designed to run both locally and on MKI/Cloud, we believe no extra tagging is required. If a test is not working on MKI/Cloud or both, there is most likely an issue with the FTR service or the configuration file it uses.
+Since deployment-agnostic tests are designed to run both locally and on MKI/Cloud, we believe no extra tagging is required in general (read below for exceptions). If a test is not working on MKI/Cloud or both, there is most likely an issue with the FTR service or the configuration file it uses.
 
 When a test fails on CI, automation will apply `.skip` to the top-level describe block. This means the test will be skipped in **both serverless and stateful environments**. If a test is unstable in a specific environment only, it is probably a sign that the test is not truly deployment-agnostic.
+
+### Excluding a suite from test environments
+As pointed out above, deployment agnostic tests should be designed to run in stateful and serverless, locally and in cloud (ECH, MKI). However, there are situations where a test suite should only run on a subset of these environments. **This should be an exception.**
+
+Here are the supported suite labels to control execution in test environments:
+* `skipStateful` - this will exclude the suite from **all stateful test runs, local and ECH**
+* `skipCloud` - this will exclude the suite from **stateful cloud / ECH test runs**
+* `skipServerless` - this will exclude the suite from **all serverless test runs, local and MKI**
+* `skipMKI` - this will exclude the suite from **serverless cloud / MKI test runs**
+
+Note that tags can not be applied to an arrow function suite like `describe('test suite', () => {`. Here's an example of how to apply a suite tag:
+```ts
+describe('test suite', function () {
+  // add a comment to explain why this suite is excluded from that test environment
+  this.tags(['skipMKI']);
+  [...]
+});
+```
 
 ## Migrating existing tests
 If your tests align with the outlined criteria and requirements, you can migrate them to deployment-agnostic by following these steps:

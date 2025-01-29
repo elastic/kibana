@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React, { useContext } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { Chart, Datum, Partition, Settings, PartitionLayout, PartialTheme } from '@elastic/charts';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../../plugin';
 import { DonutChartLegend } from './donut_chart_legend';
-import { UptimeThemeContext } from '../../../contexts';
 
 interface DonutChartProps {
   down: number;
@@ -42,11 +43,14 @@ const themeOverrides: PartialTheme = {
 };
 
 export const DonutChart = ({ height, down, up }: DonutChartProps) => {
-  const {
-    colors: { danger, gray },
-    chartTheme,
-  } = useContext(UptimeThemeContext);
+  const theme = useEuiTheme();
+  const danger = theme.euiTheme.colors.danger;
+  const gray = theme.euiTheme.colors.lightShade;
 
+  const {
+    services: { charts },
+  } = useKibana<ClientPluginsStart>();
+  const baseTheme = charts.theme.useChartsBaseTheme();
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
@@ -58,11 +62,7 @@ export const DonutChart = ({ height, down, up }: DonutChartProps) => {
             values: { down, total: up + down },
           })}
         >
-          <Settings
-            theme={[themeOverrides, chartTheme.theme ?? {}]}
-            baseTheme={chartTheme.baseTheme}
-            locale={i18n.getLocale()}
-          />
+          <Settings theme={[themeOverrides]} baseTheme={baseTheme} locale={i18n.getLocale()} />
           <Partition
             id="spec_1"
             data={[

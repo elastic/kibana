@@ -55,6 +55,11 @@ import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
+import { SearchStartProvider } from './search_start';
+import { SearchApiKeysProvider } from './search_api_keys';
+import { SearchIndexDetailPageProvider } from './search_index_details_page';
+import { SearchOverviewProvider } from './search_overview_page';
+import { SearchNavigationProvider } from './search_navigation';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -94,7 +99,12 @@ export const pageObjects = {
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
+  searchApiKeys: SearchApiKeysProvider,
   searchClassicNavigation: SearchClassicNavigationProvider,
+  searchStart: SearchStartProvider,
+  searchIndexDetailsPage: SearchIndexDetailPageProvider,
+  searchNavigation: SearchNavigationProvider,
+  searchOverview: SearchOverviewProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,

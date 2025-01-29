@@ -100,7 +100,7 @@ export const DataSourceContextProvider: FC<PropsWithChildren<DataSourceContextPr
           <h2>
             <FormattedMessage
               id="xpack.aiops.dataSourceContext.errorTitle"
-              defaultMessage="Unable to fetch data view or saved search"
+              defaultMessage="Unable to fetch data view or Discover session"
             />
           </h2>
         }

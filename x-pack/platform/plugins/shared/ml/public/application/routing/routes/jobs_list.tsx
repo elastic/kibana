@@ -24,7 +24,7 @@ import { useRouteResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
-import { basicResolvers } from '../resolvers';
+import { basicResolvers, initSavedObjects } from '../resolvers';
 
 const JobsPage = dynamic(async () => ({
   default: (await import('../../jobs/jobs_list')).JobsPage,
@@ -51,7 +51,10 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
+  const { context } = useRouteResolver('full', ['canGetJobs'], {
+    ...basicResolvers(),
+    initSavedObjects,
+  });
 
   const timefilter = useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 

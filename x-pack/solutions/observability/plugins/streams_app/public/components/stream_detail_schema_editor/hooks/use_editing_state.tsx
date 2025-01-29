@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import { FieldDefinition, ReadStreamDefinition } from '@kbn/streams-plugin/common/types';
+import {
+  ReadStreamDefinition,
+  NamedFieldDefinitionConfig,
+  isWiredReadStream,
+} from '@kbn/streams-schema';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useCallback, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { FieldStatus } from '../field_status';
+import { omit } from 'lodash';
+import { FieldStatus } from '../configuration_maps';
 
 export type SchemaEditorEditingState = ReturnType<typeof useEditingState>;
 
 export interface FieldEntry {
-  name: FieldDefinition['name'];
-  type?: FieldDefinition['type'];
-  format?: FieldDefinition['format'];
+  name: NamedFieldDefinitionConfig['name'];
+  type?: NamedFieldDefinitionConfig['type'];
+  format?: NamedFieldDefinitionConfig['format'];
   parent: string;
   status: FieldStatus;
 }
@@ -90,23 +95,31 @@ export const useEditingState = ({
   const saveChanges = useMemo(() => {
     return selectedField &&
       isFullFieldDefinition(nextFieldDefinition) &&
-      hasChanges(selectedField, nextFieldDefinition)
+      hasChanges(selectedField, nextFieldDefinition) &&
+      isWiredReadStream(definition)
       ? async () => {
           toggleIsSaving(true);
           try {
-            await streamsRepositoryClient.fetch(`PUT /api/streams/{id}`, {
+            await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
               signal: abortController.signal,
               params: {
                 path: {
-                  id: definition.id,
+                  id: definition.name,
                 },
                 body: {
-                  processing: definition.processing,
-                  children: definition.children,
-                  fields: [
-                    ...definition.fields.filter((field) => field.name !== nextFieldDefinition.name),
-                    nextFieldDefinition,
-                  ],
+                  ingest: {
+                    ...definition.stream.ingest,
+                    wired: {
+                      fields: {
+                        ...Object.fromEntries(
+                          Object.entries(definition.stream.ingest.wired.fields).filter(
+                            ([name, _field]) => name !== nextFieldDefinition.name
+                          )
+                        ),
+                        [nextFieldDefinition.name]: omit(nextFieldDefinition, 'name'),
+                      },
+                    },
+                  },
                 },
               },
             });
@@ -133,10 +146,7 @@ export const useEditingState = ({
       : undefined;
   }, [
     abortController.signal,
-    definition.children,
-    definition.fields,
-    definition.id,
-    definition.processing,
+    definition,
     nextFieldDefinition,
     refreshDefinition,
     refreshUnmappedFields,
@@ -165,14 +175,14 @@ export const useEditingState = ({
 };
 
 export const isFullFieldDefinition = (
-  value?: Partial<FieldDefinition>
-): value is FieldDefinition => {
+  value?: Partial<NamedFieldDefinitionConfig>
+): value is NamedFieldDefinitionConfig => {
   return !!value && !!value.name && !!value.type;
 };
 
 const hasChanges = (
-  selectedField: Partial<FieldDefinition>,
-  nextFieldEntry: Partial<FieldDefinition>
+  selectedField: Partial<NamedFieldDefinitionConfig>,
+  nextFieldEntry: Partial<NamedFieldDefinitionConfig>
 ) => {
   return (
     selectedField.type !== nextFieldEntry.type || selectedField.format !== nextFieldEntry.format

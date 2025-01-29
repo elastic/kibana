@@ -14,7 +14,7 @@ import {
   DEFEND_INSIGHTS,
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -48,13 +48,13 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
       },
       security: {
         authz: {
-          requiredPrivileges: ['elasticAssistant'],
+          requiredPrivileges: ['securitySolution-writeWorkflowInsights'],
         },
       },
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(DefendInsightsPostRequestBody),
@@ -69,7 +69,11 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
       async (context, request, response): Promise<IKibanaResponse<DefendInsightsPostResponse>> => {
         const startTime = moment(); // start timing the generation
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
+
+        const ctx = await context.resolve(['licensing', 'elasticAssistant']);
+
+        const assistantContext = ctx.elasticAssistant;
+
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
 
@@ -81,6 +85,15 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
           });
           if (!isEnabled) {
             return response.notFound();
+          }
+
+          if (!ctx.licensing.license.hasAtLeast('enterprise')) {
+            return response.forbidden({
+              body: {
+                message:
+                  'Your license does not support Defend Workflows. Please upgrade your license.',
+              },
+            });
           }
 
           const actions = assistantContext.actions;
@@ -136,6 +149,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig,
             esClient,
             latestReplacements,
+            contentReferencesStore: false,
             connectorTimeout: CONNECTOR_TIMEOUT,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
             langSmithProject,

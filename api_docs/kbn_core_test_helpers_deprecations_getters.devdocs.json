@@ -37,7 +37,7 @@
           },
           "; settings?: Record<string, any> | undefined; path: string; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+        "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,7 +48,7 @@
             "tags": [],
             "label": "{\n  provider,\n  settings = {},\n  path,\n}",
             "description": [],
-            "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+            "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,7 +78,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -99,7 +99,7 @@
                         "text": "ConfigDeprecationFactory"
                       }
                     ],
-                    "path": "packages/kbn-config/src/deprecation/types.ts",
+                    "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -115,7 +115,7 @@
                 "signature": [
                   "Record<string, any> | undefined"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -126,7 +126,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -154,7 +154,7 @@
           },
           "; settings?: Record<string, any> | undefined; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+        "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -165,7 +165,7 @@
             "tags": [],
             "label": "{\n  provider,\n  settings = {},\n}",
             "description": [],
-            "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+            "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -195,7 +195,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -216,7 +216,7 @@
                         "text": "ConfigDeprecationFactory"
                       }
                     ],
-                    "path": "packages/kbn-config/src/deprecation/types.ts",
+                    "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -232,7 +232,7 @@
                 "signature": [
                   "Record<string, any> | undefined"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

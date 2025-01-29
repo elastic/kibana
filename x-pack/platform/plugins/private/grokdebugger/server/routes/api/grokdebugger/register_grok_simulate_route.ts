@@ -26,6 +26,12 @@ export function registerGrokSimulateRoute(framework: KibanaFramework) {
     {
       method: 'post',
       path: '/api/grokdebugger/simulate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: requestBodySchema,
       },

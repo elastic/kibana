@@ -37,7 +37,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/cloud_details.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
                 "text": "CloudDetailsPanelProps"
               }
             ],
-            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/cloud_details.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -76,7 +76,7 @@
         "signature": [
           "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, consoleTitle, showTopBar, }: CodeBoxProps) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/code_box.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/code_box.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -90,7 +90,7 @@
             "signature": [
               "CodeBoxProps"
             ],
-            "path": "packages/kbn-search-api-panels/components/code_box.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/code_box.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,7 +125,7 @@
           },
           " | undefined) => string | undefined"
         ],
-        "path": "packages/kbn-search-api-panels/utils.ts",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +146,7 @@
                 "text": "LanguageDefinition"
               }
             ],
-            "path": "packages/kbn-search-api-panels/utils.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -168,7 +168,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/utils.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -211,7 +211,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-search-api-panels/utils.ts",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -233,7 +233,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-search-api-panels/utils.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -255,7 +255,7 @@
                 "text": "LanguageDefinition"
               }
             ],
-            "path": "packages/kbn-search-api-panels/utils.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -276,7 +276,7 @@
                 "text": "LanguageDefinitionSnippetArguments"
               }
             ],
-            "path": "packages/kbn-search-api-panels/utils.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -295,7 +295,7 @@
         "signature": [
           "({ assetBasePath, label, href, \"aria-label\": ariaLabel }: { assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/github_link.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -309,7 +309,7 @@
             "signature": [
               "{ assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }"
             ],
-            "path": "packages/kbn-search-api-panels/components/github_link.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -328,7 +328,7 @@
         "signature": [
           "({ codeSnippet, selectedLanguage, selectedPipeline, setSelectedLanguage, docLinks, assetBasePath, application, consolePlugin, sharePlugin, languages, consoleRequest, additionalIngestionPanel, ingestPipelineData, setSelectedPipeline, defaultIngestPipeline, }: IngestDataProps) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/ingest_data.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/ingest_data.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -342,7 +342,7 @@
             "signature": [
               "IngestDataProps"
             ],
-            "path": "packages/kbn-search-api-panels/components/ingest_data.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/ingest_data.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -361,7 +361,7 @@
         "signature": [
           "({ additionalIngestionPanel, docLinks, assetBasePath, }: IngestionPanelProps) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/ingestions_panel.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/ingestions_panel.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -375,7 +375,7 @@
             "signature": [
               "IngestionPanelProps"
             ],
-            "path": "packages/kbn-search-api-panels/components/ingestions_panel.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/ingestions_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -394,7 +394,7 @@
         "signature": [
           "({ selectedPipeline, setSelectedPipeline, ingestPipelinesData, defaultIngestPipeline, }: IngestPipelinePanelProps) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/ingest_pipelines/ingest_pipeline_panel.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/ingest_pipelines/ingest_pipeline_panel.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -408,7 +408,7 @@
             "signature": [
               "IngestPipelinePanelProps"
             ],
-            "path": "packages/kbn-search-api-panels/components/ingest_pipelines/ingest_pipeline_panel.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/ingest_pipelines/ingest_pipeline_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -427,7 +427,7 @@
         "signature": [
           "({ codeSnippet, consoleRequest, language, languages, setSelectedLanguage, assetBasePath, application, sharePlugin, isPanelLeft, overviewPanelProps, }: InstallClientProps) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/install_client.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/install_client.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -441,7 +441,7 @@
             "signature": [
               "InstallClientProps"
             ],
-            "path": "packages/kbn-search-api-panels/components/install_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/install_client.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -460,7 +460,7 @@
         "signature": [
           "({ language, setSelectedLanguage, isSelectedLanguage, assetBasePath, src, }: SelectClientProps) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/language_client_panel.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/language_client_panel.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -474,7 +474,7 @@
             "signature": [
               "SelectClientProps"
             ],
-            "path": "packages/kbn-search-api-panels/components/language_client_panel.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/language_client_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -493,7 +493,7 @@
         "signature": [
           "({ children, description, leftPanelContent, links, rightPanelContent, title, overviewPanelProps, }: React.PropsWithChildren<OverviewPanelProps>) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/overview_panel.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/overview_panel.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -507,7 +507,7 @@
             "signature": [
               "React.PropsWithChildren<OverviewPanelProps>"
             ],
-            "path": "packages/kbn-search-api-panels/components/overview_panel.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/overview_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -526,7 +526,7 @@
         "signature": [
           "({ clusterImage, cutImage, reporterImage, }: PipelinePanelProps) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/pipeline_panel.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/pipeline_panel.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -540,7 +540,7 @@
             "signature": [
               "PipelinePanelProps"
             ],
-            "path": "packages/kbn-search-api-panels/components/pipeline_panel.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/pipeline_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -559,7 +559,7 @@
         "signature": [
           "({ docLinks, images }: { docLinks: { arrayOrJson: string; dataEnrichment: string; dataFiltering: string; dataTransformation: string; pipelineHandling: string; }; images: { dataEnrichment: string; dataTransformation: string; dataFiltering: string; pipelineHandling: string; arrayHandling: string; }; }) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/preprocess_data.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/preprocess_data.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -573,7 +573,7 @@
             "signature": [
               "{ docLinks: { arrayOrJson: string; dataEnrichment: string; dataFiltering: string; dataTransformation: string; pipelineHandling: string; }; images: { dataEnrichment: string; dataTransformation: string; dataFiltering: string; pipelineHandling: string; arrayHandling: string; }; }"
             ],
-            "path": "packages/kbn-search-api-panels/components/preprocess_data.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/preprocess_data.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -600,7 +600,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -622,7 +622,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -649,7 +649,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-search-api-panels/index.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -669,7 +669,7 @@
                 "text": "WelcomeBannerProps"
               }
             ],
-            "path": "packages/kbn-search-api-panels/index.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -687,7 +687,7 @@
         "tags": [],
         "label": "CloudDetailsPanelProps",
         "description": [],
-        "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/cloud_details.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -701,7 +701,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/cloud_details.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -715,7 +715,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/cloud_details.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -729,7 +729,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/cloud_details.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -759,7 +759,7 @@
               "_EuiPanelButtonlike",
               ")> | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/cloud_details.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -773,7 +773,7 @@
         "tags": [],
         "label": "LanguageDefinition",
         "description": [],
-        "path": "packages/kbn-search-api-panels/types.ts",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -784,7 +784,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -804,7 +804,7 @@
                 "text": "Languages"
               }
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -815,7 +815,7 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -829,7 +829,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -843,7 +843,7 @@
             "signature": [
               "CodeSnippet | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -857,7 +857,7 @@
             "signature": [
               "CodeSnippet | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -871,7 +871,7 @@
             "signature": [
               "CodeSnippet | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -885,7 +885,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -899,7 +899,7 @@
             "signature": [
               "CodeSnippet | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -913,7 +913,7 @@
             "signature": [
               "CodeSnippet | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -927,7 +927,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -941,7 +941,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -955,7 +955,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -969,7 +969,7 @@
             "signature": [
               "{ link: string; label: string; } | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -983,7 +983,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -997,7 +997,7 @@
         "tags": [],
         "label": "LanguageDefinitionSnippetArguments",
         "description": [],
-        "path": "packages/kbn-search-api-panels/types.ts",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1008,7 +1008,7 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1019,7 +1019,7 @@
             "tags": [],
             "label": "apiKey",
             "description": [],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1033,7 +1033,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1047,7 +1047,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1061,7 +1061,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1075,7 +1075,7 @@
             "signature": [
               "Record<string, boolean> | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/types.ts",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1089,7 +1089,7 @@
         "tags": [],
         "label": "SelectClientPanelProps",
         "description": [],
-        "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1103,7 +1103,7 @@
             "signature": [
               "{ elasticsearchClients: string; kibanaRunApiInConsole: string; }"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1117,7 +1117,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1147,7 +1147,7 @@
               "_EuiPanelButtonlike",
               ")> | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1161,7 +1161,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1173,16 +1173,10 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              },
+              "ApplicationStart",
               " | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1203,7 +1197,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1243,7 +1237,7 @@
               },
               ">): void; }"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1257,7 +1251,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1271,7 +1265,7 @@
         "tags": [],
         "label": "WelcomeBannerProps",
         "description": [],
-        "path": "packages/kbn-search-api-panels/index.tsx",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1283,16 +1277,10 @@
             "label": "user",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               " | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/index.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1306,7 +1294,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/index.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1320,7 +1308,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/index.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,7 +1322,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/index.tsx",
+            "path": "src/platform/packages/shared/kbn-search-api-panels/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1350,7 +1338,7 @@
         "tags": [],
         "label": "Languages",
         "description": [],
-        "path": "packages/kbn-search-api-panels/types.ts",
+        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

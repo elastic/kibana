@@ -182,6 +182,19 @@
           },
           {
             "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.hasAccessToTimeline",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasAccessToTimeline",
+            "description": [
+              "\nWhether the current user has access to timeline"
+            ],
+            "path": "x-pack/solutions/security/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "threatIntelligence",
             "id": "def-public.SecuritySolutionPluginContext.useQuery",
             "type": "Function",
             "tags": [],
@@ -505,7 +518,7 @@
         "tags": [],
         "label": "TIPageId",
         "description": [
-          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';"
+          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/solutions/security/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';"
         ],
         "signature": [
           "\"threat_intelligence\""

@@ -21,7 +21,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 import { transformESSearchToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
-import { performChecks } from '../helpers';
+import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -57,7 +57,15 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           if (!checkResponse.isSuccess) {
             return checkResponse.response;
           }
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+
+          const contentReferencesEnabled =
+            ctx.elasticAssistant.getRegisteredFeatures(
+              DEFAULT_PLUGIN_NAME
+            ).contentReferencesEnabled;
+
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
+            contentReferencesEnabled,
+          });
           const currentUser = checkResponse.currentUser;
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
@@ -68,7 +76,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const MAX_CONVERSATION_TOTAL = query.per_page;
           // TODO remove once we have pagination https://github.com/elastic/kibana/issues/192714
           // do a separate search for default conversations and non-default conversations to ensure defaults always get included
-          // MUST MATCH THE LENGTH OF BASE_SECURITY_CONVERSATIONS from 'x-pack/plugins/security_solution/public/assistant/content/conversations/index.tsx'
+          // MUST MATCH THE LENGTH OF BASE_SECURITY_CONVERSATIONS from 'x-pack/solutions/security/plugins/security_solution/public/assistant/content/conversations/index.tsx'
           const MAX_DEFAULT_CONVERSATION_TOTAL = 7;
           const nonDefaultSize = MAX_CONVERSATION_TOTAL - MAX_DEFAULT_CONVERSATION_TOTAL;
           const result = await dataClient?.findDocuments<EsConversationSchema>({

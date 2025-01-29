@@ -182,6 +182,51 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should return 400 if the timezone of an action is not valid', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData())
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+      const updatedData = {
+        name: 'bcd',
+        tags: ['bar'],
+        schedule: { interval: '12s' },
+        throttle: '1m',
+        params: {},
+        actions: [
+          {
+            id: 'test-id',
+            group: 'default',
+            params: {},
+            alerts_filter: {
+              timeframe: {
+                days: [1, 2, 3, 4, 5, 6, 7],
+                timezone: 'invalid',
+                hours: { start: '00:00', end: '01:00' },
+              },
+            },
+          },
+        ],
+      };
+
+      const response = await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send(updatedData);
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          '[request body.actions.0.alerts_filter.timeframe.timezone]: string is not a valid timezone: invalid',
+      });
+    });
+
     describe('update rule flapping', () => {
       afterEach(async () => {
         await resetRulesSettings(supertest, 'space1');
@@ -406,76 +451,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             },
           })
           .expect(400);
-      });
-    });
-
-    describe('legacy', function () {
-      this.tags('skipFIPS');
-      it('should handle update alert request appropriately', async () => {
-        const { body: createdAlert } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-        const updatedData = {
-          name: 'bcd',
-          tags: ['bar'],
-          params: {
-            foo: true,
-          },
-          schedule: { interval: '12s' },
-          actions: [],
-          throttle: '1m',
-          notifyWhen: 'onThrottleInterval',
-        };
-
-        const response = await supertest
-          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
-          .set('kbn-xsrf', 'foo')
-          .send(updatedData)
-          .expect(200);
-
-        expect(response.body).to.eql({
-          ...updatedData,
-          id: createdAlert.id,
-          tags: ['bar'],
-          alertTypeId: 'test.noop',
-          consumer: 'alertsFixture',
-          createdBy: null,
-          enabled: true,
-          updatedBy: null,
-          apiKeyOwner: null,
-          apiKeyCreatedByUser: null,
-          muteAll: false,
-          mutedInstanceIds: [],
-          notifyWhen: 'onThrottleInterval',
-          scheduledTaskId: createdAlert.scheduled_task_id,
-          createdAt: response.body.createdAt,
-          updatedAt: response.body.updatedAt,
-          executionStatus: response.body.executionStatus,
-          revision: 1,
-          running: false,
-          ...(response.body.nextRun ? { nextRun: response.body.nextRun } : {}),
-          ...(response.body.lastRun ? { lastRun: response.body.lastRun } : {}),
-        });
-        expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-        expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
-        expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
-          Date.parse(response.body.createdAt)
-        );
-        if (response.body.nextRun) {
-          expect(Date.parse(response.body.nextRun)).to.be.greaterThan(0);
-        }
-
-        // Ensure AAD isn't broken
-        await checkAAD({
-          supertest,
-          spaceId: Spaces.space1.id,
-          type: RULE_SAVED_OBJECT_TYPE,
-          id: createdAlert.id,
-        });
       });
     });
   });

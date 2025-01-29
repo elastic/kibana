@@ -71,9 +71,6 @@ export { useAssistantOverlay } from './impl/assistant/use_assistant_overlay';
 /** a helper that enriches content returned from a query with action buttons */
 export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
 
-/** Default Elastic AI Assistant logo, can be removed once included in EUI **/
-export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_avatar';
-
 export { ConnectorSelectorInline } from './impl/connectorland/connector_selector_inline/connector_selector_inline';
 
 export {
@@ -84,11 +81,19 @@ export {
   DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
   DEFAULT_LATEST_ALERTS,
   DEFEND_INSIGHTS_STORAGE_KEY,
+  /** The end of the date range of alerts, sent as context to the LLM */
+  END_LOCAL_STORAGE_KEY,
+  /** Search bar filters that apply to the alerts sent as context to the LLM */
+  FILTERS_LOCAL_STORAGE_KEY,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies the maximum number of alerts to send as context */
   MAX_ALERTS_LOCAL_STORAGE_KEY,
+  /** Search bar query that apply to the alerts sent as context to the LLM */
+  QUERY_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies whether the settings tour should be shown */
   SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY,
+  /** The start of the date range of alerts, sent as context to the LLM */
+  START_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
@@ -136,7 +141,7 @@ export type { PromptContext } from './impl/assistant/prompt_context/types';
  * initializing it. This is used to provide 'category' options when users create Quick Prompts.
  * Also, useful for collating all of a solutions' prompts in one place.
  *
- * e.g. see Security Solution's x-pack/plugins/security_solution/public/assistant/prompt_contexts/index.tsx
+ * e.g. see Security Solution's x-pack/solutions/security/plugins/security_solution/public/assistant/prompt_contexts/index.tsx
  */
 export type { PromptContextTemplate } from './impl/assistant/prompt_context/types';
 

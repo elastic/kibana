@@ -38,6 +38,11 @@ paths:
                 apiConfig:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
                   description: LLM API configuration.
+                end:
+                  type: string
+                filter:
+                  type: object
+                  additionalProperties: true
                 langSmithProject:
                   type: string
                 langSmithApiKey:
@@ -48,6 +53,8 @@ paths:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
                 size:
                   type: number
+                start:
+                  type: string
                 subAction:
                   type: string
                   enum:

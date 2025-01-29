@@ -112,11 +112,15 @@
         "label": "Entity",
         "description": [],
         "signature": [
-          "EntityBase & { type: \"stream\"; properties: { id: string; children: { id: string; condition?: ",
-          "Condition",
-          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
-          "Condition",
-          "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }; }"
+          "EntityBase & { type: \"stream\"; properties: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamDefinition",
+            "text": "IngestStreamDefinition"
+          },
+          "; }"
         ],
         "path": "x-pack/solutions/observability/plugins/streams_app/common/index.ts",
         "deprecated": false,
@@ -131,11 +135,15 @@
         "label": "StreamEntity",
         "description": [],
         "signature": [
-          "EntityBase & { type: \"stream\"; properties: { id: string; children: { id: string; condition?: ",
-          "Condition",
-          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; format?: string | undefined; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
-          "Condition",
-          "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }; }"
+          "EntityBase & { type: \"stream\"; properties: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamDefinition",
+            "text": "IngestStreamDefinition"
+          },
+          "; }"
         ],
         "path": "x-pack/solutions/observability/plugins/streams_app/common/index.ts",
         "deprecated": false,

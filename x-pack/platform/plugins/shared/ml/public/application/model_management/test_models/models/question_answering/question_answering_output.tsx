@@ -8,8 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
-import { useCurrentThemeVars } from '../../../../contexts/kibana';
+import { useEuiFontSize, useEuiTheme, EuiBadge, EuiHorizontalRule } from '@elastic/eui';
 import type {
   FormattedQuestionAnsweringResult,
   QuestionAnsweringInference,
@@ -59,15 +58,24 @@ function insertHighlighting(result: FormattedQuestionAnsweringResult, inputText:
 }
 
 const ResultBadge: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs').fontSize;
+  const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+
+  // For Amsterdam, use a `behindText` variant. Borealis doesn't need it because of updated contrasts.
+  const badgeColor = isAmsterdam
+    ? euiTheme.colors.vis.euiColorVisBehindText5
+    : euiTheme.colors.vis.euiColorVis9;
+
   return (
     <EuiBadge
-      color={euiTheme.euiColorVis5_behindText}
+      color={badgeColor}
       style={{
         marginRight: ICON_PADDING,
         marginTop: `-${ICON_PADDING}`,
-        border: `1px solid ${euiTheme.euiColorVis5}`,
-        fontSize: euiTheme.euiFontSizeXS,
+        // For Amsterdam, add a border to the badge to improve contrast with the background.
+        ...(isAmsterdam ? { border: `1px solid ${euiTheme.colors.vis.euiColorVis5}` } : {}),
+        fontSize: euiFontSizeXS,
         padding: '0px 6px',
         pointerEvents: 'none',
       }}

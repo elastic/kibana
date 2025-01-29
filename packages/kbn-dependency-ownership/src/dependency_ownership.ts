@@ -18,7 +18,7 @@ interface GetDependencyOwnershipParams {
   missingOwner?: boolean;
 }
 
-interface DependenciesByOwner {
+export interface DependenciesByOwner {
   prodDependencies: string[];
   devDependencies: string[];
 }

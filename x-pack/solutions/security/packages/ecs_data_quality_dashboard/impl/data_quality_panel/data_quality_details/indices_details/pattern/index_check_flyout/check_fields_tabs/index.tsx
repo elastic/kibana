@@ -14,24 +14,26 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import styled, { StyledComponent } from 'styled-components';
+import { css } from '@emotion/react';
 
 import { CheckFieldsTab, CheckFieldsTabId } from './types';
 
-const StyledTabFlexGroup = styled(EuiFlexGroup)`
-  width: 100%;
-`;
+const styles = {
+  tabFlexGroup: css({
+    width: '100%',
+  }),
 
-const StyledTabFlexItem = styled.div`
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-`;
+  tabFlexItem: css({
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+  }),
 
-const StyledBadge = styled(EuiBadge)`
-  text-align: right;
-  cursor: pointer;
-`;
+  badge: css({
+    textAlign: 'right',
+    cursor: 'pointer',
+  }),
+};
 
 interface CheckFieldsSingleButtonGroupProps {
   onChange: (id: string) => void;
@@ -46,10 +48,7 @@ export interface Props {
   tabs: CheckFieldsTab[];
   renderButtonGroup: (
     props: CheckFieldsSingleButtonGroupProps
-  ) => React.ReactElement<
-    EuiButtonGroupProps,
-    StyledComponent<typeof EuiButtonGroup, {}, {}, never> | typeof EuiButtonGroup
-  >;
+  ) => React.ReactElement<EuiButtonGroupProps, typeof EuiButtonGroup>;
 }
 
 const CheckFieldsTabsComponent: React.FC<Props> = ({ tabs, renderButtonGroup }) => {
@@ -58,7 +57,11 @@ const CheckFieldsTabsComponent: React.FC<Props> = ({ tabs, renderButtonGroup }) 
       tabs.map((tab) => ({
         id: tab.id,
         name: tab.name,
-        append: <StyledBadge color={tab.badgeColor ?? 'hollow'}>{tab.badgeCount ?? 0}</StyledBadge>,
+        append: (
+          <EuiBadge css={styles.badge} color={tab.badgeColor ?? 'hollow'}>
+            {tab.badgeCount ?? 0}
+          </EuiBadge>
+        ),
         content: tab.content ?? null,
         disabled: Boolean(tab.disabled),
         ...(tab.disabled && { disabledReason: tab.disabledReason }),
@@ -72,16 +75,17 @@ const CheckFieldsTabsComponent: React.FC<Props> = ({ tabs, renderButtonGroup }) 
     () =>
       checkFieldsTabs.map((tab) => {
         let label = (
-          <StyledTabFlexGroup
+          <EuiFlexGroup
+            css={styles.tabFlexGroup}
             responsive={false}
             justifyContent="center"
             gutterSize="s"
             alignItems="center"
             title={tab.name}
           >
-            <StyledTabFlexItem>{tab.name}</StyledTabFlexItem>
+            <div css={styles.tabFlexItem}>{tab.name}</div>
             {tab.append}
-          </StyledTabFlexGroup>
+          </EuiFlexGroup>
         );
 
         if (tab.disabled && tab.disabledReason) {

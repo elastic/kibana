@@ -41,6 +41,12 @@ export function registerExecuteRoute({
   router.put(
     {
       path: '/api/watcher/watch/execute',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

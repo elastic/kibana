@@ -254,13 +254,7 @@
               "\nUsed to check capabilities for links to other plugins.\n`application.currentAppId$` is used to close the log pattern analysis flyout\nwhen user navigates out of the current plugin."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -298,13 +292,7 @@
               "\nProvides execution context for data fetching."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -377,13 +365,7 @@
               "\nUsed for data fetching."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -399,13 +381,7 @@
               "\nUsed for toast notifications."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsSetup",
-                "text": "NotificationsSetup"
-              }
+              "NotificationsSetup"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -444,13 +420,7 @@
               "\nTheme service."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -466,13 +436,7 @@
               "\nUI settings."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -518,6 +482,22 @@
                 "text": "UsageCollectionSetup"
               },
               " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppContextValue.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "\nUser profile service."
+            ],
+            "signature": [
+              "UserProfileService"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -601,13 +581,7 @@
               "\nInternationalisation service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
