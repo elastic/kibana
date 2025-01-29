@@ -113,4 +113,5 @@ export interface LayerConfigurationProps {
   panelId?: string;
   closeFlyout?: () => void;
   canEditTextBasedQuery?: boolean;
+  editorContainer?: HTMLElement;
 }

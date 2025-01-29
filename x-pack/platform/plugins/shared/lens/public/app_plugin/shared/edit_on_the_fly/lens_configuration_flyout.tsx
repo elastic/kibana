@@ -238,6 +238,8 @@ export function LensEditConfigurationFlyout({
     visualizationState: visualization,
   });
 
+  const editorContainer = useRef(null);
+
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {
       return false;
@@ -381,6 +383,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
+          <div ref={editorContainer} />
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
@@ -441,6 +444,7 @@ export function LensEditConfigurationFlyout({
                   parentApi={parentApi}
                   panelId={panelId}
                   canEditTextBasedQuery={canEditTextBasedQuery}
+                  editorContainer={editorContainer.current}
                 />
                 <EuiSpacer />
               </>

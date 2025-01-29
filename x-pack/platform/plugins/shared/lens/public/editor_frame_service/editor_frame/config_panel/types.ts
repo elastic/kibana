@@ -53,6 +53,7 @@ export interface ConfigPanelWrapperProps {
   panelId?: string;
   closeFlyout?: () => void;
   canEditTextBasedQuery?: boolean;
+  editorContainer?: HTMLElement;
 }
 
 export interface LayerPanelProps {
@@ -115,6 +116,7 @@ export interface LayerPanelProps {
   parentApi?: unknown;
   closeFlyout?: () => void;
   canEditTextBasedQuery?: boolean;
+  editorContainer?: HTMLElement;
 }
 
 export interface LayerDatasourceDropProps {
