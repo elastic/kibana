@@ -83,7 +83,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           <EuiText
             css={css`
               font-size: ${xsFontSize};
-              color: ${euiTheme.colors.subduedText};
+              color: ${euiTheme.colors.textSubdued};
             `}
           >
             <FormattedMessage
