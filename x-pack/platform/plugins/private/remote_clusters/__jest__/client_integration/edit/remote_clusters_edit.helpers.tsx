@@ -8,6 +8,7 @@
 import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 
+import { SECURITY_MODEL } from '../../../common/constants';
 import { Cluster } from '../../../public';
 import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
@@ -20,7 +21,7 @@ export const REMOTE_CLUSTER_EDIT: Cluster = {
   name: REMOTE_CLUSTER_EDIT_NAME,
   seeds: ['localhost:9400'],
   skipUnavailable: true,
-  securityModel: 'certificate',
+  securityModel: SECURITY_MODEL.CERTIFICATE,
 };
 
 const testBedConfig: TestBedConfig = {

@@ -12,6 +12,7 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
+import { removeContentReferences } from '@kbn/elastic-assistant-common';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
@@ -23,6 +24,10 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 
 interface Props {
   message: ClientMessage;
+}
+
+function getTextToCopy(content: string): string {
+  return removeContentReferences(content);
 }
 
 const CommentActionsComponent: React.FC<Props> = ({ message }) => {
@@ -91,6 +96,8 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   //         ? `${basePath}/app/apm/services/kibana/transactions/view?kuery=&rangeFrom=now-1y&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&transactionName=POST%20/internal/elastic_assistant/actions/connector/?/_execute&transactionType=request&offset=1d&latencyAggregationType=avg`
   //         : undefined;
 
+  const textToCopy = getTextToCopy(content);
+
   return (
     // APM Trace support is currently behind the Model Evaluation feature flag until wider testing is performed
     <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -129,7 +136,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
-          <EuiCopy textToCopy={content}>
+          <EuiCopy textToCopy={textToCopy}>
             {(copy) => (
               <EuiButtonIcon
                 aria-label={i18n.COPY_TO_CLIPBOARD}

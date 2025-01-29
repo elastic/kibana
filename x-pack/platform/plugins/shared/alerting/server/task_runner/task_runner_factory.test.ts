@@ -34,6 +34,7 @@ import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const backfillClient = backfillClientMock.create();
@@ -128,6 +129,7 @@ describe('Task Runner Factory', () => {
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
     isServerless: false,
+    getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
   };
 
   beforeEach(() => {
