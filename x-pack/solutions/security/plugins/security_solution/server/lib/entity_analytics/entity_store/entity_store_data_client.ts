@@ -103,7 +103,6 @@ import {
 
 import type { ApiKeyManager } from './auth/api_key';
 
-
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
   issues?: TransformHealthIssue[];
