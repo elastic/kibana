@@ -153,7 +153,13 @@ describe('getAlertSummary()', () => {
     const eventsResult = {
       ...AlertSummaryFindEventsResult,
       total: events.length,
-      data: events,
+      data: events.map((event) => ({
+        ...event,
+        _id: 'test-id',
+        _index: 'test',
+        _seq_no: 1,
+        _primary_term: 1,
+      })),
     };
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(eventsResult);
 
@@ -161,7 +167,13 @@ describe('getAlertSummary()', () => {
     const executionEventsResult = {
       ...AlertSummaryFindEventsResult,
       total: executionEvents.length,
-      data: executionEvents,
+      data: executionEvents.map((event) => ({
+        ...event,
+        _id: 'test-id',
+        _index: 'test',
+        _seq_no: 1,
+        _primary_term: 1,
+      })),
     };
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(executionEventsResult);
 
