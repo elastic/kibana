@@ -1354,7 +1354,7 @@
     "@kbn/axe-config": "link:src/dev/packages/axe-config",
     "@kbn/babel-preset": "link:src/dev/packages/babel-preset",
     "@kbn/babel-register": "link:src/dev/packages/babel-register",
-    "@kbn/babel-transform": "link:packages/kbn-babel-transform",
+    "@kbn/babel-transform": "link:src/dev/packages/babel-transform",
     "@kbn/bazel-runner": "link:src/dev/packages/bazel-runner",
     "@kbn/capture-oas-snapshot-cli": "link:src/dev/packages/capture-oas-snapshot-cli",
     "@kbn/check-mappings-update-cli": "link:src/dev/packages/check-mappings-update-cli",
