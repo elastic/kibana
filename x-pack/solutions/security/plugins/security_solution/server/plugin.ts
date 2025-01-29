@@ -279,6 +279,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
+      productFeaturesService,
     });
 
     productFeaturesService.registerApiAccessControl(core.http);
