@@ -14,7 +14,7 @@ export interface SecurityFeatureParams {
    * Unfortunately these can't be properly Typed due to it requiring an
    * import directly from the Security Solution plugin. The list of `keys` in this
    * object are defined here:
-   * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/experimental_features.ts#L14
+   * @see https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts#L14
    */
   experimentalFeatures: Record<string, boolean>;
   savedObjects: string[];

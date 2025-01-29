@@ -10,9 +10,10 @@ import moment from 'moment';
 import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useMlKibana } from '../kibana';
-import { JobSelectorFlyout } from '../../../embeddables/common/components/job_selector_flyout';
-import { getInitialGroupsMap } from '../../components/job_selector/job_selector';
-import type { JobSelectionResult } from '../../components/job_selector/job_selector_flyout';
+import {
+  JobSelectorFlyoutContent,
+  type JobSelectionResult,
+} from '../../components/job_selector/job_selector_flyout';
 
 export type GetJobSelection = ReturnType<typeof useJobSelectionFlyout>;
 
@@ -49,16 +50,12 @@ export function useJobSelectionFlyout() {
 
       const tzConfig = uiSettings.get('dateFormat:tz');
       const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
-      const maps = {
-        groupsMap: getInitialGroupsMap([]),
-        jobsMap: {},
-      };
 
       return new Promise(async (resolve, reject) => {
         try {
           flyoutRef.current = overlays.openFlyout(
             <KibanaContextProvider services={services}>
-              <JobSelectorFlyout
+              <JobSelectorFlyoutContent
                 selectedIds={[]}
                 withTimeRangeSelector={config.withTimeRangeSelector}
                 dateFormatTz={dateFormatTz}
@@ -72,7 +69,6 @@ export function useJobSelectionFlyout() {
                   resolve(payload);
                   flyoutRef.current!.close();
                 }}
-                maps={maps}
               />
             </KibanaContextProvider>
           );

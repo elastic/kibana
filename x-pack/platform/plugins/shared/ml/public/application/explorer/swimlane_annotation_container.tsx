@@ -9,13 +9,18 @@ import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useCurrentThemeVars } from '../contexts/kibana';
+
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
 import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
+
 import type { ChartTooltipService } from '../components/chart_tooltip';
+import { useAnnotationStyles } from '../timeseriesexplorer/styles';
+
 import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';
-import { getAnnotationStyles } from '../timeseriesexplorer/styles';
 
 const ANNOTATION_CONTAINER_HEIGHT = 12;
 const ANNOTATION_MIN_WIDTH = 8;
@@ -30,16 +35,16 @@ interface SwimlaneAnnotationContainerProps {
   tooltipService: ChartTooltipService;
 }
 
-const annotationStyles = getAnnotationStyles();
-
 export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> = ({
   chartWidth,
   domain,
   annotationsData,
   tooltipService,
 }) => {
+  const annotationStyles = useAnnotationStyles();
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
 
   useEffect(() => {
     if (canvasRef.current !== null && Array.isArray(annotationsData)) {
@@ -71,8 +76,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         .attr('x', Y_AXIS_LABEL_WIDTH - Y_AXIS_LABEL_PADDING)
         .attr('y', ANNOTATION_CONTAINER_HEIGHT / 2)
         .attr('dominant-baseline', 'middle')
-        .style('fill', euiTheme.euiTextSubduedColor)
-        .style('font-size', euiTheme.euiFontSizeXS);
+        .style('fill', euiTheme.colors.textSubdued)
+        .style('font-size', euiFontSizeXS);
 
       // Add border
       svg
@@ -81,7 +86,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         .attr('y', 0)
         .attr('height', ANNOTATION_CONTAINER_HEIGHT)
         .attr('width', endingXPos - startingXPos)
-        .style('stroke', euiTheme.euiBorderColor)
+        .style('stroke', euiTheme.border.color)
         .style('fill', 'none')
         .style('stroke-width', 1);
 

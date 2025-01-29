@@ -9,8 +9,11 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
 import { createIndex } from './create_index';
 import { internalElserInferenceId } from '../../../../common/consts';
+
+const LEGACY_SEMANTIC_TEXT_VERSION = '1.0.0';
 
 describe('createIndex', () => {
   let log: MockedLogger;
@@ -21,7 +24,7 @@ describe('createIndex', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  it('calls esClient.indices.create with the right parameters', async () => {
+  it('calls esClient.indices.create with the right parameters for the current manifest version', async () => {
     const mappings: MappingTypeMapping = {
       properties: {},
     };
@@ -30,6 +33,7 @@ describe('createIndex', () => {
     await createIndex({
       indexName,
       mappings,
+      manifestVersion: LATEST_MANIFEST_FORMAT_VERSION,
       log,
       esClient,
     });
@@ -41,6 +45,33 @@ describe('createIndex', () => {
       settings: {
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
+        'index.mapping.semantic_text.use_legacy_format': false,
+      },
+    });
+  });
+
+  it('calls esClient.indices.create with the right parameters for the manifest version 1.0.0', async () => {
+    const mappings: MappingTypeMapping = {
+      properties: {},
+    };
+    const indexName = '.some-index';
+
+    await createIndex({
+      indexName,
+      mappings,
+      manifestVersion: LEGACY_SEMANTIC_TEXT_VERSION,
+      log,
+      esClient,
+    });
+
+    expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.create).toHaveBeenCalledWith({
+      index: indexName,
+      mappings,
+      settings: {
+        number_of_shards: 1,
+        auto_expand_replicas: '0-1',
+        'index.mapping.semantic_text.use_legacy_format': true,
       },
     });
   });
@@ -61,6 +92,7 @@ describe('createIndex', () => {
     await createIndex({
       indexName: '.some-index',
       mappings,
+      manifestVersion: LEGACY_SEMANTIC_TEXT_VERSION,
       log,
       esClient,
     });

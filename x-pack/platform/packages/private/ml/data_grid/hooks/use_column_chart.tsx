@@ -12,9 +12,13 @@ import { css } from '@emotion/react';
 
 import useObservable from 'react-use/lib/useObservable';
 
-import { euiPaletteColorBlind, type EuiDataGridColumn } from '@elastic/eui';
+import {
+  useEuiTheme,
+  euiPaletteColorBlind,
+  type EuiDataGridColumn,
+  type EuiThemeComputed,
+} from '@elastic/eui';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
@@ -28,14 +32,6 @@ import { isNumericChartData, isOrdinalChartData } from '../lib/field_histograms'
 
 import { NON_AGGREGATABLE } from '../lib/common';
 import type { DataGridItem } from '../lib/types';
-
-const cssHistogramLegendBoolean = css({
-  width: '100%',
-  // This was originally $euiButtonMinWidth, but that
-  // is no longer exported from the EUI package,
-  // so we're replicating it here inline.
-  minWidth: `calc(${euiThemeVars.euiSize} * 7)`,
-});
 
 const cssTextAlignCenter = css({
   textAlign: 'center',
@@ -97,6 +93,7 @@ export const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYP
 type LegendText = string | JSX.Element;
 export const getLegendText = (
   chartData: ChartData,
+  euiTheme: EuiThemeComputed,
   maxChartColumns = MAX_CHART_COLUMNS
 ): LegendText => {
   if (chartData.type === 'unsupported') {
@@ -112,6 +109,14 @@ export const getLegendText = (
   }
 
   if (chartData.type === 'boolean') {
+    const cssHistogramLegendBoolean = css({
+      width: '100%',
+      // This was originally $euiButtonMinWidth, but that
+      // is no longer exported from the EUI package,
+      // so we're replicating it here inline.
+      minWidth: `calc(${euiTheme.size.base} * 7)`,
+    });
+
     return (
       <table css={cssHistogramLegendBoolean}>
         <tbody>
@@ -171,6 +176,8 @@ export const useColumnChart = (
   columnType: EuiDataGridColumn,
   maxChartColumns?: number
 ): ColumnChart => {
+  const { euiTheme } = useEuiTheme();
+
   const fieldType = getFieldType(columnType.schema);
 
   const hoveredRow = useObservable(hoveredRow$);
@@ -231,7 +238,7 @@ export const useColumnChart = (
 
   return {
     data,
-    legendText: getLegendText(chartData, maxChartColumns),
+    legendText: getLegendText(chartData, euiTheme, maxChartColumns),
     xScaleType,
   };
 };

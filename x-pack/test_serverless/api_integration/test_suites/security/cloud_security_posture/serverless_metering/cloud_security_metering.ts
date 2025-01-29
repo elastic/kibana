@@ -9,17 +9,12 @@ import expect from '@kbn/expect';
 import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
-import {
-  createPackagePolicy,
-  createCloudDefendPackagePolicy,
-} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
 import { RoleCredentials } from '../../../../../shared/services';
-import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data';
+import { getMockFindings } from './mock_data';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
-
-const CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS = 'metrics-cloud_defend.heartbeat-default';
 
 export default function (providerContext: FtrProviderContext) {
   const mockUsageApiApp = setupMockServer();
@@ -32,7 +27,6 @@ export default function (providerContext: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
-  const cloudDefinedIndex = new EsIndexDataProvider(es, CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS);
   const vulnerabilitiesIndex = new EsIndexDataProvider(
     es,
     CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
@@ -74,7 +68,6 @@ export default function (providerContext: FtrProviderContext) {
 
       await findingsIndex.deleteAll();
       await vulnerabilitiesIndex.deleteAll();
-      await cloudDefinedIndex.deleteAll();
     });
 
     afterEach(async () => {
@@ -82,7 +75,6 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await findingsIndex.deleteAll();
       await vulnerabilitiesIndex.deleteAll();
-      await cloudDefinedIndex.deleteAll();
     });
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
@@ -202,43 +194,6 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    it('Should intercept usage API request for Defend for Containers', async () => {
-      await createCloudDefendPackagePolicy(
-        supertestWithoutAuth,
-        agentPolicyId,
-        roleAuthc,
-        internalRequestHeader
-      );
-
-      const blockActionEnabledHeartbeats = getMockDefendForContainersHeartbeats({
-        isBlockActionEnables: true,
-        numberOfHearbeats: 2,
-      });
-
-      const blockActionDisabledHeartbeats = getMockDefendForContainersHeartbeats({
-        isBlockActionEnables: false,
-        numberOfHearbeats: 2,
-      });
-
-      await cloudDefinedIndex.addBulk([
-        ...blockActionEnabledHeartbeats,
-        ...blockActionDisabledHeartbeats,
-      ]);
-
-      let interceptedRequestBody: UsageRecord[] = [];
-
-      await retry.try(async () => {
-        interceptedRequestBody = getInterceptedRequestPayload();
-        expect(interceptedRequestBody.length).to.greaterThan(0);
-        if (interceptedRequestBody.length > 0) {
-          const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
-          expect(usageSubTypes).to.contain('cloud_defend');
-          expect(interceptedRequestBody.length).to.be(blockActionEnabledHeartbeats.length);
-          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-        }
-      });
-    });
-
     it('Should intercept usage API request with all integrations usage records', async () => {
       // Create one package policy - it takes care forCSPM, KSMP and CNVM
       await createPackagePolicy(
@@ -253,13 +208,6 @@ export default function (providerContext: FtrProviderContext) {
         internalRequestHeader
       );
 
-      // Create Defend for Containers package policy
-      await createCloudDefendPackagePolicy(
-        supertestWithoutAuth,
-        agentPolicyId,
-        roleAuthc,
-        internalRequestHeader
-      );
       const billableFindingsCSPM = getMockFindings({
         postureType: 'cspm',
         isBillableAsset: true,
@@ -289,16 +237,6 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 11,
       });
 
-      const blockActionEnabledHeartbeats = getMockDefendForContainersHeartbeats({
-        isBlockActionEnables: true,
-        numberOfHearbeats: 2,
-      });
-
-      const blockActionDisabledHeartbeats = getMockDefendForContainersHeartbeats({
-        isBlockActionEnables: false,
-        numberOfHearbeats: 2,
-      });
-
       await Promise.all([
         findingsIndex.addBulk([
           ...billableFindingsCSPM,
@@ -307,10 +245,6 @@ export default function (providerContext: FtrProviderContext) {
           ...notBillableFindingsKSPM,
         ]),
         vulnerabilitiesIndex.addBulk([...billableFindingsCNVM]),
-        cloudDefinedIndex.addBulk([
-          ...blockActionEnabledHeartbeats,
-          ...blockActionDisabledHeartbeats,
-        ]),
       ]);
 
       // Intercept and verify usage API request
@@ -323,16 +257,12 @@ export default function (providerContext: FtrProviderContext) {
         expect(usageSubTypes).to.contain('cspm');
         expect(usageSubTypes).to.contain('kspm');
         expect(usageSubTypes).to.contain('cnvm');
-        expect(usageSubTypes).to.contain('cloud_defend');
         const totalUsageQuantity = interceptedRequestBody.reduce(
           (acc, record) => acc + record.usage.quantity,
           0
         );
         expect(totalUsageQuantity).to.be(
-          billableFindingsCSPM.length +
-            billableFindingsKSPM.length +
-            billableFindingsCNVM.length +
-            blockActionEnabledHeartbeats.length
+          billableFindingsCSPM.length + billableFindingsKSPM.length + billableFindingsCNVM.length
         );
       });
     });

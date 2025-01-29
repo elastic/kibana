@@ -9,7 +9,7 @@
 
 import { KbnClient, createEsClientForTesting } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ScoutServerConfig } from '../../types';
+import { ScoutTestConfig } from '../../types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
 interface ClientOptions {
@@ -29,7 +29,7 @@ function createClientUrlWithAuth({ serviceName, url, username, password, log }: 
   return clientUrl.toString();
 }
 
-export function createEsClient(config: ScoutServerConfig, log: ToolingLog) {
+export function createEsClient(config: ScoutTestConfig, log: ToolingLog) {
   const { username, password } = config.auth;
   const elasticsearchUrl = createClientUrlWithAuth({
     serviceName: 'Es',
@@ -45,7 +45,7 @@ export function createEsClient(config: ScoutServerConfig, log: ToolingLog) {
   });
 }
 
-export function createKbnClient(config: ScoutServerConfig, log: ToolingLog) {
+export function createKbnClient(config: ScoutTestConfig, log: ToolingLog) {
   const kibanaUrl = createClientUrlWithAuth({
     serviceName: 'Kbn',
     url: config.hosts.kibana,

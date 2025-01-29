@@ -289,44 +289,6 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should support deprecated [metadata _id] syntax', async () => {
-        const id = uuidv4();
-        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
-        const doc1 = {
-          agent: { name: 'test-1', version: '2', type: 'auditbeat' },
-          host: { name: 'my-host' },
-          client: { ip: '127.0.0.1' },
-        };
-
-        const rule: EsqlRuleCreateProps = {
-          ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          // only _id and agent.name is projected at the end of query pipeline
-          query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
-          from: 'now-1h',
-          interval: '1h',
-        };
-
-        await indexEnhancedDocuments({
-          documents: [doc1],
-          interval,
-          id,
-        });
-
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-        });
-
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          size: 10,
-        });
-
-        expect(previewAlerts.length).toBe(1);
-      });
-
       it('should deduplicate alerts correctly based on source document _id', async () => {
         const id = uuidv4();
         // document will fall into 2 rule execution windows

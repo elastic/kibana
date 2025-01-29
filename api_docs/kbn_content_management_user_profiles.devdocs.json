@@ -13,7 +13,7 @@
         "signature": [
           "({\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}: { entityName?: string | undefined; }) => React.JSX.Element"
         ],
-        "path": "packages/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,7 +24,7 @@
             "tags": [],
             "label": "{\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}",
             "description": [],
-            "path": "packages/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -38,7 +38,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -60,7 +60,7 @@
           "IconType",
           " | undefined; includeVersionTip?: boolean | undefined; entityNamePlural?: string | undefined; }) => React.JSX.Element"
         ],
-        "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -71,7 +71,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,7 +86,7 @@
                   "IconType",
                   " | undefined"
                 ],
-                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -100,7 +100,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -114,7 +114,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -134,7 +134,7 @@
         "signature": [
           "(props: { iconType?: string | undefined; includeVersionTip?: boolean | undefined; entityNamePlural?: string | undefined; }) => React.JSX.Element"
         ],
-        "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -145,7 +145,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -159,7 +159,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -173,7 +173,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -187,7 +187,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -207,7 +207,7 @@
         "signature": [
           "(props: { uid: string; }) => React.JSX.Element | null"
         ],
-        "path": "packages/content-management/user_profiles/src/components/user_avatar_tip.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_avatar_tip.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -218,7 +218,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "path": "packages/content-management/user_profiles/src/components/user_avatar_tip.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_avatar_tip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -229,7 +229,7 @@
                 "tags": [],
                 "label": "uid",
                 "description": [],
-                "path": "packages/content-management/user_profiles/src/components/user_avatar_tip.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/components/user_avatar_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -257,7 +257,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -279,7 +279,7 @@
               },
               ">"
             ],
-            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -306,7 +306,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -328,7 +328,7 @@
               },
               ">"
             ],
-            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -365,7 +365,7 @@
           },
           ">, unknown>"
         ],
-        "path": "packages/content-management/user_profiles/src/queries.ts",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -379,7 +379,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/content-management/user_profiles/src/queries.ts",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -416,7 +416,7 @@
           },
           ">[], unknown>"
         ],
-        "path": "packages/content-management/user_profiles/src/queries.ts",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -430,7 +430,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/content-management/user_profiles/src/queries.ts",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -442,7 +442,7 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "path": "packages/content-management/user_profiles/src/queries.ts",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -456,7 +456,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/content-management/user_profiles/src/queries.ts",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/queries.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -483,7 +483,7 @@
             "text": "UserProfilesServices"
           }
         ],
-        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -499,7 +499,7 @@
         "tags": [],
         "label": "UserProfilesKibanaDependencies",
         "description": [],
-        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -512,32 +512,14 @@
             "description": [],
             "signature": [
               "{ userProfile: { bulkGet: <D extends ",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
+              "UserProfileData",
               ">(params: ",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileBulkGetParams",
-                "text": "UserProfileBulkGetParams"
-              },
+              "UserProfileBulkGetParams",
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfile",
-                "text": "UserProfile"
-              },
+              "UserProfile",
               "<D>[]>; }; }"
             ],
-            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -551,7 +533,7 @@
         "tags": [],
         "label": "UserProfilesServices",
         "description": [],
-        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -581,7 +563,7 @@
               },
               ">[]>"
             ],
-            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -595,7 +577,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/content-management/user_profiles/src/services.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -629,7 +611,7 @@
               },
               ">>"
             ],
-            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -643,7 +625,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/user_profiles/src/services.tsx",
+                "path": "src/platform/packages/shared/content-management/user_profiles/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

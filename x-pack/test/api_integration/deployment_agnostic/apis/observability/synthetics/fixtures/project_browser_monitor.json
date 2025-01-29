@@ -1,0 +1,30 @@
+{
+  "keep_stale": true,
+  "project": "test-suite",
+  "monitors": [{
+    "throttling": {
+      "download": 5,
+      "upload": 3,
+      "latency": 20
+    },
+    "schedule": 10,
+    "locations": [
+      "dev"
+    ],
+    "params": {},
+    "playwrightOptions": {
+      "headless": true,
+      "chromiumSandbox": false
+    },
+    "name": "check if title is present",
+    "id": "check-if-title-is-present",
+    "tags": [],
+    "content": "UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA",
+    "filter": {
+      "match": "check if title is present"
+    },
+    "hash": "ekrjelkjrelkjre",
+    "max_attempts": 2,
+    "type": "browser"
+  }]
+}

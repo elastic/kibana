@@ -25,10 +25,16 @@ export const getLayersMultiDimensional = ({
   valueFormatter,
   layer0FillColor,
   pathToFlattenedBucketMap,
+  successColor,
+  dangerColor,
+  primaryColor,
 }: {
   valueFormatter: (value: number) => string;
   layer0FillColor: string;
   pathToFlattenedBucketMap: Record<string, FlattenedBucket | undefined>;
+  successColor: string;
+  dangerColor: string;
+  primaryColor: string;
 }) => {
   return [
     {
@@ -52,7 +58,12 @@ export const getLayersMultiDimensional = ({
           const pattern = getGroupFromPath(node.path) ?? '';
           const flattenedBucket = pathToFlattenedBucketMap[`${pattern}${indexName}`];
 
-          return getFillColor(flattenedBucket?.incompatible);
+          return getFillColor(
+            flattenedBucket?.incompatible,
+            successColor,
+            dangerColor,
+            primaryColor
+          );
         },
       },
     },

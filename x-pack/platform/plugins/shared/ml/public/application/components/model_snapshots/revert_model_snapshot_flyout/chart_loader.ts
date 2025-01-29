@@ -6,6 +6,7 @@
  */
 
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
+import { getIndicesOptions } from '../../../../../common/util/datafeed_utils';
 import type { MlResultsService } from '../../../services/results_service';
 import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
 import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
@@ -32,7 +33,7 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
       job.data_counts.latest_record_timestamp!,
       intervalMs,
       job.datafeed_config.runtime_mappings,
-      job.datafeed_config.indices_options
+      getIndicesOptions(job.datafeed_config)
     );
     if (resp.error !== undefined) {
       throw resp.error;

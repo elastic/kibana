@@ -5,31 +5,29 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
-import styled from 'styled-components';
+import { UseEuiTheme } from '@elastic/eui';
+import { CSSObject } from '@emotion/react';
 
-export const PatternAccordion = styled(EuiAccordion)`
-  .euiAccordion__triggerWrapper {
-    padding: 14px ${({ theme }) => theme.eui.euiSize};
-    border: 1px solid ${({ theme }) => theme.eui.euiBorderColor};
-    border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  }
+export const patternAccordionCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
+  '.euiAccordion__triggerWrapper': {
+    padding: `14px ${euiTheme.size.base}`,
+    border: `1px solid ${euiTheme.border.color}`,
+    borderRadius: euiTheme.border.radius.medium,
+  },
+  '.euiAccordion__button:is(:hover, :focus)': {
+    textDecoration: 'none',
+  },
+  '.euiAccordion__buttonContent': {
+    flexGrow: 1,
+  },
+});
 
-  .euiAccordion__button:is(:hover, :focus) {
-    text-decoration: none;
-  }
-
-  .euiAccordion__buttonContent {
-    flex-grow: 1;
-  }
-`;
-
-export const PatternAccordionChildren = styled.div`
-  padding: ${({ theme }) => theme.eui.euiSize};
-  padding-bottom: 0;
-  border: 1px solid ${({ theme }) => theme.eui.euiBorderColor};
-  border-radius: 0 0 ${({ theme }) => `${theme.eui.euiBorderRadius} ${theme.eui.euiBorderRadius}`};
-  border-top: none;
-  width: calc(100% - ${({ theme }) => theme.eui.euiSizeS} * 2);
-  margin: auto;
-`;
+export const patternAccordionChildrenCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
+  padding: euiTheme.size.s,
+  paddingBottom: 0,
+  border: `1px solid ${euiTheme.border.color}`,
+  borderRadius: `0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
+  borderTop: 'none',
+  width: `calc(100% - ${euiTheme.size.s} * 2)`,
+  margin: 'auto',
+});

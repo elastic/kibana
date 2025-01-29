@@ -21,7 +21,6 @@ import {
 } from './types';
 import { productDocInstallStatusSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
-import { InferenceEndpointManager } from './services/inference_endpoint';
 import { ProductDocInstallClient } from './services/doc_install_status';
 import { DocumentationManager } from './services/doc_manager';
 import { SearchService } from './services/search';
@@ -79,15 +78,9 @@ export class ProductDocBasePlugin
     );
     const productDocClient = new ProductDocInstallClient({ soClient });
 
-    const endpointManager = new InferenceEndpointManager({
-      esClient: core.elasticsearch.client.asInternalUser,
-      logger: this.logger.get('endpoint-manager'),
-    });
-
     const packageInstaller = new PackageInstaller({
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
-      endpointManager,
       kibanaVersion: this.context.env.packageInfo.version,
       artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,

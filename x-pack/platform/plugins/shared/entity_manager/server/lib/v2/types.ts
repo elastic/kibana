@@ -102,3 +102,22 @@ export const searchBySourcesRt = z.intersection(
 );
 
 export type SearchBySources = z.output<typeof searchBySourcesRt>;
+
+export const countByTypesRt = z.object({
+  types: z.optional(z.array(z.string())),
+  filters: z.optional(z.array(z.string())),
+  start: z
+    .optional(z.string())
+    .default(() => moment().subtract(5, 'minutes').toISOString())
+    .refine((val) => moment(val).isValid(), {
+      message: '[start] should be a date in ISO format',
+    }),
+  end: z
+    .optional(z.string())
+    .default(() => moment().toISOString())
+    .refine((val) => moment(val).isValid(), {
+      message: '[end] should be a date in ISO format',
+    }),
+});
+
+export type CountByTypes = z.output<typeof countByTypesRt>;

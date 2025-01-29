@@ -88,9 +88,17 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     charts,
     unifiedSearch,
   };
-  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
   const datePickerDeps = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(services, [
+      'data',
+      'http',
+      'notifications',
+      'i18n',
+      'theme',
+      'userProfile',
+      'uiSettings',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
   };
   const location = useLocation();

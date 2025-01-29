@@ -5,24 +5,30 @@
  * 2.0.
  */
 import React from 'react';
-import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
 import { WiredStreamDetailManagement } from './wired';
 import { ClassicStreamDetailManagement } from './classic';
 
 export function StreamDetailManagement({
   definition,
   refreshDefinition,
+  isLoadingDefinition,
 }: {
   definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
+  isLoadingDefinition: boolean;
 }) {
   if (!definition) {
     return null;
   }
 
-  if (definition.managed) {
+  if (isWiredReadStream(definition)) {
     return (
-      <WiredStreamDetailManagement definition={definition} refreshDefinition={refreshDefinition} />
+      <WiredStreamDetailManagement
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+        isLoadingDefinition={isLoadingDefinition}
+      />
     );
   }
 

@@ -29,7 +29,7 @@ export const getTrimmedQuery = (queryString: string) => {
 
 const sortDates = (date1?: string, date2?: string) => {
   if (!date1 || !date2) return 0;
-  return date1 < date2 ? 1 : date1 > date2 ? -1 : 0;
+  return date1 < date2 ? -1 : date1 > date2 ? 1 : 0;
 };
 
 export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem[] => {
@@ -59,24 +59,24 @@ export const getCachedQueries = (): QueryHistoryItem[] => {
 
 // Adding the maxQueriesAllowed here for testing purposes
 export const addQueriesToCache = (
-  item: QueryHistoryItem,
+  itemToAddOrUpdate: QueryHistoryItem,
   maxQueriesAllowed = MAX_HISTORY_QUERIES_NUMBER
 ) => {
   // if the user is working on multiple tabs
   // the cachedQueries Map might not contain all
   // the localStorage queries
   const queries = getHistoryItems('desc');
+  cachedQueries.clear();
   queries.forEach((queryItem) => {
     const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
     cachedQueries.set(trimmedQueryString, queryItem);
   });
-  const trimmedQueryString = getTrimmedQuery(item.queryString);
+  const trimmedQueryString = getTrimmedQuery(itemToAddOrUpdate.queryString);
 
-  if (item.queryString) {
+  if (itemToAddOrUpdate.queryString) {
     cachedQueries.set(trimmedQueryString, {
-      ...item,
+      ...itemToAddOrUpdate,
       timeRan: new Date().toISOString(),
-      status: item.status,
     });
   }
 
@@ -87,6 +87,7 @@ export const addQueriesToCache = (
 
     // queries to store in the localstorage
     allQueries = sortedByDate.slice(0, maxQueriesAllowed);
+
     // clear and reset the queries in the cache
     cachedQueries.clear();
     allQueries.forEach((queryItem) => {

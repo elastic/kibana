@@ -138,3 +138,21 @@ export const searchEntities = async (
     .expect(expectedCode ?? 200);
   return response.body;
 };
+
+export const countEntities = async (
+  supertest: Agent,
+  params: {
+    types?: string[];
+    filters?: string[];
+    start?: string;
+    end?: string;
+  },
+  expectedCode?: number
+) => {
+  const response = await supertest
+    .post('/internal/entities/v2/_count')
+    .set('kbn-xsrf', 'xxx')
+    .send(params)
+    .expect(expectedCode ?? 200);
+  return response.body;
+};

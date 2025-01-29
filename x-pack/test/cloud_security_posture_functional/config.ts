@@ -9,6 +9,7 @@ import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { pageObjects } from './page_objects';
+import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -17,6 +18,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
+    services: {
+      ...xpackFunctionalConfig.get('services'),
+      ...services,
+    },
     pageObjects,
     testFiles: [resolve(__dirname, './pages')],
     junit: {
@@ -38,9 +43,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   1. release a new package to EPR
          *   2. merge the updated version number change to kibana
          */
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'graphVisualizationInFlyoutEnabled',
-        ])}`,
+        `--uiSettings.overrides.securitySolution:enableVisualizationsInFlyout=true`,
+        `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
         `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,

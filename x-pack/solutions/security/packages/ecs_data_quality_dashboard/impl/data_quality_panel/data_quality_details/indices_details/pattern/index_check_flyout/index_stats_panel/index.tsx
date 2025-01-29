@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import {
@@ -21,31 +28,40 @@ import {
 import { Stat } from '../../../../../stat';
 import { getIlmPhaseDescription } from '../../../../../utils/get_ilm_phase_description';
 
-const StyledFlexItem = styled(EuiFlexItem)`
-  justify-content: space-between;
-  border-right: 1px solid ${({ theme }) => theme.eui.euiBorderColor};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { fontSize } = useEuiFontSize('xs');
 
-  margin-bottom: 2px;
+  const baseFlexItem = css`
+    justify-content: space-between;
+    border-right: 1px solid ${euiTheme.border.color};
+    font-size: ${fontSize};
 
-  &:last-child {
-    border-right: none;
-  }
+    &:last-child {
+      border-right: none;
+    }
 
-  strong {
-    text-transform: capitalize;
-  }
-`;
+    strong {
+      text-transform: capitalize;
+    }
+  `;
 
-const UnpaddedStyledFlexItem = styled(StyledFlexItem)`
-  margin-bottom: 0;
-`;
+  return {
+    flexItem: css`
+      ${baseFlexItem}
+      margin-bottom: 2px;
+    `,
+    unpaddedFlexItem: css`
+      ${baseFlexItem}
+      margin-bottom: 0;
+    `,
+  };
+};
 
 export interface Props {
   docsCount: number;
   ilmPhase?: string;
   sizeInBytes?: number;
-  sameFamilyFieldsCount?: number;
   ecsCompliantFieldsCount?: number;
   customFieldsCount?: number;
   allFieldsCount?: number;
@@ -55,22 +71,22 @@ export const IndexStatsPanelComponent: React.FC<Props> = ({
   docsCount,
   ilmPhase,
   sizeInBytes,
-  sameFamilyFieldsCount,
   customFieldsCount,
   ecsCompliantFieldsCount,
   allFieldsCount,
 }) => {
+  const styles = useStyles();
   const { formatBytes, formatNumber } = useDataQualityContext();
   return (
     <EuiPanel data-test-subj="indexStatsPanel" paddingSize="s" hasShadow={false} hasBorder={true}>
       <EuiFlexGroup gutterSize="m">
-        <StyledFlexItem>
+        <EuiFlexItem css={styles.flexItem}>
           <strong>{DOCS}</strong>
           <EuiSpacer />
           {formatNumber(docsCount)}
-        </StyledFlexItem>
+        </EuiFlexItem>
         {ilmPhase && (
-          <UnpaddedStyledFlexItem>
+          <EuiFlexItem css={styles.unpaddedFlexItem}>
             <strong>{ILM_PHASE}</strong>
             <EuiSpacer />
             <Stat
@@ -78,33 +94,33 @@ export const IndexStatsPanelComponent: React.FC<Props> = ({
               tooltipText={getIlmPhaseDescription(ilmPhase)}
               badgeProps={{ 'data-test-subj': 'ilmPhase' }}
             />
-          </UnpaddedStyledFlexItem>
+          </EuiFlexItem>
         )}
-        <StyledFlexItem>
+        <EuiFlexItem css={styles.flexItem}>
           <strong>{SIZE}</strong>
           <EuiSpacer />
           {formatBytes(sizeInBytes ?? 0)}
-        </StyledFlexItem>
+        </EuiFlexItem>
         {customFieldsCount != null && (
-          <StyledFlexItem>
+          <EuiFlexItem css={styles.flexItem}>
             <strong>{CUSTOM_FIELDS}</strong>
             <EuiSpacer />
             {formatNumber(customFieldsCount)}
-          </StyledFlexItem>
+          </EuiFlexItem>
         )}
         {ecsCompliantFieldsCount != null && (
-          <StyledFlexItem>
+          <EuiFlexItem css={styles.flexItem}>
             <strong>{ECS_COMPLIANT_FIELDS}</strong>
             <EuiSpacer />
             {formatNumber(ecsCompliantFieldsCount)}
-          </StyledFlexItem>
+          </EuiFlexItem>
         )}
         {allFieldsCount != null && (
-          <StyledFlexItem>
+          <EuiFlexItem css={styles.flexItem}>
             <strong>{ALL_FIELDS}</strong>
             <EuiSpacer />
             {formatNumber(allFieldsCount)}
-          </StyledFlexItem>
+          </EuiFlexItem>
         )}
       </EuiFlexGroup>
     </EuiPanel>

@@ -6,13 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
@@ -30,6 +29,10 @@ import { PageTitle } from '../../../components/page_title';
 import { AnomalyResultsViewSelector } from '../../../components/anomaly_results_view_selector';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
+import { getInfluencers } from '../../../explorer/explorer_utils';
+import { useMlJobService } from '../../../services/job_service';
+import type { ExplorerState } from '../../../explorer/explorer_data';
+import { getExplorerDefaultState } from '../../../explorer/explorer_data';
 
 export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
@@ -43,37 +46,23 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   } = useMlKibana();
   const { mlApi } = mlServices;
 
-  const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
-  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
   const timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+  const mlJobService = useMlJobService();
+  const { selectedIds: jobIds, selectedJobs } = useJobSelection(jobsWithTimeRange);
+  const noInfluencersConfigured = getInfluencers(mlJobService, selectedJobs).length === 0;
 
-  const { jobIds } = useJobSelection(jobsWithTimeRange);
   const selectedJobsRunning = jobsWithTimeRange.some(
-    (job) => jobIds.includes(job.id) && job.isRunning === true
+    (job) => jobIds?.includes(job.id) && job.isRunning === true
   );
 
   const anomalyExplorerContext = useAnomalyExplorerContext();
-  const { explorerService } = anomalyExplorerContext;
-  const explorerState = useObservable(anomalyExplorerContext.explorerService.state$);
+  const [explorerState, setExplorerState] = useState<ExplorerState>(getExplorerDefaultState());
 
   const refresh = useRefresh();
   const lastRefresh = refresh?.lastRefresh ?? 0;
-
-  // We cannot simply infer bounds from the globalState's `time` attribute
-  // with `moment` since it can contain custom strings such as `now-15m`.
-  // So when globalState's `time` changes, we update the timefilter and use
-  // `timefilter.getBounds()` to update `bounds` in this component's state.
-  useEffect(() => {
-    if (globalState?.time !== undefined) {
-      if (globalState.time.mode === 'invalid') {
-        setInValidTimeRangeError(true);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
@@ -97,35 +86,18 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(
-    function handleJobSelection() {
-      if (jobIds.length > 0) {
-        explorerService.updateJobSelection(jobIds);
-        getJobsWithStoppedPartitions(jobIds);
-      } else {
-        explorerService.clearJobs();
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(jobIds)]
-  );
-
   useEffect(() => {
-    return () => {
-      // upon component unmounting
-      // clear any data to prevent next page from rendering old charts
-      explorerService.clearExplorerData();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (jobIds && jobIds.length > 0) {
+      getJobsWithStoppedPartitions(jobIds);
+    }
+  }, [getJobsWithStoppedPartitions, jobIds]);
 
   const [explorerData, loadExplorerData] = useExplorerData();
 
   useEffect(() => {
     if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
-      explorerService.setExplorerData(explorerData);
+      setExplorerState((prevState) => ({ ...prevState, ...explorerData }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [explorerData]);
 
   const [tableInterval] = useTableInterval();
@@ -151,35 +123,36 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   );
 
   const influencersFilterQuery = useObservable(
-    anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
+    anomalyExplorerContext.anomalyExplorerCommonStateService.influencerFilterQuery$
   );
 
-  const loadExplorerDataConfig =
-    explorerState !== undefined
-      ? {
-          lastRefresh,
-          influencersFilterQuery,
-          noInfluencersConfigured: explorerState.noInfluencersConfigured,
-          selectedCells,
-          selectedJobs: explorerState.selectedJobs,
-          tableInterval: tableInterval.val,
-          tableSeverity: tableSeverity.val,
-          viewBySwimlaneFieldName: viewByFieldName,
-        }
-      : undefined;
-
-  useEffect(
-    function updateAnomalyExplorerCommonState() {
-      anomalyExplorerContext.anomalyExplorerCommonStateService.setSelectedJobs(
-        loadExplorerDataConfig?.selectedJobs!
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [loadExplorerDataConfig]
+  const loadExplorerDataConfig = useMemo(
+    () => ({
+      lastRefresh,
+      influencersFilterQuery,
+      noInfluencersConfigured,
+      selectedCells,
+      selectedJobs,
+      tableInterval: tableInterval.val,
+      tableSeverity: tableSeverity.val,
+      viewBySwimlaneFieldName: viewByFieldName,
+    }),
+    [
+      lastRefresh,
+      influencersFilterQuery,
+      noInfluencersConfigured,
+      selectedCells,
+      selectedJobs,
+      tableInterval,
+      tableSeverity,
+      viewByFieldName,
+    ]
   );
 
   useEffect(() => {
     if (!loadExplorerDataConfig || loadExplorerDataConfig?.selectedCells === undefined) return;
+    // TODO: Find other way to set loading state as it causes unnecessary re-renders - handle it in anomaly_explorer_common_state
+    setExplorerState((prevState) => ({ ...prevState, loading: true }));
     loadExplorerData(loadExplorerDataConfig);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(loadExplorerDataConfig)]);
@@ -202,10 +175,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
       <MlPageHeader>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <AnomalyResultsViewSelector
-              viewId="explorer"
-              selectedJobs={explorerState.selectedJobs}
-            />
+            <AnomalyResultsViewSelector viewId="explorer" selectedJobs={selectedJobs} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PageTitle
@@ -223,11 +193,11 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
           <Explorer
             {...{
               explorerState,
+              noInfluencersConfigured,
               overallSwimlaneData,
               showCharts,
               severity: tableSeverity.val,
               stoppedPartitions,
-              invalidTimeRangeError,
               selectedJobsRunning,
               timeBuckets,
               timefilter,

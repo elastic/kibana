@@ -12,18 +12,24 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
+  datasources,
+  ScoutEventsReport,
+  ScoutReportEventAction,
+  type ScoutTestRunInfo,
   generateTestRunId,
   getTestIDForTitle,
-  ScoutReport,
-  ScoutReportEventAction,
-  datasources,
+  uploadScoutReportEvents,
+  ScoutFileInfo,
 } from '@kbn/scout-reporting';
 import {
-  getCodeOwnersForFile,
-  getPathsWithOwnersReversed,
-  type PathWithOwners,
+  type CodeOwnersEntry,
+  type CodeOwnerArea,
+  getOwningTeamsForPath,
+  getCodeOwnersEntries,
+  findAreaForCodeOwner,
 } from '@kbn/code-owners';
 import { Runner, Test } from '../../../fake_mocha_types';
+import { Config as FTRConfig } from '../../config';
 
 /**
  * Configuration options for the Scout Mocha reporter
@@ -40,10 +46,15 @@ export class ScoutFTRReporter {
   readonly log: ToolingLog;
   readonly name: string;
   readonly runId: string;
-  private report: ScoutReport;
-  private readonly pathsWithOwners: PathWithOwners[];
+  private report: ScoutEventsReport;
+  private readonly baseTestRunInfo: ScoutTestRunInfo;
+  private readonly codeOwnersEntries: CodeOwnersEntry[];
 
-  constructor(private runner: Runner, private reporterOptions: ScoutFTRReporterOptions = {}) {
+  constructor(
+    private runner: Runner,
+    config: FTRConfig,
+    private reporterOptions: ScoutFTRReporterOptions = {}
+  ) {
     this.log = new ToolingLog({
       level: 'info',
       writeTo: process.stdout,
@@ -53,8 +64,12 @@ export class ScoutFTRReporter {
     this.runId = generateTestRunId();
     this.log.info(`Scout test run ID: ${this.runId}`);
 
-    this.report = new ScoutReport(this.log);
-    this.pathsWithOwners = getPathsWithOwnersReversed();
+    this.report = new ScoutEventsReport(this.log);
+    this.codeOwnersEntries = getCodeOwnersEntries();
+    this.baseTestRunInfo = {
+      id: this.runId,
+      config: { file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)) },
+    };
 
     // Register event listeners
     for (const [eventName, listener] of Object.entries({
@@ -68,16 +83,23 @@ export class ScoutFTRReporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    const concatenatedOwners = getCodeOwnersForFile(filePath, this.pathsWithOwners)?.teams;
+    return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
+  }
 
-    if (concatenatedOwners === undefined) {
-      return [];
-    }
+  private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
+    return owners
+      .map((owner) => findAreaForCodeOwner(owner))
+      .filter((area) => area !== undefined) as CodeOwnerArea[];
+  }
 
-    return concatenatedOwners
-      .replace(/#.+$/, '')
-      .split(',')
-      .filter((value) => value.length > 0);
+  private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
+    const fileOwners = this.getFileOwners(filePath);
+
+    return {
+      path: filePath,
+      owner: fileOwners,
+      area: this.getOwnerAreas(fileOwners),
+    };
   }
 
   /**
@@ -98,9 +120,7 @@ export class ScoutFTRReporter {
         name: this.name,
         type: 'ftr',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       event: {
         action: ScoutReportEventAction.RUN_BEGIN,
       },
@@ -117,9 +137,7 @@ export class ScoutFTRReporter {
         name: this.name,
         type: 'ftr',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       suite: {
         title: test.parent?.fullTitle() || 'unknown',
         type: test.parent?.root ? 'root' : 'suite',
@@ -128,13 +146,12 @@ export class ScoutFTRReporter {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
+        file: test.file
+          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.file))
+          : undefined,
       },
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
-      },
-      file: {
-        path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
-        owner: test.file ? this.getFileOwners(path.relative(REPO_ROOT, test.file)) : 'unknown',
       },
     });
   };
@@ -149,9 +166,7 @@ export class ScoutFTRReporter {
         name: this.name,
         type: 'ftr',
       },
-      test_run: {
-        id: this.runId,
-      },
+      test_run: this.baseTestRunInfo,
       suite: {
         title: test.parent?.fullTitle() || 'unknown',
         type: test.parent?.root ? 'root' : 'suite',
@@ -160,6 +175,9 @@ export class ScoutFTRReporter {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
+        file: test.file
+          ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.file))
+          : undefined,
         status: test.isPending() ? 'skipped' : test.isPassed() ? 'passed' : 'failed',
         duration: test.duration,
       },
@@ -170,14 +188,10 @@ export class ScoutFTRReporter {
           stack_trace: test.err?.stack,
         },
       },
-      file: {
-        path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
-        owner: test.file ? this.getFileOwners(path.relative(REPO_ROOT, test.file)) : 'unknown',
-      },
     });
   };
 
-  onRunEnd = () => {
+  onRunEnd = async () => {
     /**
      * Root suite execution has ended
      */
@@ -188,7 +202,7 @@ export class ScoutFTRReporter {
         type: 'ftr',
       },
       test_run: {
-        id: this.runId,
+        ...this.baseTestRunInfo,
         status: this.runner.stats?.failures === 0 ? 'passed' : 'failed',
         duration: this.runner.stats?.duration || 0,
       },
@@ -200,6 +214,10 @@ export class ScoutFTRReporter {
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
+      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
+    } catch (e) {
+      // Log the error but don't propagate it
+      this.log.error(e);
     } finally {
       this.report.conclude();
     }

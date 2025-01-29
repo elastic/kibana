@@ -28,6 +28,7 @@ import {
   getSnappedTimestamps,
   getSnappedWindowParameters,
   getWindowParametersForTrigger,
+  useLogRateAnalysisBarColors,
   type DocumentCountStatsChangePoint,
   type LogRateHistogramItem,
   type WindowParameters,
@@ -198,6 +199,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
+  const barColors = useLogRateAnalysisBarColors();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
@@ -422,8 +424,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const baselineBadgeMarginLeft =
     (mlBrushMarginLeft ?? 0) + (windowParametersAsPixels?.baselineMin ?? 0);
 
-  const barColor = barColorOverride ? [barColorOverride] : undefined;
-  const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];
+  const barColor = barColorOverride ? [barColorOverride] : barColors.barColor;
+  const barHighlightColor = barHighlightColorOverride
+    ? [barHighlightColorOverride]
+    : [barColors.barHighlightColor];
 
   return (
     <>

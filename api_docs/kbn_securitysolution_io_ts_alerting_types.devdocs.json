@@ -29,7 +29,7 @@
         "description": [
           "\nTODO: This type are originally from \"src/core/types/saved_objects.ts\", once that is package friendly remove\nthis copied type.\n\nThe data for a Saved Object is stored as an object in the `attributes`\nproperty.\n"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,7 +50,7 @@
                 "text": "SavedObjectAttribute"
               }
             ],
-            "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -70,7 +70,7 @@
         "signature": [
           "number"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -85,7 +85,7 @@
         "signature": [
           "number | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -100,7 +100,7 @@
         "signature": [
           "number"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -115,7 +115,7 @@
         "signature": [
           "number | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -130,7 +130,7 @@
         "signature": [
           "\"eql\" | \"esql\" | \"kuery\" | \"lucene\""
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -145,7 +145,7 @@
         "signature": [
           "\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -160,7 +160,7 @@
         "signature": [
           "string | string[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -175,7 +175,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -190,7 +190,7 @@
         "signature": [
           "string[] | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -205,7 +205,7 @@
         "signature": [
           "string | string[] | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -220,7 +220,7 @@
         "signature": [
           "number"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -235,7 +235,7 @@
         "signature": [
           "number | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -252,7 +252,7 @@
         "signature": [
           "number"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -267,7 +267,7 @@
         "signature": [
           "{ field: string; value: string; operator: \"equals\"; risk_score: number | undefined; }[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -282,7 +282,7 @@
         "signature": [
           "{ field: string; value: string; operator: \"equals\"; risk_score: number | undefined; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -305,7 +305,7 @@
           },
           "; } & { uuid?: string | undefined; alerts_filter?: { query?: ({ kql: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; } & { $state?: { store: any; } | undefined; query?: { [x: string]: any; } | undefined; })[]; } & { dsl?: string | undefined; }) | undefined; timeframe?: { timezone: string; days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: { start: string; end: string; }; } | undefined; } | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -328,7 +328,7 @@
           },
           "; } & { uuid?: string | undefined; alerts_filter?: { query?: ({ kql: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; } & { $state?: { store: any; } | undefined; query?: { [x: string]: any; } | undefined; })[]; } & { dsl?: string | undefined; }) | undefined; timeframe?: { timezone: string; days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: { start: string; end: string; }; } | undefined; } | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; })[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -351,7 +351,7 @@
           },
           "; } & { uuid?: string | undefined; alertsFilter?: { query?: ({ kql: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; } & { $state?: { store: any; } | undefined; query?: { [x: string]: any; } | undefined; })[]; } & { dsl?: string | undefined; }) | undefined; timeframe?: { timezone: string; days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: { start: string; end: string; }; } | undefined; } | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; })[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -374,7 +374,7 @@
           },
           "; } & { uuid?: string | undefined; alertsFilter?: { query?: ({ kql: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; } & { $state?: { store: any; } | undefined; query?: { [x: string]: any; } | undefined; })[]; } & { dsl?: string | undefined; }) | undefined; timeframe?: { timezone: string; days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: { start: string; end: string; }; } | undefined; } | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -391,7 +391,7 @@
         "signature": [
           "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -406,7 +406,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -421,7 +421,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -438,7 +438,7 @@
         "signature": [
           "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -463,7 +463,7 @@
             "text": "SavedObjectAttributes"
           }
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -480,7 +480,7 @@
         "signature": [
           "boolean"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -495,7 +495,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -510,7 +510,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -525,7 +525,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -540,7 +540,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -555,7 +555,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -572,7 +572,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -604,7 +604,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -629,7 +629,7 @@
           },
           " | null | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -644,7 +644,7 @@
         "signature": [
           "\"medium\" | \"high\" | \"low\" | \"critical\""
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -659,7 +659,7 @@
         "signature": [
           "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -674,7 +674,7 @@
         "signature": [
           "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -689,7 +689,7 @@
         "signature": [
           "{ framework: string; tactic: { id: string; name: string; reference: string; }; } & { technique?: ({ id: string; name: string; reference: string; } & { subtechnique?: { id: string; name: string; reference: string; }[] | undefined; })[] | undefined; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -704,7 +704,7 @@
         "signature": [
           "unknown[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -719,7 +719,7 @@
         "signature": [
           "unknown[] | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -734,7 +734,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -749,7 +749,7 @@
         "signature": [
           "string[] | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -764,7 +764,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -779,7 +779,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -794,7 +794,7 @@
         "signature": [
           "\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -809,7 +809,7 @@
         "signature": [
           "\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -824,7 +824,7 @@
         "signature": [
           "{ entries: { field: string; type: \"mapping\"; value: string; }[]; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -839,7 +839,7 @@
         "signature": [
           "{ field: string; type: \"mapping\"; value: string; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -854,7 +854,7 @@
         "signature": [
           "{ entries: { field: string; type: \"mapping\"; value: string; }[]; }[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -869,7 +869,7 @@
         "signature": [
           "{ field: string; type: \"mapping\"; value: string; }[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -884,7 +884,7 @@
         "signature": [
           "{ entries: { field: string; type: \"mapping\"; value: string; }[]; }[] | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -899,7 +899,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -914,7 +914,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -929,7 +929,7 @@
         "signature": [
           "({ framework: string; tactic: { id: string; name: string; reference: string; }; } & { technique?: ({ id: string; name: string; reference: string; } & { subtechnique?: { id: string; name: string; reference: string; }[] | undefined; })[] | undefined; })[]"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -944,7 +944,7 @@
         "signature": [
           "({ framework: string; tactic: { id: string; name: string; reference: string; }; } & { technique?: ({ id: string; name: string; reference: string; } & { subtechnique?: { id: string; name: string; reference: string; }[] | undefined; })[] | undefined; })[] | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -959,7 +959,7 @@
         "signature": [
           "{ id: string; name: string; reference: string; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -974,7 +974,7 @@
         "signature": [
           "{ id: string; name: string; reference: string; } & { subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -989,7 +989,7 @@
         "signature": [
           "\"eql\" | \"esql\" | \"query\" | \"threshold\" | \"threat_match\" | \"saved_query\" | \"machine_learning\" | \"new_terms\""
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1004,7 +1004,7 @@
         "signature": [
           "\"eql\" | \"esql\" | \"query\" | \"threshold\" | \"threat_match\" | \"saved_query\" | \"machine_learning\" | \"new_terms\" | undefined"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1022,7 +1022,7 @@
           "Type",
           "<number, number, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1042,7 +1042,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1074,7 +1074,7 @@
           },
           "; } & { uuid?: string | undefined; alerts_filter?: { query?: ({ kql: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; } & { $state?: { store: any; } | undefined; query?: { [x: string]: any; } | undefined; })[]; } & { dsl?: string | undefined; }) | undefined; timeframe?: { timezone: string; days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: { start: string; end: string; }; } | undefined; } | undefined; frequency?: { summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined; })[] | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_actions_array/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_actions_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1092,7 +1092,7 @@
           "Type",
           "<string, string | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_export_file_name/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_export_file_name/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1110,7 +1110,7 @@
           "Type",
           "<string, string | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_from_string/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_from_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1128,7 +1128,7 @@
           "Type",
           "<string, string | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_interval_string/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_interval_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1146,7 +1146,7 @@
           "Type",
           "<string, string | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_language_string/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_language_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1164,7 +1164,7 @@
           "Type",
           "<number, number | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_max_signals_number/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_max_signals_number/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1182,7 +1182,7 @@
           "Type",
           "<number, number | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_page/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_page/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1200,7 +1200,7 @@
           "Type",
           "<number, number | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_per_page/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_per_page/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1218,7 +1218,7 @@
           "Type",
           "<{ field: string; value: string; operator: \"equals\"; risk_score: number | undefined; }[], { field: string; value: string; operator: \"equals\"; risk_score: number | undefined; }[] | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_risk_score_mapping_array/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_risk_score_mapping_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1236,7 +1236,7 @@
           "Type",
           "<{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[] | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_severity_mapping_array/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_severity_mapping_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1254,7 +1254,7 @@
           "Type",
           "<({ framework: string; tactic: { id: string; name: string; reference: string; }; } & { technique?: ({ id: string; name: string; reference: string; } & { subtechnique?: { id: string; name: string; reference: string; }[] | undefined; })[] | undefined; })[], ({ framework: string; tactic: { id: string; name: string; reference: string; }; } & { technique?: ({ id: string; name: string; reference: string; } & { subtechnique?: { id: string; name: string; reference: string; }[] | undefined; })[] | undefined; })[] | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_threat_array/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_threat_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1272,7 +1272,7 @@
           "Type",
           "<string, string | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_to_string/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_to_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1290,7 +1290,7 @@
           "Type",
           "<string, string | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_uuid/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_uuid/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1306,7 +1306,7 @@
           "Type",
           "<number, number, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1326,7 +1326,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1342,7 +1342,7 @@
           "KeyofC",
           "<{ eql: null; kuery: null; lucene: null; esql: null; }>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1362,7 +1362,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1382,7 +1382,7 @@
           "Type",
           "<string[], string[], unknown>]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1398,7 +1398,7 @@
           "Type",
           "<string[], string[], unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1418,7 +1418,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1442,7 +1442,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1458,7 +1458,7 @@
           "Type",
           "<number, number, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1478,7 +1478,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1496,7 +1496,7 @@
           "Type",
           "<string[], string[] | undefined, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/references_default_array/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/references_default_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1512,7 +1512,7 @@
           "Type",
           "<number, number, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1544,7 +1544,7 @@
           "UndefinedC",
           "]>; }>>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1574,7 +1574,7 @@
           "UndefinedC",
           "]>; }>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1746,7 +1746,7 @@
           "NullC",
           "]>; }>; }>]>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1860,7 +1860,7 @@
           "StringC",
           "; }>>; }>>]>; }>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2034,7 +2034,7 @@
           "NullC",
           "]>; }>; }>]>>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2208,7 +2208,7 @@
           "NullC",
           "]>; }>; }>]>>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2380,7 +2380,7 @@
           "NullC",
           "]>; }>; }>]>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2418,7 +2418,7 @@
           "NullC",
           "]>; }>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2433,7 +2433,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2448,7 +2448,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2470,7 +2470,7 @@
           "LiteralC",
           "<\"onThrottleInterval\">]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2502,7 +2502,7 @@
           },
           ", unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2517,7 +2517,7 @@
         "signature": [
           "BooleanC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2539,7 +2539,7 @@
           "Type",
           "<string, string, unknown>]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2554,7 +2554,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2570,7 +2570,7 @@
           "Type",
           "<string, string, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2585,7 +2585,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2601,7 +2601,7 @@
           "Type",
           "<string, string, unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2616,7 +2616,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2648,7 +2648,7 @@
           },
           ", unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2680,7 +2680,7 @@
           },
           ", unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2712,7 +2712,7 @@
           },
           ", unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2728,7 +2728,7 @@
           "KeyofC",
           "<{ low: null; medium: null; high: null; critical: null; }>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2756,7 +2756,7 @@
           "KeyofC",
           "<{ low: null; medium: null; high: null; critical: null; }>; }>>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2782,7 +2782,7 @@
           "KeyofC",
           "<{ low: null; medium: null; high: null; critical: null; }>; }>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2844,7 +2844,7 @@
           "StringC",
           "; }>>; }>>]>>; }>>]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2862,7 +2862,7 @@
           "UnknownC",
           ">"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2877,7 +2877,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2895,7 +2895,7 @@
           "StringC",
           ">"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2910,7 +2910,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2930,7 +2930,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2946,7 +2946,7 @@
           "Type",
           "<{ entries: { field: string; type: \"mapping\"; value: string; }[]; }[], { entries: { field: string; type: \"mapping\"; value: string; }[]; }[], unknown>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2961,7 +2961,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2983,7 +2983,7 @@
           "StringC",
           "; }>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2998,7 +2998,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3013,7 +3013,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3028,7 +3028,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3052,7 +3052,7 @@
           "StringC",
           "; }>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3074,7 +3074,7 @@
           "StringC",
           "; }>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3089,7 +3089,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3104,7 +3104,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3119,7 +3119,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3159,7 +3159,7 @@
           "StringC",
           "; }>>; }>>]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3174,7 +3174,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3189,7 +3189,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3204,7 +3204,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3246,7 +3246,7 @@
           "StringC",
           "; }>>; }>>]>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3268,7 +3268,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3290,7 +3290,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3310,7 +3310,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3334,7 +3334,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3364,7 +3364,7 @@
           "Type",
           "<string, string, unknown>; }>>>; }>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3388,7 +3388,7 @@
           "Type",
           "<string, string, unknown>; }>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3414,7 +3414,7 @@
           "Type",
           "<string, string, unknown>; }>>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3434,7 +3434,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3454,7 +3454,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3518,7 +3518,7 @@
           "StringC",
           "; }>>; }>>]>>; }>>]>>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3586,7 +3586,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3602,7 +3602,7 @@
           "KeyofC",
           "<{ eql: null; machine_learning: null; query: null; saved_query: null; threshold: null; threat_match: null; new_terms: null; esql: null; }>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3622,7 +3622,7 @@
           "UndefinedC",
           "]>"
         ],
-        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

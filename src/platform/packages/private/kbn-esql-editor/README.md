@@ -6,7 +6,7 @@ Contains the editor for text based languages. Specifically for:
 ---
 
 Contains the ESQL editor with the autocomplete and the autosuggest functionality (based on atlr). 
-The antlr code can be found in packages/kbn-monaco/src/esql
+The antlr code can be found in src/platform/packages/shared/kbn-monaco/src/esql
 
 A **monaco** based editor that is part of the unified search experience. It is rendered for all the applications that support text-based languages.
 In order to enable text based languages on your unified search bar add `textBasedLanguages: ['ESQL', '...']` to the dataViewPicker properties. 

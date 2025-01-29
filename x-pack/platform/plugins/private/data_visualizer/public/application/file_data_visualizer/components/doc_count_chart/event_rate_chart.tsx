@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo, type FC } from 'react';
+
 import type { PartialTheme } from '@elastic/charts';
 import {
   HistogramBarSeries,
@@ -16,10 +16,11 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { euiLightVars } from '@kbn/ui-theme';
+
 import { Axes } from './axes';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 
 export interface LineChartPoint {
   time: number | string;
@@ -33,23 +34,26 @@ interface Props {
 }
 
 export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width }) => {
-  const { euiColorLightShade } = useCurrentEuiTheme();
-  const theme: PartialTheme = {
-    scales: { histogramPadding: 0.2 },
-    background: {
-      color: 'transparent',
-    },
-    axes: {
-      gridLine: {
-        horizontal: {
-          stroke: euiColorLightShade,
-        },
-        vertical: {
-          stroke: euiColorLightShade,
+  const { euiTheme } = useEuiTheme();
+  const theme: PartialTheme = useMemo(
+    () => ({
+      scales: { histogramPadding: 0.2 },
+      background: {
+        color: 'transparent',
+      },
+      axes: {
+        gridLine: {
+          horizontal: {
+            stroke: euiTheme.colors.lightShade,
+          },
+          vertical: {
+            stroke: euiTheme.colors.lightShade,
+          },
         },
       },
-    },
-  };
+    }),
+    [euiTheme]
+  );
 
   return (
     <div
@@ -70,7 +74,8 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width })
           xAccessor={'time'}
           yAccessors={['value']}
           data={eventRateChartData}
-          color={euiLightVars.euiColorVis0}
+          // Amsterdam + Borealis
+          color={euiTheme.colors.vis.euiColorVis0}
         />
       </Chart>
     </div>

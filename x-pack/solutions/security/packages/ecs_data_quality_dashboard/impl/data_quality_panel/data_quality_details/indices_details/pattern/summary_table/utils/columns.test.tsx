@@ -36,6 +36,8 @@ const defaultNumberFormat = '0,0.[000]';
 const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
+const testColor = '#123456';
+
 describe('helpers', () => {
   describe('getSummaryTableColumns', () => {
     const indexName = '.ds-auditbeat-8.6.1-2023.02.07-000001';
@@ -65,6 +67,7 @@ describe('helpers', () => {
         pattern: 'auditbeat-*',
         onCheckNowAction: jest.fn(),
         onViewHistoryAction: jest.fn(),
+        dangerColor: testColor,
       }).map((x) => omit('render', x));
 
       expect(columns).toEqual([
@@ -126,6 +129,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const checkNowRender = (
           (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
@@ -151,6 +155,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction,
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const checkNowRender = (
           (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
@@ -179,6 +184,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction,
+          dangerColor: testColor,
         });
 
         const expandActionRender = (
@@ -208,6 +214,7 @@ describe('helpers', () => {
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
           firstIndexName: indexName,
+          dangerColor: testColor,
         });
 
         const expandActionRender = (
@@ -235,6 +242,7 @@ describe('helpers', () => {
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
           firstIndexName: 'another-index',
+          dangerColor: testColor,
         });
 
         const expandActionRender = (
@@ -267,6 +275,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -290,6 +299,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -317,6 +327,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -341,6 +352,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const indexNameRender = (columns[2] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -365,6 +377,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const docsCountRender = (columns[3] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -400,6 +413,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const incompatibleRender = (
           columns[4] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -422,6 +436,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const incompatibleRender = (
           columns[4] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
@@ -479,6 +494,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -505,6 +521,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -530,6 +547,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
@@ -553,6 +571,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
 
         const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -577,6 +596,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           onCheckNowAction: jest.fn(),
           onViewHistoryAction: jest.fn(),
+          dangerColor: testColor,
         });
 
         const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -595,22 +615,22 @@ describe('helpers', () => {
   });
 
   describe('getIncompatibleStatColor', () => {
-    test('it returns the expected color when incompatible is greater than zero', () => {
+    test('it returns the provided incompatible color when incompatible is greater than zero', () => {
       const incompatible = 123;
 
-      expect(getIncompatibleStatColor(incompatible)).toBe('#bd271e');
+      expect(getIncompatibleStatColor(incompatible, testColor)).toBe(testColor);
     });
 
     test('it returns undefined when incompatible is zero', () => {
       const incompatible = 0;
 
-      expect(getIncompatibleStatColor(incompatible)).toBeUndefined();
+      expect(getIncompatibleStatColor(incompatible, testColor)).toBeUndefined();
     });
 
     test('it returns undefined when incompatible is undefined', () => {
       const incompatible = undefined;
 
-      expect(getIncompatibleStatColor(incompatible)).toBeUndefined();
+      expect(getIncompatibleStatColor(incompatible, testColor)).toBeUndefined();
     });
   });
 });

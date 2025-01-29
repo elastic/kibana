@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export const CalloutItem = styled.div`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
+export const calloutItemCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    marginLeft: euiTheme.size.s,
+  });

@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { AssistantAvatar } from '@kbn/observability-ai-assistant-plugin/public';
 import { css } from '@emotion/css';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
 export function RootCauseAnalysisCallout({
   onClick,
@@ -46,7 +46,7 @@ export function RootCauseAnalysisCallout({
             `}
           >
             <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
-              <AssistantAvatar />
+              <AssistantIcon size="l" />
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>

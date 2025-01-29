@@ -25,7 +25,7 @@ import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import type { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
@@ -74,7 +74,7 @@ export async function validateJob(
           timeField,
           job.datafeed_config.query,
           job.datafeed_config.runtime_mappings,
-          job.datafeed_config.indices_options
+          getIndicesOptions(job.datafeed_config)
         );
       }
 

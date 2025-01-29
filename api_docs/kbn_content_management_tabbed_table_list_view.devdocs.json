@@ -13,7 +13,7 @@
         "signature": [
           "({ title, description, headingId, children, tabs, activeTabId, changeActiveTab, }: TabbedTableListViewProps) => React.JSX.Element"
         ],
-        "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "TabbedTableListViewProps"
             ],
-            "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -55,7 +55,7 @@
           },
           "<T>"
         ],
-        "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +66,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,7 +77,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,7 +99,7 @@
               },
               "<T>) => React.ReactNode | Promise<React.ReactNode>"
             ],
-            "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+            "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -120,7 +120,7 @@
                   },
                   "<T>"
                 ],
-                "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+                "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -144,7 +144,7 @@
         "signature": [
           "{ onFetchSuccess: () => void; setPageDataTestSubject: (subject: string) => void; }"
         ],
-        "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
+        "path": "src/platform/packages/shared/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

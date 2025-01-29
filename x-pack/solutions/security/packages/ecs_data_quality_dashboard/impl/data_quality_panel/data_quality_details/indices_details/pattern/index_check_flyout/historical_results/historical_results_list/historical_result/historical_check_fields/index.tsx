@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiButtonGroup } from '@elastic/eui';
 
 import type { NonLegacyHistoricalResult } from '../../../../../../../../types';
 import { getIncompatibleStatBadgeColor } from '../../../../../../../../utils/get_incompatible_stat_badge_color';
@@ -15,7 +16,7 @@ import { getIncompatibleAndSameFamilyFieldsFromHistoricalResult } from './utils/
 import { IncompatibleTab } from '../../../../incompatible_tab';
 import { SameFamilyTab } from '../../../../same_family_tab';
 import { CheckFieldsTabs } from '../../../../check_fields_tabs';
-import { StyledHistoricalResultsCheckFieldsButtonGroup } from '../styles';
+import { historicalResultsCheckFieldsButtonGroupCss } from '../styles';
 
 export interface Props {
   indexName: string;
@@ -101,7 +102,9 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
     <div data-test-subj="historicalCheckFields">
       <CheckFieldsTabs
         tabs={tabs}
-        renderButtonGroup={(props) => <StyledHistoricalResultsCheckFieldsButtonGroup {...props} />}
+        renderButtonGroup={(props) => (
+          <EuiButtonGroup css={historicalResultsCheckFieldsButtonGroupCss} {...props} />
+        )}
       />
     </div>
   );

@@ -10,7 +10,7 @@ import {
   InferenceConnector,
   InferenceConnectorType,
   isSupportedConnectorType,
-} from '../../common/connectors';
+} from '@kbn/inference-common';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 
 export function registerConnectorsRoute({
@@ -49,6 +49,7 @@ export function registerConnectorsRoute({
             connectorId: connector.id,
             name: connector.name,
             type: connector.actionTypeId as InferenceConnectorType,
+            config: connector.config ?? {},
           };
         });
 
