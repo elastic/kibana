@@ -22,7 +22,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './add_monitor';
+import { keyToOmitList, omitMonitorKeys } from './add_monitor';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -34,25 +34,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     let testFleetPolicyID: string;
     let pvtLoc: PrivateLocation;
-    const testPolicyName = 'Fleet test server policy' + Date.now();
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const security = getService('security');
-
-    const addMonitorAPI = async (monitor: any, statusCode = 200) => {
-      return addMonitorAPIHelper(supertestAPI, monitor, statusCode);
-    };
-
-    const deleteMonitor = async (
-      monitorId?: string | string[],
-      statusCode = 200,
-      spaceId?: string
-    ) => {
-      return monitorTestService.deleteMonitor(monitorId, statusCode, spaceId);
-    };
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

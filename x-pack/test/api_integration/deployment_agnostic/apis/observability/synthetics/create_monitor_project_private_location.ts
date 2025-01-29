@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { expect as rawExpect } from 'expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { ProjectMonitorsRequest, ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
@@ -43,7 +44,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
-    let testPolicyId;
+    let testPolicyId: string;
     let testPrivateLocationName: string;
     const testPolicyName = `Fleet test server policy ${uuidv4()}`;
     const testPrivateLocationsService = new PrivateLocationTestService(getService);
@@ -64,6 +65,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
+
       await testPrivateLocationsService.installSyntheticsPackage();
 
       const apiResponse = await testPrivateLocationsService.addFleetPolicy(testPolicyName);

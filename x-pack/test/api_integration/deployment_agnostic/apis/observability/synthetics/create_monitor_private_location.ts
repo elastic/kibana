@@ -491,7 +491,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...httpMonitorJson,
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
-        locations: [privateLocations[0]],
+        locations: [privateLocation.id],
       };
 
       try {
@@ -509,7 +509,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const packagePolicy = policyResponse.body.items.find(
           (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + privateLocations[0].id + `-default`
+            pkgPolicy.id === monitorId + '-' + privateLocation.id + `-default`
         );
 
         expect(packagePolicy.package.version).eql(lowerVersion);
@@ -520,7 +520,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
           const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
             (pkgPolicy: PackagePolicy) =>
-              pkgPolicy.id === monitorId + '-' + privateLocations[0].id + `-default`
+              pkgPolicy.id === monitorId + '-' + privateLocation.id + `-default`
           );
           expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
         });

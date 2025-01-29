@@ -78,7 +78,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
       httpMonitorJson = getFixtureJson('http_monitor');
     });
 

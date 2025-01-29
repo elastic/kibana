@@ -11,7 +11,6 @@ import moment from 'moment';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
@@ -24,8 +23,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const samlAuth = getService('samlAuth');
     const testPrivateLocations = new PrivateLocationTestService(getService);
     let editorUser: RoleCredentials;
-    let privateLocation1: PrivateLocation;
-    let privateLocation2: PrivateLocation;
 
     async function addMonitorAPI(monitor: any, statusCode: number = 200) {
       return await addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);

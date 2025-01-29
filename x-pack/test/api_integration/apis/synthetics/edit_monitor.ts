@@ -6,17 +6,14 @@
  */
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { omit } from 'lodash';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
-  HTTPFields,
   MonitorFields,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
@@ -32,8 +29,6 @@ export default function ({ getService }: FtrProviderContext) {
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
-    let _httpMonitorJson: HTTPFields;
-    let httpMonitorJson: HTTPFields;
     let testPolicyId = '';
 
     const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
@@ -54,23 +49,8 @@ export default function ({ getService }: FtrProviderContext) {
       return rest as EncryptedSyntheticsSavedMonitor;
     };
 
-    const editMonitor = async (modifiedMonitor: MonitorFields, monitorId: string) => {
-      const res = await supertest
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId + '?internal=true')
-        .set('kbn-xsrf', 'true')
-        .send(modifiedMonitor);
-
-      expect(res.status).eql(200, JSON.stringify(res.body));
-
-      const { created_at: createdAt, updated_at: updatedAt } = res.body;
-      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
-
-      return omit(res.body, ['created_at', 'updated_at']);
-    };
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      _httpMonitorJson = getFixtureJson('http_monitor');
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
@@ -83,10 +63,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    beforeEach(() => {
-      httpMonitorJson = { ..._httpMonitorJson };
     });
 
     it.skip('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {

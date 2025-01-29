@@ -28,11 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     let projectMonitors: ProjectMonitorsRequest;
     let httpProjectMonitors: ProjectMonitorsRequest;
-    let tcpProjectMonitors: ProjectMonitorsRequest;
-    let icmpProjectMonitors: ProjectMonitorsRequest;
 
-    let testPolicyId = '';
-    let loc: any;
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
@@ -73,7 +69,6 @@ export default function ({ getService }: FtrProviderContext) {
       await testPrivateLocations.installSyntheticsPackage();
 
       loc = await testPrivateLocations.addPrivateLocation();
-      testPolicyId = loc.agentPolicyId;
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
@@ -92,12 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
       httpProjectMonitors = setUniqueIds({
         monitors: getFixtureJson('project_http_monitor').monitors,
-      });
-      tcpProjectMonitors = setUniqueIds({
-        monitors: getFixtureJson('project_tcp_monitor').monitors,
-      });
-      icmpProjectMonitors = setUniqueIds({
-        monitors: getFixtureJson('project_icmp_monitor').monitors,
       });
     });
 
