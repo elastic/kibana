@@ -125,7 +125,7 @@ src/dev/packages/dev-proc-runner @elastic/kibana-operations
 src/dev/packages/dev-utils @elastic/kibana-operations
 src/dev/packages/docs-utils @elastic/kibana-operations
 src/dev/packages/es @elastic/kibana-operations
-packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-css @elastic/appex-sharedux
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
