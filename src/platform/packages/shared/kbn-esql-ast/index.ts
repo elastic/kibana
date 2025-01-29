@@ -37,6 +37,7 @@ export {
   isBinaryExpression,
   isWhereExpression,
   isFieldExpression,
+  isSource,
   isIdentifier,
   isIntegerLiteral,
   isLiteral,
