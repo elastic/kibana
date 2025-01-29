@@ -161,7 +161,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       ls_provider: `inference-${getConnectorProvider(this.connector)}`,
       ls_model_name: options.model ?? this.model ?? getConnectorDefaultModel(this.connector),
       ls_model_type: 'chat',
-      ls_temperature: params.temperature ?? undefined,
+      ls_temperature: params.temperature ?? this.temperature ?? undefined,
     };
   }
 

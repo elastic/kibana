@@ -104,11 +104,8 @@ describe('InferenceChatModel', () => {
     connector = createConnector();
   });
 
-  // bindTools
   // test completionWithRetry
   // withStructuredOutput
-  // getLsParams
-  // identifyingParams
 
   describe('Request conversion', () => {
     it('converts a basic message call', async () => {
@@ -656,6 +653,116 @@ describe('InferenceChatModel', () => {
       }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
 
       expect(allChunks.length).toBe(2);
+    });
+  });
+
+  describe('#bindTools', () => {
+    it('bind tools to be used for invocation', async () => {
+      const chatModel = new InferenceChatModel({
+        logger,
+        chatComplete,
+        connector,
+      });
+
+      const response = createResponse({ content: 'dummy' });
+      chatComplete.mockResolvedValue(response);
+
+      const chatModelWithTools = chatModel.bindTools([
+        {
+          name: 'test_tool',
+          description: 'Just some test tool',
+          schema: z.object({
+            city: z.string().describe('The city to get the weather for'),
+            zipCode: z.number().optional().describe('The zipCode to get the weather for'),
+          }),
+        },
+      ]);
+
+      await chatModelWithTools.invoke([
+        new HumanMessage({
+          content: 'question',
+        }),
+      ]);
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(chatComplete).toHaveBeenCalledWith({
+        connectorId: connector.connectorId,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'question',
+          },
+        ],
+        tools: {
+          test_tool: {
+            description: 'Just some test tool',
+            schema: {
+              properties: {
+                city: {
+                  description: 'The city to get the weather for',
+                  type: 'string',
+                },
+                zipCode: {
+                  description: 'The zipCode to get the weather for',
+                  type: 'number',
+                },
+              },
+              required: ['city'],
+              type: 'object',
+            },
+          },
+        },
+        stream: false,
+      });
+    });
+  });
+
+  describe('#identifyingParams', () => {
+    it('returns connectorId and modelName from the constructor', () => {
+      const chatModel = new InferenceChatModel({
+        logger,
+        chatComplete,
+        connector,
+        model: 'my-super-model',
+      });
+
+      const identifyingParams = chatModel.identifyingParams();
+
+      expect(identifyingParams).toEqual({
+        connectorId: 'connector-id',
+        modelName: 'my-super-model',
+        model_name: 'my-super-model',
+      });
+    });
+  });
+
+  describe('#getLsParams', () => {
+    it('returns connectorId and modelName from the constructor', () => {
+      connector = createConnector({
+        config: {
+          provider: 'elastic',
+          providerConfig: {
+            model_id: 'some-default-model-id',
+          },
+        },
+      });
+
+      const chatModel = new InferenceChatModel({
+        logger,
+        chatComplete,
+        connector,
+        model: 'my-super-model',
+        temperature: 0.7,
+      });
+
+      const lsParams = chatModel.getLsParams({});
+
+      expect(lsParams).toEqual({
+        ls_model_name: 'my-super-model',
+        ls_model_type: 'chat',
+        ls_provider: 'inference-elastic',
+        ls_temperature: 0.7,
+      });
     });
   });
 });
