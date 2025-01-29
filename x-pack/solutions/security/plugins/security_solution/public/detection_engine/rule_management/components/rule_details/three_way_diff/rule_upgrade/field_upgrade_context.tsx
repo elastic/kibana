@@ -106,8 +106,12 @@ export function FieldUpgradeContextProvider({
   const { setFieldEditing, setFieldReadonly } = useRulePreviewContext();
 
   useEffect(() => {
-    editing ? setFieldEditing() : setFieldReadonly();
-  }, [setFieldEditing, setFieldReadonly, editing]);
+    if (editing) {
+      setFieldEditing(fieldName);
+    } else {
+      setFieldReadonly(fieldName);
+    }
+  }, [setFieldEditing, setFieldReadonly, editing, fieldName]);
 
   invariant(fieldDiff, `Field diff is not found for ${fieldName}.`);
 
@@ -143,8 +147,8 @@ export function FieldUpgradeContextProvider({
       finalDiffableRule,
       editing,
       setRuleFieldResolvedValue,
-      setEditMode,
       setReadOnlyMode,
+      setEditMode,
     ]
   );
 

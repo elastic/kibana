@@ -16,6 +16,7 @@ import {
   RulePreviewContextProvider,
   useRulePreviewContext,
 } from './upgrade_prebuilt_rules_table/rule_preview_context';
+import type { RulesUpgradeState } from '../../../rule_management/model/prebuilt_rule_upgrade';
 interface UseRulePreviewFlyoutBaseParams {
   ruleActionsFactory: (
     rule: RuleResponse,
@@ -29,6 +30,7 @@ interface UseRulePreviewFlyoutBaseParams {
 
 interface UseRulePreviewFlyoutParams extends UseRulePreviewFlyoutBaseParams {
   rules: RuleResponse[];
+  rulesUpgradeState: RulesUpgradeState;
 }
 
 interface RulePreviewFlyoutProps {
@@ -47,6 +49,7 @@ interface UseRulePreviewFlyoutResult {
 
 export function useRulePreviewFlyout({
   rules,
+  rulesUpgradeState,
   extraTabsFactory,
   ruleActionsFactory,
   subHeaderFactory,
@@ -54,29 +57,33 @@ export function useRulePreviewFlyout({
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
   const closeRulePreview = useCallback(() => setRuleForPreview(undefined), []);
+  const openRulePreview = useCallback(
+    (ruleId: RuleSignatureId) => {
+      const ruleToShowInFlyout = rules.find((x) => x.rule_id === ruleId);
+
+      invariant(ruleToShowInFlyout, `Rule with rule_id ${ruleId} not found`);
+      setRuleForPreview(ruleToShowInFlyout);
+    },
+    [rules, setRuleForPreview]
+  );
+  const rulePreviewFlyout = (
+    <RulePreviewContextProvider
+      ruleUpgradeState={rule ? rulesUpgradeState[rule.rule_id] : undefined}
+    >
+      <RulePreviewFlyoutInternal
+        rule={rule}
+        closeRulePreview={closeRulePreview}
+        extraTabsFactory={extraTabsFactory}
+        ruleActionsFactory={ruleActionsFactory}
+        subHeaderFactory={subHeaderFactory}
+        flyoutProps={flyoutProps}
+      />
+    </RulePreviewContextProvider>
+  );
 
   return {
-    rulePreviewFlyout: (
-      <RulePreviewContextProvider key={rule?.rule_id}>
-        <RulePreviewFlyoutInternal
-          rule={rule}
-          closeRulePreview={closeRulePreview}
-          extraTabsFactory={extraTabsFactory}
-          ruleActionsFactory={ruleActionsFactory}
-          subHeaderFactory={subHeaderFactory}
-          flyoutProps={flyoutProps}
-        />
-      </RulePreviewContextProvider>
-    ),
-    openRulePreview: useCallback(
-      (ruleId: RuleSignatureId) => {
-        const ruleToShowInFlyout = rules.find((x) => x.rule_id === ruleId);
-
-        invariant(ruleToShowInFlyout, `Rule with rule_id ${ruleId} not found`);
-        setRuleForPreview(ruleToShowInFlyout);
-      },
-      [rules, setRuleForPreview]
-    ),
+    rulePreviewFlyout,
+    openRulePreview,
     closeRulePreview,
   };
 }

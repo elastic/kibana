@@ -385,6 +385,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   );
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
     rules: filteredRules,
+    rulesUpgradeState,
     subHeaderFactory,
     ruleActionsFactory,
     extraTabsFactory,
