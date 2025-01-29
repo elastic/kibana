@@ -5568,7 +5568,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-eslint@link:packages/kbn-eslint-plugin-eslint":
+"@kbn/eslint-plugin-eslint@link:src/dev/packages/eslint-plugin-eslint":
   version "0.0.0"
   uid ""
 

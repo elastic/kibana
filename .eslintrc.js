@@ -756,7 +756,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-eslint-plugin-eslint/**/*',
+        'src/dev/packages/eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
         '**/jest.config.js',

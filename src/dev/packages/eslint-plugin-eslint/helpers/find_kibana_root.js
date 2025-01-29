@@ -22,7 +22,7 @@ function isKibanaRoot(maybeKibanaRoot) {
 }
 
 module.exports = function findKibanaRoot() {
-  let maybeKibanaRoot = path.resolve(__dirname, '../../..');
+  let maybeKibanaRoot = path.resolve(__dirname, '../../../../..');
 
   // when using syslinks, __dirname reports outside of the repo
   // if that's the case, the path will contain .cache/bazel
@@ -33,7 +33,7 @@ module.exports = function findKibanaRoot() {
   // process.argv[1] would be the eslint binary, a correctly-set editor
   // will use a local eslint inside the repo node_modules and its value
   // should be `ACTUAL_KIBANA_ROOT/node_modules/.bin/eslint`
-  maybeKibanaRoot = path.resolve(process.argv[1], '../../../');
+  maybeKibanaRoot = path.resolve(process.argv[1], '../../../../../');
   if (isKibanaRoot(maybeKibanaRoot)) {
     return maybeKibanaRoot;
   }
