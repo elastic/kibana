@@ -73,7 +73,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return response.body as TransactionsGroupsMainStatistics;
   }
 
-  describe('Transaction groups alerts', () => {
+  describe('Transaction groups alerts', function () {
     describe('when data is loaded', () => {
       const transactions = [
         {
@@ -108,6 +108,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
@@ -150,6 +151,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let alerts: Alerts;
 
         before(async () => {
+          await alertingApi.cleanUpAlerts({
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
+
           const createdRule = await alertingApi.createRule({
             name: `Latency threshold | ${serviceName}`,
             params: {

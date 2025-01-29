@@ -37,7 +37,7 @@
           },
           "[] | undefined) => (value: T) => boolean"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant-common/src/utils/filter_scopes.ts",
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +58,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/kbn-ai-assistant-common/src/utils/filter_scopes.ts",
+            "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -81,7 +81,7 @@
         "signature": [
           "\"search\" | \"observability\" | \"all\""
         ],
-        "path": "x-pack/packages/kbn-ai-assistant-common/src/types/index.ts",
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,195 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { PropsWithChildren, ReactElement } from 'react';
+import { ReactWrapper, mount } from 'enzyme';
+import { Provider } from 'react-redux';
+import { PreloadedState } from '@reduxjs/toolkit';
+import { RenderOptions, render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { LensAppServices } from '../app_plugin/types';
+import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
+import { getResolvedDateRange } from '../utils';
+import { DatasourceMap, VisualizationMap } from '../types';
+import { mockVisualizationMap } from './visualization_mock';
+import { mockDatasourceMap } from './datasource_mock';
+import { makeDefaultServices } from './services_mock';
+
+export const mockStoreDeps = (
+  {
+    lensServices = makeDefaultServices(),
+    datasourceMap = mockDatasourceMap(),
+    visualizationMap = mockVisualizationMap(),
+  }: {
+    lensServices?: LensAppServices;
+    datasourceMap?: DatasourceMap;
+    visualizationMap?: VisualizationMap;
+  } = {
+    lensServices: makeDefaultServices(),
+    datasourceMap: mockDatasourceMap(),
+    visualizationMap: mockVisualizationMap(),
+  }
+) => ({
+  datasourceMap,
+  visualizationMap,
+  lensServices,
+});
+
+export function mockDatasourceStates() {
+  return {
+    testDatasource: {
+      state: {},
+      isLoading: false,
+    },
+  };
+}
+
+export const defaultState = {
+  searchSessionId: 'sessionId-1',
+  filters: [],
+  query: { language: 'lucene', query: '' },
+  resolvedDateRange: { fromDate: 'now-7d', toDate: 'now' },
+  isFullscreenDatasource: false,
+  isSaveable: false,
+  isLoading: false,
+  isLinkedToOriginatingApp: false,
+  activeDatasourceId: 'testDatasource',
+  visualization: {
+    state: {},
+    activeId: 'testVis',
+  },
+  datasourceStates: mockDatasourceStates(),
+  dataViews: {
+    indexPatterns: {},
+    indexPatternRefs: [],
+  },
+};
+
+export const renderWithReduxStore = (
+  ui: ReactElement,
+  renderOptions?: RenderOptions,
+  {
+    preloadedState,
+    storeDeps,
+  }: { preloadedState?: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
+    preloadedState: {},
+    storeDeps: mockStoreDeps(),
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any => {
+  const { store } = makeLensStore({ preloadedState, storeDeps });
+  const { wrapper, ...options } = renderOptions || {};
+
+  const CustomWrapper = wrapper as React.ComponentType<React.PropsWithChildren<{}>>;
+
+  const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => {
+    return (
+      <Provider store={store}>
+        <I18nProvider>
+          {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
+        </I18nProvider>
+      </Provider>
+    );
+  };
+
+  const rtlRender = render(ui, { wrapper: Wrapper, ...options });
+
+  return {
+    store,
+    ...rtlRender,
+  };
+};
+
+export function makeLensStore({
+  preloadedState,
+  dispatch,
+  storeDeps = mockStoreDeps(),
+}: {
+  storeDeps?: LensStoreDeps;
+  preloadedState?: Partial<LensAppState>;
+  dispatch?: jest.Mock;
+}) {
+  const data = storeDeps.lensServices.data;
+  const store = makeConfigureStore(storeDeps, {
+    lens: {
+      ...defaultState,
+      query: data.query.queryString.getQuery(),
+      filters: data.query.filterManager.getGlobalFilters(),
+      resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+      ...preloadedState,
+    },
+  } as unknown as PreloadedState<LensState>);
+
+  const origDispatch = store.dispatch;
+  store.dispatch = jest.fn(dispatch || origDispatch);
+  return { store, deps: storeDeps };
+}
+
+export interface MountStoreProps {
+  storeDeps?: LensStoreDeps;
+  preloadedState?: Partial<LensAppState>;
+  dispatch?: jest.Mock;
+}
+
+export const mountWithProvider = async (
+  component: React.ReactElement,
+  store?: MountStoreProps,
+  options?: {
+    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
+    wrappingComponentProps?: Record<string, unknown>;
+    attachTo?: HTMLElement;
+  }
+) => {
+  const { mountArgs, lensStore, deps } = getMountWithProviderParams(component, store, options);
+  const instance = mount(mountArgs.component, mountArgs.options);
+  return { instance, lensStore, deps };
+};
+
+const getMountWithProviderParams = (
+  component: React.ReactElement,
+  store?: MountStoreProps,
+  options?: {
+    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
+    wrappingComponentProps?: Record<string, unknown>;
+    attachTo?: HTMLElement;
+  }
+) => {
+  const { store: lensStore, deps } = makeLensStore(store || {});
+
+  let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
+    <I18nProvider>
+      <Provider store={lensStore}>{children}</Provider>
+    </I18nProvider>
+  );
+
+  let restOptions: {
+    attachTo?: HTMLElement | undefined;
+  } = {};
+  if (options) {
+    const { wrappingComponent: _wrappingComponent, wrappingComponentProps, ...rest } = options;
+    restOptions = rest;
+
+    if (_wrappingComponent) {
+      wrappingComponent = ({ children }) => {
+        return _wrappingComponent({
+          ...wrappingComponentProps,
+          children: <Provider store={lensStore}>{children}</Provider>,
+        });
+      };
+    }
+  }
+
+  const mountArgs = {
+    component,
+    options: {
+      wrappingComponent,
+      ...restOptions,
+    } as unknown as ReactWrapper,
+  };
+
+  return { mountArgs, lensStore, deps };
+};

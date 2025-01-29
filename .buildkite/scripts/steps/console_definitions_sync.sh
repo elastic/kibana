@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+GIT_SCOPE="src/platform/plugins/shared/console/server/lib/spec_definitions"
+
 report_main_step () {
   echo "--- $1"
 }
@@ -11,19 +13,21 @@ main () {
   report_main_step "Cloning repositories"
 
   rm -rf elasticsearch-specification
-  if ! git clone https://github.com/elastic/elasticsearch-specification --depth 1; then
+  if ! git clone --branch "$BUILDKITE_BRANCH" https://github.com/elastic/elasticsearch-specification --depth 1; then
     echo "Error: Failed to clone the elasticsearch-specification repository."
     exit 1
   fi
 
+  report_main_step "Bootstrapping Kibana"
   cd "$KIBANA_DIR"
+  .buildkite/scripts/bootstrap.sh
 
   report_main_step "Generating console definitions"
   node scripts/generate_console_definitions.js --source "$PARENT_DIR/elasticsearch-specification" --emptyDest
 
   # Check if there are any differences
   set +e
-  git diff --exit-code --quiet "$destination_file"
+  git diff --exit-code --quiet "$GIT_SCOPE"
   if [ $? -eq 0 ]; then
     echo "No differences found. Exiting.."
     exit
@@ -36,7 +40,7 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[Console] Update console definitions'
+  PR_TITLE="[Console] Update console definitions (${branch_name})"
   PR_BODY='This PR updates the console definitions to match the latest ones from the @elastic/elasticsearch-specification repo.'
 
   # Check if a PR already exists
@@ -54,7 +58,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add src/plugins/console/server/lib/spec_definitions/json/generated/*
+  git add $GIT_SCOPE
   git commit -m "Update console definitions"
 
   report_main_step "Changes committed. Creating pull request."
@@ -62,7 +66,15 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Feature:Console' --label 'Team:Kibana Management'
+  gh pr create \
+    --title "$PR_TITLE" \
+    --body "$PR_BODY" \
+    --base "$BUILDKITE_BRANCH" \
+    --head "$BRANCH_NAME" \
+    --label 'backport:skip' \
+    --label 'release_note:skip' \
+    --label 'Feature:Console' \
+    --label 'Team:Kibana Management'
 }
 
 main

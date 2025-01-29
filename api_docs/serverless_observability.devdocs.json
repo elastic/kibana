@@ -14,7 +14,7 @@
       "tags": [],
       "label": "ServerlessObservabilityPublicSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless_observability/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/serverless_observability/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "ServerlessObservabilityPublicStart",
       "description": [],
-      "path": "x-pack/plugins/serverless_observability/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/serverless_observability/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -50,7 +50,7 @@
       "tags": [],
       "label": "ServerlessObservabilityPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless_observability/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/serverless_observability/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +64,7 @@
       "tags": [],
       "label": "ServerlessObservabilityPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless_observability/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/serverless_observability/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -88,7 +88,7 @@
         "signature": [
           "\"serverlessObservability\""
         ],
-        "path": "x-pack/plugins/serverless_observability/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/serverless_observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +103,7 @@
         "signature": [
           "\"serverlessObservability\""
         ],
-        "path": "x-pack/plugins/serverless_observability/common/index.ts",
+        "path": "x-pack/solutions/observability/plugins/serverless_observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

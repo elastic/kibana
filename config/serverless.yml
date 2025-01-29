@@ -8,6 +8,7 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
+xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -215,7 +216,6 @@ xpack.task_manager.metrics_reset_interval: 120000
 # Reporting feature
 xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
-xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 
@@ -234,3 +234,6 @@ discover.enableUiSettingsValidations: true
 xpack.dataUsage.enabled: true
 # This feature is disabled in Serverless until fully tested within a Serverless environment
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
+
+# Ensure Serverless is using the Amsterdam theme
+uiSettings.experimental.defaultTheme: "amsterdam"

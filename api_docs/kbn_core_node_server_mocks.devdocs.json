@@ -69,13 +69,7 @@
             "description": [],
             "signature": [
               "({ ui, backgroundTasks, migrator, }?: { ui: boolean; backgroundTasks: boolean; migrator: boolean; }) => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-node-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreNodeServerInternalPluginApi",
-                "section": "def-server.InternalNodeServiceStart",
-                "text": "InternalNodeServiceStart"
-              },
+              "InternalNodeServiceStart",
               ">"
             ],
             "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",

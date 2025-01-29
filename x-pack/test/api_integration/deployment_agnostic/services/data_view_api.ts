@@ -18,14 +18,16 @@ export function DataViewApiProvider({ getService }: DeploymentAgnosticFtrProvide
       id,
       name,
       title,
+      spaceId,
     }: {
       roleAuthc: RoleCredentials;
       id: string;
       name: string;
       title: string;
+      spaceId?: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/content_management/rpc/create`)
+        .post(`${spaceId ? '/s/' + spaceId : ''}/api/content_management/rpc/create`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .set(samlAuth.getCommonRequestHeader())
@@ -48,9 +50,17 @@ export function DataViewApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return body;
     },
 
-    async delete({ roleAuthc, id }: { roleAuthc: RoleCredentials; id: string }) {
+    async delete({
+      roleAuthc,
+      id,
+      spaceId,
+    }: {
+      roleAuthc: RoleCredentials;
+      id: string;
+      spaceId?: string;
+    }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/content_management/rpc/delete`)
+        .post(`${spaceId ? '/s/' + spaceId : ''}/api/content_management/rpc/delete`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .set(samlAuth.getCommonRequestHeader())

@@ -67,6 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'

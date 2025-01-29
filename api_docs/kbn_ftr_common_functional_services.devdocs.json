@@ -1187,6 +1187,68 @@
       },
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
+        "id": "def-common.retryForSuccess",
+        "type": "Function",
+        "tags": [],
+        "label": "retryForSuccess",
+        "description": [],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ", options: Options<T>) => Promise<T>"
+        ],
+        "path": "packages/kbn-ftr-common-functional-services/services/retry/retry_for_success.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.retryForSuccess.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/retry/retry_for_success.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.retryForSuccess.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options<T>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-services/services/retry/retry_for_success.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-services",
         "id": "def-common.runSavedObjInfoSvc",
         "type": "Function",
         "tags": [],

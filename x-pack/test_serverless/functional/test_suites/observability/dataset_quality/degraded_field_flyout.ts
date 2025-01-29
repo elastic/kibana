@@ -9,11 +9,12 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
 import {
+  ANOTHER_1024_CHARS,
+  CONSISTENT_TAGS,
+  MORE_THAN_1024_CHARS,
   createDegradedFieldsRecord,
   defaultNamespace,
   getInitialTestLogs,
-  ANOTHER_1024_CHARS,
-  MORE_THAN_1024_CHARS,
 } from './data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
@@ -22,6 +23,7 @@ import { logsNginxMappings } from './custom_mappings/custom_integration_mappings
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
+    'header',
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
@@ -43,14 +45,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const customComponentTemplateName = 'logs-synth@mappings';
 
   const nginxAccessDatasetName = 'nginx.access';
-  const customComponentTemplateNameNginx = 'logs-nginx.access@custom';
+  const customComponentTemplateNameNginx = `logs-${nginxAccessDatasetName}@custom`;
   const nginxAccessDataStreamName = `${type}-${nginxAccessDatasetName}-${defaultNamespace}`;
   const nginxPkg = {
     name: 'nginx',
     version: '1.23.0',
   };
 
-  describe('Degraded fields flyout', () => {
+  const apmAppDatasetName = 'apm.app.tug';
+  const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
+
+  describe('Degraded fields flyout', function () {
     describe('degraded field flyout open-close', () => {
       before(async () => {
         await synthtrace.index([
@@ -97,13 +102,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('testing root cause for ignored fields', () => {
+    describe('detecting root cause for ignored fields', () => {
       before(async () => {
         // Create custom component template
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateName,
-          logsSynthMappings(degradedDatasetWithLimitsName)
-        );
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateName,
+          mappings: logsSynthMappings(degradedDatasetName),
+        });
 
         // Create custom index template
         await esClient.indices.putIndexTemplate({
@@ -129,14 +134,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Install Nginx Integration and ingest logs for it
         await PageObjects.observabilityLogsExplorer.installPackage(nginxPkg);
 
-        // Create custom component template to avoid issues with LogsDB
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateNameNginx,
-          logsNginxMappings(nginxAccessDatasetName)
-        );
+        // Create custom component template for Nginx to avoid issues with LogsDB
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateNameNginx,
+          mappings: logsNginxMappings(nginxAccessDatasetName),
+        });
 
         await synthtrace.index([
-          // Ingest Degraded Logs with 25 fields
+          // Ingest Degraded Logs with 25 fields in degraded DataSet
           timerange(moment(to).subtract(count, 'minute'), moment(to))
             .interval('1m')
             .rate(1)
@@ -182,6 +187,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     .timestamp(timestamp)
                 );
             }),
+          // Ingest Degraded Logs with 27 fields in Apm DataSet
+          timerange(moment(to).subtract(count, 'minute'), moment(to))
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) => {
+              return Array(1)
+                .fill(0)
+                .flatMap(() =>
+                  log
+                    .create()
+                    .dataset(apmAppDatasetName)
+                    .message('a log message')
+                    .logLevel(MORE_THAN_1024_CHARS)
+                    .service(serviceName)
+                    .namespace(defaultNamespace)
+                    .defaults({
+                      'service.name': serviceName,
+                      'trace.id': generateShortId(),
+                      test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      'event.ingested': new Date().toISOString(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
+                    })
+                    .timestamp(timestamp)
+                );
+            }),
         ]);
 
         // Set Limit of 25
@@ -195,6 +226,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Set Limit of 42
         await PageObjects.datasetQuality.setDataStreamSettings(nginxAccessDataStreamName, {
           'mapping.total_fields.limit': 42,
+        });
+
+        // Set Limit of 26
+        await PageObjects.datasetQuality.setDataStreamSettings(apmAppDataStreamName, {
+          'mapping.total_fields.limit': 26,
         });
 
         await synthtrace.index([
@@ -246,11 +282,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     .timestamp(timestamp)
                 );
             }),
+          // Ingest Degraded Logs with 29 fields in Apm APP DataSet
+          timerange(moment(to).subtract(count, 'minute'), moment(to))
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) => {
+              return Array(1)
+                .fill(0)
+                .flatMap(() =>
+                  log
+                    .create()
+                    .dataset(apmAppDatasetName)
+                    .message('a log message')
+                    .logLevel(MORE_THAN_1024_CHARS)
+                    .service(serviceName)
+                    .namespace(defaultNamespace)
+                    .defaults({
+                      'service.name': serviceName,
+                      'trace.id': generateShortId(),
+                      test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      'cloud.project.id': generateShortId(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
+                      'event.ingested': new Date().toISOString(),
+                    })
+                    .timestamp(timestamp)
+                );
+            }),
         ]);
 
         // Rollover Datastream to reset the limit to default which is 1000
         await PageObjects.datasetQuality.rolloverDataStream(degradedDatasetWithLimitDataStreamName);
         await PageObjects.datasetQuality.rolloverDataStream(nginxAccessDataStreamName);
+        await PageObjects.datasetQuality.rolloverDataStream(apmAppDataStreamName);
 
         // Set Limit of 26
         await PageObjects.datasetQuality.setDataStreamSettings(
@@ -269,6 +333,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }) + '-000002',
           {
             'mapping.total_fields.limit': 43,
+          }
+        );
+
+        // Set Limit of 28
+        await PageObjects.datasetQuality.setDataStreamSettings(
+          PageObjects.datasetQuality.generateBackingIndexNameWithoutVersion({
+            dataset: apmAppDatasetName,
+          }) + '-000002',
+          {
+            'mapping.total_fields.limit': 28,
           }
         );
 
@@ -317,6 +391,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
                       'cloud.project.id': generateShortId(),
+                    })
+                    .timestamp(timestamp)
+                );
+            }),
+          // Ingest Degraded Logs with 29 fields in Apm APP DataSet
+          timerange(moment(to).subtract(count, 'minute'), moment(to))
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) => {
+              return Array(1)
+                .fill(0)
+                .flatMap(() =>
+                  log
+                    .create()
+                    .dataset(apmAppDatasetName)
+                    .message('a log message')
+                    .logLevel(MORE_THAN_1024_CHARS)
+                    .service(serviceName)
+                    .namespace(defaultNamespace)
+                    .defaults({
+                      'service.name': serviceName,
+                      'trace.id': generateShortId(),
+                      test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      'cloud.project.id': generateShortId(),
+                      'event.ingested': new Date().toISOString(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
                     })
                     .timestamp(timestamp)
                 );
@@ -379,7 +480,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // Check value in Table
           const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const countColumn = table['Docs count'];
+          const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await countColumn.getCellTexts()).to.eql(['5', '5', '5']);
 
           // Check value in Flyout
@@ -399,7 +500,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // Check value in Table
           const newTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const newCountColumn = newTable['Docs count'];
+          const newCountColumn = newTable[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await newCountColumn.getCellTexts()).to.eql(['15', '15', '5', '5']);
 
           // Check value in Flyout
@@ -452,6 +553,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'test_field',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await retry.tryForTime(5000, async () => {
             const fieldIgnoredMessageExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause',
@@ -468,6 +571,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'test_field',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.tryForTime(5000, async () => {
             const testFieldValue1Exists = await PageObjects.datasetQuality.doesTextExist(
@@ -491,6 +596,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'test_field',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await retry.tryForTime(5000, async () => {
             const limitValueExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-characterLimit',
@@ -507,6 +614,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'test_field',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           // Possible Mitigation Section should exist
           await testSubjects.existOrFail(
@@ -567,6 +676,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'test_field',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.datasetQuality.waitUntilPossibleMitigationsLoaded();
 
           // Possible Mitigation Section should exist
@@ -632,6 +742,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await retry.tryForTime(5000, async () => {
             const fieldLimitMessageExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause',
@@ -648,6 +760,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'cloud',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.tryForTime(5000, async () => {
             const limitExists = await PageObjects.datasetQuality.doesTextExist(
@@ -666,6 +780,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await testSubjects.existOrFail(
             PageObjects.datasetQuality.testSubjectSelectors
               .datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist
@@ -678,6 +794,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: nginxAccessDataStreamName,
             expandedDegradedField: 'cloud.project.id',
+          });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          // Field Limit Mitigation Section should exist
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutFieldLimitMitigationAccordion'
+          );
+
+          // Should display the panel to increase field limit
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutIncreaseFieldLimitPanel'
+          );
+
+          // Should display official online documentation link
+          await testSubjects.existOrFail(
+            'datasetQualityManualMitigationsPipelineOfficialDocumentationLink'
+          );
+
+          const linkButton = await testSubjects.find(
+            'datasetQualityManualMitigationsPipelineOfficialDocumentationLink'
+          );
+
+          const linkURL = await linkButton.getAttribute('href');
+
+          expect(linkURL?.endsWith('mapping-settings-limit.html')).to.be(true);
+        });
+
+        it('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: apmAppDataStreamName,
+            expandedDegradedField: 'cloud.project',
           });
 
           // Field Limit Mitigation Section should exist
@@ -710,6 +858,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           // Field Limit Mitigation Section should exist
           await testSubjects.existOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutFieldLimitMitigationAccordion'
@@ -731,6 +881,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: nginxAccessDataStreamName,
             expandedDegradedField: 'cloud.project.id',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           // Should display current field limit
           await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingCurrentLimitFieldText');
@@ -765,10 +917,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(newFieldLimit).to.be(newLimit);
 
           // Should display the apply button
-          await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingLimitButtonButton');
+          await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingLimitButton');
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
           const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
 
@@ -782,6 +934,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           // Should not allow values less than current limit of 44
           await testSubjects.setValue(
             'datasetQualityIncreaseFieldMappingProposedLimitFieldText',
@@ -793,7 +947,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
           const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
 
@@ -816,9 +970,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await retry.tryForTime(5000, async () => {
             const applyButton = await testSubjects.find(
-              'datasetQualityIncreaseFieldMappingLimitButtonButton'
+              'datasetQualityIncreaseFieldMappingLimitButton'
             );
             await applyButton.click();
 
@@ -835,8 +991,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
 
           await applyButton.click();

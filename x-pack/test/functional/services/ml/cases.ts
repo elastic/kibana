@@ -94,5 +94,13 @@ export function MachineLearningCasesProvider(
       await testSubjects.existOrFail('comment-persistableState-aiopsChangePointChart');
       await testSubjects.existOrFail('aiopsEmbeddableChangePointChart');
     },
+
+    async assertCaseWithLogRateAnalysisAttachment(params: CaseParams) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-aiopsLogRateAnalysisEmbeddable');
+      await testSubjects.existOrFail('aiopsEmbeddableLogRateAnalysis');
+      await testSubjects.existOrFail('aiopsDocumentCountChart');
+      await testSubjects.existOrFail('aiopsLogRateAnalysisResults');
+    },
   };
 }

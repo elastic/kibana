@@ -25,10 +25,11 @@ export class ResizableLayoutExamplesPlugin implements Plugin {
       title: PLUGIN_NAME,
       visibleIn: [],
       mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
         // Load application bundle
         const { renderApp } = await import('./application');
         // Render the application
-        return renderApp(params);
+        return renderApp(coreStart, params);
       },
     });
 

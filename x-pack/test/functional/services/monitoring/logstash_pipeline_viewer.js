@@ -10,7 +10,7 @@ export function MonitoringLogstashPipelineViewerProvider({ getService }) {
   const retry = getService('retry');
   const find = getService('find');
 
-  const PIPELINE_VIEWER_SELECTOR = '.monPipelineViewer';
+  const PIPELINE_VIEWER_SELECTOR = '[data-test-subj*="pipeline-viewer"]';
   const SUBJ_PIPELINE_SECTION_PREFIX = 'pipelineViewerSection_';
   const PIPELINE_SECTION_ITEM_CLS = 'monPipelineViewer__listItem';
 

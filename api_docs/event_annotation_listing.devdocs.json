@@ -15,7 +15,7 @@
           "Props",
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
+        "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "Props"
             ],
-            "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,7 +63,7 @@
             "text": "AccessorConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -83,7 +83,7 @@
                 "text": "EventAnnotationConfig"
               }
             ],
-            "path": "packages/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -117,7 +117,7 @@
             "text": "PointInTimeEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -138,7 +138,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -172,7 +172,7 @@
             "text": "QueryPointEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -193,7 +193,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -227,7 +227,7 @@
             "text": "RangeEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -248,7 +248,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -279,7 +279,7 @@
           },
           "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
-        "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/icon_set.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/icon_set.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -291,7 +291,7 @@
         "tags": [],
         "label": "defaultAnnotationColor",
         "description": [],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -306,7 +306,7 @@
         "signature": [
           "\"#F04E981A\""
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -323,7 +323,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/event_annotation_listing/public/plugin.ts",
+      "path": "src/platform/plugins/private/event_annotation_listing/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

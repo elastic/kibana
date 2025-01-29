@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/react-mute-legacy-root-warning",
+  "owner": "@elastic/appex-sharedux",
+  "visibility": "private",
+  "group": "platform"
+}

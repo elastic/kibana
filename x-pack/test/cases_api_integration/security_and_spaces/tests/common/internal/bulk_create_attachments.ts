@@ -37,7 +37,7 @@ import {
   createCaseAndBulkCreateAttachments,
   bulkCreateAttachments,
   updateCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   createAndUploadFile,
   deleteAllFiles,
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: theCase.id });
 
         userActions.slice(1).forEach((userAction, index) => {
           const userActionWithoutServerGeneratedAttributes =
@@ -163,7 +163,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 ...attachments[index],
               },
             },
-            case_id: theCase.id,
             comment_id: theCase.comments?.find((comment) => comment.id === userAction.comment_id)
               ?.id,
             owner: 'securitySolutionFixture',

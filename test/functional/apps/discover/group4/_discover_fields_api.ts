@@ -16,17 +16,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const { common, discover, timePicker, settings, unifiedFieldList } = getPageObjects([
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'timePicker',
-    'settings',
     'unifiedFieldList',
   ]);
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:searchFieldsFromSource': false,
   };
   describe('discover uses fields API test', function describeIndexTests() {
     before(async function () {
@@ -73,28 +71,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.isShowingDocViewer();
       await discover.clickDocViewerTab('doc_view_source');
       await discover.expectSourceViewerToExist();
-    });
-
-    it('switches to _source column when fields API is no longer used', async function () {
-      await settings.navigateTo();
-      await settings.clickKibanaSettings();
-      await settings.toggleAdvancedSettingCheckbox('discover:searchFieldsFromSource');
-
-      await common.navigateToApp('discover');
-      await timePicker.setDefaultAbsoluteRange();
-
-      expect(await discover.getDocHeader()).to.have.string('Summary');
-    });
-
-    it('switches to Document column when fields API is used', async function () {
-      await settings.navigateTo();
-      await settings.clickKibanaSettings();
-      await settings.toggleAdvancedSettingCheckbox('discover:searchFieldsFromSource');
-
-      await common.navigateToApp('discover');
-      await timePicker.setDefaultAbsoluteRange();
-
-      expect(await discover.getDocHeader()).to.have.string('Summary');
     });
   });
 }

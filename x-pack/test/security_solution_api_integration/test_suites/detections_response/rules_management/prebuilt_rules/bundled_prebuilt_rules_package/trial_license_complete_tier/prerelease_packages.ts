@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const retry = getService('retry');
+  const retryService = getService('retry');
 
   /* This test makes use of the mock packages created in the '/fleet_bundled_packages' folder,
   /* in order to assert that, in production environments, the latest stable version of the package
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await deletePrebuiltRulesFleetPackage(supertest);
+      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
     });
 
     it('should install latest stable version and ignore prerelease packages', async () => {
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const fleetPackageInstallationResponse = await installPrebuiltRulesPackageViaFleetAPI(
         es,
         supertest,
-        retry
+        retryService
       );
 
       expect(fleetPackageInstallationResponse.items.length).toBe(1);

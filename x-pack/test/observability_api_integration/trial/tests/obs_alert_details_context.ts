@@ -17,6 +17,8 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
   const obsApiClient = getService('obsApiClient');
   const apmSynthtraceClient = getService('apmSynthtraceEsClient');
   const logSynthtraceClient = getService('logSynthtraceEsClient');
+  const security = getService('security');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('fetching observability alerts details context for AI assistant contextual insights', () => {
     const start = moment().subtract(10, 'minutes').valueOf();
@@ -511,5 +513,39 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
       await apmSynthtraceClient.clean();
       await logSynthtraceClient.clean();
     }
+
+    describe('security roles and access privileges', () => {
+      it('is not available to unauthorized users', async () => {
+        const UNAUTHORIZED_USERNAME = 'UNAUTHORIZED_USER';
+        const UNAUTHORIZED_USER_PASSWORD = 'UNAUTHORIZED_USER_PASSWORD';
+
+        // Create a user with no privileges
+        await security.user.create(UNAUTHORIZED_USERNAME, {
+          password: UNAUTHORIZED_USER_PASSWORD,
+          roles: [],
+          full_name: 'Unauthorized Test User',
+        });
+
+        try {
+          // Make a request to the target API with insufficient privileges
+          await supertestWithoutAuth
+            .get('/internal/observability/assistant/alert_details_contextual_insights')
+            .auth(UNAUTHORIZED_USERNAME, UNAUTHORIZED_USER_PASSWORD)
+            .query({ alertId: 'test-alert-id' })
+            .set('kbn-xsrf', 'true')
+            .expect(403)
+            .then(({ body }: any) => {
+              expect(body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message:
+                  'API [GET /internal/observability/assistant/alert_details_contextual_insights?alertId=test-alert-id] is unauthorized for user, this action is granted by the Kibana privileges [ai_assistant]',
+              });
+            });
+        } finally {
+          await security.user.delete(UNAUTHORIZED_USERNAME);
+        }
+      });
+    });
   });
 }

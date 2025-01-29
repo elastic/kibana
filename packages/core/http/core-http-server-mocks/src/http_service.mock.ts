@@ -26,7 +26,7 @@ import type {
 import { AuthStatus } from '@kbn/core-http-server';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 
-import { CspConfig, ExternalUrlConfig } from '@kbn/core-http-server-internal';
+import { CspConfig, ExternalUrlConfig, config } from '@kbn/core-http-server-internal';
 import type {
   HttpService,
   InternalHttpServicePreboot,
@@ -127,6 +127,7 @@ const createInternalPrebootContractMock = (args: CreateMockArgs = {}) => {
     basePath,
     staticAssets: createInternalStaticAssetsMock(basePath, args.cdnUrl),
     csp: CspConfig.DEFAULT,
+    prototypeHardening: false,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     getServerInfo: jest.fn(),
@@ -182,12 +183,14 @@ const createInternalSetupContractMock = () => {
     registerStaticDir: jest.fn(),
     basePath,
     csp: CspConfig.DEFAULT,
+    prototypeHardening: false,
     staticAssets: createInternalStaticAssetsMock(basePath),
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     authRequestHeaders: createAuthHeaderStorageMock(),
     getServerInfo: jest.fn(),
     registerRouterAfterListening: jest.fn(),
+    rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());

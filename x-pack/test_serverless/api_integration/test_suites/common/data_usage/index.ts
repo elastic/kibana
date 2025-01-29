@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless Data Usage APIs', function () {
     this.tags(['esGate']);
 
+    loadTestFile(require.resolve('./tests/data_streams_privileges'));
     loadTestFile(require.resolve('./tests/data_streams'));
     loadTestFile(require.resolve('./tests/metrics'));
   });

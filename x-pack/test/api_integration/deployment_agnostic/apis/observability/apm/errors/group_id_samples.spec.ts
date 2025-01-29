@@ -136,6 +136,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
+      describe('error sample without trace.id', () => {
+        before(async () => {
+          await generateData({
+            serviceName,
+            start,
+            end,
+            apmSynthtraceEsClient,
+            overrides: {
+              'trace.id': undefined,
+            },
+          });
+        });
+
+        after(() => apmSynthtraceEsClient.clean());
+
+        it('returns 200', async () => {
+          const errorsSamplesResponse = await callErrorGroupSamplesApi({
+            groupId: '0000000000000000000000000Error 1',
+          });
+
+          const errorId = errorsSamplesResponse.body.errorSampleIds[0];
+
+          const response = await callErrorSampleDetailsApi(errorId);
+          expect(response.status).to.be(200);
+        });
+      });
+
       describe('with sampled and unsampled transactions', () => {
         let errorGroupSamplesResponse: ErrorGroupSamples;
 

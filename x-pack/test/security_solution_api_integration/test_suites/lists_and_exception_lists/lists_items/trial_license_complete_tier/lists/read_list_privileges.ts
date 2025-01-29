@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           {
             feature: {
               dashboard: ['all'],
-              siem: ['all', 'read'],
+              siemV2: ['all', 'read'],
             },
             spaces: [space1Id],
           },

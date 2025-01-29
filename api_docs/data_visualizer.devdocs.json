@@ -11,7 +11,7 @@
         "tags": [],
         "label": "GetAdditionalLinksParams",
         "description": [],
-        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,7 +22,7 @@
             "tags": [],
             "label": "dataViewId",
             "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -36,7 +36,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,7 +50,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -64,7 +64,7 @@
         "tags": [],
         "label": "IndexDataVisualizerViewProps",
         "description": [],
-        "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,7 +84,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,7 +105,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -119,7 +119,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -140,7 +140,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -154,7 +154,7 @@
         "tags": [],
         "label": "ResultLink",
         "description": [],
-        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -165,7 +165,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -179,7 +179,7 @@
             "signature": [
               "\"index\" | \"file\""
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,7 +190,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -201,7 +201,7 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -212,7 +212,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,7 +226,7 @@
             "signature": [
               "(params?: any) => Promise<string>"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -240,7 +240,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+                "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -258,7 +258,7 @@
             "signature": [
               "(params?: any) => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -272,7 +272,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+                "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -290,7 +290,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -312,7 +312,7 @@
           "DataDriftDetectionAppStateProps",
           ">"
         ],
-        "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/data_drift/data_drift_app_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -360,7 +360,7 @@
           "Props",
           ">"
         ],
-        "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -422,7 +422,7 @@
           },
           "[] | undefined>)[]"
         ],
-        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/results_links/results_links.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -439,7 +439,7 @@
           "Props",
           ">"
         ],
-        "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -497,7 +497,7 @@
         "FieldStatisticTableEmbeddableProps",
         " & React.RefAttributes<{}>>; }"
       ],
-      "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
+      "path": "x-pack/platform/plugins/private/data_visualizer/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

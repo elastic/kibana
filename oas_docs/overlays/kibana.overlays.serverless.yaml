@@ -14,7 +14,7 @@ actions:
       - url: https://{kibana_url}
         variables:
           kibana_url:
-            default: localhost:5601
+            default: <KIBANA_URL>
 # Mark all operations as beta
   - target: "$.paths[*]['get','put','post','delete','options','head','patch','trace']"
     description: Add x-beta
