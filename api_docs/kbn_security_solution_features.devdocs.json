@@ -61,7 +61,7 @@
               "AlertingKibanaPrivilege",
               " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
               "AppCategory",
-              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; }> | undefined; privileges: { all: ",
+              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -170,7 +170,7 @@
           "AlertingKibanaPrivilege",
           " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
           "AppCategory",
-          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; }> | undefined; privileges: { all: ",
+          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",
@@ -231,7 +231,11 @@
           " | ",
           "ProductFeatureAssistantKey",
           " | ",
-          "ProductFeatureAttackDiscoveryKey"
+          "ProductFeatureAttackDiscoveryKey",
+          " | ",
+          "ProductFeatureTimelineFeatureKey",
+          " | ",
+          "ProductFeatureNotesFeatureKey"
         ],
         "path": "x-pack/solutions/security/packages/features/src/product_features_keys.ts",
         "deprecated": false,
@@ -396,6 +400,31 @@
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeaturesNotesConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeaturesNotesConfig",
+        "description": [],
+        "signature": [
+          "Map<",
+          "ProductFeatureNotesFeatureKey",
+          ", ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<string>>"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
         "id": "def-common.ProductFeaturesSecurityConfig",
         "type": "Type",
         "tags": [],
@@ -415,6 +444,31 @@
           "<",
           "SecuritySubFeatureId",
           ">>"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeaturesTimelineConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeaturesTimelineConfig",
+        "description": [],
+        "signature": [
+          "Map<",
+          "ProductFeatureTimelineFeatureKey",
+          ", ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<string>>"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,

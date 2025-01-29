@@ -9,6 +9,7 @@ Object {
     "managed_by": "elastic_entity_model",
   },
   "composed_of": Array [
+    "ecs@mappings",
     "entities_v1_latest_base",
     "entities_v1_entity",
     "entities_v1_event",
@@ -80,6 +81,7 @@ Object {
     "managed_by": "elastic_entity_model",
   },
   "composed_of": Array [
+    "ecs@mappings",
     "entities_v1_latest_base",
     "entities_v1_entity",
     "entities_v1_event",

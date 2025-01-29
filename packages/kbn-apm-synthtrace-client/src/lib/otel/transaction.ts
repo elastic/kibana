@@ -24,6 +24,9 @@ export interface OtelTransactionDocument extends OtelDocument {
     'transaction.root'?: boolean;
     'transaction.sampled'?: boolean;
     'transaction.type'?: string;
+    'http.response.status_code'?: number;
+    'http.request.method'?: string;
+    'url.full'?: string;
   };
   status?: {
     code?: string;

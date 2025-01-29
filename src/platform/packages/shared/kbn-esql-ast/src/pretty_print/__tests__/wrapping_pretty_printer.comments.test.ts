@@ -583,6 +583,15 @@ ROW
     // Two is more important here
     2`);
       });
+
+      test('WHERE expression', () => {
+        const query = `FROM a | STATS /* 1 */ a /* 2 */ WHERE /* 3 */ a /* 4 */ == /* 5 */ 1 /* 6 */`;
+        const text = reprint(query).text;
+
+        expect(text).toBe(
+          'FROM a | STATS /* 1 */ a /* 2 */ WHERE /* 3 */ a /* 4 */ == /* 5 */ 1 /* 6 */'
+        );
+      });
     });
   });
 });

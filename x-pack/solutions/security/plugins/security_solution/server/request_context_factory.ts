@@ -33,6 +33,7 @@ import { createDetectionRulesClient } from './lib/detection_engine/rule_manageme
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -176,7 +177,13 @@ export class RequestContextFactory implements IRequestContextFactory {
           request,
           currentUser: coreContext.security.authc.getCurrentUser(),
           spaceId: getSpaceId(),
-          packageService: startPlugins.fleet?.packageService,
+          dependencies: {
+            inferenceClient: startPlugins.inference.getClient({ request }),
+            rulesClient,
+            actionsClient,
+            savedObjectsClient: coreContext.savedObjects.client,
+            packageService: startPlugins.fleet?.packageService,
+          },
         })
       ),
 
@@ -240,6 +247,15 @@ export class RequestContextFactory implements IRequestContextFactory {
           config: config.entityAnalytics.entityStore,
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
+        });
+      }),
+      getAssetInventoryClient: memoize(() => {
+        const clusterClient = coreContext.elasticsearch.client;
+        const logger = options.logger;
+        return new AssetInventoryDataClient({
+          clusterClient,
+          logger,
+          experimentalFeatures: config.experimentalFeatures,
         });
       }),
     };

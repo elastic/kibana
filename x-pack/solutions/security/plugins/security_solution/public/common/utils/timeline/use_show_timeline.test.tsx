@@ -10,8 +10,11 @@ import { allowedExperimentalValues } from '../../../../common/experimental_featu
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { updateAppLinks } from '../../links';
 import { appLinks } from '../../../app_links';
+import { useUserPrivileges } from '../../components/user_privileges';
 import { useShowTimeline } from './use_show_timeline';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+
+jest.mock('../../components/user_privileges');
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
 jest.mock('react-router-dom', () => {
@@ -43,7 +46,7 @@ jest.mock('../../lib/kibana', () => {
         ...original.useKibana().services,
         application: {
           capabilities: {
-            siem: {
+            siemV2: {
               show: mockSiemUserCanRead(),
             },
           },
@@ -58,6 +61,10 @@ const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 
 describe('use show timeline', () => {
   beforeAll(() => {
+    (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
+    });
+
     // initialize all App links before running test
     updateAppLinks(appLinks, {
       experimentalFeatures: allowedExperimentalValues,
@@ -66,7 +73,7 @@ describe('use show timeline', () => {
         management: {},
         catalogue: {},
         actions: { show: true, crud: true },
-        siem: {
+        siemV2: {
           show: true,
           crud: true,
         },
@@ -98,6 +105,24 @@ describe('use show timeline', () => {
     const { result } = renderHook(() => useShowTimeline());
     await waitFor(() => expect(result.current).toEqual([false]));
   });
+  it('hides timeline for users without timeline access', async () => {
+    (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: false },
+    });
+
+    const { result } = renderHook(() => useShowTimeline());
+    const showTimeline = result.current;
+    expect(showTimeline).toEqual([false]);
+  });
+});
+it('shows timeline for users with timeline read access', async () => {
+  (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
+    timelinePrivileges: { read: true },
+  });
+
+  const { result } = renderHook(() => useShowTimeline());
+  const showTimeline = result.current;
+  expect(showTimeline).toEqual([true]);
 });
 
 describe('sourcererDataView', () => {

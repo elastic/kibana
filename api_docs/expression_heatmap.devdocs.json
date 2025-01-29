@@ -1355,6 +1355,44 @@
               },
               {
                 "parentPluginId": "expressionHeatmap",
+                "id": "def-common.heatmapGridConfig.args.xAxisLabelRotation",
+                "type": "Object",
+                "tags": [],
+                "label": "xAxisLabelRotation",
+                "description": [],
+                "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapGridConfig.args.xAxisLabelRotation.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"number\"[]"
+                    ],
+                    "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapGridConfig.args.xAxisLabelRotation.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressionHeatmap",
                 "id": "def-common.heatmapGridConfig.args.isXAxisTitleVisible",
                 "type": "Object",
                 "tags": [],
@@ -1455,7 +1493,7 @@
             "signature": [
               "(input: null, args: ",
               "HeatmapGridConfig",
-              ") => { strokeWidth?: number | undefined; strokeColor?: string | undefined; isCellLabelVisible: boolean; isYAxisLabelVisible: boolean; isYAxisTitleVisible: boolean; yTitle?: string | undefined; isXAxisLabelVisible: boolean; isXAxisTitleVisible: boolean; xTitle?: string | undefined; type: \"heatmap_grid\"; }"
+              ") => { strokeWidth?: number | undefined; strokeColor?: string | undefined; isCellLabelVisible: boolean; isYAxisLabelVisible: boolean; isYAxisTitleVisible: boolean; yTitle?: string | undefined; isXAxisLabelVisible: boolean; xAxisLabelRotation?: number | undefined; isXAxisTitleVisible: boolean; xTitle?: string | undefined; type: \"heatmap_grid\"; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
             "deprecated": false,

@@ -38,7 +38,7 @@ interface RawLegacyUrlAlias {
   [LEGACY_URL_ALIAS_TYPE]: LegacyUrlAlias;
 }
 
-export const TEST_CASE_TARGET_TYPE = 'sharedtype';
+export const TEST_CASE_TARGET_TYPE = 'index-pattern';
 export const TEST_CASE_SOURCE_ID = 'space_1_only'; // two aliases exist for space_1_only: one in the default spacd=e, and one in space_2
 const createRequest = ({ targetSpace, targetType, sourceId }: DisableLegacyUrlAliasesTestCase) => ({
   aliases: [{ targetSpace, targetType, sourceId }],

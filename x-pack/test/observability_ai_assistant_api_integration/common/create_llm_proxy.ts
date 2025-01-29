@@ -37,7 +37,7 @@ export interface LlmResponseSimulator {
           content?: string;
           tool_calls?: Array<{
             id: string;
-            index: string;
+            index: string | number;
             function?: {
               name: string;
               arguments: string;

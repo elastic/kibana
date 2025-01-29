@@ -108,7 +108,7 @@ describe('take action dropdown', () => {
             isOsqueryAvailable: jest.fn().mockReturnValue(true),
           },
           application: {
-            capabilities: { siem: { crud_alerts: true, read_alerts: true }, osquery: true },
+            capabilities: { siemV2: { crud_alerts: true, read_alerts: true }, osquery: true },
           },
         },
       };
@@ -147,6 +147,10 @@ describe('take action dropdown', () => {
     let wrapper: ReactWrapper;
 
     beforeAll(() => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...getUserPrivilegesMockDefaultValue(),
+        timelinePrivileges: { read: true },
+      });
       wrapper = mount(
         <TestProviders>
           <TakeActionDropdown {...defaultProps} />
@@ -242,6 +246,29 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="alert-assignees-context-menu-item"]').first().text()
         ).toEqual(ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE);
+      });
+    });
+  });
+
+  describe('privileges', () => {
+    test('should not render "Investigate in timeline" when the user does not have timeline privileges', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...getUserPrivilegesMockDefaultValue(),
+        timelinePrivileges: { read: false },
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} />
+        </TestProviders>
+      );
+      wrapper
+        .find(`button[data-test-subj="${FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}"]`)
+        .simulate('click');
+
+      await waitFor(() => {
+        expect(
+          wrapper.exists('[data-test-subj="investigate-in-timeline-action-item"]')
+        ).toBeFalsy();
       });
     });
   });

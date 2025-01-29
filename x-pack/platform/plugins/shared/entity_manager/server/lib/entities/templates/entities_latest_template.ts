@@ -15,6 +15,7 @@ import {
 } from '@kbn/entities-schema';
 import { generateLatestIndexTemplateId } from '../helpers/generate_component_id';
 import {
+  ECS_MAPPINGS_COMPONENT_TEMPLATE,
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
@@ -34,6 +35,7 @@ export const generateEntitiesLatestIndexTemplateConfig = (
   },
   ignore_missing_component_templates: getCustomLatestTemplateComponents(definition),
   composed_of: [
+    ECS_MAPPINGS_COMPONENT_TEMPLATE,
     ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
     ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,

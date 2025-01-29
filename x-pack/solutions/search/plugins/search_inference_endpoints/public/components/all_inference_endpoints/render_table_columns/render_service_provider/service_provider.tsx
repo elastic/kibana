@@ -59,6 +59,10 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     icon: elasticIcon,
     name: 'Elasticsearch',
   },
+  [ServiceProviderKeys.elastic]: {
+    icon: elasticIcon,
+    name: 'Elastic',
+  },
   [ServiceProviderKeys.elser]: {
     icon: elasticIcon,
     name: 'Elasticsearch',

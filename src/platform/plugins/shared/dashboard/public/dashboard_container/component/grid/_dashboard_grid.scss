@@ -2,12 +2,8 @@
   position: relative;
 }
 
-/**
- * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
- * otherwise the height is set inline.
- */
 .dshLayout-isMaximizedPanel {
-  height: 100%;
+  height: 100%; // need to override the kbn-grid-layout height when a single panel is expanded
 
   .embPanel__hoverActionsLeft {
     visibility: hidden;

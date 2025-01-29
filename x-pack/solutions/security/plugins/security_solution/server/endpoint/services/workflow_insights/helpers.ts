@@ -13,6 +13,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type {
   SearchParams,
   SecurityWorkflowInsight,
@@ -149,3 +151,69 @@ export function generateInsightId(insight: SecurityWorkflowInsight): string {
 
   return hash.digest('hex');
 }
+
+export function getUniqueInsights(insights: SecurityWorkflowInsight[]): SecurityWorkflowInsight[] {
+  const uniqueInsights: { [key: string]: SecurityWorkflowInsight } = {};
+  for (const insight of insights) {
+    const id = generateInsightId(insight);
+    if (!uniqueInsights[id]) {
+      uniqueInsights[id] = insight;
+    }
+  }
+  return Object.values(uniqueInsights);
+}
+
+export const generateTrustedAppsFilter = (insight: SecurityWorkflowInsight): string | undefined => {
+  return insight.remediation.exception_list_items
+    ?.flatMap((item) =>
+      item.entries.map((entry) => {
+        if (!('value' in entry)) return '';
+
+        if (entry.field === 'process.executable.caseless') {
+          return `exception-list-agnostic.attributes.entries.value:"${entry.value}"`;
+        }
+
+        if (
+          entry.field === 'process.code_signature' ||
+          (entry.field === 'process.Ext.code_signature' && typeof entry.value === 'string')
+        ) {
+          const sanitizedValue = (entry.value as string)
+            .replace(/[)(<>}{":\\]/gm, '\\$&')
+            .replace(/\s/gm, '*');
+          return `exception-list-agnostic.attributes.entries.entries.value:(*${sanitizedValue}*)`;
+        }
+
+        return '';
+      })
+    )
+    .filter(Boolean)
+    .join(' AND ');
+};
+
+export const checkIfRemediationExists = async ({
+  insight,
+  exceptionListsClient,
+}: {
+  insight: SecurityWorkflowInsight;
+  exceptionListsClient: ExceptionListClient;
+}): Promise<boolean> => {
+  if (insight.type !== DefendInsightType.Enum.incompatible_antivirus) {
+    return false;
+  }
+
+  const filter = generateTrustedAppsFilter(insight);
+
+  if (!filter) return false;
+
+  const response = await exceptionListsClient.findExceptionListItem({
+    listId: 'endpoint_trusted_apps',
+    page: 1,
+    perPage: 1,
+    namespaceType: 'agnostic',
+    filter,
+    sortField: 'created_at',
+    sortOrder: 'desc',
+  });
+
+  return !!response?.total && response.total > 0;
+};

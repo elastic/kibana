@@ -20,7 +20,6 @@ export interface EntityEngineInstallationDescriptor {
   id: string;
   version: string;
   entityType: EntityType;
-
   identityField: string;
 
   /**
@@ -60,6 +59,14 @@ export interface EntityEngineInstallationDescriptor {
   pipeline:
     | IngestProcessorContainer[]
     | ((defaultProcessors: IngestProcessorContainer[]) => IngestProcessorContainer[]);
+
+  /**
+   * Whether the extracted entity data is dynamic.
+   * If true, it means we don't know which fields will be extracted from the definition itself, and we need to apply field retention to all the incoming doc's fields.
+   *
+   * This is mainly used for the Asset Inventory use case.
+   */
+  dynamic: boolean;
 }
 
 export type FieldDescription = EntityDefinitionMetadataElement & {

@@ -6,9 +6,8 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -24,6 +23,40 @@ const { hasExpressionValidationErrors } = jest.requireMock('../validation');
 jest.mock('@kbn/esql-editor', () => ({
   fetchFieldsFromESQL: jest.fn(),
 }));
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+  const module = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...module,
+    getFields: jest.fn().mockResolvedValue([]),
+  };
+});
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common', () => {
+  const module = jest.requireActual('@kbn/triggers-actions-ui-plugin/public/common');
+  return {
+    ...module,
+    getTimeOptions: jest.fn(),
+    firstFieldOption: { text: '@timestamp', value: '@timestamp' },
+    getTimeFieldOptions: jest.fn().mockReturnValue([
+      { value: '@timestamp', text: '@timestamp' },
+      { value: 'event.ingested', text: 'event.ingested' },
+    ]),
+  };
+});
+
+jest.mock('@kbn/esql-utils', () => {
+  return {
+    getESQLResults: jest.fn().mockResolvedValue({}),
+    getIndexPattern: jest.fn(),
+    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
+    getESQLAdHocDataview: jest
+      .fn()
+      .mockResolvedValue({ timeFieldName: '@timestamp', getIndexPattern: jest.fn() }),
+    formatESQLColumns: jest.fn().mockReturnValue([]),
+  };
+});
+
 const { fetchFieldsFromESQL } = jest.requireMock('@kbn/esql-editor');
 const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
@@ -56,6 +89,39 @@ describe('EsqlQueryRuleTypeExpression', () => {
     jest.clearAllMocks();
 
     hasExpressionValidationErrors.mockReturnValue(false);
+  });
+
+  test('should render EsqlQueryRuleTypeExpression with chosen time field', async () => {
+    await act(async () => {
+      render(
+        <EsqlQueryExpression
+          unifiedSearch={unifiedSearchMock}
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={{
+            ...defaultEsqlQueryExpressionParams,
+            timeField: 'event.ingested',
+            esqlQuery: { esql: 'FROM *' },
+          }}
+          setRuleParams={() => {}}
+          setRuleProperty={() => {}}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+          data={dataMock}
+          dataViews={dataViewMock}
+          defaultActionGroupId=""
+          actionGroups={[]}
+          charts={chartsStartMock}
+          onChangeMetaData={() => {}}
+        />,
+        {
+          wrapper: AppWrapper,
+        }
+      );
+    });
+
+    const timeFieldText = await screen.findByText('event.ingested');
+    expect(timeFieldText).toBeInTheDocument();
   });
 
   it('should render EsqlQueryRuleTypeExpression with expected components', () => {
@@ -135,7 +201,8 @@ describe('EsqlQueryRuleTypeExpression', () => {
       ],
     });
     getFields.mockResolvedValue([]);
-    const result = render(
+
+    render(
       <EsqlQueryExpression
         unifiedSearch={unifiedSearchMock}
         ruleInterval="1m"
@@ -157,12 +224,12 @@ describe('EsqlQueryRuleTypeExpression', () => {
       }
     );
 
-    fireEvent.click(result.getByTestId('testQuery'));
+    fireEvent.click(screen.getByTestId('testQuery'));
     await waitFor(() => expect(fetchFieldsFromESQL).toBeCalled());
 
-    expect(result.getByTestId('testQuerySuccess')).toBeInTheDocument();
-    expect(result.getByText('Query matched 1 documents in the last 15s.')).toBeInTheDocument();
-    expect(result.queryByTestId('testQueryError')).not.toBeInTheDocument();
+    expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
+    expect(screen.getByText('Query matched 1 documents in the last 15s.')).toBeInTheDocument();
+    expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });
 
   test('should show error message if Test Query is throws error', async () => {

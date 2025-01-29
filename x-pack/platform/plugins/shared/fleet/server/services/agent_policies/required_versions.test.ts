@@ -40,7 +40,7 @@ describe('validateRequiredVersions', () => {
         ]);
       }).toThrow(
         new AgentPolicyInvalidError(
-          `Policy "test policy" failed validation: duplicate versions not allowed in required_versions`
+          `Policy "test policy" failed required_versions validation: duplicate versions not allowed`
         )
       );
     });
@@ -53,7 +53,7 @@ describe('validateRequiredVersions', () => {
         ]);
       }).toThrow(
         new AgentPolicyInvalidError(
-          `Policy "test policy" failed validation: invalid semver version 9.0.0invalid in required_versions`
+          `Policy "test policy" failed required_versions validation: invalid semver version 9.0.0invalid`
         )
       );
     });
@@ -66,7 +66,20 @@ describe('validateRequiredVersions', () => {
         ]);
       }).toThrow(
         new AgentPolicyInvalidError(
-          `Policy "test policy" failed validation: sum of required_versions percentages cannot exceed 100`
+          `Policy "test policy" failed required_versions validation: sum of percentages cannot exceed 100`
+        )
+      );
+    });
+
+    it('should throw error if percentage is 0 or undefined', () => {
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 100 },
+          { version: '9.1.0', percentage: 0 },
+        ]);
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed required_versions validation: percentage is required`
         )
       );
     });

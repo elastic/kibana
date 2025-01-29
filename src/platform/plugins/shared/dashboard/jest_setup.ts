@@ -19,8 +19,10 @@ import {
   mockDashboardContentManagementCache,
   mockDashboardContentManagementService,
   setStubKibanaServices,
+  setStubLogger,
 } from './public/services/mocks';
 
+setStubLogger();
 // Start the kibana services with stubs
 setStubKibanaServices();
 

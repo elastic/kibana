@@ -31,7 +31,8 @@ const apmMobileServiceOverview = url.format({
     rangeTo,
   },
 });
-describe('Mobile Service overview page', () => {
+// Failing: See https://github.com/elastic/kibana/issues/207183
+describe.skip('Mobile Service overview page', () => {
   before(() => {
     synthtrace.index(
       generateMobileData({

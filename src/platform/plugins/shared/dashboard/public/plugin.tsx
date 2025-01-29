@@ -79,6 +79,7 @@ import {
 } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 
 export interface DashboardFeatureFlagConfig {
@@ -156,7 +157,9 @@ export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
 {
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext) {
+    setLogger(initializerContext.logger.get('dashboard'));
+  }
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;

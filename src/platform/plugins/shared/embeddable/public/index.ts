@@ -25,10 +25,8 @@ export {
   isValueClickTriggerContext,
   MULTI_VALUE_CLICK_TRIGGER,
   panelBadgeTrigger,
-  panelHoverTrigger,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
-  PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
@@ -59,4 +57,5 @@ export {
   ADD_PANEL_ANNOTATION_GROUP,
   ADD_PANEL_OTHER_GROUP,
   ADD_PANEL_LEGACY_GROUP,
+  ADD_PANEL_VISUALIZATION_GROUP,
 } from './ui_actions/add_panel_groups';

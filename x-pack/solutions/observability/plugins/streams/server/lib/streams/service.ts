@@ -21,11 +21,7 @@ export const streamsStorageSettings = {
   schema: {
     properties: {
       name: types.keyword(),
-      stream: types.object({
-        properties: {
-          ingest: types.object({ enabled: false }),
-        },
-      }),
+      ingest: types.object({ enabled: false }),
     },
   },
 } satisfies StorageSettings;
@@ -52,6 +48,8 @@ export class StreamsService {
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
+    const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
+
     const storageAdapter = new StorageIndexAdapter(
       scopedClusterClient.asInternalUser,
       logger,
@@ -63,6 +61,7 @@ export class StreamsService {
       logger,
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),
+      isServerless,
     });
   }
 }

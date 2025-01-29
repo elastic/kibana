@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { InternalUpdateRuleMigrationData, StoredRuleMigration } from '../types';
 import {
   SiemMigrationStatus,
@@ -36,18 +37,6 @@ export type CreateRuleMigrationInput = Omit<
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
-export interface RuleMigrationFilters {
-  status?: SiemMigrationStatus | SiemMigrationStatus[];
-  ids?: string[];
-  installed?: boolean;
-  installable?: boolean;
-  prebuilt?: boolean;
-  failed?: boolean;
-  fullyTranslated?: boolean;
-  partiallyTranslated?: boolean;
-  untranslatable?: boolean;
-  searchTerm?: string;
-}
 export interface RuleMigrationGetOptions {
   filters?: RuleMigrationFilters;
   sort?: RuleMigrationSort;
@@ -397,66 +386,55 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   private getFilterQuery(
     migrationId: string,
-    {
-      status,
-      ids,
-      installed,
-      installable,
-      prebuilt,
-      searchTerm,
-      failed,
-      fullyTranslated,
-      partiallyTranslated,
-      untranslatable,
-    }: RuleMigrationFilters = {}
+    filters: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
-    if (status) {
-      if (Array.isArray(status)) {
-        filter.push({ terms: { status } });
+    if (filters.status) {
+      if (Array.isArray(filters.status)) {
+        filter.push({ terms: { status: filters.status } });
       } else {
-        filter.push({ term: { status } });
+        filter.push({ term: { status: filters.status } });
       }
     }
-    if (ids) {
-      filter.push({ terms: { _id: ids } });
+    if (filters.ids) {
+      filter.push({ terms: { _id: filters.ids } });
     }
-    if (searchTerm?.length) {
-      filter.push(searchConditions.matchTitle(searchTerm));
+    if (filters.searchTerm?.length) {
+      filter.push(searchConditions.matchTitle(filters.searchTerm));
     }
-    if (installed === true) {
+    if (filters.installed === true) {
       filter.push(searchConditions.isInstalled());
-    } else if (installed === false) {
+    } else if (filters.installed === false) {
       filter.push(searchConditions.isNotInstalled());
     }
-    if (installable === true) {
+    if (filters.installable === true) {
       filter.push(...searchConditions.isInstallable());
-    } else if (installable === false) {
+    } else if (filters.installable === false) {
       filter.push(...searchConditions.isNotInstallable());
     }
-    if (prebuilt === true) {
+    if (filters.prebuilt === true) {
       filter.push(searchConditions.isPrebuilt());
-    } else if (prebuilt === false) {
+    } else if (filters.prebuilt === false) {
       filter.push(searchConditions.isCustom());
     }
-    if (failed === true) {
+    if (filters.failed === true) {
       filter.push(searchConditions.isFailed());
-    } else if (failed === false) {
+    } else if (filters.failed === false) {
       filter.push(searchConditions.isNotFailed());
     }
-    if (fullyTranslated === true) {
+    if (filters.fullyTranslated === true) {
       filter.push(searchConditions.isFullyTranslated());
-    } else if (fullyTranslated === false) {
+    } else if (filters.fullyTranslated === false) {
       filter.push(searchConditions.isNotFullyTranslated());
     }
-    if (partiallyTranslated === true) {
+    if (filters.partiallyTranslated === true) {
       filter.push(searchConditions.isPartiallyTranslated());
-    } else if (partiallyTranslated === false) {
+    } else if (filters.partiallyTranslated === false) {
       filter.push(searchConditions.isNotPartiallyTranslated());
     }
-    if (untranslatable === true) {
+    if (filters.untranslatable === true) {
       filter.push(searchConditions.isUntranslatable());
-    } else if (untranslatable === false) {
+    } else if (filters.untranslatable === false) {
       filter.push(searchConditions.isNotUntranslatable());
     }
     return { bool: { filter } };

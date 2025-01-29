@@ -8,7 +8,6 @@
 export * from './src/search_bar';
 export * from './src/empty_viewer_state';
 export * from './src/pagination/pagination';
-// export * from './src/exceptions_utility/exceptions_utility';
 export * from './src/exception_items';
 export * from './src/exception_item_card';
 export * from './src/value_with_space_warning';

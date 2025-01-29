@@ -35,7 +35,7 @@ describe('PhaseTracker', () => {
           expect(phaseEvent?.status).toBe('loading');
           done();
         });
-      phaseTracker.trackPhaseEvents('1', { dataLoading: new BehaviorSubject(true) });
+      phaseTracker.trackPhaseEvents('1', { dataLoading$: new BehaviorSubject(true) });
     });
 
     test(`should emit 'rendered' event when dataLoading is false`, (done) => {
@@ -47,7 +47,7 @@ describe('PhaseTracker', () => {
           expect(phaseEvent?.status).toBe('rendered');
           done();
         });
-      phaseTracker.trackPhaseEvents('1', { dataLoading: new BehaviorSubject(false) });
+      phaseTracker.trackPhaseEvents('1', { dataLoading$: new BehaviorSubject(false) });
     });
   });
 
@@ -62,7 +62,7 @@ describe('PhaseTracker', () => {
           done();
         });
       phaseTracker.trackPhaseEvents('1', {
-        dataLoading: new BehaviorSubject(true),
+        dataLoading$: new BehaviorSubject(true),
         rendered$: new BehaviorSubject(false),
       });
     });
@@ -77,7 +77,7 @@ describe('PhaseTracker', () => {
           done();
         });
       phaseTracker.trackPhaseEvents('1', {
-        dataLoading: new BehaviorSubject(false),
+        dataLoading$: new BehaviorSubject(false),
         rendered$: new BehaviorSubject(false),
       });
     });
@@ -92,7 +92,7 @@ describe('PhaseTracker', () => {
           done();
         });
       phaseTracker.trackPhaseEvents('1', {
-        dataLoading: new BehaviorSubject(false),
+        dataLoading$: new BehaviorSubject(false),
         rendered$: new BehaviorSubject(true),
       });
     });

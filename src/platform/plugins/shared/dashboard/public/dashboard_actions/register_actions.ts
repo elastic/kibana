@@ -15,8 +15,6 @@ import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPAND_PANEL,
   ACTION_EXPORT_CSV,
-  ACTION_LEGACY_ADD_TO_LIBRARY,
-  ACTION_LEGACY_UNLINK_FROM_LIBRARY,
   ACTION_UNLINK_FROM_LIBRARY,
   BADGE_FILTERS_NOTIFICATION,
 } from './constants';
@@ -63,23 +61,11 @@ export const registerActions = async ({
     });
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_ADD_TO_LIBRARY);
 
-    uiActions.registerActionAsync(ACTION_LEGACY_ADD_TO_LIBRARY, async () => {
-      const { LegacyAddToLibraryAction } = await import('./actions_module');
-      return new LegacyAddToLibraryAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_LEGACY_ADD_TO_LIBRARY);
-
     uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
       const { UnlinkFromLibraryAction } = await import('./actions_module');
       return new UnlinkFromLibraryAction();
     });
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_UNLINK_FROM_LIBRARY);
-
-    uiActions.registerActionAsync(ACTION_LEGACY_UNLINK_FROM_LIBRARY, async () => {
-      const { LegacyUnlinkFromLibraryAction } = await import('./actions_module');
-      return new LegacyUnlinkFromLibraryAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_LEGACY_UNLINK_FROM_LIBRARY);
 
     uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
       const { CopyToDashboardAction } = await import('./actions_module');

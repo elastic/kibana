@@ -14,6 +14,7 @@ import { createRequestMock } from '@kbn/hapi-mocks/src/request';
 import { createFooValidation } from './router.test.util';
 import { Router, type RouterOptions } from './router';
 import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
+import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
 
 const mockResponse = {
   code: jest.fn().mockImplementation(() => mockResponse),
@@ -26,9 +27,12 @@ const mockResponseToolkit = {
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 const routerOptions: RouterOptions = {
-  isDev: false,
+  env,
   versionedRouterOptions: {
     defaultHandlerResolutionStrategy: 'oldest',
     useVersionResolutionStrategyForInternalPaths: [],
@@ -273,7 +277,7 @@ describe('Router', () => {
 
   it('registers pluginId if provided', () => {
     const pluginId = Symbol('test');
-    const router = new Router('', logger, enhanceWithContext, { pluginId });
+    const router = new Router('', logger, enhanceWithContext, { pluginId, env });
     expect(router.pluginId).toBe(pluginId);
   });
 
