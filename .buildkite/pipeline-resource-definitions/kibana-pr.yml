@@ -22,6 +22,7 @@ spec:
         ELASTIC_PR_COMMENTS_ENABLED: 'true'
         ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-ci
+        SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: ''
       cancel_intermediate_builds: true
