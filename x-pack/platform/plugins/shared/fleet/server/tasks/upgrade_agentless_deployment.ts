@@ -125,9 +125,7 @@ export class UpgradeAgentlessDeploymentsTask {
           }
 
           this.logger.info(
-            `${LOGGER_SUBJECT} processing agentless agent ${JSON.stringify(
-              agentlessAgent.upgrade_details
-            )}`
+            `${LOGGER_SUBJECT} processing agentless agent ${JSON.stringify(agentlessAgent.agent)}`
           );
 
           return processFunction(agentPolicy, agentlessAgent);
@@ -184,7 +182,7 @@ export class UpgradeAgentlessDeploymentsTask {
             page: 1,
             perPage: AGENTLESS_DEPLOYMENTS_SIZE,
           });
-
+          this.logger.info(`${LOGGER_SUBJECT} Found "${res.agents.length}" agentless agents`);
           await this.processInBatches(
             {
               agentlessPolicies,
@@ -212,7 +210,9 @@ export class UpgradeAgentlessDeploymentsTask {
     try {
       this.logger.info(`${LOGGER_SUBJECT} getting latest available agent version in ess`);
       latestAgentVersion = await getLatestAvailableAgentVersion();
-      this.logger.info(`${LOGGER_SUBJECT} latest version ${latestAgentVersion}`);
+      this.logger.info(
+        `${LOGGER_SUBJECT} latest version ${latestAgentVersion} and current agent version ${currentAgentVersion}`
+      );
     } catch (e) {
       this.logger.error(`${LOGGER_SUBJECT} Failed to get latest version error: ${e}`);
     }
@@ -240,6 +240,10 @@ export class UpgradeAgentlessDeploymentsTask {
           `${LOGGER_SUBJECT} Failed to upgrade agentless deployment to ${latestAgentVersion} for ${agentPolicy.id} error: ${e}`
         );
       }
+    } else {
+      this.logger.info(
+        `${LOGGER_SUBJECT} No upgrade available for agentless policy ${agentPolicy.id} current agent version ${currentAgentVersion} and latest version ${latestAgentVersion}`
+      );
     }
   };
 
