@@ -57,6 +57,7 @@ export type TaskPollingLifecycleOpts = {
   taskStore: TaskStore;
   config: TaskManagerConfig;
   middleware: Middleware;
+  elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
@@ -95,6 +96,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private currentPollInterval: number;
+  private started = false;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -107,6 +109,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     capacityConfiguration$,
     pollIntervalConfiguration$,
     config,
+    // Elasticsearch and SavedObjects availability status
+    elasticsearchAndSOAvailability$,
     taskStore,
     definitions,
     executionContext,
@@ -190,7 +194,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
     this.subscribeToPoller(this.poller.events$);
 
-    this.poller.start();
+    elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
+      if (areESAndSOAvailable && !this.started) {
+        this.poller.start();
+        this.started = true;
+      }
+    });
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
