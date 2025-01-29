@@ -10,6 +10,8 @@ import { memoize } from 'lodash';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import type { BuildFlavor } from '@kbn/config';
+import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
+import { getApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -35,6 +37,7 @@ import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entit
 import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { PrivmonDataClient } from './lib/entity_analytics/privmon/privmon_data_client';
 import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
+import type { ProductFeaturesService } from './lib/product_features_service';
 
 export interface IRequestContextFactory {
   create(
@@ -54,6 +57,7 @@ interface ConstructorOptions {
   kibanaVersion: string;
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
+  productFeaturesService: ProductFeaturesService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -75,11 +79,12 @@ export class RequestContextFactory implements IRequestContextFactory {
       endpointAppContextService,
       ruleMonitoringService,
       siemMigrationsService,
+      productFeaturesService,
     } = options;
 
     const { lists, ruleRegistry, security } = plugins;
 
-    const [_, startPlugins] = await core.getStartServices();
+    const [coreStart, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
@@ -154,7 +159,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
-          isRuleCustomizationEnabled: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
+          experimentalFeatures: config.experimentalFeatures,
+          productFeaturesService,
+          license: licensing.license,
         });
       }),
 
@@ -234,7 +241,11 @@ export class RequestContextFactory implements IRequestContextFactory {
       getEntityStoreDataClient: memoize(() => {
         const clusterClient = coreContext.elasticsearch.client;
         const logger = options.logger;
-        const soClient = coreContext.savedObjects.client;
+
+        const soClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+        });
+
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
           clusterClient,
@@ -248,6 +259,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           config: config.entityAnalytics.entityStore,
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
+          apiKeyManager: getApiKeyManager({
+            core: coreStart,
+            logger,
+            security: startPlugins.security,
+            encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+            request,
+            namespace: getSpaceId(),
+          }),
         });
       }),
       getPrivmonDataClient: memoize(

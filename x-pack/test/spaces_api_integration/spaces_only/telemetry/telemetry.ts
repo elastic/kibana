@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'space-1',
         description: 'This is your space-1!',
         color: '#00bfb3',
-        disabledFeatures: ['canvas', 'maps'],
+        disabledFeatures: ['canvas', 'maps', 'maps_v2'],
       });
 
       await spacesService.create({
@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         description: 'This is your space-2!',
         color: '#00bfb3',
         solution: 'security',
-        disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps'],
+        disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps', 'maps_v2'],
       });
 
       await spacesService.create({
@@ -68,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         generalCases: 0,
         generalCasesV2: 0,
         maps: 2,
+        maps_v2: 2,
         canvas: 2,
         ml: 0,
         fleetv2: 0,
@@ -96,8 +97,11 @@ export default function ({ getService }: FtrProviderContext) {
         securitySolutionTimeline: 0,
         securitySolutionNotes: 0,
         discover: 0,
+        discover_v2: 0,
         visualize: 0,
+        visualize_v2: 0,
         dashboard: 0,
+        dashboard_v2: 0,
         dev_tools: 0,
         advancedSettings: 0,
         indexPatterns: 0,

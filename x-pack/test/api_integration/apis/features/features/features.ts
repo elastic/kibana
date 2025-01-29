@@ -95,9 +95,9 @@ export default function ({ getService }: FtrProviderContext) {
         const featureIds = body.map((b: KibanaFeature) => b.id);
         expect(featureIds.sort()).to.eql(
           [
-            'discover',
-            'visualize',
-            'dashboard',
+            'discover_v2',
+            'visualize_v2',
+            'dashboard_v2',
             'dataQuality',
             'dev_tools',
             'actions',
@@ -126,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             'inventory',
             'logs',
             'maintenanceWindow',
-            'maps',
+            'maps_v2',
             'osquery',
             'rulesSettings',
             'uptime',
@@ -151,9 +151,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.be.an(Array);
 
         const scopeAgnosticFeatures = [
-          'discover',
-          'visualize',
-          'dashboard',
+          'discover_v2',
+          'visualize_v2',
+          'dashboard_v2',
           'dataQuality',
           'dev_tools',
           'actions',
@@ -182,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
           'inventory',
           'logs',
           'maintenanceWindow',
-          'maps',
+          'maps_v2',
           'osquery',
           'rulesSettings',
           'uptime',
