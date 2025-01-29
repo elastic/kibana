@@ -141,6 +141,7 @@ export interface HttpServerSetup {
   staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
+  prototypeHardening: boolean;
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -307,6 +308,7 @@ export class HttpServer {
         ),
       basePath: basePathService,
       csp: config.csp,
+      prototypeHardening: config.prototypeHardening,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,

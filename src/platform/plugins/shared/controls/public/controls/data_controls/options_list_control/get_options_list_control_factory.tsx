@@ -17,6 +17,7 @@ import {
   filter,
   map,
   skip,
+  Subject,
 } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
@@ -172,7 +173,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
 
       /** Fetch the suggestions and perform validation */
-      const loadMoreSubject = new BehaviorSubject<null>(null);
+      const loadMoreSubject = new Subject<void>();
       const fetchSubscription = fetchAndValidate$({
         api: {
           ...dataControl.api,
