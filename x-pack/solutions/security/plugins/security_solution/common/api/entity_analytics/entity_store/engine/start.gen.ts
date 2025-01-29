@@ -21,20 +21,11 @@ import { EntityType } from '../common.gen';
 export type StartEntityEngineRequestParams = z.infer<typeof StartEntityEngineRequestParams>;
 export const StartEntityEngineRequestParams = z.object({
   /**
-   * The entity type of the engine (either 'user' or 'host').
+   * The entity type of the engine
    */
   entityType: EntityType,
 });
 export type StartEntityEngineRequestParamsInput = z.input<typeof StartEntityEngineRequestParams>;
-
-export type StartEntityEngineRequestBody = z.infer<typeof StartEntityEngineRequestBody>;
-export const StartEntityEngineRequestBody = z.object({
-  /**
-   * The field to use as the timestamp for the entity type.
-   */
-  timestampField: z.string().optional().default('@timestamp'),
-});
-export type StartEntityEngineRequestBodyInput = z.input<typeof StartEntityEngineRequestBody>;
 
 export type StartEntityEngineResponse = z.infer<typeof StartEntityEngineResponse>;
 export const StartEntityEngineResponse = z.object({
