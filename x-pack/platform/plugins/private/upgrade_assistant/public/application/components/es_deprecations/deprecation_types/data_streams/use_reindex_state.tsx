@@ -8,12 +8,11 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 
 import {
-  ReindexStatus,
-  DataStreamReindexStep,
+  DataStreamReindexStatus,
   DataStreamReindexWarning,
   DataStreamMetadata,
   DataStreamReindexStatusResponse,
-  DataStreamReindexOperation,
+  DataStreamProgressDetails,
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
@@ -23,14 +22,15 @@ const POLL_INTERVAL = 1000;
 export interface ReindexState {
   loadingState: LoadingState;
   cancelLoadingState?: CancelLoadingState;
-  lastCompletedStep?: DataStreamReindexStep;
-  status?: ReindexStatus;
+
+  status?: DataStreamReindexStatus;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
   reindexWarnings?: DataStreamReindexWarning[];
   hasRequiredPrivileges?: boolean;
-  taskStatus: DataStreamReindexOperation['taskStatus'];
-  meta: DataStreamMetadata;
+  taskStatus?: DataStreamProgressDetails;
+
+  meta: DataStreamMetadata | null;
 }
 
 const getReindexState = (
@@ -38,10 +38,10 @@ const getReindexState = (
   { reindexOp, warnings, hasRequiredPrivileges, meta: updatedMeta }: DataStreamReindexStatusResponse
 ) => {
   const meta = { ...(updatedMeta ?? reindexState.meta) };
-  const newReindexState = {
+  const newReindexState: ReindexState = {
     ...reindexState,
-    taskStatus: reindexOp?.taskStatus,
-    warnings,
+
+    reindexWarnings: warnings,
     meta,
     loadingState: LoadingState.Success,
   };
@@ -55,8 +55,13 @@ const getReindexState = (
   }
 
   if (reindexOp) {
-    newReindexState.lastCompletedStep = reindexOp.lastCompletedStep;
     newReindexState.status = reindexOp.status;
+
+    if (reindexOp.status === DataStreamReindexStatus.notStarted) {
+      console.log('newReindexState::', newReindexState);
+      return newReindexState;
+    }
+
     newReindexState.reindexTaskPercComplete = reindexOp.reindexTaskPercComplete;
     newReindexState.errorMessage = reindexOp.errorMessage;
 
@@ -65,30 +70,37 @@ const getReindexState = (
     if (
       (reindexState.cancelLoadingState === CancelLoadingState.Requested ||
         reindexState.cancelLoadingState === CancelLoadingState.Loading) &&
-      reindexOp.status === ReindexStatus.cancelled
+      reindexOp.status === DataStreamReindexStatus.cancelled
     ) {
       newReindexState.cancelLoadingState = CancelLoadingState.Success;
     } else if (
       // if reindex cancellation has been requested and the reindex task is still in progress,
       // then reindex cancellation has not completed yet, set it to "loading"
       reindexState.cancelLoadingState === CancelLoadingState.Requested &&
-      reindexOp.status === ReindexStatus.inProgress
+      reindexOp.status === DataStreamReindexStatus.inProgress
     ) {
       newReindexState.cancelLoadingState = CancelLoadingState.Loading;
     }
   }
 
+  console.log('newReindexState::', newReindexState);
   return newReindexState;
 };
 
-export const useReindexStatus = ({ indexName, api }: { indexName: string; api: ApiService }) => {
+export const useReindexStatus = ({
+  dataStreamName,
+  api,
+}: {
+  dataStreamName: string;
+  api: ApiService;
+}) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
     loadingState: LoadingState.Loading,
     errorMessage: null,
     reindexTaskPercComplete: null,
     taskStatus: undefined,
     meta: {
-      indexName,
+      dataStreamName,
     },
   });
 
@@ -105,15 +117,17 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
   const updateStatus = useCallback(async () => {
     clearPollInterval();
 
-    const { data, error } = await api.getDataStreamReindexStatus(indexName);
+    const { data, error } = await api.getDataStreamReindexStatus(dataStreamName);
+    console.log('updateStatus::', data);
 
     if (error) {
+      console.log('updateStatus error::', error);
       setReindexState((prevValue: ReindexState) => {
         return {
           ...prevValue,
           loadingState: LoadingState.Error,
           errorMessage: error.message.toString(),
-          status: ReindexStatus.fetchFailed,
+          status: DataStreamReindexStatus.fetchFailed,
         };
       });
       return;
@@ -127,27 +141,24 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       return getReindexState(prevValue, data);
     });
 
-    if (data.reindexOp && data.reindexOp.status === ReindexStatus.inProgress) {
+    if (data.reindexOp && data.reindexOp.status === DataStreamReindexStatus.inProgress) {
       // Only keep polling if it exists and is in progress.
       pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
     }
-  }, [clearPollInterval, api, indexName]);
+  }, [clearPollInterval, api, dataStreamName]);
 
   const startReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {
       return {
         ...prevValue,
-        // Only reset last completed step if we aren't currently paused
-        lastCompletedStep:
-          prevValue.status === ReindexStatus.paused ? prevValue.lastCompletedStep : undefined,
-        status: ReindexStatus.inProgress,
+        status: DataStreamReindexStatus.inProgress,
         reindexTaskPercComplete: null,
         errorMessage: null,
         cancelLoadingState: undefined,
       };
     });
 
-    const { data: reindexOp, error } = await api.startDataStreamReindexTask(indexName);
+    const { data: reindexOp, error } = await api.startDataStreamReindexTask(dataStreamName);
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {
@@ -155,7 +166,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
           ...prevValue,
           loadingState: LoadingState.Error,
           errorMessage: error.message.toString(),
-          status: ReindexStatus.failed,
+          status: DataStreamReindexStatus.failed,
         };
       });
       return;
@@ -165,29 +176,33 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
     });
     updateStatus();
-  }, [api, indexName, updateStatus]);
+  }, [api, dataStreamName, updateStatus]);
 
-  const pauseReindex = useCallback(async () => {
-    setReindexState((prevValue: ReindexState) => {
-      return {
-        ...prevValue,
-        status: ReindexStatus.paused,
-      };
-    });
-    const { error } = await api.pauseDataStreamReindexTask(indexName);
+  const loadDataStreamMetadata = useCallback(async () => {
+    const { data, error } = await api.getDataStreamMetadata(dataStreamName);
+    console.log('data::', data);
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {
         return {
           ...prevValue,
+          meta: undefined,
           loadingState: LoadingState.Error,
           errorMessage: error.message.toString(),
-          status: ReindexStatus.failed,
+          status: DataStreamReindexStatus.failed,
         };
       });
       return;
     }
-  }, [api, indexName]);
+
+    setReindexState((prevValue: ReindexState) => {
+      return {
+        ...prevValue,
+        loadingState: LoadingState.Success,
+        meta: data,
+      };
+    });
+  }, [api, dataStreamName]);
 
   const cancelReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {
@@ -197,7 +212,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       };
     });
 
-    const { error } = await api.cancelDataStreamReindexTask(indexName);
+    const { error } = await api.cancelDataStreamReindexTask(dataStreamName);
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {
@@ -208,7 +223,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       });
       return;
     }
-  }, [api, indexName]);
+  }, [api, dataStreamName]);
 
   useEffect(() => {
     updateStatus();
@@ -227,9 +242,10 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
 
   return {
     reindexState,
+    loadDataStreamMetadata,
+
     startReindex,
     cancelReindex,
-    pauseReindex,
     updateStatus,
   };
 };

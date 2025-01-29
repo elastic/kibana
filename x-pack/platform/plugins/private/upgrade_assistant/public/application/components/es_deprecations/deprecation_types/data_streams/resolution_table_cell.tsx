@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { ReindexStatus } from '../../../../../../common/types';
+import { DataStreamReindexStatus } from '../../../../../../common/types';
 import { getDataStreamReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useDataStreamReindexContext } from './context';
@@ -58,12 +58,6 @@ const i18nTexts = {
       defaultMessage: 'Reindex cancelled',
     }
   ),
-  reindexPausedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexPausedText',
-    {
-      defaultMessage: 'Reindex paused',
-    }
-  ),
   resolutionText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.resolutionLabel', {
     defaultMessage: 'Reindex',
   }),
@@ -76,7 +70,7 @@ const i18nTexts = {
   ),
 };
 
-export const ReindexResolutionCell: React.FunctionComponent = () => {
+export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
   const { reindexState } = useDataStreamReindexContext();
 
   if (reindexState.loadingState === LoadingState.Loading) {
@@ -93,7 +87,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
   }
 
   switch (reindexState.status) {
-    case ReindexStatus.inProgress:
+    case DataStreamReindexStatus.inProgress:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -103,14 +97,14 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
             <EuiText size="s">
               {i18nTexts.reindexInProgressText}{' '}
               {getDataStreamReindexProgressLabel(
-                reindexState.reindexTaskPercComplete,
-                reindexState.lastCompletedStep
+                reindexState.status,
+                reindexState.reindexTaskPercComplete
               )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ReindexStatus.completed:
+    case DataStreamReindexStatus.completed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -121,7 +115,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ReindexStatus.failed:
+    case DataStreamReindexStatus.failed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -132,7 +126,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ReindexStatus.fetchFailed:
+    case DataStreamReindexStatus.fetchFailed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -143,29 +137,18 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ReindexStatus.paused:
+    default:
       return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexPausedText}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="indexSettings" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
       );
   }
-
-  return (
-    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
 };

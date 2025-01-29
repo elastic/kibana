@@ -11,17 +11,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-/**
- * Displays warning text about destructive changes required to reindex this index. The user
- * must acknowledge each change before being allowed to proceed.
- */
-export const InitializingFlyoutStep: React.FunctionComponent = () => {
+interface InitializingFlyoutStepProps {
+  errorMessage?: string | null;
+}
+
+export const InitializingFlyoutStep: React.FunctionComponent<InitializingFlyoutStepProps> = ({
+  errorMessage,
+}) => {
+  const hasInitializingError = !!errorMessage;
   return (
     <>
       <EuiFlyoutBody>
@@ -29,16 +34,32 @@ export const InitializingFlyoutStep: React.FunctionComponent = () => {
         <EuiSpacer size="xxl" />
         <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
           <EuiFlexItem>
-            <EuiLoadingSpinner size="xl" />
+            {hasInitializingError ? (
+              <EuiIcon type="alert" size="xl" color="danger" />
+            ) : (
+              <EuiLoadingSpinner size="xl" />
+            )}
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="s">
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
-                defaultMessage="Loading Data stream info"
-              />
+              {hasInitializingError ? (
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+                  defaultMessage="Error loading data stream info"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+                  defaultMessage="Loading Data stream info"
+                />
+              )}
             </EuiTitle>
           </EuiFlexItem>
+          {hasInitializingError && (
+            <EuiFlexItem>
+              <EuiText>{errorMessage}</EuiText>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
     </>

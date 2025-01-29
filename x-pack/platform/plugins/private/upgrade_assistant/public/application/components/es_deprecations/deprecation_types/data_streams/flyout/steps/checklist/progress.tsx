@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
-import { ReindexStatus, DataStreamReindexStep } from '../../../../../../../../../common/types';
+import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
 import type { ReindexState } from '../../../use_reindex_state';
 import { StepProgress, StepProgressStep } from '../../../../reindex/flyout/step_progress';
-import { getDataStreamReindexProgressLabel } from '../../../../../../../lib/utils';
+import { getDataStreamReindexProgress } from '../../../../../../../lib/utils';
 import { ReindexingDocumentsStepTitle } from './progress_title';
 
 interface Props {
@@ -26,7 +26,7 @@ interface Props {
  * and any error messages that are encountered.
  */
 export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
-  const { lastCompletedStep, status, reindexTaskPercComplete, taskStatus } = props.reindexState;
+  const { status, reindexTaskPercComplete, taskStatus } = props.reindexState;
 
   // The reindexing step is special because it generally lasts longer and can be cancelled mid-flight
   const reindexingDocsStep = {
@@ -39,55 +39,41 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
     ),
   } as StepProgressStep;
 
-  const inProgress =
-    status === ReindexStatus.inProgress &&
-    lastCompletedStep === DataStreamReindexStep.reindexStarted;
+  const inProgress = status === DataStreamReindexStatus.inProgress;
+
+  let euiProgressColor = 'subdued';
   console.log('inProgress::', inProgress);
   console.log('taskStatus::', taskStatus);
 
-  if (
-    status === ReindexStatus.failed &&
-    (lastCompletedStep === DataStreamReindexStep.created ||
-      lastCompletedStep === DataStreamReindexStep.reindexStarted)
-  ) {
+  if (status === DataStreamReindexStatus.failed) {
     reindexingDocsStep.status = 'failed';
-  } else if (
-    status === ReindexStatus.paused &&
-    (lastCompletedStep === DataStreamReindexStep.created ||
-      lastCompletedStep === DataStreamReindexStep.reindexStarted)
-  ) {
-    reindexingDocsStep.status = 'paused';
-  } else if (
-    status === ReindexStatus.cancelled &&
-    (lastCompletedStep === DataStreamReindexStep.created ||
-      lastCompletedStep === DataStreamReindexStep.reindexStarted)
-  ) {
+    euiProgressColor = 'danger';
+  } else if (status === DataStreamReindexStatus.cancelled) {
     reindexingDocsStep.status = 'cancelled';
-  } else if (status === undefined || lastCompletedStep < DataStreamReindexStep.created) {
+  } else if (status === undefined) {
     reindexingDocsStep.status = 'incomplete';
-  } else if (
-    lastCompletedStep === DataStreamReindexStep.created ||
-    lastCompletedStep === DataStreamReindexStep.reindexStarted
-  ) {
+    euiProgressColor = 'subdued';
+  } else if (status === DataStreamReindexStatus.inProgress) {
     reindexingDocsStep.status = 'inProgress';
-  } else {
+    euiProgressColor = 'primary';
+  } else if (status === DataStreamReindexStatus.completed) {
     reindexingDocsStep.status = 'complete';
+    euiProgressColor = 'success';
   }
 
+  const progressPercentage = inProgress
+    ? getDataStreamReindexProgress(status, reindexTaskPercComplete)
+    : undefined;
+  const showProgressValueText = inProgress;
+  const progressMaxValue = inProgress ? 100 : undefined;
   return (
     <>
       <EuiTitle size="xs" data-test-subj="reindexChecklistTitle">
         <h3>
-          {status === ReindexStatus.inProgress ? (
+          {status === DataStreamReindexStatus.inProgress ? (
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
-              defaultMessage="Data Stream Reindexing in progress… {percents}"
-              values={{
-                percents: getDataStreamReindexProgressLabel(
-                  reindexTaskPercComplete,
-                  lastCompletedStep
-                ),
-              }}
+              defaultMessage="Data Stream Reindexing in progress…"
             />
           ) : (
             <FormattedMessage
@@ -98,38 +84,73 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
         </h3>
       </EuiTitle>
       <StepProgress steps={[reindexingDocsStep]} />
+      {inProgress && (
+        <EuiProgress
+          valueText={showProgressValueText}
+          value={progressPercentage}
+          max={progressMaxValue}
+          color={euiProgressColor}
+          size="m"
+        />
+      )}
+      {inProgress && !taskStatus && (
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
+            defaultMessage="Fetching Status…"
+          />
+        </p>
+      )}
       {inProgress && taskStatus && (
-        <ul>
-          <li>
-            {i18n.translate('progressStep.completeTitle', {
-              defaultMessage:
-                '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} completed',
-              values: { count: taskStatus.successCount || 0 },
-            })}
-          </li>
-
-          <li>
-            {i18n.translate('progressStep.inProgressTitle', {
-              defaultMessage:
-                '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} currently in progress',
-              values: { count: taskStatus.inProgressCount || 0 },
-            })}
-          </li>
-          <li>
-            {i18n.translate('progressStep.pendingTitle', {
-              defaultMessage:
-                '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} pending to start',
-              values: { count: taskStatus.pendingCount || 0 },
-            })}
-          </li>
-          <li>
-            {i18n.translate('progressStep.failedTitle', {
-              defaultMessage:
-                '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} failed to migrate',
-              values: { count: taskStatus.errorsCount || 0 },
-            })}
-          </li>
-        </ul>
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <EuiText>
+                <p>
+                  {i18n.translate('progressStep.completeTitle', {
+                    defaultMessage:
+                      '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} completed',
+                    values: { count: taskStatus.successCount || 0 },
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <p>
+                  {i18n.translate('progressStep.inProgressTitle', {
+                    defaultMessage:
+                      '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} currently in progress',
+                    values: { count: taskStatus.inProgressCount || 0 },
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <p>
+                  {i18n.translate('progressStep.pendingTitle', {
+                    defaultMessage:
+                      '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} pending to start',
+                    values: { count: taskStatus.pendingCount || 0 },
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <p>
+                  {i18n.translate('progressStep.failedTitle', {
+                    defaultMessage:
+                      '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} failed to migrate',
+                    values: { count: taskStatus.errorsCount || 0 },
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
     </>
   );

@@ -23,7 +23,7 @@ export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ 
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+              id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
               defaultMessage="Data Stream Reindexing Complete"
             />
           </h3>

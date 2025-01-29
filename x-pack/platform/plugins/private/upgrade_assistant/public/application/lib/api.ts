@@ -15,6 +15,7 @@ import {
   SystemIndicesMigrationStatus,
   ReindexStatusResponse,
   DataStreamReindexStatusResponse,
+  DataStreamMetadata,
 } from '../../../common/types';
 import {
   API_BASE_PATH,
@@ -213,6 +214,13 @@ export class ApiService {
   public async getDataStreamReindexStatus(dataStreamName: string) {
     return await this.sendRequest<DataStreamReindexStatusResponse>({
       path: `${API_BASE_PATH}/data_streams_reindex/${dataStreamName}`,
+      method: 'get',
+    });
+  }
+
+  public async getDataStreamMetadata(dataStreamName: string) {
+    return await this.sendRequest<DataStreamMetadata>({
+      path: `${API_BASE_PATH}/data_streams_reindex/${dataStreamName}/metadata`,
       method: 'get',
     });
   }

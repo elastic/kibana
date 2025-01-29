@@ -7,45 +7,32 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
+import { i18n } from '@kbn/i18n';
 
+import { error } from '../../lib/data_streams/error';
 import { API_BASE_PATH } from '../../../common/constants';
-import {
-  DATA_STREAM_REINDEX_OP_TYPE,
-  DataStreamReindexStatusResponse,
-} from '../../../common/types';
+import { DataStreamReindexStatusResponse } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
-import { dataStreamReindexServiceFactory, DataStreamReindexWorker } from '../../lib/reindexing';
-import { dataStreamReindexActionsFactory } from '../../lib/reindexing/data_stream_actions';
+import { dataStreamReindexServiceFactory } from '../../lib/data_streams';
+
 import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
-import { reindexDataStreamHandler } from './reindex_data_stream_handler';
 
-export function registerReindexDataStreamRoutes(
-  {
-    credentialStore,
-    router,
-    licensing,
-    log,
-    getSecurityPlugin,
-    lib: { handleEsError },
-  }: RouteDependencies,
-  getWorker: () => DataStreamReindexWorker
-) {
+export function registerReindexDataStreamRoutes({
+  router,
+  licensing,
+  log,
+  getSecurityPlugin,
+  lib: { handleEsError },
+}: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/data_streams_reindex`;
 
-  // Start reindex for an index
   router.post(
     {
       path: `${BASE_PATH}/{indexName}`,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Relies on es and saved object clients for authorization',
-        },
-      },
       options: {
         access: 'public',
-        summary: `Start or resume reindex`,
+        summary: `Start the data stream reindexing`,
       },
       validate: {
         params: schema.object({
@@ -55,44 +42,44 @@ export function registerReindexDataStreamRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
       const { indexName } = request.params;
       try {
-        const result = await reindexDataStreamHandler({
-          savedObjects: getClient({ includedHiddenTypes: [DATA_STREAM_REINDEX_OP_TYPE] }),
-          dataClient: esClient,
-          indexName,
+        const callAsCurrentUser = esClient.asCurrentUser;
+        const reindexService = dataStreamReindexServiceFactory({
+          esClient: callAsCurrentUser,
           log,
           licensing,
-          request,
-          credentialStore,
-          security: getSecurityPlugin(),
         });
 
-        // Kick the worker on this node to immediately pickup the new reindex operation.
-        getWorker().forceRefresh();
-
-        return response.ok({
-          body: result,
-        });
-      } catch (error) {
-        if (error instanceof errors.ResponseError) {
-          return handleEsError({ error, response });
+        if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+          throw error.accessForbidden(
+            i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
+              defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
+              values: { indexName },
+            })
+          );
         }
-        return mapAnyErrorToKibanaHttpResponse(error);
+
+        await reindexService.createReindexOperation(indexName);
+
+        return response.ok();
+      } catch (err) {
+        if (err instanceof errors.ResponseError) {
+          return handleEsError({ error: err, response });
+        }
+        return mapAnyErrorToKibanaHttpResponse(err);
       }
     })
   );
 
-  // Get status
   router.get(
     {
       path: `${BASE_PATH}/{indexName}`,
       options: {
         access: 'public',
-        summary: `Get reindex status`,
+        summary: `Get data stream status`,
       },
       validate: {
         params: schema.object({
@@ -102,61 +89,52 @@ export function registerReindexDataStreamRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects,
         elasticsearch: { client: esClient },
       } = await core;
-      const { getClient } = savedObjects;
       const { indexName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
-      const reindexActions = dataStreamReindexActionsFactory(
-        getClient({ includedHiddenTypes: [DATA_STREAM_REINDEX_OP_TYPE] }),
-        asCurrentUser
-      );
-      const reindexService = dataStreamReindexServiceFactory(
-        asCurrentUser,
-        reindexActions,
+
+      const reindexService = dataStreamReindexServiceFactory({
+        esClient: asCurrentUser,
         log,
-        licensing
-      );
+        licensing,
+      });
 
       try {
         const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
-        const reindexOp = await reindexService.findReindexOperation(indexName);
+
         // If the user doesn't have privileges than querying for warnings is going to fail.
         const warnings = hasRequiredPrivileges
           ? await reindexService.detectReindexWarnings(indexName)
           : [];
 
-        const dataStreamMetadata = await reindexService.getDataStreamStats(indexName);
-        console.log('dataStreamMetadata::', dataStreamMetadata);
+        const reindexOp = await reindexService.fetchReindexStatus(indexName);
+        console.log('reindexOp::', reindexOp);
 
         const body: DataStreamReindexStatusResponse = {
-          reindexOp: reindexOp ? reindexOp.attributes : undefined,
+          reindexOp,
           warnings,
           hasRequiredPrivileges,
-          meta: dataStreamMetadata,
         };
 
         return response.ok({
           body,
         });
-      } catch (error) {
-        console.log('error in handler', error);
-        if (error instanceof errors.ResponseError) {
-          return handleEsError({ error, response });
+      } catch (err) {
+        if (err instanceof errors.ResponseError) {
+          return handleEsError({ error: err, response });
         }
         return mapAnyErrorToKibanaHttpResponse(error);
       }
     })
   );
 
-  // Cancel reindex
-  router.post(
+  router.get(
     {
-      path: `${BASE_PATH}/{indexName}/cancel`,
+      path: `${BASE_PATH}/{indexName}/metadata`,
       options: {
         access: 'public',
-        summary: `Cancel reindex`,
+        summary: `Get data stream reindexing metadata`,
       },
       validate: {
         params: schema.object({
@@ -166,76 +144,65 @@ export function registerReindexDataStreamRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects,
         elasticsearch: { client: esClient },
       } = await core;
       const { indexName } = request.params;
-      const { getClient } = savedObjects;
-      const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = dataStreamReindexActionsFactory(
-        getClient({ includedHiddenTypes: [DATA_STREAM_REINDEX_OP_TYPE] }),
-        callAsCurrentUser
-      );
-      const reindexService = dataStreamReindexServiceFactory(
-        callAsCurrentUser,
-        reindexActions,
+      const asCurrentUser = esClient.asCurrentUser;
+
+      const reindexService = dataStreamReindexServiceFactory({
+        esClient: asCurrentUser,
         log,
-        licensing
-      );
+        licensing,
+      });
+
+      try {
+        const dataStreamMetadata = await reindexService.getDataStreamMetadata(indexName);
+        console.log('dataStreamMetadata::', dataStreamMetadata);
+
+        return response.ok({
+          body: dataStreamMetadata,
+        });
+      } catch (err) {
+        if (err instanceof errors.ResponseError) {
+          return handleEsError({ error: err, response });
+        }
+        return mapAnyErrorToKibanaHttpResponse(error);
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: `${BASE_PATH}/{indexName}/cancel`,
+      options: {
+        access: 'public',
+        summary: `Cancel Data Stream reindexing`,
+      },
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { indexName } = request.params;
+      const callAsCurrentUser = esClient.asCurrentUser;
+      const reindexService = dataStreamReindexServiceFactory({
+        esClient: callAsCurrentUser,
+        log,
+        licensing,
+      });
 
       try {
         await reindexService.cancelReindexing(indexName);
 
         return response.ok({ body: { acknowledged: true } });
-      } catch (error) {
-        if (error instanceof errors.ResponseError) {
-          return handleEsError({ error, response });
-        }
-
-        return mapAnyErrorToKibanaHttpResponse(error);
-      }
-    })
-  );
-
-  router.post(
-    {
-      path: `${BASE_PATH}/{indexName}/pause`,
-      options: {
-        access: 'public',
-        summary: `Pause data stream reindexing`,
-      },
-      validate: {
-        params: schema.object({
-          indexName: schema.string(),
-        }),
-      },
-    },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
-      const {
-        savedObjects,
-        elasticsearch: { client: esClient },
-      } = await core;
-      const { indexName } = request.params;
-      const { getClient } = savedObjects;
-      const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = dataStreamReindexActionsFactory(
-        getClient({ includedHiddenTypes: [DATA_STREAM_REINDEX_OP_TYPE] }),
-        callAsCurrentUser
-      );
-      const reindexService = dataStreamReindexServiceFactory(
-        callAsCurrentUser,
-        reindexActions,
-        log,
-        licensing
-      );
-
-      try {
-        await reindexService.pauseReindexing(indexName);
-
-        return response.ok({ body: { acknowledged: true } });
-      } catch (error) {
-        if (error instanceof errors.ResponseError) {
-          return handleEsError({ error, response });
+      } catch (err) {
+        if (err instanceof errors.ResponseError) {
+          return handleEsError({ error: err, response });
         }
 
         return mapAnyErrorToKibanaHttpResponse(error);

@@ -16,8 +16,8 @@ import {
   ReindexCannotBeCancelled,
   ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
-} from '../../lib/reindexing/error_symbols';
-import { ReindexError } from '../../lib/reindexing/error';
+} from '../../lib/data_streams/error_symbols';
+import { ReindexError } from '../../lib/data_streams/error';
 
 export const mapAnyErrorToKibanaHttpResponse = (e: any) => {
   if (e instanceof ReindexError) {

@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DataStreamMetadata, ReindexStatus } from '../../../../../../../../../common/types';
+import {
+  DataStreamMetadata,
+  DataStreamReindexStatus,
+} from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex_state';
 import { useAppContext } from '../../../../../../../app_context';
@@ -29,28 +32,28 @@ import { DurationClarificationCallOut } from './warnings_callout';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
-    case ReindexStatus.failed:
+    case DataStreamReindexStatus.failed:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.tryAgainLabel"
           defaultMessage="Try again"
         />
       );
-    case ReindexStatus.inProgress:
+    case DataStreamReindexStatus.inProgress:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel"
           defaultMessage="Reindexing…"
         />
       );
-    case ReindexStatus.paused:
+    case DataStreamReindexStatus.paused:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
           defaultMessage="Resume reindexing"
         />
       );
-    case ReindexStatus.cancelled:
+    case DataStreamReindexStatus.cancelled:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
@@ -87,10 +90,11 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
 
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
   console.log('reindexState::', reindexState);
-  const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
-  const isCompleted = status === ReindexStatus.completed;
-  const hasFetchFailed = status === ReindexStatus.fetchFailed;
-  const hasReindexingFailed = status === ReindexStatus.failed;
+  const loading =
+    loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
+  const isCompleted = status === DataStreamReindexStatus.completed;
+  const hasFetchFailed = status === DataStreamReindexStatus.fetchFailed;
+  const hasReindexingFailed = status === DataStreamReindexStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
@@ -238,8 +242,8 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color={status === ReindexStatus.paused ? 'warning' : 'primary'}
-                    iconType={status === ReindexStatus.paused ? 'play' : undefined}
+                    color={status === DataStreamReindexStatus.paused ? 'warning' : 'primary'}
+                    iconType={status === DataStreamReindexStatus.paused ? 'play' : undefined}
                     onClick={startReindex}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}

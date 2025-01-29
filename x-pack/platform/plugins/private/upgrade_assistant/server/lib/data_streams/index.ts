@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { reindexServiceFactory } from './reindex_service';
-export { ReindexWorker } from './worker';
-export { generateNewIndexName } from './index_settings';
+export { dataStreamReindexServiceFactory } from './data_stream_reindex_service';

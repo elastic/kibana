@@ -20,36 +20,36 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ReindexStatus } from '../../../../../../../../../common/types';
+import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex_state';
 import { ReindexProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
 
-const buttonLabel = (status?: ReindexStatus) => {
+const buttonLabel = (status?: DataStreamReindexStatus) => {
   switch (status) {
-    case ReindexStatus.failed:
+    case DataStreamReindexStatus.failed:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.tryAgainLabel"
           defaultMessage="Try again"
         />
       );
-    case ReindexStatus.inProgress:
+    case DataStreamReindexStatus.inProgress:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel"
           defaultMessage="Reindexing…"
         />
       );
-    case ReindexStatus.paused:
+    case DataStreamReindexStatus.paused:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
           defaultMessage="Resume reindexing"
         />
       );
-    case ReindexStatus.cancelled:
+    case DataStreamReindexStatus.cancelled:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
@@ -73,9 +73,8 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
-  pauseReindex: () => void;
   cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, pauseReindex }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const {
     services: {
       api,
@@ -84,15 +83,16 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   } = useAppContext();
 
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
-  const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
-  const isCompleted = status === ReindexStatus.completed;
-  const hasFetchFailed = status === ReindexStatus.fetchFailed;
-  const hasReindexingFailed = status === ReindexStatus.failed;
+  const loading =
+    loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
+  const isCompleted = status === DataStreamReindexStatus.completed;
+  const hasFetchFailed = status === DataStreamReindexStatus.fetchFailed;
+  const hasReindexingFailed = status === DataStreamReindexStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
-  const showButtons = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
-  const shouldShowPauseButton = showButtons && status === ReindexStatus.inProgress;
+  const showMainButton = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
+  const shouldShowCancelButton = showMainButton && status === DataStreamReindexStatus.inProgress;
 
   return (
     <Fragment>
@@ -204,34 +204,34 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {shouldShowPauseButton && (
+              {shouldShowCancelButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
                     color={'primary'}
                     iconType={'pause'}
-                    onClick={pauseReindex}
+                    onClick={cancelReindex}
                     disabled={!hasRequiredPrivileges}
-                    data-test-subj="pauseReindexingButton"
+                    data-test-subj="cancelDataStreamReindexingButton"
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.pauseReindexButton.pauseReindexingLabel"
-                      defaultMessage="Pause reindexing"
+                      id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelReindexButtonLabel"
+                      defaultMessage="Cancel reindexing"
                     />
                   </EuiButton>
                 </EuiFlexItem>
               )}
 
-              {showButtons && (
+              {showMainButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    color={status === ReindexStatus.paused ? 'warning' : 'primary'}
-                    iconType={status === ReindexStatus.paused ? 'play' : undefined}
+                    color={status === DataStreamReindexStatus.inProgress ? 'primary' : 'warning'}
+                    iconType={status === DataStreamReindexStatus.inProgress ? undefined : 'play'}
                     onClick={startReindex}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}
-                    data-test-subj="startReindexingButton"
+                    data-test-subj="startDataStreamReindexingButton"
                   >
                     {buttonLabel(status)}
                   </EuiButton>

@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import type { QueueSettings, ReindexStatus } from './types';
-
-export const DATA_STREAM_REINDEX_OP_TYPE = 'upgrade-assistant-data-stream-reindex-operation';
-
-export type DataStreamReindexSavedObject = SavedObject<DataStreamReindexOperation>;
-
 export interface DataStreamsAction {
   type: 'dataStream';
   metadata: {
@@ -21,14 +14,14 @@ export interface DataStreamsAction {
     reindexRequired: boolean;
   };
 }
-export interface DataStreamMetadata {
-  indexName: string;
 
-  lastIndexCreationDate?: number;
-  dataStreamTotalIndicesCount?: number;
-  dataStreamTotalIndicesRequireUpgradeCount?: number;
-  dataStreamDocSize?: number;
-  dataStreamDocCount?: number;
+export interface DataStreamMetadata {
+  lastBackingIndexCreationDate: number;
+  dataStreamTotalIndicesCount: number;
+  dataStreamTotalIndicesRequireUpgradeCount: number;
+  dataStreamDocSize: number;
+  dataStreamDocCount: number;
+  backingIndices: string[];
 }
 
 export interface DataStreamReindexStatusResponse {
@@ -53,39 +46,50 @@ export interface DataStreamReindexWarning {
   };
 }
 
-export enum DataStreamReindexStep {
-  created = 0,
-  reindexStarted = 10,
-  reindexCompleted = 100,
+export enum DataStreamReindexStatus {
+  notStarted,
+  inProgress,
+  completed,
+  failed,
+  cancelled,
+  // Used by the UI to differentiate if there was a failure retrieving
+  // the status from the server API
+  fetchFailed,
 }
 
-export interface DataStreamReindexOptions {
-  /**
-   * Set this key to configure a reindex operation as part of a
-   * batch to be run in series.
-   */
-  queueSettings?: QueueSettings;
+export interface DataStreamReindexStatusNotStarted {
+  status: DataStreamReindexStatus.notStarted;
 }
 
-export interface DataStreamReindexOperation {
-  indexName: string;
-
-  status: ReindexStatus;
-  lastCompletedStep: DataStreamReindexStep;
-  locked: string | null;
-  reindexTaskId: string | null;
-  reindexTaskPercComplete: number | null;
-  errorMessage: string | null;
-
-  taskStatus?: {
-    successCount: number;
-    pendingCount: number;
-    inProgressCount: number;
-    errorsCount: number;
-  };
-
-  reindexOptions: DataStreamReindexOptions;
+export interface DataStreamProgressDetails {
+  successCount: number;
+  pendingCount: number;
+  inProgressCount: number;
+  errorsCount: number;
 }
+
+export interface DataStreamReindexStatusInProgress {
+  status: DataStreamReindexStatus.inProgress;
+  reindexTaskPercComplete: number;
+  progressDetails: DataStreamProgressDetails;
+}
+
+export interface DataStreamReindexStatusCompleted {
+  status: DataStreamReindexStatus.completed;
+  reindexTaskPercComplete: number;
+  progressDetails: DataStreamProgressDetails;
+}
+
+export interface DataStreamReindexStatusFailed {
+  status: DataStreamReindexStatus.failed;
+  errorMessage: string;
+}
+
+export type DataStreamReindexOperation =
+  | DataStreamReindexStatusNotStarted
+  | DataStreamReindexStatusInProgress
+  | DataStreamReindexStatusCompleted
+  | DataStreamReindexStatusFailed;
 
 /**
  * ES Requests Types (untyped in the ES Client)

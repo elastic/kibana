@@ -6,29 +6,26 @@
  */
 
 import { flow } from 'fp-ts/lib/function';
-import { Logger } from '@kbn/core/server';
-import { DataStreamReindexSavedObject, ReindexSavedObject } from '../../../common/types';
-
-export type SupportedReindexSavedObject = ReindexSavedObject | DataStreamReindexSavedObject;
+import { ReindexSavedObject } from '../../../common/types';
 
 export interface SortedReindexSavedObjects {
   /**
    * Reindex objects sorted into this array represent Elasticsearch reindex tasks that
    * have no inherent order and are considered to be processed in parallel.
    */
-  parallel: SupportedReindexSavedObject[];
+  parallel: ReindexSavedObject[];
 
   /**
    * Reindex objects sorted into this array represent Elasticsearch reindex tasks that
    * are consistently ordered (see {@link orderQueuedReindexOperations}) and should be
    * processed in order.
    */
-  queue: SupportedReindexSavedObject[];
+  queue: ReindexSavedObject[];
 }
 
-const sortReindexOperations = (ops: SupportedReindexSavedObject[]): SortedReindexSavedObjects => {
-  const parallel: SupportedReindexSavedObject[] = [];
-  const queue: SupportedReindexSavedObject[] = [];
+const sortReindexOperations = (ops: ReindexSavedObject[]): SortedReindexSavedObjects => {
+  const parallel: ReindexSavedObject[] = [];
+  const queue: ReindexSavedObject[] = [];
   for (const op of ops) {
     if (op.attributes.reindexOptions?.queueSettings) {
       queue.push(op);
@@ -55,36 +52,13 @@ const orderQueuedReindexOperations = ({
   ),
 });
 
-export const isQueuedOp = (op: SupportedReindexSavedObject) =>
+export const isQueuedOp = (op: ReindexSavedObject) =>
   Boolean(op.attributes.reindexOptions?.queueSettings);
 
-export const queuedOpHasStarted = (op: SupportedReindexSavedObject) =>
+export const queuedOpHasStarted = (op: ReindexSavedObject) =>
   Boolean(op.attributes.reindexOptions?.queueSettings?.startedAt);
 
 export const sortAndOrderReindexOperations = flow(
   sortReindexOperations,
   orderQueuedReindexOperations
 );
-
-/**
- * Swallows any exceptions that may occur during the reindex process. This prevents any errors from
- * stopping the worker from continuing to process more jobs.
- */
-export const swallowExceptions =
-  <SavedObject extends SupportedReindexSavedObject>(
-    func: (reindexOp: SavedObject) => Promise<SavedObject>,
-    log: Logger
-  ) =>
-  async (reindexOp: SavedObject) => {
-    try {
-      return await func(reindexOp);
-    } catch (e) {
-      if (reindexOp.attributes.locked) {
-        log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
-      } else {
-        log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
-      }
-
-      return reindexOp;
-    }
-  };

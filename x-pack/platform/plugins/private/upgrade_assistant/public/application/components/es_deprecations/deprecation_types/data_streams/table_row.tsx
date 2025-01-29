@@ -18,7 +18,7 @@ import {
 } from '../../../../lib/ui_metric';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { ReindexResolutionCell } from './resolution_table_cell';
+import { DataStreamReindexResolutionCell } from './resolution_table_cell';
 import { DataStreamReindexFlyout } from './flyout';
 import { DataStreamReindexStatusProvider, useDataStreamReindexContext } from './context';
 
@@ -34,8 +34,7 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   deprecation,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const reindexState = useDataStreamReindexContext();
-
+  const dataStreamContext = useDataStreamReindexContext();
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
 
@@ -51,9 +50,9 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
         id: 'dataStreamReindexFlyout',
         Component: DataStreamReindexFlyout,
         props: {
+          ...dataStreamContext,
           deprecation,
           closeFlyout,
-          ...reindexState,
         },
         flyoutProps: {
           onClose: closeFlyout,
@@ -63,7 +62,7 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
         },
       });
     }
-  }, [addContentToGlobalFlyout, deprecation, showFlyout, reindexState, closeFlyout]);
+  }, [addContentToGlobalFlyout, deprecation, dataStreamContext, showFlyout, closeFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -84,7 +83,7 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
               fieldName={field}
               openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
-              resolutionTableCell={<ReindexResolutionCell />}
+              resolutionTableCell={<DataStreamReindexResolutionCell />}
             />
           </EuiTableRowCell>
         );

@@ -11,21 +11,15 @@ import stringify from 'json-stable-stringify';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import _ from 'lodash';
-import {
-  ReindexSavedObject,
-  ReindexStatus,
-  DataStreamReindexSavedObject,
-} from '../../../common/types';
+import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 
-export type OpSavedObject = ReindexSavedObject | DataStreamReindexSavedObject;
 export type Credential = Record<string, any>;
 
 // Generates a stable hash for the reindex operation's current state.
-const getHash = (reindexOp: OpSavedObject) => {
+const getHash = (reindexOp: ReindexSavedObject) => {
   // Remove reindexOptions from the SO attributes as it creates an unstable hash
   // This needs further investigation, see: https://github.com/elastic/kibana/issues/123752
-  const attributes = _.omit(reindexOp.attributes, 'reindexOptions');
+  const { reindexOptions, ...attributes } = reindexOp.attributes;
   return createHash('sha256')
     .update(stringify({ id: reindexOp.id, ...attributes }))
     .digest('base64');
@@ -92,14 +86,14 @@ const invalidateApiKey = async ({
  * affecting the reindex process.
  */
 export interface CredentialStore {
-  get(reindexOp: OpSavedObject): Credential | undefined;
+  get(reindexOp: ReindexSavedObject): Credential | undefined;
   set(params: {
-    reindexOp: OpSavedObject;
+    reindexOp: ReindexSavedObject;
     request: KibanaRequest;
     security?: SecurityPluginStart;
   }): Promise<void>;
   update(params: {
-    reindexOp: OpSavedObject;
+    reindexOp: ReindexSavedObject;
     security?: SecurityPluginStart;
     credential: Credential;
   }): Promise<void>;
@@ -112,7 +106,7 @@ export const credentialStoreFactory = (logger: Logger): CredentialStore => {
   const log = logger.get('credential_store');
 
   return {
-    get(reindexOp: OpSavedObject) {
+    get(reindexOp: ReindexSavedObject) {
       return credMap.get(getHash(reindexOp));
     },
 
@@ -121,7 +115,7 @@ export const credentialStoreFactory = (logger: Logger): CredentialStore => {
       request,
       security,
     }: {
-      reindexOp: OpSavedObject;
+      reindexOp: ReindexSavedObject;
       request: KibanaRequest;
       security?: SecurityPluginStart;
     }) {
@@ -153,7 +147,7 @@ export const credentialStoreFactory = (logger: Logger): CredentialStore => {
       security,
       credential,
     }: {
-      reindexOp: OpSavedObject;
+      reindexOp: ReindexSavedObject;
       security?: SecurityPluginStart;
       credential: Credential;
     }) {

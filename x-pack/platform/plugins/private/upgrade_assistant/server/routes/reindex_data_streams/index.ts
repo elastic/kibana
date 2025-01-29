@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { createDataStreamReindexWorker } from './create_reindex_worker';
 export { registerReindexDataStreamRoutes } from './reindex_data_stream';

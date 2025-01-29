@@ -18,15 +18,17 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
+import {
+  DataStreamReindexStatus,
+  EnrichedDeprecationInfo,
+} from '../../../../../../../common/types';
 
-import type { ReindexStateContext } from '../context';
+import { ReindexStateContext } from '../context';
 
 import { DeprecationBadge } from '../../../../shared';
 import {
   UIM_DATA_STREAM_REINDEX_START_CLICK,
   UIM_DATA_STREAM_REINDEX_STOP_CLICK,
-  UIM_DATA_STREAM_REINDEX_PAUSE_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
 
@@ -47,18 +49,44 @@ const DATE_FORMAT = 'dddd, MMMM Do YYYY, h:mm:ss a';
 const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 
 export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
+  cancelReindex,
+  loadDataStreamMetadata,
   reindexState,
   startReindex,
-  cancelReindex,
   closeFlyout,
   deprecation,
 }) => {
-  const { status, reindexWarnings, meta } = reindexState;
+  const { status, reindexWarnings, errorMessage, meta } = reindexState;
   const { index } = deprecation;
   console.log('meta::', meta);
   console.log('reindexState::', reindexState);
 
   const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
+  useMemo(async () => {
+    try {
+      const result = await loadDataStreamMetadata();
+      console.log('result::', result);
+      setFlyoutStep('notStarted');
+    } catch (error) {
+      console.error('Error loading data stream metadata', error);
+    }
+  }, [loadDataStreamMetadata, setFlyoutStep]);
+
+  useMemo(() => {
+    switch (status) {
+      case DataStreamReindexStatus.failed:
+      case DataStreamReindexStatus.fetchFailed:
+      case DataStreamReindexStatus.cancelled:
+      case DataStreamReindexStatus.inProgress: {
+        setFlyoutStep('inProgress');
+        return;
+      }
+      case DataStreamReindexStatus.completed: {
+        setFlyoutStep('completed');
+        return;
+      }
+    }
+  }, [status]);
 
   const onStartReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_START_CLICK);
@@ -66,46 +94,26 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     startReindex();
   }, [startReindex]);
 
-  useMemo(() => {
-    switch (status) {
-      case ReindexStatus.failed:
-      case ReindexStatus.paused:
-      case ReindexStatus.fetchFailed:
-      case ReindexStatus.cancelled:
-      case ReindexStatus.inProgress: {
-        setFlyoutStep('inProgress');
-        return;
-      }
-      case ReindexStatus.completed: {
-        setFlyoutStep('completed');
-        return;
-      }
-      default: {
-        setFlyoutStep('notStarted');
-        return;
-      }
-    }
-  }, [status]);
-
   const onStopReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_STOP_CLICK);
     setFlyoutStep('notStarted');
     cancelReindex();
   }, [cancelReindex]);
 
-  const onPauseReindex = useCallback(() => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_PAUSE_CLICK);
-    setFlyoutStep('notStarted');
-    cancelReindex();
-  }, [cancelReindex]);
-
   const { docsSizeFormatted, lastIndexCreationDateFormatted } = useMemo(() => {
+    if (!meta) {
+      return {
+        docsSizeFormatted: 'Unknown',
+        lastIndexCreationDateFormatted: 'Unknown',
+      };
+    }
+
     return {
       docsSizeFormatted: meta.dataStreamDocSize
         ? numeral(meta.dataStreamDocSize).format(FILE_SIZE_DISPLAY_FORMAT)
         : 'Unknown',
-      lastIndexCreationDateFormatted: meta.lastIndexCreationDate
-        ? `${moment(meta.lastIndexCreationDate).format(DATE_FORMAT)}`
+      lastIndexCreationDateFormatted: meta.lastBackingIndexCreationDate
+        ? `${moment(meta.lastBackingIndexCreationDate).format(DATE_FORMAT)}`
         : 'Unknown',
     };
   }, [meta]);
@@ -113,8 +121,16 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
       case 'initializing':
-        return <InitializingFlyoutStep />;
-      case 'notStarted':
+        return <InitializingFlyoutStep errorMessage={errorMessage} />;
+      case 'notStarted': {
+        if (!meta) {
+          return (
+            <InitializingFlyoutStep
+              errorMessage={errorMessage || 'Error loading data stream info'}
+            />
+          );
+        }
+
         return (
           <DataStreamDetailsFlyoutStep
             closeFlyout={closeFlyout}
@@ -126,11 +142,19 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             reindexState={reindexState}
           />
         );
-      case 'confirm':
+      }
+      case 'confirm': {
+        if (!meta) {
+          return (
+            <InitializingFlyoutStep
+              errorMessage={errorMessage || 'Error loading data stream info'}
+            />
+          );
+        }
         return (
           <ConfirmReindexingFlyoutStep
             warnings={reindexWarnings ?? []}
-            meta={reindexState.meta}
+            meta={meta}
             hideWarningsStep={() => {
               setFlyoutStep('notStarted');
             }}
@@ -139,7 +163,15 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             }}
           />
         );
-      case 'inProgress':
+      }
+      case 'inProgress': {
+        if (!meta) {
+          return (
+            <InitializingFlyoutStep
+              errorMessage={errorMessage || 'Error loading data stream info'}
+            />
+          );
+        }
         return (
           <ChecklistFlyoutStep
             closeFlyout={closeFlyout}
@@ -147,15 +179,32 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
               setFlyoutStep('confirm');
             }}
             reindexState={reindexState}
-            pauseReindex={onPauseReindex}
             cancelReindex={onStopReindex}
           />
         );
-
-      case 'completed':
+      }
+      case 'completed': {
+        if (!meta) {
+          return (
+            <InitializingFlyoutStep
+              errorMessage={errorMessage || 'Error loading data stream info'}
+            />
+          );
+        }
         return <ReindexingCompletedFlyoutStep meta={meta} />;
+      }
     }
-  }, [flyoutStep, reindexState, closeFlyout, onStartReindex, onPauseReindex, onStopReindex, lastIndexCreationDateFormatted, reindexWarnings]);
+  }, [
+    flyoutStep,
+    reindexState,
+    closeFlyout,
+    onStartReindex,
+    onStopReindex,
+    lastIndexCreationDateFormatted,
+    reindexWarnings,
+    meta,
+    errorMessage,
+  ]);
 
   return (
     <>
@@ -163,7 +212,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         <EuiFlyoutHeader hasBorder>
           <DeprecationBadge
             isCritical={deprecation.isCritical}
-            isResolved={status === ReindexStatus.completed}
+            isResolved={status === DataStreamReindexStatus.completed}
           />
           <EuiSpacer size="s" />
           <EuiTitle size="s" data-test-subj="flyoutTitle">
