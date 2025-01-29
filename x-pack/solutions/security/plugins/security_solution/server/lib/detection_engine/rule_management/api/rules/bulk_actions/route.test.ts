@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  BulkActionsDryRunErrCode,
-} from '../../../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
@@ -18,37 +15,28 @@ import {
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
 } from '../../../../routes/__mocks__/request_responses';
-import {
-  createMockConfig,
-  requestContextMock,
-  serverMock,
-  requestMock,
-} from '../../../../routes/__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
+import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 
 jest.mock('../../../../../machine_learning/authz');
 jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
-  let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockRule = getFindResultWithSingleHit().data[0];
 
   beforeEach(() => {
     server = serverMock.create();
-    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
-    config = createMockConfig();
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
@@ -57,7 +45,7 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
-    performBulkActionRoute(server.router, config, ml, logger);
+    performBulkActionRoute(server.router, ml);
   });
 
   describe('status codes', () => {
@@ -184,7 +172,7 @@ describe('Perform bulk action route', () => {
           errors: [
             {
               message: 'mocked validation message',
-              err_code: BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+              err_code: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
               status_code: 403,
               rules: [
                 {
@@ -224,7 +212,7 @@ describe('Perform bulk action route', () => {
           errors: [
             {
               message: 'mocked validation message',
-              err_code: BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+              err_code: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
               status_code: 403,
               rules: [
                 {

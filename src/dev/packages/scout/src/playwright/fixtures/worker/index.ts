@@ -9,7 +9,7 @@
 
 export { coreWorkerFixtures } from './core_fixtures';
 export type {
-  ToolingLog,
+  ScoutLogger,
   ScoutTestConfig,
   KibanaUrl,
   EsClient,

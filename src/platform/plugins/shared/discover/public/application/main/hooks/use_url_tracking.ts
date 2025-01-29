@@ -9,26 +9,33 @@
 
 import { useEffect } from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DiscoverSavedSearchContainer } from '../state_management/discover_saved_search_container';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import type { DiscoverStateContainer } from '../state_management/discover_state';
 
 /**
  * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
  */
-export function useUrlTracking(savedSearchContainer: DiscoverSavedSearchContainer) {
+export function useUrlTracking(stateContainer: DiscoverStateContainer) {
+  const { savedSearchState, internalState } = stateContainer;
   const { urlTracker } = useDiscoverServices();
 
   useEffect(() => {
-    const subscription = savedSearchContainer.getCurrent$().subscribe((savedSearch) => {
+    const subscription = savedSearchState.getCurrent$().subscribe((savedSearch) => {
       const dataView = savedSearch.searchSource.getField('index');
-      if (!dataView) {
+
+      if (!dataView?.id) {
         return;
       }
-      const trackingEnabled =
-        // Disable for ad-hoc data views as it can't be restored after a page refresh
-        Boolean(dataView.isPersisted() || savedSearch.id) ||
-        // Enable for ES|QL, although it uses ad-hoc data views
+
+      const dataViewSupportsTracking =
+        // Disable for ad hoc data views, since they can't be restored after a page refresh
+        dataView.isPersisted() ||
+        // Unless it's a default profile data view, which can be restored on refresh
+        internalState.get().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
+        // Or we're in ES|QL mode, in which case we don't care about the data view
         isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
+
+      const trackingEnabled = dataViewSupportsTracking || Boolean(savedSearch.id);
 
       urlTracker.setTrackingEnabled(trackingEnabled);
     });
@@ -36,5 +43,5 @@ export function useUrlTracking(savedSearchContainer: DiscoverSavedSearchContaine
     return () => {
       subscription.unsubscribe();
     };
-  }, [savedSearchContainer, urlTracker]);
+  }, [internalState, savedSearchState, urlTracker]);
 }

@@ -108,6 +108,10 @@ export interface OnboardingConfigAvailabilityProps {
    * The experimental features required to enable the item.
    */
   experimentalFlagRequired?: keyof ExperimentalFeatures;
+  /**
+   * The disabled experimental features required to enable the item.
+   */
+  disabledExperimentalFlagRequired?: keyof ExperimentalFeatures;
 }
 
 export interface OnboardingCardConfig<TMetadata extends {} = {}>

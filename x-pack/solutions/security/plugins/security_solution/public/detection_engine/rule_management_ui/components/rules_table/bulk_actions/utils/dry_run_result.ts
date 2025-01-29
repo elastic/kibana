@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
-import type { ExportRulesDetails } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  BulkActionsDryRunErrCodeEnum,
+  type ExportRulesDetails,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionResponse } from '../../../../../rule_management/logic';
 
 import type { DryRunResult } from '../types';
@@ -44,7 +46,7 @@ export const transformExportDetailsToDryRunResult = (details: ExportRulesDetails
     ruleErrors: details.missing_rules.length
       ? [
           {
-            errorCode: BulkActionsDryRunErrCode.IMMUTABLE,
+            errorCode: BulkActionsDryRunErrCodeEnum.IMMUTABLE,
             message: "Prebuilt rules can't be exported.",
             ruleIds: details.missing_rules.map(({ rule_id: ruleId }) => ruleId),
           },

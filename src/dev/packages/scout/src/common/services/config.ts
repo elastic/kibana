@@ -9,21 +9,23 @@
 
 import path from 'path';
 import fs from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutTestConfig } from '../../types';
-import { serviceLoadedMsg } from '../../playwright/utils';
+import { ScoutLogger, ScoutTestConfig } from '../../types';
 
-export function createScoutConfig(configDir: string, configName: string, log: ToolingLog) {
+export function createScoutConfig(
+  configDir: string,
+  configName: string,
+  log: ScoutLogger
+): ScoutTestConfig {
   if (!configDir || !fs.existsSync(configDir)) {
     throw new Error(`Directory with servers configuration is missing`);
   }
 
   const configPath = path.join(configDir, `${configName}.json`);
-  log.info(`Reading test servers confiuration from file: ${configPath}`);
+  log.info(`[config] Reading test servers confiuration from file: ${configPath}`);
 
   const config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as ScoutTestConfig;
 
-  log.debug(serviceLoadedMsg('config'));
+  log.serviceLoaded('config');
 
   return config;
 }

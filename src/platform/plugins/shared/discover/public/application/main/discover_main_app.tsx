@@ -36,7 +36,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
 
-  useUrlTracking(stateContainer.savedSearchState);
+  useUrlTracking(stateContainer);
 
   /**
    * Adhoc data views functionality

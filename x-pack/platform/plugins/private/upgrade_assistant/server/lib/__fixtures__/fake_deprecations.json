@@ -183,5 +183,26 @@
         }
       }
     }]
+  },
+  "ilm_policies": {
+    "myfreezepolicy": [
+      {
+        "level": "warning",
+        "message": "ILM policy [myfreezepolicy] contains the action 'freeze' that is deprecated and will be removed in a future version.",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html",
+        "details": "This action is already a noop so it can be safely removed, because frozen indices no longer offer any advantages. Consider cold or frozen tiers in place of frozen indices.",
+        "resolve_during_rolling_upgrade": false
+      }
+    ]
+  },
+  "templates": {
+    "mytemplate": [
+      {
+        "level": "critical",
+        "message": "Configuring source mode in mappings is deprecated and will be removed in future versions. Use [index.mapping.source.mode] index setting instead.",
+        "url": "https://github.com/elastic/elasticsearch/pull/117172",
+        "resolve_during_rolling_upgrade": false
+      }
+    ]
   }
 }

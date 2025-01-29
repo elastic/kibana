@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
@@ -276,6 +276,15 @@ export interface Profile {
    * @returns The default app state
    */
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
+
+  /**
+   * Gets an array of default ad hoc data views to display in the data view picker (e.g. "All logs").
+   * The returned specs must include consistent IDs across resolutions for Discover to manage them correctly.
+   * @returns The default data views to display in the data view picker
+   */
+  getDefaultAdHocDataViews: () => Array<
+    Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
+  >;
 
   /**
    * Data grid

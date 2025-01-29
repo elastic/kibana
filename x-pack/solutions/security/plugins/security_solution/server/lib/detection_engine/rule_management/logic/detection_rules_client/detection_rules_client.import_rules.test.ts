@@ -17,6 +17,9 @@ import { createDetectionRulesClient } from './detection_rules_client';
 import { importRule } from './methods/import_rule';
 import { createRuleImportErrorObject } from '../import/errors';
 import { checkRuleExceptionReferences } from '../import/check_rule_exception_references';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 
 jest.mock('./methods/import_rule');
 jest.mock('../import/check_rule_exception_references');
@@ -32,7 +35,9 @@ describe('detectionRulesClient.importRules', () => {
       rulesClient: rulesClientMock.create(),
       mlAuthz: buildMlAuthz(),
       savedObjectsClient: savedObjectsClientMock.create(),
-      isRuleCustomizationEnabled: true,
+      license: licenseMock.createLicenseMock(),
+      experimentalFeatures: { prebuiltRulesCustomizationEnabled: true } as ExperimentalFeatures,
+      productFeaturesService: createProductFeaturesServiceMock(),
     });
 
     (checkRuleExceptionReferences as jest.Mock).mockReturnValue([[], []]);

@@ -10,7 +10,7 @@
 import { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { IndexStats } from '@kbn/es-archiver/src/lib/stats';
 import { coreWorkerFixtures } from './core_fixtures';
-import { createEsArchiver } from '../../../common/services';
+import { getEsArchiver } from '../../../common/services';
 
 export interface EsArchiverFixture {
   /**
@@ -37,7 +37,7 @@ export const esArchiverFixture = coreWorkerFixtures.extend<{}, { esArchiver: EsA
    */
   esArchiver: [
     ({ log, esClient, kbnClient }, use) => {
-      const esArchiverInstance = createEsArchiver(esClient, kbnClient, log);
+      const esArchiverInstance = getEsArchiver(esClient, kbnClient, log);
       const loadIfNeeded = async (name: string, performance?: LoadActionPerfOptions | undefined) =>
         esArchiverInstance!.loadIfNeeded(name, performance);
 

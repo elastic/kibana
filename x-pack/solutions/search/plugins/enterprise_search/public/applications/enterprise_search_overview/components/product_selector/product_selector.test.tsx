@@ -17,6 +17,10 @@ import { ElasticsearchProductCard } from './elasticsearch_product_card';
 
 import { ProductSelector } from '.';
 
+jest.mock('../../hooks/use_redirect_to_onboarding_start', () => ({
+  useRedirectToOnboardingStart: jest.fn(() => ({ isChecking: false })),
+}));
+
 describe('ProductSelector', () => {
   it('renders the overview page, product cards, & setup guide CTAs with no host set', () => {
     setMockValues({ config: { host: '' } });

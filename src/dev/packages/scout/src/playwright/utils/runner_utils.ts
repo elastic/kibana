@@ -11,8 +11,6 @@ import moment from 'moment';
 import { Config } from '../../config';
 import { tagsByMode } from '../tags';
 
-export const serviceLoadedMsg = (name: string) => `[scout service] ${name}`;
-
 export const isValidUTCDate = (date: string): boolean => {
   return !isNaN(Date.parse(date)) && new Date(date).toISOString() === date;
 };

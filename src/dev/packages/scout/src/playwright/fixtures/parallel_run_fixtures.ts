@@ -13,9 +13,9 @@ import type {
   EsClient,
   KbnClient,
   KibanaUrl,
+  ScoutLogger,
   ScoutSpaceParallelFixture,
   ScoutTestConfig,
-  ToolingLog,
 } from './worker';
 import {
   scoutPageParallelFixture,
@@ -43,7 +43,7 @@ export interface ScoutParallelTestFixtures {
 }
 
 export interface ScoutParallelWorkerFixtures {
-  log: ToolingLog;
+  log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
   kbnClient: KbnClient;

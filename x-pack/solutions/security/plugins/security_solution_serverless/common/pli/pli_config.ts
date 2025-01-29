@@ -29,6 +29,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.externalRuleActions,
       ProductFeatureKey.automaticImport,
+      ProductFeatureKey.prebuiltRuleCustomization,
     ],
   },
   endpoint: {

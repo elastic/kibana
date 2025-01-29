@@ -6,7 +6,6 @@
  */
 
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
@@ -108,8 +107,7 @@ const shouldSkipInvestigationFieldsBulkAction = (
 // eslint-disable-next-line complexity
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
-  action: BulkActionEditForRuleParams,
-  experimentalFeatures: ExperimentalFeatures
+  action: BulkActionEditForRuleParams
 ): {
   ruleParams: RuleAlertType['params'];
   isActionSkipped: boolean;
@@ -281,17 +279,12 @@ const applyBulkActionEditToRuleParams = (
  */
 export const ruleParamsModifier = (
   existingRuleParams: RuleAlertType['params'],
-  actions: BulkActionEditForRuleParams[],
-  experimentalFeatures: ExperimentalFeatures
+  actions: BulkActionEditForRuleParams[]
 ): RuleParamsModifierResult<RuleAlertType['params']> => {
   let isParamsUpdateSkipped = true;
 
   const modifiedParams = actions.reduce((acc, action) => {
-    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(
-      acc,
-      action,
-      experimentalFeatures
-    );
+    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(acc, action);
 
     // The rule was updated with at least one action, so mark our rule as updated
     if (!isActionSkipped) {

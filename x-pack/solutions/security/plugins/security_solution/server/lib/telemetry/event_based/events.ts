@@ -150,6 +150,27 @@ export const FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT: EventTypeOpts<{
+  duration: number;
+  interval: string;
+}> = {
+  eventType: 'entity_store_data_view_refresh_execution_event',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the entity store data view refresh execution time',
+      },
+    },
+    interval: {
+      type: 'keyword',
+      _meta: {
+        description: 'Configured interval for the entity store data view refresh task',
+      },
+    },
+  },
+};
+
 export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
   error: string;
 }> = {
@@ -690,6 +711,7 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
+  ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,

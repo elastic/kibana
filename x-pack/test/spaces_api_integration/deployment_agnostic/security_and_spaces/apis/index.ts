@@ -13,11 +13,16 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
   const license = config.get('esTestCluster.license');
   const es = getService('es');
   const supertest = getService('supertest');
+  // Should we enabled when custom roles can be provisioned for MKI
+  // See: https://github.com/elastic/kibana/issues/207361
+  const tags = ['skipMKI'];
+
+  if (license === 'basic') {
+    tags.push('skipFIPS');
+  }
 
   describe('spaces api with security', function () {
-    // Should we enabled when custom roles can be provisioned for MKI
-    // See: https://github.com/elastic/kibana/issues/207361
-    this.tags('skipMKI');
+    this.tags(tags);
     before(async () => {
       if (license === 'basic') {
         await createUsersAndRoles(es, supertest);

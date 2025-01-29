@@ -46,12 +46,13 @@ import {
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { calculateRuleSource } from './rule_source/calculate_rule_source';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 interface ApplyRulePatchProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   existingRule: RuleResponse;
   rulePatch: PatchRuleRequestBody;
-  isRuleCustomizationEnabled: boolean;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
 // eslint-disable-next-line complexity
@@ -59,7 +60,7 @@ export const applyRulePatch = async ({
   rulePatch,
   existingRule,
   prebuiltRuleAssetClient,
-  isRuleCustomizationEnabled,
+  ruleCustomizationStatus,
 }: ApplyRulePatchProps): Promise<RuleResponse> => {
   const typeSpecificParams = patchTypeSpecificParams(rulePatch, existingRule);
 
@@ -124,7 +125,7 @@ export const applyRulePatch = async ({
   nextRule.rule_source = await calculateRuleSource({
     rule: nextRule,
     prebuiltRuleAssetClient,
-    isRuleCustomizationEnabled,
+    ruleCustomizationStatus,
   });
 
   return nextRule;

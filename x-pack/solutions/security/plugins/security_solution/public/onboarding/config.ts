@@ -28,6 +28,6 @@ export const onboardingConfig: TopicConfig[] = [
     }),
     body: siemMigrationsBodyConfig,
     licenseTypeRequired: 'enterprise',
-    experimentalFlagRequired: 'siemMigrationsEnabled',
+    disabledExperimentalFlagRequired: 'siemMigrationsDisabled',
   },
 ];

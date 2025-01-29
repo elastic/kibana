@@ -34,15 +34,22 @@ import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
 
-const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => {
-  return {
-    title: adHocDataView.title,
-    name: adHocDataView.name,
-    id: adHocDataView.id!,
-    type: adHocDataView.type,
-    isAdhoc: true,
-  };
-};
+const mapDataViewListItem = (
+  dataView: DataView,
+  partial: Partial<DataViewListItemEnhanced>
+): DataViewListItemEnhanced => ({
+  title: dataView.title,
+  name: dataView.name,
+  id: dataView.id!,
+  type: dataView.type,
+  ...partial,
+});
+
+const mapAdHocDataView = (adHocDataView: DataView) =>
+  mapDataViewListItem(adHocDataView, { isAdhoc: true });
+
+const mapManagedDataView = (managedDataView: DataView) =>
+  mapDataViewListItem(managedDataView, { isManaged: true });
 
 const shrinkableContainerCss = css`
   min-width: 0;
@@ -52,6 +59,7 @@ export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
+  managedDataViews,
   savedDataViews,
   onChangeDataView,
   onAddField,
@@ -83,16 +91,16 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
+      const savedDataViewRefs = savedDataViews
         ? savedDataViews
         : (await data.dataViews.getIdsWithTitle()) ?? [];
-      const adHocDataViewRefs: DataViewListItemEnhanced[] =
-        adHocDataViews?.map(mapAdHocDataView) ?? [];
+      const adHocDataViewRefs = adHocDataViews?.map(mapAdHocDataView) ?? [];
+      const managedDataViewRefs = managedDataViews?.map(mapManagedDataView) ?? [];
 
-      setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
+      setDataViewsList([...savedDataViewRefs, ...adHocDataViewRefs, ...managedDataViewRefs]);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, managedDataViews]);
 
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);

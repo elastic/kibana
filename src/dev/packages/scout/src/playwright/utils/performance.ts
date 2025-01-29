@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '../../types';
+import { ScoutLogger } from '../fixtures/worker';
 
 export const measurePerformance = async <T>(
-  log: ToolingLog,
+  log: ScoutLogger,
   label: string,
   fn: () => Promise<T>
 ): Promise<T> => {

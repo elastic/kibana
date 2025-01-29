@@ -32,6 +32,13 @@ const failedDocsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<{
     failedDocs: DataStreamDocsStat[];
   }> {
@@ -75,6 +82,13 @@ const failedDocsDetailsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<FailedDocsDetails> {
     const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
@@ -105,6 +119,13 @@ const failedDocsErrorsRoute = createDatasetQualityServerRoute({
   }),
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
   },
   async handler(resources): Promise<FailedDocsErrorsResponse> {
     const { context, params, getEsCapabilities } = resources;

@@ -31,13 +31,13 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
+import { errorToText } from '../../../../../../common/utils/error_to_text';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
-import { errorToText } from '../../new_index/utils/error_to_text';
 import { connectorsBreadcrumbs } from '../connectors';
 
 import { generateStepState } from '../utils/generate_step_state';

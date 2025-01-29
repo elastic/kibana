@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRangeFilter, Filter } from '@kbn/es-query';
+import { buildRangeFilter, Filter, updateFilterReferences } from '@kbn/es-query';
 import {
   DataView,
   DataViewsContract,
@@ -250,26 +250,6 @@ export async function generateLink(
   const [start, end] = redirectUrl.split('/app');
 
   return start + spacePrefix + '/app' + end;
-}
-
-export function updateFilterReferences(
-  filters: Filter[],
-  fromDataView: string,
-  toDataView: string | undefined
-) {
-  return (filters || []).map((filter) => {
-    if (filter.meta.index === fromDataView) {
-      return {
-        ...filter,
-        meta: {
-          ...filter.meta,
-          index: toDataView,
-        },
-      };
-    } else {
-      return filter;
-    }
-  });
 }
 
 export function getSmallerDataViewSpec(

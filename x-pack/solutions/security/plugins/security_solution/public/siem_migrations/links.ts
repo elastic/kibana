@@ -32,6 +32,6 @@ export const siemMigrationsLinks: LinkItem = {
       defaultMessage: 'SIEM Rule Migrations',
     }),
   ],
-  experimentalKey: 'siemMigrationsEnabled',
+  hideWhenExperimentalKey: 'siemMigrationsDisabled',
   isBeta: true,
 };

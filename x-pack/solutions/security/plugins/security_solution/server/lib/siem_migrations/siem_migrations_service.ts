@@ -25,7 +25,7 @@ export class SiemMigrationsService {
   }
 
   setup(params: SiemMigrationsSetupParams) {
-    if (this.config.experimentalFeatures.siemMigrationsEnabled) {
+    if (!this.config.experimentalFeatures.siemMigrationsDisabled) {
       this.rules.setup({ ...params, pluginStop$: this.pluginStop$ });
     }
   }

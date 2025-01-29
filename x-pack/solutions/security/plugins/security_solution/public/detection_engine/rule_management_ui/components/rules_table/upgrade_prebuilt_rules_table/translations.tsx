@@ -174,3 +174,11 @@ export const RULE_NEW_VERSION_DETECTED_WARNING_DESCRIPTION = (ruleName: string) 
       values: { ruleName },
     }
   );
+
+export const CUSTOMIZATION_DISABLED_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.customizationDisabledCalloutDescription',
+  {
+    defaultMessage:
+      'Prebuilt rule customization is disabled. Only updates to Elastic version are available.',
+  }
+);

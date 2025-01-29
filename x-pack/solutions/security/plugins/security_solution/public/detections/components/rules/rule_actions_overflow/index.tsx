@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../detection_engine/rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { usePrebuiltRulesCustomizationStatus } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
@@ -73,7 +73,7 @@ const RuleActionsOverflowComponent = ({
     application: { navigateToApp },
     telemetry,
   } = useKibana().services;
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -140,8 +140,7 @@ const RuleActionsOverflowComponent = ({
               key={i18nActions.EXPORT_RULE}
               icon="exportAction"
               disabled={
-                !userHasPermissions ||
-                (isPrebuiltRulesCustomizationEnabled === false && rule.immutable)
+                !userHasPermissions || (isRulesCustomizationEnabled === false && rule.immutable)
               }
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
@@ -211,7 +210,7 @@ const RuleActionsOverflowComponent = ({
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
-      isPrebuiltRulesCustomizationEnabled,
+      isRulesCustomizationEnabled,
       startTransaction,
       closePopover,
       showBulkDuplicateExceptionsConfirmation,
