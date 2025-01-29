@@ -51,7 +51,7 @@ paths-ignore:
   - src/dev/packages/failed-test-reporter-cli
   - src/dev/packages/find-used-node-modules
   - packages/kbn-ftr-*
-  - packages/kbn-generate
+  - src/dev/packages/generate
   - packages/kbn-get-repo-files
   - packages/kbn-import-resolver
   - packages/kbn-jest-*

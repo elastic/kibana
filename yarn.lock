@@ -5852,7 +5852,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate@link:packages/kbn-generate":
+"@kbn/generate@link:src/dev/packages/generate":
   version "0.0.0"
   uid ""
 

@@ -1447,7 +1447,7 @@
     "@kbn/ftr-common-functional-ui-services": "link:src/dev/packages/ftr-common-functional-ui-services",
     "@kbn/ftr-screenshot-filename": "link:src/dev/packages/ftr-screenshot-filename",
     "@kbn/gen-ai-functional-testing": "link:src/dev/packages/gen-ai-functional-testing",
-    "@kbn/generate": "link:packages/kbn-generate",
+    "@kbn/generate": "link:src/dev/packages/generate",
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/get-repo-files": "link:packages/kbn-get-repo-files",
     "@kbn/import-locator": "link:packages/kbn-import-locator",

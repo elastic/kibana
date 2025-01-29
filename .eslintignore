@@ -31,7 +31,7 @@ snapshots.js
 # package overrides
 /src/dev/packages/eslint-config
 /packages/kbn-plugin-generator/template
-/packages/kbn-generate/templates
+/src/dev/packages/generate/templates
 /packages/kbn-test/src/functional_test_runner/__tests__/fixtures/
 /packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /src/platform/packages/shared/kbn-flot-charts/lib
