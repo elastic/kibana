@@ -24,7 +24,7 @@ const requiredPluginNames = [
 
 type RequiredRuleFormPlugins = Omit<
   RuleFormProps['plugins'],
-  'actionTypeRegistry' | 'ruleTypeRegistry'
+  'actionTypeRegistry' | 'ruleTypeRegistry' | 'dataViews'
 >;
 export const validateRuleFormPlugins = (input: unknown): RequiredRuleFormPlugins => {
   if (typeof input !== 'object' || input === null) {
