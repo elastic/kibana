@@ -15,7 +15,7 @@ import { findFiles } from './find_files';
 import { generateRegexStringArray } from './generate_regex_array';
 import { updateFile } from './update_file';
 
-const mappingFilePath = 'packages/kbn-babel-preset/styled_components_files.js';
+const mappingFilePath = 'src/dev/packages/babel-preset/styled_components_files.js';
 const mappingFileAbsolutePath = path.join(REPO_ROOT, mappingFilePath);
 
 run(

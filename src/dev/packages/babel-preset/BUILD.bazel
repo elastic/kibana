@@ -1,7 +1,7 @@
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "pkg_npm")
 
-PKG_DIRNAME = "kbn-babel-preset"
+PKG_NAME = "kbn-babel-preset"
 PKG_REQUIRE_NAME = "@kbn/babel-preset"
 
 SOURCE_FILES = glob([
@@ -44,7 +44,7 @@ RUNTIME_DEPS = [
 ]
 
 js_library(
-  name = PKG_DIRNAME,
+  name = PKG_NAME,
   srcs = NPM_MODULE_EXTRA_FILES + [
     ":srcs",
   ],
