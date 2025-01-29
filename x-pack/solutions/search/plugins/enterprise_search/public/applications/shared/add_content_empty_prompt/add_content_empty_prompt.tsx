@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { generatePath } from 'react-router-dom';
+import { useValues } from 'kea';
 
 import {
   EuiImage,
@@ -23,18 +23,20 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../common/constants';
-
 import welcomeGraphicDark from '../../../assets/images/welcome_dark.svg';
 import welcomeGraphicLight from '../../../assets/images/welcome_light.svg';
-import { NEW_API_PATH } from '../../enterprise_search_content/routes';
+
 import { docLinks } from '../doc_links';
 
 import './add_content_empty_prompt.scss';
+
+import { KibanaLogic } from '../kibana';
 import { EuiLinkTo } from '../react_router_helpers';
 
 export const AddContentEmptyPrompt: React.FC = () => {
   const { colorMode } = useEuiTheme();
+  const { share } = useValues(KibanaLogic);
+  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({}) ?? '';
 
   return (
     <EuiEmptyPrompt
@@ -59,10 +61,7 @@ export const AddContentEmptyPrompt: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <div>
-              <EuiLinkTo
-                to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_API_PATH)}
-                shouldNotCreateHref
-              >
+              <EuiLinkTo to={createIndexUrl} shouldNotCreateHref shouldNotPrepend>
                 <EuiButton color="primary" fill iconType="plusInCircle">
                   {i18n.translate(
                     'xpack.enterpriseSearch.addContentEmptyPrompt.newIndexButtonLabel',

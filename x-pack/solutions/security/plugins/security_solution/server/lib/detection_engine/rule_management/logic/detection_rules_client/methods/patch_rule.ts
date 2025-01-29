@@ -21,6 +21,7 @@ import { convertAlertingRuleToRuleResponse } from '../converters/convert_alertin
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 interface PatchRuleOptions {
   actionsClient: ActionsClient;
@@ -28,7 +29,7 @@ interface PatchRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rulePatch: RulePatchProps;
   mlAuthz: MlAuthz;
-  isRuleCustomizationEnabled: boolean;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
 export const patchRule = async ({
@@ -37,7 +38,7 @@ export const patchRule = async ({
   prebuiltRuleAssetClient,
   rulePatch,
   mlAuthz,
-  isRuleCustomizationEnabled,
+  ruleCustomizationStatus,
 }: PatchRuleOptions): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = rulePatch;
 
@@ -60,7 +61,7 @@ export const patchRule = async ({
     prebuiltRuleAssetClient,
     existingRule,
     rulePatch,
-    isRuleCustomizationEnabled,
+    ruleCustomizationStatus,
   });
 
   const patchedInternalRule = await rulesClient.update({
