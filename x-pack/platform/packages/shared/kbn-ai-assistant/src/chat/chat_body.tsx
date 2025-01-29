@@ -183,13 +183,24 @@ export function ChatBody({
 
   const [promptEditorHeight, setPromptEditorHeight] = useState<number>(0);
 
-  const handleFeedback = (message: Message, feedback: Feedback) => {
+  const handleFeedback = (feedback: Feedback) => {
     if (conversation.value?.conversation && 'user' in conversation.value) {
+      const {
+        messages: _removedMessages, // Exclude messages
+        conversation: { title: _removedTitle, ...conversationRest }, // Exclude title
+        ...rest
+      } = conversation.value;
+
+      const conversationWithoutMessagesAndTitle = {
+        ...rest,
+        conversation: conversationRest,
+      };
+
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
         payload: {
-          messageWithFeedback: { message, feedback },
-          conversation: conversation.value,
+          feedback,
+          conversation: conversationWithoutMessagesAndTitle,
         },
       });
     }

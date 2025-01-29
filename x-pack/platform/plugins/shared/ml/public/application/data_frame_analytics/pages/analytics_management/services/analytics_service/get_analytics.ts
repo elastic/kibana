@@ -11,6 +11,7 @@ import {
   type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlApi } from '../../../../../contexts/kibana';
 import type {
   GetDataFrameAnalyticsStatsResponseError,
@@ -27,6 +28,8 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { DFA_SAVED_OBJECT_TYPE } from '../../../../../../../common/types/saved_objects';
+import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -117,6 +120,7 @@ export const useGetAnalytics = (
   blockRefresh: boolean
 ): GetAnalytics => {
   const mlApi = useMlApi();
+  const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
 
   let concurrentLoads = 0;
 
@@ -137,6 +141,13 @@ export const useGetAnalytics = (
           analyticsId
         );
 
+        let savedObjectsSpaces: Record<string, string[]> = {};
+        if (canManageSpacesAndSavedObjects && mlApi.savedObjects.jobsSpaces) {
+          const results = await mlApi.savedObjects.jobsSpaces();
+          if (isPopulatedObject(results, [DFA_SAVED_OBJECT_TYPE])) {
+            savedObjectsSpaces = results[DFA_SAVED_OBJECT_TYPE];
+          }
+        }
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)
           : undefined;
@@ -168,6 +179,7 @@ export const useGetAnalytics = (
               mode: DATA_FRAME_MODE.BATCH,
               state: stats.state,
               stats,
+              spaces: savedObjectsSpaces[config.id],
             });
             return reducedtableRows;
           },

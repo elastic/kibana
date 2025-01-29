@@ -110,6 +110,8 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'endpoint_list_all',
         'endpoint_list_read',
+        'workflow_insights_all',
+        'workflow_insights_read',
         'trusted_applications_all',
         'trusted_applications_read',
         'host_isolation_exceptions_all',
