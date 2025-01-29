@@ -374,6 +374,7 @@ import type {
   GetRuleMigrationIntegrationsResponse,
   GetRuleMigrationPrebuiltRulesRequestParamsInput,
   GetRuleMigrationPrebuiltRulesResponse,
+  GetRuleMigrationPrivilegesResponse,
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
   GetRuleMigrationResourcesResponse,
@@ -1484,6 +1485,21 @@ finalize it.
           '/internal/siem_migrations/rules/{migration_id}/prebuilt_rules',
           props.params
         ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Identifies the privileges required for a SIEM rules migration and returns the missing privileges
+   */
+  async getRuleMigrationPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationPrivileges`);
+    return this.kbnClient
+      .request<GetRuleMigrationPrivilegesResponse>({
+        path: '/internal/siem_migrations/rules/missing_privileges',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
