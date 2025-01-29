@@ -423,7 +423,7 @@ export const PresentationPanelHoverActions = ({
   );
 
   return (
-    <span
+    <div
       className={classNames('embPanel__hoverActionsAnchor', {
         'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
         'embPanel__hoverActionsAnchor--editMode': viewMode === 'edit',
@@ -439,66 +439,67 @@ export const PresentationPanelHoverActions = ({
       {api && hasHoverActions && (
         <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
           {dragHandle}
-          <div id="embPanel__hoverActionsBreakpoint" />
-          {showNotifications && notificationElements}
-          {showDescription && (
-            <EuiIconTip
-              size="m"
-              title={!hideTitle ? title || undefined : undefined}
-              content={description}
-              delay="regular"
-              position="top"
-              data-test-subj="embeddablePanelDescriptionTooltip"
-              type="iInCircle"
-              iconProps={{
-                css: css`
-                  margin: ${euiTheme.size.xs};
-                `,
-              }}
-            />
-          )}
-          {quickActionElements.map(
-            ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-              <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                <EuiButtonIcon
-                  iconType={iconType}
-                  color="text"
-                  onClick={onClick as MouseEventHandler}
-                  data-test-subj={dataTestSubj}
-                  aria-label={name as string}
-                />
-              </EuiToolTip>
-            )
-          )}
-          {contextMenuPanels.length ? (
-            <EuiPopover
-              repositionOnScroll
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-              button={ContextMenuButton}
-              isOpen={isContextMenuOpen}
-              className={contextMenuClasses}
-              closePopover={onClose}
-              data-test-subj={
-                isContextMenuOpen
-                  ? 'embeddablePanelContextMenuOpen'
-                  : 'embeddablePanelContextMenuClosed'
-              }
-              focusTrapProps={{
-                closeOnMouseup: true,
-                clickOutsideDisables: false,
-                onClickOutside: onClose,
-              }}
-            >
-              <EuiContextMenu
-                data-test-subj="presentationPanelContextMenuItems"
-                initialPanelId={'mainMenu'}
-                panels={contextMenuPanels}
+          <span>
+            {showNotifications && notificationElements}
+            {showDescription && (
+              <EuiIconTip
+                size="m"
+                title={!hideTitle ? title || undefined : undefined}
+                content={description}
+                delay="regular"
+                position="top"
+                data-test-subj="embeddablePanelDescriptionTooltip"
+                type="iInCircle"
+                iconProps={{
+                  css: css`
+                    margin: ${euiTheme.size.xs};
+                  `,
+                }}
               />
-            </EuiPopover>
-          ) : null}
+            )}
+            {quickActionElements.map(
+              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+                <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                  <EuiButtonIcon
+                    iconType={iconType}
+                    color="text"
+                    onClick={onClick as MouseEventHandler}
+                    data-test-subj={dataTestSubj}
+                    aria-label={name as string}
+                  />
+                </EuiToolTip>
+              )
+            )}
+            {contextMenuPanels.length ? (
+              <EuiPopover
+                repositionOnScroll
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                button={ContextMenuButton}
+                isOpen={isContextMenuOpen}
+                className={contextMenuClasses}
+                closePopover={onClose}
+                data-test-subj={
+                  isContextMenuOpen
+                    ? 'embeddablePanelContextMenuOpen'
+                    : 'embeddablePanelContextMenuClosed'
+                }
+                focusTrapProps={{
+                  closeOnMouseup: true,
+                  clickOutsideDisables: false,
+                  onClickOutside: onClose,
+                }}
+              >
+                <EuiContextMenu
+                  data-test-subj="presentationPanelContextMenuItems"
+                  initialPanelId={'mainMenu'}
+                  panels={contextMenuPanels}
+                />
+              </EuiPopover>
+            ) : null}
+          </span>
         </div>
       )}
-    </span>
+    </div>
   );
 };

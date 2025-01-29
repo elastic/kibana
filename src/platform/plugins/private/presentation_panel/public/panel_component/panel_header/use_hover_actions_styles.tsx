@@ -27,9 +27,12 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         ${isEditMode ? editModeOutline : viewModeOutline}
       );
 
-      container: hoverActionsAnchor / size;
+      container: hoverActionsAnchor / inline-size;
       border-radius: ${euiTheme.border.radius.medium};
       position: relative;
+      display: inline-block;
+      width: 100%;
+      height: 100%;
 
       ${showBorder
         ? css`
@@ -98,49 +101,30 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
 
       pointer-events: none; // prevent hover actions wrapper from blocking interactions with other panels
 
-      height: ${euiTheme.size.xl};
-      padding: 0px ${euiTheme.size.m};
       width: 100%;
-
+      height: ${euiTheme.size.xl};
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      padding: 0px ${euiTheme.size.m};
 
       & > * {
+        // apply styles to all children
+        display: flex;
         height: ${euiTheme.size.xl};
-
-        &:not(#embPanel__hoverActionsBreakpoint) {
-          flex: 0; // do not grow
-          pointer-events: all; // re-enable pointer events for non-breakpoint children
-          // style children that are **not** the breakpoint
-          border-top: var(--internalBorderStyle);
-          border-radius: 0px;
-          background-color: ${euiTheme.colors.backgroundBasePlain};
-          padding: var(--paddingAroundAction) 0px;
-        }
-      }
-
-      & > #embPanel__hoverActionsBreakpoint {
-        flex: 1; // grow to fill remaining space between left and right action groups
-      }
-
-      // start of action group
-      & > *:first-child:not(#embPanel__hoverActionsBreakpoint),
-      & > #embPanel__hoverActionsBreakpoint + * {
-        border-left: var(--internalBorderStyle);
-        border-top-left-radius: ${euiTheme.border.radius.medium} !important;
-        padding-left: var(--paddingAroundAction);
-      }
-
-      // end of action group
-      & > *:has(+ #embPanel__hoverActionsBreakpoint),
-      & > *:last-child {
-        border-right: var(--internalBorderStyle);
-        border-top-right-radius: ${euiTheme.border.radius.medium} !important;
-        padding-right: var(--paddingAroundAction);
+        flex: 0; // do not grow
+        pointer-events: all; // re-enable pointer events for non-breakpoint children
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border: var(--internalBorderStyle);
+        border-bottom: 0px;
+        padding: var(--paddingAroundAction);
+        padding-bottom: 0px;
+        border-top-left-radius: ${euiTheme.border.radius.medium};
+        border-top-right-radius: ${euiTheme.border.radius.medium};
       }
 
       // shrink down to single wrapped element with no breakpoint when panel gets small
-      @container hoverActionsAnchor (width < 250px) {
+      @container hoverActionsAnchor (width < 200px) {
         ${singleWrapperStyles}
       }
 
