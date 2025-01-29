@@ -33,7 +33,7 @@ export async function installKibanaAssets(
       ? new https.Agent({
           ca: fs.readFileSync(KBN_CERT_PATH),
           key: fs.readFileSync(KBN_KEY_PATH),
-          // hard-coded set to false like in packages/kbn-cli-dev-mode/src/base_path_proxy_server.ts
+          // hard-coded set to false like in src/dev/packages/cli-dev-mode/src/base_path_proxy_server.ts
           rejectUnauthorized: false,
         })
       : undefined;

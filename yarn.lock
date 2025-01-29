@@ -4168,7 +4168,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
+"@kbn/cli-dev-mode@link:src/dev/packages/cli-dev-mode":
   version "0.0.0"
   uid ""
 

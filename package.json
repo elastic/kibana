@@ -1363,7 +1363,7 @@
     "@kbn/ci-stats-performance-metrics": "link:src/dev/packages/ci-stats-performance-metrics",
     "@kbn/ci-stats-reporter": "link:src/dev/packages/ci-stats-reporter",
     "@kbn/ci-stats-shipper-cli": "link:src/dev/packages/ci-stats-shipper-cli",
-    "@kbn/cli-dev-mode": "link:packages/kbn-cli-dev-mode",
+    "@kbn/cli-dev-mode": "link:src/dev/packages/cli-dev-mode",
     "@kbn/code-editor-mock": "link:src/platform/packages/shared/shared-ux/code_editor/mocks",
     "@kbn/code-owners": "link:packages/kbn-code-owners",
     "@kbn/core-analytics-browser-mocks": "link:src/core/packages/analytics/browser-mocks",
