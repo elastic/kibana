@@ -56,6 +56,7 @@ describe('streamGraph', () => {
       input: 'input',
       responseLanguage: 'English',
       llmType: 'openai',
+      connectorId: '123',
     },
     logger: mockLogger,
     onLlmResponse: mockOnLlmResponse,
