@@ -10,8 +10,6 @@
 import { ScoutPage } from '..';
 
 export class MapsPage {
-  readonly directNavigationOrigin = 'maps/map';
-
   constructor(private readonly page: ScoutPage) {}
 
   async gotoNewMap() {
