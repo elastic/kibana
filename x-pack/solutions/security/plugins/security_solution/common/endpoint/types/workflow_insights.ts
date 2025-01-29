@@ -25,7 +25,7 @@ export enum TargetType {
 export enum ActionType {
   Refreshed = 'refreshed', // new or refreshed
   Remediated = 'remediated',
-  Suppressed = 'suppressed', // temporarily supressed, can be refreshed
+  Suppressed = 'suppressed', // temporarily suppressed, can be refreshed
   Dismissed = 'dismissed', // "permanently" dismissed, cannot be normally refreshed
 }
 
