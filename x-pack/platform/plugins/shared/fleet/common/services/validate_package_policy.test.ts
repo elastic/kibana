@@ -1223,7 +1223,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        safeLoad
       );
 
       expect(res).toEqual(['myvariable is required']);
@@ -1242,7 +1242,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        safeLoad
       );
 
       expect(res).toEqual(['myvariable is required']);
@@ -1261,7 +1261,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        load
+        safeLoad
       );
 
       expect(res).toBeNull();
