@@ -82,6 +82,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
+  assistantDefaultInferenceEndpoint: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -154,6 +155,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   public getInferenceEndpointId = async () => {
+    if (!this.options.assistantDefaultInferenceEndpoint) {
+      return ASSISTANT_ELSER_INFERENCE_ID;
+    }
     const esClient = await this.options.elasticsearchClientPromise;
 
     try {
@@ -265,7 +269,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         });
 
         // await for the model to be deployed
-        await this.isInferenceEndpointExists();
+        await this.isInferenceEndpointExists(inferenceId);
       } catch (error) {
         this.options.logger.error(
           `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
