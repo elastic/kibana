@@ -132,8 +132,8 @@ export interface RouterRoute {
    *       that the function will only be called once.
    */
   validationSchemas?:
-    | (() => RouteValidator<unknown, unknown, unknown>)
-    | RouteValidator<unknown, unknown, unknown>
+    | (() => RouteValidator<unknown, unknown, unknown, unknown>)
+    | RouteValidator<unknown, unknown, unknown, unknown>
     | false;
   handler: (
     req: Request,

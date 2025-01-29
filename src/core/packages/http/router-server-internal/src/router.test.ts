@@ -258,14 +258,24 @@ describe('Router', () => {
       expect(
         isConfigSchema(
           (
-            validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
+            validationSchemas as () => RouteValidatorRequestAndResponses<
+              unknown,
+              unknown,
+              unknown,
+              unknown
+            >
           )().response![200].body!()
         )
       ).toBe(true);
       expect(
         isConfigSchema(
           (
-            validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
+            validationSchemas as () => RouteValidatorRequestAndResponses<
+              unknown,
+              unknown,
+              unknown,
+              unknown
+            >
           )().response![404].body!()
         )
       ).toBe(true);

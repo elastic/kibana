@@ -447,7 +447,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
  * Route specific configuration.
  * @public
  */
-export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
+export interface RouteConfig<P, Q, B, Method extends RouteMethod, ResponseBody = unknown> {
   /**
    * The endpoint _within_ the router path to register the route.
    *
@@ -519,7 +519,10 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
+  validate:
+    | RouteValidator<P, Q, B, ResponseBody>
+    | (() => RouteValidator<P, Q, B, ResponseBody>)
+    | false;
 
   /**
    * Defines the security requirements for a route, including authorization and authentication.

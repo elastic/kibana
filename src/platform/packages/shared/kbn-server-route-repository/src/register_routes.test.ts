@@ -12,10 +12,10 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { NEVER } from 'rxjs';
-import * as makeZodValidationObject from './make_zod_validation_object';
+import { ServerRouteRepository } from '@kbn/server-route-repository-utils';
+import * as makeZodValidations from './make_zod_validation_object';
 import { registerRoutes } from './register_routes';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
-import { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 
 describe('registerRoutes', () => {
   const post = jest.fn();
@@ -96,7 +96,8 @@ describe('registerRoutes', () => {
     expect(internalRoute.options).toEqual({
       access: 'internal',
     });
-    expect(internalRoute.validate).toEqual(noParamsValidationObject);
+    expect(internalRoute.validate.request).toEqual(noParamsValidationObject);
+    expect(internalRoute.validate.response).toBeUndefined();
 
     const [internalRouteWithSecurity] = post.mock.calls[1];
 
@@ -280,9 +281,11 @@ describe('registerRoutes', () => {
   });
 
   describe('when using zod', () => {
-    const makeZodValidationObjectSpy = jest.spyOn(
-      makeZodValidationObject,
-      'makeZodValidationObject'
+    const makeZodValidationObjectSpy = jest.spyOn(makeZodValidations, 'makeZodValidationObject');
+
+    const makeZodResponsesValidationObjectSpy = jest.spyOn(
+      makeZodValidations,
+      'makeZodResponsesValidationObject'
     );
 
     const zodParamsRt = z.object({
@@ -297,18 +300,34 @@ describe('registerRoutes', () => {
       }),
     });
 
+    const zodResponseRt = {
+      ['200']: {
+        body: z.object({
+          data: z.array(z.number()),
+        }),
+      },
+    };
+
     it('uses Core validation', () => {
       callRegisterRoutes({
         'POST /internal/route': {
           endpoint: 'POST /internal/route',
           params: zodParamsRt,
-          handler: jest.fn,
+          responses: zodResponseRt,
+          handler: jest.fn(),
         },
       });
 
       const [internalRoute] = post.mock.calls[0];
       expect(makeZodValidationObjectSpy).toHaveBeenCalledWith(zodParamsRt);
-      expect(internalRoute.validate).toEqual(makeZodValidationObjectSpy.mock.results[0].value);
+      expect(internalRoute.validate.request).toEqual(
+        makeZodValidationObjectSpy.mock.results[0].value
+      );
+
+      expect(makeZodResponsesValidationObjectSpy).toHaveBeenCalledWith(zodResponseRt);
+      expect(internalRoute.validate.response).toEqual(
+        makeZodResponsesValidationObjectSpy.mock.results[0].value
+      );
     });
 
     it('passes on params', async () => {
@@ -317,6 +336,7 @@ describe('registerRoutes', () => {
         'POST /internal/route': {
           endpoint: 'POST /internal/route',
           params: zodParamsRt,
+          responses: zodResponseRt,
           handler,
         },
       });
@@ -372,15 +392,16 @@ describe('registerRoutes', () => {
 
     it('bypasses Core validation', () => {
       callRegisterRoutes({
-        'POST /internal/route': {
+        'POST /internal/route/core': {
           endpoint: 'POST /internal/route',
           params: iotsParamsRt,
-          handler: jest.fn,
+          handler: jest.fn(),
         },
       });
 
       const [internalRoute] = post.mock.calls[0];
-      expect(internalRoute.validate).toEqual(passThroughValidationObject);
+      expect(internalRoute.validate.request).toEqual(passThroughValidationObject);
+      expect(internalRoute.validate.response).toBeUndefined();
     });
 
     it('decodes params', async () => {
@@ -429,7 +450,7 @@ describe('registerRoutes', () => {
     });
   });
 
-  function callRegisterRoutes(repository: any) {
+  function callRegisterRoutes(repository: Parameters<typeof registerRoutes>[0]['repository']) {
     registerRoutes({
       core: coreSetup,
       logger: mockLogger,

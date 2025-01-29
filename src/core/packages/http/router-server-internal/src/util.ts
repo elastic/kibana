@@ -26,9 +26,9 @@ function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
 }
 
-export function prepareResponseValidation(
-  validation: RouteValidatorFullConfigResponse
-): RouteValidatorFullConfigResponse {
+export function prepareResponseValidation<ResponseBody = unknown>(
+  validation: RouteValidatorFullConfigResponse<ResponseBody>
+): RouteValidatorFullConfigResponse<ResponseBody> {
   const responses = Object.entries(validation).map(([key, value]) => {
     if (isStatusCode(key)) {
       return [key, { ...value, ...(value.body ? { body: once(value.body) } : {}) }];
@@ -39,7 +39,9 @@ export function prepareResponseValidation(
   return Object.fromEntries(responses);
 }
 
-function prepareValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
+function prepareValidation<P, Q, B, ResponseBody>(
+  validator: RouteValidator<P, Q, B, ResponseBody>
+) {
   if (isFullValidatorContainer(validator) && validator.response) {
     return {
       ...validator,

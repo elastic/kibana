@@ -26,7 +26,10 @@ import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
 import { merge, omit } from 'lodash';
 import { Observable, isObservable } from 'rxjs';
-import { makeZodValidationObject } from './make_zod_validation_object';
+import {
+  makeZodResponsesValidationObject,
+  makeZodValidationObject,
+} from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';
 
@@ -161,7 +164,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             access,
           },
           security,
-          validate: validationObject,
+          validate: {
+            request: validationObject,
+            response: route.responses
+              ? makeZodResponsesValidationObject(route.responses)
+              : undefined,
+          },
         },
         wrappedHandler
       );
@@ -177,6 +185,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           version,
           validate: {
             request: validationObject,
+            response: route.responses
+              ? makeZodResponsesValidationObject(route.responses)
+              : undefined,
           },
         },
         wrappedHandler

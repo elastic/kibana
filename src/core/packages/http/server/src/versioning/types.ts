@@ -238,15 +238,15 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
 /** @public */
-export interface VersionedRouteCustomResponseBodyValidation {
+export interface VersionedRouteCustomResponseBodyValidation<B> {
   /** A custom validation function */
-  custom: RouteValidationFunction<unknown>;
+  custom: RouteValidationFunction<B>;
 }
 
 /** @public */
-export type VersionedResponseBodyValidation =
-  | LazyValidator
-  | VersionedRouteCustomResponseBodyValidation;
+export type VersionedResponseBodyValidation<B> =
+  | LazyValidator<B>
+  | VersionedRouteCustomResponseBodyValidation<B>;
 
 /**
  * Map of response status codes to response schemas
@@ -293,7 +293,7 @@ export interface VersionedRouteResponseValidation {
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body?: VersionedResponseBodyValidation;
+    body?: VersionedResponseBodyValidation<unknown>;
   };
   unsafe?: { body?: boolean };
 }
