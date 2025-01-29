@@ -1456,7 +1456,7 @@
     "@kbn/jest-serializers": "link:src/dev/packages/jest-serializers",
     "@kbn/journeys": "link:src/dev/packages/journeys",
     "@kbn/json-ast": "link:src/dev/packages/json-ast",
-    "@kbn/kibana-manifest-schema": "link:packages/kbn-kibana-manifest-schema",
+    "@kbn/kibana-manifest-schema": "link:src/dev/packages/kibana-manifest-schema",
     "@kbn/lint-packages-cli": "link:packages/kbn-lint-packages-cli",
     "@kbn/lint-ts-projects-cli": "link:packages/kbn-lint-ts-projects-cli",
     "@kbn/managed-vscode-config": "link:packages/kbn-managed-vscode-config",

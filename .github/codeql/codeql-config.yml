@@ -56,7 +56,7 @@ paths-ignore:
   - src/dev/packages/import-resolver
   - packages/kbn-jest-*
   - src/dev/packages/journeys
-  - packages/kbn-kibana-manifest-schema
+  - src/dev/packages/kibana-manifest-schema
   - packages/kbn-managed-vscode-config
   - packages/kbn-managed-vscode-config-cli
   - packages/kbn-optimizer
