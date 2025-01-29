@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { FETCH_STATUS, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -52,7 +53,7 @@ export function ServiceOverviewDependenciesTable({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { serviceName, transactionType } = useApmServiceContext();
-
+  const { onPageReady } = usePerformanceContext();
   const trackEvent = useUiTracker();
   const [hasTableLoaded, setHasTableLoaded] = useState(false);
   const { data, status } = useFetcher(
@@ -82,7 +83,17 @@ export function ServiceOverviewDependenciesTable({
       onLoadTable();
       setHasTableLoaded(true);
     }
-  }, [status, onLoadTable, hasTableLoaded, setHasTableLoaded]);
+
+    if (status === FETCH_STATUS.SUCCESS && !onLoadTable && !hasTableLoaded) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+      setHasTableLoaded(true);
+    }
+  }, [status, onLoadTable, hasTableLoaded, setHasTableLoaded, onPageReady, rangeFrom, rangeTo]);
 
   const dependencies =
     data?.serviceDependencies.map((dependency) => {

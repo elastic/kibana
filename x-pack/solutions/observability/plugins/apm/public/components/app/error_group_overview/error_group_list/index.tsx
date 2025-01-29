@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
@@ -81,7 +82,7 @@ export function ErrorGroupList({
 
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
 
-  const { offset } = query;
+  const { offset, rangeFrom, rangeTo } = query;
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
   const [hasTableLoaded, setHasTableLoaded] = useState(false);
@@ -97,6 +98,7 @@ export function ErrorGroupList({
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
   const isDetailedStatsLoading = isPending(detailedStatisticsStatus);
+  const { onPageReady } = usePerformanceContext();
 
   useEffect(() => {
     if (
@@ -108,12 +110,29 @@ export function ErrorGroupList({
       onLoadTable();
       setHasTableLoaded(true);
     }
+    if (
+      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      !onLoadTable &&
+      !hasTableLoaded
+    ) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+      setHasTableLoaded(true);
+    }
   }, [
     mainStatisticsStatus,
     detailedStatisticsStatus,
     onLoadTable,
     hasTableLoaded,
     setHasTableLoaded,
+    rangeFrom,
+    rangeTo,
+    onPageReady,
   ]);
 
   const columns = useMemo(() => {
