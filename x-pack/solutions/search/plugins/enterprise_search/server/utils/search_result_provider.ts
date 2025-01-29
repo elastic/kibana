@@ -89,9 +89,9 @@ export function getSearchResultProvider(
           if (!caps.catalogue.enterpriseSearch) {
             return [];
           }
-
+          const selfManagedConnectors = connectorTypes.filter((connector) => !connector.isNative);
           const services: ServiceDefinition[] = [
-            ...(config.hasConnectors ? connectorTypes : []),
+            ...(config.hasConnectors ? selfManagedConnectors : []),
 
             {
               keywords: ['esre', 'search'],
