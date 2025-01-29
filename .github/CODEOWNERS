@@ -112,7 +112,7 @@ src/dev/packages/check-mappings-update-cli @elastic/kibana-core
 src/dev/packages/check-prod-native-modules-cli @elastic/kibana-operations
 src/dev/packages/ci-stats-core @elastic/kibana-operations
 src/dev/packages/ci-stats-performance-metrics @elastic/kibana-operations
-packages/kbn-ci-stats-reporter @elastic/kibana-operations
+src/dev/packages/ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/kbn-code-owners @elastic/appex-qa

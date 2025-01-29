@@ -4160,7 +4160,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-reporter@link:packages/kbn-ci-stats-reporter":
+"@kbn/ci-stats-reporter@link:src/dev/packages/ci-stats-reporter":
   version "0.0.0"
   uid ""
 

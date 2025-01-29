@@ -1361,7 +1361,7 @@
     "@kbn/check-prod-native-modules-cli": "link:src/dev/packages/check-prod-native-modules-cli",
     "@kbn/ci-stats-core": "link:src/dev/packages/ci-stats-core",
     "@kbn/ci-stats-performance-metrics": "link:src/dev/packages/ci-stats-performance-metrics",
-    "@kbn/ci-stats-reporter": "link:packages/kbn-ci-stats-reporter",
+    "@kbn/ci-stats-reporter": "link:src/dev/packages/ci-stats-reporter",
     "@kbn/ci-stats-shipper-cli": "link:packages/kbn-ci-stats-shipper-cli",
     "@kbn/cli-dev-mode": "link:packages/kbn-cli-dev-mode",
     "@kbn/code-editor-mock": "link:src/platform/packages/shared/shared-ux/code_editor/mocks",
