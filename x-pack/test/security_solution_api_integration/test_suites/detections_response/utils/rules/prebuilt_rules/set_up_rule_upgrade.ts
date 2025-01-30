@@ -33,7 +33,7 @@ interface RuleUpgradeAssets {
 }
 
 interface SetUpRuleUpgradeParams {
-  assets: RuleUpgradeAssets;
+  assets: RuleUpgradeAssets | RuleUpgradeAssets[];
   removeInstalledAssets?: boolean;
   deps: SetUpRuleUpgradeDeps;
 }
@@ -43,31 +43,40 @@ export async function setUpRuleUpgrade({
   removeInstalledAssets,
   deps,
 }: SetUpRuleUpgradeParams): Promise<void> {
-  await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
-    createRuleAssetSavedObjectOfType(assets.installed.type, {
-      rule_id: 'rule-1',
-      version: 1,
-      ...assets.installed,
-    }),
-  ]);
+  const rulesAssets = [assets].flat();
+
+  for (const ruleAssets of rulesAssets) {
+    await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
+      createRuleAssetSavedObjectOfType(ruleAssets.installed.type, {
+        rule_id: 'rule-1',
+        version: 1,
+        ...ruleAssets.installed,
+      }),
+    ]);
+  }
+
   await installPrebuiltRules(deps.es, deps.supertest);
 
-  if (Object.keys(assets.patch).length > 0) {
-    await patchRule(deps.supertest, deps.log, {
-      rule_id: 'rule-1',
-      ...assets.patch,
-    });
+  for (const ruleAssets of rulesAssets) {
+    if (Object.keys(ruleAssets.patch).length > 0) {
+      await patchRule(deps.supertest, deps.log, {
+        rule_id: 'rule-1',
+        ...ruleAssets.patch,
+      });
+    }
   }
 
   if (removeInstalledAssets) {
     await deleteAllPrebuiltRuleAssets(deps.es, deps.log);
   }
 
-  await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
-    createRuleAssetSavedObjectOfType(assets.upgrade.type, {
-      rule_id: 'rule-1',
-      version: 2,
-      ...assets.upgrade,
-    }),
-  ]);
+  for (const ruleAssets of rulesAssets) {
+    await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
+      createRuleAssetSavedObjectOfType(ruleAssets.upgrade.type, {
+        rule_id: 'rule-1',
+        version: 2,
+        ...ruleAssets.upgrade,
+      }),
+    ]);
+  }
 }

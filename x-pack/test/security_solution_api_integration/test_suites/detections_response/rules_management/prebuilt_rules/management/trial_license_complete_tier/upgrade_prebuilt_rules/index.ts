@@ -8,7 +8,9 @@
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import { deleteAllTimelines, deleteAllPrebuiltRuleAssets } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
-import { upgradeAllRules } from './upgrade_all_rules';
+import { bulkUpgradeAllPrebuiltRules } from './bulk_upgrade_all_prebuilt_rules';
+import { bulkUpgradeSelectedPrebuiltRules } from './bulk_upgrade_selected_prebuilt_rules';
+import { upgradeOnePrebuiltRule } from './upgrade_one_prebuilt_rule';
 
 export default (context: FtrProviderContext): void => {
   const es = context.getService('es');
@@ -22,6 +24,8 @@ export default (context: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    upgradeAllRules(context);
+    bulkUpgradeAllPrebuiltRules(context);
+    bulkUpgradeSelectedPrebuiltRules(context);
+    upgradeOnePrebuiltRule(context);
   });
 };
