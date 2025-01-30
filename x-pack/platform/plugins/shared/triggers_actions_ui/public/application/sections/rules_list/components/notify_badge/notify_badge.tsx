@@ -78,9 +78,15 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const isLoading = loading || requestInFlight;
   const isDisabled = Boolean(disabled) || !snoozeSettings;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(() => setIsPopoverOpen(prevState => !prevState), []);
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen(prev => {
+      const newState = !prev;
+      if (!newState) focusTrapButtonRef.current?.blur();
+      return newState;
+    });
+  }, []);
   const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+  const closePopover = useCallback(() => {setIsPopoverOpen(false);focusTrapButtonRef.current?.blur();}, [setIsPopoverOpen]);
   const isSnoozedUntil = snoozeSettings?.isSnoozedUntil;
   const muteAll = snoozeSettings?.muteAll ?? false;
   const isSnoozedIndefinitely = muteAll;
