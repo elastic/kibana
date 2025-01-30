@@ -8,6 +8,8 @@
 import {
   StreamDefinition,
   WiredStreamDefinition,
+  isIlmLifecycle,
+  isInheritLifecycle,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -19,6 +21,7 @@ import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_
 /*
  * Changes to mappings (fields) and processing rules are not allowed on the root stream.
  * Changes to routing rules are allowed.
+ * Root stream cannot inherit a lifecycle.
  */
 export function validateRootStreamChanges(
   currentStreamDefinition: WiredStreamDefinition,
@@ -40,6 +43,10 @@ export function validateRootStreamChanges(
 
   if (hasProcessingChanges) {
     throw new RootStreamImmutabilityError('Root stream processing rules cannot be changed');
+  }
+
+  if (isInheritLifecycle(nextStreamDefinition.ingest.lifecycle)) {
+    throw new MalformedStreamError('Root stream cannot inherit lifecycle');
   }
 }
 
@@ -86,5 +93,17 @@ export function validateStreamChildrenChanges(
 
   if (removedChildren.length) {
     throw new MalformedChildrenError('Cannot remove children from a stream via updates');
+  }
+}
+
+export function validateStreamLifecycle(definition: StreamDefinition, isServerless: boolean) {
+  const lifecycle = definition.ingest.lifecycle;
+
+  if (isServerless && isIlmLifecycle(lifecycle)) {
+    throw new MalformedStreamError('ILM lifecycle is not supported in serverless environments');
+  }
+
+  if (isUnwiredStreamDefinition(definition) && isIlmLifecycle(lifecycle)) {
+    throw new MalformedStreamError('ILM lifecycle is not supported for unwired streams');
   }
 }

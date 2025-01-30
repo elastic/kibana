@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import moment from 'moment';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
