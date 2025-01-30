@@ -427,6 +427,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     onSelectionChange: handleJobSelectionChange,
     selectedJobIds,
     selectedGroups,
+    selectedJobs,
   } as unknown as JobSelectorProps;
 
   const noJobsSelected = !selectedJobs || selectedJobs.length === 0;
