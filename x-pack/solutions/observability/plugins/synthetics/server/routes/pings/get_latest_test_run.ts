@@ -46,7 +46,7 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
     // if it doesn't exist we will try to get the latest ping from the last week
     const ping = await getPing(from || 'now-1d');
 
-    // if form is provided, we will only try to get the latest ping from the provided time range
+    // if from is provided, we will only try to get the latest ping from the provided time range
     if (ping && from) {
       return { ping };
     } else {
