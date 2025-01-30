@@ -87,7 +87,7 @@ interface AssetBulkDeleteOperation {
 
 export type AssetBulkOperation = AssetBulkIndexOperation | AssetBulkDeleteOperation;
 
-interface StoredAssetLink {
+export interface StoredAssetLink {
   'asset.id': string;
   'asset.type': AssetType;
   'entity.id': string;
