@@ -458,7 +458,7 @@ export class StreamsClient {
    * GroupStreamDefinitions
    */
   async validateGroupStream({ definition }: { definition: GroupStreamDefinition }) {
-    const { members } = definition.grouped;
+    const { members } = definition.group;
 
     if (members.includes(definition.name)) {
       throw new ForbiddenMemberTypeError('The same stream can not be part of the group');
@@ -559,7 +559,7 @@ export class StreamsClient {
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
    * - if a data stream exists (creates an ingest definition on the fly)
-   * - if a grouped stream definition exists
+   * - if a group stream definition exists
    *
    * Throws when:
    * - no definition is found
