@@ -53,6 +53,7 @@
 }
 
 .embPanel__title {
+  @include euiTitle('xxs');
   overflow: hidden;
   line-height: 1.5;
   flex-grow: 1;
@@ -66,14 +67,14 @@
   }
 
   .embPanel__titleInner {
-    @include euiTitle('xxs');
-    display: inline-block;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding-right: $euiSizeS;
   }
 
   .embPanel__titleTooltipAnchor {
     max-width: 100%;
-    padding-right: $euiSizeS;
   }
 
   .embPanel__titleText {

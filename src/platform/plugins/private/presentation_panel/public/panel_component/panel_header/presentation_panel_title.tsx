@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import { once } from 'lodash';
 import React, { useMemo, useEffect, useRef, useState } from 'react';
@@ -83,13 +83,17 @@ export const usePresentationPanelTitleClickHandler = (titleElmRef: HTMLElement |
 
 export const PresentationPanelTitle = ({
   api,
+  ariaLabelElement,
   viewMode,
   hideTitle,
   panelTitle,
+  panelDescription,
 }: {
   api: unknown;
+  ariaLabelElement: JSX.Element;
   hideTitle?: boolean;
   panelTitle?: string;
+  panelDescription?: string;
   viewMode?: ViewMode;
 }) => {
   const [panelTitleElmRef, setPanelTitleElmRef] = useState<HTMLElement | null>(null);
@@ -135,5 +139,41 @@ export const PresentationPanelTitle = ({
     return () => panelTitleClickSubscription?.unsubscribe();
   }, [api, onClick]);
 
-  return panelTitleElement;
+  const describedPanelTitleElement = useMemo(() => {
+    if (hideTitle) return null;
+    if (!panelDescription) {
+      return (
+        <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
+          {panelTitleElement}
+        </span>
+      );
+    }
+    return (
+      <EuiToolTip
+        title={!hideTitle ? panelTitle || undefined : undefined}
+        content={panelDescription}
+        delay="regular"
+        position="top"
+        anchorClassName="embPanel__titleTooltipAnchor"
+        anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
+      >
+        <div data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
+          {!hideTitle ? (
+            <h2>
+              {ariaLabelElement}
+              {panelTitleElement}&nbsp;
+            </h2>
+          ) : null}
+          <EuiIcon
+            type="iInCircle"
+            color="subdued"
+            data-test-subj="embeddablePanelTitleDescriptionIcon"
+            tabIndex={0}
+          />
+        </div>
+      </EuiToolTip>
+    );
+  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, ariaLabelElement]);
+
+  return describedPanelTitleElement;
 };

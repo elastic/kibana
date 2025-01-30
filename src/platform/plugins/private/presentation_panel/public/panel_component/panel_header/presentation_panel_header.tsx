@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -98,33 +98,17 @@ export const PresentationPanelHeader = <
         data-test-subj="dashboardPanelTitle"
         className={titleClasses}
       >
-        <h2 className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
-          {ariaLabelElement}
-          <PresentationPanelTitle
-            api={api}
-            viewMode={viewMode}
-            hideTitle={hideTitle}
-            panelTitle={panelTitle}
-          />
-        </h2>
-        {panelDescription && (
-          <EuiIconTip
-            title={!hideTitle ? panelTitle || undefined : undefined}
-            content={panelDescription}
-            delay="regular"
-            position="top"
-            anchorClassName="embPanel__titleTooltipAnchor"
-            anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
-            type="iInCircle"
-            color="subdued"
-            iconProps={{
-              'data-test-subj': 'embeddablePanelTitleDescriptionIcon',
-            }}
-          />
-        )}
+        <PresentationPanelTitle
+          api={api}
+          ariaLabelElement={ariaLabelElement}
+          viewMode={viewMode}
+          hideTitle={hideTitle}
+          panelTitle={panelTitle}
+          panelDescription={panelDescription}
+        />
         {showBadges && badgeElements}
-        {showNotifications && notificationElements}
       </div>
+      {showNotifications && notificationElements}
     </figcaption>
   );
 };
