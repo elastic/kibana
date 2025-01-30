@@ -7,8 +7,7 @@
 
 import { map, mergeMap, forkJoin, from, of } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
-import { shimHitsTotal } from '@kbn/data-plugin/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ENHANCED_ES_SEARCH_STRATEGY, getHitsTotal } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/server';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX, ACTIONS_INDEX } from '../../../common/constants';
 import type {
@@ -116,9 +115,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             map((response) => ({
               ...response,
               ...{
-                rawResponse: shimHitsTotal(response.rawResponse, options),
+                rawResponse: response.rawResponse,
               },
-              total: response.rawResponse.hits.total as number,
+              total: getHitsTotal(response.rawResponse.hits.total),
             })),
             mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
           );

@@ -7,7 +7,7 @@
 
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { ISearchRequestParams, IEsSearchRequest } from '@kbn/search-types';
-import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
+import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { map } from 'rxjs';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../common/constants';
 import { RawIndicatorFieldId } from '../common/types/indicator';
@@ -92,7 +92,7 @@ export const threatIntelligenceSearchStrategyProvider = (data: PluginStart): ISe
           return {
             ...response,
             ...{
-              rawResponse: shimHitsTotal(response.rawResponse, options),
+              rawResponse: response.rawResponse,
             },
           };
         })

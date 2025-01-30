@@ -12,6 +12,7 @@ import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { getHitsTotal } from '@kbn/data-plugin/common';
 import type { FieldStatsResponse } from '../../types';
 import { getFieldExampleBuckets, getFieldValues } from '../field_examples_calculator';
 import {
@@ -179,7 +180,7 @@ export async function getNumberSummary(
   const sampledDocuments = summaryResult.aggregations!.sample.doc_count;
 
   return {
-    totalDocuments: getHitsTotal(summaryResult),
+    totalDocuments: getHitsTotal(summaryResult.hits.total),
     sampledDocuments,
     sampledValues: sampledDocuments,
     numberSummary: {
@@ -254,7 +255,7 @@ export async function getNumberHistogram(
 
   if (histogramInterval === 0) {
     return {
-      totalDocuments: getHitsTotal(minMaxResult),
+      totalDocuments: getHitsTotal(minMaxResult.hits.total),
       sampledValues:
         sumSampledValues(topValues, terms.sum_other_doc_count) ||
         minMaxResult.aggregations!.sample.sample_count.value!,
@@ -288,7 +289,7 @@ export async function getNumberHistogram(
   >;
 
   return {
-    totalDocuments: getHitsTotal(minMaxResult),
+    totalDocuments: getHitsTotal(minMaxResult.hits.total),
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
     sampledValues:
       sumSampledValues(topValues, terms.sum_other_doc_count) ||
@@ -340,7 +341,7 @@ export async function getStringSamples(
   };
 
   return {
-    totalDocuments: getHitsTotal(topValuesResult),
+    totalDocuments: getHitsTotal(topValuesResult.hits.total),
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
     sampledValues:
       sumSampledValues(
@@ -386,7 +387,7 @@ export async function getDateHistogram(
   >;
 
   return {
-    totalDocuments: getHitsTotal(results),
+    totalDocuments: getHitsTotal(results.hits.total),
     histogram: {
       buckets: results.aggregations!.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
@@ -422,7 +423,7 @@ export async function getSimpleExamples(
     );
 
     return {
-      totalDocuments: getHitsTotal(simpleExamplesResult),
+      totalDocuments: getHitsTotal(simpleExamplesResult.hits.total),
       sampledDocuments: fieldExampleBuckets.sampledDocuments,
       sampledValues: fieldExampleBuckets.sampledValues,
       topValues: {
@@ -459,10 +460,6 @@ function getFieldRef(field: DataViewField) {
       }
     : { field: field.name };
 }
-
-const getHitsTotal = (body: estypes.SearchResponse): number => {
-  return (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
-};
 
 // We could use `aggregations.sample.sample_count.value` instead, but it does not always give a correct sum
 // See Github issue #144625

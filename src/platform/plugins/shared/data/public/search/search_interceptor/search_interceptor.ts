@@ -71,7 +71,6 @@ import {
   IAsyncSearchOptions,
   isRunningResponse,
   pollSearch,
-  shimHitsTotal,
   UI_SETTINGS,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
@@ -482,9 +481,7 @@ export class SearchInterceptor {
           case ENHANCED_ES_SEARCH_STRATEGY:
             if (rawResponse.body?.rawResponse) return rawResponse.body;
             const typedResponse = rawResponse.body as unknown as AsyncSearchGetResponse;
-            const shimmedResponse = shimHitsTotal(typedResponse.response, {
-              legacyHitsTotal: searchOptions.legacyHitsTotal,
-            });
+            const shimmedResponse = typedResponse.response;
             return {
               id: typedResponse.id,
               isPartial: typedResponse.is_partial,

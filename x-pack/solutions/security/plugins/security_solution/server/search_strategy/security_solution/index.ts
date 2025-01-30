@@ -7,7 +7,6 @@
 
 import { map, mergeMap } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
-import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
@@ -38,7 +37,7 @@ export const securitySolutionSearchStrategyProvider = (
           return {
             ...response,
             ...{
-              rawResponse: shimHitsTotal(response.rawResponse, options),
+              rawResponse: response.rawResponse,
             },
           };
         }),

@@ -6,12 +6,7 @@
  */
 
 import { map, mergeMap } from 'rxjs';
-import {
-  ISearchStrategy,
-  PluginStart,
-  SearchStrategyDependencies,
-  shimHitsTotal,
-} from '@kbn/data-plugin/server';
+import { ISearchStrategy, PluginStart, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import type { ISearchOptions } from '@kbn/search-types';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -92,7 +87,7 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     map((response) => {
       return {
         ...response,
-        rawResponse: shimHitsTotal(response.rawResponse, options),
+        rawResponse: response.rawResponse,
       };
     }),
     mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
@@ -151,7 +146,7 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 
       return {
         ...response,
-        rawResponse: shimHitsTotal(response.rawResponse, options),
+        rawResponse: response.rawResponse,
       };
     }),
     mergeMap((esSearchRes) => queryFactory.parse(requestSessionLeaders, esSearchRes))

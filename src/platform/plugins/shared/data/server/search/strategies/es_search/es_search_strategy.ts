@@ -12,7 +12,7 @@ import type { ConnectionRequestParams } from '@elastic/transport';
 import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
-import { shimHitsTotal, getTotalLoaded } from '../../../../common';
+import { getTotalLoaded } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
@@ -76,7 +76,7 @@ export const esSearchStrategyProvider = (
           ...transport,
           meta: true,
         });
-        const response = shimHitsTotal(body, options);
+        const response = body;
         return toKibanaSearchResponse(response, meta?.request?.params);
       } catch (e) {
         throw getKbnSearchError(e);

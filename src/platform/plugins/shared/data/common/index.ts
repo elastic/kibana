@@ -513,7 +513,7 @@ export {
   pollSearch,
   ES_SEARCH_STRATEGY,
   getTotalLoaded,
-  shimHitsTotal,
+  getHitsTotal,
   EQL_SEARCH_STRATEGY,
   ENHANCED_ES_SEARCH_STRATEGY,
   SQL_SEARCH_STRATEGY,

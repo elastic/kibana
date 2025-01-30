@@ -8,6 +8,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getHitsTotal } from '@kbn/data-plugin/common';
 import { INTERNAL_API_VERSION, GET_INDEX_RESULTS } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
@@ -17,7 +18,6 @@ import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import { getAuthorizedIndexNames } from '../../helpers/get_authorized_index_names';
-import { getHitsTotal } from '../../helpers/get_hits_total';
 
 interface GetQuery {
   indexNames: string[];
@@ -148,7 +148,7 @@ export const getIndexResultsRoute = (
           const resultsWithoutUndefined = resultsWithUndefined.filter((r) => r);
 
           return response.ok({
-            body: { data: resultsWithoutUndefined, total: getHitsTotal(hits) },
+            body: { data: resultsWithoutUndefined, total: getHitsTotal(hits.total) },
           });
         } catch (err) {
           logger.error(err.message);
