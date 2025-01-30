@@ -26,11 +26,11 @@ import {
   DataStreamReindexStatus,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
-import type { ReindexState } from '../../../use_reindex_state';
+import type { DeprecationMetadata, ReindexState } from '../../../use_reindex_state';
 import { useAppContext } from '../../../../../../../app_context';
 import { DurationClarificationCallOut } from './warnings_callout';
 
-const buttonLabel = (status?: ReindexStatus) => {
+const buttonLabel = (status?: DataStreamReindexStatus) => {
   switch (status) {
     case DataStreamReindexStatus.failed:
       return (
@@ -79,17 +79,24 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   reindexState: ReindexState;
   startReindex: () => void;
   lastIndexCreationDateFormatted: string;
+  deprecationMetadata: DeprecationMetadata;
   meta: DataStreamMetadata;
-}> = ({ closeFlyout, reindexState, startReindex, lastIndexCreationDateFormatted, meta }) => {
+}> = ({
+  closeFlyout,
+  reindexState,
+  startReindex,
+  lastIndexCreationDateFormatted,
+  deprecationMetadata,
+  meta,
+}) => {
   const {
     services: {
       api,
-      core: { docLinks },
+      core: { http },
     },
   } = useAppContext();
 
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
-  console.log('reindexState::', reindexState);
   const loading =
     loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
   const isCompleted = status === DataStreamReindexStatus.completed;
@@ -101,7 +108,10 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   return (
     <Fragment>
       <EuiFlyoutBody>
-        <DurationClarificationCallOut formattedDate={lastIndexCreationDateFormatted} />
+        <DurationClarificationCallOut
+          formattedDate={lastIndexCreationDateFormatted}
+          learnMoreUrl={deprecationMetadata.learnMoreUrl}
+        />
         <EuiSpacer size="m" />
 
         {hasRequiredPrivileges === false && (
@@ -111,7 +121,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
-                  defaultMessage="You do not have sufficient privileges to reindex this index"
+                  defaultMessage="You do not have sufficient privileges to reindex this data stream."
                 />
               }
               color="danger"
@@ -171,12 +181,12 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                 hasFetchFailed ? (
                   <FormattedMessage
                     id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
-                    defaultMessage="Reindex status not available"
+                    defaultMessage="Data stream reindex status not available"
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
-                    defaultMessage="Reindexing error"
+                    defaultMessage="Data stream reindexing error"
                   />
                 )
               }
@@ -193,7 +203,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
               defaultMessage="You have {backingIndicesCount} backing indices on this data stream that were created in ES 7.x and will not be compatible with next version."
               values={{
-                backingIndicesCount: meta.dataStreamDocCount,
+                backingIndicesCount: deprecationMetadata.indicesRequiringUpgradeCount,
               }}
             />
           </p>
@@ -202,27 +212,56 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
               defaultMessage="{totalBackingIndices} total backing indices, and {totalBackingIndicesRequireingUpgrade} requires upgrade."
               values={{
-                totalBackingIndices: 2,
-                totalBackingIndicesRequireingUpgrade: 1,
+                totalBackingIndices: meta.dataStreamTotalIndicesCount,
+                totalBackingIndicesRequireingUpgrade:
+                  deprecationMetadata.indicesRequiringUpgradeCount,
               }}
             />
           </p>
           <ul>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+              tagName="li"
+              defaultMessage="If you do not need to update historical data, mark as read-only. You can reindex post-upgrade if updates are needed."
+            />
             <li>
-              If you don’t need to update historical data, mark as read-only. You can reindex
-              post-upgrade if updates are needed.
-            </li>
-            <li>
-              Reindex
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+                defaultMessage="Reindex"
+              />
               <ul>
-                <li>The current write index will be rolled over and reindexed.</li>
-                <li>Additional backing indices will be reindexed and remain editable.</li>
+                <FormattedMessage
+                  tagName="li"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+                  defaultMessage="The current write index will be rolled over and reindexed."
+                />
+                <FormattedMessage
+                  tagName="li"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+                  defaultMessage="Additional backing indices will be reindexed and remain editable."
+                />
               </ul>
             </li>
           </ul>
           <p>
-            If you no longer need this data, you can also proceed by deleting these indices.{' '}
-            <EuiLink>Go to index management</EuiLink>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+              defaultMessage="If you no longer need this data, you can also proceed by deleting these indices. {indexManagementLinkHtml}"
+              values={{
+                indexManagementLinkHtml: (
+                  <EuiLink
+                    href={`${http.basePath.prepend(
+                      '/app/management/data/index_management/indices'
+                    )}`}
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.indexMgmtLink"
+                      defaultMessage="Go to index management"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiText>
         <EuiSpacer />

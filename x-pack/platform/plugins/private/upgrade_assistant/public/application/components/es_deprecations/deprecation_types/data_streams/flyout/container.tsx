@@ -56,24 +56,17 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   closeFlyout,
   deprecation,
 }) => {
-  const { status, reindexWarnings, errorMessage, meta } = reindexState;
+  const { status, reindexWarnings, errorMessage, deprecationMetadata, meta } = reindexState;
   const { index } = deprecation;
-  console.log('meta::', meta);
-  console.log('reindexState::', reindexState);
 
   const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
-  useMemo(async () => {
-    try {
-      const result = await loadDataStreamMetadata();
-      console.log('result::', result);
-      setFlyoutStep('notStarted');
-    } catch (error) {
-      console.error('Error loading data stream metadata', error);
-    }
-  }, [loadDataStreamMetadata, setFlyoutStep]);
 
-  useMemo(() => {
+  const switchFlyoutStep = useCallback(() => {
     switch (status) {
+      case DataStreamReindexStatus.notStarted: {
+        setFlyoutStep('notStarted');
+        return;
+      }
       case DataStreamReindexStatus.failed:
       case DataStreamReindexStatus.fetchFailed:
       case DataStreamReindexStatus.cancelled:
@@ -88,33 +81,42 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     }
   }, [status]);
 
-  const onStartReindex = useCallback(() => {
+  useMemo(async () => {
+    await loadDataStreamMetadata();
+    switchFlyoutStep();
+  }, [loadDataStreamMetadata, switchFlyoutStep]);
+  useMemo(() => switchFlyoutStep(), [switchFlyoutStep]);
+
+  const onStartReindex = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_START_CLICK);
-    setFlyoutStep('inProgress');
-    startReindex();
+    await startReindex();
   }, [startReindex]);
 
-  const onStopReindex = useCallback(() => {
+  const onStopReindex = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_STOP_CLICK);
-    setFlyoutStep('notStarted');
-    cancelReindex();
+    await cancelReindex();
   }, [cancelReindex]);
 
-  const { docsSizeFormatted, lastIndexCreationDateFormatted } = useMemo(() => {
+  const { docsSizeFormatted, dataStreamDocCount, lastIndexCreationDateFormatted } = useMemo(() => {
     if (!meta) {
       return {
+        dataStreamDocCount: 'Unknown',
         docsSizeFormatted: 'Unknown',
         lastIndexCreationDateFormatted: 'Unknown',
       };
     }
 
     return {
-      docsSizeFormatted: meta.dataStreamDocSize
-        ? numeral(meta.dataStreamDocSize).format(FILE_SIZE_DISPLAY_FORMAT)
-        : 'Unknown',
-      lastIndexCreationDateFormatted: meta.lastBackingIndexCreationDate
-        ? `${moment(meta.lastBackingIndexCreationDate).format(DATE_FORMAT)}`
-        : 'Unknown',
+      dataStreamDocCount:
+        typeof meta.dataStreamDocCount === 'number' ? `${meta.dataStreamDocCount}` : 'Unknown',
+      docsSizeFormatted:
+        typeof meta.dataStreamDocSize === 'number'
+          ? numeral(meta.dataStreamDocSize).format(FILE_SIZE_DISPLAY_FORMAT)
+          : 'Unknown',
+      lastIndexCreationDateFormatted:
+        typeof meta.lastBackingIndexCreationDate === 'number'
+          ? `${moment(meta.lastBackingIndexCreationDate).format(DATE_FORMAT)}`
+          : 'Unknown',
     };
   }, [meta]);
 
@@ -134,6 +136,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         return (
           <DataStreamDetailsFlyoutStep
             closeFlyout={closeFlyout}
+            deprecationMetadata={deprecationMetadata}
             lastIndexCreationDateFormatted={lastIndexCreationDateFormatted}
             meta={meta}
             startReindex={() => {
@@ -154,6 +157,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         return (
           <ConfirmReindexingFlyoutStep
             warnings={reindexWarnings ?? []}
+            deprecationMetadata={deprecationMetadata}
             meta={meta}
             hideWarningsStep={() => {
               setFlyoutStep('notStarted');
@@ -191,7 +195,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             />
           );
         }
-        return <ReindexingCompletedFlyoutStep meta={meta} />;
+        return <ReindexingCompletedFlyoutStep deprecationMetadata={deprecationMetadata} />;
       }
     }
   }, [
@@ -201,6 +205,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     onStartReindex,
     onStopReindex,
     lastIndexCreationDateFormatted,
+    deprecationMetadata,
     reindexWarnings,
     meta,
     errorMessage,
@@ -226,7 +231,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                 listItems={[
                   {
                     title: 'Reindexing required for indices created on or after',
-                    description: `${lastIndexCreationDateFormatted}`,
+                    description: lastIndexCreationDateFormatted,
                   },
                 ]}
               />
@@ -238,7 +243,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                   listItems={[
                     {
                       title: 'Size',
-                      description: `${docsSizeFormatted}`,
+                      description: docsSizeFormatted,
                     },
                   ]}
                 />
@@ -249,9 +254,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                   listItems={[
                     {
                       title: 'Document Count',
-                      description: meta.dataStreamDocCount
-                        ? `${meta.dataStreamDocCount}`
-                        : 'Unknown',
+                      description: dataStreamDocCount,
                     },
                   ]}
                 />

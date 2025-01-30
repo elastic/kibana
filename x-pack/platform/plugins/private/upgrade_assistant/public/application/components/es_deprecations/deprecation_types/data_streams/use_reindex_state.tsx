@@ -13,12 +13,14 @@ import {
   DataStreamMetadata,
   DataStreamReindexStatusResponse,
   DataStreamProgressDetails,
+  DataStreamsActionMetadata,
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
 
 const POLL_INTERVAL = 1000;
 
+export type DeprecationMetadata = DataStreamsActionMetadata & { learnMoreUrl: string };
 export interface ReindexState {
   loadingState: LoadingState;
   cancelLoadingState?: CancelLoadingState;
@@ -30,6 +32,7 @@ export interface ReindexState {
   hasRequiredPrivileges?: boolean;
   taskStatus?: DataStreamProgressDetails;
 
+  deprecationMetadata: DeprecationMetadata;
   meta: DataStreamMetadata | null;
 }
 
@@ -38,6 +41,7 @@ const getReindexState = (
   { reindexOp, warnings, hasRequiredPrivileges, meta: updatedMeta }: DataStreamReindexStatusResponse
 ) => {
   const meta = { ...(updatedMeta ?? reindexState.meta) };
+
   const newReindexState: ReindexState = {
     ...reindexState,
 
@@ -58,24 +62,18 @@ const getReindexState = (
     newReindexState.status = reindexOp.status;
 
     if (reindexOp.status === DataStreamReindexStatus.notStarted) {
-      console.log('newReindexState::', newReindexState);
       return newReindexState;
     }
 
-    newReindexState.reindexTaskPercComplete = reindexOp.reindexTaskPercComplete;
-    newReindexState.errorMessage = reindexOp.errorMessage;
-
-    // if reindex cancellation was "requested" or "loading" and the reindex task is now cancelled,
-    // then reindex cancellation has completed, set it to "success"
     if (
-      (reindexState.cancelLoadingState === CancelLoadingState.Requested ||
-        reindexState.cancelLoadingState === CancelLoadingState.Loading) &&
-      reindexOp.status === DataStreamReindexStatus.cancelled
+      reindexOp.status === DataStreamReindexStatus.inProgress ||
+      reindexOp.status === DataStreamReindexStatus.completed
     ) {
-      newReindexState.cancelLoadingState = CancelLoadingState.Success;
-    } else if (
-      // if reindex cancellation has been requested and the reindex task is still in progress,
-      // then reindex cancellation has not completed yet, set it to "loading"
+      newReindexState.taskStatus = reindexOp.progressDetails;
+      newReindexState.reindexTaskPercComplete = reindexOp.reindexTaskPercComplete;
+    }
+
+    if (
       reindexState.cancelLoadingState === CancelLoadingState.Requested &&
       reindexOp.status === DataStreamReindexStatus.inProgress
     ) {
@@ -83,25 +81,27 @@ const getReindexState = (
     }
   }
 
-  console.log('newReindexState::', newReindexState);
   return newReindexState;
 };
 
 export const useReindexStatus = ({
   dataStreamName,
+  deprecationMetadata,
   api,
+  learnMoreUrl,
 }: {
   dataStreamName: string;
+  learnMoreUrl: string;
+  deprecationMetadata: DataStreamsActionMetadata;
   api: ApiService;
 }) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
+    deprecationMetadata: { learnMoreUrl, ...deprecationMetadata },
     loadingState: LoadingState.Loading,
     errorMessage: null,
     reindexTaskPercComplete: null,
     taskStatus: undefined,
-    meta: {
-      dataStreamName,
-    },
+    meta: null,
   });
 
   const pollIntervalIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -118,10 +118,8 @@ export const useReindexStatus = ({
     clearPollInterval();
 
     const { data, error } = await api.getDataStreamReindexStatus(dataStreamName);
-    console.log('updateStatus::', data);
 
     if (error) {
-      console.log('updateStatus error::', error);
       setReindexState((prevValue: ReindexState) => {
         return {
           ...prevValue,
@@ -179,10 +177,21 @@ export const useReindexStatus = ({
   }, [api, dataStreamName, updateStatus]);
 
   const loadDataStreamMetadata = useCallback(async () => {
-    const { data, error } = await api.getDataStreamMetadata(dataStreamName);
-    console.log('data::', data);
+    try {
+      const { data, error } = await api.getDataStreamMetadata(dataStreamName);
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      setReindexState((prevValue: ReindexState) => {
+        return {
+          ...prevValue,
+          loadingState: LoadingState.Success,
+          meta: data,
+        };
+      });
+    } catch (error) {
       setReindexState((prevValue: ReindexState) => {
         return {
           ...prevValue,
@@ -192,16 +201,7 @@ export const useReindexStatus = ({
           status: DataStreamReindexStatus.failed,
         };
       });
-      return;
     }
-
-    setReindexState((prevValue: ReindexState) => {
-      return {
-        ...prevValue,
-        loadingState: LoadingState.Success,
-        meta: data,
-      };
-    });
   }, [api, dataStreamName]);
 
   const cancelReindex = useCallback(async () => {
@@ -211,17 +211,27 @@ export const useReindexStatus = ({
         cancelLoadingState: CancelLoadingState.Requested,
       };
     });
+    try {
+      const { error, data } = await api.cancelDataStreamReindexTask(dataStreamName);
 
-    const { error } = await api.cancelDataStreamReindexTask(dataStreamName);
+      if (error) {
+        throw error;
+      }
 
-    if (error) {
+      setReindexState((prevValue: ReindexState) => {
+        return {
+          ...prevValue,
+          cancelLoadingState: CancelLoadingState.Success,
+          status: DataStreamReindexStatus.cancelled,
+        };
+      });
+    } catch (error) {
       setReindexState((prevValue: ReindexState) => {
         return {
           ...prevValue,
           cancelLoadingState: CancelLoadingState.Error,
         };
       });
-      return;
     }
   }, [api, dataStreamName]);
 

@@ -42,13 +42,6 @@ const buttonLabel = (status?: DataStreamReindexStatus) => {
           defaultMessage="Reindexing…"
         />
       );
-    case DataStreamReindexStatus.paused:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
-          defaultMessage="Resume reindexing"
-        />
-      );
     case DataStreamReindexStatus.cancelled:
       return (
         <FormattedMessage
@@ -76,10 +69,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   cancelReindex: () => void;
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const {
-    services: {
-      api,
-      core: { docLinks },
-    },
+    services: { api },
   } = useAppContext();
 
   const { loadingState, status, hasRequiredPrivileges } = reindexState;

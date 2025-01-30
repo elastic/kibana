@@ -8,29 +8,40 @@
 import React from 'react';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-
-import { useAppContext } from '../../../../../../../app_context';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   formattedDate: string;
+  learnMoreUrl: string;
 }
-export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({ formattedDate }) => {
-  const {
-    services: {
-      core: { docLinks },
-    },
-  } = useAppContext();
-  const { links } = docLinks;
-
+export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
+  formattedDate,
+  learnMoreUrl,
+}) => {
   return (
     <EuiCallOut color="primary">
       <p>
-        Data indexed on or after {formattedDate} needs to be reindexed to a compatible format or
-        marked as read-only.
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
+          defaultMessage="Data indexed on or after {formattedDate} needs to be reindexed to a compatible format or marked as read-only."
+          values={{ formattedDate }}
+        />
         <br />
         <br />
-        Depending on size and resources, reindexing may take extended time and your data will be in
-        a read-only state until the job has completed. <EuiLink target="_blank">Learn more</EuiLink>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
+          defaultMessage="Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed. {learnMoreHtml}"
+          values={{
+            learnMoreHtml: (
+              <EuiLink href={learnMoreUrl} target="_blank">
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       </p>
     </EuiCallOut>
   );

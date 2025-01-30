@@ -9,14 +9,15 @@ import React from 'react';
 
 import { EuiFlyoutBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { DataStreamMetadata } from '../../../../../../../../../common/types';
+import type { DeprecationMetadata } from '../../../use_reindex_state';
 
 interface Props {
-  meta: DataStreamMetadata;
+  deprecationMetadata: DeprecationMetadata;
 }
 
-export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ meta }: Props) => {
+export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({
+  deprecationMetadata,
+}: Props) => {
   return (
     <>
       <EuiFlyoutBody>
@@ -29,7 +30,13 @@ export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ 
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <p>{meta.dataStreamTotalIndicesRequireUpgradeCount} indices successfully reindexed</p>
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
+            defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully reindexed."
+            values={{ count: deprecationMetadata.indicesRequiringUpgradeCount }}
+          />
+        </p>
       </EuiFlyoutBody>
     </>
   );

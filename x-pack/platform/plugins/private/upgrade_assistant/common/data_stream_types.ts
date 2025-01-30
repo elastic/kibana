@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+export interface DataStreamsActionMetadata {
+  totalBackingIndices: number;
+  indicesRequiringUpgradeCount: number;
+  indicesRequiringUpgrade: string[];
+  reindexRequired: boolean;
+}
+
 export interface DataStreamsAction {
   type: 'dataStream';
-  metadata: {
-    totalBackingIndices: number;
-    indicesRequiringUpgradeCount: number;
-    indicesRequiringUpgrade: string[];
-    reindexRequired: boolean;
-  };
+  metadata: DataStreamsActionMetadata;
 }
 
 export interface DataStreamMetadata {
   lastBackingIndexCreationDate: number;
   dataStreamTotalIndicesCount: number;
-  dataStreamTotalIndicesRequireUpgradeCount: number;
   dataStreamDocSize: number;
   dataStreamDocCount: number;
   backingIndices: string[];
@@ -57,15 +58,15 @@ export enum DataStreamReindexStatus {
   fetchFailed,
 }
 
-export interface DataStreamReindexStatusNotStarted {
-  status: DataStreamReindexStatus.notStarted;
-}
-
 export interface DataStreamProgressDetails {
   successCount: number;
   pendingCount: number;
   inProgressCount: number;
   errorsCount: number;
+}
+
+export interface DataStreamReindexStatusNotStarted {
+  status: DataStreamReindexStatus.notStarted;
 }
 
 export interface DataStreamReindexStatusInProgress {
@@ -85,10 +86,15 @@ export interface DataStreamReindexStatusFailed {
   errorMessage: string;
 }
 
+export interface DataStreamReindexStatusCancelled {
+  status: DataStreamReindexStatus.cancelled;
+}
+
 export type DataStreamReindexOperation =
   | DataStreamReindexStatusNotStarted
   | DataStreamReindexStatusInProgress
   | DataStreamReindexStatusCompleted
+  | DataStreamReindexStatusCancelled
   | DataStreamReindexStatusFailed;
 
 /**

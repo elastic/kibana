@@ -18,6 +18,7 @@ import {
   DataStreamMetadata,
   DataStreamReindexWarning,
   DataStreamReindexTaskStatusResponse,
+  DataStreamReindexStatusCancelled,
 } from '../../../common/types';
 
 import { error } from './error';
@@ -54,7 +55,7 @@ interface DataStreamReindexService {
    * Cancels an in-progress reindex operation for a given index.
    * @param dataStreamName
    */
-  cancelReindexing: (dataStreamName: string) => Promise<void>;
+  cancelReindexing: (dataStreamName: string) => Promise<DataStreamReindexStatusCancelled>;
 
   /**
    * Retrieves metadata about the data stream.
@@ -139,45 +140,26 @@ export const dataStreamReindexServiceFactory = ({
 
         return true;
       } catch (err) {
-        console.log('err::', err);
         if (err.status === 400 && err.error.type === 'resource_already_exists_exception') {
           throw error.reindexAlreadyInProgress(
             `A reindex operation already in-progress for ${dataStreamName}`
           );
         }
 
-        throw err;
-
-        // return {
-        //   status: ReindexStatus.failed,
-        //   errorMessage: e.toString(),
-        // };
+        throw error.reindexTaskFailed(
+          `The reindex operation failed to start for ${dataStreamName}`
+        );
       }
     },
     async fetchReindexStatus(dataStreamName: string): Promise<DataStreamReindexOperation> {
       // Check reindexing task progress
-
       try {
-        // const taskResponse: DataStreamReindexTaskStatusResponse = {
-        //   complete: false,
-        //   successes: 1,
-        //   total_indices_in_data_stream: 6,
-        //   errors: [{ index: 'mock_index1', message: 'error in mock_index1'}],
-        //   start_time_millis: 1,
-        //   total_indices_requiring_upgrade: 5,
-        //   in_progress: [{ index: 'mock_index1', total_doc_count: 1, reindexed_doc_count: 1 }],
-        //   pending: 3,
-        // };
-
         const taskResponse = await esClient.transport.request<DataStreamReindexTaskStatusResponse>({
           method: 'GET',
           path: `/_migration/reindex/${dataStreamName}/_status`,
         });
 
-        console.log('taskResponse:', taskResponse);
-
         if (taskResponse.exception) {
-          console.log('has exception!');
           // Include the entire task result in the error message. This should be guaranteed
           // to be JSON-serializable since it just came back from Elasticsearch.
           throw error.reindexTaskFailed(
@@ -192,7 +174,6 @@ export const dataStreamReindexServiceFactory = ({
         if (taskResponse.complete) {
           // Check that no failures occurred
           if (taskResponse.errors.length) {
-            console.log('has errores!');
             // Include the entire task result in the error message. This should be guaranteed
             // to be JSON-serializable since it just came back from Elasticsearch.
             throw error.reindexTaskFailed(
@@ -203,8 +184,6 @@ export const dataStreamReindexServiceFactory = ({
               )}`
             );
           }
-
-          console.log('marking as complete');
 
           // Update the status
           return {
@@ -220,12 +199,6 @@ export const dataStreamReindexServiceFactory = ({
         } else {
           // Updated the percent complete
           const perc = taskResponse.successes / taskResponse.total_indices_in_data_stream;
-          console.log('taskResponse.successes:', taskResponse.successes);
-          console.log(
-            'taskResponse.total_indices_in_data_stream:',
-            taskResponse.total_indices_in_data_stream
-          );
-          console.log('perc:', perc);
 
           return {
             status: DataStreamReindexStatus.inProgress,
@@ -250,10 +223,6 @@ export const dataStreamReindexServiceFactory = ({
           };
         }
 
-        console.log('err::', err);
-        console.log('err.status::', err.status);
-        console.log('err.error::', err.error);
-
         return {
           status: DataStreamReindexStatus.failed,
           errorMessage: err.toString(),
@@ -261,21 +230,6 @@ export const dataStreamReindexServiceFactory = ({
       }
     },
     async cancelReindexing(dataStreamName: string) {
-      console.log('attempting to cancel!!!', dataStreamName);
-      // const reindexOp = await this.findReindexOperation(dataStreamName);
-
-      // if (!reindexOp) {
-      //   throw error.indexNotFound(`No reindex operation found for index ${dataStreamName}`);
-      // } else if (reindexOp.attributes.status !== ReindexStatus.inProgress) {
-      //   throw error.reindexCannotBeCancelled(`Reindex operation is not in progress`);
-      // } else if (reindexOp.attributes.lastCompletedStep !== DataStreamReindexStep.reindexStarted) {
-      //   throw error.reindexCannotBeCancelled(
-      //     `Reindex operation is not currently waiting for reindex task to complete`
-      //   );
-      // }
-
-      console.log('attempting to cancel!!!');
-
       const resp = await esClient.transport.request<{ acknowledged: boolean }>({
         method: 'POST',
         path: `/_migration/reindex/${dataStreamName}/_cancel`,
@@ -284,6 +238,10 @@ export const dataStreamReindexServiceFactory = ({
       if (!resp.acknowledged) {
         throw error.reindexCannotBeCancelled(`Could not cancel reindex.`);
       }
+
+      return {
+        status: DataStreamReindexStatus.cancelled,
+      };
     },
     async getDataStreamMetadata(dataStreamName: string): Promise<DataStreamMetadata> {
       try {
@@ -294,14 +252,10 @@ export const dataStreamReindexServiceFactory = ({
           },
           { meta: true }
         )) as TransportResult<any>;
-        console.log('statsBody::', statsBody);
 
         const dataStreamDocCount = statsBody._all.total.docs.count;
         const dataStreamDocSize = statsBody._all.total.store.total_data_set_size_in_bytes;
         const backingIndices = Object.keys(statsBody.indices);
-        console.log('backingIndices::', backingIndices);
-        console.log('dataStreamDocCount::', dataStreamDocCount);
-        console.log('dataStreamDocSize::', dataStreamDocSize);
 
         const indicesCreationDates = [];
         for (const index of backingIndices) {
@@ -321,13 +275,11 @@ export const dataStreamReindexServiceFactory = ({
         return {
           lastBackingIndexCreationDate,
           dataStreamTotalIndicesCount: backingIndices.length,
-          dataStreamTotalIndicesRequireUpgradeCount: backingIndices.length,
           dataStreamDocSize,
           dataStreamDocCount,
           backingIndices,
         };
       } catch (err) {
-        console.log('err::', err);
         throw err;
       }
     },

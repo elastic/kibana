@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DataStreamsAction, EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
@@ -98,7 +98,12 @@ export const DataStreamTableRow: React.FunctionComponent<TableRowProps> = (props
   } = useAppContext();
 
   return (
-    <DataStreamReindexStatusProvider indexName={props.deprecation.index!} api={api}>
+    <DataStreamReindexStatusProvider
+      deprecationMetadata={(props.deprecation.correctiveAction as DataStreamsAction).metadata}
+      learnMoreUrl={props.deprecation.url}
+      indexName={props.deprecation.index!}
+      api={api}
+    >
       <DataStreamTableRowCells {...props} />
     </DataStreamReindexStatusProvider>
   );

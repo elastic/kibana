@@ -16,7 +16,7 @@ import type { ReindexState } from '../../../use_reindex_state';
 import { StepProgress, StepProgressStep } from '../../../../reindex/flyout/step_progress';
 import { getDataStreamReindexProgress } from '../../../../../../../lib/utils';
 import { ReindexingDocumentsStepTitle } from './progress_title';
-
+import { CancelLoadingState } from '../../../../../../types';
 interface Props {
   reindexState: ReindexState;
 }
@@ -26,7 +26,7 @@ interface Props {
  * and any error messages that are encountered.
  */
 export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
-  const { status, reindexTaskPercComplete, taskStatus } = props.reindexState;
+  const { status, reindexTaskPercComplete, cancelLoadingState, taskStatus } = props.reindexState;
 
   // The reindexing step is special because it generally lasts longer and can be cancelled mid-flight
   const reindexingDocsStep = {
@@ -42,13 +42,23 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
   const inProgress = status === DataStreamReindexStatus.inProgress;
 
   let euiProgressColor = 'subdued';
-  console.log('inProgress::', inProgress);
-  console.log('taskStatus::', taskStatus);
 
-  if (status === DataStreamReindexStatus.failed) {
+  if (cancelLoadingState === CancelLoadingState.Error) {
     reindexingDocsStep.status = 'failed';
     euiProgressColor = 'danger';
-  } else if (status === DataStreamReindexStatus.cancelled) {
+  } else if (
+    cancelLoadingState === CancelLoadingState.Loading ||
+    cancelLoadingState === CancelLoadingState.Requested
+  ) {
+    reindexingDocsStep.status = 'inProgress';
+    euiProgressColor = 'subdued';
+  } else if (status === DataStreamReindexStatus.failed) {
+    reindexingDocsStep.status = 'failed';
+    euiProgressColor = 'danger';
+  } else if (
+    status === DataStreamReindexStatus.cancelled ||
+    cancelLoadingState === CancelLoadingState.Success
+  ) {
     reindexingDocsStep.status = 'cancelled';
   } else if (status === undefined) {
     reindexingDocsStep.status = 'incomplete';
@@ -59,6 +69,10 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
   } else if (status === DataStreamReindexStatus.completed) {
     reindexingDocsStep.status = 'complete';
     euiProgressColor = 'success';
+  } else {
+    // not started // undefined
+    reindexingDocsStep.status = 'incomplete';
+    euiProgressColor = 'subdued';
   }
 
   const progressPercentage = inProgress
@@ -93,6 +107,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
           size="m"
         />
       )}
+      <EuiSpacer size="m" />
       {inProgress && !taskStatus && (
         <p>
           <FormattedMessage
@@ -103,26 +118,38 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
       )}
       {inProgress && taskStatus && (
         <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {taskStatus.errorsCount > 0 && (
+              <EuiFlexItem>
+                <EuiText color="danger">
+                  <p>
+                    {i18n.translate('progressStep.failedTitle', {
+                      defaultMessage:
+                        '{count, plural, =1 {# backing index} other {# backing indices}} failed reindexing.',
+                      values: { count: taskStatus.errorsCount },
+                    })}
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
-              <EuiText>
+              <EuiText color="success">
                 <p>
                   {i18n.translate('progressStep.completeTitle', {
                     defaultMessage:
-                      '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} completed',
-                    values: { count: taskStatus.successCount || 0 },
+                      '{count, plural, =1 {# backing index} other {# backing indices}} reindexed successfully.',
+                    values: { count: taskStatus.successCount },
                   })}
                 </p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText color="primary">
                 <p>
                   {i18n.translate('progressStep.inProgressTitle', {
                     defaultMessage:
-                      '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} currently in progress',
-                    values: { count: taskStatus.inProgressCount || 0 },
+                      '{count, plural, =1 {# backing index} other {# backing indices}} currently reindexing.',
+                    values: { count: taskStatus.inProgressCount },
                   })}
                 </p>
               </EuiText>
@@ -132,19 +159,8 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                 <p>
                   {i18n.translate('progressStep.pendingTitle', {
                     defaultMessage:
-                      '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} pending to start',
-                    values: { count: taskStatus.pendingCount || 0 },
-                  })}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  {i18n.translate('progressStep.failedTitle', {
-                    defaultMessage:
-                      '{count, plural, =0 {Unknown} =1 {# index} other {# indices}} failed to migrate',
-                    values: { count: taskStatus.errorsCount || 0 },
+                      '{count, plural, =1 {# backing index} other {# backing indices}} pending to start reindexing.',
+                    values: { count: taskStatus.pendingCount },
                   })}
                 </p>
               </EuiText>
