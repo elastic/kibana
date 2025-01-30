@@ -105,7 +105,7 @@ export interface RuleTypeParamsExpressionProps<
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
+  dataViews?: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
