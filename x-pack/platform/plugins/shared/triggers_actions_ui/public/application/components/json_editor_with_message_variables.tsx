@@ -77,7 +77,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
   useEffect(() => {
-    if (inputTargetValue && (!xJson || xJson !== inputTargetValue)) {
+    if (!xJson && inputTargetValue) {
       setXJson(inputTargetValue);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

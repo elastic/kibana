@@ -220,6 +220,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         />
       </EuiFormRow>
       <JsonEditorWithMessageVariables
+        key={alert.template}
         messageVariables={messageVariables}
         paramsProperty={'body'}
         inputTargetValue={alert.body}
