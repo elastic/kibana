@@ -24,7 +24,7 @@ import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { createEnrichEventsFunction } from '../utils/enrichments';
-import { rowToDocument } from './utils';
+import { rowToDocument, mergeEsqlResultInSource } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -177,11 +177,11 @@ export const esqlExecutor = async ({
           });
 
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
-          const { _id, _version, _index, ...source } = document;
+          const { _id, _version, _index, ...esqlResult } = document;
 
           const sourceDocument = _id ? sourceDocuments[_id] : undefined;
           return {
-            _source: { ...sourceDocument?._source, ...source },
+            _source: mergeEsqlResultInSource(sourceDocument?._source, esqlResult),
             fields: sourceDocument?.fields,
             _id: _id ?? '',
             _index: _index || sourceDocument?._index || '',

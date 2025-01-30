@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export * from './row_to_document';
-export * from './generate_alert_id';
-export * from './merge_esql_result_in_source';
+import type { SignalSource } from '../../types';
+
+export const mergeEsqlResultInSource = (
+  source: SignalSource | undefined,
+  esqlResult: Record<string, string>
+): SignalSource => {
+  return { ...source, ...esqlResult };
+};
