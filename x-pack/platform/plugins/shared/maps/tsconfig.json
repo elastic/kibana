@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "server/config.ts",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "ui_tests/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -92,6 +93,7 @@
     "@kbn/field-utils",
     "@kbn/react-hooks",
     "@kbn/react-kibana-mount",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",
