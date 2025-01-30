@@ -15,6 +15,7 @@ import {
 import { dump } from 'js-yaml';
 import { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -134,6 +135,16 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         },
       },
     });
+
+    coreStart.analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+      flow_type: observabilityOnboardingState.type,
+      flow_id: id,
+      step: name,
+      step_status: status,
+      step_message: message,
+      payload,
+    });
+
     return { name, status, message, payload };
   },
 });
@@ -412,6 +423,23 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
             payload: installedIntegrations,
           },
         },
+      },
+    });
+
+    coreStart.analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+      flow_type: savedObservabilityOnboardingState.type,
+      flow_id: params.path.onboardingId,
+      step: 'install-integrations',
+      step_status: 'complete',
+      payload: {
+        integrations: installedIntegrations.map(
+          ({ title, pkgName, pkgVersion, installSource }) => ({
+            title,
+            pkgName,
+            pkgVersion,
+            installSource,
+          })
+        ),
       },
     });
 

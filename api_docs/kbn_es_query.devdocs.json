@@ -4515,6 +4515,92 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.updateFilterReferences",
+        "type": "Function",
+        "tags": [],
+        "label": "updateFilterReferences",
+        "description": [],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], fromDataView: string, toDataView: string | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter_references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.updateFilterReferences.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.updateFilterReferences.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fromDataView",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.updateFilterReferences.$3",
+            "type": "string",
+            "tags": [],
+            "label": "toDataView",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -4883,6 +4969,27 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/expressions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.ExecutionContextSearch.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-query/src/expressions/types.ts",
             "deprecated": false,

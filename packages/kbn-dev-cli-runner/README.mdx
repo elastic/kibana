@@ -79,7 +79,7 @@ $ node scripts/my_task
     Execte an async function, passing it the parsed flags and a tooling log that is configured to the requested logging level. If the returned promise is rejected with an error created by `createFailError(...)` or `createFlagError(...)` the process will exit as described by the error, otherwise the process will exit with code 1.
     
     **`fn` Params:**
-    - *[`log: ToolingLog`](../../../packages/kbn-dev-utils/src/tooling_log/tooling_log.js)*:
+    - *[`log: ToolingLog`](../../packages/kbn-tooling-log/src/tooling_log.ts)*:
 
       An instance of the `ToolingLog` that is configured with the standard flags: `--verbose`, `--quiet`, `--silent`, and `--debug`
 

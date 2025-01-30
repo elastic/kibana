@@ -14,7 +14,6 @@ import type { DashboardAttributes, DashboardPanel } from '../server/content_mana
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
-  saveQuery: boolean;
   createNew: boolean;
   show: boolean;
   [key: string]: boolean;
