@@ -38,7 +38,7 @@ export class CustomVisualizationsPublicPlugin
     /**
      * Create the visualization type with definition
      */
-    visualizations.createBaseVisualization<SelfChangingVisParams>({
+    visualizations.createBaseVisualization<SelfChangingVisParams>('self_changing_vis', async () => ({
       name: 'self_changing_vis',
       title: 'Self Changing Vis',
       icon: 'controlsHorizontal',
@@ -59,7 +59,7 @@ export class CustomVisualizationsPublicPlugin
         ],
       },
       toExpressionAst,
-    });
+    }));
   }
 
   public start() {}

@@ -96,7 +96,7 @@ async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
   return resolvedIndexPatterns;
 }
 
-export const metricsVisDefinition: VisTypeDefinition<
+export const metricsVisType: VisTypeDefinition<
   TimeseriesVisParams | TimeseriesVisDefaultParams
 > = {
   name: VIS_TYPE,
