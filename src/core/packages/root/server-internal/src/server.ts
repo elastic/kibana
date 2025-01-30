@@ -302,9 +302,12 @@ export class Server {
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
 
+    const loggingSetup = this.logging.setup();
+
     const deprecationsSetup = await this.deprecations.setup({
       http: httpSetup,
       coreUsageData: coreUsageDataSetup,
+      logging: loggingSetup,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
@@ -354,8 +357,6 @@ export class Server {
       http: httpSetup,
       rendering: renderingSetup,
     });
-
-    const loggingSetup = this.logging.setup();
 
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,

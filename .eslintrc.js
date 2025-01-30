@@ -1020,21 +1020,6 @@ module.exports = {
       },
     },
     {
-      // disable imports from legacy uptime plugin
-      files: [
-        'x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: ['**/legacy_uptime/*'],
-            paths: RESTRICTED_IMPORTS,
-          },
-        ],
-      },
-    },
-    {
       files: [
         'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/apm_data_access/**/*.{js,mjs,ts,tsx}',
@@ -1074,8 +1059,8 @@ module.exports = {
     {
       // front end and common typescript and javascript files only
       files: [
-        'x-pack/platform/plugins/shared/integration_assistant/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/integration_assistant/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -1159,7 +1144,7 @@ module.exports = {
       files: [
         'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/integration_assistant/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{ts,tsx}',
@@ -1174,7 +1159,7 @@ module.exports = {
       excludedFiles: [
         'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/platform/plugins/shared/integration_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1195,7 +1180,7 @@ module.exports = {
       files: [
         'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/integration_assistant/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{ts,tsx}',
@@ -1229,7 +1214,7 @@ module.exports = {
       files: [
         'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/integration_assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/automatic_import/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{js,mjs,ts,tsx}',
@@ -2045,7 +2030,9 @@ module.exports = {
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
-        // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
+        // FIXME @kbn/osquery-plugin has dependencies on:
+        // - @kbn/timelines-plugin         (security/private) https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/osquery/public/types.ts#L20
+        // - @kbn/security-solution-plugin (security/private) this one is “less critical” as it is cypress depending on cypress
         'x-pack/platform/plugins/shared/osquery/**',
 
         // For now, we keep the exception to let tests depend on anythying.

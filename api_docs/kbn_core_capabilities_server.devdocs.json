@@ -344,12 +344,12 @@
           {
             "parentPluginId": "@kbn/core-capabilities-server",
             "id": "def-server.CapabilitiesSwitcher.$2",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "uiCapabilities",
             "description": [],
             "signature": [
-              "Capabilities"
+              "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
             "path": "src/core/packages/capabilities/server/src/capabilities.ts",
             "deprecated": false,

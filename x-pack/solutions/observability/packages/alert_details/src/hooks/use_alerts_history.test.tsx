@@ -174,7 +174,7 @@ describe('useAlertsHistory', () => {
         '{"size":0,"rule_type_ids":["apm"],"consumers":["foo"],"query":{"bool":{"must":[' +
         '{"term":{"kibana.alert.rule.uuid":"cfd36e60-ef22-11ed-91eb-b7893acacfe2"}},' +
         '{"term":{"kibana.alert.instance.id":"instance-1"}},' +
-        '{"range":{"kibana.alert.time_range":{"from":"2023-04-10T00:00:00.000Z","to":"2023-05-10T00:00:00.000Z"}}}]}},' +
+        '{"range":{"kibana.alert.time_range":{"gte":"2023-04-10T00:00:00.000Z","lte":"2023-05-10T00:00:00.000Z"}}}]}},' +
         '"aggs":{"histogramTriggeredAlerts":{"date_histogram":{"field":"kibana.alert.start","fixed_interval":"1d",' +
         '"extended_bounds":{"min":"2023-04-10T00:00:00.000Z","max":"2023-05-10T00:00:00.000Z"}}},' +
         '"avgTimeToRecoverUS":{"filter":{"term":{"kibana.alert.status":"recovered"}},' +
@@ -217,7 +217,7 @@ describe('useAlertsHistory', () => {
       body:
         '{"size":0,"rule_type_ids":["apm"],"query":{"bool":{"must":[' +
         '{"term":{"kibana.alert.rule.uuid":"cfd36e60-ef22-11ed-91eb-b7893acacfe2"}},' +
-        '{"range":{"kibana.alert.time_range":{"from":"2023-04-10T00:00:00.000Z","to":"2023-05-10T00:00:00.000Z"}}}]}},' +
+        '{"range":{"kibana.alert.time_range":{"gte":"2023-04-10T00:00:00.000Z","lte":"2023-05-10T00:00:00.000Z"}}}]}},' +
         '"aggs":{"histogramTriggeredAlerts":{"date_histogram":{"field":"kibana.alert.start","fixed_interval":"1d",' +
         '"extended_bounds":{"min":"2023-04-10T00:00:00.000Z","max":"2023-05-10T00:00:00.000Z"}}},' +
         '"avgTimeToRecoverUS":{"filter":{"term":{"kibana.alert.status":"recovered"}},' +
