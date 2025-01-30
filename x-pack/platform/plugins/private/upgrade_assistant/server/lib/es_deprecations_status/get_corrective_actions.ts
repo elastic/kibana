@@ -16,19 +16,18 @@ interface Actions {
   actions: Action[];
 }
 
-export type EsMetadata = Actions & {
-  [key: string]: string;
-};
+interface ReindexRequired {
+  reindex_required?: boolean;
+}
 
-// TODO(jloleysens): Replace these regexes once this issue is addressed https://github.com/elastic/elasticsearch/issues/118062
-const ES_INDEX_MESSAGES_REQIURING_REINDEX = [
-  /Index created before/,
-  /index with a compatibility version \</,
-];
+export type EsMetadata = Actions &
+  ReindexRequired & {
+    [key: string]: string;
+  };
 
 export const getCorrectiveAction = (
   message: string,
-  metadata: EsMetadata,
+  metadata?: EsMetadata,
   indexName?: string
 ): EnrichedDeprecationInfo['correctiveAction'] => {
   const indexSettingDeprecation = metadata?.actions?.find(
@@ -37,14 +36,11 @@ export const getCorrectiveAction = (
   const clusterSettingDeprecation = metadata?.actions?.find(
     (action) => action.action_type === 'remove_settings' && typeof indexName === 'undefined'
   );
-  const requiresReindexAction = ES_INDEX_MESSAGES_REQIURING_REINDEX.some((regexp) =>
-    regexp.test(message)
-  );
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
 
-  if (requiresReindexAction) {
+  if (metadata?.reindex_required === true) {
     return {
       type: 'reindex',
     };
