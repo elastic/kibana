@@ -145,27 +145,27 @@ function GroupSelection({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="visNewVisDialogGroupSelection__body">
-        <div className="visNewVisDialogGroupSelection__visGroups">
-          <EuiSpacer size="s" />
-          <EuiSkeletonText isLoading={isLoading}>
-            <>
-              {shouldDisplayLegacyTab && (
-                <div className="visNewVisDialogGroupSelection__visGroups">
-                  <EuiTabs>
-                    {tabs.map((t) => (
-                      <EuiTab
-                        data-test-subj={t.dataTestSubj}
-                        isSelected={tab === t.id}
-                        onClick={() => setTab(t.id)}
-                        key={t.id}
-                      >
-                        {t.label}
-                      </EuiTab>
-                    ))}
-                  </EuiTabs>
-                </div>
-              )}
-
+        <EuiSkeletonText isLoading={isLoading}>
+          <>
+            {shouldDisplayLegacyTab && (
+              <div className="visNewVisDialogGroupSelection__visGroups">
+                <EuiTabs>
+                  {tabs.map((t) => (
+                    <EuiTab
+                      data-test-subj={t.dataTestSubj}
+                      isSelected={tab === t.id}
+                      onClick={() => setTab(t.id)}
+                      key={t.id}
+                    >
+                      {t.label}
+                    </EuiTab>
+                  ))}
+                </EuiTabs>
+              </div>
+            )}
+            
+            <div className="visNewVisDialogGroupSelection__visGroups">
+              <EuiSpacer size="s" />
               {tab === 'recommended' ? (
                 <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
                   {promotedVisTypes.map((visType) => (
@@ -203,11 +203,10 @@ function GroupSelection({
                   }
                 </EuiFlexGrid>
               )}
-            </>
-          </EuiSkeletonText>
-          <EuiSpacer size="l" />
-        </div>
-
+              <EuiSpacer size="l" />
+            </div>
+          </>
+        </EuiSkeletonText>
         <ModalFooter visualizeGuideLink={visualizeGuideLink} />
       </EuiModalBody>
     </>
