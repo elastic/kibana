@@ -10,7 +10,7 @@
     "serialize-javascript": "^6.0.2"
   },
   "dependencies": {
-    "@octokit/rest": "^18.10.0",
+    "@octokit/rest": "^21.1.0",
     "axios": "^1.7.9",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
