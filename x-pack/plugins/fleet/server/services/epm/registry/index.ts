@@ -441,10 +441,6 @@ export async function fetchArchiveBuffer({
   const archiveBuffer = await getResponseStreamWithSize(archiveUrl).then(({ stream, size }) =>
     streamToBuffer(stream, size)
   );
-  if (!archiveBuffer) {
-    logger.warn(`Archive Buffer not found`);
-    throw new ArchiveNotFoundError('Archive Buffer not found');
-  }
 
   if (shouldVerify) {
     const verificationResult = await verifyPackageArchiveSignature({
