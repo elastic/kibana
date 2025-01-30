@@ -124,12 +124,6 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
     [selectedOptions, allData, filterData]
   );
 
-  useEffect(
-    function updateOnTimerRefresh() {
-      loadJobMemorySize();
-    },
-    [loadJobMemorySize, refresh]
-  );
   return (
     <div
       style={{ height: chartHeight }}

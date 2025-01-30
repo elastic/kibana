@@ -57,7 +57,6 @@ export async function mountApp(
 ) {
   const [coreStart] = await core.getStartServices();
 
-  params.setBreadcrumbs(getJobsListBreadcrumbs()); // TODO: update breadcrumbs depending on section
   return renderApp(
     coreStart,
     params,

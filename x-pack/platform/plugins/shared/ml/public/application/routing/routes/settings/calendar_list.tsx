@@ -34,7 +34,6 @@ export const calendarListRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} isDst={false} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB'),
   ],
@@ -51,7 +50,6 @@ export const calendarDstListRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} isDst={true} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('CALENDAR_DST_MANAGEMENT_BREADCRUMB'),
   ],

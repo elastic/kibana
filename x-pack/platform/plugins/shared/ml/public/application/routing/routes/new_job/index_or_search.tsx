@@ -38,7 +38,6 @@ interface IndexOrSearchPageProps extends PageProps {
 
 const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.createJobLabel', {
       defaultMessage: 'Create job',

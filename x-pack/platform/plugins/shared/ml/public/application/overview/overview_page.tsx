@@ -223,7 +223,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
             defaultMessage="Notifications"
           />
         ),
-        append: (
+        append: errorsAndWarningCount ? (
           <EuiNotificationBadge
             aria-label={i18n.translate('xpack.ml.overview.notificationsIndicator.unreadErrors', {
               defaultMessage: 'Unread errors or warnings indicator.',
@@ -232,7 +232,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
           >
             {errorsAndWarningCount}
           </EuiNotificationBadge>
-        ),
+        ) : undefined,
         content: <NotificationsList />,
       },
     ],
