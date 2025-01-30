@@ -697,7 +697,7 @@ class OutputService {
           data.service_token = output.secrets?.service_token as string;
         }
         if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
+          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets?.ssl });
         }
       }
     }
@@ -1125,11 +1125,11 @@ class OutputService {
           updateData.service_token = data.secrets?.service_token as string;
         }
         if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
+          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets?.ssl });
         }
       }
     }
-
+    
     patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
 
     auditLoggingService.writeCustomSoAuditLog({
