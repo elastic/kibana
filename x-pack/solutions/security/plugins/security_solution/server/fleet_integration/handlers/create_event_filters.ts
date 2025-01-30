@@ -95,7 +95,7 @@ export const createNonInteractiveSessionEventFilter = async (
         },
       ],
       itemId: uuidv4(),
-      meta: [],
+      meta: undefined,
       comments: [],
       expireTime: undefined,
     });
