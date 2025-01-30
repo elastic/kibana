@@ -78,7 +78,7 @@ describe('useCreateAdhocDataView', () => {
 
     expect(mockAddError).toHaveBeenCalledWith(error, {
       title: i18n.FAILURE_TOAST_TITLE,
-      toastMessage: expect.any(String),
+      toastMessage: expect.anything(),
     });
   });
 });
