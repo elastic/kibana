@@ -56,7 +56,8 @@ import { verifyPackageArchiveSignature } from '../packages/package_verification'
 
 import type { ArchiveIterator } from '../../../../common/types';
 
-import { fetchUrl, getResponse, getResponseStream } from './requests';
+import { fetchUrl, getResponse, getResponseStreamWithSize } from './requests';
+
 import { getRegistryUrl } from './registry_url';
 
 export const splitPkgKey = split;
@@ -436,7 +437,10 @@ export async function fetchArchiveBuffer({
   }
   const registryUrl = getRegistryUrl();
   const archiveUrl = `${registryUrl}${archivePath}`;
-  const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+
+  const archiveBuffer = await getResponseStreamWithSize(archiveUrl).then(({ stream, size }) =>
+    streamToBuffer(stream, size)
+  );
 
   if (shouldVerify) {
     const verificationResult = await verifyPackageArchiveSignature({
