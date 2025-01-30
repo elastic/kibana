@@ -38,7 +38,7 @@ import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
 import VisualizationError from '../../components/visualization_error';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { SerializedVis, Vis } from '../../vis';
 import { getApplication, getExpressions, getUiActions } from '../../services';
 import { VIS_EVENT_TO_TRIGGER } from '../../embeddable/events';

@@ -40,16 +40,24 @@ export async function readStream({
       assetType: 'dashboard',
     }),
     streamsClient.getAncestors(name),
-    streamsClient.getDataStream(name),
+    streamsClient.getDataStream(name).catch((e) => {
+      if (e.statusCode === 404) {
+        return null;
+      }
+      throw e;
+    }),
   ]);
 
   if (isUnwiredStreamDefinition(streamDefinition)) {
     return {
       stream: omit(streamDefinition, 'name'),
-      elasticsearch_assets: await getUnmanagedElasticsearchAssets({
-        dataStream,
-        scopedClusterClient,
-      }),
+      elasticsearch_assets: dataStream
+        ? await getUnmanagedElasticsearchAssets({
+            dataStream,
+            scopedClusterClient,
+          })
+        : [],
+      data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       inherited_fields: {},
