@@ -29,46 +29,7 @@ import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex_state';
 import { useAppContext } from '../../../../../../../app_context';
 import { DurationClarificationCallOut } from './warnings_callout';
-
-const buttonLabel = (status?: DataStreamReindexStatus) => {
-  switch (status) {
-    case DataStreamReindexStatus.failed:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.tryAgainLabel"
-          defaultMessage="Try again"
-        />
-      );
-    case DataStreamReindexStatus.inProgress:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel"
-          defaultMessage="Reindexing…"
-        />
-      );
-    case DataStreamReindexStatus.paused:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
-          defaultMessage="Resume reindexing"
-        />
-      );
-    case DataStreamReindexStatus.cancelled:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
-          defaultMessage="Restart reindexing"
-        />
-      );
-    default:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
-          defaultMessage="Reindex"
-        />
-      );
-  }
-};
+import { getPrimaryButtonLabel } from '../messages';
 
 /**
  * Displays a flyout that shows the current reindexing status for a given index.
@@ -279,7 +240,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                     disabled={loading || !hasRequiredPrivileges}
                     data-test-subj="startReindexingButton"
                   >
-                    {buttonLabel(status)}
+                    {getPrimaryButtonLabel(status)}
                   </EuiButton>
                 </EuiFlexItem>
               )}

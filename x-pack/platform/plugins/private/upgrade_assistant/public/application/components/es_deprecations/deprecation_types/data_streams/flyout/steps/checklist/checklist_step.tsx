@@ -25,39 +25,7 @@ import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex_state';
 import { ReindexProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
-
-const buttonLabel = (status?: DataStreamReindexStatus) => {
-  switch (status) {
-    case DataStreamReindexStatus.failed:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.tryAgainLabel"
-          defaultMessage="Try again"
-        />
-      );
-    case DataStreamReindexStatus.inProgress:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel"
-          defaultMessage="Reindexing…"
-        />
-      );
-    case DataStreamReindexStatus.cancelled:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
-          defaultMessage="Restart reindexing"
-        />
-      );
-    default:
-      return (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
-          defaultMessage="Start reindexing"
-        />
-      );
-  }
-};
+import { getPrimaryButtonLabel } from '../messages';
 
 /**
  * Displays a flyout that shows the current reindexing status for a given index.
@@ -223,7 +191,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                     disabled={loading || !hasRequiredPrivileges}
                     data-test-subj="startDataStreamReindexingButton"
                   >
-                    {buttonLabel(status)}
+                    {getPrimaryButtonLabel(status)}
                   </EuiButton>
                 </EuiFlexItem>
               )}

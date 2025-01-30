@@ -124,6 +124,7 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
                   onChange={onChange}
                   docLinks={links}
                   id={idForWarning(index)}
+                  // @ts-ignore
                   meta={{ ...meta, ...warning.meta }}
                 />
               );

@@ -40,7 +40,7 @@ const getReindexState = (
     warnings,
     hasRequiredPrivileges,
     meta: updatedMeta,
-  }: DataStreamReindexStatusResponse & { meta: DataStreamMetadata | null }
+  }: DataStreamReindexStatusResponse & { meta?: DataStreamMetadata | null }
 ) => {
   const newReindexState: ReindexState = {
     ...reindexState,
@@ -212,7 +212,7 @@ export const useReindexStatus = ({
       };
     });
     try {
-      const { error, data } = await api.cancelDataStreamReindexTask(dataStreamName);
+      const { error } = await api.cancelDataStreamReindexTask(dataStreamName);
 
       if (error) {
         throw error;
