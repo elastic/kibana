@@ -15,12 +15,13 @@ import { omit, defaults, get, truncate } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
+import {
   SavedObjectsBulkDeleteResponse,
   Logger,
   SecurityServiceStart,
   SavedObjectsServiceStart,
   KibanaRequest,
+  SPACES_EXTENSION_ID,
 } from '@kbn/core/server';
 
 import {
@@ -37,6 +38,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result, unwrap } from './lib/result_type';
 
@@ -188,14 +190,26 @@ export class TaskStore {
     return !!(this.esoClient && this.canEncryptSavedObjects);
   }
 
-  private getSoClient(request?: KibanaRequest) {
-    if (!request) {
-      return this.savedObjectsRepository;
+  private getSoClientForCreate(options: ApiKeyOptions) {
+    let requestToUse = options.request;
+    if (options.apiKey) {
+      requestToUse = kibanaRequestFactory({
+        headers: {
+          authorization: `ApiKey ${options.apiKey}`,
+        },
+        path: '/',
+        route: { settings: {} },
+        url: { href: {}, hash: '' } as URL,
+        raw: { req: { url: '/' } } as any,
+      });
     }
-    return this.savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: [TASK_SO_NAME],
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-    });
+    if (requestToUse) {
+      return this.savedObjectsService.getScopedClient(requestToUse, {
+        includedHiddenTypes: [TASK_SO_NAME],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      });
+    }
+    return this.savedObjectsRepository;
   }
 
   private async createAPIKey(request?: KibanaRequest) {
@@ -309,7 +323,7 @@ export class TaskStore {
     this.definitions.ensureHas(taskInstance.taskType);
 
     const apiKey = options?.apiKey || (await this.createAPIKey(options?.request));
-    const soClient = this.getSoClient(options?.request);
+    const soClient = this.getSoClientForCreate(options || {});
 
     let savedObject;
     try {
@@ -349,7 +363,7 @@ export class TaskStore {
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance[]> {
     const apiKey = options?.apiKey || (await this.createAPIKey(options?.request));
-    const soClient = this.getSoClient(options?.request);
+    const soClient = this.getSoClientForCreate(options || {});
 
     const objects = taskInstances.map((taskInstance) => {
       const id = taskInstance.id || v4();
