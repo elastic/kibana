@@ -61,8 +61,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(8);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(8);
+    expect(mockGetFeature).toHaveBeenCalledTimes(9);
+    expect(MockedProductFeatures).toHaveBeenCalledTimes(9);
   });
 
   it('should init all ProductFeatures when initialized', () => {
@@ -94,24 +94,18 @@ describe('ProductFeaturesService', () => {
     const mockCasesConfig = new Map() as ProductFeaturesConfig<CasesSubFeatureId>;
     const mockAssistantConfig = new Map() as ProductFeaturesConfig<AssistantSubFeatureId>;
     const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfig;
-<<<<<<< HEAD
     const mockSiemMigrationsConfig = new Map() as ProductFeaturesConfig;
-=======
     const mockTimelineConfig = new Map() as ProductFeaturesConfig;
     const mockNotesConfig = new Map() as ProductFeaturesConfig;
->>>>>>> upstream/main
 
     const configurator: ProductFeaturesConfigurator = {
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
-<<<<<<< HEAD
       attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       siemMigrations: jest.fn(() => mockSiemMigrationsConfig),
-=======
       timeline: jest.fn(() => mockTimelineConfig),
       notes: jest.fn(() => mockNotesConfig),
->>>>>>> upstream/main
     };
     productFeaturesService.setProductFeaturesConfigurator(configurator);
 
@@ -159,26 +153,20 @@ describe('ProductFeaturesService', () => {
     const mockAttackDiscoveryConfig = new Map([
       [ProductFeatureKey.attackDiscovery, {}],
     ]) as ProductFeaturesConfig;
-<<<<<<< HEAD
     const mockSiemMigrationsConfig = new Map([
       [ProductFeatureKey.siemMigrations, {}],
     ]) as ProductFeaturesConfig;
-=======
     const mockTimelineConfig = new Map([[ProductFeatureKey.timeline, {}]]) as ProductFeaturesConfig;
     const mockNotesConfig = new Map([[ProductFeatureKey.notes, {}]]) as ProductFeaturesConfig;
->>>>>>> upstream/main
 
     const configurator: ProductFeaturesConfigurator = {
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
-<<<<<<< HEAD
       attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       siemMigrations: jest.fn(() => mockSiemMigrationsConfig),
-=======
       timeline: jest.fn(() => mockTimelineConfig),
       notes: jest.fn(() => mockNotesConfig),
->>>>>>> upstream/main
     };
     productFeaturesService.setProductFeaturesConfigurator(configurator);
 
