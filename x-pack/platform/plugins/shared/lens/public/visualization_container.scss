@@ -11,7 +11,7 @@
   display: flex;
   overflow: auto;
   // important for visualizations with no padding
-  border-radius: $euiBorderRadius;
+  border-radius: 0; 
   @include euiScrollBar;
   .lnsExpressionRenderer__component {
     position: static; // Let the progress indicator position itself against the outer parent
