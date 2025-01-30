@@ -62,6 +62,12 @@ export class ComputeHealth {
     const createdAt = new Date();
 
     for await (const response of finder.find()) {
+      function getSLOSpaceId(id: string) {
+        return (
+          response.saved_objects.find((so) => so.attributes.id === id)?.namespaces?.[0] ?? 'default'
+        );
+      }
+
       const sloDefinitions = response.saved_objects
         .map(this.toSLODefinition)
         .filter(Boolean) as SLODefinition[];
@@ -139,6 +145,7 @@ export class ComputeHealth {
           version: sloDefinition.version,
           instances: summaryResult?.doc_count ?? 0,
           status: overallStatus,
+          spaceId: getSLOSpaceId(sloDefinition.id),
           createdAt,
           data: {
             summaryUpdatedAt,

@@ -40,6 +40,9 @@ export const HEALTH_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
             },
           },
         },
+        spaceId: {
+          type: 'keyword',
+        },
         description: {
           type: 'text',
         },

@@ -57,6 +57,7 @@ const sloHealthSchema = t.type({
   tags: tagsSchema,
   revision: t.number,
   version: t.number,
+  spaceId: t.string,
   instances: t.union([t.number, t.undefined]),
   status: sloHealthStatusSchema,
   createdAt: dateType,
