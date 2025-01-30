@@ -82,15 +82,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   const [isOpen, setIsOpen] = useState(flyoutSettings.isOpen);
   const [hasBeenOpened, setHasBeenOpened] = useState(isOpen);
   const keyRef = useRef(v4());
-
-  const openFlyout = useCallback(() => {
-    if (!isOpen) {
-      keyRef.current = v4();
-      setHasBeenOpened(true);
-      setFlyoutSettings((prev) => ({ ...prev, isOpen: true }));
-      setIsOpen(true);
-    }
-  }, [isOpen, setFlyoutSettings]);
+  const theme = useTheme();
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -115,6 +107,15 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     [service, hasBeenOpened, notifications.toasts]
   );
 
+  const openFlyout = useCallback(() => {
+    if (!isOpen) {
+      keyRef.current = v4();
+      setHasBeenOpened(true);
+      setFlyoutSettings((prev) => ({ ...prev, isOpen: true }));
+      setIsOpen(true);
+    }
+  }, [isOpen, setFlyoutSettings]);
+
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
       openFlyout();
@@ -132,8 +133,6 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     title: undefined,
     hideConversationList: false,
   };
-
-  const theme = useTheme();
 
   const buttonCss = css`
     padding: 0px 8px;
