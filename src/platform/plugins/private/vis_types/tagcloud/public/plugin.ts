@@ -11,7 +11,6 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
 import type { TagcloudPublicConfig } from '../server/config';
 import { setDataViewsStart } from './services';
 
@@ -26,11 +25,6 @@ export interface TagCloudPluginStartDependencies {
 }
 
 /** @internal */
-export interface TagCloudVisDependencies {
-  palettes: ChartsPluginSetup['palettes'];
-}
-
-/** @internal */
 export class TagCloudPlugin
   implements Plugin<void, void, TagCloudPluginSetupDependencies, TagCloudPluginStartDependencies>
 {
@@ -41,15 +35,14 @@ export class TagCloudPlugin
   }
 
   public setup(core: CoreSetup, { visualizations, charts }: TagCloudPluginSetupDependencies) {
-    const visualizationDependencies: TagCloudVisDependencies = {
-      palettes: charts.palettes,
-    };
-
     const { readOnly } = this.initializerContext.config.get<TagcloudPublicConfig>();
-    visualizations.createBaseVisualization({
-      ...getTagCloudVisTypeDefinition(visualizationDependencies),
-      disableCreate: Boolean(readOnly),
-      disableEdit: Boolean(readOnly),
+    visualizations.createBaseVisualization('tagcloud', async () => {
+      const { getTagCloudVisType } = await import('./tag_cloud_type');
+      return {
+        ...getTagCloudVisType(charts.palettes),
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      };
     });
   }
 

@@ -12,7 +12,7 @@ import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expression
 import { prepareLogTable, Dimension } from '@kbn/visualizations-plugin/public';
 import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
-import { tableVisResponseHandler } from './utils';
+import { tableVisResponseHandler } from './utils/table_vis_response_handler';
 
 export interface TableVisRenderValue {
   visData: TableVisData;

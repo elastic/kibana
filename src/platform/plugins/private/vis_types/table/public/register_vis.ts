@@ -11,7 +11,7 @@ import { CoreSetup } from '@kbn/core/public';
 import { TablePluginSetupDependencies, TablePluginStartDependencies } from './plugin';
 import { createTableVisFn } from './table_vis_fn';
 import { getTableVisRenderer } from './table_vis_renderer';
-import { tableVisTypeDefinition } from './table_vis_type';
+import { VIS_TYPE_TABLE } from '../common';
 
 export const registerTableVis = async (
   core: CoreSetup<TablePluginStartDependencies>,
@@ -21,9 +21,12 @@ export const registerTableVis = async (
   const [coreStart, { usageCollection }] = await core.getStartServices();
   expressions.registerFunction(createTableVisFn);
   expressions.registerRenderer(getTableVisRenderer(coreStart, usageCollection));
-  visualizations.createBaseVisualization({
-    ...tableVisTypeDefinition,
-    disableCreate: readOnly,
-    disableEdit: readOnly,
+  visualizations.createBaseVisualization(VIS_TYPE_TABLE, async () => {
+    const { tableVisType } = await import('./table_vis_type');
+    return {
+      ...tableVisType,
+      disableCreate: readOnly,
+      disableEdit: readOnly,
+    };
   });
 };

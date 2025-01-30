@@ -28,7 +28,6 @@ import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/pu
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
-import { getTimelionVisDefinition } from './timelion_vis_type';
 import {
   setIndexPatterns,
   setDataSearch,
@@ -40,7 +39,7 @@ import {
 
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 import { getTimelionVisRenderer } from './timelion_vis_renderer';
-
+import { TIMELION_VIS_NAME } from '../common/constants';
 import type { TimelionPublicConfig } from '../server/config';
 
 /** @internal */
@@ -97,10 +96,13 @@ export class TimelionVisPlugin
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     expressions.registerRenderer(getTimelionVisRenderer(dependencies));
     const { readOnly } = this.initializerContext.config.get<TimelionPublicConfig>();
-    visualizations.createBaseVisualization({
-      ...getTimelionVisDefinition(dependencies),
-      disableCreate: Boolean(readOnly),
-      disableEdit: Boolean(readOnly),
+    visualizations.createBaseVisualization(TIMELION_VIS_NAME, async () => {
+      const { getTimelionVis } = await import('./timelion_vis_type');
+      return {
+        ...getTimelionVis(dependencies),
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      };
     });
   }
 
