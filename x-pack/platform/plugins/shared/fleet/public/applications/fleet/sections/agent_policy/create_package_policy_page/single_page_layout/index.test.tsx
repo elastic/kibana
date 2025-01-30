@@ -761,7 +761,6 @@ describe('When on the package policy create page', () => {
           expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
         });
 
-        fireEvent.click(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ));
         fireEvent.click(renderResult.getAllByText('Agentless')[0]);
 
         await act(async () => {
