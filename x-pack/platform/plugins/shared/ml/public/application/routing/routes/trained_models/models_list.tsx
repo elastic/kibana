@@ -52,7 +52,6 @@ const PageWrapper: FC = () => {
     ...basicResolvers(),
     initSavedObjects,
   });
-
   return (
     <PageLoader context={context}>
       <MlPageHeader>
@@ -65,6 +64,7 @@ const PageWrapper: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
+
       <ModelsList />
     </PageLoader>
   );
