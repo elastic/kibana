@@ -231,12 +231,9 @@ export const checkNonAggregatableFieldExistsRequest = (
   }
 
   const searchBody = {
-    query: {
-      bool: {
-        filter: filterCriteria,
-      },
-    },
     ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+    fields: [field],
+    _source: false,
   };
 
   return {

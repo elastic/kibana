@@ -19,6 +19,7 @@ import { getProcessedFields } from '@kbn/ml-data-grid';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type {
   AggregatableFieldOverallStats,
@@ -52,6 +53,7 @@ import {
   rateLimitingForkJoin,
 } from '../search_strategy/requests/fetch_utils';
 import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
+import { VECTOR_FIELD_POSTFIX } from '../constants/vector_fields';
 
 const getPopulatedFieldsInIndex = (
   populatedFieldsInIndexWithoutRuntimeFields: Set<string> | undefined | null,
@@ -320,7 +322,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
           const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
 
-          let sampledNonAggregatableFieldsExamples: Array<{ [key: string]: string }> | undefined;
+          let sampledNonAggregatableFieldsExamples:
+            | Array<{ [key: string]: string | Record<'embeddings', object> }>
+            | undefined;
           value.forEach((resp, idx) => {
             if (idx === 0 && isNonAggregatableSampledDocs(resp)) {
               const docs = resp.rawResponse.hits.hits.map((d) =>
@@ -354,9 +358,24 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           if (sampledNonAggregatableFieldsExamples) {
             sampledNonAggregatableFieldsExamples.forEach((doc) => {
               nonAggregatableFields.forEach((field, fieldIdx) => {
-                if (Object.hasOwn(doc, field)) {
+                if (isPopulatedObject<string, string>(doc, [field])) {
                   nonAggregatableFieldsCount[fieldIdx] += 1;
-                  nonAggregatableFieldsUniqueCount[fieldIdx].add(doc[field]!);
+                  nonAggregatableFieldsUniqueCount[fieldIdx].add(doc[field]);
+                  return;
+                }
+
+                const isEmbeddingField = field.endsWith(VECTOR_FIELD_POSTFIX);
+
+                if (isEmbeddingField) {
+                  const fieldName = field.replace(VECTOR_FIELD_POSTFIX, '');
+                  const fieldValue = doc[fieldName];
+
+                  if (isPopulatedObject(fieldValue, ['embeddings'])) {
+                    nonAggregatableFieldsCount[fieldIdx] += 1;
+                    nonAggregatableFieldsUniqueCount[fieldIdx].add(
+                      JSON.stringify(fieldValue.embeddings)
+                    );
+                  }
                 }
               });
             });

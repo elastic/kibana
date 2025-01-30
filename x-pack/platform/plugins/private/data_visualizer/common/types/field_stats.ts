@@ -46,6 +46,7 @@ export interface Field {
   type: string;
   cardinality: number;
   safeFieldName: string;
+  secondaryType?: string;
 }
 
 export function isValidField(arg: unknown): arg is Field {

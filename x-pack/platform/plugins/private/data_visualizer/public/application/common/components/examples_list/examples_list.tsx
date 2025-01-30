@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
+import { EuiCodeBlock, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -43,11 +43,17 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
           size="xs"
           key={`example_${i}`}
           label={
-            typeof example === 'string'
-              ? example === ''
-                ? EMPTY_EXAMPLE
-                : example
-              : JSON.stringify(example)
+            typeof example === 'string' ? (
+              example === '' ? (
+                EMPTY_EXAMPLE
+              ) : (
+                example
+              )
+            ) : (
+              <EuiCodeBlock isCopyable language="json" overflowHeight="300px">
+                {JSON.stringify(example, null, 2)}
+              </EuiCodeBlock>
+            )
           }
         />
       );

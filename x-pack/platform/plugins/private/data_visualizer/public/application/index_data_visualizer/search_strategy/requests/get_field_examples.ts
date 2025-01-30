@@ -27,20 +27,29 @@ import type {
 import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { MAX_EXAMPLES_DEFAULT } from './constants';
 import { buildFilterCriteria } from '../../../../../common/utils/build_query_filters';
+import { VECTOR_FIELD_POSTFIX } from '../../constants/vector_fields';
 
-export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, field: Field) => {
+export const getFieldExamplesRequest = (
+  params: FieldStatsCommonRequestParams,
+  field: Field,
+  isVectorField = false
+) => {
   const { index, timeFieldName, earliestMs, latestMs, query, runtimeFieldMap, maxExamples } =
     params;
 
   // Request at least 100 docs so that we have a chance of obtaining
   // 'maxExamples' of the field.
-  const size = Math.max(100, maxExamples ?? MAX_EXAMPLES_DEFAULT);
+  const size = isVectorField ? 1 : Math.max(100, maxExamples ?? MAX_EXAMPLES_DEFAULT);
   const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 
   // Use an exists filter to return examples of the field.
   if (Array.isArray(filterCriteria)) {
     filterCriteria.push({
-      exists: { field: field.fieldName },
+      exists: {
+        field: isVectorField
+          ? field.fieldName.replace('.inference.chunks.embeddings', '')
+          : field.fieldName,
+      },
     });
   }
 
@@ -71,7 +80,12 @@ export const fetchFieldsExamples = (
   const { maxExamples } = params;
   return combineLatest(
     fields.map((field) => {
-      const request: estypes.SearchRequest = getFieldExamplesRequest(params, field);
+      // Vector fields like sparse_vector, dense_vector, are quirky
+      // Exists request needs to be made with the original field name
+      // (.e.g for fieldName = foo.inference.chunks.embeddings -> { exists: { field: "foo" })
+      // and results should be parsed differently, as they come back as { foo.inference.chunks: [{embeddings: {}] }
+      const isVectorField = field.secondaryType?.endsWith('vector');
+      const request: estypes.SearchRequest = getFieldExamplesRequest(params, field, isVectorField);
 
       return dataSearch
         .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
@@ -86,6 +100,7 @@ export const fetchFieldsExamples = (
           map((resp) => {
             if (!isIKibanaSearchResponse(resp)) return resp;
             const body = resp.rawResponse;
+
             const stats = {
               fieldName: field.fieldName,
               examples: [] as unknown[],
@@ -93,11 +108,22 @@ export const fetchFieldsExamples = (
 
             if (body.hits.total > 0) {
               const hits = body.hits.hits;
+
               const processedDocs = hits.map((hit: SearchHit) => {
-                const doc: object[] | undefined = get(hit.fields, field.fieldName);
+                const doc: object[] | undefined = get(
+                  hit.fields,
+                  // Vector fields like sparse_vector, dense_vector
+                  // For field name `foo.inference.chunks.embeddings`, embeddings can be accessed at
+                  // foo.inference.chunks
+                  isVectorField
+                    ? field.fieldName.replace(VECTOR_FIELD_POSTFIX, '')
+                    : field.fieldName
+                );
                 return Array.isArray(doc) && doc.length > 0 ? doc[0] : doc;
               });
-              stats.examples = getUniqGeoOrStrExamples(processedDocs, maxExamples);
+              stats.examples = isVectorField
+                ? processedDocs.slice(0, 1)
+                : getUniqGeoOrStrExamples(processedDocs, maxExamples);
             }
 
             return stats;
