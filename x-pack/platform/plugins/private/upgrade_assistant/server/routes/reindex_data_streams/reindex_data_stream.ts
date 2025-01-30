@@ -33,7 +33,7 @@ export function registerReindexDataStreamRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'Relies on es and saved object clients for authorization',
+          reason: 'Relies on elasticsearch for authorization',
         },
       },
       options: {
