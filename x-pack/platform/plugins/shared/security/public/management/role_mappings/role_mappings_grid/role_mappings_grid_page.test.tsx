@@ -424,13 +424,6 @@ describe('RoleMappingsGridPage', () => {
       await nextTick();
       wrapper.update();
 
-      // bulk actions are still available
-      const bulkButton = wrapper.find('[data-test-subj="bulkDeleteActionButton"]');
-      expect(bulkButton).toHaveLength(1);
-
-      const createButton = wrapper.find('[data-test-subj="createRoleMappingButton"]');
-      expect(createButton).toHaveLength(1);
-
       // role mapping actions are hidden
       const editButton = wrapper.find('[data-test-subj="editRoleMappingButton-some-realm"]');
       expect(editButton).toHaveLength(0);

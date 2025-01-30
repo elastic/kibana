@@ -445,7 +445,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
   private cloningExistingRoleMapping = () =>
     typeof this.props.name === 'string' && this.props.action === 'clone';
 
-  private isReadOnlyRoleMapping = () => this.state.roleMapping?.metadata._read_only;
+  private isReadOnlyRoleMapping = () => this.state.roleMapping?.metadata?._read_only;
 
   private isReadOnly = () => this.props.readOnly || this.isReadOnlyRoleMapping();
 
