@@ -33,7 +33,7 @@ const innerCss = css`
   }
 
   .euiFormControlLayout__append {
-    padding-inline-end: 0 !important;
+    padding-inline: 0 !important;
     background: none;
   }
 
