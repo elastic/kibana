@@ -61,10 +61,9 @@ export const persistTokenCloudData = async (
         { id: CLOUD_DATA_SAVED_OBJECT_ID }
       );
     } else if (
-      (onboardingToken &&
-        cloudDataSo?.attributes.onboardingData.token &&
-        cloudDataSo?.attributes.onboardingData.token !== onboardingToken) ||
-      (security && securityAttributes && !isDeepEqual(securityAttributes, security))
+      cloudDataSo &&
+      (cloudDataSo?.attributes.onboardingData.token !== onboardingToken ||
+        !isDeepEqual(securityAttributes, security))
     ) {
       await savedObjectsClient.update<CloudDataAttributes>(
         CLOUD_DATA_SAVED_OBJECT_TYPE,

@@ -157,6 +157,41 @@ describe('persistTokenCloudData', () => {
     );
   });
 
+  it('updates an existing saved object if provide onboardingData is different from the saved one', async () => {
+    (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
+      id: CLOUD_DATA_SAVED_OBJECT_ID,
+      attributes: {
+        onboardingData: {
+          solutionType: 'security',
+          token: '',
+          security: {
+            useCase: 'siem',
+            migration: {
+              value: false,
+            },
+          },
+        },
+      },
+    });
+
+    await persistTokenCloudData(mockSavedObjectsClient, {
+      logger: mockLogger,
+      solutionType: 'security',
+      onboardingToken: 'test_token',
+    });
+
+    expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      CLOUD_DATA_SAVED_OBJECT_ID,
+      {
+        onboardingData: {
+          solutionType: 'security',
+          token: 'test_token',
+        },
+      }
+    );
+  });
+
   it('does nothing if onboardingToken and security details are the same', async () => {
     (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
