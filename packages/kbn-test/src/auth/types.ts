@@ -41,6 +41,13 @@ export interface SAMLResponseValueParams {
   log: ToolingLog;
 }
 
+export interface SAMLCallbackParams {
+  kbnHost: string;
+  samlResponse: string;
+  sid?: string;
+  log: ToolingLog;
+}
+
 export interface User {
   readonly email: string;
   readonly password: string;

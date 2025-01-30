@@ -301,40 +301,92 @@ https://kbn.test.co in the same window.`);
   });
 
   describe('finishSAMLHandshake', () => {
-    afterEach(() => {
+    jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
+      fn();
+      return {} as unknown as NodeJS.Timeout;
+    });
+
+    const params = {
+      samlResponse: 'mockSAMLResponse',
+      kbnHost: 'https://kbn.test.co',
+      sid: 'Fe26.2**1234567890',
+      log,
+    };
+
+    const retryCount = 3;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
       axiosRequestMock.mockClear();
     });
+
     const cookieStr = 'mocked_cookie';
-    test('returns valid cookie', async () => {
-      mockRequestOnce('/api/security/saml/callback', {
+
+    it('should return cookie on 302 response', async () => {
+      axiosRequestMock.mockResolvedValue({
+        status: 302,
         headers: {
           'set-cookie': [`sid=${cookieStr}; Secure; HttpOnly; Path=/`],
         },
       });
 
-      const response = await finishSAMLHandshake({
-        kbnHost: 'https://kbn.test.co',
-        samlResponse: 'PD94bWluc2U+',
-        sid: 'Fe26.2**1234567890',
-        log,
-      });
+      const response = await finishSAMLHandshake(params, retryCount);
       expect(response.key).toEqual('sid');
       expect(response.value).toEqual(cookieStr);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(1);
     });
 
-    test(`throws error when response has no 'set-cookie' header`, async () => {
-      mockRequestOnce('/api/security/saml/callback', { headers: {} });
+    it('should throw an error on 4xx response without retrying', async () => {
+      axiosRequestMock.mockResolvedValue({ status: 401 });
 
-      await expect(
-        finishSAMLHandshake({
-          kbnHost: 'https://kbn.test.co',
-          samlResponse: 'PD94bWluc2U+',
-          sid: 'Fe26.2**1234567890',
-          log,
-        })
-      ).rejects.toThrow(
-        /Failed to get cookie from SAML callback response: no 'set-cookie' header, response.data:/
+      await expect(finishSAMLHandshake(params, retryCount)).rejects.toThrow(
+        'SAML callback failed: expected 302, got 401'
       );
+      expect(axiosRequestMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should retry on 5xx response and succeed on 302 response', async () => {
+      let callCount = 0;
+      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
+        if (config.url?.endsWith('/api/security/saml/callback')) {
+          callCount += 1;
+          if (callCount === 2) {
+            return Promise.resolve({
+              status: 302,
+              headers: {
+                'set-cookie': [`sid=${cookieStr}; Secure; HttpOnly; Path=/`],
+              },
+            });
+          } else {
+            return Promise.resolve({ status: 503 });
+          }
+        }
+        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      });
+
+      await finishSAMLHandshake(params, retryCount);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should retry on 5xx response and fail after max attempts', async () => {
+      axiosRequestMock.mockResolvedValue({ status: 503 });
+
+      await expect(finishSAMLHandshake(params, retryCount)).rejects.toThrow(
+        `Retry failed after ${retryCount} attempts: SAML callback failed: expected 302, got 503`
+      );
+      expect(axiosRequestMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('should stop retrying if a later response is 4xx', async () => {
+      jest
+        .spyOn(axios, 'request')
+        .mockResolvedValueOnce({ status: 503 }) // First attempt fails (5xx), retrying
+        .mockResolvedValueOnce({ status: 400 }); // Second attempt gets a 4xx (stop retrying)
+
+      await expect(finishSAMLHandshake(params, retryCount)).rejects.toThrow(
+        'SAML callback failed: expected 302, got 400'
+      );
+      expect(axios.request).toHaveBeenCalledTimes(2);
     });
   });
 });

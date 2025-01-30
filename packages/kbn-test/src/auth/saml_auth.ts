@@ -14,12 +14,14 @@ import util from 'util';
 import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
+import { randomInt } from 'crypto';
 import { isValidHostname, isValidUrl } from './helper';
 import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
   LocalSamlSessionParams,
   RetryParams,
+  SAMLCallbackParams,
   SAMLResponseValueParams,
   UserProfile,
 } from './types';
@@ -54,6 +56,8 @@ const cleanException = (url: string, ex: any) => {
     ex.response = { REDACTED: 'REDACTED' };
   }
 };
+
+const delay = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getCookieFromResponseHeaders = (response: AxiosResponse, errorMessage: string) => {
   const setCookieHeader = response?.headers['set-cookie'];
@@ -160,7 +164,7 @@ export const createCloudSession = async (
       if (--attemptsLeft > 0) {
         // log only error message
         log.error(`${ex.message}\nWaiting ${retryParams.attemptDelay} ms before the next attempt`);
-        await new Promise((resolve) => setTimeout(resolve, retryParams.attemptDelay));
+        await delay(retryParams.attemptDelay);
       } else {
         log.error(
           `Failed to create the new cloud session with ${retryParams.attemptsCount} attempts`
@@ -253,17 +257,8 @@ ${kbnHost} in the same window.`
   return value;
 };
 
-export const finishSAMLHandshake = async ({
-  kbnHost,
-  samlResponse,
-  sid,
-  log,
-}: {
-  kbnHost: string;
-  samlResponse: string;
-  sid?: string;
-  log: ToolingLog;
-}) => {
+export const finishSAMLHandshake = async (params: SAMLCallbackParams, retriesCount: number = 3) => {
+  const { kbnHost, samlResponse, sid, log } = params;
   const encodedResponse = encodeURIComponent(samlResponse);
   const url = kbnHost + '/api/security/saml/callback';
   const request = {
@@ -279,20 +274,49 @@ export const finishSAMLHandshake = async ({
   };
   let authResponse: AxiosResponse;
 
-  try {
-    authResponse = await axios.request(request);
-  } catch (ex) {
-    log.error('Failed to call SAML callback');
-    cleanException(url, ex);
-    // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
-    log.error(`Request sent: ${util.inspect(request)}`);
-    throw ex;
+  let attemptsLeft = retriesCount;
+  while (attemptsLeft > 0) {
+    try {
+      authResponse = await axios.request(request);
+
+      // SAML callback should return 302
+      if (authResponse.status === 302) {
+        return getCookieFromResponseHeaders(
+          authResponse,
+          'Failed to get cookie from SAML callback response'
+        );
+      }
+
+      // disable retry if not 5xx errors
+      if (authResponse.status < 500) {
+        attemptsLeft = -1;
+      }
+
+      throw new Error(`SAML callback failed: expected 302, got ${authResponse.status}`);
+    } catch (ex) {
+      cleanException(kbnHost, ex);
+      // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
+      log.error(`Request sent: ${util.inspect(request)}`);
+
+      // exit for non 5xx errors
+      if (attemptsLeft === -1) {
+        throw ex;
+      }
+
+      // retry for 5xx errors
+      if (--attemptsLeft > 0) {
+        const attemptDelay = randomInt(500, 2_500);
+        // log only error message
+        log.error(`${ex.message}\nWaiting ${attemptDelay} ms before the next attempt`);
+        await delay(attemptDelay);
+      } else {
+        throw new Error(`Retry failed after ${retriesCount} attempts: ${ex.message}`);
+      }
+    }
   }
 
-  return getCookieFromResponseHeaders(
-    authResponse,
-    'Failed to get cookie from SAML callback response'
-  );
+  // should never be reached
+  throw new Error(`Failed to complete SAML handshake callback`);
 };
 
 export const getSecurityProfile = async ({
