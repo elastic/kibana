@@ -30,6 +30,12 @@ export function registerReindexDataStreamRoutes({
   router.post(
     {
       path: `${BASE_PATH}/{dataStreamName}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Start the data stream reindexing`,
