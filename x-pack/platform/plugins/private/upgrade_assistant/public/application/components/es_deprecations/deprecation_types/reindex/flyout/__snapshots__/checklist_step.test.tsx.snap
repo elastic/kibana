@@ -108,9 +108,17 @@ exports[`ChecklistFlyout renders for frozen indices 1`] = `
           }
         />
       </p>
-      <p>
+      <EuiCallOut
+        iconType="iInCircle"
+        title={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="This index is frozen"
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndexTitle"
+          />
+        }
+      >
         <MemoizedFormattedMessage
-          defaultMessage="Frozen indices will no longer be supported after upgrade, so this index be deleted as part the reindex operation. {docsLink}"
+          defaultMessage="Frozen indices will no longer be supported after upgrade, so this index will be deleted as part the reindex operation. {docsLink}"
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
           values={
             Object {
@@ -123,7 +131,8 @@ exports[`ChecklistFlyout renders for frozen indices 1`] = `
             }
           }
         />
-      </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <p>
         <MemoizedFormattedMessage
           defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
