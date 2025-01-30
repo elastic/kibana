@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const inferenceId = 'my-elser-model';
   const taskType = 'sparse_embedding';
-  const service = 'elser';
+  const service = 'elasticsearch';
 
   const modelId = '.elser_model_2';
   const svlCommonApi = getService('svlCommonApi');

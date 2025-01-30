@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
@@ -117,7 +118,7 @@ import {
 
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
-import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/task';
+import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   latestRiskScoreIndexPattern,
@@ -130,6 +131,8 @@ import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_inte
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { registerRiskScoreModulesDeprecation } from './deprecations/register_risk_score_modules_deprecation';
+import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
+import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -150,6 +153,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
   private policyWatcher?: PolicyWatcher;
+  private telemetryConfigProvider: TelemetryConfigProvider;
+  private telemetryWatcher?: TelemetryConfigWatcher;
 
   private manifestTask: ManifestTask | undefined;
   private completeExternalResponseActionsTask: CompleteExternalResponseActionsTask;
@@ -179,7 +184,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.asyncTelemetryEventsSender = new AsyncTelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
-    this.logger.debug('plugin initialized');
+    this.telemetryConfigProvider = new TelemetryConfigProvider();
+
     this.endpointContext = {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
@@ -192,6 +198,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.completeExternalResponseActionsTask = new CompleteExternalResponseActionsTask({
       endpointAppContext: this.endpointContext,
     });
+
+    this.logger.debug('plugin initialized');
   }
 
   public setup(
@@ -246,6 +254,18 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskManager: plugins.taskManager,
         experimentalFeatures,
       });
+
+      registerEntityStoreDataViewRefreshTask({
+        getStartServices: core.getStartServices,
+        appClientFactory,
+        logger: this.logger,
+        telemetry: core.analytics,
+        taskManager: plugins.taskManager,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        entityStoreConfig: config.entityAnalytics.entityStore,
+        experimentalFeatures,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+      });
     }
 
     const requestContextFactory = new RequestContextFactory({
@@ -259,6 +279,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
+      productFeaturesService,
     });
 
     productFeaturesService.registerApiAccessControl(core.http);
@@ -408,18 +429,20 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.endpointContext
     );
 
-    registerEndpointRoutes(router, this.endpointContext);
+    registerEndpointRoutes(router, this.endpointContext, core.docLinks);
     registerEndpointSuggestionsRoutes(
       router,
       plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
-      this.endpointContext
+      this.endpointContext,
+      core.docLinks
     );
     registerLimitedConcurrencyRoutes(core);
-    registerPolicyRoutes(router, this.endpointContext);
+    registerPolicyRoutes(router, this.endpointContext, core.docLinks);
     registerProtectionUpdatesNoteRoutes(router, this.endpointContext);
     registerActionRoutes(
       router,
       this.endpointContext,
+      core.docLinks,
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
@@ -580,11 +603,14 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.licensing$ = plugins.licensing.license$;
 
+    this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
+
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
       attackDiscoveryAlertFiltering: config.experimentalFeatures.attackDiscoveryAlertFiltering,
+      contentReferencesEnabled: config.experimentalFeatures.contentReferencesEnabled,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
@@ -611,6 +637,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       cases: plugins.cases,
       manifestManager,
       licenseService,
+      telemetryConfigProvider: this.telemetryConfigProvider,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
@@ -662,6 +689,14 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger
       );
       this.policyWatcher.start(licenseService);
+
+      this.telemetryWatcher = new TelemetryConfigWatcher(
+        plugins.fleet.packagePolicyService,
+        core.savedObjects,
+        core.elasticsearch,
+        this.endpointContext.service
+      );
+      this.telemetryWatcher.start(this.telemetryConfigProvider);
     }
 
     if (plugins.taskManager) {

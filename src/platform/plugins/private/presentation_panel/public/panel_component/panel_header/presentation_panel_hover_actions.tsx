@@ -206,12 +206,12 @@ export const PresentationPanelHoverActions = ({
     parentHideTitle,
     parentViewMode,
   ] = useBatchedOptionalPublishingSubjects(
-    api?.defaultPanelTitle,
-    api?.panelTitle,
-    api?.panelDescription,
-    api?.hidePanelTitle,
+    api?.defaultTitle$,
+    api?.title$,
+    api?.description$,
+    api?.hideTitle$,
     api?.hasLockedHoverActions$,
-    api?.parentApi?.hidePanelTitle,
+    api?.parentApi?.hideTitle$,
     /**
      * View mode changes often have the biggest influence over which actions will be compatible,
      * so we build and update all actions when the view mode changes. This is temporary, as these
@@ -329,7 +329,7 @@ export const PresentationPanelHoverActions = ({
       })()) as AnyApiAction[];
       if (canceled) return;
 
-      const disabledActions = api.disabledActionIds?.value;
+      const disabledActions = api.disabledActionIds$?.value;
       if (disabledActions) {
         compatibleActions = compatibleActions.filter(
           (action) => disabledActions.indexOf(action.id) === -1

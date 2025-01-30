@@ -32,6 +32,8 @@ import { ConnectorDefinition } from '@kbn/search-connectors';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
 import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
@@ -70,6 +72,7 @@ export interface KibanaLogicProps {
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share?: SharePluginStart;
+  uiActions: UiActionsStart;
   uiSettings?: IUiSettingsClient;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
 }
@@ -103,6 +106,7 @@ export interface KibanaValues {
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share: SharePluginStart | null;
+  uiActions: UiActionsStart | null;
   uiSettings: IUiSettingsClient | null;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
@@ -148,6 +152,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share || null, {}],
+    uiActions: [props.uiActions, {}],
     uiSettings: [props.uiSettings, {}],
     updateSideNavDefinition: [props.updateSideNavDefinition, {}],
     user: [

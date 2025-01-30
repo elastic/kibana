@@ -102,10 +102,13 @@ export const buildStateSubscribe =
         ? nextState.dataSource.dataViewId
         : undefined;
 
-      const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: dataViewId, savedSearch, isEsqlMode },
-        { internalStateContainer: internalState, services }
-      );
+      const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
+        dataViewId,
+        savedSearch,
+        isEsqlMode,
+        internalStateContainer: internalState,
+        services,
+      });
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view

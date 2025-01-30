@@ -138,7 +138,7 @@ function validateFunctionLiteralArg(
   }
   if (isTimeIntervalItem(actualArg)) {
     // check first if it's a valid interval string
-    if (!inKnownTimeInterval(actualArg)) {
+    if (!inKnownTimeInterval(actualArg.unit)) {
       messages.push(
         getMessageFromId({
           messageId: 'unknownInterval',
@@ -619,7 +619,29 @@ function validateFunction({
   }
   // at this point we're sure that at least one signature is matching
   const failingSignatures: ESQLMessage[][] = [];
-  for (const signature of matchingSignatures) {
+  let relevantFuncSignatures = matchingSignatures;
+  const enrichedArgs = fn.args;
+
+  if (fn.name === 'in' || fn.name === 'not_in') {
+    for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
+      relevantFuncSignatures = fnDefinition.signatures.filter(
+        (s) =>
+          s.params?.length >= argIndex &&
+          s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
+            const arg = enrichedArgs[idx];
+
+            if (isLiteralItem(arg)) {
+              return (
+                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
+              );
+            }
+            return false; // Non-literal arguments don't match
+          })
+      );
+    }
+  }
+
+  for (const signature of relevantFuncSignatures) {
     const failingSignature: ESQLMessage[] = [];
     fn.args.forEach((outerArg, index) => {
       const argDef = getParamAtPosition(signature, index);
@@ -674,7 +696,7 @@ function validateFunction({
     }
   }
 
-  if (failingSignatures.length && failingSignatures.length === matchingSignatures.length) {
+  if (failingSignatures.length && failingSignatures.length === relevantFuncSignatures.length) {
     const failingSignatureOrderedByErrorCount = failingSignatures
       .map((arr, index) => ({ index, count: arr.length }))
       .sort((a, b) => a.count - b.count);
@@ -1225,13 +1247,9 @@ function validateCommand(
                 currentCommandIndex,
               })
             );
-          }
-
-          if (isSettingItem(arg)) {
+          } else if (isSettingItem(arg)) {
             messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
-          }
-
-          if (isOptionItem(arg)) {
+          } else if (isOptionItem(arg)) {
             messages.push(
               ...validateOption(
                 arg,
@@ -1240,15 +1258,13 @@ function validateCommand(
                 references
               )
             );
-          }
-          if (isColumnItem(arg) || isIdentifier(arg)) {
+          } else if (isColumnItem(arg) || isIdentifier(arg)) {
             if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));
             }
-          }
-          if (isTimeIntervalItem(arg)) {
+          } else if (isTimeIntervalItem(arg)) {
             messages.push(
               getMessageFromId({
                 messageId: 'unsupportedTypeForCommand',
@@ -1260,8 +1276,7 @@ function validateCommand(
                 locations: arg.location,
               })
             );
-          }
-          if (isSourceItem(arg)) {
+          } else if (isSourceItem(arg)) {
             messages.push(...validateSource(arg, command.name, references));
           }
         }
@@ -1334,6 +1349,8 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
   getFieldsMetadata: [],
+  getVariablesByType: [],
+  canSuggestVariables: [],
   getJoinIndices: [],
 };
 

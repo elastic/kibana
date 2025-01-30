@@ -815,6 +815,7 @@ describe('getAllUnsecured()', () => {
           config: {
             foo: 'bar',
           },
+          exposeConfig: true,
         },
         /**
          * System actions will not
@@ -857,6 +858,7 @@ describe('getAllUnsecured()', () => {
         isSystemAction: false,
         isDeprecated: false,
         referencedByCount: 2,
+        config: { foo: 'bar' },
       },
     ]);
 

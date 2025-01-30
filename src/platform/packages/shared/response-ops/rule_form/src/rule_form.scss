@@ -6,7 +6,11 @@
   container-type: inline-size;
 }
 
-@container (max-width: 768px) {
+.actionConnectorModal__container {
+  container-type: inline-size;
+}
+
+@container (max-width: 767px) {
   .euiDescribedFormGroup {
     flex-direction: column;
   }
@@ -23,5 +27,29 @@
   }
   .ruleDefinitionHeaderRuleTypeDescription, .ruleDefinitionHeaderDocsLink {
     font-size: $euiFontSizeS;
+  }
+}
+
+[class*='showForContainer'] {
+  display: none;
+}
+
+@container (max-width: 767px) and (min-width: 575px) {
+  .hideForContainer--s {
+    display: none;
+  }
+
+  .showForContainer--s {
+    display: initial !important;
+  }
+}
+
+@container (max-width: 574px) {
+  .hideForContainer--xs {
+    display: none;
+  }
+
+  .showForContainer--xs {
+    display: initial !important;
   }
 }

@@ -19,6 +19,7 @@ import {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 import { deterministicallyRegenerateObjectId } from '@kbn/core-saved-objects-migration-server-internal';
+import { EsVersion } from '@kbn/test';
 
 const logFilePath = Path.join(__dirname, 'rewriting_id.log');
 
@@ -93,7 +94,8 @@ function createRoot() {
   );
 }
 
-// FAILING: https://github.com/elastic/kibana/issues/98351
+const willRunESv9 = EsVersion.getDefault({ integrationTest: true }).matchRange('9');
+
 describe('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
@@ -140,7 +142,9 @@ describe('migration v2', () => {
             __dirname,
             '..',
             'archives',
-            '7.13.2_so_with_multiple_namespaces.zip'
+            willRunESv9
+              ? '8.18.0_so_with_multiple_namespaces.zip'
+              : '7.13.2_so_with_multiple_namespaces.zip'
           ),
         },
       },

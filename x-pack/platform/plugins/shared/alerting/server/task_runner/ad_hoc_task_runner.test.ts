@@ -479,7 +479,7 @@ describe('Ad Hoc Task Runner', () => {
       index: '.alerts-test.alerts-default',
       refresh: 'wait_for',
       require_alias: !useDataStreamForAlerts,
-      operations: [
+      body: [
         {
           create: {
             _id: UUID,
@@ -747,13 +747,13 @@ describe('Ad Hoc Task Runner', () => {
     const bulkCall = clusterClient.bulk.mock.calls[0][0];
 
     // @ts-ignore
-    expect(bulkCall.operations[1][TIMESTAMP]).toEqual(schedule4.runAt);
+    expect(bulkCall.body[1][TIMESTAMP]).toEqual(schedule4.runAt);
     // @ts-ignore
-    expect(bulkCall.operations[1][ALERT_START]).toEqual(schedule4.runAt);
+    expect(bulkCall.body[1][ALERT_START]).toEqual(schedule4.runAt);
     // @ts-ignore
-    expect(bulkCall.operations[1][ALERT_TIME_RANGE]).toEqual({ gte: schedule4.runAt });
+    expect(bulkCall.body[1][ALERT_TIME_RANGE]).toEqual({ gte: schedule4.runAt });
     // @ts-ignore
-    expect(bulkCall.operations[1][ALERT_RULE_EXECUTION_TIMESTAMP]).toEqual(DATE_1970);
+    expect(bulkCall.body[1][ALERT_RULE_EXECUTION_TIMESTAMP]).toEqual(DATE_1970);
 
     expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -854,13 +854,13 @@ describe('Ad Hoc Task Runner', () => {
     const bulkCall = clusterClient.bulk.mock.calls[0][0];
 
     // @ts-ignore
-    expect(bulkCall.operations[1][TIMESTAMP]).toEqual(schedule5.runAt);
+    expect(bulkCall.body[1][TIMESTAMP]).toEqual(schedule5.runAt);
     // @ts-ignore
-    expect(bulkCall.operations[1][ALERT_START]).toEqual(schedule5.runAt);
+    expect(bulkCall.body[1][ALERT_START]).toEqual(schedule5.runAt);
     // @ts-ignore
-    expect(bulkCall.operations[1][ALERT_TIME_RANGE]).toEqual({ gte: schedule5.runAt });
+    expect(bulkCall.body[1][ALERT_TIME_RANGE]).toEqual({ gte: schedule5.runAt });
     // @ts-ignore
-    expect(bulkCall.operations[1][ALERT_RULE_EXECUTION_TIMESTAMP]).toEqual(DATE_1970);
+    expect(bulkCall.body[1][ALERT_RULE_EXECUTION_TIMESTAMP]).toEqual(DATE_1970);
 
     expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,

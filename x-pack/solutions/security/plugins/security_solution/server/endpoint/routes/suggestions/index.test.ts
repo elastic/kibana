@@ -12,6 +12,7 @@ import {
   savedObjectsClientMock,
   httpServerMock,
   httpServiceMock,
+  docLinksServiceMock,
 } from '@kbn/core/server/mocks';
 import type {
   KibanaResponseFactory,
@@ -157,11 +158,18 @@ describe('when calling the Suggestions route handler', () => {
       const startContract = createMockEndpointAppContextServiceStartContract();
       const routerMock = httpServiceMock.createRouter();
       const endpointAppContextService = new EndpointAppContextService();
+      const docLinks = docLinksServiceMock.createSetupContract();
+
       // add the suggestions route handlers to routerMock
-      registerEndpointSuggestionsRoutes(routerMock, config$, {
-        ...createMockEndpointAppContext(),
-        service: endpointAppContextService,
-      });
+      registerEndpointSuggestionsRoutes(
+        routerMock,
+        config$,
+        {
+          ...createMockEndpointAppContext(),
+          service: endpointAppContextService,
+        },
+        docLinks
+      );
 
       // define a convenience function to execute an API call for a given route
       callRoute = async (

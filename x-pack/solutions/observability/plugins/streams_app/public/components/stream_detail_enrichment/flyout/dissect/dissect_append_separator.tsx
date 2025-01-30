@@ -30,7 +30,11 @@ export const DissectAppendSeparator = () => {
       }
       fullWidth
     >
-      <EuiFieldText {...inputProps} inputRef={ref} />
+      <EuiFieldText
+        data-test-subj="streamsAppDissectAppendSeparatorFieldText"
+        {...inputProps}
+        inputRef={ref}
+      />
     </EuiFormRow>
   );
 };

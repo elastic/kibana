@@ -14,13 +14,13 @@ import { HealthCallout } from './health_callout/health_callout';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
 import { SloListView } from './slo_list_view/slo_list_view';
-import { SLOView } from './toggle_slo_view';
+import type { ViewType } from '../types';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  view: SLOView;
+  view: ViewType;
 }
 
 export function SlosView({ sloList, loading, error, view }: Props) {

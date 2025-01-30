@@ -18,6 +18,7 @@ export {
   getESQLWithSafeLimit,
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
+  appendStatsByToQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
@@ -25,6 +26,7 @@ export {
   getTimeFieldFromESQLQuery,
   getStartEndParams,
   hasStartEndParams,
+  getNamedParams,
   prettifyQuery,
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
@@ -34,6 +36,8 @@ export {
   isESQLFieldGroupable,
   TextBasedLanguages,
   queryCannotBeSampled,
+  mapVariableToColumn,
+  getValuesFromQueryField,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { DocLinksServiceSetup, IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -14,7 +14,10 @@ import {
   BulkCrudRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_BULK_UPDATE,
+} from '../../../../../../../common/constants';
 import { getIdBulkError } from '../../../utils/utils';
 import {
   transformBulkError,
@@ -30,7 +33,11 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const bulkUpdateRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  docLinks: DocLinksServiceSetup
+) => {
   router.versioned
     .put({
       access: 'public',
@@ -52,6 +59,17 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
         validate: {
           request: {
             body: buildRouteValidationWithZod(BulkUpdateRulesRequestBody),
+          },
+        },
+        options: {
+          deprecated: {
+            documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+            severity: 'warning',
+            reason: {
+              type: 'migrate',
+              newApiMethod: 'POST',
+              newApiPath: DETECTION_ENGINE_RULES_BULK_ACTION,
+            },
           },
         },
       },

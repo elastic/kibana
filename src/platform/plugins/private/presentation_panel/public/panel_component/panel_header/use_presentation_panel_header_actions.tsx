@@ -49,7 +49,7 @@ export const usePresentationPanelHeaderActions = <
           embeddable: api,
         })) as AnyApiAction[]) ?? [];
 
-      const disabledActions = (api.disabledActionIds?.value ?? []).concat(disabledNotifications);
+      const disabledActions = (api.disabledActionIds$?.value ?? []).concat(disabledNotifications);
       nextActions = nextActions.filter((badge) => disabledActions.indexOf(badge.id) === -1);
       return nextActions;
     };

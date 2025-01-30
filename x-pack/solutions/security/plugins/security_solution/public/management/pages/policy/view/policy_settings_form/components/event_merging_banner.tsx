@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ENDPOINT_VERSION_SUPPORTING_EVENT_MERGING_BY_DEFAULT } from '../constants';
+
+/**
+ * The version from which we decrease event volume by default.
+ */
+export const ENDPOINT_VERSION_SUPPORTING_EVENT_MERGING_BY_DEFAULT = '8.18';
 
 export interface EventMergingBannerProps {
   onDismiss: () => void;
@@ -21,7 +25,7 @@ export const EventMergingBanner = memo<EventMergingBannerProps>(({ onDismiss }) 
   const bannerTitle = i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventMergingBanner.title',
     {
-      defaultMessage: "We've recently changed Linux event collection",
+      defaultMessage: "We've recently changed event collection",
     }
   );
 

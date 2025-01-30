@@ -257,12 +257,12 @@ describe('unified data table', () => {
       });
       expect(
         screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0]
-      ).toHaveValue(String(rowHeight.initial));
+      ).toHaveValue(rowHeight.initial);
 
       fireEvent.change(
         screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0],
         {
-          target: { value: String(rowHeight.new) },
+          target: { value: rowHeight.new },
         }
       );
 

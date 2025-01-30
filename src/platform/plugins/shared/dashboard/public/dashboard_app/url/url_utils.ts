@@ -112,13 +112,13 @@ export const startSyncingExpandedPanelState = ({
   dashboardApi: DashboardApi;
   history: History;
 }) => {
-  const expandedPanelSubscription = dashboardApi?.expandedPanelId
+  const expandedPanelSubscription = dashboardApi?.expandedPanelId$
     // skip the first value because we don't want to trigger a history.replace on initial load
     .pipe(skip(1))
     .subscribe((expandedPanelId) => {
       history.replace({
         ...history.location,
-        pathname: `${createDashboardEditUrl(dashboardApi.savedObjectId.value)}${
+        pathname: `${createDashboardEditUrl(dashboardApi.savedObjectId$.value)}${
           Boolean(expandedPanelId) ? `/${expandedPanelId}` : ''
         }`,
       });

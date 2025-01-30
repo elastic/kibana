@@ -17,11 +17,10 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-  ActionTypeExecutorResult,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { ActionTypeExecutorResult, ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { promiseResult, isOk, Result } from '../lib/result_type';
 

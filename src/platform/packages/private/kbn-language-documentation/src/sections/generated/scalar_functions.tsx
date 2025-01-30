@@ -1381,7 +1381,8 @@ export const functions = {
   Use \`MATCH\` to perform a match query on the specified field.
   Using \`MATCH\` is equivalent to using the \`match\` query in the Elasticsearch Query DSL.
 
-  Match can be used on text fields, as well as other field types like boolean, dates, and numeric types.
+  Match can be used on fields from the text family like  text and  semantic_text,
+  as well as other field types like keyword, boolean, dates, and numeric types.
 
   For a simplified syntax, you can use the match operator \`:\` operator instead of \`MATCH\`.
 
@@ -3378,7 +3379,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.to_date_nanos', {
         defaultMessage: 'TO_DATE_NANOS',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3394,7 +3395,7 @@ export const functions = {
   ### TO_DATE_NANOS
   Converts an input to a nanosecond-resolution date value (aka date_nanos).
 
-  Note: The range for date nanos is 1970-01-01T00:00:00.000000000Z to 2262-04-11T23:47:16.854775807Z.  Additionally, integers cannot be converted into date nanos, as the range of integer nanoseconds only covers about 2 seconds after epoch.
+  Note: The range for date nanos is 1970-01-01T00:00:00.000000000Z to 2262-04-11T23:47:16.854775807Z, attepting to convertvalues outside of that range will result in null with a warning..  Additionally, integers cannot be converted into date nanos, as the range of integer nanoseconds only covers about 2 seconds after epoch.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',

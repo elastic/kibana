@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 import {
   GetMetadataListRequestSchema,
@@ -46,7 +48,8 @@ export const endpointFilters = schema.object({
 
 export function registerEndpointRoutes(
   router: SecuritySolutionPluginRouter,
-  endpointAppContext: EndpointAppContext
+  endpointAppContext: EndpointAppContext,
+  docLinks: DocLinksServiceSetup
 ) {
   const logger = getLogger(endpointAppContext);
 
@@ -110,13 +113,29 @@ export function registerEndpointRoutes(
         },
       },
       options: { authRequired: true },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-      deprecated: true,
     })
     .addVersion(
       {
         version: '2023-10-31',
         validate: false,
+        options: {
+          deprecated: {
+            documentationUrl:
+              docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
+            severity: 'critical',
+            message: i18n.translate(
+              'xpack.securitySolution.deprecations.endpoint.metadata.transforms',
+              {
+                defaultMessage:
+                  'The "{path}" URL is deprecated and will be removed in the next major version.',
+                values: { path: METADATA_TRANSFORMS_STATUS_ROUTE },
+              }
+            ),
+            reason: {
+              type: 'remove',
+            },
+          },
+        },
       },
       withEndpointAuthz(
         { all: ['canReadSecuritySolution'] },

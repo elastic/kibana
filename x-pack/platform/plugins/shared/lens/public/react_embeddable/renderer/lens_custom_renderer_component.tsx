@@ -75,7 +75,7 @@ export function LensRenderer({
   const disabledActionIds$ = useObservableVariable(disabledActions);
   const viewMode$ = useObservableVariable(viewMode);
   const searchSessionId$ = useObservableVariable(searchSessionId);
-  const hidePanelTitles$ = useObservableVariable(hidePanelTitles);
+  const hideTitle$ = useObservableVariable(hidePanelTitles);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -145,9 +145,9 @@ export function LensRenderer({
         // forward the unified search context
         ...searchApi,
         searchSessionId$,
-        disabledActionIds: disabledActionIds$,
+        disabledActionIds$,
         setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
-        viewMode: viewMode$,
+        viewMode$,
         // pass the sync* settings with the unified settings interface
         settings,
         // make sure to provide the initial state (useful for the comparison check)
@@ -157,7 +157,7 @@ export function LensRenderer({
           ...initialStateRef.current,
           attributes: props.attributes,
         }),
-        hidePanelTitle: hidePanelTitles$,
+        hideTitle$,
         reload$, // trigger a reload (replacement for deprepcated searchSessionId)
       })}
       onApiAvailable={setLensApi}

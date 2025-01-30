@@ -28,6 +28,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
+import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
 
 export function ConditionEditor(props: {
   condition: Condition;
@@ -83,8 +84,9 @@ export function ConditionForm(props: {
           })}
         >
           <EuiButton
+            data-test-subj="streamsAppConditionFormDisableRoutingButton"
             size={'xs' as 's'} // TODO: remove this cast when EUI is updated - EuiButton takes xs, but the type is wrong
-            onClick={() => props.onConditionChange(undefined)}
+            onClick={() => props.onConditionChange({ never: {} })}
             disabled={props.condition === undefined}
           >
             {i18n.translate('xpack.streams.conditionEditor.disable', {
@@ -119,9 +121,7 @@ export function ConditionForm(props: {
         />
       ) : !props.condition || 'operator' in props.condition ? (
         <FilterForm
-          condition={
-            (props.condition as FilterCondition) || { field: '', operator: 'eq', value: '' }
-          }
+          condition={(props.condition as FilterCondition) || EMPTY_EQUALS_CONDITION}
           onConditionChange={props.onConditionChange}
         />
       ) : (

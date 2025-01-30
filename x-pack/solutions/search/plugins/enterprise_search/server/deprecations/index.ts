@@ -55,7 +55,8 @@ export const getRegisteredDeprecations = (
       const hasAgentless = isAgentlessEnabled();
       const hasFleetServer = await hasFleetServers(
         ctx.esClient.asInternalUser,
-        ctx.savedObjectsClient
+        ctx.savedObjectsClient,
+        true // only counts if the Fleet Server is active
       );
       const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
       const [crawlerDetails, nativeConnectorsDetails] = await Promise.all([

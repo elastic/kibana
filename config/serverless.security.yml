@@ -10,6 +10,7 @@ xpack.observabilityAIAssistant.enabled: false
 xpack.search.notebooks.enabled: false
 xpack.searchPlayground.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
+xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -22,7 +23,7 @@ xpack.features.overrides:
     category: "security"
     order: 1101
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
-  siem:
+  siemV2:
     privileges:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
@@ -153,5 +154,7 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 
 # Experimental Security Solution features
 
-# This feature is disabled in Serverless until fully performance tested within a Serverless environment
-xpack.securitySolution.enableExperimental: ['entityStoreDisabled']
+# These features are disabled in Serverless until fully tested
+xpack.securitySolution.enableExperimental:
+  - entityStoreDisabled
+  - siemMigrationsDisabled

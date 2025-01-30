@@ -64,7 +64,7 @@ Having an interface for the feature and Discover consuming its definition, we ar
 For our example, we'll go to the logs app that owns the LogsAIAssistant codebase and register the feature:
 
 ```tsx
-// x-pack/platform/plugins/shared/observability_solution/logs_shared/public/plugin.ts
+// x-pack/platform/plugins/shared/logs_shared/public/plugin.ts
 
 export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   // The rest of the plugin implementation is hidden for a cleaner example

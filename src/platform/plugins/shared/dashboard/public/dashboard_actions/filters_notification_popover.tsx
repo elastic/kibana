@@ -77,7 +77,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   }, [api, setDisableEditButton]);
 
   const [dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
-    api.parentApi?.dataViews,
+    api.parentApi?.dataViews$,
     getViewModeSubject(api ?? undefined)
   );
 

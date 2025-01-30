@@ -26,8 +26,10 @@ import {
   FetchContext,
   HasParentApi,
   PublishesDataViews,
-  PublishesPanelTitle,
+  PublishesTitle,
   PublishesSavedObjectId,
+  PublishesDataLoading,
+  PublishesBlockingError,
 } from '@kbn/presentation-publishing';
 import { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -45,12 +47,12 @@ import { createDataSource } from '../../common/data_sources';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
+  PublishesBlockingError &
+  PublishesDataLoading &
   PublishesDataViews &
-  PublishesPanelTitle &
+  PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
-    dataLoading: BehaviorSubject<boolean | undefined>;
-    blockingError: BehaviorSubject<Error | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
   } & Partial<HasParentApi>;
 
@@ -67,8 +69,8 @@ const getExecutionContext = async (
   const childContext: KibanaExecutionContext = {
     type: SEARCH_EMBEDDABLE_TYPE,
     name: 'discover',
-    id: api.savedObjectId.getValue(),
-    description: api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
+    id: api.savedObjectId$.getValue(),
+    description: api.title$?.getValue() || api.defaultTitle$?.getValue() || '',
     url: editUrl,
   };
   const executionContext =
@@ -85,15 +87,19 @@ export function initializeFetch({
   api,
   stateManager,
   discoverServices,
+  setDataLoading,
+  setBlockingError,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
   discoverServices: DiscoverServices;
+  setDataLoading: (dataLoading: boolean | undefined) => void;
+  setBlockingError: (error: Error | undefined) => void;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews])
+  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews$])
     .pipe(
       tap(() => {
         // abort any in-progress requests
@@ -104,7 +110,7 @@ export function initializeFetch({
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
-        api.blockingError.next(undefined);
+        setBlockingError(undefined);
         if (!dataView || !savedSearch.searchSource) {
           return;
         }
@@ -130,7 +136,7 @@ export function initializeFetch({
         inspectorAdapters.requests.reset();
 
         try {
-          api.dataLoading.next(true);
+          setDataLoading(true);
 
           // Get new abort controller
           const currentAbortController = new AbortController();
@@ -217,9 +223,9 @@ export function initializeFetch({
       })
     )
     .subscribe((next) => {
-      api.dataLoading.next(false);
+      setDataLoading(false);
       if (!next || Object.hasOwn(next, 'error')) {
-        api.blockingError.next(next?.error);
+        setBlockingError(next?.error);
         return;
       }
 
