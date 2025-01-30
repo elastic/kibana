@@ -26772,6 +26772,20 @@ paths:
                                       required:
                                         - id
                                     - type: string
+                                ssl:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    key:
+                                      anyOf:
+                                        - additionalProperties: true
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                          required:
+                                            - id
+                                        - type: string
                             service_token:
                               nullable: true
                               type: string
@@ -27498,6 +27512,20 @@ paths:
                               required:
                                 - id
                             - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     service_token:
                       nullable: true
                       type: string
@@ -28187,6 +28215,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -28970,6 +29012,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
@@ -29683,6 +29739,20 @@ paths:
                               required:
                                 - id
                             - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     service_token:
                       nullable: true
                       type: string
@@ -30359,6 +30429,20 @@ paths:
                                     required:
                                       - id
                                   - type: string
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           service_token:
                             nullable: true
                             type: string
