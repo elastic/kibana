@@ -164,7 +164,7 @@ export function registerReindexDataStreamRoutes({
         const dataStreamMetadata = await reindexService.getDataStreamMetadata(dataStreamName);
 
         return response.ok({
-          body: dataStreamMetadata,
+          body: dataStreamMetadata || undefined,
         });
       } catch (err) {
         if (err instanceof errors.ResponseError) {

@@ -185,7 +185,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   <EuiButton
                     fill
                     color={status === DataStreamReindexStatus.inProgress ? 'primary' : 'warning'}
-                    iconType={status === DataStreamReindexStatus.inProgress ? undefined : 'play'}
+                    iconType={status === DataStreamReindexStatus.inProgress ? undefined : 'refresh'}
                     onClick={startReindex}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}

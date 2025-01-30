@@ -207,7 +207,7 @@ export const useReindexStatus = ({
         return {
           ...prevValue,
           loadingState: LoadingState.Success,
-          meta: data,
+          meta: data || null,
         };
       });
     } catch (error) {
@@ -219,7 +219,6 @@ export const useReindexStatus = ({
 
         return {
           ...prevValue,
-          meta: undefined,
           loadingState: LoadingState.Error,
           errorMessage: error.message.toString(),
           status: DataStreamReindexStatus.failed,
