@@ -7,9 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './palettes';
-export * from './classes';
-export * from './components';
-export { DEFAULT_FALLBACK_PALETTE, KbnPalette } from './constants';
+import React from 'react';
+import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export * from './hooks';
+/**
+ * Text wrapper to remove text-decoration from `EuiText`
+ */
+export const getAppendedTag = (label?: string) =>
+  label && (
+    <EuiText color="subdued" size="xs">
+      <span
+        css={css`
+          display: inline-block;
+        `}
+      >
+        {label}
+      </span>
+    </EuiText>
+  );
