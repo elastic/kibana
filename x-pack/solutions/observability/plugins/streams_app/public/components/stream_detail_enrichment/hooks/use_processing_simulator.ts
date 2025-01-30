@@ -71,7 +71,6 @@ export const useProcessingSimulator = ({
   useEffect(() => {
     setLiveDraftProcessors(draftProcessors);
   }, [draftProcessors]);
-
   const watchProcessor = useMemo(
     () =>
       debounce(
@@ -82,7 +81,10 @@ export const useProcessingSimulator = ({
             );
           }
 
-          if (isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor))) {
+          if (
+            isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor)) &&
+            processor.status === 'draft'
+          ) {
             setLiveDraftProcessors((prevLiveDraftProcessors) => {
               const newLiveDraftProcessors = prevLiveDraftProcessors.slice();
 
@@ -90,12 +92,7 @@ export const useProcessingSimulator = ({
                 (proc) => proc.id === processor.id
               );
 
-              const existingProcessor = prevLiveDraftProcessors[existingIndex];
-
-              if (
-                existingProcessor && // If the processor is found, it might also be a "saved" or "updated" processor
-                existingProcessor.status === 'draft'
-              ) {
+              if (existingIndex !== -1) {
                 newLiveDraftProcessors[existingIndex] = processor;
               } else {
                 newLiveDraftProcessors.push(processor);
@@ -111,8 +108,8 @@ export const useProcessingSimulator = ({
   );
 
   const samplingCondition = useMemo(
-    () => composeSamplingCondition(draftProcessors),
-    [draftProcessors]
+    () => composeSamplingCondition(liveDraftProcessors),
+    [liveDraftProcessors]
   );
 
   const {

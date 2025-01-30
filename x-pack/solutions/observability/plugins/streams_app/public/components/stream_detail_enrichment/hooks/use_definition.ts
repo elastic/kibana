@@ -76,9 +76,9 @@ export const useDefinition = (
 
   const hasChanges = useMemo(
     () =>
-      processors.some((proc) => proc.status === 'draft' || proc.status === 'updated') ||
-      hasOrderChanged(processors, initialProcessors.current) ||
-      processors.length !== initialProcessors.current.length,
+      processors.some((proc) => proc.status === 'draft' || proc.status === 'updated') || // New or updated processors
+      hasOrderChanged(processors, initialProcessors.current) || // Processor order changed
+      processors.length !== initialProcessors.current.length, // Processor count changed, a processor might be deleted
     [processors]
   );
 
