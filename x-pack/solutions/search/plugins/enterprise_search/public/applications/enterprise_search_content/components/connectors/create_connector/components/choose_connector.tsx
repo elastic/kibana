@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { EuiIconPlugs } from '@kbn/search-shared-ui';
 
-import connectorLogo from '../../../../../../assets/images/connector.svg';
 import {
   BETA_LABEL,
   TECH_PREVIEW_LABEL,
@@ -151,7 +151,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }
       )}
-      prepend={<EuiIcon type={selectedConnector?.iconPath ?? connectorLogo} size="l" />}
+      prepend={<EuiIcon type={selectedConnector?.iconPath ?? EuiIconPlugs} size="l" />}
       singleSelection
       fullWidth
       placeholder={i18n.translate(
