@@ -62,31 +62,30 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     pageSize: 1,
   });
 
-    const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
-    const totalVulnerabilities = useMemo(
-        () => CRITICAL + HIGH + MEDIUM + LOW + NONE,
-        [CRITICAL, HIGH, MEDIUM, LOW, NONE]
-    );
+  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
+  const totalVulnerabilities = useMemo(
+    () => CRITICAL + HIGH + MEDIUM + LOW + NONE,
+    [CRITICAL, HIGH, MEDIUM, LOW, NONE]
+  );
 
-    // this component only renders if there are findings
-    const shouldRender = useMemo(
-        () =>
-            hasVulnerabilitiesData({
-                critical: CRITICAL,
-                high: HIGH,
-                medium: MEDIUM,
-                low: LOW,
-                none: NONE,
-            }),
-        [CRITICAL, HIGH, MEDIUM, LOW, NONE]
-    );
+  // this component only renders if there are findings
+  const shouldRender = useMemo(
+    () =>
+      hasVulnerabilitiesData({
+        critical: CRITICAL,
+        high: HIGH,
+        medium: MEDIUM,
+        low: LOW,
+        none: NONE,
+      }),
+    [CRITICAL, HIGH, MEDIUM, LOW, NONE]
+  );
 
   useEffect(() => {
     if (shouldRender && telemetryKey) {
       uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
     }
   }, [telemetryKey, renderingId]);
-
 
   const vulnerabilitiesStats = useMemo(
     () =>
