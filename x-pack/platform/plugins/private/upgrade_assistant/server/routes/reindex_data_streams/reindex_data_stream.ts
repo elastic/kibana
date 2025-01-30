@@ -109,7 +109,6 @@ export function registerReindexDataStreamRoutes({
           : [];
 
         const reindexOp = await reindexService.fetchReindexStatus(indexName);
-        console.log('reindexOp::', reindexOp);
 
         const body: DataStreamReindexStatusResponse = {
           reindexOp,
@@ -157,7 +156,6 @@ export function registerReindexDataStreamRoutes({
 
       try {
         const dataStreamMetadata = await reindexService.getDataStreamMetadata(indexName);
-        console.log('dataStreamMetadata::', dataStreamMetadata);
 
         return response.ok({
           body: dataStreamMetadata,

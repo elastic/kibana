@@ -26,7 +26,6 @@ export interface DataStreamMetadata {
 }
 
 export interface DataStreamReindexStatusResponse {
-  meta: DataStreamMetadata;
   warnings?: DataStreamReindexWarning[];
   reindexOp?: DataStreamReindexOperation;
   hasRequiredPrivileges?: boolean;
@@ -36,12 +35,6 @@ export type DataStreamReindexWarningTypes = 'incompatibleDataStream';
 
 export interface DataStreamReindexWarning {
   warningType: DataStreamReindexWarningTypes;
-  /**
-   * Optional metadata for deprecations
-   *
-   * @remark
-   * For "indexSetting" we want to surface the deprecated settings.
-   */
   meta?: {
     [key: string]: string | string[];
   };
@@ -53,8 +46,6 @@ export enum DataStreamReindexStatus {
   completed,
   failed,
   cancelled,
-  // Used by the UI to differentiate if there was a failure retrieving
-  // the status from the server API
   fetchFailed,
 }
 

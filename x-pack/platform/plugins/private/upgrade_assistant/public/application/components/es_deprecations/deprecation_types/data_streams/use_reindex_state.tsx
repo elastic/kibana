@@ -38,15 +38,18 @@ export interface ReindexState {
 
 const getReindexState = (
   reindexState: ReindexState,
-  { reindexOp, warnings, hasRequiredPrivileges, meta: updatedMeta }: DataStreamReindexStatusResponse
+  {
+    reindexOp,
+    warnings,
+    hasRequiredPrivileges,
+    meta: updatedMeta,
+  }: DataStreamReindexStatusResponse & { meta: DataStreamMetadata | null }
 ) => {
-  const meta = { ...(updatedMeta ?? reindexState.meta) };
-
   const newReindexState: ReindexState = {
     ...reindexState,
 
     reindexWarnings: warnings,
-    meta,
+    meta: updatedMeta || reindexState.meta,
     loadingState: LoadingState.Success,
   };
 
