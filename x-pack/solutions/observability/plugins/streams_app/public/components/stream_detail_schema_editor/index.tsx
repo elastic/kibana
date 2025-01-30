@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiPortal } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useEditingState } from './hooks/use_editing_state';
 import { SchemaEditorFlyout } from './flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -21,7 +21,7 @@ import { useQueryAndFilters } from './hooks/use_query_and_filters';
 import { FieldStatusFilterGroup } from './filters/status_filter_group';
 
 interface SchemaEditorProps {
-  definition?: WiredReadStreamDefinition;
+  definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
   isLoadingDefinition: boolean;
 }
@@ -59,12 +59,12 @@ const Content = ({
         signal,
         params: {
           path: {
-            id: definition.name,
+            id: definition.stream.name,
           },
         },
       });
     },
-    [definition.name, streamsRepositoryClient]
+    [definition.stream.name, streamsRepositoryClient]
   );
 
   const editingState = useEditingState({
@@ -88,7 +88,7 @@ const Content = ({
   // If the definition changes (e.g. navigating to parent stream), reset the entire editing state.
   useEffect(() => {
     reset();
-  }, [definition.name, reset]);
+  }, [definition.stream.name, reset]);
 
   return (
     <EuiFlexItem>
