@@ -7,4 +7,4 @@
 
 export { GEOHASH_GRID, getGeoHashBucketAgg } from './tile_map';
 export { createRegionMapFn, regionMapRenderer } from './region_map';
-export { createTileMapFn, tileMapRenderer, tileMapVisType } from './tile_map';
+export { createTileMapFn, tileMapRenderer } from './tile_map';
