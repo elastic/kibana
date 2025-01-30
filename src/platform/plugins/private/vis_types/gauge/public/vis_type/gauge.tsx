@@ -20,9 +20,7 @@ import { getGaugeOptions } from '../editor/components';
 import { GaugeVisParams } from '../types';
 import { SplitTooltip } from './split_tooltip';
 
-export const getGaugeVisTypeDefinition = (
-  props: GaugeTypeProps
-): VisTypeDefinition<GaugeVisParams> => ({
+export const getGaugeVisType = (props: GaugeTypeProps): VisTypeDefinition<GaugeVisParams> => ({
   name: 'gauge',
   title: i18n.translate('visTypeGauge.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',

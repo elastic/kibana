@@ -42,17 +42,17 @@ export class VisTypeGaugePlugin {
       const { readOnly } = this.initializerContext.config.get<GaugePublicConfig>();
       const visTypeProps = { showElasticChartsOptions: true };
       visualizations.createBaseVisualization('gauge', async () => {
-        const { getGaugeVisTypeDefinition } = await import('./vis_type/gauge');
+        const { getGaugeVisType } = await import('./vis_type/vis_types_module');
         return {
-          ...getGaugeVisTypeDefinition(visTypeProps),
+          ...getGaugeVisType(visTypeProps),
           disableCreate: Boolean(readOnly),
           disableEdit: Boolean(readOnly),
         };
       });
       visualizations.createBaseVisualization('goal', async () => {
-        const { getGoalVisTypeDefinition } = await import('./vis_type/goal');
+        const { getGoalVisType } = await import('./vis_type/vis_types_module');
         return {
-          ...getGoalVisTypeDefinition(visTypeProps),
+          ...getGoalVisType(visTypeProps),
           disableCreate: Boolean(readOnly),
           disableEdit: Boolean(readOnly),
         };

@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-import type { HeatmapPublicConfig } from '../server/config';
-import { VisTypeHeatmapPlugin } from './plugin';
-
-export async function getHeatmapVisType() {
-  const { getHeatmapVisType: getVisType } = await import('./vis_type/heatmap');
-  return getVisType({});
-}
-
-export const plugin = (initializerContext: PluginInitializerContext<HeatmapPublicConfig>) =>
-  new VisTypeHeatmapPlugin(initializerContext);
+export { areaVisType } from './area';
+export { lineVisType } from './line';
+export { histogramVisType } from './histogram';
+export { horizontalBarVisType } from './horizontal_bar';

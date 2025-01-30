@@ -58,8 +58,8 @@ export class VisTypeHeatmapPlugin {
           }),
           disableCreate: Boolean(readOnly),
           disableEdit: Boolean(readOnly),
-       };
-     });
+        };
+      });
     }
     return {};
   }

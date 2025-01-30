@@ -13,8 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { XyPublicConfig } from '../server/config';
 import { setUISettings, setPalettesService, setDataViewsStart } from './services';
-
-import { visTypesDefinitions } from './vis_types';
+import { registerVisTypes } from './vis_types/register_vis_types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
@@ -53,13 +52,7 @@ export class VisTypeXyPlugin
     setPalettesService(charts.palettes);
 
     const { readOnly } = this.initializerContext.config.get<XyPublicConfig>();
-    visTypesDefinitions.forEach((visTypeDefinition) =>
-      visualizations.createBaseVisualization({
-        ...visTypeDefinition,
-        disableCreate: Boolean(readOnly),
-        disableEdit: Boolean(readOnly),
-      })
-    );
+    registerVisTypes(readOnly, visualizations);
     return {};
   }
 

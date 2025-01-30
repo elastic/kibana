@@ -28,7 +28,7 @@ import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
 import { getVisTypeFromParams } from './get_vis_type_from_params';
 
-export const histogramVisTypeDefinition = {
+export const histogramVisType = {
   name: 'histogram',
   title: i18n.translate('visTypeXy.histogram.histogramTitle', {
     defaultMessage: 'Vertical bar',

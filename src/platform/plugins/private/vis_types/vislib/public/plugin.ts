@@ -24,12 +24,11 @@ import {
   setCoreStart,
   setUsageCollectionStart,
 } from './services';
-import { heatmapVisTypeDefinition } from './heatmap';
-
+import { getLegacyHeatmapVisType } from './heatmap';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { getVislibVisRenderer } from './vis_renderer';
-import { gaugeVisTypeDefinition } from './gauge';
-import { goalVisTypeDefinition } from './goal';
+import { getLegacyGaugeVisType } from './gauge';
+import { getLegacyGoalVisType } from './goal';
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {
@@ -65,25 +64,25 @@ export class VisTypeVislibPlugin
 
     if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       // register vislib heatmap chart
-      visualizations.createBaseVisualization({
-        ...heatmapVisTypeDefinition,
+      visualizations.createBaseVisualization('heatmap', async () => ({
+        ...(await getLegacyHeatmapVisType()),
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),
-      });
+      }));
     }
 
     if (core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       // register vislib gauge and goal charts
-      visualizations.createBaseVisualization({
-        ...gaugeVisTypeDefinition,
+      visualizations.createBaseVisualization('gauge', async () => ({
+        ...(await getLegacyGaugeVisType()),
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),
-      });
-      visualizations.createBaseVisualization({
-        ...goalVisTypeDefinition,
+      }));
+      visualizations.createBaseVisualization('goal', async () => ({
+        ...(await getLegacyGoalVisType()),
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),
-      });
+      }));
     }
   }
 

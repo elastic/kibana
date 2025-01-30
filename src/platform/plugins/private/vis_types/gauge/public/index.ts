@@ -11,6 +11,16 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import type { GaugePublicConfig } from '../server/config';
 import { VisTypeGaugePlugin } from './plugin';
 
+export async function getGaugeVisType() {
+  const { getGaugeVisType: getVisType } = await import('./vis_type/vis_types_module');
+  return getVisType({});
+}
+
+export async function getGoalVisType() {
+  const { getGoalVisType: getVisType } = await import('./vis_type/vis_types_module');
+  return getVisType({});
+}
+
 export function plugin(initializerContext: PluginInitializerContext<GaugePublicConfig>) {
   return new VisTypeGaugePlugin(initializerContext);
 }
