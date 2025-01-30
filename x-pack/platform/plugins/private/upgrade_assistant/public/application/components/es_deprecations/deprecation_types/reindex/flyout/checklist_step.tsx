@@ -211,7 +211,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               >
                 <FormattedMessage
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
-                  defaultMessage="Frozen indices will no longer be supported after upgrade, so this index be deleted as part the reindex operation. {docsLink}"
+                  defaultMessage="Frozen indices will no longer be supported after upgrade, so this index will be deleted as part the reindex operation. {docsLink}"
                   values={{
                     docsLink: (
                       <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.unfreezeApi}>
