@@ -12,11 +12,11 @@ import {
   getLogger,
   getEsArchiver,
   createScoutConfig,
+  measurePerformanceAsync,
   getEsClient,
   getKbnClient,
 } from '../../common';
 import { ScoutTestOptions } from '../types';
-import { measurePerformance } from '../utils';
 
 export async function ingestTestDataHook(config: FullConfig, archives: string[]) {
   const log = getLogger();
@@ -26,7 +26,7 @@ export async function ingestTestDataHook(config: FullConfig, archives: string[])
     return;
   }
 
-  return measurePerformance(log, '[setup]: ingestTestDataHook', async () => {
+  return measurePerformanceAsync(log, '[setup]: ingestTestDataHook', async () => {
     // TODO: This should be configurable local vs cloud
     const configName = 'local';
     const projectUse = config.projects[0].use as ScoutTestOptions;

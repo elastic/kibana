@@ -103,6 +103,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       start,
       core,
       dataViews,
+      data,
       expressions,
       storage,
       uiActions,
