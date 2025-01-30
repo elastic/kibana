@@ -61,6 +61,7 @@ export const privilegedUsersFlyoutRoute = (
               query: {
                 bool: {
                   should: userNamesFilter,
+                  minimum_should_match: 1,
                 },
               },
             },
@@ -80,7 +81,8 @@ export const privilegedUsersFlyoutRoute = (
               ],
               query: {
                 bool: {
-                  filter: userNamesFilter,
+                  should: userNamesFilter,
+                  minimum_should_match: 1,
                 },
               },
             },
@@ -101,7 +103,8 @@ export const privilegedUsersFlyoutRoute = (
               ],
               query: {
                 bool: {
-                  filter: userNamesFilter,
+                  should: userNamesFilter,
+                  minimum_should_match: 1,
                 },
               },
             },

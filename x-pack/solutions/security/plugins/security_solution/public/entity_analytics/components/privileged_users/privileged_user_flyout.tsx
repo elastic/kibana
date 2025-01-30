@@ -18,6 +18,9 @@ import {
   EuiText,
   EuiButton,
   EuiBasicTable,
+  EuiNotificationBadge,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { Alert } from '@kbn/alerting-types';
@@ -120,7 +123,7 @@ export const PrivilegedUserFlyout: React.FC<{
 
   return (
     <EuiFlyout onClose={closeFlyout}>
-      <SummaryHeader privilegedUser={privilegedUser} />
+      <SummaryHeader privilegedUser={privilegedUser} linkedUsers={linkedUsers} />
       <EuiFlyoutBody>
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
       </EuiFlyoutBody>
@@ -128,10 +131,28 @@ export const PrivilegedUserFlyout: React.FC<{
   );
 };
 
-const SummaryHeader: React.FC<{ privilegedUser: PrivilegedUserDoc }> = ({ privilegedUser }) => (
+const LinkedUserCountBadge: React.FC<{ linkedUsers: PrivilegedUserDoc[] }> = ({ linkedUsers }) => {
+  if (linkedUsers.length <= 1) {
+    return null;
+  }
+
+  return (
+    <EuiToolTip content={linkedUsers.map((u) => u.user.name).join(', ')}>
+      <EuiBadge color={'success'}>{`+ ${linkedUsers.length - 1} related users`}</EuiBadge>
+    </EuiToolTip>
+  );
+};
+
+const SummaryHeader: React.FC<{
+  privilegedUser: PrivilegedUserDoc;
+  linkedUsers: PrivilegedUserDoc[];
+}> = ({ privilegedUser, linkedUsers }) => (
   <EuiFlyoutHeader>
     <EuiTitle size="m">
-      <h2>{`Privileged user ${privilegedUser.user.name}`}</h2>
+      <h2>
+        {`Privileged user ${privilegedUser.user.name}`}{' '}
+        <LinkedUserCountBadge linkedUsers={linkedUsers} />
+      </h2>
     </EuiTitle>
     <EuiSpacer size="s" />
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -282,6 +303,7 @@ const LinkUsersTable = ({
         <EuiButton
           size="s"
           onClick={() => (isLinked ? removeLinkedUser(user) : addLinkedUser(user))}
+          color={isLinked ? 'danger' : 'primary'}
         >
           {isLinked ? 'Remove' : 'Include'}
         </EuiButton>
@@ -344,6 +366,12 @@ const getTabs = memoize(
     {
       id: 'related',
       name: 'Related Users',
+      append:
+        candidateLinkedUsers.length > 0 ? (
+          <EuiNotificationBadge className="eui-alignCenter" size="m">
+            {candidateLinkedUsers.length}
+          </EuiNotificationBadge>
+        ) : null,
       content: (
         <RelatedUsers
           {...{
