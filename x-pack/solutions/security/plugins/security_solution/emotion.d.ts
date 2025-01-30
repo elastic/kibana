@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import styled from '@emotion/styled';
+import '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 
-export const Display = styled.div<{ show: boolean }>(({ show }) => ({
-  display: show ? undefined : 'none',
-}));
-
-Display.displayName = 'Display';
+declare module '@emotion/react' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface Theme extends UseEuiTheme {}
+}
