@@ -6,12 +6,10 @@
  */
 
 import { assign, concat } from 'lodash/fp';
-
 import type {
   EntityType,
   InitEntityEngineRequestBody,
 } from '../../../../../common/api/entity_analytics';
-import { DEFAULT_TIMESTAMP_FIELD } from '../entity_definitions/constants';
 import { generateIndexMappings } from '../elasticsearch_assets';
 import {
   hostEntityEngineDescription,
@@ -19,12 +17,10 @@ import {
   universalEntityEngineDescription,
   serviceEntityEngineDescription,
 } from '../entity_definitions/entity_descriptions';
-
 import type { EntityStoreConfig } from '../types';
 import { buildEntityDefinitionId } from '../utils';
 import type { EntityDescription } from '../entity_definitions/types';
 import type { EntityEngineInstallationDescriptor } from './types';
-
 import { merge } from '../../../../../common/utils/objects/merge';
 import { defaultOptions } from '../constants';
 
@@ -64,7 +60,7 @@ export const createEngineDescription = (params: EngineDescriptionParams) => {
     frequency: options.frequency,
     docsPerSecond: options.docsPerSecond,
     lookbackPeriod: options.lookbackPeriod,
-    timestampField: description.settings?.timestampField || DEFAULT_TIMESTAMP_FIELD,
+    timestampField: options.timestampField,
   };
 
   const defaults = {
