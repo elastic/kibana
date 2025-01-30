@@ -52,6 +52,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
+    'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
     'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
   });
 
