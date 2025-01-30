@@ -38,7 +38,7 @@ export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = 
     processorBaseSchema,
     z.object({
       field: NonEmptyString,
-      patterns: z.array(NonEmptyString),
+      patterns: z.array(NonEmptyString).nonempty(),
       pattern_definitions: z.optional(z.record(z.string())),
       ignore_missing: z.optional(z.boolean()),
     })

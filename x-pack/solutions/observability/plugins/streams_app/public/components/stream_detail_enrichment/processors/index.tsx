@@ -39,10 +39,11 @@ import {
 } from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { UseDefinitionReturn } from '../hooks/use_definition';
+import { UseProcessingSimulatorReturnType } from '../hooks/use_processing_simulator';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
-  onWatchProcessor: (processor: ProcessorDefinitionWithUIAttributes) => void;
+  onWatchProcessor: UseProcessingSimulatorReturnType['watchProcessor'];
 }
 
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
@@ -91,6 +92,7 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
 
   const handleCancel = () => {
     methods.reset();
+    onWatchProcessor({ id: 'draft', deleteIfExists: true });
     closePanel();
   };
 

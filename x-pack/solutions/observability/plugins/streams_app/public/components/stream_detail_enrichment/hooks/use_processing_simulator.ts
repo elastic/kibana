@@ -9,10 +9,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { debounce, isEmpty, uniq, uniqBy } from 'lodash';
 import {
   IngestStreamGetResponse,
-  FieldDefinition,
   getProcessorConfig,
   UnaryOperator,
   Condition,
+  processorDefinitionSchema,
+  isSchema,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
@@ -41,7 +42,9 @@ export interface UseProcessingSimulatorReturnType {
   simulation?: Simulation | null;
   tableColumns: TableColumn[];
   refreshSamples: () => void;
-  watchProcessor: (processor: ProcessorDefinitionWithUIAttributes) => void;
+  watchProcessor: (
+    processor: ProcessorDefinitionWithUIAttributes | { id: string; deleteIfExists: true }
+  ) => void;
 }
 
 export const useProcessingSimulator = ({
@@ -71,22 +74,39 @@ export const useProcessingSimulator = ({
 
   const watchProcessor = useMemo(
     () =>
-      debounce((processor: ProcessorDefinitionWithUIAttributes) => {
-        setLiveDraftProcessors((prevLiveDraftProcessors) => {
-          const newLiveDraftProcessors = prevLiveDraftProcessors.slice();
-
-          const existingIndex = prevLiveDraftProcessors.findIndex(
-            (proc) => proc.id === processor.id
-          );
-          if (existingIndex !== -1) {
-            newLiveDraftProcessors[existingIndex] = processor;
-          } else {
-            newLiveDraftProcessors.push(processor);
+      debounce(
+        (processor: ProcessorDefinitionWithUIAttributes | { id: string; deleteIfExists: true }) => {
+          if ('deleteIfExists' in processor) {
+            return setLiveDraftProcessors((prevLiveDraftProcessors) =>
+              prevLiveDraftProcessors.filter((proc) => proc.id !== processor.id)
+            );
           }
 
-          return newLiveDraftProcessors;
-        });
-      }, 500),
+          if (isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor))) {
+            setLiveDraftProcessors((prevLiveDraftProcessors) => {
+              const newLiveDraftProcessors = prevLiveDraftProcessors.slice();
+
+              const existingIndex = prevLiveDraftProcessors.findIndex(
+                (proc) => proc.id === processor.id
+              );
+
+              const existingProcessor = prevLiveDraftProcessors[existingIndex];
+
+              if (
+                existingProcessor && // If the processor is found, it might also be a "saved" or "updated" processor
+                existingProcessor.status === 'draft'
+              ) {
+                newLiveDraftProcessors[existingIndex] = processor;
+              } else {
+                newLiveDraftProcessors.push(processor);
+              }
+
+              return newLiveDraftProcessors;
+            });
+          }
+        },
+        500
+      ),
     []
   );
 
@@ -108,7 +128,7 @@ export const useProcessingSimulator = ({
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
         signal,
         params: {
-          path: { id: definition.name },
+          path: { id: definition.stream.name },
           body: {
             if: samplingCondition,
             start: start?.valueOf(),
@@ -137,7 +157,7 @@ export const useProcessingSimulator = ({
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
         signal,
         params: {
-          path: { id: definition.name },
+          path: { id: definition.stream.name },
           body: {
             documents: sampleDocs,
             processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),
@@ -145,7 +165,8 @@ export const useProcessingSimulator = ({
         },
       });
     },
-    [definition, sampleDocs, liveDraftProcessors, streamsRepositoryClient]
+    [definition, sampleDocs, liveDraftProcessors, streamsRepositoryClient],
+    { disableToastOnError: true }
   );
 
   const tableColumns = useMemo(() => {
