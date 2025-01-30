@@ -27,5 +27,6 @@
     // Width of 3 badges, with the last child not having padding on the left
     width: ($badgeSize * 3) - ($euiSizeXS * .75);
     // Force text to always be dark on top of white -> pink color
+    color: lightOrDarkTheme($euiColorDarkestShade, $euiColorLightestShade);
   }
 }
