@@ -1,16 +1,16 @@
 paths-ignore:
-  - '**/*-mocks/**'
-  - '**/*.cy.*'
-  - '**/*.mock.*'
-  - '**/*.mocks.*'
-  - '**/*.test.*'
-  - '**/.storybook/**'
   - '**/__fixtures__/**'
   - '**/__jest__/**'
   - '**/__mocks__/**'
   - '**/__snapshots__/**'
   - '**/__stories__/**'
   - '**/__tests__/**'
+  - '**/.storybook/**'
+  - '**/*-mocks/**'
+  - '**/*.cy.*'
+  - '**/*.mock.*'
+  - '**/*.mocks.*'
+  - '**/*.test.*'
   - '**/cypress/**'
   - '**/e2e/**'
   - '**/ftr_e2e/**'
@@ -19,6 +19,7 @@ paths-ignore:
   - '**/jest.integration.config.*'
   - '**/mocks.*'
   - '**/mocks/**'
+  - '**/scripts/**'
   - '**/storybook/**'
   - '**/test_helpers/**'
   - '**/test_utils/**'
@@ -29,68 +30,11 @@ paths-ignore:
   - kbn_pm
   - legacy_rfcs
   - oas_docs
-  - packages/*/scripts
-  - src/dev/packages/core-test-helpers-kbn-server
-  - packages/kbn-ambient-*-types
-  - src/dev/packages/apm-synthtrace
-  - src/dev/packages/axe-config
-  - packages/kbn-babel-*
-  - packages/kbn-bazel-*
-  - packages/kbn-ci-*
-  - src/dev/packages/cli-dev-mode
-  - packages/kbn-cypress-*
-  - src/dev/packages/dev-cli-errors
-  - src/dev/packages/dev-cli-runner
-  - src/dev/packages/dev-proc-runner
-  - src/dev/packages/dev-utils
-  - src/dev/packages/docs-utils
-  - src/dev/packages/es
-  - src/dev/packages/es-archiver
-  - packages/kbn-eslint-*
-  - src/dev/packages/expect
-  - src/dev/packages/failed-test-reporter-cli
-  - src/dev/packages/find-used-node-modules
-  - packages/kbn-ftr-*
-  - src/dev/packages/generate
-  - src/dev/packages/get-repo-files
-  - src/dev/packages/import-resolver
-  - packages/kbn-jest-*
-  - src/dev/packages/journeys
-  - src/dev/packages/kibana-manifest-schema
-  - src/dev/packages/managed-vscode-config
-  - src/dev/packages/managed-vscode-config-cli
-  - src/dev/packages/optimizer
-  - packages/kbn-optimizer-*
-  - src/dev/packages/peggy
-  - src/dev/packages/peggy-loader
-  - src/dev/packages/performance-testing-dataset-extractor
-  - src/dev/packages/plugin-generator
-  - src/dev/packages/plugin-helpers
-  - src/dev/packages/relocate
-  - src/dev/packages/repo-path
-  - src/dev/packages/repo-source-classifier
-  - src/dev/packages/repo-source-classifier-cli
-  - src/dev/packages/scout
-  - packages/kbn-scout-*
-  - src/dev/packages/some-dev-log
-  - src/dev/packages/sort-package-json
-  - src/dev/packages/stdio-dev-helpers
-  - src/dev/packages/storybook
-  - src/dev/packages/telemetry-tools
-  - src/dev/packages/test
-  - packages/kbn-test-*
-  - src/dev/packages/tooling-log
-  - packages/kbn-ts-*
-  - src/dev/packages/web-worker-stub
-  - src/dev/packages/yarn-lock-validator
   - scripts
+  - src/dev/packages
   - test
   - typings
   - x-pack/examples
   - x-pack/performance
-  - x-pack/platform/**/scripts
-  - x-pack/plugins/observability_solution/*/scripts
-  - x-pack/scripts
-  - x-pack/solutions/**/scripts
   - x-pack/test
   - x-pack/test_serverless
