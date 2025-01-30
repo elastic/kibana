@@ -11,7 +11,6 @@ import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FilterBarService } from '@kbn/test-suites-src/functional/services/filter_bar';
 import type { QueryBarProvider } from '../services/query_bar_provider';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
-import { FtrService } from '../../functional/ftr_provider_context';
 import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
