@@ -81,7 +81,7 @@ export function useGetQueryParams() {
   }, [disableSlo, history, pathname, search]);
 
   return {
-    instanceId: !!instanceId && instanceId !== ALL_VALUE ? instanceId : undefined,
+    instanceId: instanceId !== ALL_VALUE ? instanceId : undefined,
     remoteName: remoteName !== null ? remoteName : undefined,
     isDeletingSlo: deleteSlo === 'true',
     removeDeleteQueryParam,

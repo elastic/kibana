@@ -182,13 +182,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       }),
       onClick: (slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
-          paths.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
-              ? slo.instanceId
-              : undefined,
-            slo.remote?.remoteName
-          )
+          paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
         );
         navigateToUrl(sloDetailsUrl);
       },
@@ -395,13 +389,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       'data-test-subj': 'sloItem',
       render: (_, slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
-          paths.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
-              ? slo.instanceId
-              : undefined,
-            slo.remote?.remoteName
-          )
+          paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
         );
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
