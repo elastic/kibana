@@ -41,6 +41,7 @@ export const EngineDescriptor = z.object({
     .regex(/[smdh]$/)
     .optional()
     .default('24h'),
+  timestampField: z.string().optional(),
   timeout: z
     .string()
     .regex(/[smdh]$/)
