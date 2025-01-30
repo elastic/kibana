@@ -69,6 +69,7 @@ export const getRenderCellValueFn = ({
     useEffect(() => {
       if (row?.isAnchor) {
         setCellProps({
+          className: 'unifiedDataTable__cell--highlight',
           css: { backgroundColor: anchorColor },
         });
       } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
