@@ -91,12 +91,12 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
           <h3>
             {status === DataStreamReindexStatus.inProgress ? (
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
+                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingInProgressTitle"
                 defaultMessage="Reindexing in progress…"
               />
             ) : (
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
+                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklistTitle"
                 defaultMessage="Reindex data stream"
               />
             )}
@@ -110,7 +110,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
             label={
               taskStatus ? (
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
+                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingInProgressTitle"
                   defaultMessage="Started {startTimeFromNow}"
                   values={{
                     startTimeFromNow: (
@@ -139,7 +139,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
           {!taskStatus && (
             <p>
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
+                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.fetchingStatus"
                 defaultMessage="Fetching Status…"
               />
             </p>
@@ -150,11 +150,14 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                 <EuiFlexItem>
                   <EuiText size="s" color="danger">
                     <p>
-                      {i18n.translate('progressStep.failedTitle', {
-                        defaultMessage:
-                          '{count, plural, =1 {# Index} other {# Indices}} failed to reindex.',
-                        values: { count: taskStatus.errorsCount },
-                      })}
+                      {i18n.translate(
+                        'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.progressStep.failedTitle',
+                        {
+                          defaultMessage:
+                            '{count, plural, =1 {# Index} other {# Indices}} failed to reindex.',
+                          values: { count: taskStatus.errorsCount },
+                        }
+                      )}
                     </p>
                   </EuiText>
                 </EuiFlexItem>
@@ -162,33 +165,42 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
               <EuiFlexItem>
                 <EuiText size="s" color="success">
                   <p>
-                    {i18n.translate('progressStep.completeTitle', {
-                      defaultMessage:
-                        '{count, plural, =1 {# Index} other {# Indices}} successfully reindexed.',
-                      values: { count: taskStatus.successCount },
-                    })}
+                    {i18n.translate(
+                      'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.progressStep.completeTitle',
+                      {
+                        defaultMessage:
+                          '{count, plural, =1 {# Index} other {# Indices}} successfully reindexed.',
+                        values: { count: taskStatus.successCount },
+                      }
+                    )}
                   </p>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s" color="primary">
                   <p>
-                    {i18n.translate('progressStep.inProgressTitle', {
-                      defaultMessage:
-                        '{count, plural, =1 {# Index} other {# Indices}} currently reindexing.',
-                      values: { count: taskStatus.inProgressCount },
-                    })}
+                    {i18n.translate(
+                      'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.progressStep.inProgressTitle',
+                      {
+                        defaultMessage:
+                          '{count, plural, =1 {# Index} other {# Indices}} currently reindexing.',
+                        values: { count: taskStatus.inProgressCount },
+                      }
+                    )}
                   </p>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">
                   <p>
-                    {i18n.translate('progressStep.pendingTitle', {
-                      defaultMessage:
-                        '{count, plural, =1 {# Index} other {# Indices}} waiting to start.',
-                      values: { count: taskStatus.pendingCount },
-                    })}
+                    {i18n.translate(
+                      'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.progressStep.pendingTitle',
+                      {
+                        defaultMessage:
+                          '{count, plural, =1 {# Index} other {# Indices}} waiting to start.',
+                        values: { count: taskStatus.pendingCount },
+                      }
+                    )}
                   </p>
                 </EuiText>
               </EuiFlexItem>

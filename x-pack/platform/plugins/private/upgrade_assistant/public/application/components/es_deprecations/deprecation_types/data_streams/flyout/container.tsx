@@ -18,7 +18,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import {
   DataStreamReindexStatus,
   EnrichedDeprecationInfo,
@@ -33,8 +32,8 @@ import {
   uiMetricService,
 } from '../../../../../lib/ui_metric';
 
+import { containerMessages } from './messages';
 import type { FlyoutStep } from './steps/types';
-
 import { InitializingFlyoutStep } from './steps/initializing';
 import { ConfirmReindexingFlyoutStep } from './steps/confirm';
 import { DataStreamDetailsFlyoutStep } from './steps/details';
@@ -106,17 +105,10 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   const { docsSizeFormatted, indicesRequiringUpgradeDocsCount, lastIndexCreationDateFormatted } =
     useMemo(() => {
       if (!meta) {
-        const unknownMessage = i18n.translate(
-          'xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.unknownMessage',
-          {
-            defaultMessage: 'Unknown',
-          }
-        );
-
         return {
-          indicesRequiringUpgradeDocsCount: unknownMessage,
-          docsSizeFormatted: unknownMessage,
-          lastIndexCreationDateFormatted: unknownMessage,
+          indicesRequiringUpgradeDocsCount: containerMessages.unknownMessage,
+          docsSizeFormatted: containerMessages.unknownMessage,
+          lastIndexCreationDateFormatted: containerMessages.unknownMessage,
         };
       }
 
@@ -144,7 +136,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         if (!meta) {
           return (
             <InitializingFlyoutStep
-              errorMessage={errorMessage || 'Error loading data stream info'}
+              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
             />
           );
         }
@@ -165,7 +157,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         if (!meta) {
           return (
             <InitializingFlyoutStep
-              errorMessage={errorMessage || 'Error loading data stream info'}
+              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
             />
           );
         }
@@ -186,7 +178,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         if (!meta) {
           return (
             <InitializingFlyoutStep
-              errorMessage={errorMessage || 'Error loading data stream info'}
+              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
             />
           );
         }
@@ -205,7 +197,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         if (!meta) {
           return (
             <InitializingFlyoutStep
-              errorMessage={errorMessage || 'Error loading data stream info'}
+              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
             />
           );
         }

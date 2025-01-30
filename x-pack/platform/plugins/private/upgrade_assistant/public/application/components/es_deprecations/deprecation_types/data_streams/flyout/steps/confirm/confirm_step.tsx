@@ -92,7 +92,7 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
+                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
                   defaultMessage="This operation requires destructive changes that cannot be reversed"
                 />
               }
@@ -101,7 +101,7 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
             >
               <p>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
+                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
                   defaultMessage="Ensure data has been backed up before continuing. To proceed with reindexing this data, confirm below."
                 />
               </p>
@@ -109,7 +109,7 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
             <EuiSpacer />
             <p>
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
+                id="xpack.upgradeAssistant.dataStream.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
                 defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first."
                 values={{ count: meta.indicesRequiringUpgradeCount }}
               />
@@ -137,7 +137,7 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="arrowLeft" onClick={hideWarningsStep} flush="left">
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
+                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.backButtonLabel"
                 defaultMessage="Back"
               />
             </EuiButtonEmpty>
@@ -145,7 +145,7 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
           <EuiFlexItem grow={false}>
             <EuiButton fill color="primary" onClick={continueReindex} disabled={blockAdvance}>
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
+                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.startReindexingButtonLabel"
                 defaultMessage="Start reindexing"
               />
             </EuiButton>

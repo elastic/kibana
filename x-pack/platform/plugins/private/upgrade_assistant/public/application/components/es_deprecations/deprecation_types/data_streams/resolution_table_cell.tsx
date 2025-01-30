@@ -23,46 +23,49 @@ import { useDataStreamReindexContext } from './context';
 
 const i18nTexts = {
   reindexLoadingStatusText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexLoadingStatusText',
+    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexLoadingStatusText',
     {
       defaultMessage: 'Loading status…',
     }
   ),
   reindexInProgressText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexInProgressText',
+    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexInProgressText',
     {
       defaultMessage: 'Reindexing in progress…',
     }
   ),
   reindexCompleteText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexCompleteText',
+    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCompleteText',
     {
       defaultMessage: 'Reindex complete',
     }
   ),
   reindexFailedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexFailedText',
+    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFailedText',
     {
       defaultMessage: 'Reindex failed',
     }
   ),
   reindexFetchFailedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexFetchFailedText',
+    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFetchFailedText',
     {
       defaultMessage: 'Reindex status not available',
     }
   ),
   reindexCanceledText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexCanceledText',
+    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCanceledText',
     {
       defaultMessage: 'Reindex cancelled',
     }
   ),
-  resolutionText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.resolutionLabel', {
-    defaultMessage: 'Reindex',
-  }),
+  resolutionText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionLabel',
+    {
+      defaultMessage: 'Reindex',
+    }
+  ),
   resolutionTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.resolutionTooltipLabel',
+    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipLabel',
     {
       defaultMessage:
         'Resolve this issue by reindexing this data stream. This issue can be resolved automatically.',

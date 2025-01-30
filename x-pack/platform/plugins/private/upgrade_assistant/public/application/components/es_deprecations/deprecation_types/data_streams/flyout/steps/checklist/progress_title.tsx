@@ -20,7 +20,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Loading: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
           defaultMessage="Cancelling…"
         />
       );
@@ -28,7 +28,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Success: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
           defaultMessage="Cancelled"
         />
       );
@@ -36,7 +36,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Error: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
           defaultMessage="Failed to cancel reindexing"
         />
       );
@@ -47,7 +47,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case DataStreamReindexStatus.inProgress: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
           defaultMessage="Reindexing data stream"
         />
       );
@@ -55,28 +55,28 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case DataStreamReindexStatus.failed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
           defaultMessage="Reindexing failed"
         />
       );
     case DataStreamReindexStatus.fetchFailed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.fetchFailed.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.fetchFailed.reindexingDocumentsStepTitle"
           defaultMessage="Fetching status failed"
         />
       );
     case DataStreamReindexStatus.cancelled:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelled.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelled.reindexingDocumentsStepTitle"
           defaultMessage="Reindexing cancelled"
         />
       );
     case DataStreamReindexStatus.completed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.completed.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.completed.reindexingDocumentsStepTitle"
           defaultMessage="Reindexing completed"
         />
       );
@@ -84,7 +84,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     default: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
           defaultMessage="Reindex data stream"
         />
       );

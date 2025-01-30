@@ -22,7 +22,7 @@ export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ 
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
+              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.acceptChangesTitle"
               defaultMessage="Data Stream Reindexing Complete"
             />
           </h3>
@@ -30,7 +30,7 @@ export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ 
         <EuiSpacer size="m" />
         <p>
           <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
+            id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.acceptChangesTitle"
             defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully reindexed."
             values={{ count: meta.indicesRequiringUpgradeCount }}
           />

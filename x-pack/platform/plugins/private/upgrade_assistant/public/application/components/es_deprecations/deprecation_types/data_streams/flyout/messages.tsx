@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataStreamReindexStatus } from '../../../../../../../../common/types';
+import { i18n } from '@kbn/i18n';
+import { DataStreamReindexStatus } from '../../../../../../../common/types';
 
 export const getPrimaryButtonLabel = (status?: DataStreamReindexStatus) => {
   switch (status) {
@@ -15,30 +16,42 @@ export const getPrimaryButtonLabel = (status?: DataStreamReindexStatus) => {
     case DataStreamReindexStatus.failed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.tryAgainLabel"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.tryAgainLabel"
           defaultMessage="Try again"
         />
       );
     case DataStreamReindexStatus.inProgress:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.reindexingLabel"
           defaultMessage="Reindexing…"
         />
       );
     case DataStreamReindexStatus.cancelled:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.restartLabel"
           defaultMessage="Restart reindexing"
         />
       );
     default:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.runReindexLabel"
           defaultMessage="Start reindexing"
         />
       );
   }
+};
+
+export const containerMessages = {
+  unknownMessage: i18n.translate('xpack.upgradeAssistant.dataStream.flyout.unknownMessage', {
+    defaultMessage: 'Unknown',
+  }),
+  errorLoadingDataStreamInfo: i18n.translate(
+    'xpack.upgradeAssistant.dataStream.flyout.errorLoadingDataStreamInfo',
+    {
+      defaultMessage: 'Error loading data stream info',
+    }
+  ),
 };

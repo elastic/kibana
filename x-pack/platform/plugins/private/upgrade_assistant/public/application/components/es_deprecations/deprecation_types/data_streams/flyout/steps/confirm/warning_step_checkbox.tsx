@@ -9,7 +9,6 @@ import React from 'react';
 
 import {
   EuiCheckbox,
-  EuiCode,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -22,7 +21,6 @@ import { DocLinksStart } from '@kbn/core/public';
 import {
   DataStreamReindexWarning,
   DataStreamReindexWarningTypes,
-  ReindexWarning,
 } from '../../../../../../../../../common/types';
 
 export const hasReindexWarning = (
@@ -57,7 +55,7 @@ const WarningCheckbox: React.FunctionComponent<{
               <EuiIconTip
                 content={
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
+                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.documentationLinkLabel"
                     defaultMessage="Documentation"
                   />
                 }
@@ -83,55 +81,11 @@ export interface WarningCheckboxProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   docLinks: DocLinksStart['links'];
   id: string;
-  meta?: ReindexWarning['meta'];
 }
-
-export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
-  isChecked,
-  onChange,
-  docLinks,
-  id,
-  meta,
-}) => {
-  return (
-    <WarningCheckbox
-      isChecked={isChecked}
-      onChange={onChange}
-      warningId={id}
-      label={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningTitle"
-          defaultMessage="Remove deprecated index settings"
-        />
-      }
-      description={
-        <>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningDetail"
-            defaultMessage="The following deprecated index settings were detected:"
-          />
-
-          <EuiSpacer size="xs" />
-
-          <ul>
-            {(meta!.deprecatedSettings as string[]).map((setting, index) => {
-              return (
-                <li key={`${setting}-${index}`}>
-                  <EuiCode>{setting}</EuiCode>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      }
-      documentationUrl={docLinks.elasticsearch.indexModules}
-    />
-  );
-};
 
 export const IncompatibleDataInDataStreamWarningCheckbox: React.FunctionComponent<
   WarningCheckboxProps
-> = ({ isChecked, onChange, docLinks, id, meta }) => {
+> = ({ isChecked, onChange, id }) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}
@@ -139,7 +93,7 @@ export const IncompatibleDataInDataStreamWarningCheckbox: React.FunctionComponen
       warningId={id}
       label={
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningTitle"
+          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.incompatibleDataWarningTitle"
           defaultMessage="Reindex all incompatible data for this data stream"
         />
       }

@@ -44,12 +44,12 @@ export const InitializingFlyoutStep: React.FunctionComponent<InitializingFlyoutS
             <EuiTitle size="s">
               {hasInitializingError ? (
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.initializingStep.errorLoadingDataStreamInfo"
                   defaultMessage="Error loading data stream info"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.initializingStep.loadingDataStreamInfo"
                   defaultMessage="Loading Data stream info"
                 />
               )}
