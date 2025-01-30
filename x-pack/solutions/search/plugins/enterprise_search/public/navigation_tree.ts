@@ -83,6 +83,12 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                    );
+                  },
                   link: 'enterpriseSearch',
                 },
                 {
