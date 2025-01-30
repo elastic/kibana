@@ -282,6 +282,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isUpgradingSecurityPackages ||
+            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
             isEditingRule
           }
           onClick={() => {
@@ -391,7 +392,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   );
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
     rules: filteredRules,
-    rulesUpgradeState,
     subHeaderFactory,
     ruleActionsFactory,
     extraTabsFactory,

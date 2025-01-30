@@ -8,7 +8,6 @@
 import type { PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useRulePreviewContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
 import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
 import { FieldUpgradeSideHeader } from '../../field_upgrade_side_header';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
@@ -24,7 +23,6 @@ export function FieldFinalSideHeader(): JSX.Element {
   const { fieldName, hasConflict, rightSideMode, finalDiffableRule, setRuleFieldResolvedValue } =
     useFieldUpgradeContext();
   const { form } = useFieldEditFormContext();
-  const { setFieldReadonly } = useRulePreviewContext();
 
   const handleAccept = useCallback(
     () =>
@@ -58,10 +56,7 @@ export function FieldFinalSideHeader(): JSX.Element {
               iconType="checkInCircleFilled"
               size="s"
               disabled={!form?.isValid}
-              onClick={() => {
-                handleSave();
-                setFieldReadonly(fieldName);
-              }}
+              onClick={handleSave}
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
             </EuiButton>

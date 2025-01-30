@@ -16,7 +16,6 @@ import {
   RulePreviewContextProvider,
   useRulePreviewContext,
 } from './upgrade_prebuilt_rules_table/rule_preview_context';
-import type { RulesUpgradeState } from '../../../rule_management/model/prebuilt_rule_upgrade';
 interface UseRulePreviewFlyoutBaseParams {
   ruleActionsFactory: (
     rule: RuleResponse,
@@ -30,7 +29,6 @@ interface UseRulePreviewFlyoutBaseParams {
 
 interface UseRulePreviewFlyoutParams extends UseRulePreviewFlyoutBaseParams {
   rules: RuleResponse[];
-  rulesUpgradeState: RulesUpgradeState | undefined;
 }
 
 interface RulePreviewFlyoutProps {
@@ -49,7 +47,6 @@ interface UseRulePreviewFlyoutResult {
 
 export function useRulePreviewFlyout({
   rules,
-  rulesUpgradeState,
   extraTabsFactory,
   ruleActionsFactory,
   subHeaderFactory,
@@ -67,9 +64,7 @@ export function useRulePreviewFlyout({
     [rules, setRuleForPreview]
   );
   const rulePreviewFlyout = (
-    <RulePreviewContextProvider
-      ruleUpgradeState={rule && rulesUpgradeState ? rulesUpgradeState[rule.rule_id] : undefined}
-    >
+    <RulePreviewContextProvider>
       <RulePreviewFlyoutInternal
         rule={rule}
         closeRulePreview={closeRulePreview}

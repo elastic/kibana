@@ -8,7 +8,6 @@
 import { invariant } from '@formatjs/intl-utils';
 import useSet from 'react-use/lib/useSet';
 import React, { createContext, useContext, useMemo } from 'react';
-import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 
 export interface RulePreviewContextType {
   /**
@@ -22,6 +21,11 @@ export interface RulePreviewContextType {
   setFieldReadonly: (fieldName: string) => void;
 
   /**
+   * Resets all fields to readonly
+   */
+  resetAllFields: () => void;
+
+  /**
    * Returns whether the rule is being edited in the rule upgrade flyout
    */
   isEditingRule: boolean;
@@ -31,26 +35,21 @@ const RulePreviewContext = createContext<RulePreviewContextType | null>(null);
 
 interface RulePreviewContextProviderProps {
   children: React.ReactNode;
-  ruleUpgradeState: RuleUpgradeState | undefined;
 }
 
-export function RulePreviewContextProvider({
-  children,
-  ruleUpgradeState,
-}: RulePreviewContextProviderProps) {
-  const [editedFields, { add, remove }] = useSet<string>(new Set([]));
+export function RulePreviewContextProvider({ children }: RulePreviewContextProviderProps) {
+  const [editedFields, { add, remove, reset }] = useSet<string>(new Set([]));
 
-  const hasRuleTypeChange = ruleUpgradeState?.diff.fields.type?.has_update ?? false;
-  const isEditingRule =
-    hasRuleTypeChange || ruleUpgradeState?.hasUnresolvedConflicts ? false : editedFields.size > 0;
+  const isEditingRule = editedFields.size > 0;
 
   const contextValue: RulePreviewContextType = useMemo(
     () => ({
       isEditingRule,
       setFieldEditing: add,
       setFieldReadonly: remove,
+      resetAllFields: reset,
     }),
-    [isEditingRule, add, remove]
+    [isEditingRule, add, remove, reset]
   );
 
   return <RulePreviewContext.Provider value={contextValue}>{children}</RulePreviewContext.Provider>;
