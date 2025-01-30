@@ -2242,7 +2242,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:policy-settings-protection-updates-note/find",
                 "saved_object:policy-settings-protection-updates-note/open_point_in_time",
                 "saved_object:policy-settings-protection-updates-note/close_point_in_time",
-                 "saved_object:security-ai-prompt/bulk_get",
+                "saved_object:security-ai-prompt/bulk_get",
                 "saved_object:security-ai-prompt/get",
                 "saved_object:security-ai-prompt/find",
                 "saved_object:security-ai-prompt/open_point_in_time",
