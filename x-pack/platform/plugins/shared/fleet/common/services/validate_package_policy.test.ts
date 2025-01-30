@@ -1243,6 +1243,25 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toEqual(['myvariable is required']);
     });
+
+    it('should accept integer', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: [1],
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: true,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toBeNull();
+    });
   });
 
   describe('Integer', () => {

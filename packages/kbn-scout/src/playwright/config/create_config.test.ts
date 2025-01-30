@@ -41,6 +41,7 @@ describe('createPlaywrightConfig', () => {
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
       screenshot: 'only-on-failure',
+      testIdAttribute: 'data-test-subj',
       trace: 'on-first-retry',
     });
     expect(config.globalSetup).toBeUndefined();

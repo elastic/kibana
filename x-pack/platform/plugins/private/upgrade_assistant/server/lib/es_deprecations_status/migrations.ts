@@ -20,10 +20,11 @@ import { type EsMetadata, getCorrectiveAction } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
- * Remove once the data_streams type is added to the `MigrationDeprecationsResponse` type
+ * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
  */
 interface EsDeprecations extends MigrationDeprecationsResponse {
-  data_streams: Record<string, MigrationDeprecationsDeprecation[]>;
+  templates: Record<string, MigrationDeprecationsDeprecation[]>;
+  ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
 
 const createBaseMigrationDeprecation = (
@@ -74,6 +75,28 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
+  const ilmPoliciesMigrations = Object.entries(migrationsResponse.ilm_policies).flatMap(
+    ([indexName, ilmPolicyDeprecations]) => {
+      return ilmPolicyDeprecations.flatMap((ilmPolicyData) =>
+        createBaseMigrationDeprecation(ilmPolicyData, {
+          indexName,
+          deprecationType: 'ilm_policies',
+        })
+      );
+    }
+  );
+
+  const templatesMigrations = Object.entries(migrationsResponse.templates).flatMap(
+    ([indexName, templatesDeprecations]) => {
+      return templatesDeprecations.flatMap((templatesDataa) =>
+        createBaseMigrationDeprecation(templatesDataa, {
+          indexName,
+          deprecationType: 'templates',
+        })
+      );
+    }
+  );
+
   const mlSettingsMigrations = migrationsResponse.ml_settings.map((depractionData) =>
     createBaseMigrationDeprecation(depractionData, { deprecationType: 'ml_settings' })
   );
@@ -91,6 +114,8 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     ...nodeSettingsMigrations,
     ...indexSettingsMigrations,
     ...dataStreamsMigrations,
+    ...ilmPoliciesMigrations,
+    ...templatesMigrations,
   ].flat();
 };
 
@@ -120,6 +145,8 @@ export const getEnrichedDeprecations = async (
           return !systemIndicesList.includes(deprecation.index);
         }
         case 'cluster_settings':
+        case 'templates':
+        case 'ilm_policies':
         case 'ml_settings':
         case 'node_settings':
         case 'data_streams': {
