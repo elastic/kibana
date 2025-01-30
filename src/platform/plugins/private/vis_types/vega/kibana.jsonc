@@ -13,11 +13,13 @@
     "server": true,
     "requiredPlugins": [
       "data",
+      "embeddable",
       "visualizations",
       "mapsEms",
       "expressions",
       "inspector",
       "dataViews",
+      "uiActions",
       "usageCollection"
     ],
     "optionalPlugins": [

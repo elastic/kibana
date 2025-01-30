@@ -36,6 +36,8 @@ import type { ConfigSchema } from '../server/config';
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -57,8 +59,10 @@ export interface VegaPluginSetupDependencies {
 /** @internal */
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
   mapsEms: MapsEmsPluginPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  uiActions: UiActionsStart;
   usageCollection: UsageCollectionStart;
 }
 
@@ -96,14 +100,19 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public start(
     core: CoreStart,
-    { data, mapsEms, dataViews, usageCollection }: VegaPluginStartDependencies
+    deps: VegaPluginStartDependencies
   ) {
     setNotifications(core.notifications);
-    setData(data);
-    setDataViews(dataViews);
+    setData(deps.data);
+    setDataViews(deps.dataViews);
     setDocLinks(core.docLinks);
-    setMapsEms(mapsEms);
+    setMapsEms(deps.mapsEms);
     setThemeService(core.theme);
-    setUsageCollectionStart(usageCollection);
+    setUsageCollectionStart(deps.usageCollection);
+
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'addVegaPanelAction', async () => {
+      const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
+      return getAddVegaPanelAction(deps);
+    });
   }
 }
