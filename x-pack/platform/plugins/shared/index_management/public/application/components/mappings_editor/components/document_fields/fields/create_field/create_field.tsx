@@ -167,7 +167,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
       form.reset();
     }
 
-    if (fieldTypeInputRef.current) {
+    // Refocus on the type input field if this submit isn't triggered by a click outside
+    if (fieldTypeInputRef.current && !clickOutside) {
       fieldTypeInputRef.current.focus();
     }
   };
