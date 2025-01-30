@@ -17,7 +17,14 @@ const getWorkerEntry = (language) => {
     case 'json':
       return 'monaco-editor/esm/vs/language/json/json.worker.js';
     default:
-      return path.resolve(__dirname, 'src', language, 'worker', `${language}.worker.ts`);
+      return path.resolve(
+        __dirname,
+        'src',
+        'languages',
+        language,
+        'worker',
+        `${language}.worker.ts`
+      );
   }
 };
 

@@ -7,35 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XJsonLang } from './xjson';
-import { PainlessLang } from './painless';
-import { SQLLang } from './sql';
+import {
+  XJsonLang,
+  PainlessLang,
+  ESQLLang,
+  ConsoleLang,
+  ConsoleOutputLang,
+  YamlLang,
+} from './languages';
 import { monaco } from './monaco_imports';
-import { ESQLLang } from './esql';
-import { YAML_LANG_ID } from './yaml';
-import { registerLanguage } from './helpers';
-import { ConsoleLang, ConsoleOutputLang } from './console';
 
 export const DEFAULT_WORKER_ID = 'default';
+
 const langSpecificWorkerIds = [
   XJsonLang.ID,
   PainlessLang.ID,
   ESQLLang.ID,
   monaco.languages.json.jsonDefaults.languageId,
-  YAML_LANG_ID,
+  YamlLang.ID,
   ConsoleLang.ID,
   ConsoleOutputLang.ID,
 ];
-
-/**
- * Register languages and lexer rules
- */
-registerLanguage(XJsonLang);
-registerLanguage(PainlessLang);
-registerLanguage(SQLLang);
-registerLanguage(ESQLLang);
-registerLanguage(ConsoleLang);
-registerLanguage(ConsoleOutputLang);
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
