@@ -10,7 +10,6 @@ import { EuiButton, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elast
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
@@ -117,11 +116,9 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   );
 
   useEffect(() => {
-    const conversationSubscription = service.conversations.predefinedConversation$
-      .pipe(debounceTime(300))
-      .subscribe(() => {
-        openFlyout();
-      });
+    const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
+      openFlyout();
+    });
 
     return () => {
       conversationSubscription.unsubscribe();
