@@ -57,6 +57,8 @@ export const privilegedUsersRoute = (
             (hit) => hit._source as PrivilegedUserDoc
           );
 
+          const query = privilegedUsersToUserQuery(privilegedUsers, logger);
+
           const riskPrivilegedUsersResponse = await esClient.search({
             body: {
               sort: [
@@ -66,29 +68,7 @@ export const privilegedUsersRoute = (
                   },
                 },
               ],
-              query: {
-                bool: {
-                  filter: [
-                    privilegedUsersToUserQuery(privilegedUsers, logger),
-                    {
-                      bool: {
-                        should: [
-                          {
-                            match: {
-                              'user.risk.calculated_level': EntityRiskLevelsEnum.High,
-                            },
-                          },
-                          {
-                            match: {
-                              'user.risk.calculated_level': EntityRiskLevelsEnum.Critical,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
+              query,
             },
             size: 10,
             index: RISK_SCORE_INDEX_PATTERN,

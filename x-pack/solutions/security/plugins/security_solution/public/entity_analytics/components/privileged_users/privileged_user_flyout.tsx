@@ -16,46 +16,72 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiButton,
+  EuiBasicTable,
 } from '@elastic/eui';
-import React from 'react';
-
+import React, { useMemo } from 'react';
 import type { Alert } from '@kbn/alerting-types';
+import memoize from 'lodash/memoize';
 import { KibanaServices } from '../../../common/lib/kibana/services';
 import { EntityType } from '../../../../common/search_strategy';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import type {
   PrivilegedUserDoc,
+  PrivilegedUserIdentityFields,
   PrivmonLoginDoc,
   PrivmonPrivilegeDoc,
 } from '../../../../common/api/entity_analytics/privmon';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { FlyoutRiskSummary } from '../risk_summary_flyout/risk_summary';
-import type { ESQuery } from '../../../../common/typed_json';
 import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
 import { LoginsTable } from './logins_table';
 import { PrivilegesTable } from './privileges_table';
 import { AlertsTable } from './alerts_table';
 
-const buildFilter = (userNames: string[]) => ({
+const buildFilter = (users: PrivilegedUserDoc[]) => ({
   bool: {
-    should: userNames.map((userName) => ({
-      term: { 'user.name': userName },
+    should: users.map((user) => ({
+      term: { 'user.name': user.user.name },
     })),
     minimum_should_match: 1,
   },
 });
 
-const useMatchingUsers = (privilegedUser: PrivilegedUserDoc): PrivilegedUserDoc[] => {
-  return [];
+interface SimilarUsersResponseType {
+  users: PrivilegedUserDoc[];
+}
+
+const usersMatch = (a: PrivilegedUserDoc, b: PrivilegedUserDoc) =>
+  a.user.name === b.user.name && a.user.id === b.user.id;
+
+const fetchSimilarUsers = (
+  user: PrivilegedUserIdentityFields
+): Promise<SimilarUsersResponseType> => {
+  return KibanaServices.get().http.fetch('/api/privmon/similar_users', {
+    prependBasePath: true,
+    version: '2023-10-31',
+    method: 'POST',
+    body: JSON.stringify(user),
+  });
 };
 
-interface ResponseType {
+const useSimilarUsers = (user: PrivilegedUserIdentityFields) => {
+  return useFetch<PrivilegedUserIdentityFields, SimilarUsersResponseType, undefined>(
+    REQUEST_NAMES.SIMILAR_USERS,
+    fetchSimilarUsers,
+    {
+      initialParameters: user,
+    }
+  );
+};
+
+interface DataResponseType {
   logins: PrivmonLoginDoc[];
   privileges: PrivmonPrivilegeDoc[];
   alerts: Alert[];
 }
 
-const fetchFlyoutData = ({ userNames }: { userNames: string[] }): Promise<ResponseType> => {
+const fetchFlyoutData = ({ userNames }: { userNames: string[] }): Promise<DataResponseType> => {
   return KibanaServices.get().http.fetch('/api/privileged_users_flyout', {
     prependBasePath: true,
     version: '2023-10-31',
@@ -70,11 +96,27 @@ export const PrivilegedUserFlyout: React.FC<{
   privilegedUser: PrivilegedUserDoc;
   closeFlyout: () => void;
 }> = ({ privilegedUser, closeFlyout }) => {
-  const [userQuery, setUserQuery] = React.useState<ESQuery>(
-    buildFilter([privilegedUser.user.name])
-  );
+  const { data: similarUsersData } = useSimilarUsers(privilegedUser.user);
 
-  const tabs = getTabs({ privilegedUser, setUserQuery, userQuery });
+  const candidateLinkedUsers = similarUsersData?.users ?? [];
+
+  const [linkedUsers, setLinkedUsers] = React.useState<PrivilegedUserDoc[]>([privilegedUser]);
+
+  const addLinkedUser = (user: PrivilegedUserDoc) => {
+    setLinkedUsers([...linkedUsers, user]);
+  };
+
+  const removeLinkedUser = (user: PrivilegedUserDoc) => {
+    setLinkedUsers(linkedUsers.filter((u) => !usersMatch(u, user)));
+  };
+
+  const tabs = getTabs({
+    privilegedUser,
+    addLinkedUser,
+    removeLinkedUser,
+    linkedUsers,
+    candidateLinkedUsers,
+  });
 
   return (
     <EuiFlyout onClose={closeFlyout}>
@@ -138,27 +180,23 @@ const JsonViewer: React.FC<{
 
 const Overview: React.FC<{
   privilegedUser: PrivilegedUserDoc;
-  userQuery: ESQuery;
-  setUserQuery: (query: ESQuery) => void;
-}> = ({ privilegedUser, userQuery, setUserQuery }) => {
-  const matchingUsers = useMatchingUsers(privilegedUser);
-  const {
-    data = { logins: [], privileges: [], alerts: [] },
-    // fetch,
-    isLoading,
-  } = useFetch<{ userNames: string[] }, ResponseType, undefined>(
-    REQUEST_NAMES.PRIVILEGED_USER_FLYOUT_DATA,
-    fetchFlyoutData,
-    {
-      initialParameters: {
-        userNames: [privilegedUser.user.name].concat(matchingUsers.map(({ user }) => user.name)),
-      },
-    }
-  );
+  linkedUsers: PrivilegedUserDoc[];
+}> = ({ privilegedUser, linkedUsers }) => {
+  const { data = { logins: [], privileges: [], alerts: [] }, isLoading } = useFetch<
+    { userNames: string[] },
+    DataResponseType,
+    undefined
+  >(REQUEST_NAMES.PRIVILEGED_USER_FLYOUT_DATA, fetchFlyoutData, {
+    initialParameters: {
+      userNames: linkedUsers.map((u) => u.user.name),
+    },
+  });
+
+  const filterQuery = useMemo(() => buildFilter(linkedUsers), [linkedUsers]);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
-    filterQuery: userQuery,
+    filterQuery,
     onlyLatest: false,
     pagination: {
       cursorStart: 0,
@@ -189,30 +227,134 @@ const Overview: React.FC<{
   );
 };
 
-const getTabs = ({
+const HighLightedName = ({ name, matchedName }: { name: string; matchedName: string }) => {
+  if (!name.includes(matchedName)) {
+    return <EuiText>{name}</EuiText>;
+  }
+
+  return (
+    <EuiText>
+      {name.split(matchedName).map((part, index) => (
+        <span key={index}>
+          {index > 0 && <strong>{matchedName}</strong>}
+          {part}
+        </span>
+      ))}
+    </EuiText>
+  );
+};
+
+const LinkUsersTable = ({
+  candidateLinkedUsers,
+  linkedUsers,
+  addLinkedUser,
+  removeLinkedUser,
   privilegedUser,
-  setUserQuery,
-  userQuery,
 }: {
+  candidateLinkedUsers: PrivilegedUserDoc[];
+  linkedUsers: PrivilegedUserDoc[];
+  addLinkedUser: (user: PrivilegedUserDoc) => void;
+  removeLinkedUser: (user: PrivilegedUserDoc) => void;
   privilegedUser: PrivilegedUserDoc;
-  setUserQuery: (query: ESQuery) => void;
-  userQuery: ESQuery; // addUserQuery
-}) => [
-  {
-    id: 'overview',
-    name: 'Overview',
-    content: (
-      <Overview privilegedUser={privilegedUser} userQuery={userQuery} setUserQuery={setUserQuery} />
-    ),
-  },
-  {
-    id: 'json',
-    name: 'JSON',
-    content: JsonViewer({ privilegedUser }),
-  },
-  {
-    id: 'related',
-    name: 'Related Users',
-    content: <>{'Pick related users table here'}</>,
-  },
-];
+}) => {
+  const rowsData = candidateLinkedUsers.map((user) => ({
+    user,
+    isLinked: linkedUsers.some((u) => usersMatch(u, user)),
+  }));
+
+  const columns = [
+    {
+      field: 'user.user.name',
+      name: 'Name',
+      render: (name: string) => (
+        <HighLightedName name={name} matchedName={privilegedUser.user.name} />
+      ),
+    },
+    {
+      field: 'user.user.id',
+      name: 'ID',
+      render: (id: string) => <EuiText>{id}</EuiText>,
+    },
+    {
+      field: 'isLinked',
+      name: 'Linked',
+      render: (isLinked: boolean, { user }: { user: PrivilegedUserDoc }) => (
+        <EuiButton
+          size="s"
+          onClick={() => (isLinked ? removeLinkedUser(user) : addLinkedUser(user))}
+        >
+          {isLinked ? 'Remove' : 'Include'}
+        </EuiButton>
+      ),
+    },
+  ];
+
+  return <EuiBasicTable columns={columns} items={rowsData} />;
+};
+
+const RelatedUsers: React.FC<{
+  privilegedUser: PrivilegedUserDoc;
+  linkedUsers: PrivilegedUserDoc[];
+  candidateLinkedUsers: PrivilegedUserDoc[];
+  addLinkedUser: (user: PrivilegedUserDoc) => void;
+  removeLinkedUser: (user: PrivilegedUserDoc) => void;
+}> = ({ linkedUsers, addLinkedUser, removeLinkedUser, candidateLinkedUsers, privilegedUser }) => {
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <h3>{'Related Users'}</h3>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <LinkUsersTable
+        privilegedUser={privilegedUser}
+        candidateLinkedUsers={candidateLinkedUsers}
+        linkedUsers={linkedUsers}
+        addLinkedUser={addLinkedUser}
+        removeLinkedUser={removeLinkedUser}
+      />
+    </>
+  );
+};
+
+const getTabs = memoize(
+  ({
+    privilegedUser,
+    linkedUsers,
+    candidateLinkedUsers,
+    addLinkedUser,
+    removeLinkedUser,
+  }: {
+    privilegedUser: PrivilegedUserDoc;
+    linkedUsers: PrivilegedUserDoc[];
+    candidateLinkedUsers: PrivilegedUserDoc[];
+    addLinkedUser: (user: PrivilegedUserDoc) => void;
+    removeLinkedUser: (user: PrivilegedUserDoc) => void;
+  }) => [
+    {
+      id: 'overview',
+      name: 'Overview',
+      content: <Overview privilegedUser={privilegedUser} linkedUsers={linkedUsers} />,
+    },
+    {
+      id: 'json',
+      name: 'JSON',
+      content: JsonViewer({ privilegedUser }),
+    },
+    {
+      id: 'related',
+      name: 'Related Users',
+      content: (
+        <RelatedUsers
+          {...{
+            linkedUsers,
+            addLinkedUser,
+            removeLinkedUser,
+            candidateLinkedUsers,
+            privilegedUser,
+          }}
+        />
+      ),
+    },
+  ]
+);

@@ -14,6 +14,7 @@ export const REQUEST_NAMES = {
   ANOMALIES_TABLE: `${APP_UI_ID} fetch anomalies table data`,
   PRIVILEGED_USER_DATA: `${APP_UI_ID} fetch privileged user data`,
   PRIVILEGED_USER_FLYOUT_DATA: `${APP_UI_ID} fetch privileged user flyout data`,
+  SIMILAR_USERS: `${APP_UI_ID} fetch similar users`,
 } as const;
 
 export type RequestName = (typeof REQUEST_NAMES)[keyof typeof REQUEST_NAMES];

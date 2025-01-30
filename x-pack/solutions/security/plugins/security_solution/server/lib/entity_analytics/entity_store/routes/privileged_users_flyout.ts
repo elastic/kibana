@@ -43,15 +43,9 @@ export const privilegedUsersFlyoutRoute = (
         try {
           const { getAppClient } = await context.securitySolution;
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          const userNamesFilter = request.body.userNames.map((name) => ({
-            bool: {
-              should: [
-                {
-                  match: {
-                    'user.name': name,
-                  },
-                },
-              ],
+          const userNamesFilter = request.body.userNames.map((userName) => ({
+            term: {
+              'user.name': userName,
             },
           }));
 
@@ -66,7 +60,7 @@ export const privilegedUsersFlyoutRoute = (
               ],
               query: {
                 bool: {
-                  filter: userNamesFilter,
+                  should: userNamesFilter,
                 },
               },
             },

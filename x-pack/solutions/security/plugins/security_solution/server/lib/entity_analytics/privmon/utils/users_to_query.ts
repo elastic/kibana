@@ -22,15 +22,19 @@ export const privilegedUsersToUserQuery = (
         const should: QueryDslQueryContainer[] = [
           { term: { 'user.name': privilegedUser.user.name } },
         ];
-        if (privilegedUser.user.id) {
-          should.push({ term: { 'user.id': privilegedUser.user.id } });
-        }
 
-        return {
-          bool: {
-            should,
-          },
-        };
+        // do not use ID for now
+        // if (privilegedUser.user.id) {
+        //   should.push({ term: { 'user.id': privilegedUser.user.id } });
+        // }
+
+        // return {
+        //   bool: {
+        //     should,
+        //   },
+        // };
+
+        return should[0];
       }),
       minimum_should_match: 1,
     },
