@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { isDataSourceType, DataSourceType } from '../../../../../common/data_sources';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 
 export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider => ({
@@ -23,29 +21,17 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
           width: 212,
         },
         {
-          name: 'span.name',
-        },
-        {
-          name: 'service.name',
+          name: '_source',
         },
       ],
       rowHeight: 5,
     }),
   },
-  resolve: ({ dataSource, dataView, query }) => {
-    let indexPattern: string | undefined;
-
-    if (isDataSourceType(dataSource, DataSourceType.Esql)) {
-      if (!isOfAggregateQueryType(query)) {
-        return { isMatch: false };
-      }
-
-      indexPattern = getIndexPatternFromESQLQuery(query.esql);
-    } else if (isDataSourceType(dataSource, DataSourceType.DataView) && dataView) {
-      indexPattern = dataView.getIndexPattern();
-    }
-
-    if (indexPattern?.includes('traces')) {
+  resolve: ({ dataSource }) => {
+    if (
+      isDataSourceType(dataSource, DataSourceType.DataView) &&
+      dataSource.dataViewId === 'apm_static_data_view_id_default'
+    ) {
       return {
         isMatch: true,
         context: {
@@ -54,7 +40,6 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
       };
     }
 
-    // TODO Define a better way to enable traces data source
     return { isMatch: false };
   },
 });
