@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   isGroupStreamDefinitionBase,
   StreamGetResponse,
-  WiredReadStreamDefinition,
+  WiredStreamGetResponse,
 } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -71,7 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
       expect(
-        (logsDeeplyNestedStreamname.body as WiredReadStreamDefinition).stream.ingest.wired.fields
+        (logsDeeplyNestedStreamname.body as WiredStreamGetResponse).stream.ingest.wired.fields
       ).to.eql({
         field2: {
           type: 'keyword',

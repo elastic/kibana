@@ -55,7 +55,6 @@ export function StreamDetailView() {
               effective_lifecycle: response.effective_lifecycle,
               name: key,
               stream: {
-                name: key,
                 ...response.stream,
               },
             };
@@ -70,7 +69,6 @@ export function StreamDetailView() {
               name: key,
               data_stream_exists: response.data_stream_exists,
               stream: {
-                name: key,
                 ...response.stream,
               },
             };
