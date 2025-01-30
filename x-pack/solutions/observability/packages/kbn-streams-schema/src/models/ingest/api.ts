@@ -28,10 +28,10 @@ import {
 import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
 import { createIsNarrowSchema, createAsSchemaOrThrow } from '../../helpers';
 import {
-  IngestStreamLifecycle,
-  InheritedIngestStreamLifecycle,
-  ingestStreamLifecycleSchema,
-  inheritedIngestStreamLifecycleSchema,
+  UnwiredIngestStreamEffectiveLifecycle,
+  WiredIngestStreamEffectiveLifecycle,
+  unwiredIngestStreamEffectiveLifecycleSchema,
+  wiredIngestStreamEffectiveLifecycleSchema,
 } from './lifecycle';
 
 /**
@@ -77,13 +77,13 @@ const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
 interface WiredStreamGetResponse extends StreamGetResponseBase {
   stream: WiredStreamDefinition;
   inherited_fields: InheritedFieldDefinition;
-  effective_lifecycle: InheritedIngestStreamLifecycle;
+  effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
 }
 
 interface UnwiredStreamGetResponse extends StreamGetResponseBase {
   stream: UnwiredStreamDefinition;
   elasticsearch_assets: ElasticsearchAsset[];
-  effective_lifecycle: IngestStreamLifecycle;
+  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
 
 type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
@@ -126,7 +126,7 @@ const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.interse
   z.object({
     stream: wiredStreamDefinitionSchema,
     inherited_fields: inheritedFieldDefinitionSchema,
-    effective_lifecycle: inheritedIngestStreamLifecycleSchema,
+    effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 
@@ -135,7 +135,7 @@ const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.int
   z.object({
     stream: unwiredStreamDefinitionSchema,
     elasticsearch_assets: z.array(elasticsearchAssetSchema),
-    effective_lifecycle: ingestStreamLifecycleSchema,
+    effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 

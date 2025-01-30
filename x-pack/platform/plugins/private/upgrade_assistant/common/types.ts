@@ -227,7 +227,11 @@ export interface EnrichedDeprecationInfo
     estypes.MigrationDeprecationsDeprecation,
     'level' | 'resolve_during_rolling_upgrade'
   > {
-  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator' | 'data_streams';
+  type:
+    | keyof estypes.MigrationDeprecationsResponse
+    | 'health_indicator'
+    | 'ilm_policies'
+    | 'templates';
   isCritical: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;

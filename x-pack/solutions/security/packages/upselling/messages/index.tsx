@@ -54,3 +54,11 @@ export const UPGRADE_NOTES_MANAGEMENT_USER_FILTER = (requiredLicense: string) =>
       requiredLicense,
     },
   });
+
+export const UPGRADE_PREBUILT_RULE_CUSTOMIZATION = (requiredLicense: string) =>
+  i18n.translate('securitySolutionPackages.ruleManagement.prebuiltRuleCustomization.upsell', {
+    defaultMessage: 'Upgrade to {requiredLicense} to enable prebuilt rule customization',
+    values: {
+      requiredLicense,
+    },
+  });
