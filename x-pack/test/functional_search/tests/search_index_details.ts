@@ -112,6 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should have quick stats', async () => {
           await pageObjects.searchIndexDetailsPage.expectQuickStats();
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStatus();
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStorage('227b');
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappings();
           await es.indices.putMapping({
             index: indexName,
@@ -187,6 +189,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should be able to delete document', async () => {
             await pageObjects.searchIndexDetailsPage.changeTab('dataTab');
             await pageObjects.searchIndexDetailsPage.clickFirstDocumentDeleteAction();
+
+            // re-open page to refresh queries for test (these will auto-refresh,
+            // but waiting for that will make this test flakey)
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
             await pageObjects.searchIndexDetailsPage.expectAddDocumentCodeExamples();
             await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(0);
           });
