@@ -32,6 +32,7 @@ import { CreateSLOForm } from '../types';
 import { MAX_WIDTH } from '../constants';
 import { AdvancedSettings } from './indicator_section/advanced_settings/advanced_settings';
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export function SloEditFormObjectiveSection() {
   const {
@@ -41,6 +42,8 @@ export function SloEditFormObjectiveSection() {
     setValue,
     formState: { defaultValues },
   } = useFormContext<CreateSLOForm>();
+  const { isServerless } = usePluginContext();
+
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowTypeSelect = useGeneratedHtmlId({ prefix: 'timeWindowTypeSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
@@ -94,6 +97,13 @@ export function SloEditFormObjectiveSection() {
       data-test-subj="sloEditFormObjectiveSection"
     >
       <EuiFlexGroup direction="column" gutterSize="m">
+        {isServerless && (
+          <EuiCallOut>
+            {i18n.translate('xpack.slo.sloEdit.timeWindow.serverlessWarning', {
+              defaultMessage: 'Initial data backfill is limited to the past 7 days',
+            })}
+          </EuiCallOut>
+        )}
         <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow

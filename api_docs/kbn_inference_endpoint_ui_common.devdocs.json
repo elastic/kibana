@@ -11,7 +11,7 @@
         "label": "InferenceFlyoutWrapper",
         "description": [],
         "signature": [
-          "({ onFlyoutClose, addInferenceEndpoint, http, toasts, onSubmitSuccess, isEdit, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
+          "({ onFlyoutClose, http, toasts, isEdit, onSubmitSuccess, inferenceEndpoint, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.InferenceFlyoutWrapper.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onFlyoutClose,\n  addInferenceEndpoint,\n  http,\n  toasts,\n  onSubmitSuccess,\n  isEdit,\n}",
+            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  onSubmitSuccess,\n  inferenceEndpoint,\n}",
             "description": [],
             "signature": [
               "InferenceFlyoutWrapperProps"

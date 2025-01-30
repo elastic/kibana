@@ -44,6 +44,10 @@ import {
   RULE_BACKFILLS_TABLE,
   POPOVER_ACTIONS_TRIGGER_BUTTON,
   EXPORT_RULE_ACTION_BUTTON,
+  RULE_GAPS_TABLE,
+  RULE_GAPS_STATUS_FILTER,
+  RULE_GAPS_DATE_FILTER_OPTION,
+  RULE_GAPS_DATE_PICKER_APPLY_REFRESH,
 } from '../screens/rule_details';
 import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
@@ -214,9 +218,24 @@ export const filterByRunType = (ruleType: string) => {
   cy.get(EXECUTION_RUN_TYPE_FILTER_ITEM).contains(ruleType).click();
 };
 
-export const getBackfillsTableRows = () => cy.get(RULE_BACKFILLS_TABLE).find('tbody tr');
-
 export const exportRuleFromDetailsPage = () => {
   cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
   cy.get(EXPORT_RULE_ACTION_BUTTON).click();
+};
+
+export const getBackfillsTableRows = () => {
+  return cy.get(RULE_BACKFILLS_TABLE).find('tbody tr');
+};
+
+export const getGapsTableRows = () => {
+  return cy.get(RULE_GAPS_TABLE).find('tbody tr');
+};
+
+export const filterGapsByStatus = (status: string) => {
+  cy.get(RULE_GAPS_STATUS_FILTER).click();
+  cy.get(RULE_GAPS_DATE_FILTER_OPTION).contains(status).click();
+};
+
+export const refreshGapsTable = () => {
+  cy.get(RULE_GAPS_DATE_PICKER_APPLY_REFRESH).click();
 };
