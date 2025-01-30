@@ -186,8 +186,9 @@ export const chatCompleteRoute = (
             }));
           }
 
-          const contentReferencesStore =
-            contentReferencesEnabled ? newContentReferencesStore() : undefined;
+          const contentReferencesStore = contentReferencesEnabled
+            ? newContentReferencesStore()
+            : undefined;
 
           const onLlmResponse = async (
             content: string,
