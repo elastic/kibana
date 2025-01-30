@@ -402,6 +402,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           output_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
@@ -511,24 +512,12 @@ export const getSavedObjectTypes = (
                   id: { type: 'keyword' },
                 },
               },
-              kibana_api_key: {
-                dynamic: false,
-                properties: {
-                  id: { type: 'keyword' },
-                },
-              },
             },
           },
           preset: {
             type: 'keyword',
             index: false,
           },
-          sync_integrations: { type: 'boolean' },
-          kibana_url: {
-            type: 'keyword',
-            index: false,
-          },
-          kibana_api_key: { type: 'keyword', index: false },
         },
       },
       modelVersions: {
@@ -629,24 +618,7 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'mappings_addition',
-              addedMappings: {
-                sync_integrations: { type: 'boolean' },
-                kibana_url: {
-                  type: 'keyword',
-                  index: false,
-                },
-                kibana_api_key: { type: 'keyword', index: false },
-                secrets: {
-                  properties: {
-                    kibana_api_key: {
-                      dynamic: false,
-                      properties: {
-                        id: { type: 'keyword' },
-                      },
-                    },
-                  },
-                },
-              },
+              addedMappings: {},
             },
           ],
         },
