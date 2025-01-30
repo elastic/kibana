@@ -31,6 +31,10 @@ import { monaco as monacoEditor, monaco, defaultThemesResolvers } from '@kbn/mon
 import { useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { registerSupportedLanguages } from '../languages/register';
+
+// preemptively register supported languages before any editor ever gets rendered
+registerSupportedLanguages();
 
 export type EditorConstructionOptions = monacoEditor.editor.IStandaloneEditorConstructionOptions;
 
