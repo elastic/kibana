@@ -849,6 +849,7 @@ it('Returns the Elastic Connectors permissions for elastic_connectors package', 
         {
           names: ['.elastic-connectors*'],
           privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
+          allow_restricted_indices: true,
         },
         {
           names: ['content-*', '.search-acl-filter-*'],
