@@ -65,6 +65,11 @@ const getReindexState = (
       return newReindexState;
     }
 
+    if (reindexOp.status === DataStreamReindexStatus.failed) {
+      newReindexState.errorMessage = reindexOp.errorMessage;
+      return newReindexState;
+    }
+
     if (
       reindexOp.status === DataStreamReindexStatus.inProgress ||
       reindexOp.status === DataStreamReindexStatus.completed
@@ -111,10 +116,34 @@ export const useReindexStatus = ({
 
   const updateStatus = useCallback(async () => {
     clearPollInterval();
+    try {
+      const { data, error } = await api.getDataStreamReindexStatus(dataStreamName);
 
-    const { data, error } = await api.getDataStreamReindexStatus(dataStreamName);
+      if (error) {
+        setReindexState((prevValue: ReindexState) => {
+          return {
+            ...prevValue,
+            loadingState: LoadingState.Error,
+            errorMessage: error.message.toString(),
+            status: DataStreamReindexStatus.fetchFailed,
+          };
+        });
+        return;
+      }
 
-    if (error) {
+      if (data === null) {
+        return;
+      }
+
+      setReindexState((prevValue: ReindexState) => {
+        return getReindexState(prevValue, data);
+      });
+
+      if (data.reindexOp && data.reindexOp.status === DataStreamReindexStatus.inProgress) {
+        // Only keep polling if it exists and is in progress.
+        pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
+      }
+    } catch (error) {
       setReindexState((prevValue: ReindexState) => {
         return {
           ...prevValue,
@@ -123,20 +152,6 @@ export const useReindexStatus = ({
           status: DataStreamReindexStatus.fetchFailed,
         };
       });
-      return;
-    }
-
-    if (data === null) {
-      return;
-    }
-
-    setReindexState((prevValue: ReindexState) => {
-      return getReindexState(prevValue, data);
-    });
-
-    if (data.reindexOp && data.reindexOp.status === DataStreamReindexStatus.inProgress) {
-      // Only keep polling if it exists and is in progress.
-      pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
     }
   }, [clearPollInterval, api, dataStreamName]);
 
@@ -150,6 +165,15 @@ export const useReindexStatus = ({
         cancelLoadingState: undefined,
       };
     });
+
+    if (reindexState.status === DataStreamReindexStatus.failed) {
+      try {
+        await api.cancelDataStreamReindexTask(dataStreamName);
+      } catch (_) {
+        // if the task has already failed, attempt to cancel the task
+        // before attempting to start the reindexing again.
+      }
+    }
 
     const { data: reindexOp, error } = await api.startDataStreamReindexTask(dataStreamName);
 
@@ -169,7 +193,7 @@ export const useReindexStatus = ({
       return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
     });
     updateStatus();
-  }, [api, dataStreamName, updateStatus]);
+  }, [api, dataStreamName, updateStatus, reindexState.status]);
 
   const loadDataStreamMetadata = useCallback(async () => {
     try {
