@@ -32,6 +32,9 @@ const streams: StreamPutItem[] = [
             'log.level': {
               type: 'keyword',
             },
+            'stream.name': {
+              type: 'keyword',
+            },
           },
         },
         routing: [
