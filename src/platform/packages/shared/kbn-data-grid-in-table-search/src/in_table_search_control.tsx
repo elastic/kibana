@@ -70,7 +70,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
-  const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
+  const [isInputVisible, setIsInputVisible] = useState<boolean>(Boolean(props.inTableSearchTerm));
 
   const onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'] = useCallback(
     ({ rowIndex, columnId, matchIndexWithinCell }) => {
