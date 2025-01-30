@@ -36,6 +36,7 @@ export type ManagementId =
   | 'cross_cluster_replication'
   | 'dataViews'
   | 'data_quality'
+  | 'data_usage'
   | 'filesManagement'
   | 'license_management'
   | 'index_lifecycle_management'
