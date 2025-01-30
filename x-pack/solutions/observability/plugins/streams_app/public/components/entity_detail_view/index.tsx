@@ -11,7 +11,7 @@ import { css } from '@emotion/css';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
   IngestStreamEffectiveLifecycle,
-  ReadStreamDefinition,
+  IngestStreamGetResponse,
   isDslLifecycle,
   isErrorLifecycle,
   isIlmLifecycle,
@@ -44,7 +44,7 @@ export function EntityDetailViewWithoutParams({
     displayName?: string;
     id: string;
   };
-  definition?: ReadStreamDefinition;
+  definition?: IngestStreamGetResponse;
 }) {
   const router = useStreamsAppRouter();
   useStreamsAppBreadcrumbs(() => {
