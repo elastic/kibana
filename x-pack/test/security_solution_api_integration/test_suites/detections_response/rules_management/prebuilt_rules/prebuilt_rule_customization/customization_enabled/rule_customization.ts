@@ -9,15 +9,15 @@ import {
   getPrebuiltRuleMock,
   getPrebuiltRuleMockOfType,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
-import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   getWebHookAction,
   installPrebuiltRules,
-} from '../../../../../utils';
+} from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
