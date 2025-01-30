@@ -161,8 +161,9 @@ export const GridLayout = ({
         css={css`
           padding: calc(var(--kbnGridGutterSize) * 1px);
 
-          // disable pointer events on drag + resize
+          // disable pointer events and user select on drag + resize
           &:has(.kbnGridPanel--active) {
+            user-select: none;
             pointer-events: none;
           }
 
