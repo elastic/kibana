@@ -190,6 +190,7 @@ export const dataStreamReindexServiceFactory = ({
             reindexTaskPercComplete: 1,
             status: DataStreamReindexStatus.completed,
             progressDetails: {
+              startTimeMs: taskResponse.start_time_millis,
               successCount: taskResponse.successes,
               pendingCount: taskResponse.pending,
               inProgressCount: (taskResponse.in_progress ?? []).length,
@@ -204,6 +205,7 @@ export const dataStreamReindexServiceFactory = ({
             status: DataStreamReindexStatus.inProgress,
             reindexTaskPercComplete: perc,
             progressDetails: {
+              startTimeMs: taskResponse.start_time_millis,
               successCount: taskResponse.successes,
               pendingCount: taskResponse.pending,
               inProgressCount: (taskResponse.in_progress ?? []).length,

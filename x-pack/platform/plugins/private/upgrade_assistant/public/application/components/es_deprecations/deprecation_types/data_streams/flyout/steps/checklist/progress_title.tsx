@@ -48,7 +48,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing indices."
+          defaultMessage="Reindexing data stream"
         />
       );
     }
@@ -85,7 +85,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
-          defaultMessage="Reindex indices"
+          defaultMessage="Reindex data stream"
         />
       );
     }

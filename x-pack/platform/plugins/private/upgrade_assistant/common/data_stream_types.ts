@@ -58,6 +58,7 @@ export enum DataStreamReindexStatus {
 }
 
 export interface DataStreamProgressDetails {
+  startTimeMs: number;
   successCount: number;
   pendingCount: number;
   inProgressCount: number;

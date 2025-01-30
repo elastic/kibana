@@ -165,8 +165,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               {shouldShowCancelButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
-                    color={'primary'}
+                    color={'accent'}
                     iconType={'pause'}
                     onClick={cancelReindex}
                     disabled={!hasRequiredPrivileges}
