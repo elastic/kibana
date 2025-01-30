@@ -5,16 +5,16 @@
  * 2.0.
  */
 import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiProgress,
   EuiSpacer,
   EuiText,
-  EuiHorizontalRule,
-  EuiPopoverTitle,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
@@ -45,6 +45,7 @@ const StyledEuiProgress = styled(EuiProgress)`
 const DataStatsWrapper = styled.div`
   width: 250px;
 `;
+
 export interface AlertsProcessBarProps {
   data: AlertsProgressBarData[];
   isLoading: boolean;
@@ -159,7 +160,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                             </EuiText>
                           }
                           max={1}
-                          color={`vis9`}
+                          color={`vis6`}
                           size="s"
                           value={item.percentage}
                           label={
