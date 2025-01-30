@@ -16,16 +16,10 @@ export const configSchema = schema.object({
   hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: false }),
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  exposeToBrowser: {
-    ui: true,
-  },
   schema: configSchema,
 };

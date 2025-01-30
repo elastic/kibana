@@ -24,9 +24,6 @@ export const mockConfig: ConfigType = {
   hasIncrementalSyncEnabled: true,
   hasNativeConnectors: true,
   hasWebCrawler: true,
-  ui: {
-    enabled: true,
-  },
 };
 
 /**
