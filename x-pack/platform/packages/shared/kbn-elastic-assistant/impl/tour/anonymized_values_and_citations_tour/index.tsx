@@ -19,7 +19,7 @@ interface Props {
 }
 
 // Throttles reads from local storage to 1 every 5 seconds.
-// This is to prevent excessive reading from local storage. It acts 
+// This is to prevent excessive reading from local storage. It acts
 // as a cache.
 const getKnowledgeBaseTourStateThrottled = throttle(() => {
   const value = localStorage.getItem(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE);
