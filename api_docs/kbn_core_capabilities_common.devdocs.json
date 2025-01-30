@@ -19,90 +19,27 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [
+    "interfaces": [],
+    "enums": [],
+    "misc": [
       {
         "parentPluginId": "@kbn/core-capabilities-common",
         "id": "def-common.Capabilities",
-        "type": "Interface",
+        "type": "Type",
         "tags": [],
         "label": "Capabilities",
         "description": [
           "\nThe read-only set of capabilities available for the current UI session.\nCapabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,\nand the boolean is a flag indicating if the capability is enabled or disabled.\n"
         ],
+        "signature": [
+          "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
+        ],
         "path": "src/core/packages/capabilities/common/src/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-capabilities-common",
-            "id": "def-common.Capabilities.navLinks",
-            "type": "Object",
-            "tags": [],
-            "label": "navLinks",
-            "description": [
-              "Navigation link capabilities."
-            ],
-            "signature": [
-              "{ [x: string]: boolean; }"
-            ],
-            "path": "src/core/packages/capabilities/common/src/capabilities.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-capabilities-common",
-            "id": "def-common.Capabilities.management",
-            "type": "Object",
-            "tags": [],
-            "label": "management",
-            "description": [
-              "Management section capabilities."
-            ],
-            "signature": [
-              "{ [sectionId: string]: Record<string, boolean>; }"
-            ],
-            "path": "src/core/packages/capabilities/common/src/capabilities.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-capabilities-common",
-            "id": "def-common.Capabilities.catalogue",
-            "type": "Object",
-            "tags": [],
-            "label": "catalogue",
-            "description": [
-              "Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options."
-            ],
-            "signature": [
-              "{ [x: string]: boolean; }"
-            ],
-            "path": "src/core/packages/capabilities/common/src/capabilities.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-capabilities-common",
-            "id": "def-common.Capabilities.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: Record<string, boolean | Record<string, boolean>>",
-            "description": [
-              "Custom capabilities, registered by plugins."
-            ],
-            "signature": [
-              "[key: string]:  Record<string, boolean | Record<string, boolean>>"
-            ],
-            "path": "src/core/packages/capabilities/common/src/capabilities.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -2612,6 +2612,22 @@
           },
           {
             "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.tag",
+            "type": "string",
+            "tags": [],
+            "label": "tag",
+            "description": [
+              "\nUser facing tag (should be i18n-ized)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
             "id": "def-common.PaletteDefinition.internal",
             "type": "CompoundType",
             "tags": [],

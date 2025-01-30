@@ -1876,8 +1876,8 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",

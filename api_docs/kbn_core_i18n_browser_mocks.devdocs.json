@@ -14,7 +14,7 @@
         "tags": [],
         "label": "i18nServiceMock",
         "description": [],
-        "path": "packages/core/i18n/core-i18n-browser-mocks/src/i18n_service.mock.ts",
+        "path": "src/core/packages/i18n/browser-mocks/src/i18n_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<I18nServiceContract>"
             ],
-            "path": "packages/core/i18n/core-i18n-browser-mocks/src/i18n_service.mock.ts",
+            "path": "src/core/packages/i18n/browser-mocks/src/i18n_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -46,7 +46,7 @@
               "I18nStart",
               ">"
             ],
-            "path": "packages/core/i18n/core-i18n-browser-mocks/src/i18n_service.mock.ts",
+            "path": "src/core/packages/i18n/browser-mocks/src/i18n_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

@@ -14,7 +14,7 @@
         "tags": [],
         "label": "coreAppsMock",
         "description": [],
-        "path": "packages/core/apps/core-apps-browser-mocks/src/core_app.mock.ts",
+        "path": "src/core/packages/apps/browser-mocks/src/core_app.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<CoreAppContract>"
             ],
-            "path": "packages/core/apps/core-apps-browser-mocks/src/core_app.mock.ts",
+            "path": "src/core/packages/apps/browser-mocks/src/core_app.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

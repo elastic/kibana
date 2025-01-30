@@ -50,7 +50,7 @@
           "HttpResourcesService",
           ">"
         ],
-        "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+        "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -64,7 +64,7 @@
         "tags": [],
         "label": "httpResourcesMock",
         "description": [],
-        "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+        "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,15 +77,9 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-http-resources-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpResourcesServerMocksPluginApi",
-                "section": "def-server.HttpResourcesMock",
-                "text": "HttpResourcesMock"
-              }
+              "HttpResourcesMock"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -103,7 +97,7 @@
               "HttpResources",
               ">"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -121,7 +115,7 @@
               "HttpResources",
               ">, [], any>; }"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -139,7 +133,7 @@
               "HttpResources",
               ">, [], any>; }"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -379,7 +373,7 @@
               "IKibanaResponse",
               "<any>); }"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

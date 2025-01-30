@@ -228,7 +228,7 @@ export const commonEnhanceTableRowHeight = (
   const visState810 = attributes.state.visualization as VisState810;
   const newAttributes = cloneDeep(attributes);
   const vizState = newAttributes.state.visualization as VisState820;
-  vizState.rowHeight = visState810.fitRowToContent ? RowHeightMode.auto : RowHeightMode.single;
+  vizState.rowHeight = visState810.fitRowToContent ? RowHeightMode.auto : RowHeightMode.custom;
   vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
   return newAttributes as LensDocShape810<VisState820>;
 };

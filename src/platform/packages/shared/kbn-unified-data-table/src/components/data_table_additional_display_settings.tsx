@@ -20,16 +20,16 @@ export const RANGE_STEP_SAMPLE_SIZE = 10;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
-  rowHeightLines: RowHeightSettingsProps['rowHeightLines'];
   onChangeRowHeight?: (rowHeight: RowHeightSettingsProps['rowHeight']) => void;
   onChangeRowHeightLines?: (rowHeightLines: number) => void;
   headerRowHeight: RowHeightSettingsProps['rowHeight'];
-  headerRowHeightLines: RowHeightSettingsProps['rowHeightLines'];
   onChangeHeaderRowHeight?: (headerRowHeight: RowHeightSettingsProps['rowHeight']) => void;
   onChangeHeaderRowHeightLines?: (headerRowHeightLines: number) => void;
   maxAllowedSampleSize?: number;
   sampleSize: number;
   onChangeSampleSize?: (sampleSize: number) => void;
+  lineCountInput: number;
+  headerLineCountInput: number;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -38,16 +38,16 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   UnifiedDataTableAdditionalDisplaySettingsProps
 > = ({
   rowHeight,
-  rowHeightLines,
   onChangeRowHeight,
   onChangeRowHeightLines,
   headerRowHeight,
-  headerRowHeightLines,
   onChangeHeaderRowHeight,
   onChangeHeaderRowHeightLines,
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
   onChangeSampleSize,
+  lineCountInput,
+  headerLineCountInput,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -97,14 +97,14 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     settings.push(
       <RowHeightSettings
         rowHeight={headerRowHeight}
-        rowHeightLines={headerRowHeightLines}
         label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
-          defaultMessage: 'Header row height',
+          defaultMessage: 'Max header cell lines',
         })}
         onChangeRowHeight={onChangeHeaderRowHeight}
-        onChangeRowHeightLines={onChangeHeaderRowHeightLines}
+        onChangeLineCountInput={onChangeHeaderRowHeightLines}
         data-test-subj="unifiedDataTableHeaderRowHeightSettings"
         maxRowHeight={5}
+        lineCountInput={headerLineCountInput}
       />
     );
   }
@@ -113,13 +113,13 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     settings.push(
       <RowHeightSettings
         rowHeight={rowHeight}
-        rowHeightLines={rowHeightLines}
         label={i18n.translate('unifiedDataTable.rowHeightLabel', {
-          defaultMessage: 'Cell row height',
+          defaultMessage: 'Body cell lines',
         })}
         onChangeRowHeight={onChangeRowHeight}
-        onChangeRowHeightLines={onChangeRowHeightLines}
+        onChangeLineCountInput={onChangeRowHeightLines}
         data-test-subj="unifiedDataTableRowHeightSettings"
+        lineCountInput={lineCountInput}
       />
     );
   }

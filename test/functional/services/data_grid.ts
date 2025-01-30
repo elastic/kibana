@@ -625,6 +625,13 @@ export class DataGridService extends FtrService {
     await option.click();
   }
 
+  public async changeCustomRowHeightNumber(newValue: number) {
+    await this.testSubjects.setValue(
+      'unifiedDataTableRowHeightSettings_lineCountNumber',
+      newValue.toString()
+    );
+  }
+
   public async getCurrentHeaderRowHeightValue() {
     return await this.getCurrentRowHeightValue('header');
   }

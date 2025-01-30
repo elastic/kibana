@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import {
   DEFAULT_COLUMNS,
   DEFAULT_ROWS_PER_PAGE,
+  DEFAULT_ROW_COUNT,
   LOG_LEVEL_FIELD,
 } from '../../../../common/constants';
 import { DefaultLogsExplorerControllerState } from './types';
@@ -20,7 +20,7 @@ export const DEFAULT_CONTEXT: DefaultLogsExplorerControllerState = {
   grid: {
     columns: DEFAULT_COLUMNS,
     rows: {
-      rowHeight: ROWS_HEIGHT_OPTIONS.single,
+      rowHeight: DEFAULT_ROW_COUNT,
       rowsPerPage: DEFAULT_ROWS_PER_PAGE,
     },
   },
