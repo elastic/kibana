@@ -12,17 +12,25 @@ import { distinctUntilChanged, map } from 'rxjs';
 
 import {
   EuiButtonIcon,
+  EuiModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditTitle,
   EuiText,
   euiCanAnimate,
   useEuiTheme,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { GridLayoutStateManager } from '../types';
+import { GridLayoutData, GridLayoutStateManager } from '../types';
+import { resolveGridRow } from '../utils/resolve_grid_row';
 
 export const GridRowHeader = ({
   rowIndex,
@@ -40,6 +48,8 @@ export const GridRowHeader = ({
   const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
 
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
+
   const [readOnly, setReadOnly] = useState<boolean>(
     gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
   );
@@ -67,126 +77,218 @@ export const GridRowHeader = ({
     };
   }, [rowIndex, gridLayoutStateManager]);
 
-  const updateTitle = useCallback(
-    (title: string) => {
-      const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.getValue());
-      newLayout[rowIndex].title = title;
-      gridLayoutStateManager.gridLayout$.next(newLayout);
+  const updateTitle = useCallback((layout: GridLayoutData, index: number, title: string) => {
+    const newLayout = cloneDeep(layout);
+    newLayout[index].title = title;
+    return newLayout;
+  }, []);
+
+  const movePanelsToRow = useCallback(
+    (layout: GridLayoutData, startingRow: number, newRow: number) => {
+      const newLayout = cloneDeep(layout);
+      const panelsToMove = newLayout[startingRow].panels;
+      const maxRow = Math.max(
+        ...Object.values(newLayout[newRow].panels).map(({ row, height }) => row + height)
+      );
+      Object.keys(panelsToMove).forEach((index) => (panelsToMove[index].row += maxRow));
+      newLayout[newRow].panels = { ...newLayout[newRow].panels, ...panelsToMove };
+      newLayout[newRow] = resolveGridRow(newLayout[newRow]);
+      return newLayout;
     },
-    [rowIndex, gridLayoutStateManager.gridLayout$]
+    []
   );
 
+  const deleteSection = useCallback((layout: GridLayoutData, index: number) => {
+    const newLayout = cloneDeep(layout);
+    newLayout.splice(index, 1);
+    return newLayout;
+  }, []);
+
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      css={css`
-        border-bottom: ${isCollapsed ? euiTheme.border.thin : 'none'};
-        padding: ${euiTheme.size.s} 0px;
+    <>
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        css={css`
+          border-bottom: ${isCollapsed ? euiTheme.border.thin : 'none'};
+          padding: ${euiTheme.size.s} 0px;
 
-        .kbnGridLayout--deleteRowIcon {
-          margin-left: ${euiTheme.size.xs};
-        }
-        .kbnGridLayout--moveRowIcon {
-          margin-left: auto;
-        }
-
-        // these styles hide the delete + move actions by default and only show them on hover
-        .kbnGridLayout--deleteRowIcon,
-        .kbnGridLayout--moveRowIcon {
-          opacity: 0;
-          ${euiCanAnimate} {
-            transition: opacity ${euiTheme.animation.extraFast} ease-in;
+          .kbnGridLayout--deleteRowIcon {
+            margin-left: ${euiTheme.size.xs};
           }
-        }
-        &:hover .kbnGridLayout--deleteRowIcon,
-        &:hover .kbnGridLayout--moveRowIcon {
-          opacity: 1;
-        }
-      `}
-      className="kbnGridRowHeader"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          color="text"
-          aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
-            defaultMessage: 'Toggle collapse',
-          })}
-          iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-          onClick={toggleIsCollapsed}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={editMode}>
-        <EuiInlineEditTitle
-          heading="h2"
-          size="xs"
-          isReadOnly={readOnly}
-          inputAriaLabel="Edit title inline"
-          defaultValue={rowTitle}
-          onSave={updateTitle}
-          onClick={() => {
-            if (readOnly) {
-              toggleIsCollapsed();
-            } else {
-              setEditMode(!editMode);
+          .kbnGridLayout--moveRowIcon {
+            margin-left: auto;
+          }
+
+          // these styles hide the delete + move actions by default and only show them on hover
+          .kbnGridLayout--deleteRowIcon,
+          .kbnGridLayout--moveRowIcon {
+            opacity: 0;
+            ${euiCanAnimate} {
+              transition: opacity ${euiTheme.animation.extraFast} ease-in;
             }
-          }}
-          readModeProps={{
-            onClick: readOnly ? toggleIsCollapsed : undefined,
-            css: css`
-              &:hover,
-              &:focus {
-                text-decoration: none !important;
+          }
+          &:hover .kbnGridLayout--deleteRowIcon,
+          &:hover .kbnGridLayout--moveRowIcon {
+            opacity: 1;
+          }
+        `}
+        className="kbnGridRowHeader"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            color="text"
+            aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
+              defaultMessage: 'Toggle collapse',
+            })}
+            iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+            onClick={toggleIsCollapsed}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={editMode}>
+          <EuiInlineEditTitle
+            heading="h2"
+            size="xs"
+            isReadOnly={readOnly}
+            inputAriaLabel="Edit title inline"
+            defaultValue={rowTitle}
+            onSave={(title) => {
+              const newLayout = updateTitle(
+                gridLayoutStateManager.gridLayout$.getValue(),
+                rowIndex,
+                title
+              );
+              gridLayoutStateManager.gridLayout$.next(newLayout);
+            }}
+            onClick={() => {
+              if (readOnly) {
+                toggleIsCollapsed();
+              } else {
+                setEditMode(!editMode);
               }
-              & svg {
-                inline-size: 16px;
-                block-size: 16px;
-              }
-              .euiButtonEmpty__content {
-                gap: ${euiTheme.size.xs}; // decrease gap between title and pencil icon
-              }
-            `,
-          }}
-        />
-      </EuiFlexItem>
-      {
-        /**
-         * Add actions at the end of the header section when the layout is editable + the section title
-         * is not in edit mode
-         */
-        !readOnly && !editMode && (
-          <>
-            {isCollapsed && (
+            }}
+            readModeProps={{
+              onClick: readOnly ? toggleIsCollapsed : undefined,
+              css: css`
+                &:hover,
+                &:focus {
+                  text-decoration: none !important;
+                }
+                & svg {
+                  inline-size: 16px;
+                  block-size: 16px;
+                }
+                .euiButtonEmpty__content {
+                  gap: ${euiTheme.size.xs}; // decrease gap between title and pencil icon
+                }
+              `,
+            }}
+          />
+        </EuiFlexItem>
+        {
+          /**
+           * Add actions at the end of the header section when the layout is editable + the section title
+           * is not in edit mode
+           */
+          !readOnly && !editMode && (
+            <>
+              {isCollapsed && (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="s">{`(${
+                    /**
+                     * we can get away with grabbing the panel count without React state because this count
+                     * is only rendered when the section is collapsed, and the count can only be updated when
+                     * the section isn't collapsed
+                     */
+                    Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
+                      .length
+                  } panels)`}</EuiText>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="s">{`(${
-                  /**
-                   * we can get away with grabbing the panel count without React state because this count
-                   * is only rendered when the section is collapsed, and the count can only be updated when
-                   * the section isn't collapsed
-                   */
-                  Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels).length
-                } panels)`}</EuiText>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                className="kbnGridLayout--deleteRowIcon"
-              />
-            </EuiFlexItem>
-            {isCollapsed && (
-              <EuiFlexItem>
                 <EuiButtonIcon
-                  iconType="move"
-                  color="text"
-                  className="kbnGridLayout--moveRowIcon"
+                  iconType="trash"
+                  color="danger"
+                  className="kbnGridLayout--deleteRowIcon"
+                  onClick={() => {
+                    const panelCount = Object.keys(
+                      gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
+                    ).length;
+                    if (!panelCount) {
+                      deleteSection(gridLayoutStateManager.gridLayout$.getValue(), rowIndex);
+                    } else {
+                      setDeleteModalVisible(true);
+                    }
+                  }}
                 />
               </EuiFlexItem>
-            )}
-          </>
-        )
-      }
-    </EuiFlexGroup>
+              {isCollapsed && (
+                <EuiFlexItem>
+                  <EuiButtonIcon
+                    iconType="move"
+                    color="text"
+                    className="kbnGridLayout--moveRowIcon"
+                  />
+                </EuiFlexItem>
+              )}
+            </>
+          )
+        }
+      </EuiFlexGroup>
+      {deleteModalVisible && (
+        <EuiModal
+          onClose={() => {
+            setDeleteModalVisible(false);
+          }}
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Delete section</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            {`Are you sure you want to remove this section and its ${
+              Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels).length
+            } panels?`}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              onClick={() => {
+                setDeleteModalVisible(false);
+              }}
+            >
+              Cancel
+            </EuiButtonEmpty>
+            <EuiButton
+              onClick={() => {
+                setDeleteModalVisible(false);
+                const newLayout = deleteSection(
+                  gridLayoutStateManager.gridLayout$.getValue(),
+                  rowIndex
+                );
+                gridLayoutStateManager.gridLayout$.next(newLayout);
+              }}
+              fill
+              color="danger"
+            >
+              Yes
+            </EuiButton>
+            <EuiButton
+              onClick={() => {
+                setDeleteModalVisible(false);
+                let newLayout = movePanelsToRow(
+                  gridLayoutStateManager.gridLayout$.getValue(),
+                  rowIndex,
+                  0
+                );
+                newLayout = deleteSection(newLayout, rowIndex);
+                gridLayoutStateManager.gridLayout$.next(newLayout);
+              }}
+              fill
+            >
+              Delete section only
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+    </>
   );
 };
