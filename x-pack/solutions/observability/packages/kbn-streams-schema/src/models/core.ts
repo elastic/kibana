@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { createIsNarrowSchema } from '../helpers';
 import { IngestStreamDefinition, ingestStreamDefinitionSchema } from './ingest';
-import { GroupStreamDefinition, groupStreamDefinitionSchema } from './grouped';
+import { GroupStreamDefinition, groupStreamDefinitionSchema } from './group';
 
 export type StreamDefinition = IngestStreamDefinition | GroupStreamDefinition;
 

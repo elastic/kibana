@@ -7,7 +7,7 @@
 import { z } from '@kbn/zod';
 import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 import { streamDefinitionSchema } from './core';
-import { groupStreamDefinitionBaseSchema, groupStreamDefinitionSchema } from './grouped';
+import { groupStreamDefinitionBaseSchema, groupStreamDefinitionSchema } from './group';
 import {
   ingestStreamDefinitionSchema,
   unwiredStreamDefinitionSchema,

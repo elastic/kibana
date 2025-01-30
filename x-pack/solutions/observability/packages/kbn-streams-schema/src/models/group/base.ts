@@ -14,7 +14,7 @@ interface GroupBase {
   members: string[];
 }
 
-const groupedBaseSchema: z.Schema<GroupBase> = z.object({
+const groupBaseSchema: z.Schema<GroupBase> = z.object({
   description: z.optional(z.string()),
   members: z.array(NonEmptyString),
 });
@@ -24,7 +24,7 @@ interface GroupStreamDefinitionBase {
 }
 
 const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.object({
-  group: groupedBaseSchema,
+  group: groupBaseSchema,
 });
 
 type GroupStreamDefinition = StreamDefinitionBase & GroupStreamDefinitionBase;
@@ -38,7 +38,7 @@ export {
   type GroupBase,
   type GroupStreamDefinitionBase,
   type GroupStreamDefinition,
-  groupedBaseSchema,
+  groupBaseSchema,
   groupStreamDefinitionBaseSchema,
   groupStreamDefinitionSchema,
 };

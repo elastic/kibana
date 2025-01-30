@@ -19,7 +19,7 @@ import {
   groupStreamGetResponseSchema,
   GroupStreamUpsertRequest,
   groupStreamUpsertRequestSchema,
-} from './grouped';
+} from './group';
 import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 
 export const streamGetResponseSchema: z.Schema<StreamGetResponse> = z.union([
