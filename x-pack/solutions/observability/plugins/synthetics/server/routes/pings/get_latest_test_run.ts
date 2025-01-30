@@ -49,15 +49,8 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
     // if from is provided, we will only try to get the latest ping from the provided time range
     if (ping && from) {
       return { ping };
-    } else {
-      const checkIn7Days = await getPing('now-1w');
-      // fall back to max 30 days
-      if (checkIn7Days) {
-        return { ping: checkIn7Days };
-      } else {
-        const checkIn30Days = await getPing('now-30d');
-        return { ping: checkIn30Days };
-      }
     }
+    // fall back to 1w and then max 30 days
+    return { ping: (await getPing('now-1w')) || (await getPing('now-30d')) };
   },
 });
