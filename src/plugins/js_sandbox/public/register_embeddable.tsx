@@ -49,7 +49,7 @@ import type {
 import {
   apiHasExecutionContext,
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { dashboardCrossfilterSlice } from '@kbn/eventbus-slices';
@@ -400,6 +400,7 @@ export const getJsSandboxEmbeddableFactory = (
     type: 'js_sandbox',
     deserializeState: (state) => {
       const serializedState = cloneDeep(state.rawState);
+      console.log('serializedState', serializedState);
       return serializedState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
@@ -423,20 +424,32 @@ export const getJsSandboxEmbeddableFactory = (
         serialize: serializeTimeRange,
       } = initializeTimeRange(state);
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
 
       const { jsSandboxControlsApi, serializeJsSandboxChartState, jsSandboxControlsComparators } =
         initializeJsSandboxControls(state);
 
-      const dataLoading = new BehaviorSubject<boolean | undefined>(true);
-      const blockingError = new BehaviorSubject<Error | undefined>(undefined);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
 
       const api = buildApi(
         {
+          ...titleManager.api,
+          dataViews$,
+          serializeState: () => {
+            return {
+              rawState: {
+                timeRange: undefined,
+                ...titleManager.serialize(),
+                ...serializeTimeRange(),
+                ...serializeJsSandboxChartState(),
+              },
+              references: [],
+            };
+          },
           ...timeRangeApi,
-          ...titlesApi,
           ...jsSandboxControlsApi,
           getTypeDisplayName: () =>
             i18n.translate('jsSandbox.embeddable.typeDisplayName', {
@@ -461,24 +474,12 @@ export const getJsSandboxEmbeddableFactory = (
               return Promise.reject();
             }
           },
-          dataLoading,
-          blockingError,
-          dataViews: dataViews$,
-          serializeState: () => {
-            return {
-              rawState: {
-                timeRange: undefined,
-                ...serializeTitles(),
-                ...serializeTimeRange(),
-                ...serializeJsSandboxChartState(),
-              },
-              references: [],
-            };
-          },
+          dataLoading$,
+          blockingError$,
         },
         {
+          ...titleManager.comparators,
           ...timeRangeComparators,
-          ...titleComparators,
           ...jsSandboxControlsComparators,
         }
       );
