@@ -11,10 +11,11 @@ import { TestProviders } from '../../../common/mock';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 import { useRiskEngineStatus } from './use_risk_engine_status';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics';
+import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: jest.fn(),
 }));
@@ -83,129 +84,126 @@ const mockRiskEngineStatus = (status: RiskEngineStatusResponse['risk_engine_stat
     isFetching: false,
   });
 };
-describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
-  'useRiskScore entityType: %s',
-  (riskEntity) => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      appToastsMock = useAppToastsMock.create();
-      (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-      mockUseSearchStrategy.mockReturnValue(defaultSearchResponse);
-      mockUseMlCapabilities.mockReturnValue({
-        isPlatinumOrTrialLicense: true,
-      });
+describe.each([EntityType.host, EntityType.user])('useRiskScore entityType: %s', (riskEntity) => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    mockUseSearchStrategy.mockReturnValue(defaultSearchResponse);
+    mockUseMlCapabilities.mockReturnValue({
+      isPlatinumOrTrialLicense: true,
     });
+  });
 
-    test('does not search if license is not valid', () => {
-      makeLicenseInvalid();
-      mockRiskEngineStatus('ENABLED');
+  test('does not search if license is not valid', () => {
+    makeLicenseInvalid();
+    mockRiskEngineStatus('ENABLED');
 
-      const { result } = renderHook(() => useRiskScore({ riskEntity }), {
-        wrapper: TestProviders,
-      });
-      expect(mockSearch).not.toHaveBeenCalled();
+    const { result } = renderHook(() => useRiskScore({ riskEntity }), {
+      wrapper: TestProviders,
+    });
+    expect(mockSearch).not.toHaveBeenCalled();
+    expect(result.current).toEqual({
+      loading: false,
+      ...defaultRisk,
+      hasEngineBeenInstalled: true,
+      isAuthorized: false,
+      refetch: result.current.refetch,
+    });
+  });
+  test('does not search if engine is not installed', () => {
+    mockRiskEngineStatus('NOT_INSTALLED');
+    const { result } = renderHook(() => useRiskScore({ riskEntity }), {
+      wrapper: TestProviders,
+    });
+    expect(mockSearch).not.toHaveBeenCalled();
+    expect(result.current).toEqual({
+      loading: false,
+      ...defaultRisk,
+      refetch: result.current.refetch,
+    });
+  });
+
+  test('handle index not found error', () => {
+    mockRiskEngineStatus('ENABLED');
+    mockUseSearchStrategy.mockReturnValue({
+      ...defaultSearchResponse,
+      error: {
+        attributes: {
+          caused_by: {
+            type: 'index_not_found_exception',
+          },
+        },
+      },
+    });
+    const { result } = renderHook(() => useRiskScore({ riskEntity }), {
+      wrapper: TestProviders,
+    });
+    expect(result.current).toEqual({
+      loading: false,
+      ...defaultRisk,
+      hasEngineBeenInstalled: true,
+      refetch: result.current.refetch,
+      error: {
+        attributes: {
+          caused_by: {
+            type: 'index_not_found_exception',
+          },
+        },
+      },
+    });
+  });
+
+  test('show error toast', () => {
+    mockRiskEngineStatus('ENABLED');
+    const error = new Error();
+    mockUseSearchStrategy.mockReturnValue({
+      ...defaultSearchResponse,
+      error,
+    });
+    renderHook(() => useRiskScore({ riskEntity }), {
+      wrapper: TestProviders,
+    });
+    expect(appToastsMock.addError).toHaveBeenCalledWith(error, {
+      title: 'Failed to run search on risk score',
+    });
+  });
+
+  test('runs search if engine is enabled', () => {
+    mockRiskEngineStatus('ENABLED');
+    renderHook(() => useRiskScore({ riskEntity }), {
+      wrapper: TestProviders,
+    });
+    expect(mockSearch).toHaveBeenCalledTimes(1);
+    expect(mockSearch).toHaveBeenCalledWith({
+      defaultIndex: [`risk-score.risk-score-latest-default`],
+      factoryQueryType: EntityRiskQueries.list,
+      riskScoreEntity: riskEntity,
+      includeAlertsCount: false,
+    });
+  });
+
+  test('returns result', async () => {
+    mockRiskEngineStatus('ENABLED');
+
+    mockUseSearchStrategy.mockReturnValue({
+      ...defaultSearchResponse,
+      result: {
+        data: [],
+        totalCount: 0,
+      },
+    });
+    const { result } = renderHook(() => useRiskScore({ riskEntity }), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => {
       expect(result.current).toEqual({
         loading: false,
         ...defaultRisk,
         hasEngineBeenInstalled: true,
-        isAuthorized: false,
+        data: [],
         refetch: result.current.refetch,
       });
     });
-    test('does not search if engine is not installed', () => {
-      mockRiskEngineStatus('NOT_INSTALLED');
-      const { result } = renderHook(() => useRiskScore({ riskEntity }), {
-        wrapper: TestProviders,
-      });
-      expect(mockSearch).not.toHaveBeenCalled();
-      expect(result.current).toEqual({
-        loading: false,
-        ...defaultRisk,
-        refetch: result.current.refetch,
-      });
-    });
-
-    test('handle index not found error', () => {
-      mockRiskEngineStatus('ENABLED');
-      mockUseSearchStrategy.mockReturnValue({
-        ...defaultSearchResponse,
-        error: {
-          attributes: {
-            caused_by: {
-              type: 'index_not_found_exception',
-            },
-          },
-        },
-      });
-      const { result } = renderHook(() => useRiskScore({ riskEntity }), {
-        wrapper: TestProviders,
-      });
-      expect(result.current).toEqual({
-        loading: false,
-        ...defaultRisk,
-        hasEngineBeenInstalled: true,
-        refetch: result.current.refetch,
-        error: {
-          attributes: {
-            caused_by: {
-              type: 'index_not_found_exception',
-            },
-          },
-        },
-      });
-    });
-
-    test('show error toast', () => {
-      mockRiskEngineStatus('ENABLED');
-      const error = new Error();
-      mockUseSearchStrategy.mockReturnValue({
-        ...defaultSearchResponse,
-        error,
-      });
-      renderHook(() => useRiskScore({ riskEntity }), {
-        wrapper: TestProviders,
-      });
-      expect(appToastsMock.addError).toHaveBeenCalledWith(error, {
-        title: 'Failed to run search on risk score',
-      });
-    });
-
-    test('runs search if engine is enabled', () => {
-      mockRiskEngineStatus('ENABLED');
-      renderHook(() => useRiskScore({ riskEntity }), {
-        wrapper: TestProviders,
-      });
-      expect(mockSearch).toHaveBeenCalledTimes(1);
-      expect(mockSearch).toHaveBeenCalledWith({
-        defaultIndex: [`risk-score.risk-score-latest-default`],
-        factoryQueryType: `${riskEntity}sRiskScore`,
-        riskScoreEntity: riskEntity,
-        includeAlertsCount: false,
-      });
-    });
-
-    test('returns result', async () => {
-      mockRiskEngineStatus('ENABLED');
-
-      mockUseSearchStrategy.mockReturnValue({
-        ...defaultSearchResponse,
-        result: {
-          data: [],
-          totalCount: 0,
-        },
-      });
-      const { result } = renderHook(() => useRiskScore({ riskEntity }), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => {
-        expect(result.current).toEqual({
-          loading: false,
-          ...defaultRisk,
-          hasEngineBeenInstalled: true,
-          data: [],
-          refetch: result.current.refetch,
-        });
-      });
-    });
-  }
-);
+  });
+});

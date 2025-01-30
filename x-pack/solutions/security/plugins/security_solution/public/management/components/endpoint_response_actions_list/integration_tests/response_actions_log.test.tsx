@@ -1854,25 +1854,6 @@ describe('Response actions history', () => {
       ]);
     });
 
-    it('should show only action types when 3rd party vendor feature flags are set to false thus only endpoint available', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneV1Enabled: false,
-        responseActionsCrowdstrikeManualHostIsolationEnabled: false,
-      });
-      render({ isFlyout: false });
-      const { getByTestId, getAllByTestId } = renderResult;
-
-      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
-      expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
-        [...RESPONSE_ACTION_TYPE].length
-      );
-      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'Triggered by rule',
-        'Triggered manually',
-      ]);
-    });
     it('should show a list of agents and action types when opened in page view', async () => {
       mockedContext.setExperimentalFlag({
         responseActionsSentinelOneV1Enabled: true,
@@ -1892,7 +1873,7 @@ describe('Response actions history', () => {
         'Elastic Defend',
         'SentinelOne',
         'Crowdstrike',
-        'microsoft_defender_endpoint',
+        'Microsoft Defender for Endpoint',
         'Triggered by rule',
         'Triggered manually',
       ]);

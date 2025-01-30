@@ -7,20 +7,20 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { ServerError } from '@kbn/cases-plugin/public/types';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import {
   OPENAI_CONNECTOR_ID,
   OpenAiProviderType,
   BEDROCK_CONNECTOR_ID,
   GEMINI_CONNECTOR_ID,
+  INFERENCE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { isSupportedConnector } from '@kbn/inference-common';
 import { useKibana } from './use_kibana';
-import { LLMs } from '../types';
+import { LLMs, type ActionConnector, type PlaygroundConnector } from '../types';
 
 const QUERY_KEY = ['search-playground, load-connectors'];
 
@@ -99,9 +99,19 @@ const connectorTypeToLLM: Array<{
       type: LLMs.gemini,
     }),
   },
+  {
+    actionId: INFERENCE_CONNECTOR_ID,
+    match: (connector) =>
+      connector.actionTypeId === INFERENCE_CONNECTOR_ID && isSupportedConnector(connector),
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.aiConnectorTitle', {
+        defaultMessage: 'AI Connector',
+      }),
+      type: LLMs.inference,
+    }),
+  },
 ];
-
-type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };
 
 export const useLoadConnectors = (): UseQueryResult<PlaygroundConnector[], IHttpFetchError> => {
   const {
@@ -126,7 +136,7 @@ export const useLoadConnectors = (): UseQueryResult<PlaygroundConnector[], IHttp
     {
       retry: false,
       keepPreviousData: true,
-      onError: (error: ServerError) => {
+      onError: (error: IHttpFetchError<ResponseErrorBody>) => {
         if (error.name !== 'AbortError') {
           notifications?.toasts?.addError(
             error.body && error.body.message ? new Error(error.body.message) : error,

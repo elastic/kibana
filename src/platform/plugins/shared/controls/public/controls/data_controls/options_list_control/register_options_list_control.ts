@@ -14,7 +14,7 @@ import { registerControlFactory } from '../../../control_factory_registry';
 export function registerOptionsListControl() {
   registerControlFactory(OPTIONS_LIST_CONTROL, async () => {
     const [{ getOptionsListControlFactory }] = await Promise.all([
-      import('./get_options_list_control_factory'),
+      import('../../../controls_module'),
       untilPluginStartServicesReady(),
     ]);
     return getOptionsListControlFactory();

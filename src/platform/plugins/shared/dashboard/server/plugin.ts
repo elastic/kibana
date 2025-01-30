@@ -103,7 +103,7 @@ export class DashboardPlugin
         {
           domainId: 'dashboard',
           // makes sure that only users with read/all access to dashboard app can access the routes
-          routeTags: ['access:dashboardUsageStats'],
+          routePrivileges: ['dashboardUsageStats'],
         }
       );
     }

@@ -25,6 +25,7 @@ import {
 import type { ConfigType } from '../../../../config';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { EntityType } from '../../../../../common/search_strategy';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
@@ -209,7 +210,7 @@ describe('Risk Scoring Task', () => {
         dataViewId: 'data_view_id',
         enabled: true,
         filter: {},
-        identifierType: 'host',
+        identifierType: EntityType.host,
         interval: '1h',
         pageSize: 10_000,
         range: { start: 'now-30d', end: 'now' },
@@ -295,7 +296,7 @@ describe('Risk Scoring Task', () => {
           filter: {
             term: { 'host.name': 'SUSPICIOUS' },
           },
-          identifierType: 'host',
+          identifierType: EntityType.host,
           interval: '2h',
           pageSize: 11_111,
           range: { start: 'now-30d', end: 'now' },

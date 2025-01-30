@@ -57,7 +57,8 @@ export const fetchConnectors = async (
   client: ElasticsearchClient,
   indexNames?: string[],
   fetchOnlyCrawlers?: boolean,
-  searchQuery?: string
+  searchQuery?: string,
+  includeDeleted?: boolean
 ): Promise<Connector[]> => {
   const q = searchQuery && searchQuery.length > 0 ? searchQuery : undefined;
 
@@ -82,6 +83,7 @@ export const fetchConnectors = async (
         ...querystring,
         from: accumulator.length,
         size: 1000,
+        include_deleted: includeDeleted,
       },
     });
 

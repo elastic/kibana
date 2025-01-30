@@ -36,16 +36,21 @@ import { AlertReasonPanelProvider } from './document_details/alert_reason/contex
 import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
 import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
-import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
+import { UserPanel, UserPreviewPanelKey } from './entity_details/user_right';
 import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
-import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
+import { HostPanel, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
+import { UserPanelKey, HostPanelKey, ServicePanelKey } from './entity_details/shared/constants';
+import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
+import { ServicePanel } from './entity_details/service_right';
+import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
+import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -156,6 +161,17 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: NetworkPreviewPanelKey,
     component: (props) => (
       <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
+    ),
+  },
+
+  {
+    key: ServicePanelKey,
+    component: (props) => <ServicePanel {...(props as ServicePanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: ServiceDetailsPanelKey,
+    component: (props) => (
+      <ServiceDetailsPanel {...(props as ServiceDetailsExpandableFlyoutProps).params} />
     ),
   },
 ];

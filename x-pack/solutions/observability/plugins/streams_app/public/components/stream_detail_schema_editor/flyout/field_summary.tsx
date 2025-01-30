@@ -18,11 +18,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
-import { FieldStatus } from '../field_status';
+import { FieldStatusBadge } from '../field_status';
 import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
-import { FieldFormType } from './field_form_type';
 import { SchemaEditorFlyoutProps } from '.';
-import { FieldType } from '../field_type';
+import { FieldFormTypeWrapper } from './field_form_type_wrapper';
 
 const EMPTY_CONTENT = '-----';
 
@@ -144,7 +143,7 @@ export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
         <EuiFlexItem grow={2}>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <FieldStatus status={selectedField.status} />
+              <FieldStatusBadge status={selectedField.status} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -159,13 +158,13 @@ export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          {isEditing ? (
-            <FieldFormType nextFieldType={nextFieldType} setNextFieldType={setNextFieldType} />
-          ) : selectedField.type ? (
-            <FieldType type={selectedField.type} />
-          ) : (
-            `${EMPTY_CONTENT}`
-          )}
+          <FieldFormTypeWrapper
+            isEditing={isEditing}
+            nextFieldType={nextFieldType}
+            setNextFieldType={setNextFieldType}
+            selectedFieldType={selectedField.type}
+            selectedFieldName={selectedField.name}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

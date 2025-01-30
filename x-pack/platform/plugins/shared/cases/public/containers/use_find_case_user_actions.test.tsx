@@ -52,6 +52,7 @@ describe('UseFindCaseUserActions', () => {
         expect.objectContaining({
           ...initialData,
           data: {
+            latestAttachments: [],
             userActions: [...findCaseUserActionsResponse.userActions],
             total: 30,
             perPage: 10,

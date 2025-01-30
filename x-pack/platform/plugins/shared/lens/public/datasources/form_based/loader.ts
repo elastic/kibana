@@ -227,7 +227,7 @@ export function renameIndexPattern({
   };
 }
 
-export function triggerActionOnIndexPatternChange({
+export async function triggerActionOnIndexPatternChange({
   state,
   layerId,
   uiActions,
@@ -243,7 +243,7 @@ export function triggerActionOnIndexPatternChange({
   const toDataView = indexPatternId;
 
   const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-  const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+  const action = await uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
   action?.execute({
     trigger,

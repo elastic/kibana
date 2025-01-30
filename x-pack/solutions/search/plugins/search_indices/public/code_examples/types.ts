@@ -10,8 +10,11 @@ import { CreateIndexCodeDefinition, IngestDataCodeDefinition } from '../types';
 export interface CreateIndexLanguageExamples {
   default: CreateIndexCodeDefinition;
   dense_vector: CreateIndexCodeDefinition;
+  semantic: CreateIndexCodeDefinition;
 }
 
 export interface IngestDataLanguageExamples {
+  default: IngestDataCodeDefinition;
   dense_vector: IngestDataCodeDefinition;
+  semantic: IngestDataCodeDefinition;
 }

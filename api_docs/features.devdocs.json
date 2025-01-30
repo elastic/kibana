@@ -72,7 +72,7 @@
                     "section": "def-common.KibanaFeatureScope",
                     "text": "KibanaFeatureScope"
                   },
-                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; }> | undefined; }>"
+                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -101,7 +101,7 @@
             "label": "deprecated",
             "description": [],
             "signature": [
-              "Readonly<{ readonly notice: string; }> | undefined"
+              "Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -958,7 +958,7 @@
               "\nIf defined, the feature is considered deprecated and won't be available to users when configuring roles or Spaces."
             ],
             "signature": [
-              "Readonly<{ notice: string; }> | undefined"
+              "Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -1500,7 +1500,7 @@
                     "section": "def-common.KibanaFeatureScope",
                     "text": "KibanaFeatureScope"
                   },
-                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; }> | undefined; }>"
+                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -1529,7 +1529,7 @@
             "label": "deprecated",
             "description": [],
             "signature": [
-              "Readonly<{ readonly notice: string; }> | undefined"
+              "Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -2355,10 +2355,6 @@
             "references": [
               {
                 "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_post_auth_interceptor.ts"
-              },
-              {
-                "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.ts"
               },
               {
@@ -2516,10 +2512,6 @@
               {
                 "plugin": "@kbn/security-authorization-core",
                 "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
               }
             ],
             "children": [],
@@ -2783,9 +2775,19 @@
             "type": "Function",
             "tags": [],
             "label": "getKibanaFeatures",
-            "description": [],
+            "description": [
+              "\nReturns all registered Kibana features."
+            ],
             "signature": [
-              "() => ",
+              "(params?: ",
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.GetKibanaFeaturesParams",
+                "text": "GetKibanaFeaturesParams"
+              },
+              " | undefined) => ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -2798,8 +2800,62 @@
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "features",
+                "id": "def-server.FeaturesPluginStart.getKibanaFeatures.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Optional parameters to filter features."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "server",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-server.GetKibanaFeaturesParams",
+                    "text": "GetKibanaFeaturesParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "features",
+        "id": "def-server.GetKibanaFeaturesParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetKibanaFeaturesParams",
+        "description": [
+          "\nDescribes parameters used to retrieve all Kibana features (for public consumers)."
+        ],
+        "path": "x-pack/platform/plugins/shared/features/server/feature_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "features",
+            "id": "def-server.GetKibanaFeaturesParams.omitDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "omitDeprecated",
+            "description": [
+              "\nIf true, deprecated features will be omitted. For backward compatibility reasons, deprecated features are included\nin the result by default."
+            ],
+            "path": "x-pack/platform/plugins/shared/features/server/feature_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3148,7 +3204,7 @@
               "\nIf defined, the feature is considered deprecated and won't be available to users when configuring roles or Spaces."
             ],
             "signature": [
-              "Readonly<{ notice: string; }> | undefined"
+              "Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -3524,7 +3580,7 @@
                     "section": "def-common.KibanaFeatureScope",
                     "text": "KibanaFeatureScope"
                   },
-                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; }> | undefined; }>"
+                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -3553,7 +3609,7 @@
             "label": "deprecated",
             "description": [],
             "signature": [
-              "Readonly<{ readonly notice: string; }> | undefined"
+              "Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -4767,7 +4823,7 @@
               "\nIf defined, the feature is considered deprecated and won't be available to users when configuring roles or Spaces."
             ],
             "signature": [
-              "Readonly<{ notice: string; }> | undefined"
+              "Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,

@@ -21,6 +21,7 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import {
   type DarkModeValue,
+  type ThemeName,
   parseDarkModeValue,
   parseThemeNameValue,
   type UiSettingsParams,
@@ -212,7 +213,7 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
-    const themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
+    const themeName = getSettingValue<ThemeName>('theme:name', settings, parseThemeNameValue);
 
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
@@ -243,6 +244,7 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
+      hardenPrototypes: http.prototypeHardening,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       locale,

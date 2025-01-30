@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { combineLatest, debounceTime } from 'rxjs';
 
@@ -20,9 +20,15 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiPageTemplate,
+  EuiPopover,
+  EuiRange,
   EuiSpacer,
+  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
@@ -53,16 +59,21 @@ export const GridExample = ({
   coreStart: CoreStart;
   uiActions: UiActionsStart;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
+  const [isSettingsPopoverOpen, setIsSettingsPopoverOpen] = useState(false);
+  const [gutterSize, setGutterSize] = useState<number>(DASHBOARD_MARGIN_SIZE);
+  const [rowHeight, setRowHeight] = useState<number>(DASHBOARD_GRID_HEIGHT);
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
   const [viewMode, expandedPanelId] = useBatchedPublishingSubjects(
-    mockDashboardApi.viewMode,
-    mockDashboardApi.expandedPanelId
+    mockDashboardApi.viewMode$,
+    mockDashboardApi.expandedPanelId$
   );
 
   useEffect(() => {
@@ -111,6 +122,41 @@ export const GridExample = ({
     [mockDashboardApi]
   );
 
+  const customLayoutCss = useMemo(() => {
+    const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
+    return css`
+      .kbnGridRow--targeted {
+        background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
+          calc((var(--kbnGridGutterSize) / 2) * -1px);
+        background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
+          calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
+        background-image: linear-gradient(to right, ${gridColor} 1px, transparent 1px),
+          linear-gradient(to bottom, ${gridColor} 1px, transparent 1px);
+        background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.1)};
+      }
+
+      .kbnGridPanel--dragPreview {
+        border-radius: ${euiTheme.border.radius};
+        background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2)};
+        transition: opacity 100ms linear;
+      }
+
+      .kbnGridPanel--resizeHandle {
+        opacity: 0;
+        transition: opacity 0.2s, border 0.2s;
+        border-radius: 7px 0 7px 0;
+        border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
+        border-right: 2px solid ${euiTheme.colors.accentSecondary};
+        &:hover,
+        &:focus {
+          outline-style: none !important;
+          opacity: 1;
+          background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
+        }
+      }
+    `;
+  }, [euiTheme]);
+
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
@@ -123,7 +169,7 @@ export const GridExample = ({
         <EuiPageTemplate.Section
           color="subdued"
           contentProps={{
-            css: { flexGrow: 1 },
+            css: { flexGrow: 1, display: 'flex', flexDirection: 'column' },
           }}
         >
           <EuiCallOut
@@ -148,38 +194,96 @@ export const GridExample = ({
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <AddEmbeddableButton pageApi={mockDashboardApi} uiActions={uiActions} />
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <AddEmbeddableButton pageApi={mockDashboardApi} uiActions={uiActions} />{' '}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    button={
+                      <EuiButton
+                        iconType="arrowDown"
+                        iconSide="right"
+                        onClick={() => setIsSettingsPopoverOpen(!isSettingsPopoverOpen)}
+                      >
+                        {i18n.translate('examples.gridExample.settingsPopover.title', {
+                          defaultMessage: 'Layout settings',
+                        })}
+                      </EuiButton>
+                    }
+                    isOpen={isSettingsPopoverOpen}
+                    closePopover={() => setIsSettingsPopoverOpen(false)}
+                  >
+                    <>
+                      <EuiFormRow
+                        label={i18n.translate('examples.gridExample.settingsPopover.viewMode', {
+                          defaultMessage: 'View mode',
+                        })}
+                      >
+                        <EuiButtonGroup
+                          legend={i18n.translate('examples.gridExample.layoutOptionsLegend', {
+                            defaultMessage: 'Layout options',
+                          })}
+                          options={[
+                            {
+                              id: 'view',
+                              label: i18n.translate('examples.gridExample.viewOption', {
+                                defaultMessage: 'View',
+                              }),
+                              toolTipContent:
+                                'The layout adjusts when the window is resized. Panel interactivity, such as moving and resizing within the grid, is disabled.',
+                            },
+                            {
+                              id: 'edit',
+                              label: i18n.translate('examples.gridExample.editOption', {
+                                defaultMessage: 'Edit',
+                              }),
+                              toolTipContent:
+                                'The layout does not adjust when the window is resized.',
+                            },
+                          ]}
+                          idSelected={viewMode}
+                          onChange={(id) => {
+                            mockDashboardApi.viewMode$.next(id);
+                          }}
+                        />
+                      </EuiFormRow>
+                      <EuiFormRow
+                        label={i18n.translate('examples.gridExample.settingsPopover.gutterSize', {
+                          defaultMessage: 'Gutter size',
+                        })}
+                      >
+                        <EuiRange
+                          min={1}
+                          max={30}
+                          value={gutterSize}
+                          onChange={(e) => setGutterSize(parseInt(e.currentTarget.value, 10))}
+                          showLabels
+                          showValue
+                        />
+                      </EuiFormRow>
+                      <EuiFormRow
+                        label={i18n.translate('examples.gridExample.settingsPopover.rowHeight', {
+                          defaultMessage: 'Row height',
+                        })}
+                      >
+                        <EuiRange
+                          min={5}
+                          max={30}
+                          step={5}
+                          value={rowHeight}
+                          onChange={(e) => setRowHeight(parseInt(e.currentTarget.value, 10))}
+                          showLabels
+                          showValue
+                        />
+                      </EuiFormRow>
+                    </>
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonGroup
-                    legend={i18n.translate('examples.gridExample.layoutOptionsLegend', {
-                      defaultMessage: 'Layout options',
-                    })}
-                    options={[
-                      {
-                        id: 'view',
-                        label: i18n.translate('examples.gridExample.viewOption', {
-                          defaultMessage: 'View',
-                        }),
-                        toolTipContent:
-                          'The layout adjusts when the window is resized. Panel interactivity, such as moving and resizing within the grid, is disabled.',
-                      },
-                      {
-                        id: 'edit',
-                        label: i18n.translate('examples.gridExample.editOption', {
-                          defaultMessage: 'Edit',
-                        }),
-                        toolTipContent: 'The layout does not adjust when the window is resized.',
-                      },
-                    ]}
-                    idSelected={viewMode}
-                    onChange={(id) => {
-                      mockDashboardApi.viewMode.next(id);
-                    }}
-                  />
-                </EuiFlexItem>
                 {hasUnsavedChanges && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="warning">
@@ -223,13 +327,14 @@ export const GridExample = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
+
           <GridLayout
             accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
             expandedPanelId={expandedPanelId}
             layout={currentLayout}
             gridSettings={{
-              gutterSize: DASHBOARD_MARGIN_SIZE,
-              rowHeight: DASHBOARD_GRID_HEIGHT,
+              gutterSize,
+              rowHeight,
               columnCount: DASHBOARD_GRID_COLUMN_COUNT,
             }}
             renderPanelContents={renderPanelContents}
@@ -241,6 +346,7 @@ export const GridExample = ({
               mockDashboardApi.panels$.next(panels);
               mockDashboardApi.rows$.next(rows);
             }}
+            css={customLayoutCss}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>

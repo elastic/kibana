@@ -56,7 +56,8 @@ describe('CreateIndexButton', () => {
           url: {
             locators: {
               get: jest.fn().mockReturnValue({
-                getUrl: jest.fn().mockReturnValue('mock-create-index-url'),
+                getUrl: jest.fn().mockReturnValue('mock-url'),
+                getRedirectUrl: jest.fn().mockReturnValue('mock-shown-url'),
               }),
             },
           },
@@ -72,7 +73,7 @@ describe('CreateIndexButton', () => {
     fireEvent.click(createIndexButton);
 
     await waitFor(() => {
-      expect(navigateToUrl).toHaveBeenCalledWith('mock-create-index-url');
+      expect(navigateToUrl).toHaveBeenCalledWith('mock-url');
     });
   });
 });

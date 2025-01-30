@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
@@ -17,7 +18,6 @@ import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
 } from '../shared/components/left_panel/left_panel_header';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
@@ -55,13 +55,13 @@ export const HostDetailsPanel = ({
   const [tabs] = useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && name;
     const riskScoreTab = isRiskScoreTabAvailable
-      ? [getRiskInputTab({ entityName: name, entityType: RiskScoreEntity.host, scopeId })]
+      ? [getRiskInputTab({ entityName: name, entityType: EntityType.host, scopeId })]
       : [];
 
     // Determine if the Insights tab should be included
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
-        ? [getInsightsInputTab({ name, fieldName: 'host.name' })]
+        ? [getInsightsInputTab({ name, fieldName: EntityIdentifierFields.hostName })]
         : [];
     return [[...riskScoreTab, ...insightsTab], EntityDetailsLeftPanelTab.RISK_INPUTS, () => {}];
   }, [

@@ -211,7 +211,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
               <EuiFlexGroup alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color="success"
+                    color="primary"
                     data-test-subj={`case-number-custom-field-submit-button-${customFieldConfiguration.key}`}
                     fill
                     iconType="save"

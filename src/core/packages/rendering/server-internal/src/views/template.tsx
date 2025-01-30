@@ -28,6 +28,7 @@ export const Template: FunctionComponent<Props> = ({
     scriptPaths,
     injectedMetadata,
     bootstrapScriptUrl,
+    hardenPrototypes,
     strictCsp,
     customBranding,
   },
@@ -73,6 +74,9 @@ export const Template: FunctionComponent<Props> = ({
       <body>
         {createElement('kbn-csp', {
           data: JSON.stringify({ strictCsp }),
+        })}
+        {createElement('kbn-prototype-hardening', {
+          data: JSON.stringify({ hardenPrototypes }),
         })}
         {createElement('kbn-injected-metadata', { data: JSON.stringify(injectedMetadata) })}
         <div

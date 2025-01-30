@@ -22,7 +22,6 @@ import {
   deleteCases,
   deleteComment,
   getActionLicense,
-  getCase,
   getCases,
   findCaseUserActions,
   getTags,
@@ -135,34 +134,6 @@ describe('Cases API', () => {
     });
   });
 
-  describe('getCase', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(basicCaseSnake);
-    });
-    const data = basicCase.id;
-
-    it('should be called with correct check url, method, signal', async () => {
-      await getCase(data, true, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}`, {
-        method: 'GET',
-        query: { includeComments: true },
-        signal: abortCtrl.signal,
-      });
-    });
-
-    it('should return correct response', async () => {
-      const resp = await getCase(data, true, abortCtrl.signal);
-      expect(resp).toEqual(basicCase);
-    });
-
-    it('should not covert to camel case registered attachments', async () => {
-      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
-      const resp = await getCase(data, true, abortCtrl.signal);
-      expect(resp).toEqual(caseWithRegisteredAttachments);
-    });
-  });
-
   describe('resolveCase', () => {
     const aliasTargetId = '12345';
     const basicResolveCase = {
@@ -180,7 +151,9 @@ describe('Cases API', () => {
       await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
         method: 'GET',
-        query: { includeComments: true },
+        query: {
+          includeComments: true,
+        },
         signal: abortCtrl.signal,
       });
     });
@@ -540,6 +513,7 @@ describe('Cases API', () => {
       perPage: 10,
       total: 30,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
+      latestAttachments: [],
     };
     const filterActionType: CaseUserActionTypeWithAll = 'all';
     const sortOrder: 'asc' | 'desc' = 'asc';
@@ -557,16 +531,19 @@ describe('Cases API', () => {
 
     it('should be called with correct check url, method, signal', async () => {
       await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
-        method: 'GET',
-        signal: abortCtrl.signal,
-        query: {
-          types: [],
-          sortOrder: 'asc',
-          page: 1,
-          perPage: 10,
-        },
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+          },
+        }
+      );
     });
 
     it('should be called with action type user action and desc sort order', async () => {
@@ -575,30 +552,36 @@ describe('Cases API', () => {
         { type: 'action', sortOrder: 'desc', page: 2, perPage: 15 },
         abortCtrl.signal
       );
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
-        method: 'GET',
-        signal: abortCtrl.signal,
-        query: {
-          types: ['action'],
-          sortOrder: 'desc',
-          page: 2,
-          perPage: 15,
-        },
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: ['action'],
+            sortOrder: 'desc',
+            page: 2,
+            perPage: 15,
+          },
+        }
+      );
     });
 
     it('should be called with user type user action and desc sort order', async () => {
       await findCaseUserActions(basicCase.id, { ...params, type: 'user' }, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
-        method: 'GET',
-        signal: abortCtrl.signal,
-        query: {
-          types: ['user'],
-          sortOrder: 'asc',
-          page: 1,
-          perPage: 10,
-        },
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: ['user'],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+          },
+        }
+      );
     });
 
     it('should return correct response', async () => {

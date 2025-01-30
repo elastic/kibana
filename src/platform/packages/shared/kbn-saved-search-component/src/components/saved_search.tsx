@@ -15,7 +15,7 @@ import type {
   SearchEmbeddableRuntimeState,
   SearchEmbeddableApi,
 } from '@kbn/discover-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
@@ -41,6 +41,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
   } = props;
 
   const {
+    solutionNavIdOverride,
     enableDocumentViewer: documentViewerEnabled = true,
     enableFilters: filtersEnabled = true,
   } = props.displayOptions ?? {};
@@ -75,6 +76,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
               attributes: { ...attributes, references },
               timeRange,
               nonPersistedDisplayOptions: {
+                solutionNavIdOverride,
                 enableDocumentViewer: documentViewerEnabled,
                 enableFilters: filtersEnabled,
               },
@@ -100,6 +102,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     index,
     query,
     searchSourceService,
+    solutionNavIdOverride,
     timeRange,
     timestampField,
   ]);

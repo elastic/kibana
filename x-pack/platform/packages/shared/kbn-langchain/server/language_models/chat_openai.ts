@@ -201,7 +201,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       // possible client model override
       // security sends this from connectors, it is only missing from preconfigured connectors
       // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
-      model: this.model,
+      ...(llmType === 'inference' ? {} : { model: this.model }),
       n: completionRequest.n,
       stop: completionRequest.stop,
       tools: completionRequest.tools,

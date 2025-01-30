@@ -97,7 +97,7 @@ const RuleExecutionStatusSelectorComponent = ({
       repositionOnScroll
     >
       <EuiSelectable
-        aria-label={i18n.RULE_EXECTION_STATUS_FILTER}
+        aria-label={i18n.RULE_EXECUTION_STATUS_FILTER}
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
         singleSelection

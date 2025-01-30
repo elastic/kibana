@@ -15,7 +15,7 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition, isRootStream } from '@kbn/streams-schema';
+import { ReadStreamDefinition, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
@@ -103,7 +103,7 @@ export function StreamDetailEnrichmentContent({
 
   const hasProcessors = processors.length > 0;
 
-  if (isRootStream(definition)) {
+  if (isRootStreamDefinition(definition.stream)) {
     return <RootStreamEmptyPrompt />;
   }
 
@@ -118,6 +118,7 @@ export function StreamDetailEnrichmentContent({
               <DraggableProcessorListItem
                 key={processor.id}
                 idx={idx}
+                definition={definition}
                 processor={processor}
                 onUpdateProcessor={updateProcessor}
                 onDeleteProcessor={deleteProcessor}

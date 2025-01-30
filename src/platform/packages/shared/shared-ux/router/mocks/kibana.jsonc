@@ -3,5 +3,6 @@
   "id": "@kbn/shared-ux-router-mocks",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
-  "visibility": "shared"
+  "visibility": "shared",
+  "devOnly": true
 }

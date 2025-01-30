@@ -16,13 +16,14 @@ const clientId = 'clientIdTest';
 const tenantId = 'tenantIdTest';
 const clientCertificatePath = 'clientCertificatePathTest';
 const clientSecret = 'clientSecretTest';
+const clientCertificatePassword = 'clientCertificatePasswordTest';
 
 export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
   TENANT_ID: 'cisAzureTenantId',
   CLIENT_ID: 'cisAzureClientId',
   CLIENT_SECRET: 'passwordInput-client-secret',
   CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
-  CLIENT_CERTIFICATE_PASSWORD: 'cisAzureClientCertificatePassword',
+  CLIENT_CERTIFICATE_PASSWORD: 'passwordInput-client-certificate-password',
   CLIENT_USERNAME: 'cisAzureClientUsername',
   CLIENT_PASSWORD: 'cisAzureClientPassword',
 };
@@ -136,6 +137,12 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
           clientCertificatePath
         );
+
+        await cisIntegration.fillInTextField(
+          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+          clientCertificatePassword
+        );
+
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
@@ -248,6 +255,12 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
           clientCertificatePath
         );
+
+        await cisIntegration.fillInTextField(
+          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+          clientCertificatePassword
+        );
+
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);

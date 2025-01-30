@@ -2,7 +2,7 @@
 
 A component wrapper around Discover session embeddable. This can be used in solutions without being within a Dasboard context.
 
-This can be used to render a context-aware (logs etc) "document table". 
+This can be used to render a context-aware (logs etc) "document table".
 
 In the past you may have used the Log Stream Component to achieve this, this component supersedes that.
 
@@ -22,5 +22,10 @@ import { LazySavedSearchComponent } from '@kbn/saved-search-component';
     filters={optionalFilters}
     query={optionalQuery}
     timestampField={optionalTimestampFieldString}
+    displayOptions={{
+        solutionNavIdOverride: 'oblt',
+        enableDocumentViewer: true,
+        enableFilters: false,
+    }}
 />
 ```

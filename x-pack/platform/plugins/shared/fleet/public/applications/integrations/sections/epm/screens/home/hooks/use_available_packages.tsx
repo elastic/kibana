@@ -23,7 +23,7 @@ import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_me
 import { mapToCard } from '..';
 import type { PackageList, PackageListItem } from '../../../../../types';
 
-import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
+import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import {
   isInputOnlyPolicyTemplate,
@@ -140,7 +140,6 @@ export const useAvailablePackages = ({
 }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
 
-  const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
   const { isAgentlessEnabled } = useAgentless();
 
   const {
@@ -244,16 +243,12 @@ export const useAvailablePackages = ({
 
   // Filter out subcategories
   const mainCategories = useMemo(() => {
-    return showIntegrationsSubcategories
-      ? allCategories.filter((category) => category.parent_id === undefined)
-      : allCategories;
-  }, [allCategories, showIntegrationsSubcategories]);
+    return allCategories.filter((category) => category.parent_id === undefined);
+  }, [allCategories]);
 
   const availableSubCategories = useMemo(() => {
-    return showIntegrationsSubcategories
-      ? allCategories?.filter((c) => c.parent_id === selectedCategory)
-      : [];
-  }, [allCategories, selectedCategory, showIntegrationsSubcategories]);
+    return allCategories?.filter((c) => c.parent_id === selectedCategory);
+  }, [allCategories, selectedCategory]);
 
   return {
     initialSelectedCategory,

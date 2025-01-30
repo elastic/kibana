@@ -40,6 +40,7 @@ const mockConnector: Connector = {
     },
   },
   custom_scheduling: {},
+  deleted: false,
   description: 'test',
   error: null,
   features: {

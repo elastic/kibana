@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
@@ -37,30 +37,43 @@ export function HeaderTitle({ isLoading, slo }: Props) {
         <SloStatusBadge slo={slo} />
         <SloStateBadge slo={slo} />
         <SloRemoteBadge slo={slo} />
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            <strong>
-              {i18n.translate('xpack.slo.sloDetails.headerTitle.lastUpdatedMessage', {
-                defaultMessage: 'Last updated on',
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="m"
+          alignItems="center"
+          justifyContent="flexStart"
+          responsive={false}
+          wrap={true}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiMarkdownFormat textSize="xs" color="subdued">
+              {i18n.translate('xpack.slo.sloDetails.headerTitle.lastUpdatedLabel', {
+                defaultMessage: '**Last updated by** {updatedBy} **on** {updatedAt}',
+                values: {
+                  updatedBy: slo.updatedBy ?? NOT_AVAILABLE_LABEL,
+                  updatedAt: moment(slo.updatedAt).format('ll'),
+                },
               })}
-            </strong>
-            &nbsp;
-            {moment(slo.updatedAt).format('ll')}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            <strong>
-              {i18n.translate('xpack.slo.sloDetails.headerTitle.createdMessage', {
-                defaultMessage: 'Created on',
+            </EuiMarkdownFormat>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiMarkdownFormat textSize="xs" color="subdued">
+              {i18n.translate('xpack.slo.sloDetails.headerTitle.createdLabel', {
+                defaultMessage: '**Created by** {createdBy} **on** {createdAt}',
+                values: {
+                  createdBy: slo.createdBy ?? NOT_AVAILABLE_LABEL,
+                  createdAt: moment(slo.createdAt).format('ll'),
+                },
               })}
-            </strong>
-            &nbsp;
-            {moment(slo.createdAt).format('ll')}
-          </EuiText>
-        </EuiFlexItem>
+            </EuiMarkdownFormat>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
       <SLOGroupings slo={slo} />
     </EuiFlexGroup>
   );
 }
+
+const NOT_AVAILABLE_LABEL = i18n.translate('xpack.slo.sloDetails.headerTitle.notAvailableLabel', {
+  defaultMessage: 'n/a',
+});

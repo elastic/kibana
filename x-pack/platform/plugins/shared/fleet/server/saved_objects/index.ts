@@ -102,6 +102,7 @@ import {
 } from './migrations/to_v8_15_0';
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
+import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 
 /*
  * Saved object types and mappings
@@ -247,6 +248,10 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
+          agentless: {
+            dynamic: false,
+            properties: {},
+          },
           monitoring_pprof_enabled: { type: 'boolean', index: false },
           monitoring_http: { type: 'flattened', index: false },
           monitoring_diagnostics: { type: 'flattened', index: false },
@@ -314,6 +319,19 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                agentless: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -358,6 +376,10 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
+          agentless: {
+            dynamic: false,
+            properties: {},
+          },
         },
       },
       modelVersions: {
@@ -805,6 +827,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '17': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV17AdvancedFieldsForEndpointV818,
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -887,6 +917,14 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 supports_agentless: { type: 'boolean' },
               },
+            },
+          ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV17AdvancedFieldsForEndpointV818,
             },
           ],
         },

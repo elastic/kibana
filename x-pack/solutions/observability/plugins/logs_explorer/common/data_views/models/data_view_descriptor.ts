@@ -11,7 +11,7 @@ import { DataViewSpecWithId } from '../../data_source_selection';
 import { DataViewDescriptorType } from '../types';
 
 const LOGS_ALLOWED_LIST = [
-  createRegExpPatternFrom(DEFAULT_ALLOWED_LOGS_BASE_PATTERNS),
+  createRegExpPatternFrom(DEFAULT_ALLOWED_LOGS_BASE_PATTERNS, 'data'),
   // Add more strings or regex patterns as needed
 ];
 
@@ -59,7 +59,7 @@ export class DataViewDescriptor {
 
   testAgainstAllowedList(allowedList: string[]) {
     return this.title
-      ? testPatternAgainstAllowedList([createRegExpPatternFrom(allowedList)])(this.title)
+      ? testPatternAgainstAllowedList([createRegExpPatternFrom(allowedList, 'data')])(this.title)
       : false;
   }
 

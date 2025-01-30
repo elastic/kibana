@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useStyles } from './styles';
@@ -29,8 +30,7 @@ export const BackToInvestigatedAlert = ({
   return (
     <div css={styles.container}>
       <EuiBadge
-        style={styles.buttonStyle}
-        css={styles.jumpBackBadge}
+        css={css([styles.jumpBackBadge, styles.buttonStyle])}
         iconType={isDisplayedAbove ? 'arrowUp' : 'arrowDown'}
         iconSide="right"
         onClick={onClick}

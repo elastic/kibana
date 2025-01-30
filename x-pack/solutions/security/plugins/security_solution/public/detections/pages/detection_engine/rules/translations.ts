@@ -856,7 +856,7 @@ export const MODIFIED_TOOLTIP = i18n.translate(
   }
 );
 
-export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
+export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {
     defaultMessage: 'Select rule execution status to filter by',
@@ -1451,5 +1451,12 @@ export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
   'xpack.securitySolution.ruleUpdates.documentationLink',
   {
     defaultMessage: "See what's new in Prebuilt Security Detection Rules",
+  }
+);
+
+export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDuration',
+  {
+    defaultMessage: 'Unfilled gaps duration',
   }
 );

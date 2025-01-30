@@ -25,7 +25,7 @@ import {
   sendGetActionStatus,
   sendBulkGetAgentPolicies,
 } from '../../../../hooks';
-import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
+import { AgentStatusKueryHelper } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
@@ -97,7 +97,6 @@ export const getSortFieldForAPI = (field: string): string => {
 
 export function useFetchAgentsData() {
   const fullAgentPolicyFecher = useFullAgentPolicyFetcher();
-  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { notifications } = useStartServices();
 
@@ -123,6 +122,7 @@ export function useFetchAgentsData() {
   const [selectedStatus, setSelectedStatus] = useState<string[]>([
     'healthy',
     'unhealthy',
+    'orphaned',
     'updating',
     'offline',
     ...(urlHasInactive ? ['inactive'] : []),
@@ -217,7 +217,7 @@ export function useFetchAgentsData() {
               showInactive,
               showUpgradeable,
               getStatusSummary: true,
-              withMetrics: displayAgentMetrics,
+              withMetrics: true,
             }),
             sendGetAgentStatus({
               kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
@@ -235,7 +235,6 @@ export function useFetchAgentsData() {
               perPage: MAX_AGENT_ACTIONS,
             }),
           ]);
-
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
@@ -263,6 +262,7 @@ export function useFetchAgentsData() {
           }
 
           const statusSummary = agentsResponse.data.statusSummary;
+
           if (!statusSummary) {
             throw new Error('Invalid GET /agents response - no status summary');
           }
@@ -361,7 +361,6 @@ export function useFetchAgentsData() {
       sortOrder,
       showInactive,
       showUpgradeable,
-      displayAgentMetrics,
       fullAgentPolicyFecher,
       allTags,
       latestAgentActionErrors,

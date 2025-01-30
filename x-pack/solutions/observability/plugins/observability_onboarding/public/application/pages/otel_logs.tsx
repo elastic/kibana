@@ -29,7 +29,6 @@ export const OtelLogsPage = () => (
               'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
           }
         )}
-        isTechnicalPreview={true}
       />
     }
   >
