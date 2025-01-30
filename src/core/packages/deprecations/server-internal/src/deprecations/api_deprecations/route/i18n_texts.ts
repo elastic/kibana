@@ -67,7 +67,7 @@ export const getApiDeprecationMessage = (
       type: 'markdown',
       content: i18n.translate('core.deprecations.apiRouteDeprecation.enableDebugLogsMessage', {
         defaultMessage:
-          'To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, [follow this link]({enableDeprecationHttpDebugLogsLink}).',
+          'To include information about deprecated API calls in debug logs, edit your Kibana configuration as detailed in [the documentation]({enableDeprecationHttpDebugLogsLink}).',
         values: {
           enableDeprecationHttpDebugLogsLink: docLinks.links.logging.enableDeprecationHttpDebugLogs,
         },
