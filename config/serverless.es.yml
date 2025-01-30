@@ -48,11 +48,11 @@ xpack.fleet.internal.registry.excludePackages: [
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboards feature is moved from Analytics category to the Search one.
-  dashboard.category: "enterpriseSearch"
+  dashboard_v2.category: "enterpriseSearch"
   ### Dev Tools feature is moved from Analytics category to the Search one.
   dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the Search one.
-  discover.category: "enterpriseSearch"
+  discover_v2.category: "enterpriseSearch"
   ### Machine Learning feature is moved from Analytics category to the Management one.
   ml.category: "management"
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
@@ -131,3 +131,6 @@ aiAssistantManagementSelection.preferredAIAssistantType: "observability"
 xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
 xpack.observabilityAiAssistantManagement.spacesEnabled: false
 xpack.observabilityAiAssistantManagement.visibilityEnabled: false
+
+# Synonyms UI
+xpack.searchSynonyms.enabled: true
