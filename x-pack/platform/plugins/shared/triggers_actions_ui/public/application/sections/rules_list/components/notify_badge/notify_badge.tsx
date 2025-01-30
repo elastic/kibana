@@ -287,7 +287,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         aria-label={snoozeButtonAriaLabel}
         iconType="bellSlash"
         color="accent"
-        onClick={openPopover}
+        onClick={togglePopover}
         buttonRef={focusTrapButtonRef}
       />
     );
