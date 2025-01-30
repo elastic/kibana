@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { NodeType } from '../constants';
 import { NodeParamsBase, AgentState } from '../types';
 
@@ -19,12 +20,20 @@ interface ModelInputParams extends NodeParamsBase {
  * @param logger - The scoped logger
  * @param state - The current state of the graph
  */
-export function modelInput({ logger, state }: ModelInputParams): Partial<AgentState> {
+export async function modelInput({
+  actionsClient,
+  logger,
+  state,
+}: ModelInputParams): Promise<Partial<AgentState>> {
   logger.debug(() => `${NodeType.MODEL_INPUT}: Node state:\n${JSON.stringify(state, null, 2)}`);
-
-  const hasRespondStep =
-    state.isStream &&
-    (state.isOssModel || state.llmType === 'bedrock' || state.llmType === 'inference');
+  const { provider } =
+    state.llmType === 'inference'
+      ? await resolveProviderAndModel({
+          connectorId: state.connectorId,
+          actionsClient,
+        })
+      : { provider: state.llmType };
+  const hasRespondStep = state.isStream && (state.isOssModel || provider === 'bedrock');
 
   return {
     hasRespondStep,
