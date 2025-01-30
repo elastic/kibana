@@ -43,8 +43,6 @@ xpack.features.overrides:
           privileges: [ "all" ]
         - feature: "maps_v2"
           privileges: [ "all" ]
-        - feature: "savedQueryManagement"
-          privileges: [ "all" ]
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
@@ -56,8 +54,6 @@ xpack.features.overrides:
         - feature: "visualize_v2"
           privileges: [ "read" ]
         - feature: "maps_v2"
-          privileges: [ "read" ]
-        - feature: "savedQueryManagement"
           privileges: [ "read" ]
 
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
