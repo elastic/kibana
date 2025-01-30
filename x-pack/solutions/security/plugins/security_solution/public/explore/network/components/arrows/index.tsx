@@ -7,11 +7,11 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 /** Renders the body (non-pointy part) of an arrow */
 export const ArrowBody = styled.span<{ height: number }>`
-  background-color: ${(props) => props.theme.eui.euiColorLightShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.lightShade};
   height: ${({ height }) => `${height}px`};
   width: 25px;
 `;

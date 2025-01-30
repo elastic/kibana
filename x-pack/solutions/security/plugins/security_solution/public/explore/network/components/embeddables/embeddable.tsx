@@ -8,7 +8,7 @@
 import { EuiPanel } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 const Panel = styled(EuiPanel)`
   overflow: hidden;

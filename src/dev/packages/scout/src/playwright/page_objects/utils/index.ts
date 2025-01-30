@@ -15,14 +15,14 @@ import { ScoutPage } from '../../fixtures';
  * in certain test scenarios.
  *
  * @param PageObjectClass - The page object class to be instantiated lazily.
- * @param scoutPage - ScoutPage instance, that extendes the Playwright `page` fixture and passed to the page object class constructor.
+ * @param scoutPage - ScoutPage instance, that extends the Playwright `page` fixture and passed to the page object class constructor.
  * @param constructorArgs - Additional arguments to be passed to the page object class constructor.
  * @returns A proxy object that behaves like an instance of the page object class, instantiating it on demand.
  */
-export function createLazyPageObject<T extends object>(
-  PageObjectClass: new (page: ScoutPage, ...args: any[]) => T,
+export function createLazyPageObject<T extends object, Args extends any[]>(
+  PageObjectClass: new (page: ScoutPage, ...args: Args) => T,
   scoutPage: ScoutPage,
-  ...constructorArgs: any[]
+  ...constructorArgs: Args
 ): T {
   let instance: T | null = null;
   return new Proxy({} as T, {

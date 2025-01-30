@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import styled from '@emotion/styled';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const Display = styled.div<{ show: boolean }>(({ show }) => ({
-  display: show ? undefined : 'none',
-}));
-
-Display.displayName = 'Display';
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

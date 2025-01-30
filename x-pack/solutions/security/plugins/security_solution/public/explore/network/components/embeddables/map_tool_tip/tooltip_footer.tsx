@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import * as i18n from '../translations';
 
 export const Icon = styled(EuiIcon)`

@@ -35,6 +35,14 @@ export function generateIndexTemplate(id: string, isServerless: boolean) {
           default_pipeline: getProcessingPipelineName(id),
         },
       },
+      mappings: {
+        properties: {
+          'stream.name': {
+            type: 'constant_keyword' as const,
+            value: id,
+          },
+        },
+      },
     },
     allow_auto_create: true,
     // ignore missing component templates to be more robust against out-of-order syncs
