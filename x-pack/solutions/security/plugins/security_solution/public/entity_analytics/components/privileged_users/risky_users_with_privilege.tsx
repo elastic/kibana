@@ -27,7 +27,7 @@ export const RiskyUsersWithPrivilege = React.memo(
       <EuiPanel hasBorder>
         <HeaderSection
           id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
-          title={'High risky users with privilege'}
+          title={'Privileged users with a risk score'}
           titleSize="s"
           showInspectButton={false}
         />

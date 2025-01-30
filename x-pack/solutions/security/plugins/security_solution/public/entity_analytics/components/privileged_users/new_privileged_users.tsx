@@ -24,7 +24,7 @@ export const NewPrivilegedUsers = React.memo(({ data, isLoading }: NewPrivileged
     <EuiPanel hasBorder>
       <HeaderSection
         id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
-        title={'New privilege users '}
+        title={'New privileged users '}
         titleSize="s"
         showInspectButton={false}
       />

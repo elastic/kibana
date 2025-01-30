@@ -23,7 +23,7 @@ export const AlertsTable = React.memo(({ alerts, isLoading }: AlertsTableProps) 
     <EuiPanel hasBorder>
       <HeaderSection
         id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
-        title={'Alerts table'}
+        title={'Alerts'}
         titleSize="s"
         showInspectButton={false}
       />

@@ -23,7 +23,7 @@ export const LoginsTable = React.memo(({ data, isLoading }: LoginsTableProps) =>
     <EuiPanel hasBorder>
       <HeaderSection
         id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
-        title={'Logins table'}
+        title={'Logins'}
         titleSize="s"
         showInspectButton={false}
       />

@@ -46,7 +46,7 @@ export const UnusualAccessPatterns = React.memo(
       <EuiPanel hasBorder>
         <HeaderSection
           id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
-          title={'Unusual Access Patterns'}
+          title={'Unusual access patterns'}
           titleSize="s"
           showInspectButton={false}
         />
