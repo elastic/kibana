@@ -305,7 +305,7 @@ export const finishSAMLHandshake = async (params: SAMLCallbackParams, retriesCou
 
       // retry for 5xx errors
       if (--attemptsLeft > 0) {
-        // randomize delay to avoid retrying API call in parallel workers concurrently  
+        // randomize delay to avoid retrying API call in parallel workers concurrently
         const attemptDelay = randomInt(500, 2_500);
         // log only error message
         log.error(`${ex.message}\nWaiting ${attemptDelay} ms before the next attempt`);
