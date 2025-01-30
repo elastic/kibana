@@ -61,10 +61,13 @@ export function registerReindexDataStreamRoutes({
 
         if (!(await reindexService.hasRequiredPrivileges(dataStreamName))) {
           throw error.accessForbidden(
-            i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
-              defaultMessage: `You do not have adequate privileges to reindex "{dataStreamName}".`,
-              values: { dataStreamName },
-            })
+            i18n.translate(
+              'xpack.upgradeAssistant.datastream.reindex.reindexPrivilegesErrorBatch',
+              {
+                defaultMessage: `You do not have adequate privileges to reindex "{dataStreamName}".`,
+                values: { dataStreamName },
+              }
+            )
           );
         }
 
@@ -210,10 +213,13 @@ export function registerReindexDataStreamRoutes({
       try {
         if (!(await reindexService.hasRequiredPrivileges(dataStreamName))) {
           throw error.accessForbidden(
-            i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
-              defaultMessage: `You do not have adequate privileges to cancel reindexing "{dataStreamName}".`,
-              values: { dataStreamName },
-            })
+            i18n.translate(
+              'xpack.upgradeAssistant.datastream.reindex.reindexPrivilegesErrorBatch',
+              {
+                defaultMessage: `You do not have adequate privileges to cancel reindexing "{dataStreamName}".`,
+                values: { dataStreamName },
+              }
+            )
           );
         }
 
