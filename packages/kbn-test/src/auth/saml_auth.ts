@@ -295,16 +295,17 @@ export const finishSAMLHandshake = async (params: SAMLCallbackParams, retriesCou
       throw new Error(`SAML callback failed: expected 302, got ${authResponse.status}`);
     } catch (ex) {
       cleanException(kbnHost, ex);
-      // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
-      log.error(`Request sent: ${util.inspect(request)}`);
 
       // exit for non 5xx errors
       if (attemptsLeft === -1) {
+        // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
+        log.error(`Request sent: ${util.inspect(request)}`);
         throw ex;
       }
 
       // retry for 5xx errors
       if (--attemptsLeft > 0) {
+        // randomize delay to avoid retrying API call in parallel workers concurrently  
         const attemptDelay = randomInt(500, 2_500);
         // log only error message
         log.error(`${ex.message}\nWaiting ${attemptDelay} ms before the next attempt`);
