@@ -54,7 +54,7 @@ describe('SecurityLabsTool', () => {
     it('does not include citations when contentReferencesStore is false', async () => {
       const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool({
         ...defaultArgs,
-        contentReferencesStore: false,
+        contentReferencesStore: undefined,
       }) as DynamicStructuredTool;
 
       const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });

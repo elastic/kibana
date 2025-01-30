@@ -274,7 +274,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         request,
         size: request.body.size,
         ...rest,
-        contentReferencesStore: false,
+        contentReferencesStore: undefined,
       }) as DynamicTool;
 
       (esClient.search as jest.Mock).mockResolvedValue({
