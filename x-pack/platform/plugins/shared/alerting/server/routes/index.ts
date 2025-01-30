@@ -57,7 +57,7 @@ import { updateMaintenanceWindowRoute } from './maintenance_window/apis/update/u
 import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/delete/delete_maintenance_window_route';
 import { findMaintenanceWindowsRoute } from './maintenance_window/apis/find/find_maintenance_windows_route';
 import { archiveMaintenanceWindowRoute } from './maintenance_window/apis/archive/archive_maintenance_window_route';
-import { finishMaintenanceWindowRoute } from './maintenance_window/apis/finish/finish_maintenance_window_route';
+import { finishMaintenanceWindowRoute } from './maintenance_window/apis/internal/finish/finish_maintenance_window_route';
 import { getActiveMaintenanceWindowsRoute } from './maintenance_window/apis/get_active/get_active_maintenance_windows_route';
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
