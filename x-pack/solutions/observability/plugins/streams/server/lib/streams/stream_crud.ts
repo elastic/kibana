@@ -12,7 +12,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { IngestStreamLifecycle, UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { deleteComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
 import { deleteDataStream } from './data_streams/manage_data_streams';
@@ -31,9 +31,9 @@ interface DeleteStreamParams extends BaseParams {
   logger: Logger;
 }
 
-export function getEffectiveDataStreamLifecycle(
+export function getDataStreamLifecycle(
   dataStream: IndicesDataStream | null
-): IngestStreamLifecycle | UnwiredIngestStreamEffectiveLifecycle {
+): UnwiredIngestStreamEffectiveLifecycle {
   if (!dataStream) {
     return {
       error: {

@@ -24,6 +24,8 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
+  isDslLifecycle,
+  isIlmLifecycle,
   isInheritLifecycle,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
@@ -50,12 +52,14 @@ import {
   checkAccessBulk,
   deleteStreamObjects,
   deleteUnmanagedStreamObjects,
+  getDataStreamLifecycle,
 } from './stream_crud';
 import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
+import { MalformedStreamError } from './errors/malformed_stream_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -209,6 +213,12 @@ export class StreamsClient {
         logger,
         dataStream: await this.getDataStream(definition.name),
       });
+
+      // inherit lifecycle is a noop for unwired streams, it keeps the
+      // data stream configuration as-is
+      if (isDslLifecycle(definition.ingest.lifecycle)) {
+        await this.updateStreamLifecycle(definition, definition.ingest.lifecycle);
+      }
     }
   }
 
@@ -319,15 +329,26 @@ export class StreamsClient {
       );
     }
 
-    if (isWiredStreamDefinition(definition)) {
-      validateStreamLifecycle(definition, this.dependencies.isServerless);
+    validateStreamLifecycle(definition, this.dependencies.isServerless);
 
+    if (isWiredStreamDefinition(definition)) {
       const validateWiredStreamResult = await this.validateWiredStreamAndCreateChildrenIfNeeded({
         existingDefinition: existingDefinition as WiredStreamDefinition,
         definition,
       });
 
       parentDefinition = validateWiredStreamResult.parentDefinition;
+    } else if (isUnwiredStreamDefinition(definition)) {
+      // condition to be removed once ILM is implemented for unwired streams
+      if (isDslLifecycle(definition.ingest.lifecycle)) {
+        const dataStream = await this.getDataStream(definition.name);
+        const effectiveLifecycle = getDataStreamLifecycle(dataStream);
+        if (isIlmLifecycle(effectiveLifecycle)) {
+          throw new MalformedStreamError(
+            'Cannot use DSL for unwired stream as it is currently using ILM'
+          );
+        }
+      }
     }
 
     const result = !!existingDefinition ? ('updated' as const) : ('created' as const);
@@ -567,6 +588,7 @@ export class StreamsClient {
     const definition: UnwiredStreamDefinition = {
       name: dataStream.name,
       ingest: {
+        lifecycle: { inherit: {} },
         routing: [],
         processing: [],
         unwired: {},
@@ -626,6 +648,7 @@ export class StreamsClient {
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
       ingest: {
+        lifecycle: { inherit: {} },
         processing: [],
         routing: [],
         unwired: {},
@@ -821,13 +844,11 @@ export class StreamsClient {
    * inherited, any updates to a given data stream also triggers an update
    * to existing children data streams that do not specify an override.
    */
-  private async updateStreamLifecycle(
-    root: WiredStreamDefinition,
-    lifecycle: IngestStreamLifecycle
-  ) {
+  private async updateStreamLifecycle(root: StreamDefinition, lifecycle: IngestStreamLifecycle) {
     const { logger, scopedClusterClient } = this.dependencies;
-    const descendants = await this.getDescendants(root.name);
-    const inheritingStreams = findInheritingStreams(root, descendants);
+    const inheritingStreams = isWiredStreamDefinition(root)
+      ? findInheritingStreams(root, await this.getDescendants(root.name))
+      : [root.name];
 
     await updateDataStreamsLifecycle({
       esClient: scopedClusterClient.asCurrentUser,

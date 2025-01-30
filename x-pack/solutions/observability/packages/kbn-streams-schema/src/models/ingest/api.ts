@@ -26,10 +26,10 @@ import {
 import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
 import { createIsNarrowSchema, createAsSchemaOrThrow } from '../../helpers';
 import {
-  InheritedIngestStreamLifecycle,
   UnwiredIngestStreamEffectiveLifecycle,
-  inheritedIngestStreamLifecycleSchema,
+  WiredIngestStreamEffectiveLifecycle,
   unwiredIngestStreamEffectiveLifecycleSchema,
+  wiredIngestStreamEffectiveLifecycleSchema,
 } from './lifecycle';
 
 /**
@@ -75,7 +75,7 @@ const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
 interface WiredStreamGetResponse extends StreamGetResponseBase {
   stream: Omit<WiredStreamDefinition, 'name'>;
   inherited_fields: InheritedFieldDefinition;
-  effective_lifecycle: InheritedIngestStreamLifecycle;
+  effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
 }
 
 interface UnwiredStreamGetResponse extends StreamGetResponseBase {
@@ -125,7 +125,7 @@ const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.interse
   z.object({
     stream: wiredStreamDefinitionSchemaBase,
     inherited_fields: inheritedFieldDefinitionSchema,
-    effective_lifecycle: inheritedIngestStreamLifecycleSchema,
+    effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 

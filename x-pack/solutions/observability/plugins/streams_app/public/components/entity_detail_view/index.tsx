@@ -10,8 +10,8 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
+  IngestStreamEffectiveLifecycle,
   ReadStreamDefinition,
-  UnwiredIngestStreamEffectiveLifecycle,
   isDslLifecycle,
   isErrorLifecycle,
   isIlmLifecycle,
@@ -144,7 +144,7 @@ export function EntityDetailViewWithoutParams({
   );
 }
 
-function LifecycleBadge({ lifecycle }: { lifecycle: UnwiredIngestStreamEffectiveLifecycle }) {
+function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
   const {
     dependencies: {
       start: { share },

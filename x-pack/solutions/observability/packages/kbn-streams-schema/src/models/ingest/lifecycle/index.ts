@@ -38,12 +38,18 @@ export interface IngestStreamLifecycleDisabled {
 export type IngestStreamLifecycle =
   | IngestStreamLifecycleDSL
   | IngestStreamLifecycleILM
-  | IngestStreamLifecycleInherit
-  | IngestStreamLifecycleDisabled;
+  | IngestStreamLifecycleInherit;
+
+export type WiredIngestStreamEffectiveLifecycle = IngestStreamLifecycle & { from: string };
 
 export type UnwiredIngestStreamEffectiveLifecycle =
   | IngestStreamLifecycle
-  | IngestStreamLifecycleError;
+  | IngestStreamLifecycleError
+  | IngestStreamLifecycleDisabled;
+
+export type IngestStreamEffectiveLifecycle =
+  | WiredIngestStreamEffectiveLifecycle
+  | UnwiredIngestStreamEffectiveLifecycle;
 
 const dslLifecycleSchema = z.object({
   dsl: z.object({ data_retention: z.optional(NonEmptyString) }),
@@ -57,25 +63,20 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
   dslLifecycleSchema,
   ilmLifecycleSchema,
   inheritLifecycleSchema,
-  disabledLifecycleSchema,
 ]);
 
 export const unwiredIngestStreamEffectiveLifecycleSchema: z.Schema<UnwiredIngestStreamEffectiveLifecycle> =
-  z.union([ingestStreamLifecycleSchema, errorLifecycleSchema]);
+  z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema]);
 
-export type InheritedIngestStreamLifecycle = IngestStreamLifecycle & { from: string };
-
-export const inheritedIngestStreamLifecycleSchema: z.Schema<InheritedIngestStreamLifecycle> =
+export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
   ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));
 
-export const isDslLifecycle = createIsNarrowSchema(
-  unwiredIngestStreamEffectiveLifecycleSchema,
-  dslLifecycleSchema
-);
+export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
+  z.union([unwiredIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);
 
-export const isIlmLifecycle = createIsNarrowSchema(
-  unwiredIngestStreamEffectiveLifecycleSchema,
-  ilmLifecycleSchema
+export const isDslLifecycle = createIsNarrowSchema(
+  ingestStreamEffectiveLifecycleSchema,
+  dslLifecycleSchema
 );
 
 export const isErrorLifecycle = createIsNarrowSchema(
@@ -83,12 +84,17 @@ export const isErrorLifecycle = createIsNarrowSchema(
   errorLifecycleSchema
 );
 
+export const isIlmLifecycle = createIsNarrowSchema(
+  ingestStreamEffectiveLifecycleSchema,
+  ilmLifecycleSchema
+);
+
 export const isInheritLifecycle = createIsNarrowSchema(
-  ingestStreamLifecycleSchema,
+  ingestStreamEffectiveLifecycleSchema,
   inheritLifecycleSchema
 );
 
 export const isDisabledLifecycle = createIsNarrowSchema(
-  ingestStreamLifecycleSchema,
+  ingestStreamEffectiveLifecycleSchema,
   disabledLifecycleSchema
 );
