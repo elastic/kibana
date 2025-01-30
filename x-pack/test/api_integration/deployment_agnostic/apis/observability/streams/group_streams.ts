@@ -39,7 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { id: 'test-group' },
               body: {
                 stream: {
-                  grouped: {
+                  group: {
                     members: ['logs', 'logs.test2'],
                   },
                 },
@@ -58,7 +58,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { id: 'test-group-too' },
               body: {
                 stream: {
-                  grouped: {
+                  group: {
                     members: ['logs.test2'],
                   },
                 },
@@ -77,7 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { id: 'test-group' },
               body: {
                 stream: {
-                  grouped: {
+                  group: {
                     members: ['logs', 'non-existent-stream'],
                   },
                 },
@@ -95,7 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { id: 'test-group' },
               body: {
                 stream: {
-                  grouped: {
+                  group: {
                     members: ['logs', 'test-group'],
                   },
                 },
@@ -113,7 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { id: 'test-group' },
               body: {
                 stream: {
-                  grouped: {
+                  group: {
                     members: ['logs', 'test-group-too'],
                   },
                 },
@@ -144,7 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
         expect(response.body).to.eql({
           stream: {
-            grouped: {
+            group: {
               members: ['logs', 'logs.test2'],
             },
           },

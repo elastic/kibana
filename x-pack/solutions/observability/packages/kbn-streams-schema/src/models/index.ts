@@ -11,4 +11,4 @@ export * from './legacy';
 export * from './api';
 export * from './core';
 export * from './helpers';
-export * from './grouped';
+export * from './group';

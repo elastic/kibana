@@ -20,11 +20,11 @@ const groupedBaseSchema: z.Schema<GroupBase> = z.object({
 });
 
 interface GroupStreamDefinitionBase {
-  grouped: GroupBase;
+  group: GroupBase;
 }
 
 const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.object({
-  grouped: groupedBaseSchema,
+  group: groupedBaseSchema,
 });
 
 type GroupStreamDefinition = StreamDefinitionBase & GroupStreamDefinitionBase;
