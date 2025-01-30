@@ -15,6 +15,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   Condition,
+  IngestStreamLifecycle,
   StreamDefinition,
   StreamUpsertRequest,
   UnwiredStreamDefinition,
@@ -23,6 +24,9 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isInheritLifecycle,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -38,6 +42,7 @@ import { validateAncestorFields, validateDescendantFields } from './helpers/vali
 import {
   validateRootStreamChanges,
   validateStreamChildrenChanges,
+  validateStreamLifecycle,
   validateStreamTypeChanges,
 } from './helpers/validate_stream';
 import { rootStreamDefinition } from './root_stream_definition';
@@ -47,10 +52,14 @@ import {
   checkAccessBulk,
   deleteStreamObjects,
   deleteUnmanagedStreamObjects,
+  getDataStreamLifecycle,
 } from './stream_crud';
+import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
+import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
+import { MalformedStreamError } from './errors/malformed_stream_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -158,7 +167,7 @@ export class StreamsClient {
    *
    * Streams are re-synced in a specific order:
    * the leaf nodes are synced first, then its parents, etc.
-   * Thiis prevents us from routing to data streams that do
+   * This prevents us from routing to data streams that do
    * not exist yet.
    */
   async resyncStreams(): Promise<ResyncStreamsResponse> {
@@ -189,6 +198,14 @@ export class StreamsClient {
         scopedClusterClient,
         isServerless: this.dependencies.isServerless,
       });
+
+      const effectiveLifecycle = findInheritedLifecycle(
+        definition,
+        isInheritLifecycle(definition.ingest.lifecycle)
+          ? await this.getAncestors(definition.name)
+          : []
+      );
+      await this.updateStreamLifecycle(definition, effectiveLifecycle);
     } else if (isUnwiredStreamDefinition(definition)) {
       await syncUnwiredStreamDefinitionObjects({
         definition,
@@ -196,6 +213,12 @@ export class StreamsClient {
         logger,
         dataStream: await this.getDataStream(definition.name),
       });
+
+      // inherit lifecycle is a noop for unwired streams, it keeps the
+      // data stream configuration as-is
+      if (isDslLifecycle(definition.ingest.lifecycle)) {
+        await this.updateStreamLifecycle(definition, definition.ingest.lifecycle);
+      }
     }
   }
 
@@ -245,6 +268,7 @@ export class StreamsClient {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 processing: [],
                 routing: [
                   {
@@ -305,6 +329,8 @@ export class StreamsClient {
       );
     }
 
+    validateStreamLifecycle(definition, this.dependencies.isServerless);
+
     if (isWiredStreamDefinition(definition)) {
       const validateWiredStreamResult = await this.validateWiredStreamAndCreateChildrenIfNeeded({
         existingDefinition: existingDefinition as WiredStreamDefinition,
@@ -312,6 +338,17 @@ export class StreamsClient {
       });
 
       parentDefinition = validateWiredStreamResult.parentDefinition;
+    } else if (isUnwiredStreamDefinition(definition)) {
+      // condition to be removed once ILM is implemented for unwired streams
+      if (isDslLifecycle(definition.ingest.lifecycle)) {
+        const dataStream = await this.getDataStream(definition.name);
+        const effectiveLifecycle = getDataStreamLifecycle(dataStream);
+        if (isIlmLifecycle(effectiveLifecycle)) {
+          throw new MalformedStreamError(
+            'Cannot use DSL for unwired stream as it is currently using ILM'
+          );
+        }
+      }
     }
 
     const result = !!existingDefinition ? ('updated' as const) : ('created' as const);
@@ -393,6 +430,7 @@ export class StreamsClient {
         definition: {
           name: item.destination,
           ingest: {
+            lifecycle: { inherit: {} },
             processing: [],
             routing: [],
             wired: {
@@ -431,7 +469,7 @@ export class StreamsClient {
 
     const childDefinition: WiredStreamDefinition = {
       name,
-      ingest: { processing: [], routing: [], wired: { fields: {} } },
+      ingest: { lifecycle: { inherit: {} }, processing: [], routing: [], wired: { fields: {} } },
     };
 
     // check whether root stream has a child of the given name already
@@ -464,6 +502,27 @@ export class StreamsClient {
   }
 
   /**
+   * Make sure there is a stream definition for a given stream.
+   * If the data stream exists but the stream definition does not, it creates an empty stream definition.
+   * If the stream definition exists, it is a noop.
+   * If the data stream does not exist or the user does not have access, it throws.
+   */
+  async ensureStream(name: string): Promise<void> {
+    const [streamDefinition, dataStream] = await Promise.all([
+      this.getStoredStreamDefinition(name).catch((error) => {
+        if (isElasticsearch404(error)) {
+          return undefined;
+        }
+        throw error;
+      }),
+      this.getDataStream(name),
+    ]);
+    if (dataStream && !streamDefinition) {
+      await this.updateStoredStream(this.getDataStreamAsIngestStream(dataStream));
+    }
+  }
+
+  /**
    * Returns a stream definition for the given name:
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
@@ -475,7 +534,26 @@ export class StreamsClient {
    * - the user does not have access to the stream
    */
   async getStream(name: string): Promise<StreamDefinition> {
-    const definition = await Promise.all([
+    const definition = await this.getStoredStreamDefinition(name)
+      .catch(async (error) => {
+        if (isElasticsearch404(error)) {
+          const dataStream = await this.getDataStream(name);
+          return this.getDataStreamAsIngestStream(dataStream);
+        }
+        throw error;
+      })
+      .catch(async (error) => {
+        if (isElasticsearch404(error)) {
+          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
+        }
+        throw error;
+      });
+
+    return definition;
+  }
+
+  private async getStoredStreamDefinition(name: string): Promise<StreamDefinition> {
+    return await Promise.all([
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         const source = response._source;
         assertsSchema(streamDefinitionSchema, source);
@@ -488,25 +566,9 @@ export class StreamsClient {
           }
         }
       ),
-    ])
-      .then(([wiredDefinition]) => {
-        return wiredDefinition;
-      })
-      .catch(async (error) => {
-        if (isElasticsearch404(error)) {
-          const dataStream = await this.getDataStream(name);
-          return await this.getDataStreamAsIngestStream(dataStream);
-        }
-        throw error;
-      })
-      .catch(async (error) => {
-        if (isElasticsearch404(error)) {
-          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
-        }
-        throw error;
-      });
-
-    return definition;
+    ]).then(([wiredDefinition]) => {
+      return wiredDefinition;
+    });
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
@@ -522,12 +584,11 @@ export class StreamsClient {
    * Creates an on-the-fly ingest stream definition
    * from a concrete data stream.
    */
-  private async getDataStreamAsIngestStream(
-    dataStream: IndicesDataStream
-  ): Promise<UnwiredStreamDefinition> {
+  private getDataStreamAsIngestStream(dataStream: IndicesDataStream): UnwiredStreamDefinition {
     const definition: UnwiredStreamDefinition = {
       name: dataStream.name,
       ingest: {
+        lifecycle: { inherit: {} },
         routing: [],
         processing: [],
         unwired: {},
@@ -587,6 +648,7 @@ export class StreamsClient {
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
       ingest: {
+        lifecycle: { inherit: {} },
         processing: [],
         routing: [],
         unwired: {},
@@ -775,5 +837,25 @@ export class StreamsClient {
         },
       },
     }).then((streams) => streams.filter(isWiredStreamDefinition));
+  }
+
+  /**
+   * Updates either the dlm or ilm policy of a stream. A lifecycle being
+   * inherited, any updates to a given data stream also triggers an update
+   * to existing children data streams that do not specify an override.
+   */
+  private async updateStreamLifecycle(root: StreamDefinition, lifecycle: IngestStreamLifecycle) {
+    const { logger, scopedClusterClient } = this.dependencies;
+    const inheritingStreams = isWiredStreamDefinition(root)
+      ? findInheritingStreams(root, await this.getDescendants(root.name))
+      : [root.name];
+
+    await updateDataStreamsLifecycle({
+      esClient: scopedClusterClient.asCurrentUser,
+      names: inheritingStreams,
+      isServerless: this.dependencies.isServerless,
+      lifecycle,
+      logger,
+    });
   }
 }

@@ -25,6 +25,7 @@ const streams: StreamPutItem[] = [
     name: 'logs',
     stream: {
       ingest: {
+        lifecycle: { dsl: {} },
         processing: [],
         wired: {
           fields: {
@@ -38,6 +39,9 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
             'log.level': {
+              type: 'keyword',
+            },
+            'stream.name': {
               type: 'keyword',
             },
           },
@@ -75,6 +79,7 @@ const streams: StreamPutItem[] = [
     name: 'logs.test',
     stream: {
       ingest: {
+        lifecycle: { inherit: {} },
         routing: [],
         processing: [],
         wired: {
@@ -91,6 +96,7 @@ const streams: StreamPutItem[] = [
     name: 'logs.test2',
     stream: {
       ingest: {
+        lifecycle: { inherit: {} },
         processing: [
           {
             grok: {
@@ -115,6 +121,7 @@ const streams: StreamPutItem[] = [
     name: 'logs.deeply.nested.streamname',
     stream: {
       ingest: {
+        lifecycle: { inherit: {} },
         processing: [],
         wired: {
           fields: {

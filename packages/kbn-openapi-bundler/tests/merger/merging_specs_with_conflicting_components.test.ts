@@ -86,7 +86,7 @@ describe('OpenAPI Merger - merging specs with conflicting components', () => {
 
     expect(mergedSpec.paths['/api/some_api']?.get?.responses['200']).toMatchObject({
       content: {
-        'application/json; Elastic-Api-Version=2023-10-31': {
+        'application/json': {
           schema: {
             $ref: '#/components/schemas/Spec1_SomeSchema',
           },
@@ -95,7 +95,7 @@ describe('OpenAPI Merger - merging specs with conflicting components', () => {
     });
     expect(mergedSpec.paths['/api/some_api']?.post?.responses['200']).toMatchObject({
       content: {
-        'application/json; Elastic-Api-Version=2023-10-31': {
+        'application/json': {
           schema: {
             $ref: '#/components/schemas/Spec2_SomeSchema',
           },
@@ -457,7 +457,7 @@ describe('OpenAPI Merger - merging specs with conflicting components', () => {
 
     expect(mergedSpec.paths['/api/some_api']?.post?.requestBody).toMatchObject({
       content: {
-        'application/json; Elastic-Api-Version=2023-10-31': {
+        'application/json': {
           encoding: {
             something: {
               headers: {
@@ -779,7 +779,7 @@ describe('OpenAPI Merger - merging specs with conflicting components', () => {
 
     expect(mergedSpec.paths['/api/some_api']?.get?.responses['200']).toMatchObject({
       content: {
-        'application/json; Elastic-Api-Version=2023-10-31': {
+        'application/json': {
           schema: expect.objectContaining({
             discriminator: expect.objectContaining({
               mapping: {

@@ -8,6 +8,7 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import { useKnowledgeBaseStatus, UseKnowledgeBaseStatusParams } from './use_knowledge_base_status';
 import { getKnowledgeBaseStatus as _getKnowledgeBaseStatus } from './api';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const getKnowledgeBaseStatusMock = _getKnowledgeBaseStatus as jest.Mock;
 
@@ -52,11 +53,11 @@ describe('useKnowledgeBaseStatus', () => {
     renderHook(() => useKnowledgeBaseStatus(defaultProps));
     await waitFor(() => {
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/',
+        '/api/security_ai_assistant/knowledge_base/',
         {
           method: 'GET',
           signal: undefined,
-          version: '1',
+          version: API_VERSIONS.public.v1,
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();
@@ -66,11 +67,11 @@ describe('useKnowledgeBaseStatus', () => {
     renderHook(() => useKnowledgeBaseStatus({ ...defaultProps, resource: 'something' }));
     await waitFor(() =>
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/something',
+        '/api/security_ai_assistant/knowledge_base/something',
         {
           method: 'GET',
           signal: undefined,
-          version: '1',
+          version: API_VERSIONS.public.v1,
         }
       )
     );

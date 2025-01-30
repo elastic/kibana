@@ -36,6 +36,28 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('24h'),
+  timestampField: z.string().optional(),
+  timeout: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('180s'),
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  docsPerSecond: z.number().int().optional(),
   error: z.object({}).optional(),
 });
 
