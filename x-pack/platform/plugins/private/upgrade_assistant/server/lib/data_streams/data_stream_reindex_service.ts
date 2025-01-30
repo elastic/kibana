@@ -258,15 +258,17 @@ export const dataStreamReindexServiceFactory = ({
         });
 
         const deprecationsDetails = dataStreamsDeprecations[dataStreamName];
-        if (!deprecationsDetails) {
+        if (!deprecationsDetails || !deprecationsDetails.length) {
           return null;
         }
-        if (deprecationsDetails?.length !== 1) {
-          throw error.cannotGrabMetadata(
-            `Data stream ${dataStreamName} has ${deprecationsDetails.length} deprecations. Expected 1.`
-          );
+
+        // Find the first deprecation that has reindex_required set to true
+        const deprecationDetails = deprecationsDetails.find(
+          (deprecation) => deprecation._meta!.reindex_required
+        );
+        if (!deprecationDetails) {
+          return null;
         }
-        const deprecationDetails = deprecationsDetails[0];
 
         const indicesRequiringUpgrade: string[] =
           deprecationDetails._meta!.indices_requiring_upgrade;
