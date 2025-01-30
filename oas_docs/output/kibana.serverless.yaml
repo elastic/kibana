@@ -226,7 +226,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getConnectorTypesServerlessResponse:
                   $ref: '#/components/examples/get_connector_types_generativeai_response'
@@ -307,7 +307,6 @@ paths:
                   - is_preconfigured
                   - is_deprecated
                   - is_system_action
-            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 getConnectorResponse:
                   $ref: '#/components/examples/get_connector_response'
@@ -345,21 +344,6 @@ paths:
                 name:
                   description: The display name for the connector.
                   type: string
-              required:
-                - name
-                - connector_type_id
-          application/json; Elastic-Api-Version=2023-10-31:
-            examples:
-              createEmailConnectorRequest:
-                $ref: '#/components/examples/create_email_connector_request'
-              createIndexConnectorRequest:
-                $ref: '#/components/examples/create_index_connector_request'
-              createWebhookConnectorRequest:
-                $ref: '#/components/examples/create_webhook_connector_request'
-              createXmattersConnectorRequest:
-                $ref: '#/components/examples/create_xmatters_connector_request'
-            schema:
-              properties:
                 config:
                   additionalProperties: {}
                   default: {}
@@ -413,6 +397,18 @@ paths:
                     - $ref: '#/components/schemas/webhook_secrets'
                     - $ref: '#/components/schemas/cases_webhook_secrets'
                     - $ref: '#/components/schemas/xmatters_secrets'
+              required:
+                - name
+                - connector_type_id
+            examples:
+              createEmailConnectorRequest:
+                $ref: '#/components/examples/create_email_connector_request'
+              createIndexConnectorRequest:
+                $ref: '#/components/examples/create_index_connector_request'
+              createWebhookConnectorRequest:
+                $ref: '#/components/examples/create_webhook_connector_request'
+              createXmattersConnectorRequest:
+                $ref: '#/components/examples/create_xmatters_connector_request'
       responses:
         '200':
           content:
@@ -452,7 +448,6 @@ paths:
                   - is_preconfigured
                   - is_deprecated
                   - is_system_action
-            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 createEmailConnectorResponse:
                   $ref: '#/components/examples/create_email_connector_response'
@@ -493,14 +488,6 @@ paths:
                 name:
                   description: The display name for the connector.
                   type: string
-              required:
-                - name
-          application/json; Elastic-Api-Version=2023-10-31:
-            examples:
-              updateIndexConnectorRequest:
-                $ref: '#/components/examples/update_index_connector_request'
-            schema:
-              properties:
                 config:
                   additionalProperties: {}
                   default: {}
@@ -554,6 +541,11 @@ paths:
                     - $ref: '#/components/schemas/webhook_secrets'
                     - $ref: '#/components/schemas/cases_webhook_secrets'
                     - $ref: '#/components/schemas/xmatters_secrets'
+              required:
+                - name
+            examples:
+              updateIndexConnectorRequest:
+                $ref: '#/components/examples/update_index_connector_request'
       responses:
         '200':
           content:
@@ -622,22 +614,6 @@ paths:
             schema:
               additionalProperties: false
               type: object
-              properties: {}
-              required:
-                - params
-          application/json; Elastic-Api-Version=2023-10-31:
-            examples:
-              runIndexConnectorRequest:
-                $ref: '#/components/examples/run_index_connector_request'
-              runJiraConnectorRequest:
-                $ref: '#/components/examples/run_jira_connector_request'
-              runServerLogConnectorRequest:
-                $ref: '#/components/examples/run_servicenow_itom_connector_request'
-              runSlackConnectorRequest:
-                $ref: '#/components/examples/run_slack_api_connector_request'
-              runSwimlaneConnectorRequest:
-                $ref: '#/components/examples/run_swimlane_connector_request'
-            schema:
               properties:
                 params:
                   additionalProperties: {}
@@ -662,6 +638,19 @@ paths:
                     - $ref: '#/components/schemas/run_postmessage'
                     - $ref: '#/components/schemas/run_pushtoservice'
                     - $ref: '#/components/schemas/run_validchannelid'
+              required:
+                - params
+            examples:
+              runIndexConnectorRequest:
+                $ref: '#/components/examples/run_index_connector_request'
+              runJiraConnectorRequest:
+                $ref: '#/components/examples/run_jira_connector_request'
+              runServerLogConnectorRequest:
+                $ref: '#/components/examples/run_servicenow_itom_connector_request'
+              runSlackConnectorRequest:
+                $ref: '#/components/examples/run_slack_api_connector_request'
+              runSwimlaneConnectorRequest:
+                $ref: '#/components/examples/run_swimlane_connector_request'
       responses:
         '200':
           content:
@@ -701,7 +690,6 @@ paths:
                   - is_preconfigured
                   - is_deprecated
                   - is_system_action
-            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 runIndexConnectorResponse:
                   $ref: '#/components/examples/run_index_connector_response'
@@ -728,7 +716,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getConnectorsResponse:
                   $ref: '#/components/examples/get_connectors_response'
@@ -1659,25 +1647,6 @@ paths:
                   description: 'Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
                   nullable: true
                   type: string
-              required:
-                - name
-                - rule_type_id
-                - consumer
-                - schedule
-          application/json; Elastic-Api-Version=2023-10-31:
-            examples:
-              createEsQueryEsqlRuleRequest:
-                $ref: '#/components/examples/create_es_query_esql_rule_request'
-              createEsQueryRuleRequest:
-                $ref: '#/components/examples/create_es_query_rule_request'
-              createEsQueryKqlRuleRequest:
-                $ref: '#/components/examples/create_es_query_kql_rule_request'
-              createIndexThresholdRuleRequest:
-                $ref: '#/components/examples/create_index_threshold_rule_request'
-              createTrackingContainmentRuleRequest:
-                $ref: '#/components/examples/create_tracking_containment_rule_request'
-            schema:
-              properties:
                 params:
                   additionalProperties: {}
                   default: {}
@@ -1697,6 +1666,22 @@ paths:
                     - $ref: '#/components/schemas/params_property_slo_burn_rate'
                     - $ref: '#/components/schemas/params_property_synthetics_uptime_tls'
                     - $ref: '#/components/schemas/params_property_synthetics_monitor_status'
+              required:
+                - name
+                - rule_type_id
+                - consumer
+                - schedule
+            examples:
+              createEsQueryEsqlRuleRequest:
+                $ref: '#/components/examples/create_es_query_esql_rule_request'
+              createEsQueryRuleRequest:
+                $ref: '#/components/examples/create_es_query_rule_request'
+              createEsQueryKqlRuleRequest:
+                $ref: '#/components/examples/create_es_query_kql_rule_request'
+              createIndexThresholdRuleRequest:
+                $ref: '#/components/examples/create_index_threshold_rule_request'
+              createTrackingContainmentRuleRequest:
+                $ref: '#/components/examples/create_tracking_containment_rule_request'
       responses:
         '200':
           content:
@@ -2344,7 +2329,6 @@ paths:
                   - muted_alert_ids
                   - execution_status
                   - revision
-            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 createEsQueryEsqlRuleResponse:
                   $ref: '#/components/examples/create_es_query_esql_rule_response'
@@ -2589,7 +2573,6 @@ paths:
               required:
                 - name
                 - schedule
-          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               updateRuleRequest:
                 $ref: '#/components/examples/update_rule_request'
@@ -3240,7 +3223,6 @@ paths:
                   - muted_alert_ids
                   - execution_status
                   - revision
-            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 updateRuleResponse:
                   $ref: '#/components/examples/update_rule_response'
@@ -4239,7 +4221,6 @@ paths:
                   - muted_alert_ids
                   - execution_status
                   - revision
-            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 findRulesResponse:
                   $ref: '#/components/examples/find_rules_response'
@@ -37408,7 +37389,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -37429,7 +37410,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -37469,13 +37450,13 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse'
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -37496,20 +37477,20 @@ paths:
       operationId: CreateKnowledgeBaseEntry
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps'
         required: true
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           description: Successful request returning Knowledge Base Entries
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
           description: Generic Error
@@ -37523,7 +37504,7 @@ paths:
       operationId: PerformKnowledgeBaseEntryBulkAction
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             schema:
               type: object
               properties:
@@ -37550,13 +37531,13 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkCrudActionResponse'
           description: Successful bulk operation request
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
           description: Generic Error
@@ -37613,7 +37594,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -37635,7 +37616,7 @@ paths:
           description: Successful response
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -37664,13 +37645,13 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_DeleteResponseFields'
           description: Successful request returning the deleted Knowledge Base Entry's ID
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
           description: Generic Error
@@ -37691,13 +37672,13 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           description: Successful request returning a Knowledge Base Entry
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
           description: Generic Error
@@ -37717,20 +37698,20 @@ paths:
             $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps'
         required: true
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           description: Successful request returning the updated Knowledge Base Entry
         '400':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
           description: Generic Error
@@ -37908,7 +37889,7 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             schema:
               additionalProperties: false
               type: object
@@ -38437,7 +38418,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getSpacesResponseExample1:
                   $ref: '#/components/examples/get_spaces_response1'
@@ -38495,7 +38476,6 @@ paths:
               required:
                 - id
                 - name
-          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               createSpaceRequest:
                 $ref: '#/components/examples/create_space_request'
@@ -38546,7 +38526,7 @@ paths:
         '200':
           description: Indicates a successful call.
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 getSpaceResponseExample:
                   $ref: '#/components/examples/get_space_response'
@@ -38608,7 +38588,6 @@ paths:
               required:
                 - id
                 - name
-          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               updateSpaceRequest:
                 $ref: '#/components/examples/update_space_request'
