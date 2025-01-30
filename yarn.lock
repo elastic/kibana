@@ -2332,25 +2332,25 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.8.tgz#b3a9e59449dfcc6e085ab43d447d95c1d9ee5e91"
-  integrity sha512-o/4Fvd3odZN8SSjok03vLJOif/vVb1oQW4zGCYhCrwyolccd6deAvcy84w5l8GVr61J6bTM9g/8vydqPudw6Ug==
+"@elastic/eui-theme-borealis@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.9.tgz#6aea79b15091e84235555236726f1bb1fc0da2bf"
+  integrity sha512-56tzAX5Go4RuSD1fuKvHiLPumGll1NYK1dG4E9OPe7xfLXBGdLjhdXabkJfUlc5OVX2xK9RI3TOmUiimqm8SJg==
 
-"@elastic/eui-theme-common@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.8.tgz#f5c88d2af39dfef412df73f35d16d584e1e64374"
-  integrity sha512-rzYFRPegUoGjp9eJj90LTsKF9SiKOgcOtAHDMl99yEbNXIV9jMfs54tRf7zMQq0/w+FZXJbOqhnUc4rdKUhVWw==
+"@elastic/eui-theme-common@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.9.tgz#42d4f15b6d8dd9f8976eb3f2d46fd59af3f37a9c"
+  integrity sha512-nmeqi+gZruBQtDOirPIGgZh0QejrlmeZixKaaM/iQca5rQiTNHAE29sSpGFk20+//yfiDPQMFee7PQU/A4R4Ow==
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@99.0.0-borealis.1":
-  version "99.0.0-borealis.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.0.0-borealis.1.tgz#1df3e18a50883f73855bb33c7a6fc044e68eecb1"
-  integrity sha512-6OuX+8jurohZRdq8I+KGYvmU0ajNrBhGCzRziDQNtofQv5fk2C60U5BQnPbX7Qp9gPkxApNlmAarYqMs/TfMSA==
+"@elastic/eui@99.1.0-borealis.0":
+  version "99.1.0-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.1.0-borealis.0.tgz#b5b34c749ac56b8ecd290fb715f56ba2e5f255ab"
+  integrity sha512-akDYl5ScBNwBm1sIsPHQVPq5rJpkgjg5Qtb2F1T36eWFp9ux5EVAqoFylsLBIaUnXiwVDkDAVH604IOrR46COg==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.8"
+    "@elastic/eui-theme-common" "0.0.9"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
