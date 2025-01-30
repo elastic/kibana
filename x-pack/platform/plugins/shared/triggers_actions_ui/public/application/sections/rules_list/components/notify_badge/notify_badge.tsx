@@ -78,6 +78,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const isLoading = loading || requestInFlight;
   const isDisabled = Boolean(disabled) || !snoozeSettings;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const togglePopover = useCallback(() => setIsPopoverOpen(prevState => !prevState), []);
   const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
   const isSnoozedUntil = snoozeSettings?.isSnoozedUntil;
@@ -209,7 +210,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         minWidth={85}
         iconType="bellSlash"
         color="accent"
-        onClick={openPopover}
+        onClick={togglePopover}
         buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
@@ -228,7 +229,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         iconType="calendar"
         color="text"
         aria-label={snoozeButtonAriaLabel}
-        onClick={openPopover}
+        onClick={togglePopover}
         buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
@@ -251,7 +252,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         aria-label={snoozeButtonAriaLabel}
         className={isPopoverOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
-        onClick={openPopover}
+        onClick={togglePopover}
         buttonRef={focusTrapButtonRef}
       />
     );
