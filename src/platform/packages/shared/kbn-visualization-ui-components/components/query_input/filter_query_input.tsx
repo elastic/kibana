@@ -18,11 +18,14 @@ import {
   EuiFlexGroup,
   EuiIconTip,
   EuiPopoverProps,
+  euiTextBreakWord,
+  useEuiFontSize,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryInput, validateQuery } from '.';
 import type { QueryInputServices } from '.';
-import './filter_query_input.scss';
 
 const filterByLabel = i18n.translate('visualizationUiComponents.filterQueryInput.label', {
   defaultMessage: 'Filter by',
@@ -100,6 +103,11 @@ export function FilterQueryInput({
             isOpen={filterPopoverOpen}
             closePopover={onClosePopup}
             display="block"
+            panelProps={{
+              css: css`
+                width: 960px;
+              `,
+            }}
             panelClassName="filterQueryInput__popover"
             initialFocus={dataTestSubj ? `textarea[data-test-subj='${dataTestSubj}']` : undefined}
             button={
@@ -113,6 +121,12 @@ export function FilterQueryInput({
                       onClick={() => {
                         setFilterPopoverOpen(!filterPopoverOpen);
                       }}
+                      css={css`
+                        ${euiTextBreakWord()};
+                        ${useEuiFontSize('s')};
+                        min-height: ${euiThemeVars.euiSizeXL};
+                        width: 100%;
+                      `}
                       color={isInputFilterValid ? 'text' : 'danger'}
                       title={i18n.translate(
                         'visualizationUiComponents.filterQueryInput.clickToEdit',

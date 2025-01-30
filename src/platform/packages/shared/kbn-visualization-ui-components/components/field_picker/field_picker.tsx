@@ -13,8 +13,8 @@ import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
-import type { FieldOptionValue, FieldOption } from './types';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { FieldOptionValue, FieldOption } from './types';
 
 export interface FieldPickerProps<T extends FieldOptionValue>
   extends EuiComboBoxProps<FieldOption<T>['value']> {
@@ -64,12 +64,12 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
             ) : null,
             css: {
               color: !fieldOption.compatible ? euiThemeVars.euiColorLightShade : undefined,
-              backgroundColor: !fieldOptionExists? euiThemeVars.euiColorLightestShade : undefined,
-            }
+              backgroundColor: !fieldOptionExists ? euiThemeVars.euiColorLightestShade : undefined,
+            },
           };
         }),
       };
-    }  
+    }
     return {
       ...otherAttr,
       compatible,
@@ -79,7 +79,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
       css: {
         color: !compatible ? euiThemeVars.euiColorLightShade : undefined,
         backgroundColor: !exists ? euiThemeVars.euiColorLightestShade : undefined,
-      }
+      },
     };
   });
 
