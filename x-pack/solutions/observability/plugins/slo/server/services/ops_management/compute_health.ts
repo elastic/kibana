@@ -146,10 +146,10 @@ export class ComputeHealth {
           instances: summaryResult?.doc_count ?? 0,
           status: overallStatus,
           spaceId: getSLOSpaceId(sloDefinition.id),
-          createdAt,
+          createdAt: createdAt.toISOString(),
           data: {
-            summaryUpdatedAt,
-            lastRollupIngestedAt,
+            summaryUpdatedAt: summaryUpdatedAt.toISOString(),
+            lastRollupIngestedAt: lastRollupIngestedAt.toISOString(),
             delay,
             staleTime,
             outdatedVersion: isOutdatedVersion,

@@ -60,10 +60,10 @@ const sloHealthSchema = t.type({
   spaceId: t.string,
   instances: t.union([t.number, t.undefined]),
   status: sloHealthStatusSchema,
-  createdAt: dateType,
+  createdAt: t.string,
   data: t.type({
-    summaryUpdatedAt: dateType,
-    lastRollupIngestedAt: dateType,
+    summaryUpdatedAt: t.string,
+    lastRollupIngestedAt: t.string,
     delay: t.number,
     staleTime: t.number,
     outdatedVersion: t.boolean,

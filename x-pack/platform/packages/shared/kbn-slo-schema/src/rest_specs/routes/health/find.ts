@@ -6,15 +6,27 @@
  */
 
 import * as t from 'io-ts';
+import { sloHealthResponseSchema } from '../../slo_health';
 
-const findSLOHealthParamsSchema = t.type({
-  query: t.string,
-  filter: t.string,
-  sortBy: t.union([t.literal('status'), t.literal('id')]),
-  sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-  searchAfter: t.string,
-  size: t.string,
+const findSLOHealthParamsSchema = t.partial({
+  query: t.partial({
+    query: t.string,
+    filter: t.string,
+    sortBy: t.literal('status'),
+    sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+    searchAfter: t.string,
+    size: t.string,
+  }),
 });
 
-export type FindSLOHealthParams = t.TypeOf<typeof findSLOHealthParamsSchema>;
-export { findSLOHealthParamsSchema };
+const findSLOHealthResponseSchema = t.type({
+  searchAfter: t.union([t.string, t.undefined]),
+  size: t.number,
+  total: t.number,
+  results: t.array(sloHealthResponseSchema),
+});
+
+export type FindSLOHealthParams = t.TypeOf<typeof findSLOHealthParamsSchema.props.query>;
+export type FindSLOHealthResponse = t.OutputOf<typeof findSLOHealthResponseSchema>;
+
+export { findSLOHealthParamsSchema, findSLOHealthResponseSchema };
