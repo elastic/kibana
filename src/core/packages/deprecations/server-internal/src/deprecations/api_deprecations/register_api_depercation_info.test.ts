@@ -20,12 +20,15 @@ import {
   coreUsageDataServiceMock,
   coreUsageStatsClientMock,
 } from '@kbn/core-usage-data-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import _ from 'lodash';
+import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 
 describe('#registerApiDeprecationsInfo', () => {
   const deprecationsFactory = mockDeprecationsFactory.create();
   const deprecationsRegistry = mockDeprecationsRegistry.create();
+  const docLinks: DocLinksServiceSetup = docLinksServiceMock.createSetupContract();
   let usageClientMock: ReturnType<typeof coreUsageStatsClientMock.create>;
   let http: ReturnType<typeof httpServiceMock.createInternalSetupContract>;
   let coreUsageData: ReturnType<typeof coreUsageDataServiceMock.createSetupContract>;
@@ -47,7 +50,7 @@ describe('#registerApiDeprecationsInfo', () => {
 
   it('registers api deprecations', async () => {
     deprecationsFactory.getRegistry.mockReturnValue(deprecationsRegistry);
-    registerApiDeprecationsInfo({ deprecationsFactory, coreUsageData, http });
+    registerApiDeprecationsInfo({ deprecationsFactory, coreUsageData, http, docLinks });
 
     expect(deprecationsFactory.getRegistry).toBeCalledWith('core.api_deprecations');
     expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
@@ -93,7 +96,7 @@ describe('#registerApiDeprecationsInfo', () => {
       );
 
     it('returns removed type deprecated route', async () => {
-      const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http, docLinks });
       const deprecatedRoute = createDeprecatedRouteDetails({
         routePath: '/api/test_removed/',
         routeDeprecationOptions: { reason: { type: 'remove' } },
@@ -129,6 +132,10 @@ describe('#registerApiDeprecationsInfo', () => {
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_removed/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              Object {
+                "content": "To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, [follow this link](https://www.elastic.co/guide/en/kibana/test-branch/logging-settings.html#enable-http-debug-logs).",
+                "type": "markdown",
+              },
               "This issue has been marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00 but the API has been called 12 times since.",
             ],
             "title": "The \\"GET /api/test_removed/\\" route is removed",
@@ -138,7 +145,7 @@ describe('#registerApiDeprecationsInfo', () => {
     });
 
     it('returns migrated type deprecated route', async () => {
-      const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http, docLinks });
       const deprecatedRoute = createDeprecatedRouteDetails({
         routePath: '/api/test_migrated/',
         routeDeprecationOptions: {
@@ -176,6 +183,10 @@ describe('#registerApiDeprecationsInfo', () => {
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_migrated/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              Object {
+                "content": "To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, [follow this link](https://www.elastic.co/guide/en/kibana/test-branch/logging-settings.html#enable-http-debug-logs).",
+                "type": "markdown",
+              },
               "This issue has been marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00 but the API has been called 12 times since.",
             ],
             "title": "The \\"GET /api/test_migrated/\\" route is migrated to a different API",
@@ -185,7 +196,7 @@ describe('#registerApiDeprecationsInfo', () => {
     });
 
     it('returns bumped type deprecated route', async () => {
-      const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http, docLinks });
       const deprecatedRoute = createDeprecatedRouteDetails({
         routePath: '/api/test_bumped/',
         routeDeprecationOptions: { reason: { type: 'bump', newApiVersion: '444' } },
@@ -221,6 +232,10 @@ describe('#registerApiDeprecationsInfo', () => {
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_bumped/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              Object {
+                "content": "To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, [follow this link](https://www.elastic.co/guide/en/kibana/test-branch/logging-settings.html#enable-http-debug-logs).",
+                "type": "markdown",
+              },
               "This issue has been marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00 but the API has been called 12 times since.",
             ],
             "title": "The \\"GET /api/test_bumped/\\" route has a newer version available",
@@ -230,7 +245,7 @@ describe('#registerApiDeprecationsInfo', () => {
     });
 
     it('returns deprecated type deprecated route', async () => {
-      const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http, docLinks });
       const deprecatedRoute = createDeprecatedRouteDetails({
         routePath: '/api/test_deprecated/',
         routeDeprecationOptions: { reason: { type: 'deprecate' }, message: 'additional message' },
@@ -265,6 +280,10 @@ describe('#registerApiDeprecationsInfo', () => {
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_deprecated/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              Object {
+                "content": "To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, [follow this link](https://www.elastic.co/guide/en/kibana/test-branch/logging-settings.html#enable-http-debug-logs).",
+                "type": "markdown",
+              },
               "This issue has been marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00 but the API has been called 12 times since.",
               "additional message",
             ],
@@ -275,7 +294,7 @@ describe('#registerApiDeprecationsInfo', () => {
     });
 
     it('does not return resolved deprecated route', async () => {
-      const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http, docLinks });
       const deprecatedRoute = createDeprecatedRouteDetails({ routePath: '/api/test_resolved/' });
       http.getRegisteredDeprecatedApis.mockReturnValue([deprecatedRoute]);
       usageClientMock.getDeprecatedApiUsageStats.mockResolvedValue([
@@ -290,7 +309,7 @@ describe('#registerApiDeprecationsInfo', () => {
     });
 
     it('returns never resolved deprecated route', async () => {
-      const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http, docLinks });
       const deprecatedRoute = createDeprecatedRouteDetails({
         routePath: '/api/test_never_resolved/',
       });
@@ -328,6 +347,10 @@ describe('#registerApiDeprecationsInfo', () => {
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_never_resolved/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              Object {
+                "content": "To enable debug logs for deprecated API calls, modify the Kibana configuration. For more information, [follow this link](https://www.elastic.co/guide/en/kibana/test-branch/logging-settings.html#enable-http-debug-logs).",
+                "type": "markdown",
+              },
             ],
             "title": "The \\"GET /api/test_never_resolved/\\" route is removed",
           },
@@ -336,7 +359,7 @@ describe('#registerApiDeprecationsInfo', () => {
     });
 
     it('does not return deprecated routes that have never been called', async () => {
-      const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http, docLinks });
       const deprecatedRoute = createDeprecatedRouteDetails({
         routePath: '/api/test_never_resolved/',
       });
