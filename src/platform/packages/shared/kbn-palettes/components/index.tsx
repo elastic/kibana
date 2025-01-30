@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutLogger } from '../fixtures/worker';
+import React from 'react';
+import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export const measurePerformance = async <T>(
-  log: ScoutLogger,
-  label: string,
-  fn: () => Promise<T>
-): Promise<T> => {
-  const startTime = performance.now();
-  const result = await fn();
-  const duration = performance.now() - startTime;
-  log.debug(`${label} took ${duration.toFixed(2)}ms`);
-  return result;
-};
+/**
+ * Text wrapper to remove text-decoration from `EuiText`
+ */
+export const getAppendedTag = (label?: string) =>
+  label && (
+    <EuiText color="subdued" size="xs">
+      <span
+        css={css`
+          display: inline-block;
+        `}
+      >
+        {label}
+      </span>
+    </EuiText>
+  );
