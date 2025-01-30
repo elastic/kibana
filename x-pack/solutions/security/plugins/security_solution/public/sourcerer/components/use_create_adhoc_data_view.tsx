@@ -49,19 +49,17 @@ export const useCreateAdhocDataView = (
         addError(possibleError !== null ? possibleError : new Error(i18n.FAILURE_TOAST_TITLE), {
           title: i18n.FAILURE_TOAST_TITLE,
           toastMessage: (
-            <>
-              <FormattedMessage
-                id="xpack.securitySolution.indexPatterns.failureToastText"
-                defaultMessage="Unexpected error occurred on update. If you would like to modify your data, you can manually select a data view {link}."
-                values={{
-                  link: (
-                    <EuiLink onClick={onResolveErrorManually} data-test-subj="failureToastLink">
-                      {i18n.TOGGLE_TO_NEW_SOURCERER}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </>
+            <FormattedMessage
+              id="xpack.securitySolution.indexPatterns.failureToastText"
+              defaultMessage="Unexpected error occurred on update. If you would like to modify your data, you can manually select a data view {link}."
+              values={{
+                link: (
+                  <EuiLink onClick={onResolveErrorManually} data-test-subj="failureToastLink">
+                    {i18n.TOGGLE_TO_NEW_SOURCERER}
+                  </EuiLink>
+                ),
+              }}
+            />
           ) as unknown as string,
         });
 

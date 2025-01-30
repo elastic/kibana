@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useCreateAdhocDataView } from './use_create_adhoc_data_view';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import * as i18n from './translations';
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
-const mockPatterns = ['packetbeat-*', 'winlogbeat-*'];
 const mockedUseKibana = mockUseKibana();
+mockedUseKibana.services.dataViews = { create: jest.fn() };
+mockedUseKibana.services.uiSettings = { get: jest.fn().mockReturnValue([]) };
+
 jest.mock('../../common/hooks/use_app_toasts', () => {
   const original = jest.requireActual('../../common/hooks/use_app_toasts');
 
@@ -37,48 +39,46 @@ jest.mock('@kbn/react-kibana-mount', () => {
     toMountPoint: jest.fn(),
   };
 });
-describe('use_update_data_view', () => {
-  const mockError = jest.fn();
 
-  beforeEach(() => {
-    mockedUseKibana.services.uiSettings.get.mockImplementation(() => mockPatterns);
-    mockedUseKibana.services.uiSettings.set.mockResolvedValue(true);
-    jest.clearAllMocks();
-  });
+describe('useCreateAdhocDataView', () => {
+  beforeEach(() => {});
 
-  test('Successful uiSettings updates with correct index pattern, and shows success toast', async () => {
-    const { result } = renderHook(() => useCreateAdhocDataView(mockError));
-    const updateDataView = result.current;
-    const isUiSettingsSuccess = await updateDataView(['missing-*']);
-    expect(mockedUseKibana.services.uiSettings.set.mock.calls[0][1]).toEqual(
-      [...mockPatterns, 'missing-*'].sort()
-    );
-    expect(isUiSettingsSuccess).toEqual(true);
-    expect(mockAddSuccess).toHaveBeenCalled();
-  });
+  afterEach(() => {});
 
-  test('Failed uiSettings update returns false and shows error toast', async () => {
-    mockedUseKibana.services.uiSettings.set.mockImplementation(() => false);
-    const { result } = renderHook(() => useCreateAdhocDataView(mockError));
-    const updateDataView = result.current;
-    const isUiSettingsSuccess = await updateDataView(['missing-*']);
-    expect(mockedUseKibana.services.uiSettings.set.mock.calls[0][1]).toEqual(
-      [...mockPatterns, 'missing-*'].sort()
-    );
-    expect(isUiSettingsSuccess).toEqual(false);
-    expect(mockAddError).toHaveBeenCalled();
-    expect(mockAddError.mock.calls[0][0]).toEqual(new Error(i18n.FAILURE_TOAST_TITLE));
-  });
+  it('should create data view successfully with given patterns', async () => {
+    const { result } = renderHook(() => useCreateAdhocDataView(jest.fn()));
 
-  test('Failed uiSettings throws error and shows error toast', async () => {
-    mockedUseKibana.services.uiSettings.get.mockImplementation(() => {
-      throw new Error('Uh oh bad times over here');
+    const mockDataViews = mockedUseKibana.services.dataViews;
+
+    await act(async () => {
+      await result.current.createAdhocDataView(['pattern-1-*', 'pattern-2-*']);
     });
-    const { result } = renderHook(() => useCreateAdhocDataView(mockError));
-    const updateDataView = result.current;
-    const isUiSettingsSuccess = await updateDataView(['missing-*']);
-    expect(isUiSettingsSuccess).toEqual(false);
-    expect(mockAddError).toHaveBeenCalled();
-    expect(mockAddError.mock.calls[0][0]).toEqual(new Error('Uh oh bad times over here'));
+
+    expect(mockDataViews.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'pattern-1-*,pattern-2-*',
+        id: 'adhoc_sourcerer_pattern-1-*,pattern-2-*',
+      })
+    );
+  });
+
+  it('should add error on failure', async () => {
+    const onResolveErrorManually = jest.fn();
+    const error = new Error('error');
+    const mockDataViews = mockedUseKibana.services.dataViews;
+
+    mockDataViews.create.mockRejectedValueOnce(error);
+
+    const { result } = renderHook(() => useCreateAdhocDataView(onResolveErrorManually));
+
+    await act(async () => {
+      const dataView = await result.current.createAdhocDataView(['pattern-1-*']);
+      expect(dataView).toBeNull();
+    });
+
+    expect(mockAddError).toHaveBeenCalledWith(error, {
+      title: i18n.FAILURE_TOAST_TITLE,
+      toastMessage: expect.any(String),
+    });
   });
 });
