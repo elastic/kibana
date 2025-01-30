@@ -81,6 +81,7 @@ interface WiredStreamGetResponse extends StreamGetResponseBase {
 interface UnwiredStreamGetResponse extends StreamGetResponseBase {
   stream: Omit<UnwiredStreamDefinition, 'name'>;
   elasticsearch_assets: ElasticsearchAsset[];
+  data_stream_exists: boolean;
   effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
 
@@ -133,6 +134,7 @@ const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.int
   z.object({
     stream: unwiredStreamDefinitionSchemaBase,
     elasticsearch_assets: z.array(elasticsearchAssetSchema),
+    data_stream_exists: z.boolean(),
     effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })
 );
@@ -149,7 +151,7 @@ const isWiredStreamGetResponse = createIsNarrowSchema(
 
 const isUnWiredStreamGetResponse = createIsNarrowSchema(
   ingestStreamGetResponseSchema,
-  wiredStreamGetResponseSchema
+  unwiredStreamGetResponseSchema
 );
 
 const asWiredStreamGetResponse = createAsSchemaOrThrow(
