@@ -1599,7 +1599,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: boolean; readonly attackDiscoveryAlertFiltering: boolean; readonly defendInsights: boolean; readonly contentReferencesEnabled: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; readonly attackDiscoveryAlertFiltering: boolean; readonly contentReferencesEnabled: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -3821,7 +3821,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "{ assistantModelEvaluation: boolean; attackDiscoveryAlertFiltering: boolean; defendInsights: boolean; contentReferencesEnabled: boolean; }"
+          "{ assistantModelEvaluation: boolean; defendInsights: boolean; attackDiscoveryAlertFiltering: boolean; contentReferencesEnabled: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -5978,7 +5978,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: false; readonly attackDiscoveryAlertFiltering: false; readonly defendInsights: false; readonly contentReferencesEnabled: false; }"
+          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; readonly attackDiscoveryAlertFiltering: false; readonly contentReferencesEnabled: false; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -6713,7 +6713,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; attackDiscoveryAlertFiltering: Zod.ZodBoolean; contentReferencesEnabled: Zod.ZodBoolean; defendInsights: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; attackDiscoveryAlertFiltering: boolean; defendInsights: boolean; contentReferencesEnabled: boolean; }, { assistantModelEvaluation: boolean; attackDiscoveryAlertFiltering: boolean; defendInsights: boolean; contentReferencesEnabled: boolean; }>"
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; attackDiscoveryAlertFiltering: Zod.ZodBoolean; contentReferencesEnabled: Zod.ZodBoolean; defendInsights: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; defendInsights: boolean; attackDiscoveryAlertFiltering: boolean; contentReferencesEnabled: boolean; }, { assistantModelEvaluation: boolean; defendInsights: boolean; attackDiscoveryAlertFiltering: boolean; contentReferencesEnabled: boolean; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
