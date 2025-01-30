@@ -25,6 +25,8 @@ import {
 } from '@kbn/visualization-ui-components';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 3;
 
@@ -78,7 +80,9 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
 
   const addFieldButton = (
     <NewBucketButton
-      className="lnsConfigPanelAnnotations__addButton"
+      css={css`
+        margin-top: ${euiThemeVars.euiSizeXS};
+      `}
       data-test-subj={`lnsXY-annotation-tooltip-add_field`}
       onClick={() => {
         setFields([...currentFields, { name: '', id: generateId() }]);

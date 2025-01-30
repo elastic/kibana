@@ -15,6 +15,8 @@ import type {
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { isRangeAnnotationConfig } from '../..';
 import { defaultRangeAnnotationLabel, defaultAnnotationLabel } from './helpers';
 import { toLineAnnotationColor, toRangeAnnotationColor } from './helpers';
@@ -31,7 +33,15 @@ export const ConfigPanelApplyAsRangeSwitch = ({
 }) => {
   const isRange = isRangeAnnotationConfig(annotation);
   return (
-    <EuiFormRow display="columnCompressed" className="lnsRowCompressedMargin">
+    <EuiFormRow
+      display="columnCompressed"
+      className="lnsRowCompressedMargin"
+      css={css`
+        & + .lnsRowCompressedMargin {
+          margin-top: ${euiThemeVars.euiSizeS};
+        }
+      `}
+    >
       <EuiSwitch
         data-test-subj="lns-xyAnnotation-rangeSwitch"
         label={
@@ -105,6 +115,14 @@ export const ConfigPanelRangeDatePicker = ({
       fullWidth
       label={label}
       className="lnsConfigPanelAnnotations__date lnsRowCompressedMargin"
+      css={css`
+        & + .lnsRowCompressedMargin {
+          margin-top: ${euiThemeVars.euiSizeS};
+        }
+        .euiFormControlLayout__prepend {
+          min-width: 50px; // makes both labels ("from" and "to") the same width
+        }
+      `}
     >
       <EuiDatePicker
         compressed
