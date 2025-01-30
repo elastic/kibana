@@ -356,6 +356,7 @@ packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
+src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/plugins/shared/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
