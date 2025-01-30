@@ -23,7 +23,7 @@ import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -127,6 +127,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
     uiActions,
+    data,
   } = kibana.services;
   const darkMode = core.theme?.getTheme().darkMode;
 
@@ -396,7 +397,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart, undefined, AbortController?]) => ({
+      (...args: [{ esql: string }, ExpressionsStart, TimeRange, AbortController?]) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
@@ -430,11 +431,12 @@ export const ESQLEditor = memo(function ESQLEditor({
           };
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
+          const timeRange = data.query.timefilter.timefilter.getTime();
           try {
             const table = await memoizedFieldsFromESQL(
               esqlQuery,
               expressions,
-              undefined,
+              timeRange,
               abortController
             ).result;
             const columns: ESQLRealField[] =
@@ -478,19 +480,21 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     query.esql,
     memoizedSources,
     dataViews,
     core,
     esqlFieldsCache,
+    data.query.timefilter.timefilter,
     memoizedFieldsFromESQL,
     expressions,
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    variablesService,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    variablesService?.esqlVariables,
+    variablesService?.areSuggestionsEnabled,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
