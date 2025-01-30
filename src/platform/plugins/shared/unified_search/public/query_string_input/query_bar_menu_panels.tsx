@@ -217,8 +217,10 @@ export function useQueryBarMenuPanels({
   setRenderedComponent,
 }: QueryBarMenuPanelsProps) {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { appName, usageCollection, uiSettings, http, storage } = kibana.services;
+  const { appName, usageCollection, uiSettings, http, storage, application } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
+  const showSavedQueries =
+    showQueryInput && showFilterBar && application.capabilities.savedQueryManagement?.showQueries;
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
   const [hasSavedQueries, setHasSavedQueries] = useState(false);
@@ -246,10 +248,10 @@ export function useQueryBarMenuPanels({
 
       setHasSavedQueries(queryCount > 0);
     };
-    if (showQueryInput && showFilterBar) {
+    if (showSavedQueries) {
       fetchSavedQueries();
     }
-  }, [savedQueryService, showQueryInput, showFilterBar]);
+  }, [savedQueryService, showSavedQueries]);
 
   useEffect(() => {
     if (savedQuery) {
@@ -430,7 +432,7 @@ export function useQueryBarMenuPanels({
   }
 
   // saved queries actions are only shown when the showQueryInput and showFilterBar is true
-  if (showQueryInput && showFilterBar) {
+  if (showSavedQueries) {
     items.push(...queryAndFiltersRelatedPanels);
   }
 

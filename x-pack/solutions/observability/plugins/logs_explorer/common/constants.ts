@@ -50,6 +50,7 @@ export const DEFAULT_COLUMNS = [
   // RESOURCE_FIELD_CONFIGURATION,
   //  CONTENT_FIELD_CONFIGURATION
 ];
+export const DEFAULT_ROW_COUNT = 1;
 export const DEFAULT_ROWS_PER_PAGE = 100;
 
 // List of prefixes which needs to be filtered out for Display in Content Column
