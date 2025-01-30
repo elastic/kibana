@@ -15,6 +15,7 @@ export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
   gridProps: {
     additionalControls?: React.ReactNode;
+    inTableSearchControl?: React.ReactNode;
   };
 }
 
@@ -41,7 +42,7 @@ export const internalRenderCustomToolbar = (
       keyboardShortcutsControl,
       displayControl,
     },
-    gridProps: { additionalControls },
+    gridProps: { additionalControls, inTableSearchControl },
   } = props;
 
   const buttons = hasRoomForGridControls ? (
@@ -90,18 +91,28 @@ export const internalRenderCustomToolbar = (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             {Boolean(leftSide) && buttons}
-            {(keyboardShortcutsControl || displayControl || fullScreenControl) && (
+            {Boolean(
+              keyboardShortcutsControl ||
+                displayControl ||
+                fullScreenControl ||
+                inTableSearchControl
+            ) && (
               <EuiFlexItem grow={false}>
                 <div className="unifiedDataTableToolbarControlGroup">
-                  {keyboardShortcutsControl && (
+                  {Boolean(inTableSearchControl) && (
+                    <div className="unifiedDataTableToolbarControlIconButton">
+                      {inTableSearchControl}
+                    </div>
+                  )}
+                  {Boolean(keyboardShortcutsControl) && (
                     <div className="unifiedDataTableToolbarControlIconButton">
                       {keyboardShortcutsControl}
                     </div>
                   )}
-                  {displayControl && (
+                  {Boolean(displayControl) && (
                     <div className="unifiedDataTableToolbarControlIconButton">{displayControl}</div>
                   )}
-                  {fullScreenControl && (
+                  {Boolean(fullScreenControl) && (
                     <div className="unifiedDataTableToolbarControlIconButton">
                       {fullScreenControl}
                     </div>

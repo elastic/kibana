@@ -180,10 +180,14 @@ export default function ({ getService }: FtrProviderContext) {
           "case_3_feature_a",
           "case_4_feature_a",
           "case_4_feature_b",
+          "dashboard",
+          "discover",
           "generalCases",
+          "maps",
           "observabilityCases",
           "securitySolutionCases",
           "siem",
+          "visualize",
         ]
       `);
     });
@@ -205,6 +209,10 @@ export default function ({ getService }: FtrProviderContext) {
       const featureIdsImplicitlyReplacedWithMultipleFeatures = new Set([
         'case_2_feature_a',
         'case_4_feature_a',
+        'discover',
+        'dashboard',
+        'visualize',
+        'maps',
         'siem',
       ]);
       for (const feature of features) {

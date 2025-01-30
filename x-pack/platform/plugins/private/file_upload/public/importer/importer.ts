@@ -9,6 +9,7 @@ import { chunk, intersection } from 'lodash';
 import moment from 'moment';
 import type {
   IndicesIndexSettings,
+  IngestDeletePipelineResponse,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
@@ -85,9 +86,10 @@ export abstract class Importer implements IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined
+    pipeline: IngestPipeline | undefined,
+    createPipelines?: IngestPipeline[]
   ) {
-    let ingestPipeline: IngestPipelineWrapper | undefined;
+    let ingestPipelineWrapper: IngestPipelineWrapper | undefined;
     if (pipeline !== undefined) {
       updatePipelineTimezone(pipeline);
 
@@ -98,10 +100,20 @@ export abstract class Importer implements IImporter {
       }
       // if no pipeline has been supplied,
       // send an empty object
-      ingestPipeline = {
+      ingestPipelineWrapper = {
         id: `${index}-pipeline`,
         pipeline,
       };
+    }
+
+    let createPipelinesWrappers: IngestPipelineWrapper[] | undefined;
+    if (createPipelines) {
+      createPipelinesWrappers = createPipelines.map((p, i) => {
+        return {
+          id: `${index}-${i}-pipeline`,
+          pipeline: p,
+        };
+      });
     }
 
     this._index = index;
@@ -123,8 +135,36 @@ export abstract class Importer implements IImporter {
       data: [],
       settings,
       mappings,
-      ingestPipeline,
+      ingestPipeline: ingestPipelineWrapper,
+      createPipelines: createPipelinesWrappers,
     });
+  }
+
+  public async initializeWithoutCreate(
+    index: string,
+    mappings: MappingTypeMapping,
+    pipeline: IngestPipeline | undefined
+  ) {
+    if (pipeline !== undefined) {
+      if (pipelineContainsSpecialProcessors(pipeline)) {
+        // pipeline contains processors which we know are slow
+        // so reduce the chunk size significantly to avoid timeouts
+        this._chunkSize = REDUCED_CHUNK_SIZE;
+      }
+    }
+
+    this._index = index;
+    this._pipeline = pipeline;
+
+    // if an @timestamp field has been added to the
+    // mappings, use this field as the time field.
+    // This relies on the field being populated by
+    // the ingest pipeline on ingest
+    this._timeFieldName = isPopulatedObject(mappings.properties, [DEFAULT_TIME_FIELD])
+      ? DEFAULT_TIME_FIELD
+      : undefined;
+
+    this._initialized = true;
   }
 
   public async import(
@@ -250,6 +290,19 @@ export abstract class Importer implements IImporter {
       body,
     });
   }
+
+  public async deletePipelines(pipelineIds: string[]) {
+    // remove_pipelines
+    // const body = JSON.stringify({
+    //   pipelineIds,
+    // });
+
+    return await getHttp().fetch<IngestDeletePipelineResponse[]>({
+      path: `/internal/file_upload/remove_pipelines/${pipelineIds.join(',')}`,
+      method: 'DELETE',
+      version: '1',
+    });
+  }
 }
 
 function populateFailures(
@@ -346,6 +399,7 @@ export function callImportRoute({
   settings,
   mappings,
   ingestPipeline,
+  createPipelines,
 }: {
   id: string | undefined;
   index: string;
@@ -353,6 +407,7 @@ export function callImportRoute({
   settings: IndicesIndexSettings;
   mappings: MappingTypeMapping;
   ingestPipeline: IngestPipelineWrapper | undefined;
+  createPipelines?: IngestPipelineWrapper[];
 }) {
   const query = id !== undefined ? { id } : {};
   const body = JSON.stringify({
@@ -361,6 +416,7 @@ export function callImportRoute({
     settings,
     mappings,
     ingestPipeline,
+    createPipelines,
   });
 
   return getHttp().fetch<ImportResponse>({

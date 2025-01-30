@@ -16,6 +16,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 
+jest.mock('../hooks/use_source_indices_field', () => ({
+  useSourceIndicesFields: () => ({}),
+}));
+
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {

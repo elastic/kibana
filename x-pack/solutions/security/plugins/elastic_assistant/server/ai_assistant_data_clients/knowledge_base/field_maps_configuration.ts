@@ -7,6 +7,7 @@
 import { FieldMap } from '@kbn/data-stream-adapter';
 
 export const ASSISTANT_ELSER_INFERENCE_ID = 'elastic-security-ai-assistant-elser2';
+export const ELASTICSEARCH_ELSER_INFERENCE_ID = '.elser-2-elasticsearch';
 
 export const knowledgeBaseFieldMap: FieldMap = {
   // Base fields

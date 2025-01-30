@@ -49,6 +49,9 @@ function getColorBlindPalette(steps: number) {
 
 const COLOR_PALETTES: COLOR_PALETTE[] = [
   {
+    // TODO remove all empty `title` props below after
+    // https://github.com/elastic/eui/pull/8289 is released
+    title: '',
     value: 'Blues',
     getPalette: (steps: number) => {
       return euiPaletteCool(steps);
@@ -57,6 +60,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: '',
     value: 'Greens',
     getPalette: (steps: number) => {
       return euiPaletteGreen(steps);
@@ -65,6 +69,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: '',
     value: 'Greys',
     getPalette: (steps: number) => {
       return euiPaletteGray(steps);
@@ -73,6 +78,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: '',
     value: 'Reds',
     getPalette: (steps: number) => {
       return euiPaletteRed(steps);
@@ -81,6 +87,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: '',
     value: 'Yellow to Red',
     getPalette: (steps: number) => {
       return euiPaletteWarm(steps);
@@ -89,6 +96,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: '',
     value: 'Green to Red',
     getPalette: (steps: number) => {
       return euiPaletteForStatus(steps);
@@ -97,6 +105,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: '',
     value: 'Blue to Red',
     getPalette: (steps: number) => {
       return euiPaletteForTemperature(steps);
@@ -105,6 +114,7 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: '',
     value: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
     getPalette: (steps: number) => {
       return colorPaletteGenerator(HEATMAP_PALETTE, steps, true, true);
@@ -113,18 +123,21 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
     type: 'gradient',
   },
   {
+    title: '',
     value: 'palette_0',
     getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind(),
     type: 'fixed',
   },
   {
+    title: '',
     value: 'palette_20',
     getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind({ rotations: 2 }),
     type: 'fixed',
   },
   {
+    title: '',
     value: 'palette_30',
     getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind({ rotations: 3 }),

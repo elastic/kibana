@@ -31,6 +31,15 @@ export const FILE_FORMATS = {
   TIKA: 'tika',
 };
 
+export function isSupportedFormat(format: string) {
+  return (
+    format === FILE_FORMATS.NDJSON ||
+    format === FILE_FORMATS.DELIMITED ||
+    format === FILE_FORMATS.SEMI_STRUCTURED_TEXT ||
+    format === FILE_FORMATS.TIKA
+  );
+}
+
 export const SUPPORTED_FIELD_TYPES = {
   BOOLEAN: 'boolean',
   CONFLICT: 'conflict',

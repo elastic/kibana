@@ -17,9 +17,9 @@ which include the *Discover* configuration&mdash;selected columns in the documen
 Discover sessions are primarily used for adding search results to a dashboard.
 
 [role="xpack"]
-==== Read-only access
-If you have insufficient privileges to save queries,
-the *Save* button isn't visible in the saved query management popover.
+==== Saved query access
+If you have insufficient privileges to manage saved queries,
+you will be unable to load or save queries from the saved query management popover.
 For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
 ==== Save a query

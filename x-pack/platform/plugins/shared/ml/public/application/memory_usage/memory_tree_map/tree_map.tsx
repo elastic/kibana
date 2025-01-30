@@ -136,7 +136,6 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
     },
     [loadJobMemorySize, refresh]
   );
-
   return (
     <div
       style={{ height: chartHeight }}

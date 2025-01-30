@@ -26,7 +26,10 @@ export const elasticPalette = new KbnColorFnPalette({
   colorCount: 10,
   defaultNumberOfColors: 30,
   name: i18n.translate('palettes.elastic.name', {
-    defaultMessage: 'Elastic (default)',
+    defaultMessage: 'Elastic',
+  }),
+  tag: i18n.translate('palettes.elastic.tag', {
+    defaultMessage: 'Default',
   }),
   // Return exact colors requested given enough rotations
   colorFn: (n) => euiPaletteColorBlind({ rotations: Math.ceil(n / 10) }).slice(0, n),

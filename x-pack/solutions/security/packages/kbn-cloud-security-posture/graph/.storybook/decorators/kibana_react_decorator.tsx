@@ -8,6 +8,7 @@ import React, { ComponentType } from 'react';
 import { action } from '@storybook/addon-actions';
 import { createKibanaReactContext, type KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { of } from 'rxjs';
 import {
   WEB_STORAGE_CLEAR_ACTION,
@@ -110,6 +111,7 @@ const uiSettings: Record<string, unknown> = {
 };
 
 const services: Partial<KibanaServices> = {
+  application: applicationServiceMock.createStartContract(),
   uiSettings: {
     // @ts-ignore
     get: (key: string) => uiSettings[key],

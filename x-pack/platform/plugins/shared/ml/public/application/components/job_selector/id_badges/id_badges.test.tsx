@@ -9,8 +9,19 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { IdBadgesProps } from './id_badges';
 import { IdBadges } from './id_badges';
+import type { MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => ({
+    services: {
+      share: { url: { locators: jest.fn() } },
+      application: { navigateToUrl: jest.fn() },
+    },
+  }),
+}));
 
 const props: IdBadgesProps = {
+  page: 'jobs',
   limit: 2,
   selectedGroups: [
     {
@@ -25,6 +36,21 @@ const props: IdBadgesProps = {
   selectedJobIds: ['job1', 'job2', 'job3'],
   onLinkClick: jest.fn(),
   showAllBarBadges: false,
+  onRemoveJobId: jest.fn(),
+  selectedJobs: [
+    {
+      id: 'job1',
+      isSingleMetricViewerJob: false,
+    } as MlSummaryJob,
+    {
+      id: 'job2',
+      isSingleMetricViewerJob: true,
+    } as MlSummaryJob,
+    {
+      id: 'job3',
+      isSingleMetricViewerJob: true,
+    } as MlSummaryJob,
+  ],
 };
 
 const overLimitProps: IdBadgesProps = { ...props, selectedJobIds: ['job4'] };

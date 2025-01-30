@@ -70,6 +70,7 @@ export const renderApp = (
     share,
     ml,
     fleet,
+    uiActions,
   } = plugins;
 
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
@@ -115,6 +116,7 @@ export const renderApp = (
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
+    uiActions,
     uiSettings,
     updateSideNavDefinition,
   });

@@ -1092,6 +1092,9 @@
       "status": {
         "type": "keyword"
       },
+      "timestampField": {
+        "type": "keyword"
+      },
       "type": {
         "type": "keyword"
       }

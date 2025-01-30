@@ -180,7 +180,7 @@ export function AlertsSearchBar({
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
       showQueryInput={true}
-      saveQueryMenuVisibility="allowed_by_app_privilege"
+      allowSavingQueries
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
       onQueryChange={onSearchQueryChange}

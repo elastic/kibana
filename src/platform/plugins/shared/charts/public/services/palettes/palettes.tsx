@@ -215,6 +215,7 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
   return {
     default: {
       title: defaultPalette.name,
+      tag: defaultPalette.tag,
       ...buildRoundRobinCategoricalWithMappedColors(
         'default', // needs to match key of palette definition
         defaultPalette.colors(),

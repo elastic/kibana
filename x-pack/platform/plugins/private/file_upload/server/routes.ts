@@ -38,10 +38,11 @@ function importData(
   settings: IndicesIndexSettings,
   mappings: MappingTypeMapping,
   ingestPipeline: IngestPipelineWrapper,
+  createPipelines: IngestPipelineWrapper[],
   data: InputData
 ) {
   const { importData: importDataFunc } = importDataProvider(client);
-  return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
+  return importDataFunc(id, index, settings, mappings, ingestPipeline, createPipelines, data);
 }
 
 /**
@@ -183,7 +184,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       async (context, request, response) => {
         try {
           const { id } = request.query;
-          const { index, data, settings, mappings, ingestPipeline } = request.body;
+          const { index, data, settings, mappings, ingestPipeline, createPipelines } = request.body;
           const esClient = (await context.core).elasticsearch.client;
 
           // `id` being `undefined` tells us that this is a new import due to create a new index.
@@ -201,6 +202,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             mappings,
             // @ts-expect-error
             ingestPipeline,
+            createPipelines,
             data
           );
           return response.ok({ body: result });
@@ -392,6 +394,50 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const { base64File } = request.body;
           const esClient = (await context.core).elasticsearch.client;
           const resp = await previewTikaContents(esClient, base64File);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/remove_pipelines Remove a list of ingest pipelines
+   * @apiName RemovePipelines
+   * @apiDescription Remove a list of ingest pipelines by id
+   */
+  router.versioned
+    .delete({
+      path: '/internal/file_upload/remove_pipelines/{pipelineIds}',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({ pipelineIds: schema.string() }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { pipelineIds } = request.params;
+          const esClient = (await context.core).elasticsearch.client;
+
+          const resp = await Promise.all(
+            pipelineIds.split(',').map((id) => esClient.asCurrentUser.ingest.deletePipeline({ id }))
+          );
 
           return response.ok({
             body: resp,
