@@ -79,6 +79,8 @@ export function ServiceOverviewDependenciesTable({
   );
 
   useEffect(() => {
+    // this component is used both for the service overview tab and the transactions tab,
+    // onLoadTable will be defined if it's the service overview tab
     if (status === FETCH_STATUS.SUCCESS && onLoadTable && !hasTableLoaded) {
       onLoadTable();
       setHasTableLoaded(true);

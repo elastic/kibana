@@ -101,6 +101,8 @@ export function ErrorGroupList({
   const { onPageReady } = usePerformanceContext();
 
   useEffect(() => {
+    // this component is used both for the service overview tab and the errors tab,
+    // onLoadTable will be defined if it's the service overview tab
     if (
       mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
       detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
