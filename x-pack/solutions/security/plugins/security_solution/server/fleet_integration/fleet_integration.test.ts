@@ -421,7 +421,7 @@ describe('Fleet integrations', () => {
       );
 
       expect(exceptionListClient.createExceptionList).toHaveBeenCalledWith(
-        expect.objectContaining({ listId: ENDPOINT_EVENT_FILTERS_LIST_ID })
+        expect.objectContaining({ listId: ENDPOINT_EVENT_FILTERS_LIST_ID, meta: undefined })
       );
 
       expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
@@ -439,6 +439,7 @@ describe('Fleet integrations', () => {
           ],
           itemId: 'NEW_UUID',
           namespaceType: 'agnostic',
+          meta: undefined,
         })
       );
     });
