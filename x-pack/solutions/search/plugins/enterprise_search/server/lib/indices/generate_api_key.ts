@@ -31,6 +31,7 @@ export const generateApiKey = async (
         cluster: ['monitor', 'manage_connector'],
         index: [
           {
+            allow_restricted_indices: true,
             names: [indexName, aclIndexName, `${CONNECTORS_INDEX}*`],
             privileges: ['all'],
           },
