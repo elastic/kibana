@@ -839,6 +839,7 @@ export const UnifiedDataTable = ({
   const {
     rowHeight: headerRowHeight,
     rowHeightLines: headerRowHeightLines,
+    lineCountInput: headerLineCountInput,
     onChangeRowHeight: onChangeHeaderRowHeight,
     onChangeRowHeightLines: onChangeHeaderRowHeightLines,
   } = useRowHeight({
@@ -850,14 +851,15 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight: onUpdateHeaderRowHeight,
   });
 
-  const { rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = useRowHeight({
-    storage,
-    consumer,
-    key: 'dataGridRowHeight',
-    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
-    rowHeightState,
-    onUpdateRowHeight,
-  });
+  const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
+    useRowHeight({
+      storage,
+      consumer,
+      key: 'dataGridRowHeight',
+      configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+      rowHeightState,
+      onUpdateRowHeight,
+    });
 
   const euiGridColumns = useMemo(
     () =>
@@ -1063,23 +1065,22 @@ export const UnifiedDataTable = ({
           {onUpdateDataGridDensity ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
-            rowHeightLines={rowHeightLines}
             onChangeRowHeight={onChangeRowHeight}
             onChangeRowHeightLines={onChangeRowHeightLines}
             headerRowHeight={headerRowHeight}
-            headerRowHeightLines={headerRowHeightLines}
             onChangeHeaderRowHeight={onChangeHeaderRowHeight}
             onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
             maxAllowedSampleSize={maxAllowedSampleSize}
             sampleSize={sampleSizeState}
             onChangeSampleSize={onUpdateSampleSize}
+            lineCountInput={lineCountInput}
+            headerLineCountInput={headerLineCountInput}
           />
         </>
       ),
     };
   }, [
     headerRowHeight,
-    headerRowHeightLines,
     maxAllowedSampleSize,
     onChangeHeaderRowHeight,
     onChangeHeaderRowHeightLines,
@@ -1089,9 +1090,10 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight,
     onUpdateSampleSize,
     rowHeight,
-    rowHeightLines,
     sampleSizeState,
     onUpdateDataGridDensity,
+    lineCountInput,
+    headerLineCountInput,
   ]);
 
   const toolbarVisibility = useMemo(
