@@ -293,6 +293,7 @@ function connectorServicePermissions(packagePolicyId: string): [string, Security
         {
           names: ['.elastic-connectors*'],
           privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
+          allow_restricted_indices: true,
         },
         {
           names: ['content-*', '.search-acl-filter-*'],
