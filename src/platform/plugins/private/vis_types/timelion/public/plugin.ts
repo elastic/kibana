@@ -37,7 +37,6 @@ import {
   setUsageCollection,
 } from './helpers/plugin_services';
 
-import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 import { getTimelionVisRenderer } from './timelion_vis_renderer';
 import { TIMELION_VIS_NAME } from '../common/constants';
 import type { TimelionPublicConfig } from '../server/config';
@@ -67,9 +66,7 @@ export interface TimelionVisStartDependencies {
 }
 
 /** @public */
-export interface VisTypeTimelionPluginStart {
-  getArgValueSuggestions: typeof getArgValueSuggestions;
-}
+export interface VisTypeTimelionPluginStart {}
 
 /** @internal */
 export class TimelionVisPlugin
@@ -120,8 +117,6 @@ export class TimelionVisPlugin
       setUsageCollection(usageCollection);
     }
 
-    return {
-      getArgValueSuggestions,
-    };
+    return {};
   }
 }
