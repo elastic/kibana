@@ -14,13 +14,6 @@ import { GlobalConfigService } from '../services/global_config_service';
 
 export const mockLogger = loggingSystemMock.createLogger().get();
 
-export const mockRequestHandler = {
-  createRequest: jest.fn(() => () => {}),
-  hasValidData(data: any) {
-    return (this.createRequest as jest.Mock).mock.calls[0][0].hasValidData(data);
-  },
-};
-
 export const mockMl = mlPluginServerMock.createSetupContract();
 
 export const mockConfig: ConfigType = {
@@ -50,7 +43,6 @@ export const mockConfig: ConfigType = {
 export const mockDependencies = {
   // Mock router should be handled on a per-test basis
   config: mockConfig,
-  enterpriseSearchRequestHandler: mockRequestHandler as any,
   getSavedObjectsService: jest.fn(),
   getStartServices: jest.fn(),
   globalConfigService: new GlobalConfigService(),
