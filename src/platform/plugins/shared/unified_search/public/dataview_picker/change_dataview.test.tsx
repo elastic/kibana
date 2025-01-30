@@ -197,4 +197,37 @@ describe('DataView component', () => {
       },
     ]);
   });
+
+  it('should properly handle managed data views', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          savedDataViews: [
+            {
+              id: 'dataview-1',
+              title: 'dataview-1',
+            },
+          ],
+          managedDataViews: [dataViewMock],
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
+      {
+        id: 'dataview-1',
+        title: 'dataview-1',
+      },
+      {
+        id: 'the-data-view-id',
+        title: 'the-data-view-title',
+        name: 'the-data-view',
+        type: 'default',
+        isManaged: true,
+      },
+    ]);
+  });
 });
