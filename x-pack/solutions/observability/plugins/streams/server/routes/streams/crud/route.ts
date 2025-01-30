@@ -12,6 +12,8 @@ import {
   streamUpsertRequestSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { badData, badRequest } from '@hapi/boom';
+import { hasSupportedStreamsRoot } from '../../../lib/streams/root_stream_definition';
 import { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
@@ -144,6 +146,14 @@ export const editStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
+
+    if (!(await streamsClient.isStreamsEnabled())) {
+      throw badData('Streams are not enabled');
+    }
+
+    if (!hasSupportedStreamsRoot(params.path.id)) {
+      throw badRequest('Cannot create a stream with a different root than "logs"');
+    }
 
     return await streamsClient.upsertStream({
       request: params.body,

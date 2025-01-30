@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { DiagnosticResult, errors } from '@elastic/elasticsearch';
 import {
   IndicesDataStream,
   QueryDslQueryContainer,
@@ -43,7 +43,7 @@ import {
   validateStreamLifecycle,
   validateStreamTypeChanges,
 } from './helpers/validate_stream';
-import { rootStreamDefinition } from './root_stream_definition';
+import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
 import { StreamsStorageClient } from './service';
 import {
   checkAccess,
@@ -56,6 +56,7 @@ import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
+import { NameTakenError } from './errors/name_taken_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -69,8 +70,6 @@ export type SyncStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
 export type ForkStreamResponse = AcknowledgeResponse<'created'>;
 export type ResyncStreamsResponse = AcknowledgeResponse<'updated'>;
 export type UpsertStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
-
-const LOGS_ROOT_STREAM_NAME = 'logs';
 
 function isElasticsearch404(error: unknown): error is errors.ResponseError & { statusCode: 404 } {
   return isResponseError(error) && error.statusCode === 404;
@@ -296,6 +295,8 @@ export class StreamsClient {
     result: 'created' | 'updated';
     parentDefinition?: WiredStreamDefinition;
   }> {
+    await this.assertNoHierarchicalConflicts(definition.name);
+
     const existingDefinition = await this.getStream(definition.name).catch((error) => {
       if (isDefinitionNotFoundError(error)) {
         return undefined;
@@ -342,6 +343,47 @@ export class StreamsClient {
       result,
       parentDefinition,
     };
+  }
+
+  private async assertNoHierarchicalConflicts(definitionName: string) {
+    const streamNames = [...getAncestors(definitionName), definitionName];
+    const hasConflict = await Promise.all(
+      streamNames.map((streamName) => this.isStreamNameTaken(streamName))
+    );
+    const conflicts = streamNames.filter((_, index) => hasConflict[index]);
+
+    if (conflicts.length !== 0) {
+      throw new NameTakenError(
+        `Cannot create stream "${definitionName}" due to hierarchical conflicts caused by existing indices or data streams: [${conflicts.join(
+          ', '
+        )}]`
+      );
+    }
+  }
+
+  private async isStreamNameTaken(streamName: string): Promise<boolean> {
+    try {
+      const definition = await this.getStream(streamName);
+      return isUnwiredStreamDefinition(definition);
+    } catch (error) {
+      if (!isDefinitionNotFoundError(error)) {
+        throw error;
+      }
+    }
+
+    try {
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+        index: streamName,
+      });
+
+      return true;
+    } catch (error) {
+      if (isElasticsearch404(error)) {
+        return false;
+      }
+
+      throw error;
+    }
   }
 
   /**
@@ -530,6 +572,22 @@ export class StreamsClient {
     return this.dependencies.scopedClusterClient.asCurrentUser.indices
       .getDataStream({ name })
       .then((response) => {
+        if (response.data_streams.length === 0) {
+          throw new errors.ResponseError({
+            meta: {
+              aborted: false,
+              attempts: 1,
+              connection: null,
+              context: null,
+              name: 'resource_not_found_exception',
+              request: {} as unknown as DiagnosticResult['meta']['request'],
+            },
+            warnings: [],
+            body: 'resource_not_found_exception',
+            statusCode: 404,
+          });
+        }
+
         const dataStream = response.data_streams[0];
         return dataStream;
       });
