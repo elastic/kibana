@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import styled from '@emotion/styled';
-
-export const Display = styled.div<{ show: boolean }>(({ show }) => ({
-  display: show ? undefined : 'none',
-}));
-
-Display.displayName = 'Display';
+export const VISIBLE_CHROME = 'kbnAppWrapper visibleChrome';
+export const HIDDEN_CHROME = 'kbnAppWrapper hiddenChrome';
+export const FULL_SCREEN_MODE = 'mapsFullScreenMode';
+export const EXIT_FULL_SCREEN = 'exitFullScreenModeButton';
