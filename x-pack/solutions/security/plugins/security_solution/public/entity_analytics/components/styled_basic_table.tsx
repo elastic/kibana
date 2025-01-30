@@ -8,7 +8,7 @@ import styled from '@emotion/styled';
 import { EuiBasicTable } from '@elastic/eui';
 
 // @ts-expect-error TS2769
-export const StyledBasicTable = styled(EuiBasicTable)`
+export const StyledBasicTable: typeof EuiBasicTable = styled(EuiBasicTable)`
   .euiTableRow {
     .euiTableRowCell {
       border-bottom: none !important;
