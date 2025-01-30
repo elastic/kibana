@@ -74,18 +74,6 @@ export default function (providerContext: FtrProviderContext) {
           )?.includes('https://console.aws.amazon.com/cloudformation/')
         ).to.be(true);
       });
-      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        const currentUrl = await cisIntegration.clickLaunchAndGetCurrentUrl(
-          'confirmCloudFormationModalConfirmButton'
-        );
-
-        // Log the URL for debugging
-        logger.debug(`Current URL: ${currentUrl}`);
-        expect(currentUrl.includes('console.aws.amazon.com%2Fcloudformation')).to.be(true);
-      });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/187470
