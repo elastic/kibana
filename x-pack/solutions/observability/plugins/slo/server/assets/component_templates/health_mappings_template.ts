@@ -15,7 +15,7 @@ export const HEALTH_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
   template: {
     mappings: {
       properties: {
-        '@timestamp': {
+        createdAt: {
           type: 'date',
           format: 'date_optional_time||epoch_millis',
         },
@@ -46,11 +46,11 @@ export const HEALTH_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
         tags: {
           type: 'keyword',
         },
-        health: {
+        status: {
+          type: 'keyword',
+        },
+        data: {
           properties: {
-            status: {
-              type: 'keyword',
-            },
             summaryUpdatedAt: {
               type: 'date',
               format: 'date_optional_time||epoch_millis',
@@ -59,22 +59,34 @@ export const HEALTH_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
               type: 'date',
               format: 'date_optional_time||epoch_millis',
             },
-            latency: {
+            delay: {
+              type: 'long',
+            },
+            staleTime: {
               type: 'long',
             },
             outdatedVersion: { type: 'boolean' },
             summaryTransform: {
               properties: {
                 id: { type: 'keyword', ignore_above: 256 },
-                health: { type: 'keyword' },
-                error: { type: 'text' },
+                state: { type: 'keyword' },
+                health: {
+                  properties: {
+                    status: { type: 'keyword' },
+                  },
+                },
               },
             },
             rollupTransform: {
               properties: {
                 id: { type: 'keyword', ignore_above: 256 },
-                health: { type: 'keyword' },
-                error: { type: 'text' },
+                state: { type: 'keyword' },
+                reason: { type: 'text' },
+                health: {
+                  properties: {
+                    status: { type: 'keyword' },
+                  },
+                },
               },
             },
           },

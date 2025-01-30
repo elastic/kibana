@@ -65,12 +65,12 @@ export const SLI_DESTINATION_INDEX_NAME = `.slo-observability.sli-v${SLO_RESOURC
 export const SLI_DESTINATION_INDEX_PATTERN = `.slo-observability.sli-v${SLO_RESOURCES_VERSION_MAJOR}*`;
 export const SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}.`;
 
-export const HEALTH_COMPONENT_TEMPLATE_MAPPINGS_NAME = 'slo-observability.health-mappings';
-export const HEALTH_COMPONENT_TEMPLATE_SETTINGS_NAME = 'slo-observability.health-settings';
-export const HEALTH_INDEX_TEMPLATE_NAME = 'slo-observability.health';
-export const HEALTH_INDEX_TEMPLATE_PATTERN = `slo-observability.health-*`;
-export const HEALTH_INDEX_NAME = `slo-observability.health-v${SLO_RESOURCES_VERSION}`;
-export const HEALTH_INDEX_PATTERN = `slo-observability.health-v${SLO_RESOURCES_VERSION_MAJOR}*`;
+export const HEALTH_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.health-mappings';
+export const HEALTH_COMPONENT_TEMPLATE_SETTINGS_NAME = '.slo-observability.health-settings';
+export const HEALTH_INDEX_TEMPLATE_NAME = '.slo-observability.health';
+export const HEALTH_INDEX_TEMPLATE_PATTERN = `.slo-observability.health-*`;
+export const HEALTH_INDEX_NAME = `.slo-observability.health-v${SLO_RESOURCES_VERSION}`;
+export const HEALTH_INDEX_PATTERN = `.slo-observability.health-v${SLO_RESOURCES_VERSION_MAJOR}*`;
 
 export const SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.summary-mappings';
 export const SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME = '.slo-observability.summary-settings';

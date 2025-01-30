@@ -7,7 +7,6 @@
 
 import { errors } from '@elastic/elasticsearch';
 import {
-  ElasticsearchClient,
   SavedObjectsClient,
   type CoreSetup,
   type Logger,
@@ -19,10 +18,8 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { SLOConfig } from '../../types';
-import { StoredSLODefinition } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
+import { ComputeHealth } from '../ops_management/compute_health';
 
 export const TYPE = 'slo:health-task';
 export const VERSION = '1.0.0';
@@ -121,7 +118,8 @@ export class HealthTask {
         return;
       }
 
-      await this.computeHealth(esClient, soClient);
+      const computeHealth = new ComputeHealth(esClient, soClient, this.logger);
+      await computeHealth.execute();
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
         this.logger.warn(`[HealthTask] request aborted due to timeout: ${err}`);
@@ -130,24 +128,5 @@ export class HealthTask {
       }
       this.logger.error(`[HealthTask] error: ${err}`);
     }
-  }
-
-  private async computeHealth(esClient: ElasticsearchClient, soClient: SavedObjectsClient) {
-    this.logger.info('[HealthTask] Computing health...');
-
-    const finder = await soClient.createPointInTimeFinder<StoredSLODefinition>({
-      type: SO_SLO_TYPE,
-      perPage: 100,
-      namespaces: ['*'],
-    });
-
-    for await (const definitions of finder.find()) {
-      console.dir(definitions, { depth: 4 });
-
-      // extract the transform ID from every definitions.attributes using the id and revision
-      // get the transform stats for each transform ID
-    }
-
-    await finder.close();
   }
 }

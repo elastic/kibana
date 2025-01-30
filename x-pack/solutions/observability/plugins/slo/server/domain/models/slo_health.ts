@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './duration';
-export * from './indicators';
-export * from './time_window';
-export * from './slo';
-export * from './settings';
-export * from './health';
-export * from './slo_health';
+import { sloHealthSchema } from '@kbn/slo-schema';
+import * as t from 'io-ts';
+
+type SLOHealth = t.TypeOf<typeof sloHealthSchema>;
+
+export type { SLOHealth };

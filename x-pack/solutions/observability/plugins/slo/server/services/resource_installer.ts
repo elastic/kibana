@@ -17,15 +17,15 @@ import {
   SUMMARY_DESTINATION_INDEX_NAME,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { HEALTH_MAPPINGS_TEMPLATE } from '../assets/component_templates/health_mappings_template';
+import { HEALTH_SETTINGS_TEMPLATE } from '../assets/component_templates/health_settings_template';
 import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/slI_mappings_template';
 import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/slI_settings_template';
 import { SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/summary_mappings_template';
 import { SUMMARY_SETTINGS_TEMPLATE } from '../assets/component_templates/summary_settings_template';
+import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
-import { HEALTH_MAPPINGS_TEMPLATE } from '../assets/component_templates/health_mappings_template';
-import { HEALTH_SETTINGS_TEMPLATE } from '../assets/component_templates/health_settings_template';
-import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_template';
 import { retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
@@ -93,7 +93,9 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       this.esClient
     );
     if (template._meta?.version && currentVersion === template._meta.version) {
-      this.logger.info(`SLO component template found with version [${template._meta.version}]`);
+      this.logger.info(
+        `SLO component template [${template.name}] found with version [${template._meta.version}]`
+      );
     } else {
       this.logger.info(`Installing SLO component template [${template.name}]`);
       return this.execute(() => this.esClient.cluster.putComponentTemplate(template));
@@ -108,7 +110,9 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     );
 
     if (template._meta?.version && currentVersion === template._meta.version) {
-      this.logger.info(`SLO index template found with version [${template._meta.version}]`);
+      this.logger.info(
+        `SLO index template [${template.name}] found with version [${template._meta.version}]`
+      );
     } else {
       this.logger.info(`Installing SLO index template [${template.name}]`);
       return this.execute(() => this.esClient.indices.putIndexTemplate(template));
