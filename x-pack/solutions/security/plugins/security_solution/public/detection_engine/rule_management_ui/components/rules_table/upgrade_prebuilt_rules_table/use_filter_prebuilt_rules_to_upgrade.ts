@@ -31,8 +31,11 @@ export const useFilterPrebuiltRulesToUpgrade = ({
         return false;
       }
 
+      let tagsFilteringResult = true;
+      let ruleSourceFilteringResult = true;
+
       if (tags && tags.length > 0) {
-        return tags.every((tag) => ruleInfo.current_rule.tags.includes(tag));
+        tagsFilteringResult = tags.every((tag) => ruleInfo.current_rule.tags.includes(tag));
       }
 
       if (ruleSource && ruleSource.length > 0) {
@@ -40,21 +43,21 @@ export const useFilterPrebuiltRulesToUpgrade = ({
           ruleSource.includes(RuleCustomizationEnum.customized) &&
           ruleSource.includes(RuleCustomizationEnum.not_customized)
         ) {
-          return true;
+          ruleSourceFilteringResult = true;
         } else if (
           ruleSource.includes(RuleCustomizationEnum.customized) &&
           ruleInfo.current_rule.rule_source.type === 'external'
         ) {
-          return ruleInfo.current_rule.rule_source.is_customized;
+          ruleSourceFilteringResult = ruleInfo.current_rule.rule_source.is_customized;
         } else if (
           ruleSource.includes(RuleCustomizationEnum.not_customized) &&
           ruleInfo.current_rule.rule_source.type === 'external'
         ) {
-          return ruleInfo.current_rule.rule_source.is_customized === false;
+          ruleSourceFilteringResult = ruleInfo.current_rule.rule_source.is_customized === false;
         }
       }
 
-      return true;
+      return tagsFilteringResult && ruleSourceFilteringResult;
     });
   }, [filterOptions, data]);
 };
