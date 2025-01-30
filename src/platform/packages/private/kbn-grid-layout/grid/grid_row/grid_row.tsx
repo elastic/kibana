@@ -38,7 +38,6 @@ export const GridRow = ({
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getKeysInOrder(currentRow.panels)
   );
-  const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
   /** Set initial styles based on state at mount to prevent styles from "blipping" */
@@ -73,7 +72,6 @@ export const GridRow = ({
 
       /**
        * This subscription ensures that the row will re-render when one of the following changes:
-       * - Title
        * - Collapsed state
        * - Panel IDs (adding/removing/replacing, but not reordering)
        */
@@ -93,7 +91,6 @@ export const GridRow = ({
           pairwise()
         )
         .subscribe(([oldRowData, newRowData]) => {
-          if (oldRowData.title !== newRowData.title) setRowTitle(newRowData.title);
           if (oldRowData.isCollapsed !== newRowData.isCollapsed)
             setIsCollapsed(newRowData.isCollapsed);
           if (
@@ -165,13 +162,14 @@ export const GridRow = ({
     >
       {rowIndex !== 0 && (
         <GridRowHeader
+          rowIndex={rowIndex}
+          gridLayoutStateManager={gridLayoutStateManager}
           isCollapsed={isCollapsed}
           toggleIsCollapsed={() => {
             const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
             newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
             gridLayoutStateManager.gridLayout$.next(newLayout);
           }}
-          rowTitle={rowTitle}
         />
       )}
       {!isCollapsed && (
