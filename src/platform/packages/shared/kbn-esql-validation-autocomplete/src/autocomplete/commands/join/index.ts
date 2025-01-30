@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type ESQLAstItem, ESQLAst } from '@kbn/esql-ast';
-import { ESQLCommand } from '@kbn/esql-ast/src/types';
+import { type ESQLAstItem, ESQLAst, ESQLCommand, mutate, LeafPrinter } from '@kbn/esql-ast';
+import type { ESQLAstJoinCommand } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from '../../../shared/types';
 import {
   CommandBaseDefinition,
@@ -40,6 +40,46 @@ const getFullCommandMnemonics = (
     `${type.name.toUpperCase()} ${definition.name.toUpperCase()}`,
     type.description ?? definition.description,
   ]);
+};
+
+const suggestFields = async (
+  command: ESQLCommand<'join'>,
+  getColumnsByType: GetColumnsByTypeFn,
+  callbacks?: ESQLCallbacks
+) => {
+  const summary = mutate.commands.join.summarizeCommand(command as ESQLAstJoinCommand);
+  const joinIndexPattern = LeafPrinter.print(summary.target.index);
+
+  const [lookupIndexFields, sourceFields] = await Promise.all([
+    callbacks?.getColumnsFor?.({ query: `FROM ${joinIndexPattern}` }),
+    getColumnsByType(['any'], [], {
+      advanceCursor: true,
+      openSuggestions: true,
+    }),
+  ]);
+
+  const supportsControls = callbacks?.canSuggestVariables?.() ?? false;
+  const getVariablesByType = callbacks?.getVariablesByType;
+  const joinFields = buildFieldsDefinitionsWithMetadata(
+    lookupIndexFields!,
+    { supportsControls },
+    getVariablesByType
+  );
+
+  const intersection = suggestionIntersection(joinFields, sourceFields);
+  const union = suggestionUnion(sourceFields, joinFields);
+
+  for (const commonField of intersection) {
+    commonField.sortText = '1';
+    commonField.kind = 'Issue';
+    commonField.documentation = {
+      value: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.join.sharedField', {
+        defaultMessage: 'Field shared between the source and the lookup index',
+      }),
+    };
+  }
+
+  return [...intersection, ...union];
 };
 
 export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
@@ -118,36 +158,9 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
     }
 
     case 'after_on': {
-      const res = await callbacks?.getColumnsFor?.({ query: 'FROM lookup_index' });
-      const supportsControls = callbacks?.canSuggestVariables?.() ?? false;
-      const getVariablesByType = callbacks?.getVariablesByType;
-      const joinFields = buildFieldsDefinitionsWithMetadata(
-        res!,
-        { supportsControls },
-        getVariablesByType
-      );
-      const sourceFields = await getColumnsByType(['any'], [], {
-        advanceCursor: true,
-        openSuggestions: true,
-      });
+      const fields = await suggestFields(command, getColumnsByType, callbacks);
 
-      const intersection = suggestionIntersection(joinFields, sourceFields);
-      const union = suggestionUnion(sourceFields, joinFields);
-
-      for (const commonField of intersection) {
-        commonField.sortText = '1';
-        commonField.kind = 'Issue';
-        commonField.documentation = {
-          value: i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.autocomplete.join.sharedField',
-            {
-              defaultMessage: 'Field shared between the source and the lookup index',
-            }
-          ),
-        };
-      }
-
-      return [...intersection, ...union];
+      return fields;
     }
 
     case 'condition': {
@@ -156,10 +169,7 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
       const commaIsLastToken = !!match?.groups?.comma;
 
       if (commaIsLastToken) {
-        const fields = await getColumnsByType(['any'], [], {
-          advanceCursor: true,
-          openSuggestions: true,
-        });
+        const fields = await suggestFields(command, getColumnsByType, callbacks);
 
         return fields;
       }
