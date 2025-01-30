@@ -35,9 +35,9 @@ export class TypesService {
     };
   }
 
-  private async getAll() {
+  private getAll = async () => {
     return await asyncMap(Object.values(this.types), async (getVisType) => {
-      return getVisType()
+      return await getVisType();
     });
   }
 
