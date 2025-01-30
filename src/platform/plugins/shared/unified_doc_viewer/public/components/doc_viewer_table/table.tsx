@@ -527,6 +527,9 @@ export const DocViewerTable = ({
             renderCellPopover={renderCellPopover}
             pagination={pagination}
             leadingControlColumns={leadingControlColumns}
+            gridStyle={{
+              rowHover: 'highlight',
+            }}
           />
         </EuiFlexItem>
       )}
