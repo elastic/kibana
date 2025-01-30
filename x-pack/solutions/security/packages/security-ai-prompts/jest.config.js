@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-export interface Prompt {
-  promptId: string;
-  promptGroupId: string;
-  prompt: {
-    default: string;
-  };
-  provider?: string;
-  model?: string;
-  description?: string;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/security-ai-prompts'],
+};
