@@ -13,6 +13,7 @@ import {
   IngestStreamEffectiveLifecycle,
   IngestStreamGetResponse,
   isDslLifecycle,
+  isErrorLifecycle,
   isIlmLifecycle,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -171,6 +172,16 @@ function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecyc
     );
   }
 
+  if (isErrorLifecycle(lifecycle)) {
+    return (
+      <EuiBadge color="hollow">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
+          defaultMessage: 'Error: {message}',
+          values: { message: lifecycle.error.message },
+        })}
+      </EuiBadge>
+    );
+  }
   if (isDslLifecycle(lifecycle)) {
     return (
       <EuiBadge color="hollow">

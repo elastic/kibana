@@ -6,13 +6,13 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
 import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
+import { EuiCallOut, EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { useKibana } from '../../hooks/use_kibana';
-import { Wrapper } from './wrapper';
+import { ManagementTabs, Wrapper } from './wrapper';
 
 type ManagementSubTabs = 'enrich' | 'overview';
 
@@ -41,20 +41,24 @@ export function ClassicStreamDetailManagement({
       inherited_fields: {},
       effective_lifecycle: definition.effective_lifecycle,
       name: definition.stream.name,
+      data_stream_exists: definition.data_stream_exists,
       stream: {
         ...definition.stream,
       },
     };
   }, [definition]);
 
-  const tabs = {
+  const tabs: ManagementTabs = {
     overview: {
       content: <UnmanagedStreamOverview definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),
     },
-    enrich: {
+  };
+
+  if (definition.data_stream_exists) {
+    tabs.enrich = {
       content: (
         <StreamDetailEnrichment
           definition={legacyDefinition}
@@ -64,8 +68,8 @@ export function ClassicStreamDetailManagement({
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
         defaultMessage: 'Extract field',
       }),
-    },
-  };
+    };
+  }
 
   if (!isValidManagementSubTab(subtab)) {
     return (
@@ -93,6 +97,24 @@ function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetR
     }
     return acc;
   }, {} as Record<string, Array<{ type: string; id: string }>>);
+  if (!definition.data_stream_exists) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
+          defaultMessage: 'Data stream missing',
+        })}
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
+            defaultMessage:
+              'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+          })}{' '}
+        </p>
+      </EuiCallOut>
+    );
+  }
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiText>

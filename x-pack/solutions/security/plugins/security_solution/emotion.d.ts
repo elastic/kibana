@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-export interface Prompt {
-  promptId: string;
-  promptGroupId: string;
-  prompt: {
-    default: string;
-  };
-  provider?: string;
-  model?: string;
-  description?: string;
+import '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+declare module '@emotion/react' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface Theme extends UseEuiTheme {}
 }

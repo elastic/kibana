@@ -19,7 +19,11 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { IngestStreamGetResponse, isWiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  IngestStreamGetResponse,
+  isUnWiredStreamGetResponse,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
@@ -126,7 +130,10 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
 
   const docCountFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition) {
+      if (
+        !definition ||
+        (isUnWiredStreamGetResponse(definition) && !definition.data_stream_exists)
+      ) {
         return undefined;
       }
       return streamsRepositoryClient.fetch('GET /api/streams/{id}/_details', {

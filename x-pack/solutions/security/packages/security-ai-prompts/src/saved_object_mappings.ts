@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { promptSavedObjectType } from '../../../common/constants';
 
+export const promptSavedObjectType = 'security-ai-prompt';
 export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
