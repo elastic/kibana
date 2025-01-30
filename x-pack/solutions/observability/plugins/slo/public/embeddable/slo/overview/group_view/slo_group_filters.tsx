@@ -254,7 +254,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           query={{ query: String(kqlQuery), language: 'kuery' }}
           showDatePicker={false}
           disableQueryLanguageSwitcher={true}
-          saveQueryMenuVisibility="globally_managed"
+          allowSavingQueries
           onClearSavedQuery={() => {}}
           showQueryInput={true}
           onSavedQueryUpdated={(savedQuery) => {

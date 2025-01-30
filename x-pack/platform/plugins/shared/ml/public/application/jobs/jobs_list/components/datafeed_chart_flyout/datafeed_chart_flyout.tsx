@@ -52,6 +52,7 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import type {
   CombinedJobWithStats,
@@ -87,7 +88,7 @@ interface DatafeedChartFlyoutProps {
   jobId: string;
   end: number;
   onClose: () => void;
-  onModelSnapshotAnnotationClick: (modelSnapshot: ModelSnapshot) => void;
+  onModelSnapshotAnnotationClick?: (modelSnapshot: ModelSnapshot) => void;
 }
 
 function setLineAnnotationHeader(
@@ -356,21 +357,23 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           onChange={() => setShowAnnotations(!showAnnotations)}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiCheckbox
-                          id={checkboxIdModelSnapshot}
-                          label={
-                            <EuiText size={'xs'}>
-                              <FormattedMessage
-                                id="xpack.ml.jobsList.datafeedChart.showModelSnapshotsCheckboxLabel"
-                                defaultMessage="Show model snapshots"
-                              />
-                            </EuiText>
-                          }
-                          checked={showModelSnapshots}
-                          onChange={() => setShowModelSnapshots(!showModelSnapshots)}
-                        />
-                      </EuiFlexItem>
+                      {onModelSnapshotAnnotationClick ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiCheckbox
+                            id={checkboxIdModelSnapshot}
+                            label={
+                              <EuiText size={'xs'}>
+                                <FormattedMessage
+                                  id="xpack.ml.jobsList.datafeedChart.showModelSnapshotsCheckboxLabel"
+                                  defaultMessage="Show model snapshots"
+                                />
+                              </EuiText>
+                            }
+                            checked={showModelSnapshots}
+                            onChange={() => setShowModelSnapshots(!showModelSnapshots)}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -421,10 +424,17 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             )
                               return;
 
-                            onModelSnapshotAnnotationClick(
-                              // @ts-expect-error property 'modelSnapshot' does not exist on type
-                              annotations.lines[0].datum.modelSnapshot
-                            );
+                            if (
+                              onModelSnapshotAnnotationClick &&
+                              isPopulatedObject<string, ModelSnapshot>(
+                                annotations.lines?.[0]?.datum,
+                                ['modelSnapshot']
+                              )
+                            ) {
+                              onModelSnapshotAnnotationClick(
+                                annotations.lines[0].datum.modelSnapshot
+                              );
+                            }
                           }}
                           theme={{
                             lineSeriesStyle: {
