@@ -307,6 +307,14 @@ paths:
             schema:
               type: object
               properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  description: The number of documents per second to process.
+                  type: integer
                 enrichPolicyExecutionInterval:
                   $ref: '#/components/schemas/Interval'
                 entityTypes:
@@ -319,12 +327,28 @@ paths:
                   type: integer
                 filter:
                   type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
                   default: 24h
-                  description: The lookback period for the entity store
+                  description: >-
+                    The amount of time the transform looks back to calculate the
+                    aggregations.
                   pattern: '[smdh]$'
+                  type: string
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp.
                   type: string
         description: Schema for the entity store initialization
         required: true
@@ -429,6 +453,14 @@ paths:
             schema:
               type: object
               properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  description: The number of documents per second to process.
+                  type: integer
                 enrichPolicyExecutionInterval:
                   $ref: '#/components/schemas/Interval'
                 fieldHistoryLength:
@@ -437,8 +469,29 @@ paths:
                   type: integer
                 filter:
                   type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: >-
+                    The amount of time the transform looks back to calculate the
+                    aggregations.
+                  pattern: '[smdh]$'
+                  type: string
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp for the entity type.
+                  type: string
         description: Schema for the engine initialization
         required: true
       responses:
@@ -455,7 +508,7 @@ paths:
     post:
       operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine
           in: path
           name: entityType
           required: true
@@ -1007,11 +1060,21 @@ components:
     EngineDescriptor:
       type: object
       properties:
+        delay:
+          default: 1m
+          pattern: '[smdh]$'
+          type: string
+        docsPerSecond:
+          type: integer
         error:
           type: object
         fieldHistoryLength:
           type: integer
         filter:
+          type: string
+        frequency:
+          default: 1m
+          pattern: '[smdh]$'
           type: string
         indexPattern:
           $ref: '#/components/schemas/IndexPattern'
@@ -1021,6 +1084,12 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/EngineStatus'
+        timeout:
+          default: 180s
+          pattern: '[smdh]$'
+          type: string
+        timestampField:
+          type: string
         type:
           $ref: '#/components/schemas/EntityType'
       required:
@@ -1160,6 +1229,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         host:
           type: object
           properties:
@@ -1198,7 +1273,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - host
         - entity
     IdField:
@@ -1307,6 +1381,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         service:
           type: object
           properties:
@@ -1317,7 +1397,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - service
         - entity
     StoreStatus:
@@ -1363,6 +1442,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         user:
           type: object
           properties:
@@ -1397,7 +1482,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - user
         - entity
   securitySchemes:
