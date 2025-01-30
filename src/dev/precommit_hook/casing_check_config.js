@@ -99,9 +99,9 @@ export const IGNORE_FILE_GLOBS = [
  * @type {Array}
  */
 export const KEBAB_CASE_DIRECTORY_GLOBS = [
-  'packages/*',
   'x-pack',
   'x-pack/packages/*',
+  'src/dev/packages/*/*',
   'src/core/packages/*/*',
   'src/platform/packages/private/*',
   'src/platform/packages/shared/*',
@@ -129,9 +129,9 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
 export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
-  'packages/*',
+  'src/dev/packages/*',
   'x-pack/packages/ai-infra/*',
-  'packages/kbn-pm/src/utils/__fixtures__/*',
+  'kbn-pm/src/utils/__fixtures__/*',
   'src/dev/packages/check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
   'x-pack/dev-tools',
   'src/dev/packages/optimizer/src/__fixtures__/mock_repo/x-pack',

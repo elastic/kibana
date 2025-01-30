@@ -12,7 +12,7 @@ import { getConfigFilePath } from './get_config_file';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 // Not mocking to validate the actual path to the config file
-const CONFIG_ROOT = path.join(REPO_ROOT, 'packages', 'kbn-scout', 'src', 'config');
+const CONFIG_ROOT = path.join(REPO_ROOT, 'src/dev/packages/scout/src/config');
 
 describe('getConfigFilePath', () => {
   it('should return the correct path for stateful config', () => {

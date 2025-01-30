@@ -102,7 +102,7 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
      *      - folder/
      *        - bar.ts <-- the linted fle
      * import "x-pack/common/foo" should be
-     * import ../../../../foo
+     * import ../../foo
      */
     {
       code: dedent`
@@ -121,11 +121,11 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
       errors: [
         {
           line: 1,
-          message: 'Imported module "x-pack/common/foo" should be "../../../../foo"',
+          message: 'Imported module "x-pack/common/foo" should be "../../foo"',
         },
       ],
       output: dedent`
-        import '../../../../foo'
+        import '../../foo'
       `,
     },
     /**
@@ -138,7 +138,7 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
      *        - example <-- the linted file
      *
      * import "x-pack/common/foo" should be
-     * import ../../../../common/foo
+     * import ../../common/foo
      */
     {
       code: dedent`
@@ -157,11 +157,11 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
       errors: [
         {
           line: 1,
-          message: 'Imported module "x-pack/common/foo" should be "../../../../common/foo"',
+          message: 'Imported module "x-pack/common/foo" should be "../../common/foo"',
         },
       ],
       output: dedent`
-        import '../../../../common/foo'
+        import '../../common/foo'
       `,
     },
 
