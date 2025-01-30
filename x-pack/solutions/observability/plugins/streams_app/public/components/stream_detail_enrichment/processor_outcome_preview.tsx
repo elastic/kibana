@@ -96,9 +96,8 @@ export const ProcessorOutcomePreview = ({
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <OutcomePreviewTable documents={simulationDocuments} columns={tableColumns} />
+      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </>
   );
 };

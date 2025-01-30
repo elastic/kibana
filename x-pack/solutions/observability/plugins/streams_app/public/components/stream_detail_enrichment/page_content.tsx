@@ -86,9 +86,7 @@ export function StreamDetailEnrichmentContent({
         paddingSize="none"
         css={css`
           display: flex;
-          max-width: 100%;
           overflow: auto;
-          flex-grow: 1;
         `}
       >
         <EuiResizableContainer>
@@ -99,38 +97,31 @@ export function StreamDetailEnrichmentContent({
                 minSize="400px"
                 tabIndex={0}
                 paddingSize="none"
-                css={css`
-                  display: flex;
-                  flex-direction: column;
-                `}
+                css={verticalFlexCss}
               >
                 <ProcessorsHeader />
                 <EuiPanel
                   paddingSize="m"
                   hasShadow={false}
                   borderRadius="none"
-                  color="plain"
                   css={css`
                     overflow: auto;
                   `}
                 >
                   {hasProcessors && (
-                    <>
-                      <SortableList onDragItem={handlerItemDrag}>
-                        {processors.map((processor, idx) => (
-                          <DraggableProcessorListItem
-                            key={processor.id}
-                            idx={idx}
-                            definition={definition}
-                            processor={processor}
-                            onUpdateProcessor={updateProcessor}
-                            onDeleteProcessor={deleteProcessor}
-                            onWatchProcessor={watchProcessor}
-                          />
-                        ))}
-                      </SortableList>
-                      <EuiSpacer size="s" />
-                    </>
+                    <SortableList onDragItem={handlerItemDrag}>
+                      {processors.map((processor, idx) => (
+                        <DraggableProcessorListItem
+                          key={processor.id}
+                          idx={idx}
+                          definition={definition}
+                          processor={processor}
+                          onUpdateProcessor={updateProcessor}
+                          onDeleteProcessor={deleteProcessor}
+                          onWatchProcessor={watchProcessor}
+                        />
+                      ))}
+                    </SortableList>
                   )}
                   <AddProcessorPanel
                     key={processors.length} // Used to force reset the inner form state once a new processor is added
@@ -148,10 +139,7 @@ export function StreamDetailEnrichmentContent({
                 minSize="300px"
                 tabIndex={0}
                 paddingSize="s"
-                css={css`
-                  display: flex;
-                  flex-direction: column;
-                `}
+                css={verticalFlexCss}
               >
                 <SimulationPlayground
                   definition={definition}
@@ -186,7 +174,6 @@ const ProcessorsHeader = () => {
       paddingSize="m"
       hasShadow={false}
       borderRadius="none"
-      color="plain"
       grow={false}
       css={css`
         z-index: ${euiTheme.levels.maskBelowHeader};
@@ -208,3 +195,8 @@ const ProcessorsHeader = () => {
     </EuiPanel>
   );
 };
+
+const verticalFlexCss = css`
+  display: flex;
+  flex-direction: column;
+`;

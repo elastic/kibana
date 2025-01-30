@@ -83,7 +83,6 @@ export const GrokPatternsEditor = () => {
             />
           ))}
         </SortableList>
-        <EuiSpacer size="s" />
         <EuiButtonEmpty
           data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
           onClick={handleAddPattern}

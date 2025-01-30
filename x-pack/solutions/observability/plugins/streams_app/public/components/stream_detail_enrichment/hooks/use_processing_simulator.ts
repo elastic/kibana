@@ -71,6 +71,7 @@ export const useProcessingSimulator = ({
   useEffect(() => {
     setLiveDraftProcessors(draftProcessors);
   }, [draftProcessors]);
+
   const watchProcessor = useMemo(
     () =>
       debounce(
