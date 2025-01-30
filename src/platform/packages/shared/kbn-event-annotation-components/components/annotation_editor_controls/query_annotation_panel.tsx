@@ -22,6 +22,8 @@ import {
 } from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export const defaultQuery: Query = {
   query: '',
@@ -71,6 +73,12 @@ export const ConfigPanelQueryAnnotation = ({
         hasChildLabel
         display="rowCompressed"
         className="lnsRowCompressedMargin"
+        css={css`
+             & + .lnsRowCompressedMargin {
+          margin-top: ${euiThemeVars.euiSizeS};
+        }
+          }
+        `}
         fullWidth
         label={i18n.translate('eventAnnotationComponents.xyChart.annotation.queryInput', {
           defaultMessage: 'Annotation query',

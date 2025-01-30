@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +40,8 @@ import type {
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
   defaultAnnotationColor,
@@ -366,6 +367,11 @@ const AnnotationEditorControls = ({
           <EuiFormRow
             display="rowCompressed"
             className="lnsRowCompressedMargin"
+            css={css`
+              & + .lnsRowCompressedMargin {
+                margin-top: ${euiThemeVars.euiSizeS};
+              }
+            `}
             fullWidth
             label={i18n.translate('eventAnnotationComponents.xyChart.annotation.tooltip', {
               defaultMessage: 'Show additional fields',
