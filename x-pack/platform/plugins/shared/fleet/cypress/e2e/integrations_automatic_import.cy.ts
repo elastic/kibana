@@ -9,7 +9,6 @@ import { deleteIntegrations } from '../tasks/integrations';
 import {
   UPLOAD_PACKAGE_LINK,
   ASSISTANT_BUTTON,
-  TECH_PREVIEW_BADGE,
   CREATE_INTEGRATION_LANDING_PAGE,
   BUTTON_FOOTER_NEXT,
   INTEGRATION_TITLE_INPUT,
@@ -77,7 +76,6 @@ describe('Add Integration - Automatic Import', () => {
 
     cy.getBySel(ASSISTANT_BUTTON).should('exist');
     cy.getBySel(UPLOAD_PACKAGE_LINK).should('exist');
-    cy.getBySel(TECH_PREVIEW_BADGE).should('exist');
 
     // Create Automatic Import Page
     cy.getBySel(ASSISTANT_BUTTON).click();
