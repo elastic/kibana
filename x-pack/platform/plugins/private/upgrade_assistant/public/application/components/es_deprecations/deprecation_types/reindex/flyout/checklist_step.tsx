@@ -199,24 +199,35 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </p>
           {frozen && (
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
-                defaultMessage="Frozen indices will no longer be supported after upgrade, so this index be deleted as part the reindex operation. {docsLink}"
-                values={{
-                  docsLink: (
-                    <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.unfreezeApi}>
-                      {i18n.translate(
-                        'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
-                        {
-                          defaultMessage: 'Learn more',
-                        }
-                      )}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
+            <>
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndexTitle"
+                    defaultMessage="This index is frozen"
+                  />
+                }
+                iconType="iInCircle"
+              >
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
+                  defaultMessage="Frozen indices will no longer be supported after upgrade, so this index be deleted as part the reindex operation. {docsLink}"
+                  values={{
+                    docsLink: (
+                      <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.unfreezeApi}>
+                        {i18n.translate(
+                          'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
+                          {
+                            defaultMessage: 'Learn more',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
           )}
           <p>
             <FormattedMessage
