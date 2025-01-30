@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview Host Stat Data rendering it renders the default OverviewHostStats 1`] = `
-<styled.div
+<overview_host_stats--HostStatsContainer
   data-test-subj="overview-hosts-stats"
 >
   <EuiHorizontalRule
@@ -23,7 +23,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -32,13 +32,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </Styled(EuiFlexItem)>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupauditbeat"
   >
-    <styled.div>
+    <overview_host_stats--AccordionContent>
       <EuiFlexGroup
         gutterSize="s"
         justifyContent="spaceBetween"
@@ -51,27 +51,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Audit"
                 id="xpack.securitySolution.overview.auditBeatAuditTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-auditbeatAuditd"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={73847}
               isGroupStat={false}
               isLoading={false}
               max={246351}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -85,27 +85,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="File Integrity Module"
                 id="xpack.securitySolution.overview.auditBeatFimTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-auditbeatFIM"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={107307}
               isGroupStat={false}
               isLoading={false}
               max={246351}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -119,27 +119,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Login"
                 id="xpack.securitySolution.overview.auditBeatLoginTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-auditbeatLogin"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={60015}
               isGroupStat={false}
               isLoading={false}
               max={246351}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -153,27 +153,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Package"
                 id="xpack.securitySolution.overview.auditBeatPackageTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-auditbeatPackage"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={2003}
               isGroupStat={false}
               isLoading={false}
               max={246351}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -187,27 +187,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Process"
                 id="xpack.securitySolution.overview.auditBeatProcessTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-auditbeatProcess"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={1200}
               isGroupStat={false}
               isLoading={false}
               max={246351}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -221,29 +221,29 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="User"
                 id="xpack.securitySolution.overview.auditBeatUserTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-auditbeatUser"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={1979}
               isGroupStat={false}
               isLoading={false}
               max={246351}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
-    </styled.div>
+    </overview_host_stats--AccordionContent>
   </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
@@ -264,7 +264,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -273,13 +273,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </Styled(EuiFlexItem)>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupendgame"
   >
-    <styled.div>
+    <overview_host_stats--AccordionContent>
       <EuiFlexGroup
         gutterSize="s"
         justifyContent="spaceBetween"
@@ -292,27 +292,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="DNS"
                 id="xpack.securitySolution.overview.endgameDnsTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-endgameDns"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={39123}
               isGroupStat={false}
               isLoading={false}
               max={156714735}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -326,27 +326,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="File"
                 id="xpack.securitySolution.overview.endgameFileTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-endgameFile"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={39456}
               isGroupStat={false}
               isLoading={false}
               max={156714735}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -360,27 +360,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Image Load"
                 id="xpack.securitySolution.overview.endgameImageLoadTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-endgameImageLoad"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={39789}
               isGroupStat={false}
               isLoading={false}
               max={156714735}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -394,27 +394,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Network"
                 id="xpack.securitySolution.overview.endgameNetworkTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-endgameNetwork"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={39101112}
               isGroupStat={false}
               isLoading={false}
               max={156714735}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -428,27 +428,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Process"
                 id="xpack.securitySolution.overview.endgameProcessTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-endgameProcess"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={39131415}
               isGroupStat={false}
               isLoading={false}
               max={156714735}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -462,27 +462,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Registry"
                 id="xpack.securitySolution.overview.endgameRegistryTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-endgameRegistry"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={39161718}
               isGroupStat={false}
               isLoading={false}
               max={156714735}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -496,29 +496,29 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Security"
                 id="xpack.securitySolution.overview.endgameSecurityTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-endgameSecurity"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={39202122}
               isGroupStat={false}
               isLoading={false}
               max={156714735}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
-    </styled.div>
+    </overview_host_stats--AccordionContent>
   </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
@@ -539,7 +539,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -548,13 +548,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </Styled(EuiFlexItem)>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupfilebeat"
   >
-    <styled.div>
+    <overview_host_stats--AccordionContent>
       <EuiFlexGroup
         gutterSize="s"
         justifyContent="spaceBetween"
@@ -567,29 +567,29 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="System Module"
                 id="xpack.securitySolution.overview.filebeatSystemModuleTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-filebeatSystemModule"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={568}
               isGroupStat={false}
               isLoading={false}
               max={568}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
-    </styled.div>
+    </overview_host_stats--AccordionContent>
   </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
@@ -610,7 +610,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -619,13 +619,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </Styled(EuiFlexItem)>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupwinlogbeat"
   >
-    <styled.div>
+    <overview_host_stats--AccordionContent>
       <EuiFlexGroup
         gutterSize="s"
         justifyContent="spaceBetween"
@@ -638,27 +638,27 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Security"
                 id="xpack.securitySolution.overview.winlogbeatSecurityTitle"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-winlogbeatSecurity"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={195929}
               isGroupStat={false}
               isLoading={false}
               max={296999}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
         gutterSize="s"
@@ -672,29 +672,29 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             color="subdued"
             size="s"
           >
-            <styled.div>
+            <overview_host_stats--MoveItLeftTitle>
               <MemoizedFormattedMessage
                 defaultMessage="Microsoft-Windows-Sysmon/Operational"
                 id="xpack.securitySolution.overview.winlogbeatMWSysmonOperational"
               />
-            </styled.div>
+            </overview_host_stats--MoveItLeftTitle>
           </EuiText>
         </EuiFlexItem>
-        <Styled(EuiFlexItem)
+        <overview_host_stats--NoMarginTopFlexItem
           data-test-subj="host-stat-winlogbeatMWSysmonOperational"
           grow={false}
         >
-          <styled.div>
+          <overview_host_stats--MoveItLeft>
             <Memo(StatValueComponent)
               count={101070}
               isGroupStat={false}
               isLoading={false}
               max={296999}
             />
-          </styled.div>
-        </Styled(EuiFlexItem)>
+          </overview_host_stats--MoveItLeft>
+        </overview_host_stats--NoMarginTopFlexItem>
       </EuiFlexGroup>
-    </styled.div>
+    </overview_host_stats--AccordionContent>
   </EuiAccordionClass>
-</styled.div>
+</overview_host_stats--HostStatsContainer>
 `;
