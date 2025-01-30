@@ -160,7 +160,7 @@ export function DifferentialTopNFunctionsView() {
         rangeTo,
       },
       customMetrics: {
-        key1: 'TotalCount',
+        key1: 'totalCount',
         value1: state.data?.TotalCount ?? 0,
       },
     });
