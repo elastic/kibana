@@ -29,7 +29,7 @@ export function getTourSteps(docLinks: DocLinksStart['links']) {
         <EuiText>
           {i18n.translate('console.tour.shellStepContent', {
             defaultMessage:
-              'Console is an interactive UI for calling Elasticsearch and Kibana APIs and viewing their responses. Use Query DSL syntax to search your data, manage settings, and more.',
+              'Console is an interactive UI for calling Elasticsearch and Kibana APIs and viewing their responses. Search your data, manage settings, and more using Elastic query languages.',
           })}
         </EuiText>
       ),
