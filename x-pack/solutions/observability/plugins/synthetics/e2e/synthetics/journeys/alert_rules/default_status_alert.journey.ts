@@ -66,8 +66,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.getByTestId('ruleScheduleUnitInput').selectOption('second');
     await page.getByTestId('ruleScheduleNumberInput').fill('20');
     await page.click(byTestId('ruleFlyoutFooterSaveButton'));
-    await page.click(byTestId('confirmModalConfirmButton'));
-    await page.waitForSelector("text=Updated 'Synthetics status internal rule'");
+    await page.waitForSelector('text=Updated "Synthetics status internal rule"');
   });
 
   step('Monitor is as up in overview page', async () => {
