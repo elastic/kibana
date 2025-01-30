@@ -66,7 +66,7 @@ export const SHOW_REAL_VALUES = i18n.translate(
 export const ANONYMIZE_VALUES = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.anonymizeValues',
   {
-    defaultMessage: 'Show anonymize values',
+    defaultMessage: 'Show anonymized values',
   }
 );
 

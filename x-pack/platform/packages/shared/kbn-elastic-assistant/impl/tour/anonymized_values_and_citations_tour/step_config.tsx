@@ -8,7 +8,7 @@
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AI_ASSISTANT_SETTINGS_MENU_CONTAINER } from '../../assistant/assistant_header';
+import { AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID } from '../../assistant/assistant_header';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -25,7 +25,7 @@ export const anonymizedValuesAndCitationsTourStep1 = {
       defaultMessage="New and improved!"
     />
   ),
-  anchor: `#${AI_ASSISTANT_SETTINGS_MENU_CONTAINER}`,
+  anchor: `#${AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}`,
   content: (
     <EuiText size="s">
       <FormattedMessage
