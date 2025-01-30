@@ -181,6 +181,21 @@ export const createProductFeaturesServiceMock = (
           ])
         )
       ),
+      siemMigrations: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  api: ['test-api-action'],
+                  ui: ['test-ui-action'],
+                },
+              },
+            },
+          ])
+        )
+      ),
     });
   }
 
