@@ -21,10 +21,13 @@ import {
   EuiNotificationBadge,
   EuiBadge,
   EuiToolTip,
+  EuiHorizontalRule,
+  EuiPanel,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { Alert } from '@kbn/alerting-types';
 import memoize from 'lodash/memoize';
+import { HeaderSection } from '../../../common/components/header_section';
 import { KibanaServices } from '../../../common/lib/kibana/services';
 import { EntityType } from '../../../../common/search_strategy';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -228,15 +231,23 @@ const Overview: React.FC<{
   return (
     <>
       <EuiSpacer size="m" />
-      <FlyoutRiskSummary
-        riskScoreData={riskScoreState}
-        queryId={'hello'}
-        recalculatingScore={false}
-        isLinkEnabled={false}
-        entityType={EntityType.user}
-        openDetailsPanel={() => {}}
-      />
+
+      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
+        <>
+          <FlyoutRiskSummary
+            riskScoreData={riskScoreState}
+            queryId={'hello'}
+            recalculatingScore={false}
+            isLinkEnabled={false}
+            entityType={EntityType.user}
+            openDetailsPanel={() => {}}
+          />
+          <EuiHorizontalRule />
+        </>
+      )}
       <>
+        <EuiSpacer size="m" />
+        <ObservationsTable linkedUsers={linkedUsers} />
         <EuiSpacer size="m" />
         <LoginsTable data={data.logins ?? []} isLoading={isLoading} />
         <EuiSpacer size="m" />
@@ -312,6 +323,48 @@ const LinkUsersTable = ({
   ];
 
   return <EuiBasicTable columns={columns} items={rowsData} />;
+};
+
+const ObservationsTable: React.FC<{
+  linkedUsers: PrivilegedUserDoc[];
+}> = ({ linkedUsers }) => {
+  const rowsData = linkedUsers.flatMap((user) =>
+    user.observations.map((observation) => ({
+      observation,
+      user,
+    }))
+  );
+
+  const columns = [
+    {
+      field: 'observation.timestamp',
+      name: 'Timestamp',
+      render: (timestamp: string) => <FormattedRelativePreferenceDate value={timestamp} />,
+    },
+    {
+      field: 'user.user.name',
+      name: 'User',
+      render: (name: string) => <EuiText>{name}</EuiText>,
+    },
+    {
+      field: 'observation.summary',
+      name: 'Observation',
+      render: (summary: string) => <EuiText>{summary}</EuiText>,
+    },
+  ];
+
+  return (
+    <EuiPanel hasBorder>
+      <HeaderSection
+        id={'hello'}
+        title={'Why are they privileged?'}
+        titleSize="s"
+        showInspectButton={false}
+      />
+      <EuiBasicTable items={rowsData.slice(0, 5)} columns={columns} />
+      <EuiSpacer size="m" />
+    </EuiPanel>
+  );
 };
 
 const RelatedUsers: React.FC<{
