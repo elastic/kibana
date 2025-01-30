@@ -25,6 +25,10 @@ export interface OutputSecretPath {
   path: string;
   value: string | { id: string };
 }
+export interface FleetServerHostSecretPath {
+  path: string;
+  value: string | { id: string };
+}
 // this is used in the top level secret_refs array on package and agent policies
 export interface PolicySecretReference {
   id: string;

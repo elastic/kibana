@@ -19,12 +19,28 @@ import {
   useStartServices,
   useSwitchInput,
   validateInputs,
+  useSecretInput,
 } from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common/services';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetServerHost } from '../../../../types';
 
 const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
+
+export interface FleetServerHostSSLInputsType {
+  nameInput: ReturnType<typeof useInput>;
+  hostUrlsInput: ReturnType<typeof useComboInput>;
+  isDefaultInput: ReturnType<typeof useSwitchInput>;
+  proxyIdInput: ReturnType<typeof useInput>;
+  sslCertificateInput: ReturnType<typeof useInput>;
+  sslKeyInput: ReturnType<typeof useInput>;
+  sslKeySecretInput: ReturnType<typeof useSecretInput>;
+  sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  sslEsCertificateInput: ReturnType<typeof useInput>;
+  sslESKeyInput: ReturnType<typeof useInput>;
+  sslESKeySecretInput: ReturnType<typeof useSecretInput>;
+  sslEsCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+}
 
 const ConfirmTitle = () => (
   <FormattedMessage
@@ -146,34 +162,41 @@ export function useFleetServerHostsForm(
   );
   const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
 
-  const certificateAuthoritiesInput = useInput(
-    fleetServerHost?.certificate_authorities ?? '',
+  const sslCertificateAuthoritiesInput = useComboInput(
+    'sslCertificateAuthoritiesComboxBox',
+    fleetServerHost?.ssl?.certificate_authorities ?? [],
+    undefined,
+    isEditDisabled
+  );
+  const sslCertificateInput = useInput(
+    fleetServerHost?.ssl?.certificate ?? '',
     () => undefined,
     isEditDisabled
   );
-  const certificateInput = useInput(
-    fleetServerHost?.certificate ?? '',
+
+  const sslEsCertificateAuthoritiesInput = useComboInput(
+    'sslEsCertificateAuthoritiesComboxBox',
+    fleetServerHost?.ssl?.es_certificate_authorities ?? [],
+    undefined,
+    isEditDisabled
+  );
+  const sslEsCertificateInput = useInput(
+    fleetServerHost?.ssl?.es_certificate ?? '',
     () => undefined,
     isEditDisabled
   );
-  const certificateKeyInput = useInput(
-    fleetServerHost?.certificate_key ?? '',
-    () => undefined,
+  const sslKeyInput = useInput(fleetServerHost?.ssl?.key ?? '', undefined, isEditDisabled);
+  const sslESKeyInput = useInput(fleetServerHost?.ssl?.es_key ?? '', undefined, isEditDisabled);
+
+  const sslKeySecretInput = useSecretInput(
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+    undefined,
     isEditDisabled
   );
-  const esCertificateAuthoritiesInput = useInput(
-    fleetServerHost?.es_certificate_authorities ?? '',
-    () => undefined,
-    isEditDisabled
-  );
-  const esCertificateInput = useInput(
-    fleetServerHost?.es_certificate ?? '',
-    () => undefined,
-    isEditDisabled
-  );
-  const esCertificateKeyInput = useInput(
-    fleetServerHost?.es_certificate_key ?? '',
-    () => undefined,
+
+  const sslESKeySecretInput = useSecretInput(
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+    undefined,
     isEditDisabled
   );
 
@@ -183,27 +206,30 @@ export function useFleetServerHostsForm(
       isDefaultInput,
       hostUrlsInput,
       proxyIdInput,
-      certificateAuthoritiesInput,
-      certificateInput,
-      certificateKeyInput,
-      esCertificateAuthoritiesInput,
-      esCertificateInput,
-      esCertificateKeyInput,
+      sslCertificateAuthoritiesInput,
+      sslCertificateInput,
+      sslEsCertificateAuthoritiesInput,
+      sslEsCertificateInput,
+      sslKeyInput,
+      sslESKeyInput,
+      sslKeySecretInput,
+      sslESKeySecretInput,
     }),
     [
       nameInput,
       isDefaultInput,
       hostUrlsInput,
       proxyIdInput,
-      certificateAuthoritiesInput,
-      certificateInput,
-      certificateKeyInput,
-      esCertificateAuthoritiesInput,
-      esCertificateInput,
-      esCertificateKeyInput,
+      sslCertificateAuthoritiesInput,
+      sslCertificateInput,
+      sslEsCertificateAuthoritiesInput,
+      sslEsCertificateInput,
+      sslKeyInput,
+      sslESKeyInput,
+      sslKeySecretInput,
+      sslESKeySecretInput,
     ]
   );
-
   const validate = useCallback(() => validateInputs(inputs), [inputs]);
 
   const submit = useCallback(async () => {
@@ -220,13 +246,34 @@ export function useFleetServerHostsForm(
         host_urls: hostUrlsInput.value,
         is_default: isDefaultInput.value,
         proxy_id: proxyIdInput.value !== '' ? proxyIdInput.value : null,
-        certificate_authorities: certificateAuthoritiesInput.value,
-        certificate: certificateInput.value,
-        certificate_key: certificateKeyInput.value,
-        es_certificate_authorities: esCertificateAuthoritiesInput.value,
-        es_certificate: esCertificateInput.value,
-        es_certificate_key: esCertificateKeyInput.value,
+        ssl: {
+          certificate: sslCertificateInput.value,
+          key: sslKeyInput.value || undefined,
+          certificate_authorities: sslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
+          es_certificate: sslEsCertificateInput.value,
+          es_key: sslESKeyInput.value || undefined,
+          es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
+            (val) => val !== ''
+          ),
+        },
+        ...(!sslKeyInput.value &&
+          sslKeySecretInput.value && {
+            secrets: {
+              ssl: {
+                key: sslKeySecretInput.value,
+              },
+            },
+          }),
+        ...(!sslESKeyInput.value &&
+          sslESKeySecretInput.value && {
+            secrets: {
+              ssl: {
+                es_key: sslESKeySecretInput.value,
+              },
+            },
+          }),
       };
+      console.log('data', data);
       if (fleetServerHost) {
         const res = await sendPutFleetServerHost(fleetServerHost.id, data);
         if (res.error) {
@@ -260,12 +307,14 @@ export function useFleetServerHostsForm(
     hostUrlsInput.value,
     isDefaultInput.value,
     proxyIdInput.value,
-    certificateAuthoritiesInput.value,
-    certificateInput.value,
-    certificateKeyInput.value,
-    esCertificateAuthoritiesInput.value,
-    esCertificateInput.value,
-    esCertificateKeyInput.value,
+    sslCertificateInput.value,
+    sslKeyInput.value,
+    sslCertificateAuthoritiesInput.value,
+    sslEsCertificateInput.value,
+    sslEsCertificateAuthoritiesInput.value,
+    sslKeySecretInput.value,
+    sslESKeyInput.value,
+    sslESKeySecretInput.value,
     fleetServerHost,
     notifications.toasts,
     onSuccess,

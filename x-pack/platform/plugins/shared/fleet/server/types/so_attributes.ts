@@ -111,12 +111,13 @@ export interface FleetServerHostSOAttributes {
   is_preconfigured: boolean;
   is_internal?: boolean;
   proxy_id?: string | null;
-  certificate_authorities?: string | null;
-  certificate?: string | null;
-  certificate_key?: string | null;
-  es_certificate_authorities?: string | null;
-  es_certificate?: string | null;
-  es_certificate_key?: string | null;
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+      es_key?: { id: string };
+    };
+  };
+  ssl?: string | null; // encrypted ssl field
 }
 
 export interface PackagePolicySOAttributes {

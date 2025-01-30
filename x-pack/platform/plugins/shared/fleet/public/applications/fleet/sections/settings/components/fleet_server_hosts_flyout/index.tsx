@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,16 +26,16 @@ import {
   EuiSwitch,
   EuiComboBox,
   EuiCallOut,
-  EuiFieldText,
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
-import { useStartServices } from '../../../../hooks';
+import { useFleetStatus, useStartServices } from '../../../../hooks';
 import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
+import { SSLFormSection } from './ssl_form_section';
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
 export interface FleetServerHostsFlyoutProps {
@@ -52,6 +52,24 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   proxies,
 }) => {
   const { docLinks, cloud } = useStartServices();
+  const fleetStatus = useFleetStatus();
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
+    'disabled'
+  );
+
+  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  }
+
+  const onToggleSecretStorage = (secretEnabled: boolean) => {
+    if (secretsToggleState === 'disabled') {
+      return;
+    }
+
+    setSecretsToggleState(secretEnabled);
+  };
+
+  const useSecretsStorage = secretsToggleState === true;
 
   const form = useFleetServerHostsForm(fleetServerHost, onClose, defaultFleetServerHost);
   const { inputs } = form;
@@ -232,126 +250,11 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             />
           </EuiFormRow>
           <EuiSpacer size="l" />
-          <EuiFormRow
-            fullWidth
-            {...inputs.certificateInput.formRowProps}
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.certificateLabel"
-                defaultMessage="Client SSL Certificate"
-              />
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              data-test-subj="fleetServerHostsFlyout.certificateInput"
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.certificatePlaceholder',
-                { defaultMessage: 'Specify SSL certificate' }
-              )}
-              {...inputs.certificateInput.props}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            {...inputs.certificateKeyInput.formRowProps}
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.certificateKeyLabel"
-                defaultMessage="Client SSL Certificate key"
-              />
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              data-test-subj="fleetServerHostsFlyout.certificateKeyInput"
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.certificateKeyPlaceholder',
-                { defaultMessage: 'Specify SSL certificate key' }
-              )}
-              {...inputs.certificateKeyInput.props}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            {...inputs.certificateAuthoritiesInput.formRowProps}
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.certificateAuthoritiesLabel"
-                defaultMessage="Server SSL certificate authorities"
-              />
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              data-test-subj="fleetServerHostsFlyout.certificateAuthoritiesInput"
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.certificateAuthoritiesPlaceholder',
-                { defaultMessage: 'Specify certificate authorities' }
-              )}
-              {...inputs.certificateAuthoritiesInput.props}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            {...inputs.esCertificateInput.formRowProps}
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.EScertificateLabel"
-                defaultMessage="SSL certificate for Elasticsearch"
-              />
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              data-test-subj="fleetServerHostsFlyout.esCertificateInput"
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.esCertificatePlaceholder',
-                { defaultMessage: 'Specify Elasticsearch SSL certificate' }
-              )}
-              {...inputs.esCertificateInput.props}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            {...inputs.esCertificateKeyInput.formRowProps}
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.esCertificateKeyLabel"
-                defaultMessage="SSL certificate key for Elasticsearch"
-              />
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              data-test-subj="fleetServerHostsFlyout.esCertificateKeyInput"
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.esCertificateKeyPlaceholder',
-                { defaultMessage: 'Specify Elasticsearch SSL certificate key' }
-              )}
-              {...inputs.esCertificateKeyInput.props}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            {...inputs.esCertificateAuthoritiesInput.formRowProps}
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.esCertificateAuthoritiesLabel"
-                defaultMessage="Elasticsearch Certificate Authorities"
-              />
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              data-test-subj="fleetServerHostsFlyout.esCertificateAuthoritiesInput"
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.esCertificateAuthoritiesPlaceholder',
-                { defaultMessage: 'Specify Elasticsearch certificate authorities' }
-              )}
-              {...inputs.esCertificateAuthoritiesInput.props}
-            />
-          </EuiFormRow>
+          <SSLFormSection
+            inputs={inputs}
+            useSecretsStorage={useSecretsStorage}
+            onToggleSecretStorage={onToggleSecretStorage}
+          />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -371,6 +274,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               isDisabled={form.isDisabled}
               onClick={form.submit}
               data-test-subj="saveApplySettingsBtn"
+              aria-label="Save and apply settings"
             >
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.saveButton"

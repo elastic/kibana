@@ -35,6 +35,13 @@ const varsSchema = schema.maybe(
   )
 );
 
+const secretRefSchema = schema.oneOf([
+  schema.object({
+    id: schema.string(),
+  }),
+  schema.string(),
+]);
+
 export const PreconfiguredPackagesSchema = schema.arrayOf(
   schema.object({
     name: schema.string(),
@@ -109,12 +116,24 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     is_internal: schema.maybe(schema.boolean()),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
     proxy_id: schema.nullable(schema.string()),
-    certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    es_certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    es_certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    es_certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+    secrets: schema.maybe(
+      schema.object({
+        ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      })
+    ),
+    ssl: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.object({
+          certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+          es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          es_certificate: schema.maybe(schema.string()),
+          es_key: schema.maybe(schema.string()),
+        }),
+      ])
+    ),
   }),
   { defaultValue: [] }
 );

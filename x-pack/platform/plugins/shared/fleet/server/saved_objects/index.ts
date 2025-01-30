@@ -1105,12 +1105,29 @@ export const getSavedObjectTypes = (
           host_urls: { type: 'keyword', index: false },
           is_preconfigured: { type: 'boolean' },
           proxy_id: { type: 'keyword' },
-          certificate_authorities: { type: 'keyword', index: false },
-          certificate: { type: 'keyword', index: false },
-          certificate_key: { type: 'keyword', index: false },
-          es_certificate_authorities: { type: 'keyword', index: false },
-          es_certificate: { type: 'keyword', index: false },
-          es_certificate_key: { type: 'keyword', index: false },
+          ssl: { type: 'binary' },
+          secrets: {
+            dynamic: false,
+            properties: {
+              ssl: {
+                dynamic: false,
+                properties: {
+                  key: {
+                    dynamic: false,
+                    properties: {
+                      id: { type: 'keyword' },
+                    },
+                  },
+                  es_key: {
+                    dynamic: false,
+                    properties: {
+                      id: { type: 'keyword' },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
       modelVersions: {
@@ -1129,12 +1146,29 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                certificate_authorities: { type: 'keyword', index: false },
-                certificate: { type: 'keyword', index: false },
-                certificate_key: { type: 'keyword', index: false },
-                es_certificate_authorities: { type: 'keyword', index: false },
-                es_certificate: { type: 'keyword', index: false },
-                es_certificate_key: { type: 'keyword', index: false },
+                ssl: { type: 'binary' },
+                secrets: {
+                  dynamic: false,
+                  properties: {
+                    ssl: {
+                      dynamic: false,
+                      properties: {
+                        key: {
+                          dynamic: false,
+                          properties: {
+                            id: { type: 'keyword' },
+                          },
+                        },
+                        es_key: {
+                          dynamic: false,
+                          properties: {
+                            id: { type: 'keyword' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
           ],
@@ -1248,5 +1282,10 @@ export function registerEncryptedSavedObjects(
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
     attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
+  });
+  encryptedSavedObjects.registerType({
+    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToIncludeInAAD: new Set(['service_token']),
   });
 }

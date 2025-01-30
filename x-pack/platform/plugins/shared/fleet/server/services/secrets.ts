@@ -11,7 +11,10 @@ import { get, keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import type {
+  FleetServerHost,
+  FleetServerHostSecretPath,
   KafkaOutput,
+  NewFleetServerHost,
   NewLogstashOutput,
   NewRemoteElasticsearchOutput,
   Output,
@@ -851,4 +854,56 @@ function getPolicyWithSecretReferences(
   });
 
   return result;
+}
+
+// Fleet server hosts functions
+
+function getFleetServerHostsSecretPaths(
+  fleetServerHost: NewFleetServerHost | Partial<FleetServerHost>
+): FleetServerHostSecretPath[] {
+  const secretPaths: FleetServerHostSecretPath[] = [];
+
+  if (fleetServerHost?.secrets?.ssl?.key) {
+    secretPaths.push({
+      path: 'secrets.ssl.key',
+      value: fleetServerHost.secrets.ssl.key,
+    });
+  }
+
+  return secretPaths;
+}
+export async function extractAndWriteFleetServerHostsSecrets(opts: {
+  fleetServerHost: NewFleetServerHost;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{ fleetServerHost: NewFleetServerHost; secretReferences: PolicySecretReference[] }> {
+  const { fleetServerHost, esClient, secretHashes = {} } = opts;
+
+  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost).filter(
+    (path) => typeof path.value === 'string'
+  );
+
+  if (secretPaths.length === 0) {
+    return { fleetServerHost, secretReferences: [] };
+  }
+
+  const secrets = await createSecrets({
+    esClient,
+    values: secretPaths.map(({ value }) => value as string),
+  });
+
+  const fleetServerHosWithSecretRefs = JSON.parse(JSON.stringify(fleetServerHost));
+  secretPaths.forEach((secretPath, i) => {
+    const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
+    const maybeHash = get(secretHashes, pathWithoutPrefix);
+    set(fleetServerHosWithSecretRefs, secretPath.path, {
+      id: secrets[i].id,
+      ...(typeof maybeHash === 'string' && { hash: maybeHash }),
+    });
+  });
+
+  return {
+    fleetServerHost: fleetServerHosWithSecretRefs,
+    secretReferences: secrets.map(({ id }) => ({ id })),
+  };
 }

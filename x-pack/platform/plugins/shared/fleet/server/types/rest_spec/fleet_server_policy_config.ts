@@ -7,6 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
+const secretRefSchema = schema.oneOf([
+  schema.object({
+    id: schema.string(),
+  }),
+  schema.string(),
+]);
+
 export const FleetServerHostSchema = schema.object({
   id: schema.string(),
   name: schema.string(),
@@ -15,12 +22,26 @@ export const FleetServerHostSchema = schema.object({
   is_internal: schema.maybe(schema.boolean()),
   is_preconfigured: schema.boolean({ defaultValue: false }),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  es_certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  es_certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  es_certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  secrets: schema.maybe(
+    schema.object({
+      ssl: schema.maybe(
+        schema.object({ key: schema.maybe(secretRefSchema), es_key: schema.maybe(secretRefSchema) })
+      ),
+    })
+  ),
+  ssl: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+        certificate: schema.maybe(schema.string()),
+        key: schema.maybe(schema.string()),
+        es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+        es_certificate: schema.maybe(schema.string()),
+        es_key: schema.maybe(schema.string()),
+      }),
+    ])
+  ),
 });
 
 export const FleetServerHostResponseSchema = schema.object({
@@ -45,12 +66,29 @@ export const PutFleetServerHostRequestSchema = {
     is_default: schema.maybe(schema.boolean({ defaultValue: false })),
     is_internal: schema.maybe(schema.boolean()),
     proxy_id: schema.nullable(schema.string()),
-    certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    es_certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    es_certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    es_certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+    secrets: schema.maybe(
+      schema.object({
+        ssl: schema.maybe(
+          schema.object({
+            key: schema.maybe(secretRefSchema),
+            es_key: schema.maybe(secretRefSchema),
+          })
+        ),
+      })
+    ),
+    ssl: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.object({
+          certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+          es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          es_certificate: schema.maybe(schema.string()),
+          es_key: schema.maybe(schema.string()),
+        }),
+      ])
+    ),
   }),
 };
 
