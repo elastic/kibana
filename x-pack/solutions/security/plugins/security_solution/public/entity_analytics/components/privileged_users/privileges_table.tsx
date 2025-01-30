@@ -23,7 +23,7 @@ export const PrivilegesTable = React.memo(({ data, isLoading }: PrivilegesTableP
     <EuiPanel hasBorder>
       <HeaderSection
         id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
-        title={'Privileges table'}
+        title={'Privileges'}
         titleSize="s"
         showInspectButton={false}
       />
