@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apm } from '@elastic/apm-rum';
 import React from 'react';
 
 import type { KibanaErrorBoundaryServices } from '../../types';
@@ -63,6 +64,7 @@ class SectionErrorBoundaryInternal extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    apm.captureError(error);
     console.error('Error caught by Kibana React Section Error Boundary'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
 
