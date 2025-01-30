@@ -22,7 +22,7 @@ import type {
 import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
-import type { DocLinksServiceSetup } from '@kbn/core/server';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';

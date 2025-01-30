@@ -9,10 +9,10 @@
 
 import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
-import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 export const getApiDeprecationTitle = (details: RouterDeprecatedApiDetails) => {
   const { routePath, routeMethod, routeDeprecationOptions } = details;
