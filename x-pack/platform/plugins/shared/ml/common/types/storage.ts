@@ -7,6 +7,10 @@
 
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import type { FrozenTierPreference } from '@kbn/ml-date-picker';
+import type {
+  AdaptiveAllocationsParams,
+  CommonDeploymentParams,
+} from '../../public/application/services/ml_api_service/trained_models';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields' as const;
 export const ML_APPLY_TIME_RANGE_CONFIG = 'ml.jobSelectorFlyout.applyTimeRange';
@@ -16,6 +20,7 @@ export const ML_ANOMALY_EXPLORER_PANELS = 'ml.anomalyExplorerPanels';
 export const ML_NOTIFICATIONS_LAST_CHECKED_AT = 'ml.notificationsLastCheckedAt';
 export const ML_OVERVIEW_PANELS = 'ml.overviewPanels';
 export const ML_ELSER_CALLOUT_DISMISSED = 'ml.elserUpdateCalloutDismissed';
+export const ML_ACTIVE_MODEL_DEPLOYMENTS = 'ml.trainedModels.activeDeployments';
 
 export type PartitionFieldConfig =
   | {
@@ -61,6 +66,13 @@ export interface OverviewPanelsState {
   dfaJobs: boolean;
 }
 
+// TODO: There is probably an existing type we can reuse
+interface ModelDeploymentParams {
+  modelId: string;
+  deploymentParams: CommonDeploymentParams;
+  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
+}
+
 export interface MlStorageRecord {
   [key: string]: unknown;
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
@@ -71,6 +83,7 @@ export interface MlStorageRecord {
   [ML_NOTIFICATIONS_LAST_CHECKED_AT]: number | undefined;
   [ML_OVERVIEW_PANELS]: OverviewPanelsState;
   [ML_ELSER_CALLOUT_DISMISSED]: boolean | undefined;
+  [ML_ACTIVE_MODEL_DEPLOYMENTS]: ModelDeploymentParams[];
 }
 
 export type MlStorage = Partial<MlStorageRecord> | null;
@@ -93,6 +106,8 @@ export type TMlStorageMapped<T extends MlStorageKey> = T extends typeof ML_ENTIT
   ? OverviewPanelsState | undefined
   : T extends typeof ML_ELSER_CALLOUT_DISMISSED
   ? boolean | undefined
+  : T extends typeof ML_ACTIVE_MODEL_DEPLOYMENTS
+  ? string[] | undefined
   : null;
 
 export const ML_STORAGE_KEYS = [
@@ -104,4 +119,5 @@ export const ML_STORAGE_KEYS = [
   ML_NOTIFICATIONS_LAST_CHECKED_AT,
   ML_OVERVIEW_PANELS,
   ML_ELSER_CALLOUT_DISMISSED,
+  ML_ACTIVE_MODEL_DEPLOYMENTS,
 ] as const;

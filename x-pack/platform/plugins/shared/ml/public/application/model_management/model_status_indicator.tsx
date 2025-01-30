@@ -12,7 +12,7 @@ import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText, useEuiTheme } from '@e
 import useObservable from 'react-use/lib/useObservable';
 import { isBaseNLPModelItem } from '../../../common/types/trained_models';
 import { getModelStateColor } from './get_model_state';
-import { useTrainedModelsService } from './hooks/use_trained_models_service';
+import { useMlKibana } from '../contexts/kibana';
 
 export const ModelStatusIndicator = ({
   modelId,
@@ -23,7 +23,11 @@ export const ModelStatusIndicator = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const trainedModelsService = useTrainedModelsService();
+  const {
+    services: {
+      mlServices: { trainedModelsService },
+    },
+  } = useMlKibana();
 
   const currentModel = useObservable(
     trainedModelsService.getModel$(modelId),

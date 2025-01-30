@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Subscription, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subscription, of, from, merge, pairwise, delay, EMPTY } from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
@@ -16,16 +17,19 @@ import {
   map,
   shareReplay,
   tap,
-  from,
   take,
   finalize,
   withLatestFrom,
   filter,
+  catchError,
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import { i18n } from '@kbn/i18n';
 import {
   isBaseNLPModelItem,
+  isNLPModelItem,
   type ModelDownloadState,
   type TrainedModelUIItem,
 } from '../../../common/types/trained_models';
@@ -39,46 +43,81 @@ interface ModelDownloadStatus {
   [modelId: string]: ModelDownloadState;
 }
 
-type ModelOperation =
-  | {
-      modelId: string;
-      type: 'downloading' | 'deploying';
-    }
-  | {
-      type: 'fetching';
-    };
-
 const DOWNLOAD_POLL_INTERVAL = 3000;
 
+export interface ModelDeploymentParams {
+  modelId: string;
+  deploymentParams: CommonDeploymentParams;
+  state: 'downloading' | 'deploying';
+  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
+}
+
 export class TrainedModelsService {
-  private _modelItems$ = new BehaviorSubject<TrainedModelUIItem[]>([]);
-  private downloadStatus$ = new BehaviorSubject<ModelDownloadStatus>({});
-  private stopPolling$ = new Subject<void>();
+  private readonly _reloadSubject$ = new Subject();
+
+  private readonly _modelItems$ = new BehaviorSubject<TrainedModelUIItem[]>([]);
+  private readonly stopPolling$ = new Subject<void>();
+  private readonly cancelDeployment$ = new Subject<string>();
+  private readonly downloadStatus$ = new BehaviorSubject<ModelDownloadStatus>({});
+  private readonly downloadInProgress = new Set<string>();
+  private readonly deploymentInProgress = new Set<string>();
   private pollingSubscription?: Subscription;
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
-  private _activeOperations$ = new BehaviorSubject<ModelOperation[]>([]);
-  private cancelDeployment$ = new Subject<string>();
+  public isInitialized = false;
+  private setDeployingModels?: (deployingModels: ModelDeploymentParams[]) => void;
+  private displayErrorToast?: (error: ErrorType, title?: string) => void;
+  private displaySuccessToast?: (toast: { title: string; text: string }) => void;
+  private subscription!: Subscription;
+  private _deployingModels$ = new BehaviorSubject<ModelDeploymentParams[]>([]);
+  private destroySubscription?: Subscription;
+  private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
-  public readonly isLoading$ = this._activeOperations$.pipe(
-    map((operations) => operations.length > 0),
-    distinctUntilChanged(),
-    shareReplay(1)
-  );
+  public initStorage(
+    deployingModels$: BehaviorSubject<ModelDeploymentParams[]>,
+    setDeployingModels: (deploymentModels: ModelDeploymentParams[]) => void
+  ) {
+    // Always cancel any pending destroy when trying to initialize
+    if (this.destroySubscription) {
+      this.destroySubscription.unsubscribe();
+      this.destroySubscription = undefined;
+    }
+
+    if (this.isInitialized) return;
+
+    this.subscription = new Subscription();
+    this.isInitialized = true;
+
+    this.setDeployingModels = setDeployingModels;
+    this._deployingModels$ = deployingModels$;
+
+    this.setupFetchingSubscription();
+    this.setupDeploymentSubscription();
+  }
+
+  public initToastNotifications(
+    displayErrorToast: (error: ErrorType, title?: string) => void,
+    displaySuccessToast: (toast: { title: string; text: string }) => void
+  ) {
+    this.displayErrorToast = displayErrorToast;
+    this.displaySuccessToast = displaySuccessToast;
+  }
+
+  public readonly isLoading$ = this._isLoading$.pipe(distinctUntilChanged());
 
   public readonly modelItems$: Observable<TrainedModelUIItem[]> = this._modelItems$.pipe(
     distinctUntilChanged(isEqual),
-    shareReplay(1)
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  public readonly activeOperations$ = this._activeOperations$.pipe(
-    distinctUntilChanged((prev, curr) => isEqual(prev, curr))
-  );
+  public get activeDeployments$(): Observable<ModelDeploymentParams[]> {
+    return this._deployingModels$;
+  }
 
-  public get activeOperations(): ModelOperation[] {
-    return this._activeOperations$.getValue();
+  public get activeDeployments(): ModelDeploymentParams[] {
+    return this._deployingModels$.getValue();
   }
 
   public get modelItems(): TrainedModelUIItem[] {
@@ -86,112 +125,135 @@ export class TrainedModelsService {
   }
 
   public get isLoading(): boolean {
-    return this._activeOperations$.getValue().length > 0;
+    return this._isLoading$.getValue();
   }
 
-  public fetchModels$() {
-    this.addActiveOperation({ type: 'fetching' });
-
-    return from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
-      map((resultItems) => {
-        // Merge extisting items with new items
-        // to preserve state and download status
-        const updatedItems = this.mergeModelItems(resultItems);
-        this._modelItems$.next(updatedItems);
-        this.startDownloadStatusPolling();
-      }),
-      finalize(() => this.removeActiveOperation('fetching')),
-      take(1)
-    );
+  public fetchModels() {
+    const timestamp = Date.now();
+    this._reloadSubject$.next(timestamp);
   }
 
-  public downloadModel$(modelId: string) {
-    this.addActiveOperation({
-      modelId,
-      type: 'downloading',
-    });
-
-    return from(this.trainedModelsApiService.installElasticTrainedModelConfig(modelId)).pipe(
-      tap({
-        error: () => this.removeActiveOperation('downloading', modelId),
-      }),
-      switchMap(() => this.fetchModels$())
-    );
-  }
-
-  public startModelDeployment$(
+  public startModelDeployment(
     modelId: string,
     deploymentParams: CommonDeploymentParams,
     adaptiveAllocationsParams?: AdaptiveAllocationsParams
   ) {
-    this.addActiveOperation({ modelId, type: 'deploying' });
-
-    const cancelation$ = this.cancelDeployment$.pipe(
-      filter((canceledModelId) => canceledModelId === modelId),
-      take(1),
-      shareReplay(1)
-    );
-
-    return this.getModel$(modelId).pipe(
-      takeUntil(cancelation$),
-      filter(
-        (model) =>
-          isBaseNLPModelItem(model) &&
-          (model.state === MODEL_STATE.DOWNLOADED || model.state === MODEL_STATE.STARTED)
-      ),
-      take(1),
-      switchMap(() => {
-        // Manually update the model state
-        const currentModels = this.modelItems;
-        const updatedModels = currentModels.map((model) =>
-          model.model_id === modelId ? { ...model, state: MODEL_STATE.STARTING } : model
-        );
-        this._modelItems$.next(updatedModels);
-
-        return this.trainedModelsApiService
-          .startModelAllocation(modelId, deploymentParams, adaptiveAllocationsParams)
-          .pipe(takeUntil(cancelation$));
-      }),
-      finalize(() => {
-        this.removeActiveOperation('deploying', modelId);
-        this.fetchModels$().subscribe();
-      })
-    );
+    const newDeployment = {
+      modelId,
+      deploymentParams,
+      adaptiveAllocationsParams,
+      state: 'downloading' as const,
+    };
+    const currentDeployments = this._deployingModels$.getValue();
+    this.setDeployingModels?.([...currentDeployments, newDeployment]);
   }
 
-  public updateModelDeployment$(
+  public downloadModel(modelId: string) {
+    this.downloadInProgress.add(modelId);
+    this._isLoading$.next(true);
+    from(this.trainedModelsApiService.installElasticTrainedModelConfig(modelId))
+      .pipe(
+        finalize(() => {
+          this.downloadInProgress.delete(modelId);
+          this._isLoading$.next(false);
+          this.fetchModels();
+        })
+      )
+      .subscribe({
+        error: (error) => {
+          this.displayErrorToast?.(
+            error,
+            i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
+              defaultMessage: 'Failed to download "{modelId}"',
+              values: { modelId },
+            })
+          );
+        },
+      });
+  }
+
+  public updateModelDeployment(
     modelId: string,
     deploymentId: string,
     config: AdaptiveAllocationsParams
   ) {
-    this.addActiveOperation({ modelId, type: 'deploying' });
-
-    return from(
-      this.trainedModelsApiService.updateModelDeployment(modelId, deploymentId, config)
-    ).pipe(
-      finalize(() => this.removeActiveOperation('deploying', modelId)),
-      switchMap(() => this.fetchModels$())
-    );
+    from(this.trainedModelsApiService.updateModelDeployment(modelId, deploymentId, config))
+      .pipe(
+        finalize(() => {
+          this.fetchModels();
+        })
+      )
+      .subscribe({
+        error: (error) => {
+          this.displayErrorToast?.(
+            error,
+            i18n.translate('xpack.ml.trainedModels.modelsList.updateFailed', {
+              defaultMessage: 'Failed to update "{deploymentId}"',
+              values: { deploymentId },
+            })
+          );
+        },
+      });
   }
 
-  public stopModelDeployment$(
+  public stopModelDeployment(
     modelId: string,
     deploymentIds: string[],
     options?: { force: boolean }
   ) {
-    return from(
-      this.trainedModelsApiService.stopModelAllocation(modelId, deploymentIds, options)
-    ).pipe(switchMap((results) => this.fetchModels$().pipe(map(() => results))));
+    from(this.trainedModelsApiService.stopModelAllocation(modelId, deploymentIds, options))
+      .pipe(
+        finalize(() => {
+          this.fetchModels();
+        })
+      )
+      .subscribe({
+        error: (error) => {
+          this.displayErrorToast?.(
+            error,
+            i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
+              defaultMessage: 'Failed to stop "{deploymentIds}"',
+              values: { deploymentIds: deploymentIds.join(', ') },
+            })
+          );
+        },
+      });
   }
 
   public getModel(modelId: string): TrainedModelUIItem | undefined {
     return this.modelItems.find((item) => item.model_id === modelId);
   }
 
+  public getModel$(modelId: string): Observable<TrainedModelUIItem | undefined> {
+    return this._modelItems$.pipe(
+      map((items) => items.find((item) => item.model_id === modelId)),
+      distinctUntilChanged()
+    );
+  }
+
   public cleanupModelOperations(modelId: string) {
     this.markDownloadAborted(modelId);
-    this.removeActiveOperation('deploying', modelId);
     this.cancelDeployment$.next(modelId);
+    this.setDeployingModels?.(
+      this.activeDeployments.filter((deployment) => deployment.modelId !== modelId)
+    );
+  }
+
+  private isModelReadyForDeployment(model: TrainedModelUIItem | undefined) {
+    return (
+      isBaseNLPModelItem(model) &&
+      (model.state === MODEL_STATE.DOWNLOADED || model.state === MODEL_STATE.STARTED)
+    );
+  }
+
+  private updateUiStateForDeployment(modelId: string) {
+    const currentModels = this.modelItems;
+    const updatedModels = currentModels.map((model) =>
+      isBaseNLPModelItem(model) && model.model_id === modelId
+        ? { ...model, state: MODEL_STATE.STARTING }
+        : model
+    );
+    this._modelItems$.next(updatedModels);
   }
 
   private markDownloadAborted(modelId: string) {
@@ -204,14 +266,154 @@ export class TrainedModelsService {
     return newItems.map((item) => {
       const prevItem = existingItems.find((i) => i.model_id === item.model_id);
 
-      if (!prevItem) return item;
+      if (!prevItem || !isBaseNLPModelItem(prevItem) || !isBaseNLPModelItem(item)) return item;
 
-      if (isBaseNLPModelItem(prevItem) && prevItem.state === MODEL_STATE.DOWNLOADING) {
+      if (prevItem.state === MODEL_STATE.DOWNLOADING) {
         return { ...item, state: prevItem.state, downloadState: prevItem.downloadState };
+      }
+
+      if (
+        prevItem.state === MODEL_STATE.STARTING &&
+        (this.deploymentInProgress.has(item.model_id) ||
+          this.activeDeployments.some((deployment) => deployment.modelId === item.model_id)) &&
+        item.state !== MODEL_STATE.STARTED
+      ) {
+        return { ...item, state: prevItem.state };
       }
 
       return item;
     });
+  }
+
+  private setupFetchingSubscription() {
+    const fetchTrigger$ = merge(
+      this._reloadSubject$,
+      this._deployingModels$.pipe(
+        pairwise(),
+        filter(([prev, curr]) => {
+          return prev.length !== curr.length;
+        })
+      )
+    );
+
+    this.subscription.add(
+      fetchTrigger$
+        .pipe(
+          switchMap(() => {
+            this._isLoading$.next(true);
+            return from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
+              catchError((error) => {
+                this.displayErrorToast?.(
+                  error,
+                  i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
+                    defaultMessage: 'Error loading trained models',
+                  })
+                );
+                return of([]);
+              }),
+              finalize(() => {
+                this._isLoading$.next(false);
+              })
+            );
+          })
+        )
+        .subscribe((fetchedItems) => {
+          const updatedItems = this.mergeModelItems(fetchedItems);
+          this._modelItems$.next(updatedItems);
+
+          this.startDownloadStatusPolling();
+        })
+    );
+  }
+
+  private setupDeploymentSubscription() {
+    const deploymentSubscription = this._deployingModels$
+      .pipe(
+        filter((deployments) => deployments.length > 0),
+        withLatestFrom(this._modelItems$),
+        switchMap(([deployments, modelItems]) => {
+          // Create observables for each new deployment
+          const deploymentObservables = deployments.map((deployment) => {
+            if (this.deploymentInProgress.has(deployment.modelId)) {
+              return EMPTY;
+            }
+
+            this.deploymentInProgress.add(deployment.modelId);
+
+            const cancelation$ = this.cancelDeployment$.pipe(
+              filter((canceledId) => canceledId === deployment.modelId),
+              take(1)
+            );
+
+            const shouldMakeApiCall = modelItems.some(
+              (model) =>
+                isNLPModelItem(model) &&
+                !model.deployment_ids.includes(deployment.deploymentParams.deployment_id!)
+            );
+
+            return this.getModel$(deployment.modelId).pipe(
+              takeUntil(cancelation$),
+              take(1),
+              filter((model) => this.isModelReadyForDeployment(model)),
+              filter(() => shouldMakeApiCall),
+              tap(() => {
+                this.updateUiStateForDeployment(deployment.modelId);
+              }),
+              switchMap(() => {
+                return from(
+                  this.trainedModelsApiService.startModelAllocation(
+                    deployment.modelId,
+                    deployment.deploymentParams,
+                    deployment.adaptiveAllocationsParams
+                  )
+                ).pipe(
+                  finalize(() => {
+                    this.deploymentInProgress.delete(deployment.modelId);
+
+                    const currentDeployingModels = this._deployingModels$.getValue();
+
+                    const updated = currentDeployingModels.filter(
+                      (model) => model.modelId !== deployment.modelId
+                    );
+
+                    this.setDeployingModels?.(updated);
+                  })
+                );
+              }),
+              tap({
+                next: () => {
+                  this.displaySuccessToast?.({
+                    title: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
+                      defaultMessage: 'Deployment started',
+                    }),
+                    text: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccessText', {
+                      defaultMessage: '"{deploymentId}" has started successfully.',
+                      values: { deploymentId: deployment.deploymentParams.deployment_id },
+                    }),
+                  });
+                },
+                error: (error) => {
+                  this.displayErrorToast?.(
+                    error,
+                    i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
+                      defaultMessage: 'Failed to start "{deploymentId}"',
+                      values: { deploymentId: deployment.deploymentParams.deployment_id },
+                    })
+                  );
+                  this.fetchModels();
+                },
+              }),
+              takeUntil(cancelation$)
+            );
+          });
+
+          // Merge all deployment observables
+          return merge(...deploymentObservables);
+        })
+      )
+      .subscribe();
+
+    this.subscription.add(deploymentSubscription);
   }
 
   /**
@@ -260,11 +462,9 @@ export class TrainedModelsService {
                 // Aborted
                 this.abortedDownloads.delete(item.model_id);
                 newItem.state = MODEL_STATE.NOT_DOWNLOADED;
-                this.removeActiveOperation('downloading', item.model_id);
               } else if (downloadInProgress.has(item.model_id) || !item.state) {
                 // Finished downloading
                 newItem.state = MODEL_STATE.DOWNLOADED;
-                this.removeActiveOperation('downloading', item.model_id);
               }
               downloadInProgress.delete(item.model_id);
               return newItem;
@@ -301,36 +501,73 @@ export class TrainedModelsService {
     this.downloadStatusFetchInProgress = false;
   }
 
-  public getModel$(modelId: string): Observable<TrainedModelUIItem | undefined> {
-    return this._modelItems$.pipe(
-      map((items) => items.find((item) => item.model_id === modelId)),
-      distinctUntilChanged()
+  private hasActiveOperations(): boolean {
+    return (
+      this.downloadInProgress.size > 0 ||
+      this.deploymentInProgress.size > 0 ||
+      this.downloadStatusFetchInProgress
     );
   }
 
-  private addActiveOperation(operation: ModelOperation) {
-    const currentOperations = this._activeOperations$.getValue();
-    this._activeOperations$.next([...currentOperations, operation]);
-  }
+  private cleanupService() {
+    // Clear operation state
+    this.downloadInProgress.clear();
+    this.deploymentInProgress.clear();
+    this.abortedDownloads.clear();
+    this.downloadStatusFetchInProgress = false;
 
-  private removeActiveOperation(operationType: ModelOperation['type'], modelId?: string) {
-    const currentOperations = this._activeOperations$.getValue();
-    this._activeOperations$.next(
-      currentOperations.filter((op) => {
-        if ('modelId' in op) {
-          return !(op.type === operationType && op.modelId === modelId);
-        }
+    // Clear subscriptions
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+    }
 
-        return op.type !== operationType;
-      })
-    );
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+
+    // Reset behavior subjects to initial values
+    this._modelItems$.next([]);
+    this.downloadStatus$.next({});
+    this._deployingModels$.next([]);
+
+    // Clear callbacks
+    this.setDeployingModels = undefined;
+    this.displayErrorToast = undefined;
+    this.displaySuccessToast = undefined;
+
+    // Reset initialization flag
+    this.isInitialized = false;
   }
 
   public destroy() {
-    this.stopPolling();
-    this._modelItems$.complete();
-    this.downloadStatus$.complete();
-    this.stopPolling$.complete();
-    this._activeOperations$.complete();
+    // Cancel any pending destroy
+    if (this.destroySubscription) {
+      this.destroySubscription.unsubscribe();
+      this.destroySubscription = undefined;
+    }
+
+    if (this.hasActiveOperations()) {
+      this.destroySubscription = merge(
+        timer(0, 1000).pipe(
+          // Check if any operations are still in progress
+          map(() => this.hasActiveOperations())
+        )
+      )
+        .pipe(
+          // Wait until all operations are complete
+          filter((hasOperations) => !hasOperations),
+          take(1),
+          // Add a small delay to ensure all cleanup is complete
+          delay(100)
+        )
+        .subscribe({
+          complete: () => {
+            this.cleanupService();
+            this.destroySubscription = undefined;
+          },
+        });
+    } else {
+      this.cleanupService();
+    }
   }
 }

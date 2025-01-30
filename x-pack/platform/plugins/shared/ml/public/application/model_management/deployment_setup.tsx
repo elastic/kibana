@@ -56,6 +56,7 @@ import { DeploymentParamsMapper } from './deployment_params_mapper';
 
 import type { HttpService } from '../services/http_service';
 import { ModelStatusIndicator } from './model_status_indicator';
+import type { TrainedModelsService } from './trained_models_service';
 
 interface DeploymentSetupProps {
   config: DeploymentParamsUI;
@@ -879,7 +880,8 @@ export const getUserInputModelDeploymentParamsProvider =
     cloudInfo: CloudInfo,
     showNodeInfo: boolean,
     nlpSettings: NLPSettings,
-    httpService: HttpService
+    httpService: HttpService,
+    trainedModelsService: TrainedModelsService
   ) =>
   (
     model: NLPModelItem,
@@ -902,7 +904,7 @@ export const getUserInputModelDeploymentParamsProvider =
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            <KibanaContextProvider services={{ mlServices: { httpService } }}>
+            <KibanaContextProvider services={{ mlServices: { httpService, trainedModelsService } }}>
               <StartUpdateDeploymentModal
                 nlpSettings={nlpSettings}
                 showNodeInfo={showNodeInfo}

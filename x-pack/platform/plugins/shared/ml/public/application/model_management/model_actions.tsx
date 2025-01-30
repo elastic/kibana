@@ -33,14 +33,12 @@ import {
 } from '../../../common/types/trained_models';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { getUserConfirmationProvider } from './force_stop_dialog';
-import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';
-import { useTrainedModelsService } from './hooks/use_trained_models_service';
 
 export function useModelActions({
   onDfaTestAction,
@@ -65,7 +63,7 @@ export function useModelActions({
       application: { navigateToUrl },
       overlays,
       docLinks,
-      mlServices: { mlApi, httpService },
+      mlServices: { mlApi, httpService, trainedModelsService },
       ...startServices
     },
   } = useMlKibana();
@@ -75,11 +73,10 @@ export function useModelActions({
 
   const cloudInfo = useCloudCheck();
 
-  const trainedModelsService = useTrainedModelsService();
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
-  const activeOperations = useObservable(
-    trainedModelsService.activeOperations$,
-    trainedModelsService.activeOperations
+  const activeDeployments = useObservable(
+    trainedModelsService.activeDeployments$,
+    trainedModelsService.activeDeployments
   );
 
   const [
@@ -99,8 +96,6 @@ export function useModelActions({
   const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeployment;
 
   const navigateToPath = useNavigateToPath();
-
-  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const urlLocator = useMlLocator()!;
 
@@ -133,7 +128,8 @@ export function useModelActions({
         cloudInfo,
         showNodeInfo,
         nlpSettings,
-        httpService
+        httpService,
+        trainedModelsService
       ),
     [
       overlays,
@@ -143,6 +139,7 @@ export function useModelActions({
       showNodeInfo,
       nlpSettings,
       httpService,
+      trainedModelsService,
     ]
   );
 
@@ -222,8 +219,8 @@ export function useModelActions({
         isPrimary: true,
         color: 'success',
         enabled: (item) => {
-          const isModelBeingDeployed = activeOperations.some(
-            (op) => op.type === 'deploying' && op.modelId === item.model_id
+          const isModelBeingDeployed = activeDeployments.some(
+            (deployment) => deployment.modelId === item.model_id
           );
 
           return canStartStopTrainedModels && !isModelBeingDeployed;
@@ -249,50 +246,20 @@ export function useModelActions({
 
           if (!modelDeploymentParams) return;
 
-          trainedModelsService
-            .startModelDeployment$(
-              item.model_id,
-              {
-                priority: modelDeploymentParams.priority!,
-                threads_per_allocation: modelDeploymentParams.threads_per_allocation!,
-                number_of_allocations: modelDeploymentParams.number_of_allocations,
-                deployment_id: modelDeploymentParams.deployment_id,
-              },
-              {
-                ...(modelDeploymentParams.adaptive_allocations?.enabled
-                  ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
-                  : {}),
-              }
-            )
-            .subscribe({
-              error: (e) => {
-                displayErrorToast(
-                  e,
-                  i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
-                    defaultMessage: 'Failed to start "{deploymentId}"',
-                    values: {
-                      deploymentId: modelDeploymentParams.deployment_id,
-                    },
-                  })
-                );
-              },
-              next: () => {
-                displaySuccessToast({
-                  title: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
-                    defaultMessage: 'Deployment started',
-                  }),
-                  text: i18n.translate(
-                    'xpack.ml.trainedModels.modelsList.startSuccessDescription',
-                    {
-                      defaultMessage: '"{deploymentId}" has started successfully.',
-                      values: {
-                        deploymentId: modelDeploymentParams.deployment_id,
-                      },
-                    }
-                  ),
-                });
-              },
-            });
+          trainedModelsService.startModelDeployment(
+            item.model_id,
+            {
+              priority: modelDeploymentParams.priority!,
+              threads_per_allocation: modelDeploymentParams.threads_per_allocation!,
+              number_of_allocations: modelDeploymentParams.number_of_allocations,
+              deployment_id: modelDeploymentParams.deployment_id,
+            },
+            {
+              ...(modelDeploymentParams.adaptive_allocations?.enabled
+                ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
+                : {}),
+            }
+          );
         },
       },
       {
@@ -327,38 +294,18 @@ export function useModelActions({
 
           if (!deploymentParams) return;
 
-          trainedModelsService
-            .updateModelDeployment$(item.model_id, deploymentParams.deployment_id!, {
+          trainedModelsService.updateModelDeployment(
+            item.model_id,
+            deploymentParams.deployment_id!,
+            {
               ...(deploymentParams.adaptive_allocations
                 ? { adaptive_allocations: deploymentParams.adaptive_allocations }
                 : {
                     number_of_allocations: deploymentParams.number_of_allocations!,
                     adaptive_allocations: { enabled: false },
                   }),
-            })
-            .subscribe({
-              next: () => {
-                displaySuccessToast(
-                  i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
-                    defaultMessage: 'Deployment for "{modelId}" has been updated successfully.',
-                    values: {
-                      modelId: item.model_id,
-                    },
-                  })
-                );
-              },
-              error: (e) => {
-                displayErrorToast(
-                  e,
-                  i18n.translate('xpack.ml.trainedModels.modelsList.updateFailed', {
-                    defaultMessage: 'Failed to update "{modelId}"',
-                    values: {
-                      modelId: item.model_id,
-                    },
-                  })
-                );
-              },
-            });
+            }
+          );
         },
       },
       {
@@ -403,40 +350,9 @@ export function useModelActions({
             }
           }
 
-          trainedModelsService
-            .stopModelDeployment$(item.model_id, deploymentIds, {
-              force: requireForceStop,
-            })
-            .subscribe({
-              next: (results) => {
-                if (Object.values(results).some((r) => r.error !== undefined)) {
-                  Object.entries(results).forEach(([id, r]) => {
-                    if (r.error !== undefined) {
-                      displayErrorToast(
-                        r.error,
-                        i18n.translate('xpack.ml.trainedModels.modelsList.stopDeploymentWarning', {
-                          defaultMessage: 'Failed to stop "{deploymentId}"',
-                          values: {
-                            deploymentId: id,
-                          },
-                        })
-                      );
-                    }
-                  });
-                }
-              },
-              error: (e) => {
-                displayErrorToast(
-                  e,
-                  i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
-                    defaultMessage: 'Failed to stop "{modelId}"',
-                    values: {
-                      modelId: item.model_id,
-                    },
-                  })
-                );
-              },
-            });
+          trainedModelsService.stopModelDeployment(item.model_id, deploymentIds, {
+            force: requireForceStop,
+          });
         },
       },
       {
@@ -597,16 +513,14 @@ export function useModelActions({
       urlLocator,
       navigateToUrl,
       navigateToPath,
-      activeOperations,
+      activeDeployments,
       canStartStopTrainedModels,
       canCreateTrainedModels,
       getUserInputModelDeploymentParams,
       modelAndDeploymentIds,
-      onModelDownloadRequest,
       trainedModelsService,
-      displayErrorToast,
+      onModelDownloadRequest,
       isLoading,
-      displaySuccessToast,
       getUserConfirmation,
       onModelDeployRequest,
       canManageIngestPipelines,

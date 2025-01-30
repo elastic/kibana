@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ELSER_ID_V1, MODEL_STATE } from '@kbn/ml-trained-models-utils';
+import { ELSER_ID_V1 } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -62,13 +62,12 @@ import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useMlKibana } from '../contexts/kibana';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useRefresh } from '../routing/use_refresh';
-import { useToastNotificationService } from '../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from './config_mapping';
 import { DeleteModelsModal } from './delete_models_modal';
 import { useModelActions } from './model_actions';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { TestModelAndPipelineCreationFlyout } from './test_models';
-import { useTrainedModelsService } from './hooks/use_trained_models_service';
+import { useInitTrainedModelsService } from './hooks/use_init_trained_models_service';
 import { ModelStatusIndicator } from './model_status_indicator';
 
 interface PageUrlState {
@@ -112,17 +111,18 @@ export const ModelsList: FC<Props> = ({
     },
   } = useMlKibana();
 
-  const trainedModelsService = useTrainedModelsService();
+  const trainedModelsService = useInitTrainedModelsService();
+
   const items = useObservable(trainedModelsService.modelItems$, trainedModelsService.modelItems);
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
-  const activeOperations = useObservable(
-    trainedModelsService.activeOperations$,
-    trainedModelsService.activeOperations
+  const activeDeployments = useObservable(
+    trainedModelsService.activeDeployments$,
+    trainedModelsService.activeDeployments
   );
 
   // Navigation blocker when there are active operations
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: activeOperations.length > 0,
+    hasUnsavedChanges: activeDeployments.length > 0,
     blockSpaNavigation: false,
   });
 
@@ -154,8 +154,6 @@ export const ModelsList: FC<Props> = ({
 
   const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
 
-  const { displayErrorToast } = useToastNotificationService();
-
   const [selectedModels, setSelectedModels] = useState<TrainedModelUIItem[]>([]);
   const [modelsToDelete, setModelsToDelete] = useState<TrainedModelUIItem[]>([]);
   const [modelToDeploy, setModelToDeploy] = useState<DFAModelItem | undefined>();
@@ -172,41 +170,30 @@ export const ModelsList: FC<Props> = ({
   }, [items]);
 
   const fetchModels = useCallback(() => {
-    const fetchSubscription = trainedModelsService.fetchModels$().subscribe({
-      error: (error) => {
-        displayErrorToast(
-          error,
-          i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
-            defaultMessage: 'Error loading trained models',
+    trainedModelsService.fetchModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(
+    function updateExpandedRows() {
+      // Update expanded rows when items change
+      setItemIdToExpandedRowMap((prevMap) => {
+        return Object.fromEntries(
+          Object.keys(prevMap).map((modelId) => {
+            const item = items.find((i) => i.model_id === modelId);
+            return item ? [modelId, <ExpandedRow item={item as TrainedModelItem} />] : [];
           })
         );
-      },
-    });
-
-    return fetchSubscription;
-  }, [displayErrorToast, trainedModelsService]);
-
-  useEffect(() => {
-    // Update expanded rows when items change
-    setItemIdToExpandedRowMap((prevMap) => {
-      return Object.fromEntries(
-        Object.keys(prevMap).map((modelId) => {
-          const item = items.find((i) => i.model_id === modelId);
-          return item ? [modelId, <ExpandedRow item={item as TrainedModelItem} />] : [];
-        })
-      );
-    });
-  }, [items]);
+      });
+    },
+    [items]
+  );
 
   useEffect(
     function updateOnTimerRefresh() {
       if (!refresh) return;
 
-      const fetchSubscription = fetchModels();
-
-      return () => {
-        fetchSubscription.unsubscribe();
-      };
+      fetchModels();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
@@ -258,24 +245,9 @@ export const ModelsList: FC<Props> = ({
 
   const onModelDownloadRequest = useCallback(
     async (modelId: string) => {
-      // Check if download operation is already scheduled
-      if (activeOperations.some((op) => op.type === 'downloading' && op.modelId === modelId)) {
-        return;
-      }
-
-      trainedModelsService.downloadModel$(modelId).subscribe({
-        error: (error) => {
-          displayErrorToast(
-            error,
-            i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
-              defaultMessage: 'Failed to download "{modelId}"',
-              values: { modelId },
-            })
-          );
-        },
-      });
+      trainedModelsService.downloadModel(modelId);
     },
-    [activeOperations, displayErrorToast, trainedModelsService]
+    [trainedModelsService]
   );
 
   /**
@@ -655,9 +627,7 @@ export const ModelsList: FC<Props> = ({
         <DeleteModelsModal
           onClose={(refreshList) => {
             modelsToDelete.forEach((model) => {
-              if (isBaseNLPModelItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
-                trainedModelsService.cleanupModelOperations(model.model_id);
-              }
+              trainedModelsService.cleanupModelOperations(model.model_id);
             });
 
             setItemIdToExpandedRowMap((prev) => {
