@@ -11,7 +11,6 @@ import { FtrService } from '../ftr_provider_context';
 
 export class AnnotationEditorPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
 
   /**
