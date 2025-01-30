@@ -58,9 +58,7 @@ export class AnnotationEditorPageObject extends FtrService {
     const queryInput = await this.testSubjects.find('annotation-query-based-query-input');
     await queryInput.type(config.query);
 
-    const titles = await this.find.allByCssSelector(
-      '.euiFlyout h3.lnsDimensionEditorSection__heading'
-    );
+    const titles = await this.testSubjects.findAll(`lnsDimensionEditorSectionHeading`)
     const lastTitle = titles[titles.length - 1];
     await lastTitle.click(); // close query input pop-up
     await lastTitle.focus(); // scroll down to the bottom of the section

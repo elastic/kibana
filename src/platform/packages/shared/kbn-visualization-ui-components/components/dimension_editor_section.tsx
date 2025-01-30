@@ -9,7 +9,8 @@
 
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import './dimension_editor_section.scss';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 
 export const DimensionEditorSection = ({
   children,
@@ -19,10 +20,40 @@ export const DimensionEditorSection = ({
   children?: React.ReactNode | React.ReactNode[];
 }) => {
   return (
-    <div className="lnsDimensionEditorSection">
-      <div className="lnsDimensionEditorSection__border" />
+    <div
+      css={css`
+        padding-bottom: ${euiThemeVars.euiSize};
+        padding-top: ${euiThemeVars.euiSize};
+        :first-child {
+          padding-top: 0;
+          .lnsDimensionEditorSection__border {
+            display: none;
+          }
+        }
+      `}
+    >
+      <div
+        className="lnsDimensionEditorSection__border"
+        css={css`
+          position: relative;
+          &:before {
+            content: '';
+            position: absolute;
+            top: -${euiThemeVars.euiSize};
+            right: -${euiThemeVars.euiSize};
+            left: -${euiThemeVars.euiSize};
+            border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+          }
+        `}
+      />
       {title && (
-        <EuiTitle size="xxs" className="lnsDimensionEditorSection__heading">
+        <EuiTitle
+          size="xxs"
+          data-test-subj="lnsDimensionEditorSectionHeading"
+          css={css`
+            padding-bottom: ${euiThemeVars.euiSize};
+          `}
+        >
           <h3>{title}</h3>
         </EuiTitle>
       )}
