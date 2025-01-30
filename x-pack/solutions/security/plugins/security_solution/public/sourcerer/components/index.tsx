@@ -27,12 +27,12 @@ import { SourcererScopeName } from '../store/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import { FormRow, PopoverContent, StyledButtonEmpty, StyledFormRow } from './helpers';
 import { useSourcererDataView } from '../containers';
-import { useCreateAdhocDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
+import { useDataViewFallback } from './use_data_view_fallback';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -289,52 +289,22 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     sourcererMissingPatterns,
   ]);
 
-  const onOpenAndReset = useCallback(() => {
+  const handleDataViewFallbackError = useCallback(() => {
     setPopoverIsOpen(true);
     resetDataSources();
   }, [resetDataSources]);
 
-  const { createAdhocDataView } = useCreateAdhocDataView(onOpenAndReset);
-
-  // NOTE: this exists because missingPatterns array reference is swapped very often and we only care about
-  // the values here
-  const stableMissingPatternsString = useMemo(() => missingPatterns.join(), [missingPatterns]);
-
-  useEffect(() => {
-    // NOTE: this lets us prevent setting the index too often,
-    // as there is no way to pass in abort signal into the data view creation apis
-    let ignore = false;
-
-    (async () => {
-      if (
-        (dataViewId === null && isModified === 'deprecated') ||
-        isModified === 'missingPatterns'
-      ) {
-        const adhocDataView = await createAdhocDataView(stableMissingPatternsString.split(','));
-
-        if (ignore) {
-          return;
-        }
-
-        if (!adhocDataView || !adhocDataView.id) {
-          return;
-        }
-
-        const patterns = adhocDataView.getIndexPattern().split(',');
-        dispatchChangeDataView(adhocDataView.id, patterns, false);
-      }
-    })();
-
-    return () => {
-      ignore = true;
-    };
-  }, [
-    dataViewId,
-    isModified,
-    createAdhocDataView,
-    stableMissingPatternsString,
-    dispatchChangeDataView,
-  ]);
+  // NOTE: this hook will enable the fallback data view (adhoc),
+  // depending on the state of this component (see "enableFallback" below)
+  useDataViewFallback({
+    onApplyFallbackDataView: dispatchChangeDataView,
+    enableFallback:
+      // NOTE: there are cases where sourcerer does not know the dataViewId to display and only knows required patterns.
+      // In that case, we enable the fallback dataview creation that will try to create adhoc data view based on the patterns & will select it.
+      (dataViewId === null && isModified === 'deprecated') || isModified === 'missingPatterns',
+    missingPatterns,
+    onResolveErrorManually: handleDataViewFallbackError,
+  });
 
   useEffect(() => {
     setDataViewId(selectedDataViewId);

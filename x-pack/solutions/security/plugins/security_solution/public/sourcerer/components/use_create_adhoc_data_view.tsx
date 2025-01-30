@@ -20,7 +20,7 @@ export interface UseCreateAdhocDataViewReturnValue {
 }
 
 export const useCreateAdhocDataView = (
-  onOpenAndReset: () => void
+  onResolveErrorManually: () => void
 ): UseCreateAdhocDataViewReturnValue => {
   const { dataViews, uiSettings } = useKibana().services;
   const { addError } = useAppToasts();
@@ -55,7 +55,7 @@ export const useCreateAdhocDataView = (
                 defaultMessage="Unexpected error occurred on update. If you would like to modify your data, you can manually select a data view {link}."
                 values={{
                   link: (
-                    <EuiLink onClick={onOpenAndReset} data-test-subj="failureToastLink">
+                    <EuiLink onClick={onResolveErrorManually} data-test-subj="failureToastLink">
                       {i18n.TOGGLE_TO_NEW_SOURCERER}
                     </EuiLink>
                   ),
@@ -68,7 +68,7 @@ export const useCreateAdhocDataView = (
         return null;
       }
     },
-    [addError, onOpenAndReset, uiSettings, dataViews]
+    [addError, onResolveErrorManually, uiSettings, dataViews]
   );
 
   return { createAdhocDataView };

@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useCreateAdhocDataView } from './use_update_data_view';
+import { useCreateAdhocDataView } from './use_create_adhoc_data_view';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import * as i18n from './translations';
 const mockAddSuccess = jest.fn();
