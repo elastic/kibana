@@ -19,6 +19,7 @@ export const TRACE_ID_FIELD = 'trace.id';
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';
 export const DATASTREAM_DATASET_FIELD = 'data_stream.dataset';
+export const DATASTREAM_TYPE_FIELD = 'data_stream.type';
 
 // Resource Fields
 export const AGENT_NAME_FIELD = 'agent.name';
@@ -41,5 +42,5 @@ export const DEGRADED_DOCS_FIELDS = [IGNORED_FIELD, IGNORED_FIELD_VALUES_FIELD] 
 
 // Error Stacktrace
 export const ERROR_STACK_TRACE = 'error.stack_trace';
-export const ERROR_EXCEPTION_STACKTRACE = 'error.exception.stacktrace';
-export const ERROR_LOG_STACKTRACE = 'error.log.stacktrace';
+export const ERROR_EXCEPTION_STACKTRACE_ABS_PATH = 'error.exception.stacktrace.abs_path';
+export const ERROR_LOG_STACKTRACE_ABS_PATH = 'error.log.stacktrace.abs_path';

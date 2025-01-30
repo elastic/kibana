@@ -8,15 +8,15 @@
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import {
-  IngestStreamLifecycle,
   InheritedFieldDefinition,
-  InheritedIngestStreamLifecycle,
+  UnwiredIngestStreamEffectiveLifecycle,
   UnwiredStreamDefinition,
+  WiredIngestStreamEffectiveLifecycle,
   WiredStreamDefinition,
-  ingestStreamLifecycleSchema,
   inheritedFieldDefinitionSchema,
-  inheritedIngestStreamLifecycleSchema,
+  unwiredIngestStreamEffectiveLifecycleSchema,
   unwiredStreamDefinitionSchema,
+  wiredIngestStreamEffectiveLifecycleSchema,
   wiredStreamDefinitionSchema,
 } from './ingest';
 import { ElasticsearchAsset, elasticsearchAssetSchema } from './ingest/common';
@@ -35,12 +35,13 @@ interface ReadStreamDefinitionBase {
 
 interface WiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: WiredStreamDefinition;
-  effective_lifecycle: InheritedIngestStreamLifecycle;
+  effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
 }
 
 interface UnwiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: UnwiredStreamDefinition;
-  effective_lifecycle: IngestStreamLifecycle;
+  data_stream_exists: boolean;
+  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
 
 type ReadStreamDefinition = WiredReadStreamDefinition | UnwiredReadStreamDefinition;
@@ -56,7 +57,7 @@ const wiredReadStreamDefinitionSchema: z.Schema<WiredReadStreamDefinition> = z.i
   readStreamDefinitionSchemaBase,
   z.object({
     stream: wiredStreamDefinitionSchema,
-    effective_lifecycle: inheritedIngestStreamLifecycleSchema,
+    effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 
@@ -64,7 +65,8 @@ const unwiredReadStreamDefinitionSchema: z.Schema<UnwiredReadStreamDefinition> =
   readStreamDefinitionSchemaBase,
   z.object({
     stream: unwiredStreamDefinitionSchema,
-    effective_lifecycle: ingestStreamLifecycleSchema,
+    data_stream_exists: z.boolean(),
+    effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 

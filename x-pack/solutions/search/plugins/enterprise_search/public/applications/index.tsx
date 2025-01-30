@@ -83,6 +83,7 @@ export const renderApp = (
     security,
     share,
     ml,
+    uiActions,
   } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
@@ -137,6 +138,7 @@ export const renderApp = (
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
+    uiActions,
     uiSettings,
     updateSideNavDefinition,
   });
@@ -202,7 +204,7 @@ export const renderApp = (
  * Render function for Kibana's header action menu chrome -
  * reusable by any Enterprise Search plugin simply by passing in
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
- * @see https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
+ * @see https://github.com/elastic/kibana/blob/8.0/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
 
 export const renderHeaderActions = (
