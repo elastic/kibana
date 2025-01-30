@@ -6,9 +6,9 @@
  */
 
 import { queryPings } from './query_pings';
-import { SyntheticsEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../lib';
 
-jest.mock('../../lib'); // Mock the ES client module
+jest.mock('../lib'); // Mock the ES client module
 
 const mockEsClient: Partial<SyntheticsEsClient> = {
   search: jest.fn(),
