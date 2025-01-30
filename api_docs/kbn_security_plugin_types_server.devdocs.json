@@ -4383,7 +4383,7 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
               },
               {
                 "plugin": "transform",

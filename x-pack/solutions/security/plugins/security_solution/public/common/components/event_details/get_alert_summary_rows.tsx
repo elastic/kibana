@@ -63,6 +63,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   }),
 
   // ** //
+  { id: 'Endpoint.policy.applied.artifacts.global.channel' },
   { id: 'user.name' },
   { id: 'rule.name' },
   { id: 'cloud.provider' },

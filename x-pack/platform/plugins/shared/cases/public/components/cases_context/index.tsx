@@ -148,7 +148,7 @@ export const CasesProvider: FC<
         );
       } else {
         throw new Error(
-          'Invalid owner provided to cases context. See https://github.com/elastic/kibana/blob/main/x-pack/plugins/cases/README.md#casescontext-setup'
+          'Invalid owner provided to cases context. See https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/cases/README.md#casescontext-setup'
         );
       }
     },
