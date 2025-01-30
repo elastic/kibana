@@ -28,7 +28,6 @@ import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
-
 import { registerRoutes } from './routes/register_routes';
 import {
   reindexOperationSavedObjectType,
