@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type { MonitoringType } from '../../../../../../../../../../common/types';
+
 export const mockAgentPolicy = {
   id: '888c9a80-cae6-4675-82ad-73553cb343f9',
   name: 'Agent policy 1',
   description: '',
   namespace: 'default',
-  monitoring_enabled: ['logs', 'metrics', 'traces'],
+  monitoring_enabled: ['logs', 'metrics', 'traces'] as MonitoringType,
   inactivity_timeout: 1209600,
   is_protected: false,
-  status: 'active',
+  status: 'active' as const, // or 'Inactive' as const
   is_managed: false,
   revision: 1,
   updated_at: '2025-01-29T14:12:36.256Z',
