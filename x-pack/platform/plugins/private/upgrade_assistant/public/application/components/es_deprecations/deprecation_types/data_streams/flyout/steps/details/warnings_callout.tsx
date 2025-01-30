@@ -23,7 +23,7 @@ export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
-          defaultMessage="Data indexed on or after {formattedDate} needs to be reindexed to a compatible format or marked as read-only."
+          defaultMessage="Indices created on or before {formattedDate} need to be reindexed to a compatible format or marked as read-only."
           values={{ formattedDate }}
         />
         <br />

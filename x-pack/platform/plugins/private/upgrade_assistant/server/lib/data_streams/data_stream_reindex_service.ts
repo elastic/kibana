@@ -61,7 +61,7 @@ interface DataStreamReindexService {
    * Retrieves metadata about the data stream.
    * @param dataStreamName
    */
-  getDataStreamMetadata: (dataStreamName: string) => Promise<DataStreamMetadata>;
+  getDataStreamMetadata: (dataStreamName: string) => Promise<DataStreamMetadata | null>;
 }
 
 export interface DataStreamReindexServiceFactoryParams {
@@ -243,7 +243,7 @@ export const dataStreamReindexServiceFactory = ({
         status: DataStreamReindexStatus.cancelled,
       };
     },
-    async getDataStreamMetadata(dataStreamName: string): Promise<DataStreamMetadata> {
+    async getDataStreamMetadata(dataStreamName: string): Promise<DataStreamMetadata | null> {
       try {
         const { body: statsBody } = (await esClient.transport.request(
           {
@@ -254,11 +254,14 @@ export const dataStreamReindexServiceFactory = ({
         )) as TransportResult<any>;
 
         const { data_streams: dataStreamsDeprecations } = await esClient.migration.deprecations({
-          filter_path: `data_streams.${dataStreamName}`,
+          filter_path: `data_streams`,
         });
 
         const deprecationsDetails = dataStreamsDeprecations[dataStreamName];
-        if (deprecationsDetails.length !== 1) {
+        if (!deprecationsDetails) {
+          return null;
+        }
+        if (deprecationsDetails?.length !== 1) {
           throw error.cannotGrabMetadata(
             `Data stream ${dataStreamName} has ${deprecationsDetails.length} deprecations. Expected 1.`
           );

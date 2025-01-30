@@ -202,7 +202,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
-              defaultMessage="{allBackingIndices} total backing indices, and {totalBackingIndicesRequireingUpgrade} requires upgrade."
+              defaultMessage="{allBackingIndices} total backing indices, and {backingIndicesRequireingUpgrade} requires upgrade."
               values={{
                 allBackingIndices: meta.allIndicesCount,
                 backingIndicesRequireingUpgrade: meta.indicesRequiringUpgradeCount,
@@ -272,8 +272,8 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color={status === DataStreamReindexStatus.paused ? 'warning' : 'primary'}
-                    iconType={status === DataStreamReindexStatus.paused ? 'play' : undefined}
+                    color={status === DataStreamReindexStatus.cancelled ? 'warning' : 'primary'}
+                    iconType={status === DataStreamReindexStatus.cancelled ? 'play' : undefined}
                     onClick={startReindex}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}

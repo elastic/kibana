@@ -18,6 +18,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import moment from 'moment';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import {
   DataStreamReindexStatus,
   EnrichedDeprecationInfo,
@@ -75,16 +76,21 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         return;
       }
       case DataStreamReindexStatus.completed: {
-        setFlyoutStep('completed');
+        setTimeout(() => {
+          // wait for 1.5 more seconds fur the UI to visually get to 100%
+          setFlyoutStep('completed');
+        }, 1500);
         return;
       }
     }
   }, [status]);
 
   useMemo(async () => {
-    await loadDataStreamMetadata();
-    switchFlyoutStep();
-  }, [loadDataStreamMetadata, switchFlyoutStep]);
+    if (flyoutStep === 'initializing') {
+      await loadDataStreamMetadata();
+      switchFlyoutStep();
+    }
+  }, [loadDataStreamMetadata, switchFlyoutStep, flyoutStep]);
   useMemo(() => switchFlyoutStep(), [switchFlyoutStep]);
 
   const onStartReindex = useCallback(async () => {
@@ -100,10 +106,17 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   const { docsSizeFormatted, indicesRequiringUpgradeDocsCount, lastIndexCreationDateFormatted } =
     useMemo(() => {
       if (!meta) {
+        const unknownMessage = i18n.translate(
+          'xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.unknownMessage',
+          {
+            defaultMessage: 'Unknown',
+          }
+        );
+
         return {
-          indicesRequiringUpgradeDocsCount: 'Unknown',
-          docsSizeFormatted: 'Unknown',
-          lastIndexCreationDateFormatted: 'Unknown',
+          indicesRequiringUpgradeDocsCount: unknownMessage,
+          docsSizeFormatted: unknownMessage,
+          lastIndexCreationDateFormatted: unknownMessage,
         };
       }
 
@@ -223,44 +236,48 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
           <EuiTitle size="s" data-test-subj="flyoutTitle">
             <h2 id="reindexDetailsFlyoutTitle">{index}</h2>
           </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <EuiDescriptionList
-                textStyle="reverse"
-                listItems={[
-                  {
-                    title: 'Reindexing required for indices created on or after',
-                    description: lastIndexCreationDateFormatted,
-                  },
-                ]}
-              />
-            </EuiFlexItem>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionList
-                  textStyle="reverse"
-                  listItems={[
-                    {
-                      title: 'Size',
-                      description: docsSizeFormatted,
-                    },
-                  ]}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiDescriptionList
-                  textStyle="reverse"
-                  listItems={[
-                    {
-                      title: 'Document Count',
-                      description: indicesRequiringUpgradeDocsCount,
-                    },
-                  ]}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
+          {meta && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexItem>
+                  <EuiDescriptionList
+                    textStyle="reverse"
+                    listItems={[
+                      {
+                        title: 'Reindexing required for indices created on or before',
+                        description: lastIndexCreationDateFormatted,
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionList
+                      textStyle="reverse"
+                      listItems={[
+                        {
+                          title: 'Size',
+                          description: docsSizeFormatted,
+                        },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiDescriptionList
+                      textStyle="reverse"
+                      listItems={[
+                        {
+                          title: 'Document Count',
+                          description: indicesRequiringUpgradeDocsCount,
+                        },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexGroup>
+            </>
+          )}
         </EuiFlyoutHeader>
       )}
 

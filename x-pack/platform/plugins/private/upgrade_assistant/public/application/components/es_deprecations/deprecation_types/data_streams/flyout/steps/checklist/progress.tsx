@@ -39,7 +39,8 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
     ),
   } as StepProgressStep;
 
-  const inProgress = status === DataStreamReindexStatus.inProgress;
+  const inProgress =
+    status === DataStreamReindexStatus.inProgress || status === DataStreamReindexStatus.completed;
 
   let euiProgressColor = 'subdued';
 

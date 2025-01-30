@@ -24,9 +24,15 @@ interface MlActionMetadata {
 interface DataStreamActionMetadata {
   actions?: Action[];
   total_backing_indices: number;
-  indices_requiring_upgrade_count: number;
-  indices_requiring_upgrade: string[];
   reindex_required: boolean;
+
+  // Action required before moving to 9.0
+  indices_requiring_upgrade_count?: number;
+  indices_requiring_upgrade?: string[];
+
+  // Action not required before moving to 9.0
+  ignored_indices_requiring_upgrade?: string[];
+  ignored_indices_requiring_upgrade_count?: number;
 }
 
 export type EsMetadata = Actions | MlActionMetadata | DataStreamActionMetadata;
@@ -60,14 +66,28 @@ export const getCorrectiveAction = (
   if (requiresDataStreamsAction) {
     const {
       total_backing_indices: totalBackingIndices,
-      indices_requiring_upgrade_count: indicesRequiringUpgradeCount,
-      indices_requiring_upgrade: indicesRequiringUpgrade,
+      indices_requiring_upgrade_count: indicesRequiringUpgradeCount = 0,
+      indices_requiring_upgrade: indicesRequiringUpgrade = [],
+
+      ignored_indices_requiring_upgrade: ignoredIndicesRequiringUpgrade = [],
+      ignored_indices_requiring_upgrade_count: ignoredIndicesRequiringUpgradeCount = 0,
+
       reindex_required: reindexRequired,
     } = metadata as DataStreamActionMetadata;
+
+    /**
+     * If there are no indices requiring upgrade, or reindexRequired = false.
+     * Then we don't need to show the corrective action
+     */
+    if (indicesRequiringUpgradeCount < 1 || !reindexRequired) {
+      return;
+    }
 
     return {
       type: 'dataStream',
       metadata: {
+        ignoredIndicesRequiringUpgrade,
+        ignoredIndicesRequiringUpgradeCount,
         totalBackingIndices,
         indicesRequiringUpgradeCount,
         indicesRequiringUpgrade,

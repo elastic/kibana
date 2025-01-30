@@ -188,6 +188,11 @@ export const useReindexStatus = ({
       });
     } catch (error) {
       setReindexState((prevValue: ReindexState) => {
+        // if state is completed, we don't need to update the meta
+        if (prevValue.status === DataStreamReindexStatus.completed) {
+          return prevValue;
+        }
+
         return {
           ...prevValue,
           meta: undefined,

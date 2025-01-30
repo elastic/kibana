@@ -9,6 +9,8 @@ export interface DataStreamsActionMetadata {
   totalBackingIndices: number;
   indicesRequiringUpgradeCount: number;
   indicesRequiringUpgrade: string[];
+  ignoredIndicesRequiringUpgrade: string[];
+  ignoredIndicesRequiringUpgradeCount: number;
   reindexRequired: boolean;
 }
 
