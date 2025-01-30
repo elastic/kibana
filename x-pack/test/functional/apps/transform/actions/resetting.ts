@@ -14,7 +14,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('resetting', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/208870
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/208871
+  describe.skip('resetting', function () {
     const PREFIX = 'resetting';
 
     const testDataList = [
