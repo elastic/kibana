@@ -238,6 +238,16 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     reopenCase?: readonly string[];
+    /**
+     * List of case owners whose users should have assignCase access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    assign: ['securitySolution']
+     *  }
+     * ```
+     */
+    assign?: readonly string[];
   };
 
   /**

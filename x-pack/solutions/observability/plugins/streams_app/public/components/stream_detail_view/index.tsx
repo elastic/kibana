@@ -67,6 +67,7 @@ export function StreamDetailView() {
             inherited_fields: {},
             effective_lifecycle: response.effective_lifecycle,
             name: key,
+            data_stream_exists: response.data_stream_exists,
             stream: {
               name: key,
               ...response.stream,

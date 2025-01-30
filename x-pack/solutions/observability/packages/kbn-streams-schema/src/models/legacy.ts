@@ -13,8 +13,8 @@ import {
   UnwiredStreamDefinition,
   WiredIngestStreamEffectiveLifecycle,
   WiredStreamDefinition,
-  ingestStreamLifecycleSchema,
   inheritedFieldDefinitionSchema,
+  unwiredIngestStreamEffectiveLifecycleSchema,
   unwiredStreamDefinitionSchema,
   wiredIngestStreamEffectiveLifecycleSchema,
   wiredStreamDefinitionSchema,
@@ -40,6 +40,7 @@ interface WiredReadStreamDefinition extends ReadStreamDefinitionBase {
 
 interface UnwiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: UnwiredStreamDefinition;
+  data_stream_exists: boolean;
   effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
 
@@ -64,7 +65,8 @@ const unwiredReadStreamDefinitionSchema: z.Schema<UnwiredReadStreamDefinition> =
   readStreamDefinitionSchemaBase,
   z.object({
     stream: unwiredStreamDefinitionSchema,
-    effective_lifecycle: ingestStreamLifecycleSchema,
+    data_stream_exists: z.boolean(),
+    effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 

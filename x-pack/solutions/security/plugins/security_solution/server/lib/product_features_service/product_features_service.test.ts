@@ -45,6 +45,7 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
   getAssistantFeature: () => mockGetFeature(),
   getCasesFeature: () => mockGetFeature(),
   getCasesV2Feature: () => mockGetFeature(),
+  getCasesV3Feature: () => mockGetFeature(),
   getSecurityFeature: () => mockGetFeature(),
   getSecurityV2Feature: () => mockGetFeature(),
   getTimelineFeature: () => mockGetFeature(),
@@ -60,8 +61,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(8);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(8);
+    expect(mockGetFeature).toHaveBeenCalledTimes(9);
+    expect(MockedProductFeatures).toHaveBeenCalledTimes(9);
   });
 
   it('should init all ProductFeatures when initialized', () => {

@@ -20,6 +20,9 @@ export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 // New version created in 8.17 to adopt the roles migration changes
 export const CASES_FEATURE_ID_V2 = 'securitySolutionCasesV2' as const;
 
+// New version created in 8.18 for case assignees
+export const CASES_FEATURE_ID_V3 = 'securitySolutionCasesV3' as const;
+
 export const SECURITY_SOLUTION_CASES_APP_ID = 'securitySolutionCases' as const;
 
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;

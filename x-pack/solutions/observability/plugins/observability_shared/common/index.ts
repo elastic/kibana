@@ -8,7 +8,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const observabilityFeatureId = 'observability';
 export const observabilityAppId = 'observability-overview';
-export const casesFeatureId = 'observabilityCasesV2';
+export const casesFeatureId = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
 
 // SLO alerts table in slo detail page

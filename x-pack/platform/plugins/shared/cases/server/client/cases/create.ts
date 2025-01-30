@@ -52,11 +52,17 @@ export const create = async (
     validateCustomFields(customFieldsValidationParams);
 
     const savedObjectID = SavedObjectsUtils.generateId();
-
-    await auth.ensureAuthorized({
-      operation: Operations.createCase,
-      entities: [{ owner: query.owner, id: savedObjectID }],
-    });
+    if (query.assignees && query.assignees.length > 0) {
+      await auth.ensureAuthorized({
+        operation: [Operations.assignCase, Operations.createCase],
+        entities: [{ owner: query.owner, id: savedObjectID }],
+      });
+    } else {
+      await auth.ensureAuthorized({
+        operation: Operations.createCase,
+        entities: [{ owner: query.owner, id: savedObjectID }],
+      });
+    }
 
     /**
      * Assign users to a case is only available to Platinum+

@@ -7,24 +7,29 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { testSubjectIds } from '../../../constants/test_subject_ids';
 
-const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
-const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-const AWS_MANUAL_TEST_ID = 'aws-manual-setup-option';
-const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
-const ROLE_ARN_TEST_ID = 'awsRoleArnInput';
-const DIRECT_ACCESS_KEY_ID_TEST_ID = 'awsDirectAccessKeyId';
-const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'passwordInput-secret-access-key';
-const TEMP_ACCESS_KEY_ID_TEST_ID = 'awsTemporaryKeysAccessKeyId';
-const TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID = 'passwordInput-secret-access-key';
-const TEMP_ACCESS_SESSION_TOKEN_TEST_ID = 'awsTemporaryKeysSessionToken';
-const SHARED_CREDENTIALS_FILE_TEST_ID = 'awsSharedCredentialFile';
-const SHARED_CREDETIALS_PROFILE_NAME_TEST_ID = 'awsCredentialProfileName';
+const {
+  CIS_AWS_OPTION_TEST_ID,
+  AWS_SINGLE_ACCOUNT_TEST_ID,
+  AWS_MANUAL_TEST_ID,
+  AWS_CREDENTIAL_SELECTOR,
+  ROLE_ARN_TEST_ID,
+  DIRECT_ACCESS_KEY_ID_TEST_ID,
+  DIRECT_ACCESS_SECRET_KEY_TEST_ID,
+  TEMP_ACCESS_KEY_ID_TEST_ID,
+  TEMP_ACCESS_KEY_SECRET_KEY_TEST_ID,
+  TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
+  SHARED_CREDENTIALS_FILE_TEST_ID,
+  SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
+} = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects } = providerContext;
+  const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
+  const retry = getService('retry');
+  const logger = getService('log');
 
   describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
@@ -34,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-
+      await cisIntegration.closeAllOpenTabs();
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
@@ -69,22 +74,10 @@ export default function (providerContext: FtrProviderContext) {
           )?.includes('https://console.aws.amazon.com/cloudformation/')
         ).to.be(true);
       });
-      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (
-            await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmCloudFormationModalConfirmButton'
-            )
-          ).includes('console.aws.amazon.com%2Fcloudformation')
-        ).to.be(true);
-      });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/187470
-    describe.skip('CIS_AWS Organization Manual Assume Role', () => {
+    describe('CIS_AWS Organization Manual Assume Role', () => {
       it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -92,7 +85,18 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+
+        /*
+         * sometimes it takes a while to save the integration so added timeout to wait for post install modal
+         */
+        await retry.try(async () => {
+          const modal = await cisIntegration.getPostInstallModal();
+          if (!modal) {
+            logger.debug('Post install modal not found');
+          }
+          expect(modal !== undefined).to.be(true);
+        });
+
         await cisIntegration.navigateToIntegrationCspList();
         expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
           true

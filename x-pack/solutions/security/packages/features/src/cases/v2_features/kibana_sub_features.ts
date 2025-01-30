@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { CasesSubFeatureId } from '../../product_features_keys';
-import { APP_ID } from '../../constants';
+import { APP_ID, CASES_FEATURE_ID_V3 } from '../../constants';
 import type { CasesFeatureParams } from '../types';
 
 /**
@@ -57,6 +57,7 @@ export const getCasesSubFeaturesMapV2 = ({
               delete: [APP_ID],
             },
             ui: uiCapabilities.delete,
+            replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['cases_delete'] }],
           },
         ],
       },
@@ -91,6 +92,7 @@ export const getCasesSubFeaturesMapV2 = ({
               settings: [APP_ID],
             },
             ui: uiCapabilities.settings,
+            replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['cases_settings'] }],
           },
         ],
       },
@@ -128,6 +130,7 @@ export const getCasesSubFeaturesMapV2 = ({
               createComment: [APP_ID],
             },
             ui: uiCapabilities.createComment,
+            replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['create_comment'] }],
           },
         ],
       },
@@ -161,6 +164,7 @@ export const getCasesSubFeaturesMapV2 = ({
               reopenCase: [APP_ID],
             },
             ui: uiCapabilities.reopenCase,
+            replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['case_reopen'] }],
           },
         ],
       },

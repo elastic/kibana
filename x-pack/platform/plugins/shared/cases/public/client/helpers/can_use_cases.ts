@@ -7,7 +7,7 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import {
-  FEATURE_ID_V2,
+  FEATURE_ID_V3,
   GENERAL_CASES_OWNER,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
@@ -32,9 +32,9 @@ export const canUseCases =
     owners: CasesOwners[] = [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER, GENERAL_CASES_OWNER]
   ): CasesPermissions => {
     const aggregatedPermissions = owners.reduce<CasesPermissions>(
+      // eslint-disable-next-line complexity
       (acc, owner) => {
         const userCapabilitiesForOwner = getUICapabilities(capabilities[getFeatureID(owner)]);
-
         acc.create = acc.create || userCapabilitiesForOwner.create;
         acc.read = acc.read || userCapabilitiesForOwner.read;
         acc.update = acc.update || userCapabilitiesForOwner.update;
@@ -44,6 +44,7 @@ export const canUseCases =
         acc.settings = acc.settings || userCapabilitiesForOwner.settings;
         acc.reopenCase = acc.reopenCase || userCapabilitiesForOwner.reopenCase;
         acc.createComment = acc.createComment || userCapabilitiesForOwner.createComment;
+        acc.assign = acc.assign || userCapabilitiesForOwner.assign;
 
         const allFromAcc =
           acc.create &&
@@ -54,7 +55,8 @@ export const canUseCases =
           acc.connectors &&
           acc.settings &&
           acc.reopenCase &&
-          acc.createComment;
+          acc.createComment &&
+          acc.assign;
 
         acc.all = acc.all || userCapabilitiesForOwner.all || allFromAcc;
 
@@ -71,6 +73,7 @@ export const canUseCases =
         settings: false,
         reopenCase: false,
         createComment: false,
+        assign: false,
       }
     );
 
@@ -81,8 +84,8 @@ export const canUseCases =
 
 const getFeatureID = (owner: CasesOwners) => {
   if (owner === GENERAL_CASES_OWNER) {
-    return FEATURE_ID_V2;
+    return FEATURE_ID_V3;
   }
 
-  return `${owner}CasesV2`;
+  return `${owner}CasesV3`;
 };

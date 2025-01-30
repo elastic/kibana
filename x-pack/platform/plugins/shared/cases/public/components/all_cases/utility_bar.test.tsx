@@ -209,6 +209,44 @@ describe('Severity form field', () => {
     });
   });
 
+  it('does show the bulk actions with only assign permissions', async () => {
+    appMockRender = createAppMockRenderer({
+      permissions: {
+        ...noCasesPermissions(),
+        assign: true,
+      },
+    });
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
+
+    expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+  });
+
+  it('shows bulk actions when only assignCase and update permissions are present', async () => {
+    appMockRender = createAppMockRenderer({
+      permissions: {
+        ...noCasesPermissions(),
+        assign: true,
+        update: true,
+      },
+    });
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
+
+    expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+  });
+
+  it('shows bulk actions when only assignCase and delete permissions are present', async () => {
+    appMockRender = createAppMockRenderer({
+      permissions: {
+        ...noCasesPermissions(),
+        assign: true,
+        delete: true,
+      },
+    });
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
+
+    expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+  });
+
   describe('Maximum number of cases', () => {
     const newProps = {
       ...props,
