@@ -54,8 +54,10 @@ describe('ES deprecations API', () => {
   describe('GET /api/upgrade_assistant/es_deprecations', () => {
     it('returns state', async () => {
       ESUpgradeStatusApis.getESUpgradeStatus.mockResolvedValue({
-        deprecations: [],
+        migrationsDeprecations: [],
+        enrichedHealthIndicators: [],
         totalCriticalDeprecations: 0,
+        totalCriticalHealthIssues: 0,
       });
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -64,7 +66,7 @@ describe('ES deprecations API', () => {
 
       expect(resp.status).toEqual(200);
       expect(JSON.stringify(resp.payload)).toMatchInlineSnapshot(
-        `"{\\"deprecations\\":[],\\"totalCriticalDeprecations\\":0}"`
+        `"{\\"migrationsDeprecations\\":[],\\"enrichedHealthIndicators\\":[],\\"totalCriticalDeprecations\\":0,\\"totalCriticalHealthIssues\\":0}"`
       );
     });
 

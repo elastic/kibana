@@ -296,7 +296,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         dashboards: new subPluginClasses.Dashboards(),
         explore: new subPluginClasses.Explore(),
-        kubernetes: new subPluginClasses.Kubernetes(),
         onboarding: new subPluginClasses.Onboarding(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
@@ -331,7 +330,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
-      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       onboarding: subPlugins.onboarding.start(),
       overview: subPlugins.overview.start(),
@@ -345,7 +343,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       investigations: subPlugins.investigations.start(),
       machineLearning: subPlugins.machineLearning.start(),
       siemMigrations: subPlugins.siemMigrations.start(
-        this.experimentalFeatures.siemMigrationsEnabled
+        !this.experimentalFeatures.siemMigrationsDisabled
       ),
     };
   }

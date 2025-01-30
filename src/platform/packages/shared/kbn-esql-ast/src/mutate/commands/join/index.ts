@@ -16,6 +16,7 @@ import type {
   ESQLAstQueryExpression,
   ESQLCommand,
   ESQLIdentifier,
+  ESQLSource,
 } from '../../../types';
 import * as generic from '../../generic';
 
@@ -42,6 +43,11 @@ export const list = (ast: ESQLAstQueryExpression): IterableIterator<ESQLAstJoinC
 export const byIndex = (ast: ESQLAstQueryExpression, index: number): ESQLCommand | undefined => {
   return [...list(ast)][index];
 };
+
+const getSource = (node: WalkerAstNode): ESQLSource =>
+  Walker.match(node, {
+    type: 'source',
+  }) as ESQLSource;
 
 const getIdentifier = (node: WalkerAstNode): ESQLIdentifier =>
   Walker.match(node, {
@@ -108,6 +114,6 @@ export interface JoinCommandSummary {
 }
 
 export interface JoinCommandTarget {
-  index: ESQLIdentifier;
+  index: ESQLSource;
   alias?: ESQLIdentifier;
 }

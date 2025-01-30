@@ -223,8 +223,15 @@ export interface HealthIndicatorAction {
 }
 
 export interface EnrichedDeprecationInfo
-  extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
-  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator' | 'data_streams';
+  extends Omit<
+    estypes.MigrationDeprecationsDeprecation,
+    'level' | 'resolve_during_rolling_upgrade'
+  > {
+  type:
+    | keyof estypes.MigrationDeprecationsResponse
+    | 'health_indicator'
+    | 'ilm_policies'
+    | 'templates';
   isCritical: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
@@ -244,7 +251,9 @@ export interface CloudBackupStatus {
 
 export interface ESUpgradeStatus {
   totalCriticalDeprecations: number;
-  deprecations: EnrichedDeprecationInfo[];
+  migrationsDeprecations: EnrichedDeprecationInfo[];
+  totalCriticalHealthIssues: number;
+  enrichedHealthIndicators: EnrichedDeprecationInfo[];
 }
 
 export interface ResolveIndexResponseFromES {

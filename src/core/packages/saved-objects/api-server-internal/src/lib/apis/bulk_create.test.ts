@@ -56,6 +56,8 @@ import {
   expectCreateResult,
   mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
@@ -71,6 +73,7 @@ describe('#bulkCreate', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -99,6 +102,7 @@ describe('#bulkCreate', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -116,6 +120,9 @@ describe('#bulkCreate', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -1045,6 +1052,39 @@ describe('#bulkCreate', () => {
         expect(result).toEqual({
           saved_objects: [obj1, obj2].map((x) => expectCreateResult(x)),
         });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeBulkCreate', async () => {
+        const obj1WithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const obj2WithoutManaged = {
+          type: 'index-pattern',
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        };
+        await bulkCreateSuccess(client, repository, [obj1WithoutManaged, obj2WithoutManaged]);
+
+        expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: expect.arrayContaining([
+              expect.objectContaining({
+                id: '6.0.0-alpha1',
+                name: 'Test One',
+              }),
+              expect.objectContaining({
+                id: 'logstash-*',
+                name: 'Test Two',
+              }),
+            ]),
+          })
+        );
       });
     });
   });

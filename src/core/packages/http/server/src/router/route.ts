@@ -396,6 +396,13 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   excludeFromOAS?: boolean;
 
   /**
+   * Whether the rate limiter should never throttle this route.
+   *
+   * @default false
+   */
+  excludeFromRateLimiter?: boolean;
+
+  /**
    * Release version or date that this route will be removed
    * Use with `deprecated: true`
    *

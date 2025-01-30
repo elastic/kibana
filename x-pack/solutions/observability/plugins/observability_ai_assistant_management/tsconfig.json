@@ -28,7 +28,8 @@
     "@kbn/ai-assistant",
     "@kbn/core-plugins-server",
     "@kbn/product-doc-base-plugin",
-    "@kbn/ai-assistant-icon"
+    "@kbn/ai-assistant-icon",
+    "@kbn/ml-plugin"
   ],
   "exclude": [
     "target/**/*"
