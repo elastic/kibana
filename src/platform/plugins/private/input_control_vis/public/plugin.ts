@@ -78,7 +78,7 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     const { readOnly } = this.initializerContext.config.get<InputControlPublicConfig>();
     visualizations.createBaseVisualization(INPUT_CONTROL_VIS_TYPE, async () => {
       const { createInputControlVisTypeDefinition } = await import('./input_control_vis_type');
-      return createInputControlVisTypeDefinition(visualizationDependencies, Boolean(readOnly))
+      return createInputControlVisTypeDefinition(visualizationDependencies, Boolean(readOnly));
     });
   }
 

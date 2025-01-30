@@ -163,7 +163,7 @@ function GroupSelection({
                 </EuiTabs>
               </div>
             )}
-            
+
             <div className="visNewVisDialogGroupSelection__visGroups">
               <EuiSpacer size="s" />
               {tab === 'recommended' ? (

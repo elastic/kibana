@@ -51,11 +51,14 @@ describe('Vis Class', function () {
   };
 
   beforeEach(async function () {
-    vis = new Vis(new BaseVisType({
-      name: 'pie',
-      title: 'pie',
-      icon: 'pie-icon',
-    } as unknown as VisTypeDefinition<object>), stateFixture as any);
+    vis = new Vis(
+      new BaseVisType({
+        name: 'pie',
+        title: 'pie',
+        icon: 'pie-icon',
+      } as unknown as VisTypeDefinition<object>),
+      stateFixture as any
+    );
     await vis.setState(stateFixture as any);
   });
 

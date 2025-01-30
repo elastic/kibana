@@ -49,7 +49,7 @@ describe('AggBasedSelection', () => {
   ] as BaseVisType[];
 
   const visTypes: TypesStart = {
-    get: async function<T extends VisParams>(id: string) {
+    async get<T extends VisParams>(id: string) {
       return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
     all: async () => {
@@ -99,7 +99,7 @@ describe('AggBasedSelection', () => {
           onVisTypeSelected={jest.fn()}
         />
       );
-      
+
       await new Promise((resolve) => process.nextTick(resolve));
 
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');

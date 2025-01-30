@@ -65,7 +65,7 @@ describe('GroupSelection', () => {
 
   const visTypesRegistry = (visTypes: BaseVisType[]): TypesStart => {
     return {
-      get: async function<T extends VisParams>(id: string) {
+      async get<T extends VisParams>(id: string) {
         return visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
       },
       all: async () => {

@@ -65,7 +65,7 @@ describe('NewVisModal', () => {
     },
   ] as BaseVisType[];
   const visTypes: TypesStart = {
-    get: async function<T extends VisParams>(id: string) {
+    async get<T extends VisParams>(id: string) {
       return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
     all: async () => {
@@ -145,7 +145,9 @@ describe('NewVisModal', () => {
       renderNewVisModal();
       waitFor(async () => {
         await userEvent.click(screen.getByText('Vis Type 1'));
-        expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
+        expect(window.location.assign).toBeCalledWith(
+          'testbasepath/app/visualize#/create?type=vis'
+        );
       });
     });
 

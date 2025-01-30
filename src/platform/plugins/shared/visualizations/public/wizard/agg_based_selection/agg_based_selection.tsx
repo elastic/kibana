@@ -56,20 +56,17 @@ export function AggBasedSelection(props: AggBasedSelectionProps) {
     const entries = !query
       ? aggVisTypes.map((type: any) => ({ type, highlighted: false }))
       : aggVisTypes.map((type) => {
-        const matchesQuery =
-          type.name.toLowerCase().includes(q) ||
-          type.title.toLowerCase().includes(q) ||
-          (typeof type.description === 'string' && type.description.toLowerCase().includes(q));
-        return { type, highlighted: matchesQuery };
-      });
+          const matchesQuery =
+            type.name.toLowerCase().includes(q) ||
+            type.title.toLowerCase().includes(q) ||
+            (typeof type.description === 'string' && type.description.toLowerCase().includes(q));
+          return { type, highlighted: matchesQuery };
+        });
 
     return orderBy(entries, ['highlighted', 'type.title'], ['desc', 'asc']);
-  }, [query, visTypes]);  
-  
-  function renderVisType(visType: {
-    type: BaseVisType;
-    highlighted: boolean;
-  }) {
+  }, [query, visTypes]);
+
+  function renderVisType(visType: { type: BaseVisType; highlighted: boolean }) {
     const isDisabled = query !== '' && !visType.highlighted;
     const onClick = () => props.onVisTypeSelected(visType.type);
 
@@ -91,8 +88,8 @@ export function AggBasedSelection(props: AggBasedSelectionProps) {
         />
       </EuiFlexItem>
     );
-  };
-  
+  }
+
   return (
     <>
       <EuiModalHeader>
@@ -104,9 +101,7 @@ export function AggBasedSelection(props: AggBasedSelectionProps) {
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {props.openedAsRoot ? null : (
-          <DialogNavigation goBack={() => props.showMainDialog(true)} />
-        )}
+        {props.openedAsRoot ? null : <DialogNavigation goBack={() => props.showMainDialog(true)} />}
         <EuiFieldSearch
           placeholder="Filter"
           value={query}

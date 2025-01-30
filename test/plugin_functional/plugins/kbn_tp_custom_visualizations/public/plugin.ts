@@ -38,28 +38,31 @@ export class CustomVisualizationsPublicPlugin
     /**
      * Create the visualization type with definition
      */
-    visualizations.createBaseVisualization<SelfChangingVisParams>('self_changing_vis', async () => ({
-      name: 'self_changing_vis',
-      title: 'Self Changing Vis',
-      icon: 'controlsHorizontal',
-      description:
-        'This visualization is able to change its own settings, that you could also set in the editor.',
-      visConfig: {
-        defaults: {
-          counter: 0,
-        },
-      },
-      editorConfig: {
-        optionTabs: [
-          {
-            name: 'options',
-            title: 'Options',
-            editor: SelfChangingEditor,
+    visualizations.createBaseVisualization<SelfChangingVisParams>(
+      'self_changing_vis',
+      async () => ({
+        name: 'self_changing_vis',
+        title: 'Self Changing Vis',
+        icon: 'controlsHorizontal',
+        description:
+          'This visualization is able to change its own settings, that you could also set in the editor.',
+        visConfig: {
+          defaults: {
+            counter: 0,
           },
-        ],
-      },
-      toExpressionAst,
-    }));
+        },
+        editorConfig: {
+          optionTabs: [
+            {
+              name: 'options',
+              title: 'Options',
+              editor: SelfChangingEditor,
+            },
+          ],
+        },
+        toExpressionAst,
+      })
+    );
   }
 
   public start() {}

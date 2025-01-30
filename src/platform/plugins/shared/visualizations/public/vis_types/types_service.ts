@@ -39,7 +39,7 @@ export class TypesService {
     return await asyncMap(Object.values(this.types), async (getVisType) => {
       return await getVisType();
     });
-  }
+  };
 
   public setup() {
     return {

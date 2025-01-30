@@ -7,24 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from "react";
-import { BaseVisType } from "./base_vis_type";
-import { TypesStart } from "./types_service";
+import { useEffect, useState } from 'react';
+import { BaseVisType } from './base_vis_type';
+import { TypesStart } from './types_service';
 
 export function useVisTypes(visTypesRegistry: TypesStart) {
   const [isLoading, setIsLoading] = useState(false);
-  const [ visTypes, setVisTypes ] = useState<BaseVisType[]>([]);
+  const [visTypes, setVisTypes] = useState<BaseVisType[]>([]);
   useEffect(() => {
     let canceled = false;
     setIsLoading(true);
-    visTypesRegistry.all()
-      .then(types => {
+    visTypesRegistry
+      .all()
+      .then((types) => {
         if (!canceled) {
           setIsLoading(false);
           setVisTypes(types);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         if (!canceled) {
           setIsLoading(false);
           setVisTypes([]);
@@ -33,11 +34,11 @@ export function useVisTypes(visTypesRegistry: TypesStart) {
 
     return () => {
       canceled = true;
-    }
+    };
   }, [visTypesRegistry]);
 
   return {
     isLoading,
     visTypes,
-  }
+  };
 }

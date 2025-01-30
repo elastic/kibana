@@ -96,12 +96,14 @@ export class Vis<TVisParams extends VisParams = VisParams> {
     if (state.type && this.type.name !== state.type) {
       const newType = await getTypes().get<TVisParams>(state.type);
       if (!newType) {
-        throw new Error(i18n.translate('visualizations.visualizationTypeInvalidMessage', {
-          defaultMessage: 'Invalid visualization type "{visType}"',
-          values: {
-            visType: state.type,
-          },
-        }));
+        throw new Error(
+          i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+            defaultMessage: 'Invalid visualization type "{visType}"',
+            values: {
+              visType: state.type,
+            },
+          })
+        );
       }
       this.type = newType;
       typeChanged = true;

@@ -96,9 +96,7 @@ async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
   return resolvedIndexPatterns;
 }
 
-export const metricsVisType: VisTypeDefinition<
-  TimeseriesVisParams | TimeseriesVisDefaultParams
-> = {
+export const metricsVisType: VisTypeDefinition<TimeseriesVisParams | TimeseriesVisDefaultParams> = {
   name: VIS_TYPE,
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
