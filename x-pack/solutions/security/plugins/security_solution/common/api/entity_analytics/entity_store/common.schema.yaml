@@ -36,6 +36,8 @@ components:
           type: string
           default: 24h
           pattern: '[smdh]$'
+        timestampField:
+          type: string
         timeout:
           type: string
           default: 180s
