@@ -144,40 +144,49 @@ export const GridRowHeader = ({
               }
               .euiButtonEmpty__content {
                 gap: ${euiTheme.size.xs}; // decrease gap between title and pencil icon
-                // &:after {
-                //   flex: 0;
-                //   display: block;
-                //   content: '(10 panels)';
-                //   color: ${euiTheme.colors.textSubdued};
-                // }
               }
             `,
           }}
         />
       </EuiFlexItem>
-      {!readOnly && !editMode && (
-        <>
-          {isCollapsed && (
+      {
+        /**
+         * Add actions at the end of the header section when the layout is editable + the section title
+         * is not in edit mode
+         */
+        !readOnly && !editMode && (
+          <>
+            {isCollapsed && (
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="s">{`(${
+                  /**
+                   * we can get away with grabbing the panel count without React state because this count
+                   * is only rendered when the section is collapsed, and the count can only be updated when
+                   * the section isn't collapsed
+                   */
+                  Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels).length
+                } panels)`}</EuiText>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="s">{`(${
-                Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels).length
-              } panels)`}</EuiText>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                className="kbnGridLayout--deleteRowIcon"
+              />
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              className="kbnGridLayout--deleteRowIcon"
-            />
-          </EuiFlexItem>
-        </>
-      )}
-      {isCollapsed && (
-        <EuiFlexItem>
-          <EuiButtonIcon iconType="move" color="text" className="kbnGridLayout--moveRowIcon" />
-        </EuiFlexItem>
-      )}
+            {isCollapsed && (
+              <EuiFlexItem>
+                <EuiButtonIcon
+                  iconType="move"
+                  color="text"
+                  className="kbnGridLayout--moveRowIcon"
+                />
+              </EuiFlexItem>
+            )}
+          </>
+        )
+      }
     </EuiFlexGroup>
   );
 };
