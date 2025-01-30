@@ -38,6 +38,8 @@ export const entityDefinitionSchema = z.object({
         syncField: z.optional(z.string()),
         syncDelay: z.optional(durationSchema),
         frequency: z.optional(durationSchema),
+        timeout: z.optional(durationSchema),
+        docsPerSecond: z.optional(z.number()),
       })
     ),
   }),

@@ -2064,7 +2064,7 @@
             "label": "indexMode",
             "description": [],
             "signature": [
-              "\"standard\" | \"time_series\" | \"logsdb\""
+              "\"standard\" | \"lookup\" | \"time_series\" | \"logsdb\""
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -3699,7 +3699,7 @@
         "label": "IndexMode",
         "description": [],
         "signature": [
-          "\"standard\" | \"time_series\" | \"logsdb\""
+          "\"standard\" | \"lookup\" | \"time_series\" | \"logsdb\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,
