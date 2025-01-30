@@ -374,8 +374,7 @@ GET _search
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/186935
-    describe.skip('index fields autocomplete', () => {
+    describe('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {
@@ -394,7 +393,11 @@ GET _search
 
       it('fields autocomplete only shows fields of the index', async () => {
         await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText('GET _search\n{\n"fields": ["');
+        await PageObjects.console.enterText('GET _search\n{\n"fields": [');
+        // Wait for the autocomplete request to finish loading
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // Trigger the autocomplete for the field we previously added
+        await PageObjects.console.enterText('te');
 
         expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
         expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);
