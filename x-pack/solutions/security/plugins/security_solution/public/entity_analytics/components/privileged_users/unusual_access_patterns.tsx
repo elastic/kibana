@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBasicTable, EuiButtonIcon, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButtonIcon, EuiInMemoryTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Alert } from '@kbn/alerting-types';
 import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
@@ -50,10 +50,14 @@ export const UnusualAccessPatterns = React.memo(
           titleSize="s"
           showInspectButton={false}
         />
-        <EuiBasicTable
-          items={alerts.slice(0, 5)}
+        <EuiInMemoryTable
+          items={alerts}
           columns={getTableColumns(privilegedUsers, openAlertDetailsPreview)}
           loading={isLoading}
+          pagination={{
+            pageSizeOptions: [5, 10, 20],
+            initialPageSize: 5,
+          }}
         />
         <EuiSpacer size="m" />
       </EuiPanel>

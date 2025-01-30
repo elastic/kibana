@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiInMemoryTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -27,7 +27,15 @@ export const AlertsTable = React.memo(({ alerts, isLoading }: AlertsTableProps) 
         titleSize="s"
         showInspectButton={false}
       />
-      <EuiBasicTable items={alerts.slice(0, 5)} columns={getTableColumns()} loading={isLoading} />
+      <EuiInMemoryTable
+        items={alerts}
+        columns={getTableColumns()}
+        loading={isLoading}
+        pagination={{
+          pageSizeOptions: [5, 10],
+          initialPageSize: 5,
+        }}
+      />
       <EuiSpacer size="m" />
     </EuiPanel>
   );

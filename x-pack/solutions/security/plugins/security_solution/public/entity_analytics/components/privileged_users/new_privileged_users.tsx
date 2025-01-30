@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiInMemoryTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import type { PrivilegedUserDoc } from '../../../../common/api/entity_analytics/privmon';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -29,7 +29,15 @@ export const NewPrivilegedUsers = React.memo(({ data, isLoading }: NewPrivileged
         showInspectButton={false}
       />
 
-      <EuiBasicTable items={data.slice(0, 5)} columns={getTableColumns()} loading={isLoading} />
+      <EuiInMemoryTable
+        items={data}
+        columns={getTableColumns()}
+        loading={isLoading}
+        pagination={{
+          pageSizeOptions: [5, 10, 20],
+          initialPageSize: 5,
+        }}
+      />
       <EuiSpacer size="m" />
     </EuiPanel>
   );

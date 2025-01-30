@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   EuiHorizontalRule,
   EuiPanel,
+  EuiInMemoryTable,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { Alert } from '@kbn/alerting-types';
@@ -344,12 +345,12 @@ const ObservationsTable: React.FC<{
     {
       field: 'user.user.name',
       name: 'User',
-      render: (name: string) => <EuiText>{name}</EuiText>,
+      render: (name: string) => name,
     },
     {
       field: 'observation.summary',
       name: 'Observation',
-      render: (summary: string) => <EuiText>{summary}</EuiText>,
+      render: (summary: string) => summary,
     },
   ];
 
@@ -361,7 +362,14 @@ const ObservationsTable: React.FC<{
         titleSize="s"
         showInspectButton={false}
       />
-      <EuiBasicTable items={rowsData.slice(0, 5)} columns={columns} />
+      <EuiInMemoryTable
+        items={rowsData}
+        columns={columns}
+        pagination={{
+          pageSizeOptions: [5, 10],
+          initialPageSize: 5,
+        }}
+      />
       <EuiSpacer size="m" />
     </EuiPanel>
   );

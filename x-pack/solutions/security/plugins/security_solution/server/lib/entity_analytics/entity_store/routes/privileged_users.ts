@@ -12,7 +12,6 @@ import {
   PRIVMON_LOGINS_INDEX_PATTERN,
   PRIVMON_USERS_INDEX_PATTERN,
 } from '../../../../../common/entity_analytics/privmon';
-import { EntityRiskLevelsEnum } from '../../../../../common/api/entity_analytics/common';
 import type { PrivilegedUserDoc } from '../../../../../common/api/entity_analytics/privmon';
 import { API_VERSIONS, RISK_SCORE_INDEX_PATTERN } from '../../../../../common/constants';
 
@@ -70,7 +69,7 @@ export const privilegedUsersRoute = (
               ],
               query,
             },
-            size: 10,
+            size: 100,
             index: RISK_SCORE_INDEX_PATTERN,
           });
 
@@ -106,7 +105,7 @@ export const privilegedUsersRoute = (
                 },
               },
             },
-            size: 10,
+            size: 100,
             index: PRIVMON_LOGINS_INDEX_PATTERN,
           });
 
@@ -142,7 +141,7 @@ export const privilegedUsersRoute = (
                 },
               },
             },
-            size: 10,
+            size: 100,
             index: getAppClient().getAlertsIndex(),
           });
 

@@ -65,7 +65,7 @@ export const privilegedUsersFlyoutRoute = (
                 },
               },
             },
-            size: 10,
+            size: 100,
             index: PRIVMON_LOGINS_INDEX_PATTERN,
           });
           const logins = loginsResponse.hits.hits.map((hit) => hit._source);
@@ -86,7 +86,7 @@ export const privilegedUsersFlyoutRoute = (
                 },
               },
             },
-            size: 10,
+            size: 100,
             index: PRIVMON_PRIVILEGES_INDEX_PATTERN,
           });
 
@@ -108,7 +108,7 @@ export const privilegedUsersFlyoutRoute = (
                 },
               },
             },
-            size: 10,
+            size: 100,
             index: getAppClient().getAlertsIndex(),
           });
 

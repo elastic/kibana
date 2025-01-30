@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiInMemoryTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type {
   PrivilegedUserDoc,
   PrivmonLoginDoc,
@@ -33,10 +33,15 @@ export const SuccessfulPrivilegedAccess = React.memo(
           titleSize="s"
           showInspectButton={false}
         />
-        <EuiBasicTable
-          items={data.slice(0, 5)}
+
+        <EuiInMemoryTable
+          items={data}
           columns={getTableColumns(privilegedUsers)}
           loading={isLoading}
+          pagination={{
+            pageSizeOptions: [5, 10, 20],
+            initialPageSize: 5,
+          }}
         />
         <EuiSpacer size="m" />
       </EuiPanel>
