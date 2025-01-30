@@ -19,12 +19,10 @@ interface SimulationPlaygroundProps {
   simulation: UseProcessingSimulatorReturnType['simulation'];
   samples: UseProcessingSimulatorReturnType['samples'];
   onRefreshSamples: UseProcessingSimulatorReturnType['refreshSamples'];
-  simulationError: UseProcessingSimulatorReturnType['error'];
 }
 
 export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
-  const { definition, columns, isLoading, simulation, samples, onRefreshSamples, simulationError } =
-    props;
+  const { definition, columns, isLoading, simulation, samples, onRefreshSamples } = props;
 
   const tabs = {
     dataPreview: {
@@ -63,13 +61,11 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
       <EuiSpacer size="m" />
       {selectedTabId === 'dataPreview' && (
         <ProcessorOutcomePreview
-          definition={definition}
           columns={columns}
           isLoading={isLoading}
           simulation={simulation}
           samples={samples}
           onRefreshSamples={onRefreshSamples}
-          simulationError={simulationError}
         />
       )}
       {selectedTabId === 'detectedFields' &&

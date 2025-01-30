@@ -56,7 +56,7 @@ export function StreamDetailEnrichmentContent({
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
 
-  const { error, isLoading, refreshSamples, simulation, samples, tableColumns, watchProcessor } =
+  const { isLoading, refreshSamples, simulation, samples, tableColumns, watchProcessor } =
     useProcessingSimulator({ definition, processors });
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
@@ -159,7 +159,6 @@ export function StreamDetailEnrichmentContent({
                   simulation={simulation}
                   samples={samples}
                   onRefreshSamples={refreshSamples}
-                  simulationError={error}
                   isLoading={isLoading}
                 />
               </EuiResizablePanel>

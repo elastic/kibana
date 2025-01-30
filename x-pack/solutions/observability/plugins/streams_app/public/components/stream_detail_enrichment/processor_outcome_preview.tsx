@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { flattenObject } from '@kbn/object-utils';
 import { isEmpty } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
@@ -28,23 +27,19 @@ import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_proce
 import { AssetImage } from '../asset_image';
 
 interface ProcessorOutcomePreviewProps {
-  definition: IngestStreamGetResponse;
   columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturnType['isLoading'];
   simulation: UseProcessingSimulatorReturnType['simulation'];
   samples: UseProcessingSimulatorReturnType['samples'];
   onRefreshSamples: UseProcessingSimulatorReturnType['refreshSamples'];
-  simulationError: UseProcessingSimulatorReturnType['error'];
 }
 
 export const ProcessorOutcomePreview = ({
-  definition,
   columns,
   isLoading,
   simulation,
   samples,
   onRefreshSamples,
-  simulationError,
 }: ProcessorOutcomePreviewProps) => {
   const { dependencies } = useKibana();
   const { data } = dependencies.start;
