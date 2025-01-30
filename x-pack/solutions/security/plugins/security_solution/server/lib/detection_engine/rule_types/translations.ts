@@ -36,7 +36,7 @@ export const EQL_SHARD_FAILURE_MESSAGE = (
     ? i18n.translate(
         'xpack.securitySolution.detectionEngine.eqlSequenceRuleType.eqlShardFailures',
         {
-          defaultMessage: `The EQL query failed to run successfully on the following shards: {shardFailures}`,
+          defaultMessage: `the EQL query failed to run successfully due to unavailable shards: {shardFailures}`,
           values: {
             shardFailures: shardFailuresMessage,
           },
