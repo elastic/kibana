@@ -282,7 +282,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isUpgradingSecurityPackages ||
-            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
+            hasRuleTypeChange ||
             isEditingRule
           }
           onClick={() => {
