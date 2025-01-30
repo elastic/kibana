@@ -18,11 +18,17 @@ export interface DataStreamsAction {
 }
 
 export interface DataStreamMetadata {
-  lastBackingIndexCreationDate: number;
-  dataStreamTotalIndicesCount: number;
-  dataStreamDocSize: number;
-  dataStreamDocCount: number;
-  backingIndices: string[];
+  dataStreamName: string;
+  documentationUrl: string;
+
+  lastIndexRequiringUpgradeCreationDate: number;
+  allIndices: string[];
+  allIndicesCount: number;
+  indicesRequiringUpgradeCount: number;
+  indicesRequiringUpgrade: string[];
+
+  indicesRequiringUpgradeDocsSize: number;
+  indicesRequiringUpgradeDocsCount: number;
 }
 
 export interface DataStreamReindexStatusResponse {

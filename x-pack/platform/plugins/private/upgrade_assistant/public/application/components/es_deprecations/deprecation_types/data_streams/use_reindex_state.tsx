@@ -13,14 +13,12 @@ import {
   DataStreamMetadata,
   DataStreamReindexStatusResponse,
   DataStreamProgressDetails,
-  DataStreamsActionMetadata,
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
 
 const POLL_INTERVAL = 1000;
 
-export type DeprecationMetadata = DataStreamsActionMetadata & { learnMoreUrl: string };
 export interface ReindexState {
   loadingState: LoadingState;
   cancelLoadingState?: CancelLoadingState;
@@ -32,7 +30,6 @@ export interface ReindexState {
   hasRequiredPrivileges?: boolean;
   taskStatus?: DataStreamProgressDetails;
 
-  deprecationMetadata: DeprecationMetadata;
   meta: DataStreamMetadata | null;
 }
 
@@ -89,17 +86,12 @@ const getReindexState = (
 
 export const useReindexStatus = ({
   dataStreamName,
-  deprecationMetadata,
   api,
-  learnMoreUrl,
 }: {
   dataStreamName: string;
-  learnMoreUrl: string;
-  deprecationMetadata: DataStreamsActionMetadata;
   api: ApiService;
 }) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
-    deprecationMetadata: { learnMoreUrl, ...deprecationMetadata },
     loadingState: LoadingState.Loading,
     errorMessage: null,
     reindexTaskPercComplete: null,

@@ -13,6 +13,7 @@ import {
   ReindexAlreadyInProgress,
   ReindexCannotBeCancelled,
   ReindexTaskFailed,
+  MetadataCannotBeGrabbed,
 } from '../../lib/data_streams/error_symbols';
 import { ReindexError } from '../../lib/data_streams/error';
 
@@ -28,6 +29,7 @@ export const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
       case ReindexAlreadyInProgress:
       case ReindexCannotBeCancelled:
+      case MetadataCannotBeGrabbed:
         return kibanaResponseFactory.badRequest({ body: e.message });
       default:
       // nothing matched

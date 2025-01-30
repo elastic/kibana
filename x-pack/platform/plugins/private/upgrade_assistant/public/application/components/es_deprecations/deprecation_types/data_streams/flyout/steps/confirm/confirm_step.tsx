@@ -29,7 +29,6 @@ import {
   IncompatibleDataInDataStreamWarningCheckbox,
   WarningCheckboxProps,
 } from './warning_step_checkbox';
-import { DeprecationMetadata } from '../../../use_reindex_state';
 
 interface CheckedIds {
   [id: string]: boolean;
@@ -47,7 +46,6 @@ interface WarningsConfirmationFlyoutProps {
   hideWarningsStep: () => void;
   continueReindex: () => void;
   warnings: DataStreamReindexWarning[];
-  deprecationMetadata: DeprecationMetadata;
   meta: DataStreamMetadata;
 }
 
@@ -57,7 +55,7 @@ interface WarningsConfirmationFlyoutProps {
  */
 export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
   WarningsConfirmationFlyoutProps
-> = ({ warnings, hideWarningsStep, deprecationMetadata, continueReindex, meta }) => {
+> = ({ warnings, hideWarningsStep, continueReindex, meta }) => {
   const {
     services: {
       core: { docLinks },
@@ -113,7 +111,7 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
                 defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first."
-                values={{ count: deprecationMetadata.indicesRequiringUpgradeCount }}
+                values={{ count: meta.indicesRequiringUpgradeCount }}
               />
             </p>
             <EuiSpacer size="m" />

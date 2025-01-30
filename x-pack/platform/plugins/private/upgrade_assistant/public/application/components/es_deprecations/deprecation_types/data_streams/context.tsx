@@ -8,7 +8,7 @@
 import React, { createContext, useContext } from 'react';
 
 import { ApiService } from '../../../../lib/api';
-import { useReindexStatus, ReindexState, DeprecationMetadata } from './use_reindex_state';
+import { useReindexStatus, ReindexState } from './use_reindex_state';
 
 export interface ReindexStateContext {
   reindexState: ReindexState;
@@ -32,22 +32,16 @@ export const useDataStreamReindexContext = () => {
 interface Props {
   api: ApiService;
   children: React.ReactNode;
-  deprecationMetadata: DeprecationMetadata;
-  indexName: string;
-  learnMoreUrl: string;
+  dataStreamName: string;
 }
 
 export const DataStreamReindexStatusProvider: React.FunctionComponent<Props> = ({
   api,
-  indexName,
-  deprecationMetadata,
+  dataStreamName,
   children,
-  learnMoreUrl,
 }) => {
   const { reindexState, startReindex, loadDataStreamMetadata, cancelReindex } = useReindexStatus({
-    dataStreamName: indexName,
-    deprecationMetadata,
-    learnMoreUrl,
+    dataStreamName,
     api,
   });
 

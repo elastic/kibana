@@ -253,12 +253,37 @@ export const dataStreamReindexServiceFactory = ({
           { meta: true }
         )) as TransportResult<any>;
 
-        const dataStreamDocCount = statsBody._all.total.docs.count;
-        const dataStreamDocSize = statsBody._all.total.store.total_data_set_size_in_bytes;
-        const backingIndices = Object.keys(statsBody.indices);
+        const { data_streams: dataStreamsDeprecations } = await esClient.migration.deprecations({
+          filter_path: `data_streams.${dataStreamName}`,
+        });
+
+        const deprecationsDetails = dataStreamsDeprecations[dataStreamName];
+        if (deprecationsDetails.length !== 1) {
+          throw error.cannotGrabMetadata(
+            `Data stream ${dataStreamName} has ${deprecationsDetails.length} deprecations. Expected 1.`
+          );
+        }
+        const deprecationDetails = deprecationsDetails[0];
+
+        const indicesRequiringUpgrade: string[] =
+          deprecationDetails._meta!.indices_requiring_upgrade;
+        const allIndices = Object.keys(statsBody.indices);
+
+        let indicesRequiringUpgradeDocsCount = 0;
+        let indicesRequiringUpgradeDocsSize = 0;
 
         const indicesCreationDates = [];
-        for (const index of backingIndices) {
+        for (const index of indicesRequiringUpgrade) {
+          const indexStats = Object.entries(statsBody.indices).find(([key]) => key === index);
+
+          if (!indexStats) {
+            throw error.cannotGrabMetadata(`Index ${index} does not exist in this cluster.`);
+          }
+
+          indicesRequiringUpgradeDocsSize += (indexStats[1] as any).total.store
+            .total_data_set_size_in_bytes;
+          indicesRequiringUpgradeDocsCount += (indexStats[1] as any).total.docs.count;
+
           const body = await esClient.indices.getSettings({
             index,
             flat_settings: true,
@@ -270,17 +295,23 @@ export const dataStreamReindexServiceFactory = ({
           }
         }
 
-        const lastBackingIndexCreationDate = Math.max(...indicesCreationDates);
+        const lastIndexRequiringUpgradeCreationDate = Math.max(...indicesCreationDates);
 
         return {
-          lastBackingIndexCreationDate,
-          dataStreamTotalIndicesCount: backingIndices.length,
-          dataStreamDocSize,
-          dataStreamDocCount,
-          backingIndices,
+          dataStreamName,
+          documentationUrl: deprecationDetails.url,
+          allIndices,
+          allIndicesCount: allIndices.length,
+          indicesRequiringUpgrade,
+          indicesRequiringUpgradeCount: indicesRequiringUpgrade.length,
+          lastIndexRequiringUpgradeCreationDate,
+          indicesRequiringUpgradeDocsSize,
+          indicesRequiringUpgradeDocsCount,
         };
       } catch (err) {
-        throw err;
+        throw error.cannotGrabMetadata(
+          `Could not grab metadata for ${dataStreamName}. ${err.message.toString()}`
+        );
       }
     },
   };

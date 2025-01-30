@@ -11,6 +11,7 @@ import {
   ReindexTaskFailed,
   ReindexAlreadyInProgress,
   ReindexCannotBeCancelled,
+  MetadataCannotBeGrabbed,
 } from './error_symbols';
 
 export class ReindexError extends Error {
@@ -26,7 +27,7 @@ export const createErrorFactory = (symbol: symbol) => (message: string) => {
 export const error = {
   indexNotFound: createErrorFactory(IndexNotFound),
   accessForbidden: createErrorFactory(AccessForbidden),
-
+  cannotGrabMetadata: createErrorFactory(MetadataCannotBeGrabbed),
   reindexTaskFailed: createErrorFactory(ReindexTaskFailed),
   reindexAlreadyInProgress: createErrorFactory(ReindexAlreadyInProgress),
   reindexCannotBeCancelled: createErrorFactory(ReindexCannotBeCancelled),

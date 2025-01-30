@@ -25,18 +25,18 @@ export function registerReindexDataStreamRoutes({
   getSecurityPlugin,
   lib: { handleEsError },
 }: RouteDependencies) {
-  const BASE_PATH = `${API_BASE_PATH}/data_streams_reindex`;
+  const BASE_PATH = `${API_BASE_PATH}/reindex_data_streams`;
 
   router.post(
     {
-      path: `${BASE_PATH}/{indexName}`,
+      path: `${BASE_PATH}/{dataStreamName}`,
       options: {
         access: 'public',
         summary: `Start the data stream reindexing`,
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          dataStreamName: schema.string(),
         }),
       },
     },
@@ -44,7 +44,7 @@ export function registerReindexDataStreamRoutes({
       const {
         elasticsearch: { client: esClient },
       } = await core;
-      const { indexName } = request.params;
+      const { dataStreamName } = request.params;
       try {
         const callAsCurrentUser = esClient.asCurrentUser;
         const reindexService = dataStreamReindexServiceFactory({
@@ -53,16 +53,16 @@ export function registerReindexDataStreamRoutes({
           licensing,
         });
 
-        if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+        if (!(await reindexService.hasRequiredPrivileges(dataStreamName))) {
           throw error.accessForbidden(
             i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
-              defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
-              values: { indexName },
+              defaultMessage: `You do not have adequate privileges to reindex "{dataStreamName}".`,
+              values: { dataStreamName },
             })
           );
         }
 
-        await reindexService.createReindexOperation(indexName);
+        await reindexService.createReindexOperation(dataStreamName);
 
         return response.ok();
       } catch (err) {
@@ -76,14 +76,14 @@ export function registerReindexDataStreamRoutes({
 
   router.get(
     {
-      path: `${BASE_PATH}/{indexName}`,
+      path: `${BASE_PATH}/{dataStreamName}`,
       options: {
         access: 'public',
         summary: `Get data stream status`,
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          dataStreamName: schema.string(),
         }),
       },
     },
@@ -91,7 +91,7 @@ export function registerReindexDataStreamRoutes({
       const {
         elasticsearch: { client: esClient },
       } = await core;
-      const { indexName } = request.params;
+      const { dataStreamName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
 
       const reindexService = dataStreamReindexServiceFactory({
@@ -101,14 +101,14 @@ export function registerReindexDataStreamRoutes({
       });
 
       try {
-        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
+        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(dataStreamName);
 
         // If the user doesn't have privileges than querying for warnings is going to fail.
         const warnings = hasRequiredPrivileges
-          ? await reindexService.detectReindexWarnings(indexName)
+          ? await reindexService.detectReindexWarnings(dataStreamName)
           : [];
 
-        const reindexOp = await reindexService.fetchReindexStatus(indexName);
+        const reindexOp = await reindexService.fetchReindexStatus(dataStreamName);
 
         const body: DataStreamReindexStatusResponse = {
           reindexOp,
@@ -130,14 +130,14 @@ export function registerReindexDataStreamRoutes({
 
   router.get(
     {
-      path: `${BASE_PATH}/{indexName}/metadata`,
+      path: `${BASE_PATH}/{dataStreamName}/metadata`,
       options: {
         access: 'public',
         summary: `Get data stream reindexing metadata`,
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          dataStreamName: schema.string(),
         }),
       },
     },
@@ -145,7 +145,7 @@ export function registerReindexDataStreamRoutes({
       const {
         elasticsearch: { client: esClient },
       } = await core;
-      const { indexName } = request.params;
+      const { dataStreamName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
 
       const reindexService = dataStreamReindexServiceFactory({
@@ -155,7 +155,7 @@ export function registerReindexDataStreamRoutes({
       });
 
       try {
-        const dataStreamMetadata = await reindexService.getDataStreamMetadata(indexName);
+        const dataStreamMetadata = await reindexService.getDataStreamMetadata(dataStreamName);
 
         return response.ok({
           body: dataStreamMetadata,
@@ -171,14 +171,14 @@ export function registerReindexDataStreamRoutes({
 
   router.post(
     {
-      path: `${BASE_PATH}/{indexName}/cancel`,
+      path: `${BASE_PATH}/{dataStreamName}/cancel`,
       options: {
         access: 'public',
         summary: `Cancel Data Stream reindexing`,
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          dataStreamName: schema.string(),
         }),
       },
     },
@@ -186,7 +186,7 @@ export function registerReindexDataStreamRoutes({
       const {
         elasticsearch: { client: esClient },
       } = await core;
-      const { indexName } = request.params;
+      const { dataStreamName } = request.params;
       const callAsCurrentUser = esClient.asCurrentUser;
       const reindexService = dataStreamReindexServiceFactory({
         esClient: callAsCurrentUser,
@@ -195,7 +195,7 @@ export function registerReindexDataStreamRoutes({
       });
 
       try {
-        await reindexService.cancelReindexing(indexName);
+        await reindexService.cancelReindexing(dataStreamName);
 
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {

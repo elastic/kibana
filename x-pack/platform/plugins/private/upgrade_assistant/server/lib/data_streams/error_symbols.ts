@@ -10,3 +10,4 @@ export const IndexNotFound = Symbol('IndexNotFound');
 export const ReindexTaskFailed = Symbol('ReindexTaskFailed');
 export const ReindexAlreadyInProgress = Symbol('ReindexAlreadyInProgress');
 export const ReindexCannotBeCancelled = Symbol('ReindexCannotBeCancelled');
+export const MetadataCannotBeGrabbed = Symbol('MetadataCannotBeGrabbed');

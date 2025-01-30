@@ -56,7 +56,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   closeFlyout,
   deprecation,
 }) => {
-  const { status, reindexWarnings, errorMessage, deprecationMetadata, meta } = reindexState;
+  const { status, reindexWarnings, errorMessage, meta } = reindexState;
   const { index } = deprecation;
 
   const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
@@ -97,28 +97,31 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     await cancelReindex();
   }, [cancelReindex]);
 
-  const { docsSizeFormatted, dataStreamDocCount, lastIndexCreationDateFormatted } = useMemo(() => {
-    if (!meta) {
-      return {
-        dataStreamDocCount: 'Unknown',
-        docsSizeFormatted: 'Unknown',
-        lastIndexCreationDateFormatted: 'Unknown',
-      };
-    }
+  const { docsSizeFormatted, indicesRequiringUpgradeDocsCount, lastIndexCreationDateFormatted } =
+    useMemo(() => {
+      if (!meta) {
+        return {
+          indicesRequiringUpgradeDocsCount: 'Unknown',
+          docsSizeFormatted: 'Unknown',
+          lastIndexCreationDateFormatted: 'Unknown',
+        };
+      }
 
-    return {
-      dataStreamDocCount:
-        typeof meta.dataStreamDocCount === 'number' ? `${meta.dataStreamDocCount}` : 'Unknown',
-      docsSizeFormatted:
-        typeof meta.dataStreamDocSize === 'number'
-          ? numeral(meta.dataStreamDocSize).format(FILE_SIZE_DISPLAY_FORMAT)
-          : 'Unknown',
-      lastIndexCreationDateFormatted:
-        typeof meta.lastBackingIndexCreationDate === 'number'
-          ? `${moment(meta.lastBackingIndexCreationDate).format(DATE_FORMAT)}`
-          : 'Unknown',
-    };
-  }, [meta]);
+      return {
+        indicesRequiringUpgradeDocsCount:
+          typeof meta.indicesRequiringUpgradeDocsCount === 'number'
+            ? `${meta.indicesRequiringUpgradeDocsCount}`
+            : 'Unknown',
+        docsSizeFormatted:
+          typeof meta.indicesRequiringUpgradeDocsSize === 'number'
+            ? numeral(meta.indicesRequiringUpgradeDocsSize).format(FILE_SIZE_DISPLAY_FORMAT)
+            : 'Unknown',
+        lastIndexCreationDateFormatted:
+          typeof meta.lastIndexRequiringUpgradeCreationDate === 'number'
+            ? `${moment(meta.lastIndexRequiringUpgradeCreationDate).format(DATE_FORMAT)}`
+            : 'Unknown',
+      };
+    }, [meta]);
 
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
@@ -136,7 +139,6 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         return (
           <DataStreamDetailsFlyoutStep
             closeFlyout={closeFlyout}
-            deprecationMetadata={deprecationMetadata}
             lastIndexCreationDateFormatted={lastIndexCreationDateFormatted}
             meta={meta}
             startReindex={() => {
@@ -157,7 +159,6 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         return (
           <ConfirmReindexingFlyoutStep
             warnings={reindexWarnings ?? []}
-            deprecationMetadata={deprecationMetadata}
             meta={meta}
             hideWarningsStep={() => {
               setFlyoutStep('notStarted');
@@ -195,7 +196,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             />
           );
         }
-        return <ReindexingCompletedFlyoutStep deprecationMetadata={deprecationMetadata} />;
+        return <ReindexingCompletedFlyoutStep meta={meta} />;
       }
     }
   }, [
@@ -205,7 +206,6 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     onStartReindex,
     onStopReindex,
     lastIndexCreationDateFormatted,
-    deprecationMetadata,
     reindexWarnings,
     meta,
     errorMessage,
@@ -254,7 +254,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                   listItems={[
                     {
                       title: 'Document Count',
-                      description: dataStreamDocCount,
+                      description: indicesRequiringUpgradeDocsCount,
                     },
                   ]}
                 />

@@ -26,7 +26,7 @@ import {
   DataStreamReindexStatus,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
-import type { DeprecationMetadata, ReindexState } from '../../../use_reindex_state';
+import type { ReindexState } from '../../../use_reindex_state';
 import { useAppContext } from '../../../../../../../app_context';
 import { DurationClarificationCallOut } from './warnings_callout';
 
@@ -79,16 +79,8 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   reindexState: ReindexState;
   startReindex: () => void;
   lastIndexCreationDateFormatted: string;
-  deprecationMetadata: DeprecationMetadata;
   meta: DataStreamMetadata;
-}> = ({
-  closeFlyout,
-  reindexState,
-  startReindex,
-  lastIndexCreationDateFormatted,
-  deprecationMetadata,
-  meta,
-}) => {
+}> = ({ closeFlyout, reindexState, startReindex, lastIndexCreationDateFormatted, meta }) => {
   const {
     services: {
       api,
@@ -110,7 +102,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutBody>
         <DurationClarificationCallOut
           formattedDate={lastIndexCreationDateFormatted}
-          learnMoreUrl={deprecationMetadata.learnMoreUrl}
+          learnMoreUrl={meta.documentationUrl}
         />
         <EuiSpacer size="m" />
 
@@ -203,18 +195,17 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
               defaultMessage="You have {backingIndicesCount} backing indices on this data stream that were created in ES 7.x and will not be compatible with next version."
               values={{
-                backingIndicesCount: deprecationMetadata.indicesRequiringUpgradeCount,
+                backingIndicesCount: meta.indicesRequiringUpgradeCount,
               }}
             />
           </p>
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
-              defaultMessage="{totalBackingIndices} total backing indices, and {totalBackingIndicesRequireingUpgrade} requires upgrade."
+              defaultMessage="{allBackingIndices} total backing indices, and {totalBackingIndicesRequireingUpgrade} requires upgrade."
               values={{
-                totalBackingIndices: meta.dataStreamTotalIndicesCount,
-                totalBackingIndicesRequireingUpgrade:
-                  deprecationMetadata.indicesRequiringUpgradeCount,
+                allBackingIndices: meta.allIndicesCount,
+                backingIndicesRequireingUpgrade: meta.indicesRequiringUpgradeCount,
               }}
             />
           </p>
