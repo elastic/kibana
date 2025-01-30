@@ -127,7 +127,7 @@ export class KibanaFramework {
   callWithRequest<Hit = {}, Aggregation = undefined>(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'search',
-    options?: CallWithRequestParams,
+    options?: CallWithRequestParams | estypes.SearchRequest,
     request?: KibanaRequest
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   callWithRequest<Hit = {}, Aggregation = undefined>(

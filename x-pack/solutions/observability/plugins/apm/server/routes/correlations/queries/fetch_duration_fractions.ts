@@ -34,22 +34,20 @@ export const fetchDurationFractions = async ({
     apm: {
       events: [eventType],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: getCommonCorrelationsQuery({
-        start,
-        end,
-        environment,
-        kuery,
-        query,
-      }),
-      aggs: {
-        latency_ranges: {
-          range: {
-            field: eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION,
-            ranges,
-          },
+    track_total_hits: false,
+    size: 0,
+    query: getCommonCorrelationsQuery({
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+    }),
+    aggs: {
+      latency_ranges: {
+        range: {
+          field: eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION,
+          ranges,
         },
       },
     },

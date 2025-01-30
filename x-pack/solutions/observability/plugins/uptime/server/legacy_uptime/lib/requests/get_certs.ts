@@ -31,11 +31,7 @@ const getCertsResults = async (
 
   const searchBody = getCertsRequestBody(requestParams);
 
-  const request = { body: searchBody };
-
-  const { body: result } = await uptimeEsClient.search<Ping, typeof request>({
-    body: searchBody,
-  });
+  const { body: result } = await uptimeEsClient.search<Ping, typeof searchBody>(searchBody);
 
   return result;
 };

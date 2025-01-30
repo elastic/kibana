@@ -44,7 +44,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
     size: 1000,
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search(params);
   let isWaterfallSupported = false;
   let hasNavigationRequest = false;
 

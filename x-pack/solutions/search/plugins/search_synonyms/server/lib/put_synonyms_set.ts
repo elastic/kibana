@@ -14,8 +14,6 @@ export const putSynonymsSet = async (
 ): Promise<SynonymsPutSynonymResponse> => {
   return client.synonyms.putSynonym({
     id: synonymsSetId,
-    body: {
-      synonyms_set: [],
-    },
+    synonyms_set: [],
   });
 };

@@ -83,50 +83,48 @@ const getQueryParams = (
 
   const queryParams = {
     index,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                'summary.down': { gt: 0 },
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              'summary.down': { gt: 0 },
             },
-            {
-              terms: {
-                'monitor.id': monitorIds,
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: dateRangeStart,
-                  lte: dateRangeEnd,
-                },
-              },
-            },
-          ] as estypes.QueryDslQueryContainer,
-        },
-      },
-      aggs: {
-        histogram: {
-          date_histogram: {
-            field: '@timestamp',
-            // 12 seems to be a good size for performance given
-            // long monitor lists of up to 100 on the overview page
-            fixed_interval: minInterval + 'ms',
           },
-          aggs: {
-            by_id: {
-              terms: {
-                field: 'monitor.id',
-                size: Math.max(monitorIds.length, 1),
+          {
+            terms: {
+              'monitor.id': monitorIds,
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: dateRangeStart,
+                lte: dateRangeEnd,
               },
-              aggs: {
-                totalDown: {
-                  sum: { field: 'summary.down' },
-                },
+            },
+          },
+        ] as estypes.QueryDslQueryContainer,
+      },
+    },
+    aggs: {
+      histogram: {
+        date_histogram: {
+          field: '@timestamp',
+          // 12 seems to be a good size for performance given
+          // long monitor lists of up to 100 on the overview page
+          fixed_interval: minInterval + 'ms',
+        },
+        aggs: {
+          by_id: {
+            terms: {
+              field: 'monitor.id',
+              size: Math.max(monitorIds.length, 1),
+            },
+            aggs: {
+              totalDown: {
+                sum: { field: 'summary.down' },
               },
             },
           },

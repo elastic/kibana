@@ -64,7 +64,7 @@ export const getJourneyScreenshot = async ({
     },
   };
 
-  const result = await syntheticsEsClient.search({ body });
+  const result = await syntheticsEsClient.search(body);
 
   const screenshotsOrRefs =
     (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;

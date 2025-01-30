@@ -83,48 +83,46 @@ export async function getServiceTransactionGroups({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            {
-              bool: {
-                should: [
-                  { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
-                  { term: { [TRANSACTION_TYPE]: transactionType } },
-                ],
-              },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          {
+            bool: {
+              should: [
+                { term: { [TRANSACTION_NAME]: txGroupsDroppedBucketName } },
+                { term: { [TRANSACTION_TYPE]: transactionType } },
+              ],
             },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...wildcardQuery(TRANSACTION_NAME, searchQuery),
-          ],
+          },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...wildcardQuery(TRANSACTION_NAME, searchQuery),
+        ],
+      },
+    },
+    aggs: {
+      total_duration: { sum: { field } },
+      transaction_overflow_count: {
+        sum: {
+          field: TRANSACTION_OVERFLOW_COUNT,
         },
       },
-      aggs: {
-        total_duration: { sum: { field } },
-        transaction_overflow_count: {
-          sum: {
-            field: TRANSACTION_OVERFLOW_COUNT,
-          },
+      transaction_groups: {
+        terms: {
+          field: TRANSACTION_NAME,
+          size: MAX_NUMBER_OF_TX_GROUPS,
+          order: { _count: 'desc' },
         },
-        transaction_groups: {
-          terms: {
-            field: TRANSACTION_NAME,
-            size: MAX_NUMBER_OF_TX_GROUPS,
-            order: { _count: 'desc' },
+        aggs: {
+          transaction_group_total_duration: {
+            sum: { field },
           },
-          aggs: {
-            transaction_group_total_duration: {
-              sum: { field },
-            },
-            ...getLatencyAggregation(latencyAggregationType, field),
-            ...getOutcomeAggregation(documentType),
-          },
+          ...getLatencyAggregation(latencyAggregationType, field),
+          ...getOutcomeAggregation(documentType),
         },
       },
     },

@@ -91,7 +91,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search(params);
 
   const locations = result?.aggregations?.location?.buckets ?? [];
 

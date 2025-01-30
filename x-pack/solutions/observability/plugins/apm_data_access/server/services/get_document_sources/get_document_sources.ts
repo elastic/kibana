@@ -36,7 +36,7 @@ const getRequest = ({
   rollupInterval: RollupInterval;
   filters: estypes.QueryDslQueryContainer[];
 }) => {
-  const searchParams = {
+  return {
     apm: {
       sources: [
         {
@@ -45,20 +45,12 @@ const getRequest = ({
         },
       ],
     },
-    body: {
-      track_total_hits: 1,
-      size: 0,
-      terminate_after: 1,
-    },
-  };
-  return {
-    ...searchParams,
-    body: {
-      ...searchParams.body,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    track_total_hits: 1,
+    size: 0,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: filters,
       },
     },
   };

@@ -38,10 +38,8 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
     includeLegacyData?: boolean;
   } & ({ events: ProcessorEvent[] } | { sources: ApmDataSource[] });
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 export type APMLogEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {

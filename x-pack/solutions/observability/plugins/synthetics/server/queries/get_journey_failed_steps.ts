@@ -52,7 +52,7 @@ export const getJourneyFailedSteps = async ({
     size: 500,
   };
 
-  const { body: result } = await syntheticsEsClient.search({ body: params });
+  const { body: result } = await syntheticsEsClient.search(params);
 
   return result.hits.hits.map(({ _id, _source }) => {
     const step = Object.assign({ _id }, _source) as JourneyStep;

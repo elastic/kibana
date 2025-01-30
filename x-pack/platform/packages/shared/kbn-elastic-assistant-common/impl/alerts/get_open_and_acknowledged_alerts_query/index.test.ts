@@ -135,7 +135,7 @@ describe('getOpenAndAcknowledgedAlertsQuery', () => {
       size,
     });
 
-    expect(query.body.query.bool.filter).toEqual([
+    expect(query.query.bool.filter).toEqual([
       {
         bool: {
           must: [],
@@ -192,7 +192,7 @@ describe('getOpenAndAcknowledgedAlertsQuery', () => {
     });
 
     const rangeFilter: MaybeHasRange | undefined = (
-      query.body.query.bool.filter[0].bool as MaybeHasFilter
+      query.query.bool.filter[0].bool as MaybeHasFilter
     ).filter?.find((x) => Object.hasOwn(x, 'range'));
 
     const timestamp: MaybeTimestampValues | undefined = rangeFilter?.range?.['@timestamp'];
@@ -211,7 +211,7 @@ describe('getOpenAndAcknowledgedAlertsQuery', () => {
     });
 
     const rangeFilter: MaybeHasRange | undefined = (
-      query.body.query.bool.filter[0].bool as MaybeHasFilter
+      query.query.bool.filter[0].bool as MaybeHasFilter
     ).filter?.find((x) => Object.hasOwn(x, 'range'));
 
     const timestamp: MaybeTimestampValues | undefined = rangeFilter?.range?.['@timestamp'];

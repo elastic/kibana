@@ -50,17 +50,19 @@ const getIndexTemplatesUsingComponentTemplate = async (
         () =>
           esClient.indices.putIndexTemplate({
             name: template.name,
-            body: {
-              ...template.index_template,
-              // @ts-expect-error https://github.com/elastic/elasticsearch-js/issues/2584
-              template: {
-                ...template.index_template.template,
-                settings: {
-                  ...template.index_template.template?.settings,
-                  'index.mapping.total_fields.limit': totalFieldsLimit,
-                },
+            ...template.index_template,
+            template: {
+              ...template.index_template.template,
+              settings: {
+                ...template.index_template.template?.settings,
+                'index.mapping.total_fields.limit': totalFieldsLimit,
               },
             },
+            // GET brings string | string[] | undefined but this PUT expects string[]
+            ignore_missing_component_templates: template.index_template
+              .ignore_missing_component_templates
+              ? [template.index_template.ignore_missing_component_templates].flat()
+              : undefined,
           }),
         { logger }
       );

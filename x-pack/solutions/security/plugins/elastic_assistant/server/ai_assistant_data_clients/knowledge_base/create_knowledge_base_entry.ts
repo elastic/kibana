@@ -51,7 +51,7 @@ export const createKnowledgeBaseEntry = async ({
   telemetry,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateSchema({
+  const document = transformToCreateSchema({
     createdAt,
     spaceId,
     user,
@@ -59,14 +59,14 @@ export const createKnowledgeBaseEntry = async ({
     global,
   });
   const telemetryPayload = {
-    entryType: body.type,
-    required: body.required ?? false,
-    sharing: body.users.length ? 'private' : 'global',
-    ...(body.type === 'document' ? { source: body.source } : {}),
+    entryType: document.type,
+    required: document.required ?? false,
+    sharing: document.users.length ? 'private' : 'global',
+    ...(document.type === 'document' ? { source: document.source } : {}),
   };
   try {
     const response = await esClient.create({
-      body,
+      document,
       id: uuidv4(),
       index: knowledgeBaseIndex,
       refresh: 'wait_for',

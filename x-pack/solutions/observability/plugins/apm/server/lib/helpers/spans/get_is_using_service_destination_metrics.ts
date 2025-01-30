@@ -55,19 +55,17 @@ export async function getIsUsingServiceDestinationMetrics({
       apm: {
         events: [getProcessorEventForServiceDestinationStatistics(true)],
       },
-      body: {
-        track_total_hits: 1,
-        size: 0,
-        terminate_after: 1,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...kqlQuery(kuery),
-              ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-              ...(query ? [query] : []),
-            ],
-          },
+      track_total_hits: 1,
+      size: 0,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...kqlQuery(kuery),
+            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+            ...(query ? [query] : []),
+          ],
         },
       },
     });

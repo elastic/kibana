@@ -84,50 +84,48 @@ export async function fetchAndTransformGcMetrics({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...serviceNodeNameQuery(serviceNodeName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            { exists: { field: targetField } },
-            { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...serviceNodeNameQuery(serviceNodeName),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          { exists: { field: targetField } },
+          { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
+        ],
       },
-      aggs: {
-        per_pool: {
-          terms: {
-            field: `${groupByField}`,
-          },
-          aggs: {
-            timeseries: {
-              date_histogram: getMetricsDateHistogramParams({
-                start,
-                end,
-                metricsInterval: config.metricsInterval,
-              }),
-              aggs: {
-                // get the max value
-                max: fieldAggregation,
-                // get the derivative, which is the delta y
+    },
+    aggs: {
+      per_pool: {
+        terms: {
+          field: `${groupByField}`,
+        },
+        aggs: {
+          timeseries: {
+            date_histogram: getMetricsDateHistogramParams({
+              start,
+              end,
+              metricsInterval: config.metricsInterval,
+            }),
+            aggs: {
+              // get the max value
+              max: fieldAggregation,
+              // get the derivative, which is the delta y
+              derivative: {
                 derivative: {
-                  derivative: {
-                    buckets_path: 'max',
-                  },
+                  buckets_path: 'max',
                 },
-                // if a gc counter is reset, the delta will be >0 and
-                // needs to be excluded
-                value: {
-                  bucket_script: {
-                    buckets_path: { value: 'derivative' },
-                    script: 'params.value > 0.0 ? params.value : 0.0',
-                  },
+              },
+              // if a gc counter is reset, the delta will be >0 and
+              // needs to be excluded
+              value: {
+                bucket_script: {
+                  buckets_path: { value: 'derivative' },
+                  script: 'params.value > 0.0 ? params.value : 0.0',
                 },
               },
             },

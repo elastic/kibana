@@ -193,9 +193,7 @@ export class CreateSLO {
       temporaryDoc,
       summaryTransform,
       rollUpTransform,
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       rollUpTransformCompositeQuery: getTransformQueryComposite(rollUpTransform),
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       summaryTransformCompositeQuery: getTransformQueryComposite(summaryTransform),
     };
   }

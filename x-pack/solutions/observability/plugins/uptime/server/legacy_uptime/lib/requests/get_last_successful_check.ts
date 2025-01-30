@@ -90,7 +90,7 @@ export const getLastSuccessfulCheck: UMElasticsearchQueryFn<
     location,
   });
 
-  const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
+  const { body: result } = await uptimeEsClient.search(lastSuccessCheckParams);
 
   if (result.hits.total.value < 1) {
     return null;

@@ -69,41 +69,39 @@ async function getTopErroneousTransactions({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(ERROR_GROUP_ID, groupId),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(ERROR_GROUP_ID, groupId),
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        top_five_transactions: {
-          terms: {
-            field: TRANSACTION_NAME,
-            size: 5,
-          },
-          aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                _source: [TRANSACTION_TYPE],
-              },
+    },
+    aggs: {
+      top_five_transactions: {
+        terms: {
+          field: TRANSACTION_NAME,
+          size: 5,
+        },
+        aggs: {
+          sample: {
+            top_hits: {
+              size: 1,
+              _source: [TRANSACTION_TYPE],
             },
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                extended_bounds: {
-                  min: startWithOffset,
-                  max: endWithOffset,
-                },
+          },
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              extended_bounds: {
+                min: startWithOffset,
+                max: endWithOffset,
               },
             },
           },

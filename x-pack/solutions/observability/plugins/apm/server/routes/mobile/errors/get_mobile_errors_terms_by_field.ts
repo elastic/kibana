@@ -39,25 +39,23 @@ export async function getMobileErrorsTermsByField({
     apm: {
       events: [ProcessorEvent.error],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
+    },
+    aggs: {
+      terms: {
         terms: {
-          terms: {
-            field: fieldName,
-            size,
-          },
+          field: fieldName,
+          size,
         },
       },
     },

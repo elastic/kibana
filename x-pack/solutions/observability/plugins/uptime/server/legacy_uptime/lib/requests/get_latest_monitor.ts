@@ -60,7 +60,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
     },
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search(params);
 
   const doc = result.hits?.hits?.[0];
   const docId = (doc?._id as string | undefined) ?? '';

@@ -58,7 +58,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
     },
   };
 
-  const result = await uptimeEsClient.search({ body });
+  const result = await uptimeEsClient.search(body);
 
   const screenshotsOrRefs =
     (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;

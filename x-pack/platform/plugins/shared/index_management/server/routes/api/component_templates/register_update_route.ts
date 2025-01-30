@@ -45,12 +45,10 @@ export const registerUpdateRoute = ({
 
         const responseBody = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
-          body: {
-            template: template as estypes.IndicesIndexState,
-            version,
-            _meta,
-            deprecated,
-          },
+          template: template as estypes.IndicesIndexState,
+          version,
+          _meta,
+          deprecated,
         });
 
         return response.ok({ body: responseBody });

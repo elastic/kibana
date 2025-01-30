@@ -119,14 +119,12 @@ export async function getIndices(dataClient: IScopedClusterClient, pattern: stri
   const response = await dataClient.asCurrentUser.search<unknown, { indices: IndicesAggs }>(
     {
       index: pattern,
-      body: {
-        size: 0,
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: limit,
-            },
+      size: 0,
+      aggs: {
+        indices: {
+          terms: {
+            field: '_index',
+            size: limit,
           },
         },
       },

@@ -47,7 +47,7 @@ export const getNetworkEvents = async ({
     size: 1000,
   };
 
-  const { body: result } = await syntheticsEsClient.search({ body: params });
+  const { body: result } = await syntheticsEsClient.search(params);
   let isWaterfallSupported = false;
   let hasNavigationRequest = false;
 

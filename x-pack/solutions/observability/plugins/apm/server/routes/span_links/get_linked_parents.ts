@@ -37,21 +37,19 @@ export async function getLinkedParentsOfSpan({
       events: [processorEvent],
     },
     _source: [SPAN_LINKS],
-    body: {
-      track_total_hits: false,
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            { term: { [TRACE_ID]: traceId } },
-            { exists: { field: SPAN_LINKS } },
-            { term: { [PROCESSOR_EVENT]: processorEvent } },
-            ...(processorEvent === ProcessorEvent.transaction
-              ? [{ term: { [TRANSACTION_ID]: spanId } }]
-              : [{ term: { [SPAN_ID]: spanId } }]),
-          ],
-        },
+    track_total_hits: false,
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          { term: { [TRACE_ID]: traceId } },
+          { exists: { field: SPAN_LINKS } },
+          { term: { [PROCESSOR_EVENT]: processorEvent } },
+          ...(processorEvent === ProcessorEvent.transaction
+            ? [{ term: { [TRANSACTION_ID]: spanId } }]
+            : [{ term: { [SPAN_ID]: spanId } }]),
+        ],
       },
     },
   });

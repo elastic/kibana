@@ -46,48 +46,46 @@ export async function getAgentInstances({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              exists: {
-                field: AGENT_NAME,
-              },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            exists: {
+              field: AGENT_NAME,
             },
-            {
-              exists: {
-                field: AGENT_VERSION,
-              },
-            },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...(serviceName ? termQuery(SERVICE_NAME, serviceName) : []),
-          ],
-        },
-      },
-      aggs: {
-        serviceNodes: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-            missing: SERVICE_NODE_NAME_MISSING,
-            size: MAX_NUMBER_OF_SERVICE_NODES,
           },
-          aggs: {
-            environments: {
-              terms: {
-                field: SERVICE_ENVIRONMENT,
-              },
+          {
+            exists: {
+              field: AGENT_VERSION,
             },
-            sample: {
-              top_metrics: {
-                metrics: [{ field: AGENT_VERSION } as const],
-                sort: {
-                  '@timestamp': 'desc' as const,
-                },
+          },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...(serviceName ? termQuery(SERVICE_NAME, serviceName) : []),
+        ],
+      },
+    },
+    aggs: {
+      serviceNodes: {
+        terms: {
+          field: SERVICE_NODE_NAME,
+          missing: SERVICE_NODE_NAME_MISSING,
+          size: MAX_NUMBER_OF_SERVICE_NODES,
+        },
+        aggs: {
+          environments: {
+            terms: {
+              field: SERVICE_ENVIRONMENT,
+            },
+          },
+          sample: {
+            top_metrics: {
+              metrics: [{ field: AGENT_VERSION } as const],
+              sort: {
+                '@timestamp': 'desc' as const,
               },
             },
           },

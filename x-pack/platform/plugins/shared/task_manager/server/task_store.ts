@@ -577,12 +577,12 @@ export class TaskStore {
     const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
       ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
     );
-    const body = queries.flatMap((query) => [{}, query]);
+    const searches = queries.flatMap((query) => [{}, query]);
 
     const result = await this.esClientWithoutRetries.msearch<SavedObjectsRawDoc['_source']>({
       index: this.index,
       ignore_unavailable: true,
-      body,
+      searches,
     });
     const { responses } = result;
 

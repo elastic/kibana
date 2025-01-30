@@ -47,7 +47,7 @@ export async function getContainerIdFromSignals({
   const start = moment(query.alert_started_at).subtract(30, 'minutes').valueOf();
   const end = moment(query.alert_started_at).valueOf();
 
-  const params: APMEventESSearchRequest = {
+  const params: Omit<APMEventESSearchRequest, 'apm'> = {
     _source: ['container.id'],
     terminate_after: 1,
     size: 1,
@@ -100,7 +100,7 @@ async function getContainerIdFromTraces({
   params,
   apmEventClient,
 }: {
-  params: APMEventESSearchRequest;
+  params: Omit<APMEventESSearchRequest, 'apm'>;
   apmEventClient: APMEventClient;
 }) {
   const requiredFields = asMutableArray([CONTAINER_ID] as const);
@@ -113,7 +113,8 @@ async function getContainerIdFromTraces({
         },
       ],
     },
-    body: { ...params, fields: requiredFields },
+    ...params,
+    fields: requiredFields,
   });
 
   const event = unflattenKnownApmEventFields(maybe(res.hits.hits[0])?.fields, requiredFields);

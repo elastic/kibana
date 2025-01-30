@@ -104,64 +104,62 @@ export async function getServiceMetadataDetails({
       events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric],
     },
     sort: [{ _score: { order: 'desc' as const } }, { '@timestamp': { order: 'desc' as const } }],
-    body: {
-      track_total_hits: 1,
-      size: 1,
-      query: { bool: { filter, should } },
-      aggs: {
-        serviceVersions: {
-          terms: {
-            field: SERVICE_VERSION,
-            size: 10,
-            order: { _key: 'desc' as const },
-          },
+    track_total_hits: 1,
+    size: 1,
+    query: { bool: { filter, should } },
+    aggs: {
+      serviceVersions: {
+        terms: {
+          field: SERVICE_VERSION,
+          size: 10,
+          order: { _key: 'desc' as const },
         },
-        availabilityZones: {
-          terms: {
-            field: CLOUD_AVAILABILITY_ZONE,
-            size: 10,
-          },
-        },
-        containerIds: {
-          terms: {
-            field: CONTAINER_ID,
-            size: 10,
-          },
-        },
-        regions: {
-          terms: {
-            field: CLOUD_REGION,
-            size: 10,
-          },
-        },
-        cloudServices: {
-          terms: {
-            field: CLOUD_SERVICE_NAME,
-            size: 1,
-          },
-        },
-        machineTypes: {
-          terms: {
-            field: CLOUD_MACHINE_TYPE,
-            size: 10,
-          },
-        },
-        faasTriggerTypes: {
-          terms: {
-            field: FAAS_TRIGGER_TYPE,
-            size: 10,
-          },
-        },
-        faasFunctionNames: {
-          terms: {
-            field: FAAS_ID,
-            size: 10,
-          },
-        },
-        totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
-      fields: ['*'],
+      availabilityZones: {
+        terms: {
+          field: CLOUD_AVAILABILITY_ZONE,
+          size: 10,
+        },
+      },
+      containerIds: {
+        terms: {
+          field: CONTAINER_ID,
+          size: 10,
+        },
+      },
+      regions: {
+        terms: {
+          field: CLOUD_REGION,
+          size: 10,
+        },
+      },
+      cloudServices: {
+        terms: {
+          field: CLOUD_SERVICE_NAME,
+          size: 1,
+        },
+      },
+      machineTypes: {
+        terms: {
+          field: CLOUD_MACHINE_TYPE,
+          size: 10,
+        },
+      },
+      faasTriggerTypes: {
+        terms: {
+          field: FAAS_TRIGGER_TYPE,
+          size: 10,
+        },
+      },
+      faasFunctionNames: {
+        terms: {
+          field: FAAS_ID,
+          size: 10,
+        },
+      },
+      totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
     },
+    fields: ['*'],
   };
 
   const data = await apmEventClient.search('get_service_metadata_details', params);
