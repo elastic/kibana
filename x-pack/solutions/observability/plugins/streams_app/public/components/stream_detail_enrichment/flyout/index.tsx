@@ -106,7 +106,9 @@ export function AddProcessorFlyout({
         <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
           <ProcessorTypeSelector />
           <EuiSpacer size="m" />
-          {formFields.type === 'grok' && <GrokProcessorForm />}
+          {formFields.type === 'grok' && (
+            <GrokProcessorForm samples={samples} definition={definition} onSimulate={simulate} />
+          )}
           {formFields.type === 'dissect' && <DissectProcessorForm />}
         </EuiForm>
         <EuiHorizontalRule />

@@ -263,6 +263,10 @@ const isMappingFailure = (entry: any) =>
 
 const suggestionsParamsSchema = z.object({
   path: z.object({ id: z.string() }),
+  body: z.object({
+    documents: z.array(z.record(z.unknown())),
+    field: z.string(),
+  }),
 });
 
 type SuggestionsParams = z.infer<typeof suggestionsParamsSchema>;
@@ -285,20 +289,39 @@ export const processingSuggestionRoute = createServerRoute({
 
     const chatResponse = await inferenceClient.chatComplete({
       connectorId: 'azure-gpt4',
-      system: `Here is my system message`,
+      system: `You are a super smart expert for Elasticsearch and log message parsing`,
       messages: [
         {
           role: MessageRole.User,
-          content: 'Do something',
+          content:
+            'Take the following example messages and suggest grok patterns:\n' +
+            params.body.documents.map((doc) => doc[params.body.field]).join('/n/n') +
+            '\n\n Only answer with a JSON array like this: ["%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:loglevel} %{GREEDYDATA:message}"]\n\n' +
+            'Make sure that the original field "message" is not overwritten by anything in the pattern. Just answer with the JSON array, nothing else, no introduction or something',
         },
       ],
     });
 
+    const content = chatResponse.content;
+    const patterns: string[] = JSON.parse(content).map(sanitizePattern);
+
+    if (!Array.isArray(patterns)) {
+      return {
+        patterns: [],
+        content,
+      };
+    }
+
     return {
-      chatResponse,
+      patterns,
+      content,
     };
   },
 });
+
+function sanitizePattern(pattern: string) {
+  return pattern.replace(/%\{([^}]+):message\}/g, '%{$1:message_derived}');
+}
 
 export const processingRoutes = {
   ...simulateProcessorRoute,
