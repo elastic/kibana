@@ -24,14 +24,6 @@ export const configSchema = schema.object({
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ unusedFromRoot }) => [
-    unusedFromRoot('enterpriseSearch.host', { level: 'critical' }),
-    unusedFromRoot('enterpriseSearch.ssl', { level: 'critical' }),
-    unusedFromRoot('enterpriseSearch.accessCheckTimeout', { level: 'critical' }),
-    unusedFromRoot('enterpriseSearch.accessCheckTimeoutWarning', { level: 'critical' }),
-    unusedFromRoot('enterpriseSearch.customHeaders', { level: 'critical' }),
-    unusedFromRoot('enterpriseSearch.isCloud', { level: 'warning' }),
-  ],
   exposeToBrowser: {
     ui: true,
   },
