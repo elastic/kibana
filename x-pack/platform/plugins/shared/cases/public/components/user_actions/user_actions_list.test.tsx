@@ -32,7 +32,7 @@ const defaultProps = {
 jest.mock('../../common/lib/kibana');
 
 // FLAKY: https://github.com/elastic/kibana/issues/176524
-describe.skip(`UserActionsList`, () => {
+describe(`UserActionsList`, () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -104,8 +104,9 @@ describe.skip(`UserActionsList`, () => {
 
   // TODO Skipped after update to userEvent v14, the final assertion doesn't pass
   // https://github.com/elastic/kibana/pull/189949
-  it.skip('Outlines comment when update move to link is clicked', async () => {
+  it('Outlines comment when update move to link is clicked', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    jest.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
     const ourActions = [
@@ -131,12 +132,14 @@ describe.skip(`UserActionsList`, () => {
       )[0]?.classList.contains('outlined')
     ).toBe(false);
 
-    await user.click(await screen.findByTestId(`comment-update-action-${ourActions[1].id}`));
+    await user.click(await screen.findByTestId(`move-to-link-${props.data.comments[0].id}`));
 
     expect(
       (
         await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
       )[0]?.classList.contains('outlined')
     ).toBe(true);
+
+    jest.useRealTimers();
   });
 });

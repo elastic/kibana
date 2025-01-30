@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within, act } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
@@ -165,7 +165,7 @@ describe('TemplateForm', () => {
 
   // TODO: This test needs revisiting, it likely times out because of slow user events after
   // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
-  it.skip('serializes the template field data correctly', async () => {
+  it('serializes the template field data correctly', async () => {
     let formState: FormState<TemplateFormProps>;
 
     const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
@@ -194,9 +194,11 @@ describe('TemplateForm', () => {
     await user.keyboard('{enter}');
     await user.paste('bar');
     await user.keyboard('{enter}');
-
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -250,7 +252,10 @@ describe('TemplateForm', () => {
     });
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -318,7 +323,10 @@ describe('TemplateForm', () => {
     await user.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -377,7 +385,10 @@ describe('TemplateForm', () => {
     });
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -443,7 +454,10 @@ describe('TemplateForm', () => {
     });
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -521,7 +535,10 @@ describe('TemplateForm', () => {
     await user.selectOptions(await screen.findByTestId('categorySelect'), ['Denial of Service']);
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -623,7 +640,10 @@ describe('TemplateForm', () => {
     await user.paste('765');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -732,7 +752,10 @@ describe('TemplateForm', () => {
     );
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -802,7 +825,10 @@ describe('TemplateForm', () => {
     await user.paste('');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -836,7 +862,10 @@ describe('TemplateForm', () => {
     await user.paste(name);
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -870,7 +899,10 @@ describe('TemplateForm', () => {
     await user.paste(description);
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -909,7 +941,10 @@ describe('TemplateForm', () => {
     }
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -946,7 +981,10 @@ describe('TemplateForm', () => {
     await user.keyboard('{enter}');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-    await user.click(screen.getByText('testSubmit'));
+
+    await act(async () => {
+      await user.click(screen.getByText('testSubmit'));
+    });
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
