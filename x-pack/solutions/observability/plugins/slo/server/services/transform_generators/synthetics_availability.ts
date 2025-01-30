@@ -111,7 +111,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
       { term: { 'meta.space_id': this.spaceId } },
-      getFilterRange(slo, '@timestamp'),
+      getFilterRange(slo, '@timestamp', this.isServerless),
     ];
     const { monitorIds, tags, projects } = buildParamValues({
       monitorIds: indicator.params.monitorIds || [],

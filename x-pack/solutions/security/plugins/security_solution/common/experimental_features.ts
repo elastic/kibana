@@ -190,11 +190,6 @@ export const allowedExperimentalValues = Object.freeze({
   jamfDataInAnalyzerEnabled: true,
 
   /**
-   * Enables graph visualization in alerts flyout
-   */
-  graphVisualizationInFlyoutEnabled: false,
-
-  /**
    * Enables an ability to customize Elastic prebuilt rules.
    *
    * Ticket: https://github.com/elastic/kibana/issues/174168
@@ -247,9 +242,9 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
 
   /**
-   * Enables the siem migrations feature
+   * Disables the siem migrations feature
    */
-  siemMigrationsEnabled: false,
+  siemMigrationsDisabled: false,
 
   /**
    * Enables the Defend Insights feature
