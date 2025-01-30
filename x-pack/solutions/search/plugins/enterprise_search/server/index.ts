@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { EnterpriseSearchPlugin } = await import('./plugin');
@@ -44,7 +45,46 @@ export const configSchema = schema.object({
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ unused }) => [unused('canDeployEntSearch', { level: 'warning' })],
+  deprecations: ({ deprecate, unused }) => [
+    unused('canDeployEntSearch', { level: 'warning' }),
+    (deprecationConfig, fromPath, addDeprecation, context) => {
+      [
+        deprecate('host', '9.0.0', {
+          documentationUrl: context.docLinks.enterpriseSearch.upgrade9x,
+          level: 'critical',
+          title: i18n.translate('xpack.enterpriseSearch.deprecations.config.hostTitle', {
+            defaultMessage: 'Enterprise Search host(s) must be removed',
+          }),
+        }),
+        deprecate('ssl', '9.0.0', {
+          documentationUrl: context.docLinks.enterpriseSearch.upgrade9x,
+          level: 'critical',
+          title: ENT_SEARCH_NODE_DEPRECATION_TITLE,
+        }),
+        deprecate('accessCheckTimeout', '9.0.0', {
+          documentationUrl: context.docLinks.enterpriseSearch.upgrade9x,
+          level: 'critical',
+          title: ENT_SEARCH_NODE_DEPRECATION_TITLE,
+        }),
+        deprecate('accessCheckTimeoutWarning', '9.0.0', {
+          documentationUrl: context.docLinks.enterpriseSearch.upgrade9x,
+          level: 'critical',
+          title: ENT_SEARCH_NODE_DEPRECATION_TITLE,
+        }),
+        deprecate('customHeaders', '9.0.0', {
+          documentationUrl: context.docLinks.enterpriseSearch.upgrade9x,
+          level: 'critical',
+          title: ENT_SEARCH_NODE_DEPRECATION_TITLE,
+        }),
+        deprecate('isCloud', '9.0.0', {
+          level: 'critical',
+        }),
+        deprecate('ui', '9.0.0', {
+          level: 'critical',
+        }),
+      ].forEach((deprecation) => deprecation(deprecationConfig, fromPath, addDeprecation, context));
+    },
+  ],
   exposeToBrowser: {
     host: true,
     ui: true,
@@ -53,3 +93,8 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 };
 
 export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
+
+const ENT_SEARCH_NODE_DEPRECATION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.deprecations.config.nodeValuesTitle',
+  { defaultMessage: 'Enterprise Search connection config values must be removed' }
+);
