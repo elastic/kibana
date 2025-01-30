@@ -52,7 +52,7 @@ export async function getMenuItemGroups(
   }
 
   // add menu items from vis types
-  visualizationsService.all().forEach((visType) => {
+  (await visualizationsService.all()).forEach((visType) => {
     if (visType.disableCreate) return;
 
     const group = VIS_GROUP_TO_ADD_PANEL_GROUP[visType.group];
