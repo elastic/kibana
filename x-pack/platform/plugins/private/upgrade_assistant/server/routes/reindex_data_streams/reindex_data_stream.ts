@@ -178,6 +178,12 @@ export function registerReindexDataStreamRoutes({
   router.post(
     {
       path: `${BASE_PATH}/{dataStreamName}/cancel`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on elasticsearch for authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Cancel Data Stream reindexing`,
@@ -194,6 +200,7 @@ export function registerReindexDataStreamRoutes({
       } = await core;
       const { dataStreamName } = request.params;
       const callAsCurrentUser = esClient.asCurrentUser;
+
       const reindexService = dataStreamReindexServiceFactory({
         esClient: callAsCurrentUser,
         log,
@@ -201,6 +208,15 @@ export function registerReindexDataStreamRoutes({
       });
 
       try {
+        if (!(await reindexService.hasRequiredPrivileges(dataStreamName))) {
+          throw error.accessForbidden(
+            i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
+              defaultMessage: `You do not have adequate privileges to cancel reindexing "{dataStreamName}".`,
+              values: { dataStreamName },
+            })
+          );
+        }
+
         await reindexService.cancelReindexing(dataStreamName);
 
         return response.ok({ body: { acknowledged: true } });
