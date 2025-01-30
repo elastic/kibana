@@ -179,11 +179,12 @@ export const esqlExecutor = async ({
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
           const { _id, _version, _index, ...source } = document;
 
+          const sourceDocument = _id ? sourceDocuments[_id] : undefined;
           return {
-            _source: source as SignalSource,
-            fields: _id ? sourceDocuments[_id]?.fields : {},
+            _source: { ...sourceDocument?._source, ...source },
+            fields: sourceDocument?.fields,
             _id: _id ?? '',
-            _index: _index ?? '',
+            _index: _index || sourceDocument?._index || '',
           };
         });
 

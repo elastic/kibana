@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.rule_type_id': 'siem.esqlRule',
         'kibana.space_ids': ['default'],
         'kibana.alert.rule.tags': [],
-        'agent.name': 'test-1',
+        agent: { name: 'test-1' },
         id,
         'event.kind': 'signal',
         'kibana.alert.original_time': expect.any(String),
@@ -287,8 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
         // all fields from source document should be returned
         expect(previewAlerts[0]._source).toEqual(
           expect.objectContaining({
-            'agent.name': 'test-1',
-            agent: { version: '2', type: 'auditbeat' },
+            agent: { version: '2', type: 'auditbeat', name: 'test-1' },
             host: { name: 'my-host' },
             client: { ip: '127.0.0.1' },
           })
@@ -1470,7 +1469,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('alerts on alerts', () => {
+    describe('alerts on alerts', () => {
       let id: string;
       let ruleId: string;
       beforeEach(async () => {
@@ -1509,9 +1508,25 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
         expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toHaveLength(2);
-        expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toEqual([]);
+        expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toEqual([
+          {
+            depth: 0,
+            id: expect.any(String),
+            index: 'ecs_compliant',
+            type: 'event',
+          },
+          {
+            depth: 1,
+            id: expect.any(String),
+            index: '.internal.alerts-security.alerts-default-000001',
+            rule: ruleId,
+            type: 'signal',
+          },
+        ]);
       });
 
+      // we need this use case when ALERT_ANCESTORS field dropped in ES|QL query, it's not returned in ES|QL response
+      // so later when we merge source, fields and ES|QL response, it's different to a tests case above
       it('should create alert on alert when properties dropped in ES|QL query', async () => {
         const ruleOnAlert: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock(),
@@ -1528,7 +1543,21 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
         expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toHaveLength(2);
-        expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toEqual([]);
+        expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toEqual([
+          {
+            depth: 0,
+            id: expect.any(String),
+            index: 'ecs_compliant',
+            type: 'event',
+          },
+          {
+            depth: 1,
+            id: expect.any(String),
+            index: '.internal.alerts-security.alerts-default-000001',
+            rule: ruleId,
+            type: 'signal',
+          },
+        ]);
       });
 
       it('should create alert on alert for aggregating query', async () => {
@@ -1546,8 +1575,11 @@ export default ({ getService }: FtrProviderContext) => {
         });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toHaveLength(2);
-        expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toEqual([]);
+        // since we don't fetch source document when using aggregating query, only one ancestors item is present
+        expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toHaveLength(1);
+        expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toEqual([
+          { depth: 0, id: '', index: '', type: 'event' },
+        ]);
       });
     });
   });
