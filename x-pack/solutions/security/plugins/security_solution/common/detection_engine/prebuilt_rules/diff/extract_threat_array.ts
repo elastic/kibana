@@ -47,4 +47,4 @@ const trimSubtechniqueArray = (subtechniqueArray: ThreatSubtechnique[]): ThreatS
 };
 
 const normalizeThreatReference = (reference: string): string =>
-  reference.endsWith('/') ? reference.slice(0, -1) : reference; // Removes the trailing backslash in urls to account for any inconsitencies between our script generated data and prebuilt rules packages
+  !reference.endsWith('/') ? `${reference}/` : reference; // Adds a trailing backslash in urls if it doesn't exist to account for any inconsitencies between our script generated data and prebuilt rules packages
