@@ -444,7 +444,7 @@ export function LensEditConfigurationFlyout({
                   parentApi={parentApi}
                   panelId={panelId}
                   canEditTextBasedQuery={canEditTextBasedQuery}
-                  editorContainer={editorContainer.current}
+                  editorContainer={editorContainer.current || undefined}
                 />
                 <EuiSpacer />
               </>
