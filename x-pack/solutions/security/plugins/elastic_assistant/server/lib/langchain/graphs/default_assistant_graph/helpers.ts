@@ -149,7 +149,7 @@ export const streamGraph = async ({
       tags: traceOptions?.tags ?? [],
       version: 'v1',
     },
-    inputs?.llmType === 'inference' ? { includeNames: ['Summarizer'] } : undefined
+    inputs?.provider === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
   );
 
   const pushStreamUpdate = async () => {
