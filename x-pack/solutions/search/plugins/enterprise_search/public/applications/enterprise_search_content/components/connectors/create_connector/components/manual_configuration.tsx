@@ -119,7 +119,7 @@ POST /_security/api_key
           "privileges": [
             "all"
           ],
-          "allow_restricted_indices": false
+          "allow_restricted_indices": true
         }
       ]
     }
