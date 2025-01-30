@@ -18,6 +18,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -40,6 +41,7 @@ export interface StreamsAppStartDependencies {
   share: SharePublicStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   navigation: NavigationPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export interface StreamsAppPublicSetup {}

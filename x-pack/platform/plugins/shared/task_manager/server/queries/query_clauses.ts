@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface MustCondition {
   bool: Pick<estypes.QueryDslBoolQuery, 'must'>;

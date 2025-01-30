@@ -18,18 +18,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+import { SearchEmptyPrompt, DecorativeHorizontalStepper, EuiIconWeb } from '@kbn/search-shared-ui';
 
 import { COMING_SOON_LABEL } from '../../../shared/constants';
 import { GithubIcon } from '../../../shared/icons/github_icon';
-import CrawlerIcon from '../../../shared/icons/web_crawlers.svg';
 import { KibanaLogic } from '../../../shared/kibana';
 import { CRAWLERS_ELASTIC_MANAGED_PATH } from '../../routes';
 
 export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
   return (
     <SearchEmptyPrompt
-      icon={CrawlerIcon}
+      icon={EuiIconWeb}
       title={i18n.translate('xpack.enterpriseSearch.webCrawlersEmpty.title', {
         defaultMessage: 'Set up a web crawler',
       })}
@@ -59,7 +58,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                       justifyContent="center"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type={CrawlerIcon} />
+                        <EuiIcon color="primary" size="l" type={EuiIconWeb} />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiIcon size="m" type="sortRight" />
@@ -153,7 +152,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                           <EuiIcon size="m" type="sortRight" />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type={CrawlerIcon} />
+                          <EuiIcon color="primary" size="l" type={EuiIconWeb} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiIcon size="m" type="sortRight" />

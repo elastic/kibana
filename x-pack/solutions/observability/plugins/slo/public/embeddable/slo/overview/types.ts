@@ -10,8 +10,8 @@ import { Filter } from '@kbn/es-query';
 import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import {
   HasEditCapabilities,
-  PublishesPanelTitle,
-  PublishesWritablePanelTitle,
+  PublishesTitle,
+  PublishesWritableTitle,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 
@@ -45,8 +45,8 @@ export type SloOverviewEmbeddableState = SerializedTitles &
   Partial<SingleSloCustomInput>;
 
 export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
-  PublishesWritablePanelTitle &
-  PublishesPanelTitle &
+  PublishesWritableTitle &
+  PublishesTitle &
   HasSloGroupOverviewConfig &
   HasEditCapabilities &
   HasSupportedTriggers;

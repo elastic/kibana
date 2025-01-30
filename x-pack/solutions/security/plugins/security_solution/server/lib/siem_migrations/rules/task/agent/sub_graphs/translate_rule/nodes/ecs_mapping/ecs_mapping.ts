@@ -12,7 +12,7 @@ import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_ca
 import type { GraphNode } from '../../types';
 import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
 import { ESQL_TRANSLATE_ECS_MAPPING_PROMPT } from './prompts';
-import { cleanMarkdown } from '../../../../../util/comments';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetEcsMappingNodeParams {
   inferenceClient: InferenceClient;
@@ -48,7 +48,7 @@ export const getEcsMappingNode = ({
 
     return {
       response,
-      comments: [cleanMarkdown(ecsSummary)],
+      comments: [generateAssistantComment(cleanMarkdown(ecsSummary))],
       translation_finalized: true,
       translation_result: translationResult,
       elastic_rule: {

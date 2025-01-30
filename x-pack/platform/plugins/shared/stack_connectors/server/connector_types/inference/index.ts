@@ -15,7 +15,7 @@ import {
   GenerativeAIForSecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
@@ -161,8 +161,16 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       );
     }
 
+    if (taskType === 'chat_completion' && !Object.keys(SUB_ACTION).includes('UNIFIED_COMPLETION')) {
+      throw new Error(
+        `Task type is not supported${
+          taskType && taskType.length ? `: ${taskType}` : ``
+        } by Inference Endpoint.`
+      );
+    }
+
     if (
-      !taskType.includes('completion') &&
+      taskType !== 'chat_completion' &&
       !Object.keys(SUB_ACTION).includes(taskType.toUpperCase())
     ) {
       throw new Error(

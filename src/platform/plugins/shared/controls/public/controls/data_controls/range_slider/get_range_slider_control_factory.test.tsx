@@ -147,7 +147,7 @@ describe('RangesliderControlApi', () => {
         controlGroupApi
       );
       expect(api.filters$.value).toBeUndefined();
-      expect(api.blockingError.value?.message).toEqual(
+      expect(api.blockingError$.value?.message).toEqual(
         'no data view found for id notGonnaFindMeDataView'
       );
     });

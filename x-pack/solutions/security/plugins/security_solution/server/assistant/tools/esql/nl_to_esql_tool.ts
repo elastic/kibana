@@ -48,7 +48,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
           client: inference.getClient({ request }),
           connectorId,
           input: question,
-          ...(isOssModel ? { functionCalling: 'simulated' } : {}),
+          functionCalling: 'auto',
           logger,
         })
       );

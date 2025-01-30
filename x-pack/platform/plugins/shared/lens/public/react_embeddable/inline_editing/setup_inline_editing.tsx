@@ -50,7 +50,8 @@ export function prepareInlineEditPanel(
     stateTransfer: EmbeddableStateTransfer,
     skipAppLeave?: boolean
   ) => () => Promise<void>,
-  uuid?: string
+  uuid?: string,
+  parentApi?: unknown
 ) {
   return async function openConfigPanel({
     onApply,
@@ -137,6 +138,7 @@ export function prepareInlineEditPanel(
           }
         }}
         hideTimeFilterInfo={hideTimeFilterInfo}
+        parentApi={parentApi}
       />
     );
   };

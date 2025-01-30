@@ -10,7 +10,7 @@ import { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   apiIsOfType,
-  apiPublishesPanelTitle,
+  apiPublishesTitle,
   apiPublishesUnifiedSearch,
   HasEditCapabilities,
   HasLibraryTransforms,
@@ -75,7 +75,7 @@ export const isMapApi = (api: unknown): api is MapApi => {
     api &&
       apiIsOfType(api, 'map') &&
       typeof (api as MapApi).getLayerList === 'function' &&
-      apiPublishesPanelTitle(api) &&
+      apiPublishesTitle(api) &&
       apiPublishesUnifiedSearch(api)
   );
 };

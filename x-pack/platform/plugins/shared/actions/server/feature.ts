@@ -77,7 +77,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
       description: i18n.translate(
         'xpack.actions.featureRegistry.endpointSecuritySubFeatureDescription',
         {
-          defaultMessage: 'Includes: Sentinel One, Crowdstrike',
+          defaultMessage: 'Includes: Sentinel One, CrowdStrike, Microsoft Defender for Endpoint',
         }
       ),
       privilegeGroups: [

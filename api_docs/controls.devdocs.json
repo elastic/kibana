@@ -1177,6 +1177,14 @@
           },
           " & ",
           {
+            "pluginId": "@kbn/esql-variables-types",
+            "scope": "public",
+            "docId": "kibKbnEsqlVariablesTypesPluginApi",
+            "section": "def-public.PublishesESQLVariables",
+            "text": "PublishesESQLVariables"
+          },
+          " & ",
+          {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
@@ -1231,7 +1239,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          ">>, \"unsavedChanges\"> & ",
+          ">>, \"unsavedChanges$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1435,6 +1443,14 @@
           },
           " & ",
           {
+            "pluginId": "@kbn/esql-variables-types",
+            "scope": "public",
+            "docId": "kibKbnEsqlVariablesTypesPluginApi",
+            "section": "def-public.PublishesESQLVariables",
+            "text": "PublishesESQLVariables"
+          },
+          " & ",
+          {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
@@ -1489,7 +1505,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          ">>, \"unsavedChanges\"> & ",
+          ">>, \"unsavedChanges$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1847,8 +1863,8 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
           " & ",
           {
@@ -1880,9 +1896,9 @@
           },
           " & ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.HasSerializableState",
             "text": "HasSerializableState"
           },
@@ -1939,10 +1955,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"hidePanelTitle\"> & ",
+          ", \"hideTitle$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1971,6 +1987,21 @@
           " & { untilFiltersReady: () => Promise<void>; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/data_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.ESQL_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_CONTROL",
+        "description": [],
+        "signature": [
+          "\"esqlControl\""
+        ],
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3348,6 +3379,21 @@
         "description": [],
         "signature": [
           "\"small\" | \"medium\" | \"large\""
+        ],
+        "path": "src/platform/plugins/shared/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.ESQL_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_CONTROL",
+        "description": [],
+        "signature": [
+          "\"esqlControl\""
         ],
         "path": "src/platform/plugins/shared/controls/common/constants.ts",
         "deprecated": false,
