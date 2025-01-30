@@ -61,7 +61,7 @@ export const createEventFilters = async (
 /**
  * Create an Event Filter for non-interactive sessions and attach it to the policy
  */
-export const createNonInteractiveSessionEventFilter = async (
+const createNonInteractiveSessionEventFilter = async (
   logger: Logger,
   exceptionsClient: ExceptionListClient,
   packagePolicy: PackagePolicy
