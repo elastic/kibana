@@ -48,7 +48,7 @@ export const getCountMetricAgg = () =>
       if (value === 0 && agg.params.emptyAsNull) {
         return null;
       }
-      if (value == null && !agg.params.emptyAsNull) return 0;
+      if (value == null) {
         // if the value is undefined, respect the emptyAsNull flag
         return agg.params.emptyAsNull ? null : 0;
       }
