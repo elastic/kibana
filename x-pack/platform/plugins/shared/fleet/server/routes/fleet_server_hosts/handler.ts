@@ -64,6 +64,7 @@ export const postFleetServerHost: RequestHandler<
   const { id, ...data } = request.body;
   const FleetServerHost = await createFleetServerHost(
     soClient,
+    esClient,
     { ...data, is_preconfigured: false },
     { id }
   );
@@ -140,7 +141,12 @@ export const putFleetServerHostHandler: RequestHandler<
       await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
     }
 
-    const item = await updateFleetServerHost(soClient, request.params.itemId, request.body);
+    const item = await updateFleetServerHost(
+      soClient,
+      esClient,
+      request.params.itemId,
+      request.body
+    );
     const body = {
       item,
     };

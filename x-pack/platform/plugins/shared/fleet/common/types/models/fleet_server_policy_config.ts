@@ -22,8 +22,8 @@ export interface NewFleetServerHost {
   } | null;
   secrets?: {
     ssl?: {
-      key?: FleetServerSecret;
-      es_key?: FleetServerSecret;
+      key?: { id: string };
+      es_key?: { id: string };
     };
   };
 }
@@ -31,10 +31,3 @@ export interface NewFleetServerHost {
 export interface FleetServerHost extends NewFleetServerHost {
   id: string;
 }
-
-export type FleetServerSecret =
-  | string
-  | {
-      id: string;
-      hash?: string;
-    };

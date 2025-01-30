@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObject,
 } from '@kbn/core/server';
+
+import type { Nullable } from 'tough-cookie';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -25,6 +29,7 @@ import type {
   FleetServerHost,
   NewFleetServerHost,
   AgentPolicy,
+  PolicySecretReference,
 } from '../types';
 import { FleetServerHostUnauthorizedError, FleetServerHostNotFoundError } from '../errors';
 
@@ -32,28 +37,42 @@ import { appContextService } from './app_context';
 
 import { agentPolicyService } from './agent_policy';
 import { escapeSearchQueryPhrase } from './saved_object';
+import {
+  deleteFleetServerHostsSecrets,
+  deleteSecrets,
+  extractAndUpdateFleetServerHostsSecrets,
+  extractAndWriteFleetServerHostsSecrets,
+  isSecretStorageEnabled,
+} from './secrets';
 
-function savedObjectToFleetServerHost(so: SavedObject<FleetServerHostSOAttributes>) {
-  const data = { ...so.attributes };
+function savedObjectToFleetServerHost(
+  so: SavedObject<FleetServerHostSOAttributes>
+): FleetServerHost {
+  const { ssl, proxy_id: proxyId, ...attributes } = so.attributes;
 
-  if (data.proxy_id === null) {
-    delete data.proxy_id;
-  }
-
-  return { id: so.id, ...data };
+  return {
+    id: so.id,
+    ...attributes,
+    ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
+    ...(proxyId ? { proxy_id: proxyId } : {}),
+  };
 }
 
 export async function createFleetServerHost(
   soClient: SavedObjectsClientContract,
-  data: NewFleetServerHost,
+  esClient: ElasticsearchClient,
+  fleetServerHost: NewFleetServerHost,
   options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
 ): Promise<FleetServerHost> {
   const logger = appContextService.getLogger();
-  if (data.is_default) {
+  const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
+
+  if (fleetServerHost.is_default) {
     const defaultItem = await getDefaultFleetServerHost(soClient);
     if (defaultItem && defaultItem.id !== options?.id) {
       await updateFleetServerHost(
         soClient,
+        esClient,
         defaultItem.id,
         { is_default: false },
         { fromPreconfiguration: options?.fromPreconfiguration }
@@ -61,8 +80,28 @@ export async function createFleetServerHost(
     }
   }
 
-  if (data.host_urls) {
-    data.host_urls = data.host_urls.map(normalizeHostsForAgents);
+  if (fleetServerHost.host_urls) {
+    data.host_urls = fleetServerHost.host_urls.map(normalizeHostsForAgents);
+  }
+
+  // Store secret values if enabled; if not, store plain text values
+  if (await isSecretStorageEnabled(esClient, soClient)) {
+    const { fleetServerHost: fleetServerHostWithSecrets } =
+      await extractAndWriteFleetServerHostsSecrets({
+        fleetServerHost,
+        esClient,
+        // secretHashes: fleetServerHost.is_preconfigured ? options?.secretHashes : undefined,
+      });
+
+    if (fleetServerHostWithSecrets.secrets)
+      fleetServerHost.secrets = fleetServerHostWithSecrets.secrets;
+  } else {
+    if (
+      (!fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) ||
+      (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key)
+    ) {
+      data.ssl = JSON.stringify({ ...fleetServerHost.ssl, ...fleetServerHost.secrets.ssl });
+    }
   }
   logger.debug(`Creating fleet server host with ${data}`);
   const res = await soClient.create<FleetServerHostSOAttributes>(
@@ -146,19 +185,31 @@ export async function deleteFleetServerHost(
     force: options?.fromPreconfiguration,
   });
 
-  return await soClient.delete(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id);
+  const soDeleteResult = await soClient.delete(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id);
+  await deleteFleetServerHostsSecrets({
+    fleetServerHost,
+    esClient: appContextService.getInternalUserESClient(),
+  });
+
+  return soDeleteResult;
 }
 
 export async function updateFleetServerHost(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   id: string,
   data: Partial<FleetServerHost>,
   options?: { fromPreconfiguration?: boolean }
 ) {
+  let secretsToDelete: PolicySecretReference[] = [];
+
   const logger = appContextService.getLogger();
   logger.debug(`Updating fleet server host ${id}`);
 
   const originalItem = await getFleetServerHost(soClient, id);
+  const updateData: Nullable<Partial<FleetServerHostSOAttributes>> = {
+    ...omit(data, ['ssl', 'secrets']),
+  };
 
   if (data.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetServerHostUnauthorizedError(
@@ -171,6 +222,7 @@ export async function updateFleetServerHost(
     if (defaultItem && defaultItem.id !== id) {
       await updateFleetServerHost(
         soClient,
+        esClient,
         defaultItem.id,
         {
           is_default: false,
@@ -181,14 +233,48 @@ export async function updateFleetServerHost(
   }
 
   if (data.host_urls) {
-    data.host_urls = data.host_urls.map(normalizeHostsForAgents);
+    updateData.host_urls = data.host_urls.map(normalizeHostsForAgents);
   }
 
-  await soClient.update<FleetServerHostSOAttributes>(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id, data);
+  // Store secret values if enabled; if not, store plain text values
+  if (await isSecretStorageEnabled(esClient, soClient)) {
+    const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
+      oldFleetServerHost: originalItem,
+      fleetServerHostUpdate: data,
+      esClient,
+      // secretHashes: data.is_preconfigured ? secretHashes : undefined,
+    });
+
+    updateData.secrets = secretsRes.fleetServerHostUpdate.secrets;
+    secretsToDelete = secretsRes.secretsToDelete;
+  } else {
+    if (
+      (!data.ssl?.key && data.secrets?.ssl?.key) ||
+      (!data.ssl?.es_key && data.secrets?.ssl?.es_key)
+    ) {
+      updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
+    }
+  }
+
+  // use encrypted SO
+  await soClient.update<FleetServerHostSOAttributes>(
+    FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    id,
+    updateData
+  );
+
+  if (secretsToDelete.length) {
+    try {
+      await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
+    } catch (err) {
+      logger.warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+    }
+  }
+
   logger.debug(`Updated fleet server host ${id}`);
   return {
     ...originalItem,
-    ...data,
+    ...updateData,
   };
 }
 
@@ -262,7 +348,10 @@ export async function getDefaultFleetServerHost(
 /**
  * Migrate Global setting fleet server hosts to their own saved object
  */
-export async function migrateSettingsToFleetServerHost(soClient: SavedObjectsClientContract) {
+export async function migrateSettingsToFleetServerHost(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
   const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
   if (defaultFleetServerHost) {
     return;
@@ -284,6 +373,7 @@ export async function migrateSettingsToFleetServerHost(soClient: SavedObjectsCli
   // Migrate
   await createFleetServerHost(
     soClient,
+    esClient,
     {
       name: 'Default',
       host_urls: oldSettings.attributes.fleet_server_hosts,

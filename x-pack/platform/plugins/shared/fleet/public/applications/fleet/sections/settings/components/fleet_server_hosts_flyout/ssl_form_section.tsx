@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -13,23 +13,40 @@ import { i18n } from '@kbn/i18n';
 import { MultiRowInput } from '../multi_row_input';
 
 import { SecretFormRow } from '../edit_output_flyout/output_form_secret_form_row';
+import { useFleetStatus } from '../../../../hooks';
 
 import type { FleetServerHostSSLInputsType } from './use_fleet_server_host_form';
 
 interface Props {
   inputs: FleetServerHostSSLInputsType;
-  useSecretsStorage: boolean;
-  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
 export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
-  const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
+  const { inputs } = props;
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     sslKey: false,
     sslESKey: false,
   });
+
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
+    'disabled'
+  );
+  const fleetStatus = useFleetStatus();
+  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  }
+
+  const onToggleSecretStorage = (secretEnabled: boolean) => {
+    if (secretsToggleState === 'disabled') {
+      return;
+    }
+
+    setSecretsToggleState(secretEnabled);
+  };
+
+  const useSecretsStorage = secretsToggleState === true;
 
   useEffect(() => {
     if (!isFirstLoad) return;

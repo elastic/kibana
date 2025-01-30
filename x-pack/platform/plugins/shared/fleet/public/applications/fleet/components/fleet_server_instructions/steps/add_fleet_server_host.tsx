@@ -24,13 +24,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import styled from 'styled-components';
+
 import type { FleetServerHost } from '../../../types';
 
 import { useStartServices, useLink } from '../../../hooks';
 import type { FleetServerHostForm } from '../hooks';
 import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
 import { FleetServerHostSelect } from '../components';
-import styled from 'styled-components';
+import { SSLFormSection } from '../../../sections/settings/components/fleet_server_hosts_flyout/ssl_form_section';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .ingest-active-button {
@@ -190,126 +192,7 @@ export const AddFleetServerHostStepContent = ({
             buttonClassName="ingest-active-button"
           >
             <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              {...inputs.hostUrlsInput}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.fleetServerHostsFlyout.certificateLabel"
-                  defaultMessage="Client SSL Certificate"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                data-test-subj="fleetServerHostsFlyout.certificateInput"
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.fleetServerHostsFlyout.certificatePlaceholder',
-                  { defaultMessage: 'Specify SSL certificate' }
-                )}
-                {...inputs.certificateInput.props}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              {...inputs.certificateKeyInput.formRowProps}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.fleetServerHostsFlyout.certificateKeyLabel"
-                  defaultMessage="Client SSL Certificate key"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                data-test-subj="fleetServerHostsFlyout.certificateKeyInput"
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.fleetServerHostsFlyout.certificateKeyPlaceholder',
-                  { defaultMessage: 'Specify SSL certificate key' }
-                )}
-                {...inputs.certificateKeyInput.props}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              {...inputs.certificateAuthoritiesInput.formRowProps}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.fleetServerHostsFlyout.certificateAuthoritiesLabel"
-                  defaultMessage="Server SSL certificate authorities"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                data-test-subj="fleetServerHostsFlyout.certificateAuthoritiesInput"
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.fleetServerHostsFlyout.certificateAuthoritiesPlaceholder',
-                  { defaultMessage: 'Specify certificate authorities' }
-                )}
-                {...inputs.certificateAuthoritiesInput.props}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              {...inputs.esCertificateInput.formRowProps}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.fleetServerHostsFlyout.EScertificateLabel"
-                  defaultMessage="SSL certificate for Elasticsearch"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                data-test-subj="fleetServerHostsFlyout.esCertificateInput"
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.fleetServerHostsFlyout.esCertificatePlaceholder',
-                  { defaultMessage: 'Specify Elasticsearch SSL certificate' }
-                )}
-                {...inputs.esCertificateInput.props}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              {...inputs.esCertificateKeyInput.formRowProps}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.fleetServerHostsFlyout.esCertificateKeyLabel"
-                  defaultMessage="SSL certificate key for Elasticsearch"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                data-test-subj="fleetServerHostsFlyout.esCertificateKeyInput"
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.fleetServerHostsFlyout.esCertificateKeyPlaceholder',
-                  { defaultMessage: 'Specify Elasticsearch SSL certificate key' }
-                )}
-                {...inputs.esCertificateKeyInput.props}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              {...inputs.esCertificateAuthoritiesInput.formRowProps}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.fleetServerHostsFlyout.esCertificateAuthoritiesLabel"
-                  defaultMessage="Elasticsearch Certificate Authorities"
-                />
-              }
-            >
-              <EuiFieldText
-                fullWidth
-                data-test-subj="fleetServerHostsFlyout.esCertificateAuthoritiesInput"
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.fleetServerHostsFlyout.esCertificateAuthoritiesPlaceholder',
-                  { defaultMessage: 'Specify Elasticsearch certificate authorities' }
-                )}
-                {...inputs.esCertificateAuthoritiesInput.props}
-              />
-            </EuiFormRow>
+            <SSLFormSection inputs={inputs} />
           </StyledEuiAccordion>
           <EuiSpacer size="m" />
           {fleetServerHosts.length > 0 ? (

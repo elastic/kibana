@@ -7,12 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-const secretRefSchema = schema.oneOf([
-  schema.object({
-    id: schema.string(),
-  }),
-  schema.string(),
-]);
+const secretRefSchema = schema.object({
+  id: schema.string(),
+});
 
 export const FleetServerHostSchema = schema.object({
   id: schema.string(),

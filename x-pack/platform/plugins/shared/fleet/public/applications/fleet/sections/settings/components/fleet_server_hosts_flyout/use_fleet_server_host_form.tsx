@@ -31,7 +31,7 @@ export interface FleetServerHostSSLInputsType {
   nameInput: ReturnType<typeof useInput>;
   hostUrlsInput: ReturnType<typeof useComboInput>;
   isDefaultInput: ReturnType<typeof useSwitchInput>;
-  proxyIdInput: ReturnType<typeof useInput>;
+  proxyIdInput?: ReturnType<typeof useInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;

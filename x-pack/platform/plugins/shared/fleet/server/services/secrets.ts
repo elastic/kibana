@@ -907,3 +907,79 @@ export async function extractAndWriteFleetServerHostsSecrets(opts: {
     secretReferences: secrets.map(({ id }) => ({ id })),
   };
 }
+
+export async function deleteFleetServerHostsSecrets(opts: {
+  fleetServerHost: NewFleetServerHost;
+  esClient: ElasticsearchClient;
+}): Promise<void> {
+  const { fleetServerHost, esClient } = opts;
+
+  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost).filter(
+    (path) => typeof path.value === 'string'
+  );
+
+  if (secretPaths.length === 0) {
+    return Promise.resolve();
+  }
+
+  const secretIds = secretPaths.map(({ value }) => (value as { id: string }).id);
+
+  try {
+    return deleteSecrets({ esClient, ids: secretIds });
+  } catch (err) {
+    appContextService.getLogger().warn(`Error deleting secrets: ${err}`);
+  }
+}
+
+export async function extractAndUpdateFleetServerHostsSecrets(opts: {
+  oldFleetServerHost: NewFleetServerHost;
+  fleetServerHostUpdate: Partial<NewFleetServerHost>;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{
+  fleetServerHostUpdate: Partial<NewFleetServerHost>;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldFleetServerHost, fleetServerHostUpdate, esClient, secretHashes } = opts;
+  const oldSecretPaths = getFleetServerHostsSecretPaths(oldFleetServerHost);
+  const updatedSecretPaths = getFleetServerHostsSecretPaths(fleetServerHostUpdate);
+
+  if (!oldSecretPaths.length && !updatedSecretPaths.length) {
+    return { fleetServerHostUpdate, secretReferences: [], secretsToDelete: [] };
+  }
+
+  const { toCreate, toDelete, noChange } = diffOutputSecretPaths(
+    oldSecretPaths,
+    updatedSecretPaths
+  );
+
+  const createdSecrets = await createSecrets({
+    esClient,
+    values: toCreate.map((secretPath) => secretPath.value as string),
+  });
+
+  const fleetServerHostWithSecretRefs = JSON.parse(JSON.stringify(fleetServerHostUpdate));
+  toCreate.forEach((secretPath, i) => {
+    const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
+    const maybeHash = get(secretHashes, pathWithoutPrefix);
+
+    set(fleetServerHostWithSecretRefs, secretPath.path, {
+      id: createdSecrets[i].id,
+      ...(typeof maybeHash === 'string' && { hash: maybeHash }),
+    });
+  });
+
+  const secretReferences = [
+    ...noChange.map((secretPath) => ({ id: (secretPath.value as { id: string }).id })),
+    ...createdSecrets.map(({ id }) => ({ id })),
+  ];
+
+  return {
+    fleetServerHostUpdate: fleetServerHostWithSecretRefs,
+    secretReferences,
+    secretsToDelete: toDelete.map((secretPath) => ({
+      id: (secretPath.value as { id: string }).id,
+    })),
+  };
+}

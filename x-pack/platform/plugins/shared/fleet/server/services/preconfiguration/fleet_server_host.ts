@@ -81,7 +81,7 @@ export async function ensurePreconfiguredFleetServerHosts(
     esClient,
     preconfiguredFleetServerHosts
   );
-  await createCloudFleetServerHostIfNeeded(soClient);
+  await createCloudFleetServerHostIfNeeded(soClient, esClient);
   await cleanPreconfiguredFleetServerHosts(soClient, esClient, preconfiguredFleetServerHosts);
 }
 
@@ -120,6 +120,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       if (isCreate) {
         await createFleetServerHost(
           soClient,
+          esClient,
           {
             ...data,
             is_preconfigured: true,
@@ -129,6 +130,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       } else if (isUpdateWithNewData) {
         await updateFleetServerHost(
           soClient,
+          esClient,
           id,
           {
             ...data,
@@ -146,7 +148,10 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
   );
 }
 
-export async function createCloudFleetServerHostIfNeeded(soClient: SavedObjectsClientContract) {
+export async function createCloudFleetServerHostIfNeeded(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
   const cloudServerHosts = getCloudFleetServersHosts();
   if (!cloudServerHosts || cloudServerHosts.length === 0) {
     return;
@@ -156,6 +161,7 @@ export async function createCloudFleetServerHostIfNeeded(soClient: SavedObjectsC
   if (!defaultFleetServerHost) {
     await createFleetServerHost(
       soClient,
+      esClient,
       {
         name: 'Default',
         is_default: true,
@@ -188,6 +194,7 @@ export async function cleanPreconfiguredFleetServerHosts(
     if (existingFleetServerHost.is_default) {
       await updateFleetServerHost(
         soClient,
+        esClient,
         existingFleetServerHost.id,
         { is_preconfigured: false },
         {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -30,7 +30,7 @@ import {
 
 import { MultiRowInput } from '../multi_row_input';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
-import { useFleetStatus, useStartServices } from '../../../../hooks';
+import { useStartServices } from '../../../../hooks';
 import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
@@ -52,24 +52,6 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   proxies,
 }) => {
   const { docLinks, cloud } = useStartServices();
-  const fleetStatus = useFleetStatus();
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
-    'disabled'
-  );
-
-  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
-    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
-  }
-
-  const onToggleSecretStorage = (secretEnabled: boolean) => {
-    if (secretsToggleState === 'disabled') {
-      return;
-    }
-
-    setSecretsToggleState(secretEnabled);
-  };
-
-  const useSecretsStorage = secretsToggleState === true;
 
   const form = useFleetServerHostsForm(fleetServerHost, onClose, defaultFleetServerHost);
   const { inputs } = form;
@@ -250,11 +232,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             />
           </EuiFormRow>
           <EuiSpacer size="l" />
-          <SSLFormSection
-            inputs={inputs}
-            useSecretsStorage={useSecretsStorage}
-            onToggleSecretStorage={onToggleSecretStorage}
-          />
+          <SSLFormSection inputs={inputs} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
