@@ -139,6 +139,11 @@ export type IStorageClient<TSchema extends IndexStorageSettings, TApplicationTyp
   ? InternalIStorageClient<ApplicationDocument<TApplicationType>>
   : never;
 
+export type SimpleIStorageClient<TStorageSettings extends IndexStorageSettings> = IStorageClient<
+  TStorageSettings,
+  Omit<StorageDocumentOf<TStorageSettings>, '_id'>
+>;
+
 export type ApplicationDocument<TApplicationType> = TApplicationType & { _id: string };
 
 export type StorageDocumentOf<TStorageSettings extends StorageSettings> = StorageFieldTypeOf<{
