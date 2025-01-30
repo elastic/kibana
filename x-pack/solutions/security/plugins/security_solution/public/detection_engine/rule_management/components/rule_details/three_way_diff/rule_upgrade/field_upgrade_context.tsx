@@ -103,7 +103,7 @@ export function FieldUpgradeContextProvider({
     initialRightSideMode === FieldFinalSideMode.Edit
   );
 
-  const { setFieldEditing, setFieldReadonly, resetAllFields } = useRulePreviewContext();
+  const { setFieldEditing, setFieldReadonly } = useRulePreviewContext();
 
   useEffect(() => {
     if (editing) {
@@ -111,11 +111,7 @@ export function FieldUpgradeContextProvider({
     } else {
       setFieldReadonly(fieldName);
     }
-
-    return () => {
-      resetAllFields();
-    };
-  }, [setFieldEditing, setFieldReadonly, editing, fieldName, resetAllFields]);
+  }, [setFieldEditing, setFieldReadonly, editing, fieldName]);
 
   invariant(fieldDiff, `Field diff is not found for ${fieldName}.`);
 

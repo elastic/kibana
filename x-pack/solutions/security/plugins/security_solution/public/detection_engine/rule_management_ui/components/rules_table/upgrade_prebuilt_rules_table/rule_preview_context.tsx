@@ -21,11 +21,6 @@ export interface RulePreviewContextType {
   setFieldReadonly: (fieldName: string) => void;
 
   /**
-   * Resets all fields to readonly
-   */
-  resetAllFields: () => void;
-
-  /**
    * Returns whether the rule is being edited in the rule upgrade flyout
    */
   isEditingRule: boolean;
@@ -38,7 +33,7 @@ interface RulePreviewContextProviderProps {
 }
 
 export function RulePreviewContextProvider({ children }: RulePreviewContextProviderProps) {
-  const [editedFields, { add, remove, reset }] = useSet<string>(new Set([]));
+  const [editedFields, { add, remove }] = useSet<string>(new Set([]));
 
   const isEditingRule = editedFields.size > 0;
 
@@ -47,9 +42,8 @@ export function RulePreviewContextProvider({ children }: RulePreviewContextProvi
       isEditingRule,
       setFieldEditing: add,
       setFieldReadonly: remove,
-      resetAllFields: reset,
     }),
-    [isEditingRule, add, remove, reset]
+    [isEditingRule, add, remove]
   );
 
   return <RulePreviewContext.Provider value={contextValue}>{children}</RulePreviewContext.Provider>;
