@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash';
 import { TransportResult } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const sanitizeBulkErrorResponse = (
   response: TransportResult<estypes.BulkResponse, unknown> | estypes.BulkResponse

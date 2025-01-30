@@ -19,7 +19,12 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
+import {
+  ReadStreamDefinition,
+  isUnwiredReadStream,
+  isWiredReadStream,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
@@ -58,7 +63,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
   } = useDateRange({ data });
 
   const indexPatterns = useMemo(() => {
-    return getIndexPatterns(definition);
+    return getIndexPatterns(definition?.stream);
   }, [definition]);
 
   const discoverLocator = useMemo(
@@ -126,7 +131,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
 
   const docCountFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition) {
+      if (!definition || (isUnwiredReadStream(definition) && !definition.data_stream_exists)) {
         return undefined;
       }
       return streamsRepositoryClient.fetch('GET /api/streams/{id}/_details', {
@@ -142,6 +147,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, dataViews, streamsRepositoryClient, start, end]
   );
 
@@ -303,7 +309,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
       return [];
     }
     return streamsListFetch.value?.streams.filter(
-      (d) => isWiredStream(d) && d.name.startsWith(stream.name as string)
+      (d) => isWiredStreamDefinition(d) && d.name.startsWith(stream.name as string)
     );
   }, [stream, streamsListFetch.value?.streams]);
 
@@ -332,6 +338,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
               </EuiText>
               <EuiFlexGroup justifyContent="center">
                 <EuiButton
+                  data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
                   iconType="plusInCircle"
                   href={router.link('/{key}/management/{subtab}', {
                     path: {

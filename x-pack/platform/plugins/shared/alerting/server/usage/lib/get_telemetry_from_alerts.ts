@@ -8,7 +8,7 @@
 import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
@@ -38,14 +38,16 @@ export async function getTotalAlertsCountAggregations({
     const query = {
       index: AAD_INDEX_PATTERN,
       size: 0,
-      query: {
-        match_all: {},
-      },
-      aggs: {
-        by_rule_type_id: {
-          terms: {
-            field: 'kibana.alert.rule.rule_type_id',
-            size: NUM_ALERTING_RULE_TYPES,
+      body: {
+        query: {
+          match_all: {},
+        },
+        aggs: {
+          by_rule_type_id: {
+            terms: {
+              field: 'kibana.alert.rule.rule_type_id',
+              size: NUM_ALERTING_RULE_TYPES,
+            },
           },
         },
       },

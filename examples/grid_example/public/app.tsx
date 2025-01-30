@@ -72,8 +72,8 @@ export const GridExample = ({
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
   const [viewMode, expandedPanelId] = useBatchedPublishingSubjects(
-    mockDashboardApi.viewMode,
-    mockDashboardApi.expandedPanelId
+    mockDashboardApi.viewMode$,
+    mockDashboardApi.expandedPanelId$
   );
 
   useEffect(() => {
@@ -244,7 +244,7 @@ export const GridExample = ({
                           ]}
                           idSelected={viewMode}
                           onChange={(id) => {
-                            mockDashboardApi.viewMode.next(id);
+                            mockDashboardApi.viewMode$.next(id);
                           }}
                         />
                       </EuiFormRow>

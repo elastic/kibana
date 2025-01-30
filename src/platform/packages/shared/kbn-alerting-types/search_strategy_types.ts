@@ -13,7 +13,7 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from './alert_type';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {

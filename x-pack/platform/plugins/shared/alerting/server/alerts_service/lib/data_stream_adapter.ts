@@ -208,9 +208,11 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
         () =>
           esClient.indices.create({
             index: indexPatterns.name,
-            aliases: {
-              [indexPatterns.alias]: {
-                is_write_index: true,
+            body: {
+              aliases: {
+                [indexPatterns.alias]: {
+                  is_write_index: true,
+                },
               },
             },
           }),

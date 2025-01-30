@@ -16,6 +16,7 @@ import {
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { PublishesESQLVariables } from '@kbn/esql-variables-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
@@ -36,8 +37,8 @@ import {
   HasUniqueId,
   PublishesDataLoading,
   PublishesDataViews,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
+  PublishesDescription,
+  PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
@@ -131,10 +132,11 @@ export type DashboardApi = CanExpandPanels &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
-  PublishesPanelDescription &
-  Pick<PublishesPanelTitle, 'panelTitle'> &
+  PublishesDescription &
+  Pick<PublishesTitle, 'title$'> &
   PublishesReload &
   PublishesSavedObjectId &
+  PublishesESQLVariables &
   PublishesSearchSession &
   PublishesSettings &
   PublishesUnifiedSearch &

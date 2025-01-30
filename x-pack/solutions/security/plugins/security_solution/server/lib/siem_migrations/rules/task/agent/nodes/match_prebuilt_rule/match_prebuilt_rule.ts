@@ -16,7 +16,7 @@ import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
-import { cleanMarkdown } from '../../../util/comments';
+import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
@@ -42,7 +42,13 @@ export const getMatchPrebuiltRuleNode = ({
       techniqueIds.join(',')
     );
     if (prebuiltRules.length === 0) {
-      return { comments: ['## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.'] };
+      return {
+        comments: [
+          generateAssistantComment(
+            '## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.'
+          ),
+        ],
+      };
     }
 
     const outputParser = new JsonOutputParser();
@@ -68,7 +74,9 @@ export const getMatchPrebuiltRuleNode = ({
       splunk_rule: JSON.stringify(splunkRule, null, 2),
     })) as GetMatchedRuleResponse;
 
-    const comments = response.summary ? [cleanMarkdown(response.summary)] : undefined;
+    const comments = response.summary
+      ? [generateAssistantComment(cleanMarkdown(response.summary))]
+      : undefined;
 
     if (response.match) {
       const matchedRule = prebuiltRules.find((r) => r.name === response.match);

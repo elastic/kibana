@@ -58,7 +58,9 @@ export class ClonePanelAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
-    return Boolean(!embeddable.blockingError?.value && getInheritedViewMode(embeddable) === 'edit');
+    return Boolean(
+      !embeddable.blockingError$?.value && getInheritedViewMode(embeddable) === 'edit'
+    );
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

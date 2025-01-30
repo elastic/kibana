@@ -41,7 +41,7 @@ export function initializeUnsavedChangesManager({
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   lastSavedState: DashboardState;
   panelsManager: ReturnType<typeof initializePanelsManager>;
-  savedObjectId$: PublishesSavedObjectId['savedObjectId'];
+  savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   viewModeManager: ReturnType<typeof initializeViewModeManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
@@ -66,12 +66,12 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([
-    dashboardUnsavedChanges.api.unsavedChanges,
+    dashboardUnsavedChanges.api.unsavedChanges$,
     childrenUnsavedChanges$(panelsManager.api.children$),
     controlGroupApi$.pipe(
       skipWhile((controlGroupApi) => !controlGroupApi),
       switchMap((controlGroupApi) => {
-        return controlGroupApi!.unsavedChanges;
+        return controlGroupApi!.unsavedChanges$;
       })
     ),
   ])

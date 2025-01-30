@@ -98,7 +98,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   hits?: UnifiedHistogramHitsContext;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  dataLoading$?: LensEmbeddableOutput['dataLoading'];
+  dataLoading$?: LensEmbeddableOutput['dataLoading$'];
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */

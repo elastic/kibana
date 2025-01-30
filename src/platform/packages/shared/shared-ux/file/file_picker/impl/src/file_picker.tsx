@@ -92,13 +92,16 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
   const modal = (
     <EuiModal
       data-test-subj="filePickerModal"
-      className="filesFilePicker filesFilePicker--fixed"
       maxWidth="75vw"
       onClose={onClose}
       css={css`
         @media screen and (min-width: ${euiTheme.breakpoint.l}px) {
           width: 75vw;
           height: 75vh;
+        }
+        .euiCard__content,
+        .euiCard__description {
+          margin: 0; // make the cards a little bit more compact
         }
       `}
     >

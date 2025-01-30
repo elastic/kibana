@@ -6,7 +6,7 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamDefinition } from '@kbn/streams-schema';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
@@ -14,7 +14,7 @@ import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 
-export function StreamDetailDashboardsView({ definition }: { definition?: StreamDefinition }) {
+export function StreamDetailDashboardsView({ definition }: { definition?: ReadStreamDefinition }) {
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);

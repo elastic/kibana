@@ -25,7 +25,7 @@ export function hasNoResults$({
   setIsLoading,
 }: {
   controlFetch$: Observable<ControlFetchContext>;
-  dataViews$?: PublishesDataViews['dataViews'];
+  dataViews$?: PublishesDataViews['dataViews$'];
   rangeFilters$: DataControlApi['filters$'];
   ignoreParentSettings$: ControlGroupApi['ignoreParentSettings$'];
   setIsLoading: (isLoading: boolean) => void;

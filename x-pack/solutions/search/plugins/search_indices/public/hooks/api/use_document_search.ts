@@ -22,7 +22,7 @@ const DEFAULT_PAGINATION = {
   size: DEFAULT_DOCUMENT_PAGE_SIZE,
   total: 0,
 };
-export const INDEX_SEARCH_POLLING = 5 * 1000;
+export const INDEX_SEARCH_POLLING = 30000;
 export const useIndexDocumentSearch = (indexName: string) => {
   const {
     services: { http },

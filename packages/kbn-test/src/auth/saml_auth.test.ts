@@ -230,7 +230,7 @@ describe('saml_auth', () => {
       });
 
       expect(createSAMLRequest('https://kbn.test.co', '8.12.0', log)).rejects.toThrow(
-        `Failed to parse 'set-cookie' header`
+        /Failed to parse cookie from SAML response headers: no 'set-cookie' header, response.data:/
       );
     });
 
@@ -332,7 +332,9 @@ https://kbn.test.co in the same window.`);
           sid: 'Fe26.2**1234567890',
           log,
         })
-      ).rejects.toThrow(`Failed to parse 'set-cookie' header`);
+      ).rejects.toThrow(
+        /Failed to get cookie from SAML callback response: no 'set-cookie' header, response.data:/
+      );
     });
   });
 });
