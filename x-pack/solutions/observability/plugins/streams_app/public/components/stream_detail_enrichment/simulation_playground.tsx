@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
-
-type TabId = 'dataPreview' | 'detectedFields';
 
 interface SimulationPlaygroundProps {
   definition: IngestStreamGetResponse;
@@ -34,32 +32,18 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
         'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
         { defaultMessage: 'Data preview' }
       ),
-      content: (
-        <ProcessorOutcomePreview
-          definition={definition}
-          columns={columns}
-          isLoading={isLoading}
-          simulation={simulation}
-          samples={samples}
-          onRefreshSamples={onRefreshSamples}
-          simulationError={simulationError}
-        />
-      ),
     },
-    detectedFields: {
-      name: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-        { defaultMessage: 'Detected fields' }
-      ),
-      content: i18n.translate('xpack.streams.simulationPlayground.div.detectedFieldsLabel', {
-        defaultMessage: 'WIP',
-      }),
-    },
+    ...(isWiredStreamGetResponse(definition) && {
+      detectedFields: {
+        name: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
+          { defaultMessage: 'Detected fields' }
+        ),
+      },
+    }),
   } as const;
 
-  const [selectedTabId, setSelectedTabId] = useState<TabId>('dataPreview');
-
-  const currentTabContent = tabs[selectedTabId].content;
+  const [selectedTabId, setSelectedTabId] = useState<keyof typeof tabs>('dataPreview');
 
   return (
     <>
@@ -69,7 +53,7 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
             <EuiTab
               key={tabId}
               isSelected={selectedTabId === tabId}
-              onClick={() => setSelectedTabId(tabId as TabId)}
+              onClick={() => setSelectedTabId(tabId as keyof typeof tabs)}
             >
               {tab.name}
             </EuiTab>
@@ -77,7 +61,21 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
         </EuiTabs>
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      {currentTabContent}
+      {selectedTabId === 'dataPreview' && (
+        <ProcessorOutcomePreview
+          definition={definition}
+          columns={columns}
+          isLoading={isLoading}
+          simulation={simulation}
+          samples={samples}
+          onRefreshSamples={onRefreshSamples}
+          simulationError={simulationError}
+        />
+      )}
+      {selectedTabId === 'detectedFields' &&
+        i18n.translate('xpack.streams.simulationPlayground.div.detectedFieldsLabel', {
+          defaultMessage: 'WIP',
+        })}
     </>
   );
 };
