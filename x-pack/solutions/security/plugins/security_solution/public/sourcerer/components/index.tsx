@@ -296,9 +296,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const { createAdhocDataView } = useCreateAdhocDataView(onOpenAndReset);
 
-  const missingPatternsString = useMemo(() => missingPatterns.join(), [missingPatterns]);
+  // NOTE: this exists because missingPatterns array reference is swapped very often and we only care about
+  // the values here
+  const stableMissingPatternsString = useMemo(() => missingPatterns.join(), [missingPatterns]);
 
   useEffect(() => {
+    // NOTE: this lets us prevent setting the index too often,
+    // as there is no way to pass in abort signal into the data view creation apis
     let ignore = false;
 
     (async () => {
@@ -306,25 +310,31 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         (dataViewId === null && isModified === 'deprecated') ||
         isModified === 'missingPatterns'
       ) {
-        const adhocDataView = await createAdhocDataView(missingPatternsString.split(','));
+        const adhocDataView = await createAdhocDataView(stableMissingPatternsString.split(','));
 
         if (ignore) {
           return;
         }
 
-        if (adhocDataView && adhocDataView.id) {
-          const patterns = adhocDataView.getIndexPattern().split(',');
-          console.info('[adhoc] adhoc dataview created', missingPatternsString, adhocDataView);
-          dispatchChangeDataView(adhocDataView.id, patterns, false);
+        if (!adhocDataView || !adhocDataView.id) {
+          return;
         }
+
+        const patterns = adhocDataView.getIndexPattern().split(',');
+        dispatchChangeDataView(adhocDataView.id, patterns, false);
       }
     })();
 
     return () => {
-      console.log('[adhoc] ignore update', missingPatternsString);
       ignore = true;
     };
-  }, [dataViewId, isModified, createAdhocDataView, missingPatternsString, dispatchChangeDataView]);
+  }, [
+    dataViewId,
+    isModified,
+    createAdhocDataView,
+    stableMissingPatternsString,
+    dispatchChangeDataView,
+  ]);
 
   useEffect(() => {
     setDataViewId(selectedDataViewId);

@@ -27,7 +27,7 @@ export const useCreateAdhocDataView = (
 
   const createAdhocDataView = useCallback(
     async (missingPatterns: string[]): Promise<DataView | null> => {
-      const asyncSearch = async (): Promise<DataView> => {
+      const createDataView = async (): Promise<DataView> => {
         const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
         const combinedPatterns = [...defaultPatterns, ...missingPatterns];
         const validatedPatterns = ensurePatternFormat(combinedPatterns);
@@ -44,7 +44,7 @@ export const useCreateAdhocDataView = (
         return adHocDataView;
       };
       try {
-        return await asyncSearch();
+        return await createDataView();
       } catch (possibleError) {
         addError(possibleError !== null ? possibleError : new Error(i18n.FAILURE_TOAST_TITLE), {
           title: i18n.FAILURE_TOAST_TITLE,
