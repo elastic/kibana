@@ -143,8 +143,6 @@ export class ManagementPlugin
                   });
                 }
               });
-
-              // coreStart.chrome.setBreadcrumbs(trailingBreadcrumbs);
             }
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,

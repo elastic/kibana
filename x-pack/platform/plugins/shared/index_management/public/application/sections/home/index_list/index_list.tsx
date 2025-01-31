@@ -9,11 +9,11 @@ import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { ScopedHistory } from '@kbn/core/public';
+import useObservable from 'react-use/lib/useObservable';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { useAppContext } from '../../../app_context';
 import { IndexTable } from './index_table';
-import useObservable from 'react-use/lib/useObservable';
 
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {

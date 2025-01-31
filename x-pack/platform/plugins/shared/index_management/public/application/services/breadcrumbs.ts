@@ -46,8 +46,7 @@ export enum IndexManagementBreadcrumb {
   enrichPoliciesCreate = 'enrichPoliciesCreate',
 
   content = 'content',
-  indicesList ='indicesList'
-
+  indicesList = 'indicesList',
 }
 
 class BreadcrumbService {
