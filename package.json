@@ -1755,7 +1755,7 @@
     "expect": "^29.7.0",
     "expose-loader": "^0.7.5",
     "express": "^4.21.2",
-    "fetch-mock": "^7.3.9",
+    "fetch-mock": "^10.1.0",
     "file-loader": "^4.2.0",
     "find-cypress-specs": "^1.41.4",
     "form-data": "^4.0.0",
