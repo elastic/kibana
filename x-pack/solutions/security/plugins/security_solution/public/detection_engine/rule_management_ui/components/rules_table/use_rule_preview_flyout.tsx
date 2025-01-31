@@ -64,7 +64,7 @@ export function useRulePreviewFlyout({
     [rules, setRuleForPreview]
   );
   const rulePreviewFlyout = (
-    <RulePreviewContextProvider>
+    <RulePreviewContextProvider key={rule?.rule_id}>
       <RulePreviewFlyoutInternal
         rule={rule}
         closeRulePreview={closeRulePreview}
