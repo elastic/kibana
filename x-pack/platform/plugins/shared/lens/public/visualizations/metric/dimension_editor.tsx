@@ -213,23 +213,22 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
 function PrimaryMetricEditor(props: SubProps) {
   const { state, setState, frame, accessor, idPrefix, isInlineEditing } = props;
 
+  if (accessor == null) {
+    return null;
+  }
   const currentData = frame.activeData?.[state.layerId];
 
   const isMetricNumeric = isNumericFieldForDatatable(currentData, accessor);
 
-  if (accessor == null) {
-    return null;
-  }
-
-  const hasDynamicColoring = Boolean(isMetricNumeric && state?.palette);
+  const hasDynamicColoring = Boolean(isMetricNumeric && state.palette);
 
   const supportsPercentPalette = Boolean(
     state.maxAccessor ||
       (state.breakdownByAccessor && !state.collapseFn) ||
-      state?.palette?.params?.rangeType === 'percent'
+      state.palette?.params?.rangeType === 'percent'
   );
 
-  const activePalette = state?.palette || {
+  const activePalette = state.palette || {
     type: 'palette',
     name: (supportsPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams)
       .name,
