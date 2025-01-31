@@ -54,6 +54,10 @@ viewer:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -138,6 +142,10 @@ editor:
         - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
         - feature_osquery.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -193,6 +201,10 @@ t1_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -251,6 +263,10 @@ t2_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_osquery.run_saved_queries
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -326,6 +342,10 @@ t3_analyst:
         - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
         - feature_osquery.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -391,6 +411,10 @@ threat_intelligence_analyst:
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -463,6 +487,10 @@ rule_author:
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -542,6 +570,10 @@ soc_manager:
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_indexPatterns.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -604,6 +636,10 @@ detections_admin:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -670,6 +706,10 @@ platform_engineer:
         - feature_fleetv2.all
         - feature_osquery.all
         - feature_indexPatterns.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -747,6 +787,10 @@ endpoint_operations_analyst:
         - feature_osquery.all
         - feature_fleet.all
         - feature_fleetv2.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
@@ -826,6 +870,10 @@ endpoint_policy_manager:
         - feature_osquery.all
         - feature_fleet.all
         - feature_fleetv2.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_maps.all
+        - feature_visualize.all
         - feature_discover_v2.all
         - feature_dashboard_v2.all
         - feature_maps_v2.all
