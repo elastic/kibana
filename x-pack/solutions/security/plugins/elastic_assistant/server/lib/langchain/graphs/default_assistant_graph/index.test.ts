@@ -176,13 +176,14 @@ describe('callAssistantGraph', () => {
   });
 
   it('calls getPrompt for each tool and the default system prompt', async () => {
+    const getTool = jest.fn();
     const mockTool: AssistantTool = {
       id: 'id',
       name: 'name',
       description: 'description',
       sourceRegister: 'sourceRegister',
       isSupported: (params: AssistantToolParams) => true,
-      getTool: (params: AssistantToolParams) => null,
+      getTool,
     };
     const params = {
       ...defaultParams,
@@ -216,6 +217,12 @@ describe('callAssistantGraph', () => {
         provider: 'openai',
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
+      })
+    );
+    expect(getPromptMock).toHaveBeenCalledTimes(2);
+    expect(getTool).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: 'prompt',
       })
     );
   });
