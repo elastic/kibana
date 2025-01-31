@@ -62,8 +62,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(9);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(9);
+    expect(mockGetFeature).toHaveBeenCalledTimes(10);
+    expect(MockedProductFeatures).toHaveBeenCalledTimes(10);
   });
 
   it('should init all ProductFeatures when initialized', () => {
