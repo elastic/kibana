@@ -21,6 +21,8 @@ import {
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { MultiFilterEvent } from '../../common/types';
 import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
@@ -39,6 +41,14 @@ import {
 interface ExpressioHeatmapRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
 }
+
+const heatmapContainerCss = css({
+  height: '100%',
+  width: '100%',
+  overflow: 'auto hidden',
+  userSelect: 'text',
+  padding: euiThemeVars.euiSizeS,
+});
 
 export const heatmapRenderer: (
   deps: ExpressioHeatmapRendererDependencies
@@ -101,7 +111,7 @@ export const heatmapRenderer: (
 
     render(
       <KibanaRenderContextProvider {...core}>
-        <div className="heatmap-container" data-test-subj="heatmapChart">
+        <div className="euiScrollBar" css={heatmapContainerCss} data-test-subj="heatmapChart">
           <HeatmapComponent
             {...config}
             onClickValue={onClickValue}
