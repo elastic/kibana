@@ -36,6 +36,7 @@ jest.mock('../../../../../app_context', () => {
 describe('ChecklistFlyout', () => {
   const defaultProps = {
     indexName: 'myIndex',
+    frozen: false,
     closeFlyout: jest.fn(),
     confirmInputValue: 'CONFIRM',
     onConfirmInputChange: jest.fn(),
@@ -65,6 +66,12 @@ describe('ChecklistFlyout', () => {
 
   it('renders', () => {
     expect(shallow(<ChecklistFlyoutStep {...defaultProps} />)).toMatchSnapshot();
+  });
+
+  it('renders for frozen indices', () => {
+    const props = cloneDeep(defaultProps);
+    props.frozen = true;
+    expect(shallow(<ChecklistFlyoutStep {...props} />)).toMatchSnapshot();
   });
 
   it('disables button while reindexing', () => {

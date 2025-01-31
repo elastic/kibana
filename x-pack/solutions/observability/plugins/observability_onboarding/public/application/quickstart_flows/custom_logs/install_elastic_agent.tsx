@@ -72,6 +72,7 @@ export function InstallElasticAgent() {
       return callApi('GET /internal/observability_onboarding/logs/setup/privileges');
     }
     // FIXME: Dario could not find a reasonable fix for getState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: setup } = useFetcher((callApi) => {
@@ -106,6 +107,7 @@ export function InstallElasticAgent() {
     },
     // FIXME: Dario could not find a reasonable fix for getState()
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [monitoringRole?.hasPrivileges]
   );
 
@@ -135,6 +137,7 @@ export function InstallElasticAgent() {
       });
     }
     // FIXME: Dario could not find a reasonable fix for getState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
@@ -152,6 +155,7 @@ export function InstallElasticAgent() {
     },
     // FIXME: Dario could not find a reasonable fix for succesfullySavedOnboardingState
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [apiKeyEncoded, onboardingId, succesfullySavedOnboardingState]
   );
 
