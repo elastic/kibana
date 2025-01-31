@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { EuiThemeProvider, Pagination } from '@elastic/eui';
 import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -15,7 +16,6 @@ import { ExceptionItems } from '.';
 import { ViewerStatus } from '../types';
 import { fireEvent, render } from '@testing-library/react';
 import { ruleReferences } from '../mocks/rule_references.mock';
-import { Pagination } from '@elastic/eui';
 import { mockGetFormattedComments } from '../mocks/comments.mock';
 import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
 import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';
@@ -139,24 +139,26 @@ describe('ExceptionsViewerItems', () => {
   describe('securityLinkAnchorComponent, formattedDateComponent, exceptionsUtilityComponent and getFormattedComments', () => {
     it('it should render sent securityLinkAnchorComponent', () => {
       const wrapper = render(
-        <ExceptionItems
-          viewerStatus={'' as ViewerStatus}
-          exceptions={[getExceptionListItemSchemaMock()]}
-          listType={ExceptionListTypeEnum.DETECTION}
-          ruleReferences={ruleReferences}
-          isReadOnly={false}
-          pagination={pagination}
-          lastUpdated={Date.now()}
-          onCreateExceptionListItem={onCreateExceptionListItem}
-          onDeleteException={onDeleteException}
-          onEditExceptionItem={onEditExceptionItem}
-          onPaginationChange={onPaginationChange}
-          securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-          formattedDateComponent={() => null}
-          exceptionsUtilityComponent={() => null}
-          getFormattedComments={() => []}
-          showValueListModal={MockedShowValueListModal}
-        />
+        <EuiThemeProvider>
+          <ExceptionItems
+            viewerStatus={'' as ViewerStatus}
+            exceptions={[getExceptionListItemSchemaMock()]}
+            listType={ExceptionListTypeEnum.DETECTION}
+            ruleReferences={ruleReferences}
+            isReadOnly={false}
+            pagination={pagination}
+            lastUpdated={Date.now()}
+            onCreateExceptionListItem={onCreateExceptionListItem}
+            onDeleteException={onDeleteException}
+            onEditExceptionItem={onEditExceptionItem}
+            onPaginationChange={onPaginationChange}
+            securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+            formattedDateComponent={() => null}
+            exceptionsUtilityComponent={() => null}
+            getFormattedComments={() => []}
+            showValueListModal={MockedShowValueListModal}
+          />
+        </EuiThemeProvider>
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
       fireEvent.click(wrapper.getByTestId('exceptionItemCardMetaInfoEmptyButton'));

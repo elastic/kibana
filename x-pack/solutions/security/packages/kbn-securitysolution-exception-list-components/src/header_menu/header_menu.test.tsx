@@ -6,6 +6,7 @@
  */
 
 import { createEvent, fireEvent, render } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 import { HeaderMenu } from '.';
 import { actions, actionsWithDisabledDelete } from '../mocks/header.mock';
@@ -118,13 +119,15 @@ describe('HeaderMenu', () => {
   it('should render custom Actions', () => {
     const customActions = getSecurityLinkAction('headerMenuTest');
     const wrapper = render(
-      <HeaderMenu
-        iconType="boxesHorizontal"
-        disableActions={false}
-        emptyButton
-        actions={customActions}
-        useCustomActions
-      />
+      <EuiThemeProvider>
+        <HeaderMenu
+          iconType="boxesHorizontal"
+          disableActions={false}
+          emptyButton
+          actions={customActions}
+          useCustomActions
+        />
+      </EuiThemeProvider>
     );
 
     expect(wrapper.container).toMatchSnapshot();
