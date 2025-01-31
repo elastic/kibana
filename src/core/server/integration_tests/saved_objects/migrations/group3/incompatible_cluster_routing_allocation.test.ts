@@ -34,7 +34,7 @@ const { startES } = createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
+      dataArchive: Path.join(__dirname, '..', 'archives', '8.18_with_sample_data_logs.zip'),
     },
   },
 });
@@ -92,8 +92,7 @@ async function updateRoutingAllocations(
   });
 }
 
-// FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/158318
-describe.skip('incompatible_cluster_routing_allocation', () => {
+describe('incompatible_cluster_routing_allocation', () => {
   let client: ElasticsearchClient;
   let root: Root;
 
