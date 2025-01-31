@@ -37,7 +37,9 @@ export const useGridRowHeaderStyles = () => {
         }
       }
       &:hover .kbnGridLayout--deleteRowIcon,
-      &:hover .kbnGridLayout--moveRowIcon {
+      &:hover .kbnGridLayout--moveRowIcon,
+      &:has(:focus-visible) .kbnGridLayout--deleteRowIcon,
+      &:has(:focus-visible) .kbnGridLayout--moveRowIcon {
         opacity: 1;
       }
     `;

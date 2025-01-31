@@ -28,13 +28,13 @@ export const GridRowHeader = ({
   gridLayoutStateManager: GridLayoutStateManager;
   toggleIsCollapsed: () => void;
 }) => {
+  const headerStyles = useGridRowHeaderStyles();
+
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
   const [readOnly, setReadOnly] = useState<boolean>(
     gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
   );
-
-  const headerStyles = useGridRowHeaderStyles();
 
   useEffect(() => {
     const accessModeSubscription = gridLayoutStateManager.accessMode$

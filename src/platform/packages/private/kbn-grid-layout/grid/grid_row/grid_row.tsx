@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
+import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
+
+import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
@@ -33,7 +35,6 @@ export const GridRow = ({
   gridLayoutStateManager,
 }: GridRowProps) => {
   const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
   const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
@@ -134,18 +135,6 @@ export const GridRow = ({
   );
 
   /**
-   * Set a class for the collapsed state in order to control styles of header
-   */
-  useEffect(() => {
-    if (!containerRef.current) return;
-    if (isCollapsed) {
-      containerRef.current.classList.add('kbnGridRowContainer--collapsed');
-    } else {
-      containerRef.current.classList.remove('kbnGridRowContainer--collapsed');
-    }
-  }, [isCollapsed]);
-
-  /**
    * Memoize panel children components (independent of their order) to prevent unnecessary re-renders
    */
   const children: { [panelId: string]: React.ReactNode } = useMemo(() => {
@@ -167,7 +156,12 @@ export const GridRow = ({
   }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex]);
 
   return (
-    <div ref={containerRef} css={styles.fullHeight} className="kbnGridRowContainer">
+    <div
+      css={styles.fullHeight}
+      className={classNames('kbnGridRowContainer', {
+        'kbnGridRowContainer--collapsed': isCollapsed,
+      })}
+    >
       {rowIndex !== 0 && (
         <GridRowHeader
           rowIndex={rowIndex}
