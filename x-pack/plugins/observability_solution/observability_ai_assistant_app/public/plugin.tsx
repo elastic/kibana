@@ -116,7 +116,9 @@ export class ObservabilityAIAssistantAppPlugin
             () => {}
           );
 
-          return () => {};
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
         },
         // right before the user profile
         order: 1001,
