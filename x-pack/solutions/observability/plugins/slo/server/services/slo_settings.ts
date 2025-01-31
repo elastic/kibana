@@ -11,7 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { PutSLOSettingsParams, sloSettingsSchema } from '@kbn/slo-schema';
 import {
   DEFAULT_STALE_SLO_THRESHOLD_HOURS,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { getListOfSloSummaryIndices } from '../../common/summary_indices';
 import { SLOSettings, StoredSLOSettings } from '../domain/models';
@@ -62,7 +62,7 @@ export const getListOfSummaryIndices = async (
 ) => {
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
-    return { indices: [SLO_SUMMARY_DESTINATION_INDEX_PATTERN], settings };
+    return { indices: [SUMMARY_DESTINATION_INDEX_PATTERN], settings };
   }
 
   const clustersByName = await esClient.cluster.remoteInfo();

@@ -127,7 +127,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
                 >
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
-                    defaultMessage="View this search in Discover"
+                    defaultMessage="View this session in Discover"
                   />
                 </EuiButtonEmpty>
               </p>

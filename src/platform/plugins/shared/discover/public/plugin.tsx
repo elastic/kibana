@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -42,7 +42,7 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
+import { defaultCustomizationContext } from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -69,8 +69,6 @@ export class DiscoverPlugin
 {
   private readonly appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly historyService = new HistoryService();
-  private readonly inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> =
-    new Map([[null, defaultCustomizationContext.inlineTopNav]]);
   private readonly experimentalFeatures: ExperimentalFeatures;
 
   private scopedHistory?: ScopedHistory<unknown>;
@@ -207,23 +205,11 @@ export class DiscoverPlugin
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
 
-        const customizationContext$: Observable<DiscoverCustomizationContext> = services.chrome
-          .getActiveSolutionNavId$()
-          .pipe(
-            map((solutionNavId) => ({
-              ...defaultCustomizationContext,
-              inlineTopNav:
-                this.inlineTopNav.get(solutionNavId) ??
-                this.inlineTopNav.get(null) ??
-                defaultCustomizationContext.inlineTopNav,
-            }))
-          );
-
         const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
           services,
-          customizationContext$,
+          customizationContext: defaultCustomizationContext,
           experimentalFeatures: this.experimentalFeatures,
         });
 
@@ -264,18 +250,7 @@ export class DiscoverPlugin
 
     this.registerEmbeddable(core, plugins);
 
-    return {
-      locator: this.locator,
-      showInlineTopNav: () => {
-        this.inlineTopNav.set(null, {
-          enabled: true,
-          showLogsExplorerTabs: false,
-        });
-      },
-      configureInlineTopNav: (projectNavId, options) => {
-        this.inlineTopNav.set(projectNavId, options);
-      },
-    };
+    return { locator: this.locator };
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
@@ -397,7 +372,7 @@ export class DiscoverPlugin
       const [coreStart, deps] = await core.getStartServices();
       return {
         executeTriggerActions: deps.uiActions.executeTriggerActions,
-        isEditable: () => coreStart.application.capabilities.discover.save as boolean,
+        isEditable: () => coreStart.application.capabilities.discover_v2.save as boolean,
       };
     };
 
