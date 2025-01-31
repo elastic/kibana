@@ -58,7 +58,7 @@ function getArtificialLogsWithDeviation(
   includeTextField = false,
   includeGaps = false
 ) {
-  const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
+  const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['operations'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
 

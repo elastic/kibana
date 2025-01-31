@@ -122,5 +122,5 @@ export const makePing = async (
     document,
   });
 
-  return doc;
+  return document;
 };
