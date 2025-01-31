@@ -1,3 +1,4 @@
+
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
@@ -114,7 +115,9 @@
     "@kbn/core-application-browser",
     "@kbn/timerange",
     "@kbn/metrics-experience-plugin",
-    "@kbn/unified-metrics-grid"
+    "@kbn/unified-metrics-grid",
+    "@kbn/grouping",
+    "@kbn/core-notifications-browser",
   ],
   "exclude": ["target/**/*"]
 }
