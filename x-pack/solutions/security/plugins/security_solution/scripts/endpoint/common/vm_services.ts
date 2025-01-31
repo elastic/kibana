@@ -378,8 +378,14 @@ export const createVagrantHostVmClient = (
     let response;
     try {
       // Check for running Vagrant/Ruby processes before suspending
-      let vagrantProcesses = await execa.command(`ps aux | grep vagrant`, execaOptions);
-      let rubyProcesses = await execa.command(`ps aux | grep ruby`, execaOptions);
+      let vagrantProcesses = await execa.command(`ps -ef | grep vagrant`, {
+        ...execaOptions,
+        shell: true,
+      });
+      let rubyProcesses = await execa.command(`ps -ef | grep ruby`, {
+        ...execaOptions,
+        shell: true,
+      });
 
       log.warning(`Checking for running Vagrant processes:\n${vagrantProcesses.stdout}`);
       log.warning(`Checking for running Ruby processes:\n${rubyProcesses.stdout}`);
@@ -399,8 +405,11 @@ export const createVagrantHostVmClient = (
         await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds before retrying
 
         // Check again after waiting
-        vagrantProcesses = await execa.command(`ps aux | grep vagrant`, execaOptions);
-        rubyProcesses = await execa.command(`ps aux | grep ruby`, execaOptions);
+        vagrantProcesses = await execa.command(`ps -ef | grep vagrant`, {
+          ...execaOptions,
+          shell: true,
+        });
+        rubyProcesses = await execa.command(`ps -ef | grep ruby`, { ...execaOptions, shell: true });
         retries++;
       }
 
