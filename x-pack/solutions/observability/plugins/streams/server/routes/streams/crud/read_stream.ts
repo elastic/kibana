@@ -13,6 +13,7 @@ import {
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
+import { omit } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
 import { StreamsClient } from '../../../lib/streams/client';
 import {
