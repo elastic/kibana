@@ -41,14 +41,19 @@ export class DashboardAddPanelService extends FtrService {
     });
   }
 
-  async addMarkdownPanel() {
+  async clickAddMarkdownPanel() {
     await this.clickEditorMenuButton();
     await this.clickAddNewPanelFromUIActionLink('Markdown text');
   }
 
-  async addMapPanel() {
+  async clickAddMapPanel() {
     await this.clickEditorMenuButton();
     await this.clickAddNewPanelFromUIActionLink('Maps');
+  }
+
+  async clickAddLensPanel() {
+    await this.clickEditorMenuButton();
+    await this.clickAddNewPanelFromUIActionLink('Lens');
   }
 
   async clickEditorMenuButton() {

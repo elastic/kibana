@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await dashboard.initTests();
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.addMarkdownPanel();
+      await dashboardAddPanel.clickAddMarkdownPanel();
       await visEditor.setMarkdownTxt(markdown);
       await visEditor.clickGo();
     });

@@ -296,8 +296,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create a new dashboard, then a new visualization in Lens.
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await testSubjects.click('dashboardEditorMenuButton');
-      await testSubjects.click('visType-lens');
+      await dashboardAddPanel.clickAddLensPanel();
       // Configure it and save to return to the dashboard.
       await lens.waitForField('@timestamp');
       await lens.configureDimension({

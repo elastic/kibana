@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     if (inViewMode) {
       await dashboard.switchToEditMode();
     }
-    await dashboardAddPanel.addMapPanel();
+    await dashboardAddPanel.clickAddMapPanel();
     await maps.clickSaveAndReturnButton();
   }
 

@@ -9,11 +9,10 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
-  const { dashboard, header, maps, visualize } = getPageObjects([
+  const { dashboard, header, maps } = getPageObjects([
     'dashboard',
     'header',
     'maps',
-    'visualize',
   ]);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -38,8 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickEditorMenuButton();
-      await visualize.clickMapsApp();
+      await dashboardAddPanel.clickAddMapPanel();
       await header.waitUntilLoadingHasFinished();
       await maps.waitForLayersToLoad();
       await maps.clickSaveAndReturnButton();
