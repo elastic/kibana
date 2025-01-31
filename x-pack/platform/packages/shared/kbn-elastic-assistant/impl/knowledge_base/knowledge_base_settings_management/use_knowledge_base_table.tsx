@@ -168,7 +168,7 @@ export const useKnowledgeBaseTable = () => {
           render: (entry: KnowledgeBaseEntryResponse) => (
             <NameColumn entry={entry} existingIndices={existingIndices} />
           ),
-          sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
+          sortable: ({ name }: KnowledgeBaseEntryResponse) => name.toLocaleLowerCase(),
           width: '30%',
         },
         {
