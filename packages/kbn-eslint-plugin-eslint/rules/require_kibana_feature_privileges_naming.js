@@ -11,57 +11,53 @@ const ts = require('typescript');
 const path = require('path');
 
 function getImportedVariableValue(context, name, propertyName) {
-  try {
-    const parent = context
-      .getAncestors()
-      .find((ancestor) => ['BlockStatement', 'Program'].includes(ancestor.type));
+  const parent = context
+    .getAncestors()
+    .find((ancestor) => ['BlockStatement', 'Program'].includes(ancestor.type));
 
-    if (!parent) return;
+  if (!parent) return;
 
-    const importDeclaration = parent.body.find(
-      (statement) =>
-        statement.type === 'ImportDeclaration' &&
-        statement.specifiers.some((specifier) => specifier.local.name === name)
-    );
+  const importDeclaration = parent.body.find(
+    (statement) =>
+      statement.type === 'ImportDeclaration' &&
+      statement.specifiers.some((specifier) => specifier.local.name === name)
+  );
 
-    if (!importDeclaration) return;
+  if (!importDeclaration) return;
 
-    const absoluteImportPath = require.resolve(importDeclaration.source.value, {
-      paths: [path.dirname(context.getFilename())],
-    });
+  const absoluteImportPath = require.resolve(importDeclaration.source.value, {
+    paths: [path.dirname(context.getFilename())],
+  });
 
-    const program = ts.createProgram([absoluteImportPath], {});
-    const sourceFile = program.getSourceFile(absoluteImportPath);
+  const program = ts.createProgram([absoluteImportPath], {});
+  const sourceFile = program.getSourceFile(absoluteImportPath);
 
-    if (!sourceFile) return null;
+  if (!sourceFile) return null;
 
-    const checker = program.getTypeChecker();
-    const symbols = checker.getExportsOfModule(sourceFile.symbol);
-    const symbol = symbols.find((s) => s.name === name);
+  const checker = program.getTypeChecker();
+  const symbols = checker.getExportsOfModule(sourceFile.symbol);
+  const symbol = symbols.find((s) => s.name === name);
 
-    if (!symbol) return null;
+  if (!symbol) return null;
 
-    if (propertyName) {
-      const currentSymbol = checker.getTypeOfSymbolAtLocation(symbol, sourceFile);
-      const property = currentSymbol.getProperty(propertyName);
+  if (propertyName) {
+    const currentSymbol = checker.getTypeOfSymbolAtLocation(symbol, sourceFile);
+    const property = currentSymbol.getProperty(propertyName);
 
-      if (ts.isStringLiteral(property.valueDeclaration.initializer)) {
-        return property.valueDeclaration.initializer.text;
-      }
-
-      return null;
+    if (ts.isStringLiteral(property.valueDeclaration.initializer)) {
+      return property.valueDeclaration.initializer.text;
     }
 
-    const initializer = symbol?.valueDeclaration?.initializer;
-
-    if (ts.isStringLiteral(initializer)) {
-      return initializer.text;
-    }
-
-    return null;
-  } catch (e) {
     return null;
   }
+
+  const initializer = symbol?.valueDeclaration?.initializer;
+
+  if (ts.isStringLiteral(initializer)) {
+    return initializer.text;
+  }
+
+  return null;
 }
 
 function validatePrivilegesNode(context, privilegesNode, scopedVariables) {

@@ -119,5 +119,22 @@ ruleTester.run('@kbn/require_kibana_feature_privileges_naming', rule, {
         },
       ],
     },
+    {
+      code: `
+        const privilege = 'users-manage';
+        plugins.features.registerKibanaFeature({
+          privileges: {
+            all: {
+              api: [privilege, "create_logs", "read_logs"],
+            },
+          },
+        });
+      `,
+      errors: [
+        {
+          message: `API privilege 'users-manage' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
+        },
+      ],
+    },
   ],
 });
