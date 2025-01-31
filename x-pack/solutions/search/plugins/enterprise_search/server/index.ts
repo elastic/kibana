@@ -89,5 +89,5 @@ export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
 
 const ENT_SEARCH_NODE_DEPRECATION_TITLE = i18n.translate(
   'xpack.enterpriseSearch.deprecations.config.nodeValuesTitle',
-  { defaultMessage: 'Enterprise Search connection config values must be removed' }
+  { defaultMessage: 'Enterprise Search connection values must be removed' }
 );
