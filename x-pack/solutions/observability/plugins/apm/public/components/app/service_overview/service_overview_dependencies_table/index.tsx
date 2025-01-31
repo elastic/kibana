@@ -81,18 +81,17 @@ export function ServiceOverviewDependenciesTable({
   useEffect(() => {
     // this component is used both for the service overview tab and the transactions tab,
     // onLoadTable will be defined if it's the service overview tab
-    if (status === FETCH_STATUS.SUCCESS && onLoadTable && !hasTableLoaded) {
-      onLoadTable();
-      setHasTableLoaded(true);
-    }
-
-    if (status === FETCH_STATUS.SUCCESS && !onLoadTable && !hasTableLoaded) {
-      onPageReady({
-        meta: {
-          rangeFrom,
-          rangeTo,
-        },
-      });
+    if (status === FETCH_STATUS.SUCCESS && !hasTableLoaded) {
+      if (onLoadTable) {
+        onLoadTable();
+      } else {
+        onPageReady({
+          meta: {
+            rangeFrom,
+            rangeTo,
+          },
+        });
+      }
       setHasTableLoaded(true);
     }
   }, [status, onLoadTable, hasTableLoaded, setHasTableLoaded, onPageReady, rangeFrom, rangeTo]);

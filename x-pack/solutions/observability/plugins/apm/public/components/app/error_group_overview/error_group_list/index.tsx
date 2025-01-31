@@ -106,24 +106,18 @@ export function ErrorGroupList({
     if (
       mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
       detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      onLoadTable &&
       !hasTableLoaded
     ) {
-      onLoadTable();
-      setHasTableLoaded(true);
-    }
-    if (
-      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      !onLoadTable &&
-      !hasTableLoaded
-    ) {
-      onPageReady({
-        meta: {
-          rangeFrom,
-          rangeTo,
-        },
-      });
+      if (onLoadTable) {
+        onLoadTable();
+      } else {
+        onPageReady({
+          meta: {
+            rangeFrom,
+            rangeTo,
+          },
+        });
+      }
       setHasTableLoaded(true);
     }
   }, [
