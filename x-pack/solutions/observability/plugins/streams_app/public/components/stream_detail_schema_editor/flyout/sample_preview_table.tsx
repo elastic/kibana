@@ -10,7 +10,7 @@ import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { NamedFieldDefinitionConfig, ReadStreamDefinition } from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
 import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
@@ -18,7 +18,7 @@ import { isFullFieldDefinition } from '../hooks/use_editing_state';
 import { LoadingPanel } from '../../loading_panel';
 
 interface SamplePreviewTableProps {
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponse;
   nextFieldDefinition?: Partial<NamedFieldDefinitionConfig>;
   streamsRepositoryClient: StreamsRepositoryClient;
 }
@@ -45,7 +45,7 @@ const SamplePreviewTableContent = ({
         signal,
         params: {
           path: {
-            id: definition.name,
+            id: definition.stream.name,
           },
           body: {
             field_definitions: [nextFieldDefinition],
@@ -53,7 +53,7 @@ const SamplePreviewTableContent = ({
         },
       });
     },
-    [definition.name, nextFieldDefinition, streamsRepositoryClient],
+    [definition.stream.name, nextFieldDefinition, streamsRepositoryClient],
     {
       disableToastOnError: true,
     }

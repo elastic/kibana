@@ -10,7 +10,6 @@ import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/s
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { initSavedObjects } from './saved_objects';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -55,8 +54,6 @@ export class ElasticAssistantPlugin
     plugins: ElasticAssistantPluginSetupDependencies
   ) {
     this.logger.debug('elasticAssistant: Setup');
-
-    initSavedObjects(core.savedObjects);
 
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),

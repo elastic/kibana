@@ -995,6 +995,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/se
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generative-ai
 x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
@@ -2331,6 +2332,11 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-explore
 
 /x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-explore
+
+## The Hive Connector
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/security-threat-hunting
 
 ## Generative AI owner connectors
 # OpenAI

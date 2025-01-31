@@ -15,12 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const { dashboard, common, visualize, timePicker } = getPageObjects([
-    'dashboard',
-    'common',
-    'visualize',
-    'timePicker',
-  ]);
+  const { dashboard, common, timePicker } = getPageObjects(['dashboard', 'common', 'timePicker']);
   const dashboardName = 'dashboard with filter';
   const copyOfDashboardName = `Copy of ${dashboardName}`;
   const filterBar = getService('filterBar');
@@ -156,29 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(hasFilter).to.be(true);
         });
 
-        it('when a new vis is added', async function () {
-          const originalPanelCount = await dashboard.getPanelCount();
-          await dashboardAddPanel.clickEditorMenuButton();
-          await dashboardAddPanel.clickAggBasedVisualizations();
-          await visualize.clickAreaChart();
-          await visualize.clickNewSearch();
-          await visualize.saveVisualizationExpectSuccess('new viz panel', {
-            saveAsNew: false,
-            redirectToOrigin: true,
-          });
-
-          await dashboard.clickCancelOutOfEditMode(false);
-          // for this sleep see https://github.com/elastic/kibana/issues/22299
-          await common.sleep(500);
-
-          // confirm lose changes
-          await common.clickConfirmOnModal();
-
-          const panelCount = await dashboard.getPanelCount();
-          expect(panelCount).to.eql(originalPanelCount);
-        });
-
-        it('when an existing vis is added', async function () {
+        it('when a panel is added', async function () {
           const originalPanelCount = await dashboard.getPanelCount();
 
           await dashboardAddPanel.addVisualization('new viz panel');

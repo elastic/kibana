@@ -28,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
     simulateTemplateByName,
   } = templatesApi(getService);
 
-  describe('index templates', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/209027
+  describe.skip('index templates', () => {
     after(async () => await cleanUpTemplates());
 
     describe('get all', () => {

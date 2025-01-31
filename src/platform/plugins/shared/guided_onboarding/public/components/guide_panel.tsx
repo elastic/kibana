@@ -25,7 +25,6 @@ import type { PluginState } from '../../common';
 
 import { QuitGuideModal } from './quit_guide_modal';
 import { getGuidePanelStyles } from './guide_panel.styles';
-import { GuideButton } from './guide_button';
 
 import { GuidePanelFlyout } from './guide_panel_flyout';
 import { getStepLocationPath } from './get_step_location';
@@ -177,17 +176,6 @@ export const GuidePanel = ({ api, application, notifications, theme$ }: GuidePan
 
   return (
     <>
-      <div css={styles.setupButton}>
-        <GuideButton
-          isLoading={isLoading}
-          pluginState={pluginState}
-          guideConfig={guideConfig}
-          toggleGuidePanel={toggleGuide}
-          isGuidePanelOpen={isGuideOpen}
-          navigateToLandingPage={navigateToLandingPage}
-        />
-      </div>
-
       <GuidePanelFlyout
         isOpen={isGuideOpen}
         isLoading={isLoading}
@@ -204,7 +192,6 @@ export const GuidePanel = ({ api, application, notifications, theme$ }: GuidePan
         euiTheme={euiTheme}
         completeGuide={completeGuide}
       />
-
       {isQuitGuideModalOpen && (
         <QuitGuideModal
           closeModal={closeQuitGuideModal}

@@ -113,6 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(dashboards).to.eql([]);
 
       expect(stream).to.eql({
+        name: TEST_STREAM_NAME,
         ingest: {
           lifecycle: { inherit: {} },
           processing: [

@@ -25,7 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const POLICY_NAME_FIELD = 'createAgentPolicyNameField';
 
-  // Failing: See https://github.com/elastic/kibana/issues/208533
   describe('Agentless Security Posture Integration Options', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
@@ -41,6 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
         AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickOptionButton(KSPM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -59,6 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
         AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickOptionButton(CNVM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -72,10 +73,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(hasAgentBased).to.be(true);
     });
 
-    it.skip(`should show cspm with agentless option`, async () => {
+    it(`should show cspm with agentless option`, async () => {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
         AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickOptionButton(CSPM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();

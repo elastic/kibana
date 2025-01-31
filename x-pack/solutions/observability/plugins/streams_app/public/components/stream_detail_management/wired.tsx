@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -25,13 +25,29 @@ export function WiredStreamDetailManagement({
   refreshDefinition,
   isLoadingDefinition,
 }: {
-  definition?: WiredReadStreamDefinition;
+  definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
   isLoadingDefinition: boolean;
 }) {
   const {
     path: { key, subtab },
   } = useStreamsAppParams('/{key}/management/{subtab}');
+
+  const legacyDefinition = useMemo(() => {
+    if (!definition) {
+      return undefined;
+    }
+    return {
+      dashboards: definition.dashboards,
+      inherited_fields: definition.inherited_fields,
+      elasticsearch_assets: [],
+      effective_lifecycle: definition.effective_lifecycle,
+      name: definition.stream.name,
+      stream: {
+        ...definition.stream,
+      },
+    };
+  }, [definition]);
 
   const tabs = {
     route: {
@@ -44,7 +60,10 @@ export function WiredStreamDetailManagement({
     },
     enrich: {
       content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+        <StreamDetailEnrichment
+          definition={legacyDefinition}
+          refreshDefinition={refreshDefinition}
+        />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
         defaultMessage: 'Extract field',

@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_AGG_VIS_ACTION_ID = 'ADD_AGG_VIS';
 export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';

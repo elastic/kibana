@@ -514,7 +514,7 @@
         "label": "RowHeightSettings",
         "description": [],
         "signature": [
-          "({\n  label,\n  rowHeight,\n  rowHeightLines,\n  compressed,\n  onChangeRowHeight,\n  onChangeRowHeightLines,\n  maxRowHeight,\n  ['data-test-subj']: dataTestSubj,\n}: ",
+          "({\n  lineCountInput,\n  label,\n  rowHeight,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight,\n  ['data-test-subj']: dataTestSubj,\n}: ",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "public",
@@ -533,7 +533,7 @@
             "id": "def-public.RowHeightSettings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  label,\n  rowHeight,\n  rowHeightLines,\n  compressed,\n  onChangeRowHeight,\n  onChangeRowHeightLines,\n  maxRowHeight,\n  ['data-test-subj']: dataTestSubj,\n}",
+            "label": "{\n  lineCountInput,\n  label,\n  rowHeight,\n  onChangeRowHeight,\n  onChangeLineCountInput,\n  maxRowHeight,\n  ['data-test-subj']: dataTestSubj,\n}",
             "description": [],
             "signature": [
               {
@@ -954,6 +954,17 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.lineCountInput",
+            "type": "number",
+            "tags": [],
+            "label": "lineCountInput",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
             "id": "def-public.RowHeightSettingsProps.rowHeight",
             "type": "CompoundType",
             "tags": [],
@@ -962,20 +973,6 @@
             "signature": [
               "RowHeightMode",
               " | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/unified-data-table",
-            "id": "def-public.RowHeightSettingsProps.rowHeightLines",
-            "type": "number",
-            "tags": [],
-            "label": "rowHeightLines",
-            "description": [],
-            "signature": [
-              "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
@@ -1002,20 +999,6 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/unified-data-table",
-            "id": "def-public.RowHeightSettingsProps.compressed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "compressed",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1057,10 +1040,10 @@
           },
           {
             "parentPluginId": "@kbn/unified-data-table",
-            "id": "def-public.RowHeightSettingsProps.onChangeRowHeightLines",
+            "id": "def-public.RowHeightSettingsProps.onChangeLineCountInput",
             "type": "Function",
             "tags": [],
-            "label": "onChangeRowHeightLines",
+            "label": "onChangeLineCountInput",
             "description": [],
             "signature": [
               "(newRowHeightLines: number) => void"
@@ -1071,7 +1054,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-data-table",
-                "id": "def-public.RowHeightSettingsProps.onChangeRowHeightLines.$1",
+                "id": "def-public.RowHeightSettingsProps.onChangeLineCountInput.$1",
                 "type": "number",
                 "tags": [],
                 "label": "newRowHeightLines",
@@ -3434,10 +3417,10 @@
         "tags": [],
         "label": "ROWS_HEIGHT_OPTIONS",
         "description": [
-          "\nRow height might be a value from -1 to 20\nA value of -1 automatically adjusts the row height to fit the contents.\nA value of 0 displays the content in a single line.\nA value from 1 to 20 represents number of lines of Document explorer row to display."
+          "\nRow height might be a value from -1 to 20\nA value of -1 automatically adjusts the row height to fit the contents.\nA value from 1 to 20 represents number of lines of Document explorer row to display."
         ],
         "signature": [
-          "{ readonly auto: -1; readonly single: 0; readonly default: 3; }"
+          "{ readonly auto: -1; readonly default: 3; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/constants.ts",
         "deprecated": false,

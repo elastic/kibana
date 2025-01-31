@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 
 import { useConfig } from '../../../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
@@ -86,6 +86,11 @@ export function useSetupTechnology({
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
 
+  const allowedSetupTechnologies = useMemo(() => {
+    return isOnlyAgentlessIntegration(packageInfo, integrationToEnable)
+      ? [SetupTechnology.AGENTLESS]
+      : [SetupTechnology.AGENTLESS, SetupTechnology.AGENT_BASED];
+  }, [integrationToEnable, packageInfo]);
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
@@ -172,6 +177,7 @@ export function useSetupTechnology({
 
   return {
     handleSetupTechnologyChange,
+    allowedSetupTechnologies,
     selectedSetupTechnology,
     defaultSetupTechnology,
   };

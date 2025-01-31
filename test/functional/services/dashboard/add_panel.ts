@@ -64,11 +64,6 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.missingOrFail('dashboardPanelSelectionFlyout');
   }
 
-  async clickAggBasedVisualizations() {
-    this.log.debug('DashboardAddPanel.clickEditorMenuAggBasedMenuItem');
-    await this.clickAddNewPanelFromUIActionLink('Aggregation based');
-  }
-
   async clickVisType(visType: string) {
     this.log.debug('DashboardAddPanel.clickVisType');
     await this.testSubjects.click(`visType-${visType}`);

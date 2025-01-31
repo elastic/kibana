@@ -10,7 +10,6 @@ import {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
   IngestStreamUpsertRequest,
-  WiredReadStreamDefinition,
   WiredStreamGetResponse,
   isDslLifecycle,
   isIlmLifecycle,
@@ -103,11 +102,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('acknowledged', true);
 
         const updatedRootDefinition = await getStream(apiClient, 'logs');
-        expect((updatedRootDefinition as WiredReadStreamDefinition).stream.ingest.lifecycle).to.eql(
-          {
-            dsl: { data_retention: '999d' },
-          }
-        );
+        expect((updatedRootDefinition as WiredStreamGetResponse).stream.ingest.lifecycle).to.eql({
+          dsl: { data_retention: '999d' },
+        });
         expect(updatedRootDefinition.effective_lifecycle).to.eql({
           dsl: { data_retention: '999d' },
           from: 'logs',

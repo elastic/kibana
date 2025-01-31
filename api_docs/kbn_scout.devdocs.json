@@ -747,7 +747,7 @@
             "section": "def-common.ScoutPage",
             "text": "ScoutPage"
           },
-          ", ...args: any[]) => T, scoutPage: ",
+          ", ...args: Args) => T, scoutPage: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
@@ -755,7 +755,7 @@
             "section": "def-common.ScoutPage",
             "text": "ScoutPage"
           },
-          ", constructorArgs: any[]) => T"
+          ", constructorArgs: Args) => T"
         ],
         "path": "packages/kbn-scout/src/playwright/page_objects/utils/index.ts",
         "deprecated": false,
@@ -779,7 +779,7 @@
                 "section": "def-common.ScoutPage",
                 "text": "ScoutPage"
               },
-              ", ...args: any[]) => T"
+              ", ...args: Args) => T"
             ],
             "path": "packages/kbn-scout/src/playwright/page_objects/utils/index.ts",
             "deprecated": false,
@@ -793,7 +793,7 @@
             "tags": [],
             "label": "scoutPage",
             "description": [
-              "- ScoutPage instance, that extendes the Playwright `page` fixture and passed to the page object class constructor."
+              "- ScoutPage instance, that extends the Playwright `page` fixture and passed to the page object class constructor."
             ],
             "signature": [
               {
@@ -812,14 +812,14 @@
           {
             "parentPluginId": "@kbn/scout",
             "id": "def-common.createLazyPageObject.$3",
-            "type": "Array",
+            "type": "Uncategorized",
             "tags": [],
             "label": "constructorArgs",
             "description": [
               "- Additional arguments to be passed to the page object class constructor."
             ],
             "signature": [
-              "any[]"
+              "Args"
             ],
             "path": "packages/kbn-scout/src/playwright/page_objects/utils/index.ts",
             "deprecated": false,
@@ -1264,6 +1264,34 @@
             "description": [],
             "signature": [
               "FilterBar"
+            ],
+            "path": "packages/kbn-scout/src/playwright/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.PageObjects.maps",
+            "type": "Object",
+            "tags": [],
+            "label": "maps",
+            "description": [],
+            "signature": [
+              "MapsPage"
+            ],
+            "path": "packages/kbn-scout/src/playwright/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.PageObjects.renderable",
+            "type": "Object",
+            "tags": [],
+            "label": "renderable",
+            "description": [],
+            "signature": [
+              "RenderablePage"
             ],
             "path": "packages/kbn-scout/src/playwright/page_objects/index.ts",
             "deprecated": false,

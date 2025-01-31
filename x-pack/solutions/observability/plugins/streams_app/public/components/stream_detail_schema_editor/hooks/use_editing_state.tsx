@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  ReadStreamDefinition,
-  NamedFieldDefinitionConfig,
-  isWiredReadStream,
-} from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useCallback, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -39,7 +35,7 @@ export const useEditingState = ({
   toastsService,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
   refreshUnmappedFields: () => void;
   toastsService: ToastsStart;
@@ -95,8 +91,7 @@ export const useEditingState = ({
   const saveChanges = useMemo(() => {
     return selectedField &&
       isFullFieldDefinition(nextFieldDefinition) &&
-      hasChanges(selectedField, nextFieldDefinition) &&
-      isWiredReadStream(definition)
+      hasChanges(selectedField, nextFieldDefinition)
       ? async () => {
           toggleIsSaving(true);
           try {
@@ -104,7 +99,7 @@ export const useEditingState = ({
               signal: abortController.signal,
               params: {
                 path: {
-                  id: definition.name,
+                  id: definition.stream.name,
                 },
                 body: {
                   ingest: {

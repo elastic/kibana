@@ -209,10 +209,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private isSidebarEnabled = true;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { config } = this;
-    if (!config.ui?.enabled) {
-      return;
-    }
     const { cloud, share } = plugins;
 
     core.application.register({
@@ -481,9 +477,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    if (!this.config.ui?.enabled) {
-      return;
-    }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);

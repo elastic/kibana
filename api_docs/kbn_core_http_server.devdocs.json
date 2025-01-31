@@ -3657,6 +3657,14 @@
                 "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/node_disk_space.ts"
               },
               {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+              },
+              {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/settings/register_load_route.ts"
               },
@@ -5763,6 +5771,14 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/cluster_settings.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
               },
               {
                 "plugin": "watcher",
