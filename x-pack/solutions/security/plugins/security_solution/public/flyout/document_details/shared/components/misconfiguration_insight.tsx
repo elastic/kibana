@@ -77,7 +77,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     if (shouldRender && telemetryKey) {
       uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
     }
-  }, [telemetryKey, renderingId]);
+  }, [shouldRender, telemetryKey, renderingId]);
 
   const misconfigurationsStats = useMemo(
     () => getFindingsStats(passedFindings, failedFindings),
