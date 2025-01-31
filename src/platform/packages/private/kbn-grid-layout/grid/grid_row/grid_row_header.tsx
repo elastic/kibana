@@ -31,40 +31,26 @@ import { i18n } from '@kbn/i18n';
 
 import { GridLayoutData, GridLayoutStateManager } from '../types';
 import { resolveGridRow } from '../utils/resolve_grid_row';
+import { GridRowTitle } from './grid_row_title';
 
 export const GridRowHeader = ({
   rowIndex,
   gridLayoutStateManager,
-  isCollapsed,
   toggleIsCollapsed,
 }: {
   rowIndex: number;
   gridLayoutStateManager: GridLayoutStateManager;
-  isCollapsed: boolean;
   toggleIsCollapsed: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
-
-  const [editMode, setEditMode] = useState<boolean>(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
-
   const [readOnly, setReadOnly] = useState<boolean>(
     gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
   );
-  const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
+  const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    const titleSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(
-        map((gridLayout) => gridLayout[rowIndex].title),
-        distinctUntilChanged()
-      )
-      .subscribe((title) => {
-        setRowTitle(title);
-      });
-
     const accessModeSubscription = gridLayoutStateManager.accessMode$
       .pipe(distinctUntilChanged())
       .subscribe((accessMode) => {
@@ -72,16 +58,9 @@ export const GridRowHeader = ({
       });
 
     return () => {
-      titleSubscription.unsubscribe();
       accessModeSubscription.unsubscribe();
     };
-  }, [rowIndex, gridLayoutStateManager]);
-
-  const updateTitle = useCallback((layout: GridLayoutData, index: number, title: string) => {
-    const newLayout = cloneDeep(layout);
-    newLayout[index].title = title;
-    return newLayout;
-  }, []);
+  }, [gridLayoutStateManager]);
 
   const movePanelsToRow = useCallback(
     (layout: GridLayoutData, startingRow: number, newRow: number) => {
@@ -110,14 +89,15 @@ export const GridRowHeader = ({
         gutterSize="xs"
         alignItems="center"
         css={css`
-          border-bottom: ${isCollapsed ? euiTheme.border.thin : 'none'};
           padding: ${euiTheme.size.s} 0px;
+
+          border-bottom: none;
+          .kbnGridRowContainer--collapsed & {
+            border-bottom: ${euiTheme.border.thin};
+          }
 
           .kbnGridLayout--deleteRowIcon {
             margin-left: ${euiTheme.size.xs};
-          }
-          .kbnGridLayout--moveRowIcon {
-            margin-left: auto;
           }
 
           // these styles hide the delete + move actions by default and only show them on hover
@@ -141,70 +121,49 @@ export const GridRowHeader = ({
             aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
               defaultMessage: 'Toggle collapse',
             })}
-            iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+            iconType={'arrowDown'}
             onClick={toggleIsCollapsed}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={editMode}>
-          <EuiInlineEditTitle
-            heading="h2"
-            size="xs"
-            isReadOnly={readOnly}
-            inputAriaLabel="Edit title inline"
-            defaultValue={rowTitle}
-            onSave={(title) => {
-              const newLayout = updateTitle(
-                gridLayoutStateManager.gridLayout$.getValue(),
-                rowIndex,
-                title
-              );
-              gridLayoutStateManager.gridLayout$.next(newLayout);
-            }}
-            onClick={() => {
-              if (readOnly) {
-                toggleIsCollapsed();
-              } else {
-                setEditMode(!editMode);
+            css={css`
+              transition: ${euiTheme.animation.extraFast}
+              transform: rotate(0deg)t;
+              .kbnGridRowContainer--collapsed & {
+                transform: rotate(-90deg) !important;
               }
-            }}
-            readModeProps={{
-              onClick: readOnly ? toggleIsCollapsed : undefined,
-              css: css`
-                &:hover,
-                &:focus {
-                  text-decoration: none !important;
-                }
-                & svg {
-                  inline-size: 16px;
-                  block-size: 16px;
-                }
-                .euiButtonEmpty__content {
-                  gap: ${euiTheme.size.xs}; // decrease gap between title and pencil icon
-                }
-              `,
-            }}
+            `}
           />
         </EuiFlexItem>
+        <GridRowTitle
+          rowIndex={rowIndex}
+          readOnly={readOnly}
+          editTitleOpen={editTitleOpen}
+          setEditTitleOpen={setEditTitleOpen}
+          gridLayoutStateManager={gridLayoutStateManager}
+        />
         {
           /**
            * Add actions at the end of the header section when the layout is editable + the section title
            * is not in edit mode
            */
-          !readOnly && !editMode && (
+          !readOnly && !editTitleOpen && (
             <>
-              {isCollapsed && (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="s">{`(${
-                    /**
-                     * we can get away with grabbing the panel count without React state because this count
-                     * is only rendered when the section is collapsed, and the count can only be updated when
-                     * the section isn't collapsed
-                     */
-                    Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
-                      .length
-                  } panels)`}</EuiText>
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  display: none;
+                  .kbnGridRowContainer--collapsed & {
+                    display: block;
+                  }
+                `}
+              >
+                <EuiText color="subdued" size="s">{`(${
+                  /**
+                   * we can get away with grabbing the panel count without React state because this count
+                   * is only rendered when the section is collapsed, and the count can only be updated when
+                   * the section isn't collapsed
+                   */
+                  Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels).length
+                } panels)`}</EuiText>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="trash"
@@ -222,15 +181,22 @@ export const GridRowHeader = ({
                   }}
                 />
               </EuiFlexItem>
-              {isCollapsed && (
-                <EuiFlexItem>
-                  <EuiButtonIcon
-                    iconType="move"
-                    color="text"
-                    className="kbnGridLayout--moveRowIcon"
-                  />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  display: none;
+                  margin-left: auto;
+                  .kbnGridRowContainer--collapsed & {
+                    display: block;
+                  }
+                `}
+              >
+                <EuiButtonIcon
+                  iconType="move"
+                  color="text"
+                  className="kbnGridLayout--moveRowIcon"
+                />
+              </EuiFlexItem>
             </>
           )
         }
