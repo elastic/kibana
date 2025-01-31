@@ -47,8 +47,6 @@ const mockItems: SolutionSideNavItem[] = [
   },
 ];
 
-const betaMockItemsCount = mockItems.filter((item) => item.isBeta).length;
-
 const mockCategories: LinkCategories = [
   {
     label: 'HOSTS CATEGORY',
