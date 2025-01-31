@@ -197,7 +197,7 @@ export const links: LinkItem = {
       id: SecurityPageName.entityAnalyticsEntityStoreManagement,
       title: ENTITY_STORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: 'Store host and user entities observed in events.',
+        defaultMessage: 'Store entities data observed in events.',
       }),
       landingIcon: IconAssetCriticality,
       path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
