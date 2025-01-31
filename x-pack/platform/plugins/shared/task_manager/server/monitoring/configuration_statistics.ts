@@ -40,14 +40,6 @@ export function createConfigurationAggregator(
   startingCapacity: number,
   taskPollingLifecycle?: TaskPollingLifecycle
 ): AggregatedStatProvider<ConfigStat> {
-  const pollInterval$ = taskPollingLifecycle
-    ? taskPollingLifecycle.pollIntervalConfiguration$.pipe(
-        startWith(config.poll_interval),
-        map<number, Pick<TaskManagerConfig, 'poll_interval'>>((pollInterval) => ({
-          poll_interval: pollInterval,
-        }))
-      )
-    : of({ poll_interval: config.poll_interval });
   const capacity$ = taskPollingLifecycle
     ? taskPollingLifecycle.capacityConfiguration$.pipe(
         startWith(startingCapacity),
@@ -66,10 +58,11 @@ export function createConfigurationAggregator(
           as_cost: getCapacityInCost(startingCapacity),
         },
       });
+
   return combineLatest([
     of(pick(config, ...CONFIG_FIELDS_TO_EXPOSE)),
     of({ claim_strategy: config.claim_strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY }),
-    pollInterval$,
+    of({ poll_interval: config.poll_interval }),
     capacity$,
   ]).pipe(
     map((configurations) => ({
