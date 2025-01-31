@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/product-intercept-dialog-plugin",
+  "owner": ["@elastic/appex-sharedux"],
+  "group": "platform",
+  "description": "The Product Intercept Dialog Plugin is a shared plugin that provides a dialog for intercepting product navigation.",
+  "plugin": {
+    "id": "productInterceptDialog",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["taskManager"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
+  }
+}

@@ -1436,6 +1436,8 @@
       "@kbn/product-doc-common/*": ["x-pack/platform/packages/shared/ai-infra/product-doc-common/*"],
       "@kbn/profiler-cli": ["x-pack/platform/packages/shared/kbn-profiler-cli"],
       "@kbn/profiler-cli/*": ["x-pack/platform/packages/shared/kbn-profiler-cli/*"],
+      "@kbn/product-intercept-dialog-plugin": ["x-pack/platform/plugins/private/product_intercept_dialog"],
+      "@kbn/product-intercept-dialog-plugin/*": ["x-pack/platform/plugins/private/product_intercept_dialog/*"],
       "@kbn/profiling-data-access-plugin": ["x-pack/solutions/observability/plugins/profiling_data_access"],
       "@kbn/profiling-data-access-plugin/*": ["x-pack/solutions/observability/plugins/profiling_data_access/*"],
       "@kbn/profiling-plugin": ["x-pack/solutions/observability/plugins/profiling"],

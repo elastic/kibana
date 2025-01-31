@@ -6564,6 +6564,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/product-intercept-dialog-plugin@link:x-pack/platform/plugins/private/product_intercept_dialog":
+  version "0.0.0"
+  uid ""
+
 "@kbn/profiler-cli@link:x-pack/platform/packages/shared/kbn-profiler-cli":
   version "0.0.0"
   uid ""
