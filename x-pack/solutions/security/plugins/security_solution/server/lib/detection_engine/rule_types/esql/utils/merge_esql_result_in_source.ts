@@ -6,10 +6,22 @@
  */
 
 import type { SignalSource } from '../../types';
+import {
+  robustGet,
+  robustUnset,
+} from '../../utils/source_fields_merging/utils/robust_field_access';
 
 export const mergeEsqlResultInSource = (
   source: SignalSource | undefined,
   esqlResult: Record<string, string>
 ): SignalSource => {
-  return { ...source, ...esqlResult };
+  const document = source ?? {};
+  Object.keys(esqlResult).forEach((field) => {
+    if (robustGet({ key: field, document })) {
+      robustUnset({ key: field, document });
+    }
+    document[field] = esqlResult[field];
+  });
+
+  return document;
 };

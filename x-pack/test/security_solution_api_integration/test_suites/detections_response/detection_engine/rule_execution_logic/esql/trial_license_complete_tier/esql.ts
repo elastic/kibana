@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.rule_type_id': 'siem.esqlRule',
         'kibana.space_ids': ['default'],
         'kibana.alert.rule.tags': [],
-        agent: { name: 'test-1' },
+        'agent.name': 'test-1',
         id,
         'event.kind': 'signal',
         'kibana.alert.original_time': expect.any(String),
@@ -252,6 +252,7 @@ export default ({ getService }: FtrProviderContext) => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = {
+          'agent.name': 'test-1',
           agent: { name: 'test-1', version: '2', type: 'auditbeat' },
           host: { name: 'my-host' },
           client: { ip: '127.0.0.1' },
@@ -287,7 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
         // all fields from source document should be returned
         expect(previewAlerts[0]._source).toEqual(
           expect.objectContaining({
-            agent: { version: '2', type: 'auditbeat', name: 'test-1' },
+            agent: { version: '2', type: 'auditbeat' },
             host: { name: 'my-host' },
             client: { ip: '127.0.0.1' },
           })
