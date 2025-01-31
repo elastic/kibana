@@ -141,23 +141,32 @@ export function MarkerBody({
   );
 }
 
-const xyAnnotationNumberIconStyles = css({
-  borderRadius: euiThemeVars.euiSize,
-  minWidth: euiThemeVars.euiSize,
-  height: euiThemeVars.euiSize,
-  backgroundColor: 'currentColor',
-});
+const xyAnnotationNumberIconCss = {
+  self: css({
+    borderRadius: euiThemeVars.euiSize,
+    minWidth: euiThemeVars.euiSize,
+    height: euiThemeVars.euiSize,
+    backgroundColor: 'currentColor',
+  }),
+
+  text: css({
+    fontWeight: 500,
+    fontSize: '9px',
+    letterSpacing: '-.5px',
+    lineHeight: '11px',
+  }),
+};
 
 function NumberIcon({ number }: { number: number }) {
   return (
     <EuiFlexGroup
       justifyContent="spaceAround"
-      css={xyAnnotationNumberIconStyles}
+      css={xyAnnotationNumberIconCss.self}
       data-test-subj="xyVisGroupedAnnotationIcon"
       gutterSize="none"
       alignItems="center"
     >
-      <EuiText color="ghost" className="xyAnnotationNumberIcon__text">
+      <EuiText color="ghost" css={xyAnnotationNumberIconCss.text}>
         {number < 10 ? number : `9+`}
       </EuiText>
     </EuiFlexGroup>
