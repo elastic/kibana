@@ -8,7 +8,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 jest.mock('axios');
 import {
@@ -21,33 +21,24 @@ import {
 const axiosRequestMock = jest.spyOn(axios, 'request');
 const axiosGetMock = jest.spyOn(axios, 'get');
 
-const log = new ToolingLog();
-
-const mockRequestOnce = (mockedPath: string, response: any) => {
-  axiosRequestMock.mockImplementationOnce((config: AxiosRequestConfig) => {
-    if (config.url?.endsWith(mockedPath)) {
-      return Promise.resolve(response);
-    }
-    return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
-  });
-};
-
-const mockGetOnce = (mockedUrl: string, response: any) => {
-  axiosGetMock.mockImplementationOnce((url: string) => {
-    if (url === mockedUrl) {
-      return Promise.resolve(response);
-    }
-    return Promise.reject(new Error(`Unexpected URL`));
-  });
-};
+jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
+  fn();
+  return {} as unknown as NodeJS.Timeout;
+});
 
 describe('saml_auth', () => {
+  const log = new ToolingLog();
+
   describe('createCloudSession', () => {
     afterEach(() => {
-      axiosRequestMock.mockClear();
+      jest.clearAllMocks();
     });
+
     test('returns token value', async () => {
-      mockRequestOnce('/api/v1/saas/auth/_login', { data: { token: 'mocked_token' }, status: 200 });
+      axiosRequestMock.mockResolvedValueOnce({
+        data: { token: 'mocked_token' },
+        status: 200,
+      });
 
       const sessionToken = await createCloudSession({
         hostname: 'cloud',
@@ -60,21 +51,13 @@ describe('saml_auth', () => {
     });
 
     test('retries until response has the token value', async () => {
-      let callCount = 0;
-      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
-        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
-          callCount += 1;
-          if (callCount !== 3) {
-            return Promise.resolve({ data: { message: 'no token' }, status: 503 });
-          } else {
-            return Promise.resolve({
-              data: { token: 'mocked_token' },
-              status: 200,
-            });
-          }
-        }
-        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
-      });
+      axiosRequestMock
+        .mockResolvedValueOnce({ data: { message: 'no token' }, status: 503 })
+        .mockResolvedValueOnce({ data: { message: 'no token' }, status: 503 })
+        .mockResolvedValueOnce({
+          data: { token: 'mocked_token' },
+          status: 200,
+        });
 
       const sessionToken = await createCloudSession(
         {
@@ -94,12 +77,7 @@ describe('saml_auth', () => {
     });
 
     test('retries and throws error when response code is not 200', async () => {
-      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
-        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
-          return Promise.resolve({ data: { message: 'no token' }, status: 503 });
-        }
-        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
-      });
+      axiosRequestMock.mockResolvedValue({ data: { message: 'no token' }, status: 503 });
 
       await expect(
         createCloudSession(
@@ -121,14 +99,9 @@ describe('saml_auth', () => {
     });
 
     test('retries and throws error when response has no token value', async () => {
-      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
-        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
-          return Promise.resolve({
-            data: { user_id: 1234, okta_session_id: 5678, authenticated: false },
-            status: 200,
-          });
-        }
-        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      axiosRequestMock.mockResolvedValue({
+        data: { user_id: 1234, okta_session_id: 5678, authenticated: false },
+        status: 200,
       });
 
       await expect(
@@ -151,6 +124,8 @@ describe('saml_auth', () => {
     });
 
     test(`throws error when retry 'attemptsCount' is below 1`, async () => {
+      axiosRequestMock.mockResolvedValue({ data: { message: 'no token' }, status: 503 });
+
       await expect(
         createCloudSession(
           {
@@ -170,14 +145,9 @@ describe('saml_auth', () => {
     });
 
     test(`should fail without retry when response has 'mfa_required: true'`, async () => {
-      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
-        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
-          return Promise.resolve({
-            data: { user_id: 12345, authenticated: false, mfa_required: true },
-            status: 200,
-          });
-        }
-        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      axiosRequestMock.mockResolvedValue({
+        data: { user_id: 12345, authenticated: false, mfa_required: true },
+        status: 200,
       });
 
       await expect(
@@ -202,10 +172,11 @@ describe('saml_auth', () => {
 
   describe('createSAMLRequest', () => {
     afterEach(() => {
-      axiosRequestMock.mockClear();
+      jest.clearAllMocks();
     });
+
     test('returns { location, sid }', async () => {
-      mockRequestOnce('/internal/security/login', {
+      axiosRequestMock.mockResolvedValue({
         data: {
           location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F',
         },
@@ -222,7 +193,7 @@ describe('saml_auth', () => {
     });
 
     test(`throws error when response has no 'set-cookie' header`, async () => {
-      mockRequestOnce('/internal/security/login', {
+      axiosRequestMock.mockResolvedValue({
         data: {
           location: 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F',
         },
@@ -235,7 +206,7 @@ describe('saml_auth', () => {
     });
 
     test('throws error when location is not a valid url', async () => {
-      mockRequestOnce('/internal/security/login', {
+      axiosRequestMock.mockResolvedValue({
         data: {
           location: 'http/.test',
         },
@@ -251,7 +222,7 @@ describe('saml_auth', () => {
 
     test('throws error when response has no location', async () => {
       const data = { error: 'mocked error' };
-      mockRequestOnce('/internal/security/login', {
+      axiosRequestMock.mockResolvedValue({
         data,
         headers: {
           'set-cookie': [`sid=Fe26.2**1234567890; Secure; HttpOnly; Path=/`],
@@ -266,8 +237,9 @@ describe('saml_auth', () => {
 
   describe('createSAMLResponse', () => {
     afterEach(() => {
-      axiosGetMock.mockClear();
+      jest.clearAllMocks();
     });
+
     const location = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
     const createSAMLResponseParams = {
       location,
@@ -278,7 +250,7 @@ describe('saml_auth', () => {
     };
 
     test('returns valid saml response', async () => {
-      mockGetOnce(location, {
+      axiosGetMock.mockResolvedValueOnce({
         data: `<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body><input type="hidden" name="SAMLResponse" value="PD94bWluc2U+"></body></html>`,
       });
 
@@ -287,7 +259,7 @@ describe('saml_auth', () => {
     });
 
     test('throws error when failed to parse SAML response value', async () => {
-      mockGetOnce(location, {
+      axiosGetMock.mockResolvedValueOnce({
         data: `<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body></body></html>`,
       });
 
@@ -301,26 +273,18 @@ https://kbn.test.co in the same window.`);
   });
 
   describe('finishSAMLHandshake', () => {
-    jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
-      fn();
-      return {} as unknown as NodeJS.Timeout;
-    });
-
     const params = {
       samlResponse: 'mockSAMLResponse',
       kbnHost: 'https://kbn.test.co',
       sid: 'Fe26.2**1234567890',
       log,
     };
-
+    const cookieStr = 'mocked_cookie';
     const retryCount = 3;
 
     beforeEach(() => {
       jest.clearAllMocks();
-      axiosRequestMock.mockClear();
     });
-
-    const cookieStr = 'mocked_cookie';
 
     it('should return cookie on 302 response', async () => {
       axiosRequestMock.mockResolvedValue({
@@ -346,23 +310,14 @@ https://kbn.test.co in the same window.`);
     });
 
     it('should retry on 5xx response and succeed on 302 response', async () => {
-      let callCount = 0;
-      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
-        if (config.url?.endsWith('/api/security/saml/callback')) {
-          callCount += 1;
-          if (callCount === 2) {
-            return Promise.resolve({
-              status: 302,
-              headers: {
-                'set-cookie': [`sid=${cookieStr}; Secure; HttpOnly; Path=/`],
-              },
-            });
-          } else {
-            return Promise.resolve({ status: 503 });
-          }
-        }
-        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
-      });
+      axiosRequestMock
+        .mockResolvedValueOnce({ status: 503 }) // First attempt fails (5xx), retrying
+        .mockResolvedValueOnce({
+          status: 302,
+          headers: {
+            'set-cookie': [`sid=${cookieStr}; Secure; HttpOnly; Path=/`],
+          },
+        }); // Second attempt succeeds
 
       await finishSAMLHandshake(params, retryCount);
       expect(axiosRequestMock).toHaveBeenCalledTimes(2);
@@ -378,8 +333,7 @@ https://kbn.test.co in the same window.`);
     });
 
     it('should stop retrying if a later response is 4xx', async () => {
-      jest
-        .spyOn(axios, 'request')
+      axiosRequestMock
         .mockResolvedValueOnce({ status: 503 }) // First attempt fails (5xx), retrying
         .mockResolvedValueOnce({ status: 400 }); // Second attempt gets a 4xx (stop retrying)
 
