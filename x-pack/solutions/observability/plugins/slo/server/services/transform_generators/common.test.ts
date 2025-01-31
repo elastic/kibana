@@ -45,7 +45,8 @@ describe('common', () => {
               preventInitialBackfill: true,
             },
           }),
-          '@timestamp'
+          '@timestamp',
+          false
         )
       ).toEqual({
         range: {
@@ -67,12 +68,36 @@ describe('common', () => {
               preventInitialBackfill: false,
             },
           }),
-          '@timestamp'
+          '@timestamp',
+          false
         )
       ).toEqual({
         range: {
           '@timestamp': {
             gte: 'now-30d/d',
+          },
+        },
+      });
+    });
+
+    it('starts at now minus 7 days when preventInitialBackfill is false and serverless is true', () => {
+      expect(
+        getFilterRange(
+          createSLO({
+            timeWindow: thirtyDaysRolling(),
+            settings: {
+              frequency: twoMinute(),
+              syncDelay: fiveMinute(),
+              preventInitialBackfill: false,
+            },
+          }),
+          '@timestamp',
+          true
+        )
+      ).toEqual({
+        range: {
+          '@timestamp': {
+            gte: 'now-7d',
           },
         },
       });

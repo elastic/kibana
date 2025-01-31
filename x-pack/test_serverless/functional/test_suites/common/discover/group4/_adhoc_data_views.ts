@@ -41,6 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('adhoc data views', function () {
+    // see details: https://github.com/elastic/kibana/issues/208982
+    this.tags(['failsOnMKI']);
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');

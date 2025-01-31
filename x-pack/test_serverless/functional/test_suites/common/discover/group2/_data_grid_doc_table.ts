@@ -33,6 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
 
   describe('discover data grid doc table', function describeIndexTests() {
+    // see details: https://github.com/elastic/kibana/issues/208982
+    this.tags(['failsOnMKI']);
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
