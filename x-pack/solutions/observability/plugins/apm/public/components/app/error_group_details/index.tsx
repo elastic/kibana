@@ -91,14 +91,14 @@ export function ErrorGroupDetails() {
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
+  const encodedGroupId = encodeURIComponent(groupId);
   useBreadcrumb(
     () => ({
       title: groupId,
       href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
         path: {
           serviceName,
-          groupId,
+          groupId: encodedGroupId,
         },
         query: {
           rangeFrom,
@@ -115,6 +115,7 @@ export function ErrorGroupDetails() {
       comparisonEnabled,
       environment,
       groupId,
+      encodedGroupId,
       kuery,
       rangeFrom,
       rangeTo,
@@ -131,7 +132,7 @@ export function ErrorGroupDetails() {
             params: {
               path: {
                 serviceName,
-                groupId,
+                groupId: encodedGroupId,
               },
               query: {
                 environment,
@@ -143,12 +144,12 @@ export function ErrorGroupDetails() {
           });
         }
       },
-      [environment, kuery, serviceName, start, end, groupId]
+      [environment, kuery, serviceName, start, end, encodedGroupId]
     );
 
   const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({
     serviceName,
-    groupId,
+    groupId: encodedGroupId,
     environment,
     kuery,
   });

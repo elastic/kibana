@@ -35,7 +35,7 @@ export function ErrorSampler({ errorSampleIds, errorSamplesFetchStatus, occurren
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
-
+  const encodedGroupId = encodeURIComponent(groupId);
   const { observabilityAIAssistant } = useApmPluginContext();
 
   const { rangeFrom, rangeTo, environment, kuery, errorId } = query;
@@ -51,7 +51,7 @@ export function ErrorSampler({ errorSampleIds, errorSamplesFetchStatus, occurren
             params: {
               path: {
                 serviceName,
-                groupId,
+                groupId: encodedGroupId,
                 errorId,
               },
               query: {
@@ -65,7 +65,7 @@ export function ErrorSampler({ errorSampleIds, errorSamplesFetchStatus, occurren
         );
       }
     },
-    [environment, kuery, serviceName, start, end, groupId, errorId]
+    [environment, kuery, serviceName, start, end, encodedGroupId, errorId]
   );
   const onSampleClick = (sample: string) => {
     history.push({

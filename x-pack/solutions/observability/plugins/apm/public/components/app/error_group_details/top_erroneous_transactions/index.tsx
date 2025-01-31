@@ -42,6 +42,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const encodedGroupId = encodeURIComponent(groupId);
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -51,7 +52,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
             params: {
               path: {
                 serviceName,
-                groupId,
+                groupId: encodedGroupId,
               },
               query: {
                 environment,
@@ -66,7 +67,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         );
       }
     },
-    [environment, kuery, serviceName, start, end, groupId, comparisonEnabled, offset]
+    [environment, kuery, serviceName, start, end, encodedGroupId, comparisonEnabled, offset]
   );
 
   const loading = isPending(status);
