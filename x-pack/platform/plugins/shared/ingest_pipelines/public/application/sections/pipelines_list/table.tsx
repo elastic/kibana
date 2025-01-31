@@ -40,7 +40,7 @@ export interface Props {
   isLoading: boolean;
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
-  onDeletePipelineClick: (pipelineName: string[]) => void;
+  onDeletePipelineClick: (pipelineName: Pipeline[]) => void;
 }
 
 export const deprecatedPipelineBadge = {
@@ -246,7 +246,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         selection.length > 0 ? (
           <EuiButton
             data-test-subj="deletePipelinesButton"
-            onClick={() => onDeletePipelineClick(selection.map((pipeline) => pipeline.name))}
+            onClick={() => onDeletePipelineClick(selection)}
             color="danger"
           >
             <FormattedMessage
@@ -423,7 +423,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
             type: 'icon',
             icon: 'trash',
             color: 'danger',
-            onClick: ({ name }) => onDeletePipelineClick([name]),
+            onClick: (pipeline) => onDeletePipelineClick([pipeline]),
           },
         ],
       },

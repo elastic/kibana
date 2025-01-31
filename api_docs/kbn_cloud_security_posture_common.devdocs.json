@@ -83,7 +83,9 @@
             "label": "trackUiMetric",
             "description": [],
             "signature": [
-              "(metricType: string, eventName: string) => void"
+              "(metricType: string, eventName: ",
+              "CloudSecurityUiCounters",
+              ") => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/utils/ui_metrics.ts",
             "deprecated": false,
@@ -107,12 +109,12 @@
               {
                 "parentPluginId": "@kbn/cloud-security-posture-common",
                 "id": "def-common.UiMetricService.trackUiMetric.$2",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "eventName",
                 "description": [],
                 "signature": [
-                  "string"
+                  "CloudSecurityUiCounters"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/utils/ui_metrics.ts",
                 "deprecated": false,

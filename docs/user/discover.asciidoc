@@ -11,7 +11,7 @@ What processes take longer than 500 milliseconds to respond?
 [[save-your-search]]
 With *Discover*, you can quickly search and filter your data, get information
 about the structure of the fields, and display your findings in a visualization.
-You can also customize and save your searches and place them on a dashboard.
+You can also customize and save your Discover sessions and place them on a dashboard.
 
 [role="screenshot"]
 image::images/hello-field.png[A view of the Discover app]

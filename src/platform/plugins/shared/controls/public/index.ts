@@ -36,6 +36,7 @@ export {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
+  ESQL_CONTROL,
 } from '../common';
 export type {
   ControlGroupRuntimeState,

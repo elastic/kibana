@@ -54,7 +54,7 @@ describe('Relationships', () => {
               icon: 'search',
               inAppUrl: {
                 path: '/app/discover#//1',
-                uiCapabilitiesPath: 'discover.show',
+                uiCapabilitiesPath: 'discover_v2.show',
               },
               title: 'My Search Title',
             },
@@ -67,7 +67,7 @@ describe('Relationships', () => {
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/2',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               title: 'My Visualization Title',
             },
@@ -137,7 +137,7 @@ describe('Relationships', () => {
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/2',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               title: 'My Visualization Title',
             },
@@ -155,7 +155,7 @@ describe('Relationships', () => {
           icon: 'search',
           inAppUrl: {
             path: '/discover/1',
-            uiCapabilitiesPath: 'discover.show',
+            uiCapabilitiesPath: 'discover_v2.show',
           },
         },
       },
@@ -192,7 +192,7 @@ describe('Relationships', () => {
               icon: 'dashboardApp',
               inAppUrl: {
                 path: '/app/kibana#/dashboard/1',
-                uiCapabilitiesPath: 'dashboard.show',
+                uiCapabilitiesPath: 'dashboard_v2.show',
               },
               title: 'My Dashboard 1',
             },
@@ -205,7 +205,7 @@ describe('Relationships', () => {
               icon: 'dashboardApp',
               inAppUrl: {
                 path: '/app/kibana#/dashboard/2',
-                uiCapabilitiesPath: 'dashboard.show',
+                uiCapabilitiesPath: 'dashboard_v2.show',
               },
               title: 'My Dashboard 2',
             },
@@ -223,7 +223,7 @@ describe('Relationships', () => {
           icon: 'visualizeApp',
           inAppUrl: {
             path: '/edit/1',
-            uiCapabilitiesPath: 'visualize.show',
+            uiCapabilitiesPath: 'visualize_v2.show',
           },
         },
       },
@@ -260,7 +260,7 @@ describe('Relationships', () => {
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/1',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               title: 'My Visualization Title 1',
             },
@@ -273,7 +273,7 @@ describe('Relationships', () => {
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/2',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               title: 'My Visualization Title 2',
             },
@@ -291,7 +291,7 @@ describe('Relationships', () => {
           icon: 'dashboardApp',
           inAppUrl: {
             path: '/dashboard/1',
-            uiCapabilitiesPath: 'dashboard.show',
+            uiCapabilitiesPath: 'dashboard_v2.show',
           },
         },
       },
@@ -332,7 +332,7 @@ describe('Relationships', () => {
           icon: 'dashboardApp',
           inAppUrl: {
             path: '/dashboard/1',
-            uiCapabilitiesPath: 'dashboard.show',
+            uiCapabilitiesPath: 'dashboard_v2.show',
           },
         },
       },

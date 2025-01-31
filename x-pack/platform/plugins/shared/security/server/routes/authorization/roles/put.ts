@@ -113,7 +113,7 @@ export function definePutRolesRoutes({
 
           await esClient.asCurrentUser.security.putRole({
             name: request.params.name,
-            body,
+            ...body,
           });
 
           if (roleGrantsSubFeaturePrivileges(features, request.body)) {

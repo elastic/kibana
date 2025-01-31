@@ -10,14 +10,15 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition, isRoot } from '@kbn/streams-schema';
+import { WiredStreamDefinition, isDslLifecycle, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { logsSettings, logsLifecycle } from './logs_layer';
+import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
 
 export function generateLayer(
   id: string,
-  definition: WiredStreamDefinition
+  definition: WiredStreamDefinition,
+  isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
@@ -33,11 +34,12 @@ export function generateLayer(
     }
     properties[field] = property;
   });
+
   return {
     name: getComponentTemplateName(id),
     template: {
-      settings: isRoot(definition.name) ? logsSettings : {},
-      lifecycle: isRoot(definition.name) ? logsLifecycle : undefined,
+      lifecycle: getTemplateLifecycle(definition, isServerless),
+      settings: getTemplateSettings(definition, isServerless),
       mappings: {
         subobjects: false,
         dynamic: false,
@@ -50,4 +52,55 @@ export function generateLayer(
       description: `Default settings for the ${id} stream`,
     },
   };
+}
+
+function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+  const lifecycle = definition.ingest.lifecycle;
+  if (isServerless) {
+    // dlm cannot be disabled in serverless
+    return {
+      data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
+    };
+  }
+
+  if (isIlmLifecycle(lifecycle)) {
+    return { enabled: false };
+  }
+
+  if (isDslLifecycle(lifecycle)) {
+    return {
+      enabled: true,
+      data_retention: lifecycle.dsl.data_retention,
+    };
+  }
+
+  return undefined;
+}
+
+function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
+  const baseSettings = isRoot(definition.name) ? logsSettings : {};
+  const lifecycle = definition.ingest.lifecycle;
+
+  if (isServerless) {
+    return baseSettings;
+  }
+
+  if (isIlmLifecycle(lifecycle)) {
+    return {
+      ...baseSettings,
+      'index.lifecycle.prefer_ilm': true,
+      'index.lifecycle.name': lifecycle.ilm.policy,
+    };
+  }
+
+  if (isDslLifecycle(lifecycle)) {
+    return {
+      ...baseSettings,
+      'index.lifecycle.prefer_ilm': false,
+      'index.lifecycle.name': undefined,
+    };
+  }
+
+  // don't specify any lifecycle property when lifecyle is disabled or inherited
+  return baseSettings;
 }

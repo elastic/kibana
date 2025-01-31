@@ -9,18 +9,17 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import {
   InheritedFieldDefinition,
+  UnwiredIngestStreamEffectiveLifecycle,
   UnwiredStreamDefinition,
+  WiredIngestStreamEffectiveLifecycle,
   WiredStreamDefinition,
   inheritedFieldDefinitionSchema,
+  unwiredIngestStreamEffectiveLifecycleSchema,
   unwiredStreamDefinitionSchema,
+  wiredIngestStreamEffectiveLifecycleSchema,
   wiredStreamDefinitionSchema,
 } from './ingest';
-import {
-  ElasticsearchAsset,
-  IngestStreamLifecycle,
-  elasticsearchAssetSchema,
-  ingestStreamLifecycleSchema,
-} from './ingest/common';
+import { ElasticsearchAsset, elasticsearchAssetSchema } from './ingest/common';
 import { createIsNarrowSchema } from '../helpers';
 
 /**
@@ -31,16 +30,18 @@ interface ReadStreamDefinitionBase {
   name: string;
   dashboards: string[];
   elasticsearch_assets: ElasticsearchAsset[];
-  lifecycle: IngestStreamLifecycle;
   inherited_fields: InheritedFieldDefinition;
 }
 
 interface WiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: WiredStreamDefinition;
+  effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
 }
 
 interface UnwiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: UnwiredStreamDefinition;
+  data_stream_exists: boolean;
+  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
 
 type ReadStreamDefinition = WiredReadStreamDefinition | UnwiredReadStreamDefinition;
@@ -50,13 +51,13 @@ const readStreamDefinitionSchemaBase: z.Schema<ReadStreamDefinitionBase> = z.obj
   dashboards: z.array(NonEmptyString),
   elasticsearch_assets: z.array(elasticsearchAssetSchema),
   inherited_fields: inheritedFieldDefinitionSchema,
-  lifecycle: ingestStreamLifecycleSchema,
 });
 
 const wiredReadStreamDefinitionSchema: z.Schema<WiredReadStreamDefinition> = z.intersection(
   readStreamDefinitionSchemaBase,
   z.object({
     stream: wiredStreamDefinitionSchema,
+    effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 
@@ -64,6 +65,8 @@ const unwiredReadStreamDefinitionSchema: z.Schema<UnwiredReadStreamDefinition> =
   readStreamDefinitionSchemaBase,
   z.object({
     stream: unwiredStreamDefinitionSchema,
+    data_stream_exists: z.boolean(),
+    effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 

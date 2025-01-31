@@ -80,6 +80,7 @@ interface PolicyTemplateVarsFormProps {
   disabled: boolean;
   setupTechnology: SetupTechnology;
   isEditPage?: boolean;
+  hasInvalidRequiredVars: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({
