@@ -12,6 +12,7 @@ import type {
 } from '@kbn/core/server';
 import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/search-types';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import type {
   FactoryQueryTypes,
   StrategyRequestType,
@@ -20,7 +21,10 @@ import type {
 import type { EndpointAppContext } from '../../../endpoint/types';
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
-  buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
+  buildDsl: (
+    options: StrategyRequestType<T>,
+    deps?: SearchStrategyDependencies
+  ) => ISearchRequestParams | Promise<ISearchRequestParams>;
   parse: (
     options: StrategyRequestType<T>,
     response: IEsSearchResponse,
@@ -31,6 +35,7 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
       request: KibanaRequest;
       spaceId?: string;
       ruleDataClient?: IRuleDataClient | null;
+      dsl: ISearchRequestParams;
     }
   ) => Promise<StrategyResponseType<T>>;
 }

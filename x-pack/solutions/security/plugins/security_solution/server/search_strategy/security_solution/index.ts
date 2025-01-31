@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { map, mergeMap } from 'rxjs';
+import { map, mergeMap, from, concatAll } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { z } from '@kbn/zod';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import { securitySolutionFactory } from './factory';
 import type { EndpointAppContext } from '../../endpoint/types';
@@ -31,9 +32,17 @@ export const securitySolutionSearchStrategyProvider = (
       const queryFactory = securitySolutionFactory[parsedRequest.factoryQueryType];
       // NOTE: without this parameter, .hits.hits can be empty
       options.retrieveResults = true;
-      const dsl = queryFactory.buildDsl(parsedRequest);
 
-      return es.search({ ...request, params: dsl }, options, deps).pipe(
+      // Ensures that DSL is a promise
+      const dslPromise: Promise<ISearchRequestParams> = new Promise((resolve) =>
+        resolve(queryFactory.buildDsl(parsedRequest, deps))
+      );
+
+      return from(dslPromise).pipe(
+        map((dsl) => {
+          return es.search({ ...request, params: dsl }, options, deps);
+        }),
+        concatAll(),
         map((response) => {
           return {
             ...response,
@@ -42,16 +51,18 @@ export const securitySolutionSearchStrategyProvider = (
             },
           };
         }),
-        mergeMap((esSearchRes) =>
-          queryFactory.parse(parsedRequest, esSearchRes, {
+        mergeMap(async (esSearchRes) => {
+          const dsl = await dslPromise;
+          return queryFactory.parse(parsedRequest, esSearchRes, {
             esClient: deps.esClient,
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,
             request: deps.request,
             spaceId: getSpaceId && getSpaceId(deps.request),
             ruleDataClient,
-          })
-        )
+            dsl,
+          });
+        })
       );
     },
     cancel: async (id, options, deps) => {
