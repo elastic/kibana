@@ -346,7 +346,7 @@ const getSetupFormatFromInput = (
   if (!credentialsType) {
     return GCP_SETUP_ACCESS.CLOUD_SHELL;
   }
-  
+
   if (credentialsType !== GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE) {
     return GCP_SETUP_ACCESS.MANUAL;
   }
