@@ -86,6 +86,10 @@ export const buildEqlSearchRequest = ({
         filter: requestFilter,
       },
     },
+    // the allow_partial_search_results query parameter will supersede
+    // the corresponding xpack settings on cluster
+    // issue: https://github.com/elastic/kibana/issues/208760
+    allow_partial_search_results: true,
     runtime_mappings: runtimeMappings,
     timestamp_field: timestampField,
     event_category_field: eventCategoryOverride,

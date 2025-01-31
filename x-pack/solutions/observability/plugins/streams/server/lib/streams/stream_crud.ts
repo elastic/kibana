@@ -32,8 +32,15 @@ interface DeleteStreamParams extends BaseParams {
 }
 
 export function getDataStreamLifecycle(
-  dataStream: IndicesDataStream
+  dataStream: IndicesDataStream | null
 ): UnwiredIngestStreamEffectiveLifecycle {
+  if (!dataStream) {
+    return {
+      error: {
+        message: 'Data stream not found',
+      },
+    };
+  }
   if (
     dataStream.ilm_policy &&
     (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
