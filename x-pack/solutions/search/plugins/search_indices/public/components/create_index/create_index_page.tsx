@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingLogo } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
@@ -24,7 +24,7 @@ const CreateIndexLabel = i18n.translate('xpack.searchIndices.createIndex.docTitl
 });
 
 export const CreateIndexPage = () => {
-  const { console: consolePlugin } = useKibana().services;
+  const { console: consolePlugin, history, searchNavigation } = useKibana().services;
   const {
     data: indicesData,
     isInitialLoading,
@@ -39,13 +39,14 @@ export const CreateIndexPage = () => {
   usePageChrome(CreateIndexLabel, [...IndexManagementBreadcrumbs, { text: CreateIndexLabel }]);
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
       data-test-subj="elasticsearchCreateIndexPage"
       grow={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
+      <KibanaPageTemplate.Section alignment="top" restrictWidth={false}>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
@@ -53,6 +54,6 @@ export const CreateIndexPage = () => {
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };

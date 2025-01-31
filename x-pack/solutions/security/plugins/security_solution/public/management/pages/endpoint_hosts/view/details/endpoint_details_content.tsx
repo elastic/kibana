@@ -24,6 +24,7 @@ import { useEndpointSelector } from '../hooks';
 import { nonExistingPolicies, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
@@ -43,7 +44,16 @@ interface EndpointDetailsContentProps {
 
 export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
-    const isWorkflowInsightsEnabled = useIsExperimentalFeatureEnabled('defendInsights');
+    // Access control
+    const isWorkflowInsightsFeatureFlagEnabled = useIsExperimentalFeatureEnabled('defendInsights');
+    const { canReadWorkflowInsights } = useUserPrivileges().endpointPrivileges;
+    const canAccessWorkflowInsights = useMemo(() => {
+      if (!isWorkflowInsightsFeatureFlagEnabled) {
+        return false;
+      }
+      return canReadWorkflowInsights;
+    }, [canReadWorkflowInsights, isWorkflowInsightsFeatureFlagEnabled]);
+
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useMemo(
       () => hostInfo.metadata.Endpoint.policy.applied.status,
@@ -185,7 +195,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
     }, [hostInfo, policyInfo, missingPolicies, policyStatus, policyStatusClickHandler]);
     return (
       <div>
-        {isWorkflowInsightsEnabled && <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />}
+        {canAccessWorkflowInsights && <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />}
         <EuiDescriptionList
           columnWidths={[1, 3]}
           compressed

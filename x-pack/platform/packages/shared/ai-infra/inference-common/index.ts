@@ -10,6 +10,9 @@ export {
   ChatCompletionEventType,
   ToolChoiceType,
   type Message,
+  type MessageContentImage,
+  type MessageContentText,
+  type MessageContent,
   type AssistantMessage,
   type ToolMessage,
   type UserMessage,
@@ -93,6 +96,7 @@ export {
   isInferenceRequestError,
   isInferenceRequestAbortedError,
 } from './src/errors';
+export { elasticModelDictionary } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {
@@ -101,3 +105,8 @@ export {
   isSupportedConnector,
   type InferenceConnector,
 } from './src/connectors';
+export {
+  defaultInferenceEndpoints,
+  InferenceEndpointProvider,
+  elasticModelIds,
+} from './src/inference_endpoints';

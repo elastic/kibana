@@ -196,7 +196,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
         'full query parameter require agent policies read permissions'
       );
     }
-    let items = await agentPolicyService.getByIDs(soClient, ids, {
+    let items = await agentPolicyService.getByIds(soClient, ids, {
       withPackagePolicies,
       ignoreMissing,
     });
@@ -327,8 +327,12 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,
     };
-
-    if (spaceIds && spaceIds.length > 1 && authorizedSpaces) {
+    // Update spaces if there is more than one space ID assigned to that policy or if there the space that policy is created is different than the current space
+    if (
+      spaceIds &&
+      authorizedSpaces &&
+      (spaceIds.length > 1 || (spaceIds.length === 0 && spaceIds[0]) !== spaceId)
+    ) {
       await updateAgentPolicySpaces({
         agentPolicyId: agentPolicy.id,
         currentSpaceId: spaceId,
@@ -687,7 +691,7 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
       body: { items: [] },
     });
   }
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, ids, {
+  const agentPolicies = await agentPolicyService.getByIds(soClient, ids, {
     withPackagePolicies: true,
   });
 

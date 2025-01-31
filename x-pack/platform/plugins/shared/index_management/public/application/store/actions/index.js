@@ -14,7 +14,6 @@ export * from './forcemerge_indices';
 export * from './load_indices';
 export * from './open_indices';
 export * from './refresh_indices';
-export * from './unfreeze_indices';
 export * from './reload_indices';
 export * from './table_state';
 export * from './extension_action';

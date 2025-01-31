@@ -28,7 +28,8 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.threatIntelligence,
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.externalRuleActions,
-      ProductFeatureKey.integrationAssistant,
+      ProductFeatureKey.automaticImport,
+      ProductFeatureKey.prebuiltRuleCustomization,
     ],
   },
   endpoint: {
@@ -44,6 +45,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointAgentTamperProtection,
       ProductFeatureKey.endpointCustomNotification,
       ProductFeatureKey.endpointProtectionUpdates,
+      ProductFeatureKey.securityWorkflowInsights,
     ],
   },
   cloud: {

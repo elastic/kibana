@@ -28,6 +28,10 @@ import { FrameType, normalizeFrameType } from '@kbn/profiling-utils';
  *
  * Taken originally from prodfiler_ui/src/helpers/Pixi/frameTypeToColors.tsx
  */
+const RED = 0xfd8484;
+const ORANGE = 0xffaa00;
+const YELLOW = 0xe1e100;
+
 export const FRAME_TYPE_COLOR_MAP = {
   [FrameType.Unsymbolized]: [0xfd8484, 0xfd9d9d, 0xfeb5b5, 0xfecece],
   [FrameType.Python]: [0xfcae6b, 0xfdbe89, 0xfdcea6, 0xfedfc4],
@@ -42,6 +46,9 @@ export const FRAME_TYPE_COLOR_MAP = {
   [FrameType.DotNET]: [0x6c60e1, 0x8075e5, 0x948be9, 0xa8a0ed],
   [FrameType.ErrorFlag]: [0x0, 0x0, 0x0, 0x0], // This is a special case, it's not a real frame type
   [FrameType.Error]: [0xfd8484, 0xfd9d9d, 0xfeb5b5, 0xfecece],
+  [FrameType.Root]: [RED, RED, RED, RED],
+  [FrameType.ProcessName]: [ORANGE, ORANGE, ORANGE, ORANGE],
+  [FrameType.ThreadName]: [YELLOW, YELLOW, YELLOW, YELLOW],
 };
 
 export function frameTypeToRGB(frameType: FrameType, x: number): number {

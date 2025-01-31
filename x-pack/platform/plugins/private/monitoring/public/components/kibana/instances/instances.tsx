@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import { css } from '@emotion/react';
+import { capitalize, get } from 'lodash';
 import {
   EuiCallOut,
   EuiHealth,
@@ -16,12 +19,14 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiToolTip,
+  UseEuiTheme,
+  euiFontSize,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { capitalize, get } from 'lodash';
-import React, { Fragment } from 'react';
+
 import type { TableChange, Sorting, Pagination } from '../../../application/hooks/use_table';
 import type { AlertsByName } from '../../../alerts/types';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
@@ -39,6 +44,10 @@ import { EuiMonitoringTable } from '../../table';
 import { ClusterStatus } from '../cluster_status';
 import { formatLastSeenTimestamp } from '../format_last_seen_timestamp';
 import type { SetupMode } from '../../setup_mode/types';
+
+const tableCellSplitNumber = (theme: UseEuiTheme) => css`
+  font-size: ${euiFontSize(theme, 'm').fontSize};
+`;
 
 const getColumns = (
   setupMode: SetupMode,
@@ -64,14 +73,12 @@ const getColumns = (
           };
 
           setupModeStatus = (
-            <div className="monTableCell__setupModeStatus">
-              <SetupModeBadge
-                setupMode={setupMode}
-                status={status}
-                instance={instance}
-                productName={KIBANA_SYSTEM_ID}
-              />
-            </div>
+            <SetupModeBadge
+              setupMode={setupMode}
+              status={status}
+              instance={instance}
+              productName={KIBANA_SYSTEM_ID}
+            />
           );
           if (status.isNetNewUser) {
             return (
@@ -188,10 +195,8 @@ const getColumns = (
 
         return (
           <div>
-            <div className="monTableCell__splitNumber">
-              {formatNumber(value, 'int_commas') + ' ms avg'}
-            </div>
-            <div className="monTableCell__splitNumber">
+            <div css={tableCellSplitNumber}>{formatNumber(value, 'int_commas') + ' ms avg'}</div>
+            <div css={tableCellSplitNumber}>
               {formatNumber(kibana?.response_times?.max, 'int_commas')} ms max
             </div>
           </div>
@@ -319,7 +324,7 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
         {setupModeCallOut}
         <EuiPanel>
           <EuiMonitoringTable
-            className="kibanaInstancesTable"
+            data-test-subj="kibanaInstancesTable"
             rows={dataFlattened}
             columns={getColumns(setupMode, alerts, dateFormat, staleStatusThresholdSeconds)}
             sorting={sorting}

@@ -102,13 +102,7 @@
               ", [], unknown>; getPlugins: jest.MockInstance<",
               "InjectedMetadataPlugin",
               "[], [], unknown>; getAnonymousStatusPage: jest.MockInstance<boolean, [], unknown>; getLegacyMetadata: jest.MockInstance<{ uiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; globalUiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; }, [], unknown>; getCustomBranding: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-custom-branding-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingCommonPluginApi",
-                "section": "def-common.CustomBranding",
-                "text": "CustomBranding"
-              },
+              "CustomBranding",
               ", [], unknown>; getFeatureFlags: jest.MockInstance<{ overrides: Record<string, unknown>; } | undefined, [], unknown>; } & ",
               "InternalInjectedMetadataSetup"
             ],

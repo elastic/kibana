@@ -85,9 +85,17 @@ export enum ProductFeatureSecurityKey {
   cloudSecurityPosture = 'cloud_security_posture',
 
   /**
-   * enables the integration assistant
+   * enables the automatic import
    */
-  integrationAssistant = 'integration_assistant',
+  automaticImport = 'automatic_import',
+
+  /** Enables Endpoint Workflow Insights */
+  securityWorkflowInsights = 'security_workflow_insights',
+
+  /**
+   * Enables customization of prebuilt Elastic rules
+   */
+  prebuiltRuleCustomization = 'prebuilt_rule_customization',
 }
 
 export enum ProductFeatureCasesKey {
@@ -111,19 +119,37 @@ export enum ProductFeatureAttackDiscoveryKey {
   attackDiscovery = 'attack_discovery',
 }
 
+export enum ProductFeatureTimelineFeatureKey {
+  /**
+   * Enables Timeline
+   */
+  timeline = 'timeline',
+}
+
+export enum ProductFeatureNotesFeatureKey {
+  /**
+   * Enables Notes
+   */
+  notes = 'notes',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
+  ...ProductFeatureTimelineFeatureKey,
+  ...ProductFeatureNotesFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
   | ProductFeatureSecurityKey
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
-  | ProductFeatureAttackDiscoveryKey;
+  | ProductFeatureAttackDiscoveryKey
+  | ProductFeatureTimelineFeatureKey
+  | ProductFeatureNotesFeatureKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -137,6 +163,7 @@ export enum SecuritySubFeatureId {
   eventFilters = 'eventFiltersSubFeature',
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
+  workflowInsights = 'workflowInsightsSubFeature',
   hostIsolation = 'hostIsolationSubFeature',
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
@@ -150,6 +177,7 @@ export enum CasesSubFeatureId {
   casesSettings = 'casesSettingsSubFeature',
   createComment = 'createCommentSubFeature',
   reopenCase = 'reopenCaseSubFeature',
+  assignUsers = 'assignUsersSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */

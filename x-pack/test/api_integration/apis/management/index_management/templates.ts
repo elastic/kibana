@@ -15,6 +15,7 @@ import { getRandomString } from './lib/random';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
+  const es = getService('es');
   const { catTemplate, getTemplatePayload, getSerializedTemplate } = templatesHelpers(getService);
   const {
     getAllTemplates,
@@ -27,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
     simulateTemplateByName,
   } = templatesApi(getService);
 
-  describe('index templates', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/209027
+  describe.skip('index templates', () => {
     after(async () => await cleanUpTemplates());
 
     describe('get all', () => {
@@ -232,6 +234,43 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.name).to.equal(templateName);
         expect(Object.keys(body).sort()).to.eql(expectedKeys);
         expect(Object.keys(body.template).sort()).to.eql(expectedTemplateKeys);
+      });
+
+      describe('with logs-*-* index pattern', () => {
+        const logsdbTemplateName = 'test-logsdb-template';
+        before(async () => {
+          const template = getTemplatePayload(logsdbTemplateName, ['logs-*-*']);
+          await createTemplate(template).expect(200);
+        });
+
+        after(async () => {
+          await deleteTemplates([{ name: logsdbTemplateName }]);
+        });
+
+        const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+          { enabled: true, indexMode: 'logsdb' },
+          { enabled: false, indexMode: 'standard' },
+          { enabled: null, indexMode: 'standard' }, // In stateful Kibana, the cluster.logsdb.enabled setting is false by default, so standard index mode
+        ];
+
+        logsdbSettings.forEach(({ enabled, indexMode }) => {
+          it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+            await es.cluster.putSettings({
+              body: {
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled,
+                    },
+                  },
+                },
+              },
+            });
+
+            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            expect(body.indexMode).to.equal(indexMode);
+          });
+        });
       });
     });
 

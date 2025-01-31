@@ -19,6 +19,13 @@ export const registerGetPluginStateRoute = (router: IRouter) => {
   router.get(
     {
       path: `${API_BASE_PATH}/state`,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "This route is opted out from authorization because it's a wrapper around the Saved Object client",
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -40,6 +47,13 @@ export const registerPutPluginStateRoute = (router: IRouter) => {
   router.put(
     {
       path: `${API_BASE_PATH}/state`,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "This route is opted out from authorization because it's a wrapper around the Saved Object client",
+        },
+      },
       validate: {
         body: schema.object({
           status: schema.maybe(schema.string()),

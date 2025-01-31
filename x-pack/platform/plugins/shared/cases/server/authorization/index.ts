@@ -190,6 +190,14 @@ const CaseOperations = {
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [WriteOperations.AssignCase]: {
+    ecsType: EVENT_TYPES.change,
+    name: WriteOperations.AssignCase as const,
+    action: 'cases_assign',
+    verbs: updateVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
 };
 
 const ConfigurationOperations = {

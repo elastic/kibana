@@ -115,13 +115,26 @@ describe('CompleteExternalTaskRunner class', () => {
 
     expect(esClientMock.bulk).toHaveBeenCalledWith({
       index: ENDPOINT_ACTION_RESPONSES_INDEX,
+      // Array below will have records for each type of external EDR, so as new ones are
+      // added, a new response should be added to the array below
       operations: [
+        // for SentinelOne
         { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
         expect.objectContaining({
           '@timestamp': expect.any(String),
           EndpointActions: expect.any(Object),
           agent: expect.any(Object),
         }),
+
+        // for crowdstrike
+        { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
+        expect.objectContaining({
+          '@timestamp': expect.any(String),
+          EndpointActions: expect.any(Object),
+          agent: expect.any(Object),
+        }),
+
+        // for Microsoft Defender
         { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
         expect.objectContaining({
           '@timestamp': expect.any(String),

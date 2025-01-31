@@ -15,21 +15,25 @@ import { BurnRateRuleParams } from '../../../typings';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   createRemoteSloDeleteUrl,
+  createRemoteSloDisableUrl,
   createRemoteSloEditUrl,
+  createRemoteSloEnableUrl,
   createRemoteSloResetUrl,
 } from '../../../utils/slo/remote_slo_urls';
+
+interface Props {
+  slo?: SLOWithSummaryResponse;
+  rules?: Array<Rule<BurnRateRuleParams>>;
+  setIsEditRuleFlyoutOpen: (val: boolean) => void;
+  setIsActionsPopoverOpen: (val: boolean) => void;
+}
 
 export const useSloActions = ({
   slo,
   rules,
   setIsEditRuleFlyoutOpen,
   setIsActionsPopoverOpen,
-}: {
-  slo?: SLOWithSummaryResponse;
-  rules?: Array<Rule<BurnRateRuleParams>>;
-  setIsEditRuleFlyoutOpen: (val: boolean) => void;
-  setIsActionsPopoverOpen: (val: boolean) => void;
-}) => {
+}: Props) => {
   const {
     share: {
       url: { locators },
@@ -44,6 +48,8 @@ export const useSloActions = ({
       handleNavigateToRules: () => {},
       remoteDeleteUrl: undefined,
       remoteResetUrl: undefined,
+      remoteEnableUrl: undefined,
+      remoteDisableUrl: undefined,
       sloDetailsUrl: '',
     };
   }
@@ -79,6 +85,8 @@ export const useSloActions = ({
 
   const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
   const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);
+  const remoteEnableUrl = createRemoteSloEnableUrl(slo, spaceId);
+  const remoteDisableUrl = createRemoteSloDisableUrl(slo, spaceId);
 
   const sloEditUrl = slo.remote
     ? createRemoteSloEditUrl(slo, spaceId)
@@ -89,6 +97,8 @@ export const useSloActions = ({
     handleNavigateToRules,
     remoteDeleteUrl,
     remoteResetUrl,
+    remoteEnableUrl,
+    remoteDisableUrl,
     sloDetailsUrl: http.basePath.prepend(detailsUrl),
   };
 };

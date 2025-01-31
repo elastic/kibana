@@ -175,7 +175,7 @@
         "signature": [
           "({\n  core,\n  repository,\n  logger,\n  dependencies,\n}: { core: ",
           "CoreSetup",
-          "<object, unknown>; repository: Record<string, ",
+          "<{}, unknown>; repository: Record<string, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -225,7 +225,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
                 "deprecated": false,
@@ -673,7 +673,7 @@
         "label": "EndpointOf",
         "description": [],
         "signature": [
-          "keyof TServerRouteRepository"
+          "keyof TServerRouteRepository & string"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,

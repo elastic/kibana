@@ -42,7 +42,9 @@
       "charts",
       "cloud",
       "lens",
-      "share"
+      "share",
+      "fleet",
+      "searchIndices"
     ],
     "requiredBundles": ["kibanaReact"]
   }

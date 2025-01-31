@@ -67,7 +67,12 @@ export async function buildSnapshot({
 export function archiveForPlatform(platform: NodeJS.Platform, license: string) {
   switch (platform) {
     case 'darwin':
-      return { format: 'tar', ext: 'tar.gz', task: 'darwin-tar', platform: 'darwin' };
+      return {
+        format: 'tar',
+        ext: 'tar.gz',
+        task: os.arch() === 'arm64' ? 'darwin-aarch64-tar' : 'darwin-tar',
+        platform: 'darwin',
+      };
     case 'win32':
       return { format: 'zip', ext: 'zip', task: 'windows-zip', platform: 'windows' };
     case 'linux':

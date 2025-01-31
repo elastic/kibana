@@ -18,7 +18,7 @@ export const RULES_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.rulesCard.description',
   {
     defaultMessage:
-      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are  met.',
+      'Rules are the detection engine that allows you as an analyst to proactively monitor your environment.',
   }
 );
 
@@ -40,5 +40,12 @@ export const RULES_CARD_ADD_RULES_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.rulesCard.addRulesButton',
   {
     defaultMessage: 'Add Elastic rules',
+  }
+);
+
+export const RULES_CARD_STEP_SELECTOR_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.rulesCard.stepSelectorTitle',
+  {
+    defaultMessage: 'Here are two ways you can add rules',
   }
 );

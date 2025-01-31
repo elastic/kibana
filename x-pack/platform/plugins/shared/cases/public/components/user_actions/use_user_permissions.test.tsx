@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useUserPermissions } from './use_user_permissions';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';

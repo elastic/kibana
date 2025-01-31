@@ -43,9 +43,7 @@ function renderActions({ agent, agentPolicy }: { agent: Agent; agentPolicy?: Age
 
 describe('AgentDetailsActionMenu', () => {
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      diagnosticFileUploadEnabled: true,
-    } as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
         readAgents: true,
@@ -71,17 +69,6 @@ describe('AgentDetailsActionMenu', () => {
 
       return utils.queryByTestId('requestAgentDiagnosticsBtn');
     }
-
-    it('should not render action if feature is disabled', async () => {
-      mockedExperimentalFeaturesService.get.mockReturnValue({
-        diagnosticFileUploadEnabled: false,
-      } as any);
-      const res = renderAndGetDiagnosticsButton({
-        agent: {} as Agent,
-        agentPolicy: {} as AgentPolicy,
-      });
-      expect(res).toBe(null);
-    });
 
     it('should render an active action button if agent version >= 8.7', async () => {
       const res = renderAndGetDiagnosticsButton({

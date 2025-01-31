@@ -18,7 +18,11 @@ import { InjectActionParamsOpts, injectActionParams } from '../inject_action_par
 import { RuleTypeParams, SanitizedRule, GetViewInAppRelativeUrlFnOpts } from '../../types';
 import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
-import { ConcreteTaskInstance, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  TaskErrorSource,
+  TaskPriority,
+} from '@kbn/task-manager-plugin/server';
 import { RuleNotifyWhen } from '../../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
@@ -116,6 +120,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
@@ -125,6 +130,7 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My  goes here",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -366,6 +372,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
@@ -375,6 +382,7 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My  goes here",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -411,6 +419,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
@@ -420,6 +429,7 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My state-val goes here",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -769,6 +779,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "action-2",
@@ -778,6 +789,7 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My  goes here",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -1014,12 +1026,14 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "testActionTypeId",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
             "params": Object {
               "message": "New: 1 Ongoing: 0 Recovered: 0",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -1161,12 +1175,14 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "testActionTypeId",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
             "params": Object {
               "message": "New: 1 Ongoing: 0 Recovered: 0",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -1413,6 +1429,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
@@ -1422,6 +1439,7 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My  goes here",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -1443,6 +1461,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "2",
@@ -1452,6 +1471,7 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My  goes here",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -1974,6 +1994,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
@@ -1983,6 +2004,7 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My  goes here",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -2004,6 +2026,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
@@ -2013,6 +2036,7 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My  goes here",
             },
+            "priority": undefined,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -2034,6 +2058,7 @@ describe('Action Scheduler', () => {
           Object {
             "actionTypeId": "test",
             "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
             "consumer": "rule-consumer",
             "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
             "id": "1",
@@ -2043,6 +2068,154 @@ describe('Action Scheduler', () => {
               "foo": true,
               "stateVal": "My  goes here",
             },
+            "priority": undefined,
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+            "uuid": "111-111",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('does schedule actions with priority when specified', async () => {
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
+        priority: TaskPriority.Low,
+        rule: {
+          ...defaultSchedulerContext.rule,
+          actions: [
+            {
+              ...defaultSchedulerContext.rule.actions[0],
+              frequency: {
+                summary: false,
+                notifyWhen: RuleNotifyWhen.CHANGE,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await actionScheduler.run({
+      activeCurrentAlerts: {
+        ...generateAlert({
+          id: 1,
+          pendingRecoveredCount: 1,
+          lastScheduledActionsGroup: 'recovered',
+        }),
+        ...generateAlert({
+          id: 2,
+          pendingRecoveredCount: 1,
+          lastScheduledActionsGroup: 'recovered',
+        }),
+        ...generateAlert({
+          id: 3,
+          pendingRecoveredCount: 1,
+          lastScheduledActionsGroup: 'recovered',
+        }),
+      },
+      recoveredCurrentAlerts: {},
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "priority": 1,
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+            "uuid": "111-111",
+          },
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "priority": 1,
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+            "uuid": "111-111",
+          },
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "apiKeyId": undefined,
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 3 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "priority": 1,
             "relatedSavedObjects": Array [
               Object {
                 "id": "1",
@@ -2523,6 +2696,7 @@ describe('Action Scheduler', () => {
             Object {
               "actionTypeId": ".test-system-action",
               "apiKey": "MTIzOmFiYw==",
+              "apiKeyId": undefined,
               "consumer": "rule-consumer",
               "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
               "id": "1",
@@ -2530,6 +2704,7 @@ describe('Action Scheduler', () => {
                 "foo": "bar",
                 "myParams": "test",
               },
+              "priority": undefined,
               "relatedSavedObjects": Array [
                 Object {
                   "id": "1",

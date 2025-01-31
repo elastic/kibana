@@ -28,12 +28,6 @@ export const LOCAL_QUERY_BAR_SEARCH_INPUT_SELECTOR =
 
 export const RISK_SCORE_ERROR_PANEL = '[data-test-subj="risk-score-error-panel"]';
 
-export const RISK_SCORE_UPDATE_CANCEL = '[data-test-subj="risk-score-update-cancel"]';
-
-export const RISK_SCORE_UPDATE_CONFIRM = '[data-test-subj="risk-score-update-confirm"]';
-
-export const RISK_SCORE_UPDATE_BUTTON = '[data-test-subj="risk-score-update-button"]';
-
 export const RISK_SCORE_STATUS = '[data-test-subj="risk-score-status"]';
 
 export const RISK_SCORE_STATUS_LOADING = '[data-test-subj="risk-score-status-loading"]';

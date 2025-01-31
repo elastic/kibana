@@ -83,19 +83,24 @@ exports[`useComparisonCellValue should render cells with diff mode "Chars" 2`] =
       is a 
     </span>
     <span
-      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
-    >
-      different 
-    </span>
-    <span
-      class="unifiedDataTable__comparisonSegment"
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
     >
       m
     </span>
     <span
-      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+      diff
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment"
     >
       e
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+      rent m
     </span>
     <span
       class="unifiedDataTable__comparisonSegment"

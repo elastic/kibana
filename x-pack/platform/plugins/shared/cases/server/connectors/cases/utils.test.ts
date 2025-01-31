@@ -629,6 +629,7 @@ describe('utils', () => {
         'cases:my-owner/deleteComment',
         'cases:my-owner/findConfigurations',
         'cases:my-owner/reopenCase',
+        'cases:my-owner/assignCase',
       ]);
     });
   });

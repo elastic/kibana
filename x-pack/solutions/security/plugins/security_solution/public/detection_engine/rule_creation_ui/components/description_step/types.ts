@@ -20,6 +20,7 @@ export interface BuildQueryBarDescription {
   filters: Filter[];
   filterManager: FilterManager;
   query: string;
+  queryLanguage?: string;
   savedId: string;
   indexPatterns?: DataViewBase;
   queryLabel?: string;

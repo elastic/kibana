@@ -13,7 +13,7 @@ import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { DashboardPanelState } from '../../../common';
 import type { GridData } from '../../../server/content_management';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../dashboard_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management';
 
 interface IplacementDirection {
   grid: Omit<GridData, 'i'>;

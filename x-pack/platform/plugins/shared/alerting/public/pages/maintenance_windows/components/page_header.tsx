@@ -6,22 +6,21 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+  useEuiFontSize,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { LinkIcon } from './link_icon';
 import * as i18n from '../translations';
 import { TruncatedText } from './truncated_text';
 import { useMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
-
-export const styles = {
-  linkBack: css`
-    font-size: ${euiThemeVars.euiFontSizeXS};
-    line-height: ${euiThemeVars.euiLineHeight};
-    margin-bottom: ${euiThemeVars.euiSizeS};
-  `,
-};
 
 export const ExperimentalBadge = React.memo(() => (
   <EuiBetaBadge
@@ -72,6 +71,9 @@ export interface PageHeaderProps {
 
 export const PageHeader = React.memo<PageHeaderProps>(
   ({ showBackButton = false, title, description }) => {
+    const { euiTheme } = useEuiTheme();
+    const xsFontSize = useEuiFontSize('xs').fontSize;
+    const lineHeight = useEuiFontSize('xs').lineHeight;
     const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
 
     const navigateToMaintenanceWindowsClick = useCallback(() => {
@@ -82,7 +84,14 @@ export const PageHeader = React.memo<PageHeaderProps>(
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           {showBackButton && (
-            <div data-test-subj="link-back" css={styles.linkBack}>
+            <div
+              data-test-subj="link-back"
+              css={css`
+                font-size: ${xsFontSize};
+                line-height: ${lineHeight};
+                margin-bottom: ${euiTheme.size.s};
+              `}
+            >
               <LinkIcon onClick={navigateToMaintenanceWindowsClick} iconType="arrowLeft">
                 {i18n.MAINTENANCE_WINDOWS_RETURN_LINK}
               </LinkIcon>

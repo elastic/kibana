@@ -8,8 +8,8 @@
 import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { useTheme, useKibanaSpace } from '@kbn/observability-shared-plugin/public';
+import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
+import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { useLensFormulaHelper } from './use_lens_formula_helper';
 import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
@@ -44,7 +44,7 @@ export const getFiltersFromDefs = (
 export function getLayerConfigs(
   allSeries: AllSeries,
   reportType: ReportViewType,
-  theme: EuiTheme,
+  euiTheme: EuiThemeComputed,
   dataViews: DataViewState,
   reportConfigMap: ReportConfigMap,
   spaceId?: string
@@ -73,7 +73,9 @@ export function getLayerConfigs(
         getFiltersFromDefs(series.textReportDefinitions)
       );
 
-      const color = (theme.eui as unknown as Record<string, string>)?.[`euiColorVis${seriesIndex}`];
+      const color = (euiTheme.colors.vis as unknown as Record<string, string>)?.[
+        `euiColorVis${seriesIndex}`
+      ];
       let seriesColor = series.color!;
       if (reportType !== 'single-metric') {
         seriesColor = series.color ?? color;
@@ -108,7 +110,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
   const { reportConfigMap } = useExploratoryView();
 
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const lensFormulaHelper = useLensFormulaHelper();
 
@@ -123,7 +125,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     const layerConfigs = getLayerConfigs(
       allSeriesT,
       reportTypeT,
-      theme,
+      euiTheme,
       dataViews,
       reportConfigMap,
       spaceId.space?.id
@@ -158,5 +160,5 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     return lensAttributes.getJSON('lnsXY', lastRefresh);
     // we also want to check the state on allSeries changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViews, reportType, storage, theme, lastRefresh, allSeries, lensFormulaHelper]);
+  }, [dataViews, reportType, storage, euiTheme, lastRefresh, allSeries, lensFormulaHelper]);
 };

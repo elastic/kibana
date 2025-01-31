@@ -14,8 +14,9 @@ import type {
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';

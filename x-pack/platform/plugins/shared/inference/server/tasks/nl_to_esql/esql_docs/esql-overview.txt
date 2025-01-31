@@ -57,7 +57,8 @@ ES|QL does not support configurations where the `_source` field is disabled. ES|
 
 #### Full-Text Search
 
-Because of the way ES|QL treats `text` values, full-text search is not yet supported. Queries on `text` fields are like queries on `keyword` fields: they are case-sensitive and need to match the full string.
+Because of the way ES|QL treats `text` values, queries on `text` fields are like queries on `keyword` fields: they are case-sensitive and need to match the full string.
+To perform full-text search on `text` fields, search functions such as `MATCH` should be used.
 
 #### Time Series Data Streams
 

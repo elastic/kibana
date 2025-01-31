@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { SloListCardView } from './card_view/slos_card_view';
+import { SloListCardView } from './card_view/slo_list_card_view';
 import { SloListCompactView } from './compact_view/slo_list_compact_view';
 import { HealthCallout } from './health_callout/health_callout';
 import { SloListEmpty } from './slo_list_empty';

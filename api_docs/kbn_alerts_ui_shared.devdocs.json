@@ -2089,6 +2089,20 @@
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.ActionTypeModel.subFeature",
+            "type": "string",
+            "tags": [],
+            "label": "subFeature",
+            "description": [],
+            "signature": [
+              "\"endpointSecurity\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2611,9 +2625,7 @@
                     "section": "def-common.Query",
                     "text": "Query"
                   },
-                  ">, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; saveQueryMenuVisibility?: ",
-                  "SavedQueryMenuVisibility",
-                  " | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
+                  ">, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; allowSavingQueries?: boolean | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -2623,7 +2635,7 @@
                   },
                   "[]) => void) | undefined; }"
                 ],
-                "path": "src/plugins/unified_search/public/types.ts",
+                "path": "src/platform/plugins/shared/unified_search/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4142,7 +4154,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -4524,7 +4536,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5346,6 +5358,14 @@
           },
           " & ",
           {
+            "pluginId": "@kbn/esql-variables-types",
+            "scope": "public",
+            "docId": "kibKbnEsqlVariablesTypesPluginApi",
+            "section": "def-public.PublishesESQLVariables",
+            "text": "PublishesESQLVariables"
+          },
+          " & ",
+          {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
@@ -5400,7 +5420,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          ">>, \"unsavedChanges\"> & ",
+          ">>, \"unsavedChanges$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

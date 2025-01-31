@@ -5422,10 +5422,27 @@
           {
             "parentPluginId": "@kbn/test",
             "id": "def-common.GetCookieOptions.forceNewSession",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "forceNewSession",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.GetCookieOptions.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6383,6 +6400,18 @@
           " & { getUrl: () => string; }"
         ],
         "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.fleetPackageRegistryDockerImage",
+        "type": "string",
+        "tags": [],
+        "label": "fleetPackageRegistryDockerImage",
+        "description": [],
+        "path": "packages/kbn-test/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

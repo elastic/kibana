@@ -38,18 +38,19 @@ export default function ({ getService }: FtrProviderContext) {
     return lastState;
   };
 
-  describe('reindexing', () => {
+  describe('reindexing', function () {
+    // bail on first error in this suite since cases sequentially depend on each other
+    this.bail(true);
+
     afterEach(() => {
       // Cleanup saved objects
       return es.deleteByQuery({
         index: '.kibana',
         refresh: true,
-        body: {
-          query: {
-            simple_query_string: {
-              query: REINDEX_OP_TYPE,
-              fields: ['type'],
-            },
+        query: {
+          simple_query_string: {
+            query: REINDEX_OP_TYPE,
+            fields: ['type'],
           },
         },
       });
@@ -57,6 +58,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should create a new index with the same documents', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+
+      const { dummydata: originalIndex } = await es.indices.get({
+        index: 'dummydata',
+        flat_settings: true,
+      });
+
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
@@ -70,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(lastState.status).to.equal(ReindexStatus.completed);
 
       const { newIndexName } = lastState;
-      const indexSummary = await es.indices.get({ index: 'dummydata' });
+      const indexSummary = await es.indices.get({ index: 'dummydata', flat_settings: true });
 
       // The new index was created
       expect(indexSummary[newIndexName]).to.be.an('object');
@@ -78,8 +85,64 @@ export default function ({ getService }: FtrProviderContext) {
       expect(indexSummary[newIndexName].aliases?.dummydata).to.be.an('object');
       // Verify mappings exist on new index
       expect(indexSummary[newIndexName].mappings?.properties).to.be.an('object');
+      // Verify settings exist on new index
+      expect(indexSummary[newIndexName].settings).to.be.an('object');
+      expect({
+        'index.number_of_replicas':
+          indexSummary[newIndexName].settings?.['index.number_of_replicas'],
+        'index.refresh_interval': indexSummary[newIndexName].settings?.['index.refresh_interval'],
+      }).to.eql({
+        'index.number_of_replicas': originalIndex.settings?.['index.number_of_replicas'],
+        'index.refresh_interval': originalIndex.settings?.['index.refresh_interval'],
+      });
       // The number of documents in the new index matches what we expect
       expect((await es.count({ index: lastState.newIndexName })).count).to.be(3);
+
+      // Cleanup newly created index
+      await es.indices.delete({
+        index: lastState.newIndexName,
+      });
+    });
+
+    it('should match the same original index settings after reindex', async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+
+      const originalSettings = {
+        'index.number_of_replicas': 1,
+        'index.refresh_interval': '10s',
+      };
+
+      // Forcing custom settings
+      await es.indices.putSettings({
+        index: 'dummydata',
+        settings: originalSettings,
+      });
+
+      await supertest
+        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const lastState = await waitForReindexToComplete('dummydata');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+
+      const { newIndexName } = lastState;
+      const indexSummary = await es.indices.get({ index: 'dummydata', flat_settings: true });
+
+      // The new index was created
+      expect(indexSummary[newIndexName]).to.be.an('object');
+      // The original index name is aliased to the new one
+      expect(indexSummary[newIndexName].aliases?.dummydata).to.be.an('object');
+      // Verify mappings exist on new index
+      expect(indexSummary[newIndexName].mappings?.properties).to.be.an('object');
+      // Verify settings exist on new index
+      expect(indexSummary[newIndexName].settings).to.be.an('object');
+      expect({
+        'index.number_of_replicas':
+          indexSummary[newIndexName].settings?.['index.number_of_replicas'],
+        'index.refresh_interval': indexSummary[newIndexName].settings?.['index.refresh_interval'],
+      }).to.eql(originalSettings);
 
       // Cleanup newly created index
       await es.indices.delete({
@@ -118,15 +181,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Add aliases and ensure each returns the right number of docs
       await es.indices.updateAliases({
-        body: {
-          actions: [
-            { add: { index: 'dummydata', alias: 'myAlias' } },
-            { add: { index: 'dummy*', alias: 'wildcardAlias' } },
-            {
-              add: { index: 'dummydata', alias: 'myHttpsAlias', filter: { term: { https: true } } },
-            },
-          ],
-        },
+        actions: [
+          { add: { index: 'dummydata', alias: 'myAlias' } },
+          { add: { index: 'dummy*', alias: 'wildcardAlias' } },
+          {
+            add: { index: 'dummydata', alias: 'myHttpsAlias', filter: { term: { https: true } } },
+          },
+        ],
       });
       expect((await es.count({ index: 'myAlias' })).count).to.be(3);
       expect((await es.count({ index: 'wildcardAlias' })).count).to.be(3);

@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { MAX_TEMPLATES_LENGTH } from '../../../common/constants';
 import type { CasesConfigurationUITemplate } from '../../../common/ui';
-import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import * as i18n from './translations';
 import { TemplatesList } from './templates_list';
 
@@ -72,9 +71,6 @@ const TemplatesComponent: React.FC<Props> = ({
       title={
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>{i18n.TEMPLATE_TITLE}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ExperimentalBadge />
-          </EuiFlexItem>
         </EuiFlexGroup>
       }
       description={<p>{i18n.TEMPLATE_DESCRIPTION}</p>}

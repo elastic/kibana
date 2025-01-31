@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { EuiIconPlugs } from '@kbn/search-shared-ui';
 
-import connectorLogo from '../../../../../../assets/images/connector.svg';
 import {
   BETA_LABEL,
   TECH_PREVIEW_LABEL,
@@ -37,12 +37,16 @@ import { SelfManagePreference } from '../create_connector';
 
 interface ChooseConnectorSelectableProps {
   selfManaged: SelfManagePreference;
+  disabled?: boolean;
 }
 interface OptionData {
   secondaryContent?: string;
 }
 
-export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({ selfManaged }) => {
+export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
+  selfManaged,
+  disabled,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<OptionData>>>(
     []
@@ -142,11 +146,12 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({ self
 
   return (
     <EuiComboBox
+      isDisabled={disabled}
       aria-label={i18n.translate(
         'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }
       )}
-      prepend={<EuiIcon type={selectedConnector?.iconPath ?? connectorLogo} size="l" />}
+      prepend={<EuiIcon type={selectedConnector?.iconPath ?? EuiIconPlugs} size="l" />}
       singleSelection
       fullWidth
       placeholder={i18n.translate(

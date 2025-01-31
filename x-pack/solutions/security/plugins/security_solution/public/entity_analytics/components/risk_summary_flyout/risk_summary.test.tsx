@@ -18,6 +18,7 @@ import type {
   VisualizationEmbeddableProps,
 } from '../../../common/components/visualization_actions/types';
 import type { Query } from '@kbn/es-query';
+import { EntityType } from '../../../../common/search_strategy';
 
 const mockVisualizationEmbeddable = jest
   .fn()
@@ -42,6 +43,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -79,6 +81,7 @@ describe('FlyoutRiskSummary', () => {
           recalculatingScore={false}
           isLinkEnabled
           isPreviewMode
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -97,6 +100,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -112,6 +116,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -128,6 +133,8 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled={false}
+          isPreviewMode
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -144,6 +151,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -160,6 +168,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -176,6 +185,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -204,6 +214,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.host}
         />
       </TestProviders>
     );
@@ -227,6 +238,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.user}
         />
       </TestProviders>
     );
@@ -250,6 +262,7 @@ describe('FlyoutRiskSummary', () => {
           openDetailsPanel={() => {}}
           recalculatingScore={false}
           isLinkEnabled
+          entityType={EntityType.user}
         />
       </TestProviders>
     );

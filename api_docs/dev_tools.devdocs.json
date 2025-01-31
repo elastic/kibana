@@ -27,7 +27,7 @@
             "section": "def-public.DevToolsSetup",
             "text": "DevToolsSetup"
           },
-          ", void, object, object>"
+          ", void, never, never>"
         ],
         "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
         "deprecated": false,
@@ -59,7 +59,7 @@
             "signature": [
               "(coreSetup: ",
               "CoreSetup",
-              "<object, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
+              "<{}, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
               "CreateDevToolArgs",
               ") => ",
               "DevToolApp",
@@ -78,7 +78,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
                 "deprecated": false,

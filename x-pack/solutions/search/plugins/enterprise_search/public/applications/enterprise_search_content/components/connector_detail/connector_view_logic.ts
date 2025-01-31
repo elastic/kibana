@@ -34,7 +34,11 @@ import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,
 } from '../../utils/connector_helpers';
-import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
+import {
+  getConnectorLastSeenError,
+  hasConnectorBeenSeenRecently,
+  isLastSeenOld,
+} from '../../utils/connector_status_helpers';
 
 import {
   ConnectorNameAndDescriptionActions,
@@ -82,6 +86,7 @@ export interface ConnectorViewValues {
   isCanceling: boolean;
   isHiddenIndex: boolean;
   isLoading: boolean;
+  isWaitingOnAgentlessDeployment: boolean;
   lastUpdated: string | null;
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
@@ -206,6 +211,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
       (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
     ],
+
     hasIncrementalSyncFeature: [
       () => [selectors.connector],
       (connector?: Connector) => hasIncrementalSyncFeature(connector),
@@ -230,6 +236,14 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ) =>
         [Status.IDLE && Status.LOADING].includes(fetchConnectorApiStatus) ||
         (index && [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus)),
+    ],
+    isWaitingOnAgentlessDeployment: [
+      () => [selectors.connector],
+      (connector: Connector) => {
+        if (!connector || !connector.is_native) return false;
+
+        return !hasConnectorBeenSeenRecently(connector);
+      },
     ],
     pipelineData: [
       () => [selectors.connector],

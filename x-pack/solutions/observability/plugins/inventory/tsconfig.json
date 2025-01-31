@@ -52,15 +52,14 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/observability-utils-browser",
-    "@kbn/observability-utils-server",
-    "@kbn/observability-utils-common",
     "@kbn/storybook",
     "@kbn/dashboard-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/react-hooks",
-    "@kbn/observability-utils-common",
     "@kbn/observability-utils-browser",
-    "@kbn/observability-utils-server",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/dataset-quality-plugin",
+    "@kbn/observability-utils-common",
+    "@kbn/discover-plugin",
   ]
 }

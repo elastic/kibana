@@ -120,6 +120,11 @@ export const allowedExperimentalValues = Object.freeze({
   attackDiscoveryAlertFiltering: false,
 
   /**
+   * Enables content references (citations) in the AI Assistant
+   */
+  contentReferencesEnabled: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -184,23 +189,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   jamfDataInAnalyzerEnabled: true,
 
-  /*
-   * Disables discover esql tab within timeline
-   *
-   */
-  timelineEsqlTabDisabled: false,
-
-  /*
-   * Disables date pickers and sourcerer in analyzer if needed.
-   *
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
-
-  /**
-   * Enables graph visualization in alerts flyout
-   */
-  graphVisualizationInFlyoutEnabled: false,
-
   /**
    * Enables an ability to customize Elastic prebuilt rules.
    *
@@ -228,6 +216,11 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
+   * Enables the storing of gaps in the event log
+   */
+  storeGapsInEventLogEnabled: false,
+
+  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -246,17 +239,17 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
-  serviceEntityStoreEnabled: false,
+  serviceEntityStoreEnabled: true,
 
   /**
-   * Enables the siem migrations feature
+   * Disables the siem migrations feature
    */
-  siemMigrationsEnabled: false,
+  siemMigrationsDisabled: false,
 
   /**
    * Enables the Defend Insights feature
    */
-  defendInsights: false,
+  defendInsights: true,
 
   /**
    * Enables flyout history and new preview navigation
@@ -265,8 +258,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables CrowdStrike's RunScript RTR command
+   * Release: 8.18/9.0
    */
-  crowdstrikeRunScriptEnabled: false,
+  crowdstrikeRunScriptEnabled: true,
 
   /**
    * Enables the Asset Inventory Entity Store feature.
@@ -278,6 +272,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Asset Inventory feature
    */
   assetInventoryUXEnabled: false,
+
+  /**
+   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
+   * Release: 8.18/9.0
+   */
+  responseActionsMSDefenderEndpointEnabled: true,
+
+  /**
+   * Enables banner for informing users about changes in data collection.
+   */
+  eventCollectionDataReductionBannerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

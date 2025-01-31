@@ -41,6 +41,14 @@ const configSchema = schema.object({
   }),
   // Used for extra enrichment of telemetry
   labels: labelsSchema,
+  // Allows shipping telemetry to a local index in ES
+  localShipper: schema.conditional(
+    schema.contextRef('dist'),
+    schema.literal(false), // Only allow changing it if it's not a distributable release
+    schema.boolean({ defaultValue: false }),
+    schema.literal(false),
+    { defaultValue: false }
+  ),
 });
 
 export type TelemetryConfigType = TypeOf<typeof configSchema>;
@@ -56,6 +64,7 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
     sendUsageTo: true,
     hidePrivacyStatement: true,
     labels: true,
+    localShipper: true,
   },
   dynamicConfig: {
     labels: true,

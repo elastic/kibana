@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
@@ -27,8 +27,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade/upgrade_warning';
 import { getMlGlobalServices } from '../../../../util/get_services';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
@@ -45,13 +46,11 @@ import type { MlSavedObjectType } from '../../../../../../common/types/saved_obj
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
-
 interface Props {
   coreStart: CoreStart;
   share: SharePluginStart;
   history: ManagementAppMountParams['history'];
-  spacesApi?: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   data: DataPublicPluginStart;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsStart;
@@ -63,7 +62,7 @@ export const JobsListPage: FC<Props> = ({
   coreStart,
   share,
   history,
-  spacesApi,
+  spaces,
   data,
   usageCollection,
   fieldFormats,
@@ -104,12 +103,6 @@ export const JobsListPage: FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const ContextWrapper = useCallback(
-    spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
-    [spacesApi]
-  );
-
   if (initialized === false) {
     return null;
   }
@@ -132,7 +125,7 @@ export const JobsListPage: FC<Props> = ({
               data,
               usageCollection,
               fieldFormats,
-              spacesApi,
+              spaces,
               mlServices,
             }}
           >
@@ -178,11 +171,11 @@ export const JobsListPage: FC<Props> = ({
               data,
               usageCollection,
               fieldFormats,
-              spacesApi,
+              spaces,
               mlServices,
             }}
           >
-            <ContextWrapper feature={PLUGIN_ID}>
+            <SpaceManagementContextWrapper feature={PLUGIN_ID}>
               <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
                 <Router history={history}>
                   <EuiPageTemplate.Header
@@ -238,14 +231,14 @@ export const JobsListPage: FC<Props> = ({
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <SpaceManagement
-                      spacesApi={spacesApi}
+                      spacesApi={spaces}
                       onTabChange={setCurrentTabId}
                       onReload={setRefreshJobs}
                     />
                   </EuiPageTemplate.Section>
                 </Router>
               </EnabledFeaturesContextProvider>
-            </ContextWrapper>
+            </SpaceManagementContextWrapper>
           </KibanaContextProvider>
         </RedirectAppLinks>
       </KibanaRenderContextProvider>

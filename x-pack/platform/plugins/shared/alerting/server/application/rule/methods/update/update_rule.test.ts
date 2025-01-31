@@ -196,6 +196,8 @@ describe('update()', () => {
         isSystemAction: false,
       },
     ]);
+    actionsClient.listTypes.mockReset();
+    actionsClient.listTypes.mockResolvedValue([]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);

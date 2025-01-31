@@ -11,8 +11,18 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 const borderSpec = `1px solid ${euiThemeVars.euiColorLightShade}`;
 
-export function NestedView({ children, last }: { children: React.ReactNode; last?: boolean }) {
-  return (
+export function NestedView({
+  children,
+  last,
+  isBeingDragged,
+}: {
+  children: React.ReactNode;
+  last?: boolean;
+  isBeingDragged?: boolean;
+}) {
+  return isBeingDragged ? (
+    <>{children}</>
+  ) : (
     <div
       className={css`
         padding-left: ${euiThemeVars.euiSizeS}; //11px

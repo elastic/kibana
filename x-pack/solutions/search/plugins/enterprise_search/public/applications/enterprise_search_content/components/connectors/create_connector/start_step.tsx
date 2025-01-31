@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import * as Constants from '../../../../shared/constants';
+import { KibanaLogic } from '../../../../shared/kibana';
 import { isValidIndexName } from '../../../utils/validate_index_name';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
 
@@ -41,7 +42,6 @@ import { SelfManagePreference } from './create_connector';
 
 interface StartStepProps {
   error?: string | React.ReactNode;
-  isRunningLocally: boolean;
   onSelfManagePreferenceChange(preference: SelfManagePreference): void;
   selfManagePreference: SelfManagePreference;
   setCurrentStep: Function;
@@ -50,7 +50,6 @@ interface StartStepProps {
 
 export const StartStep: React.FC<StartStepProps> = ({
   title,
-  isRunningLocally,
   selfManagePreference,
   setCurrentStep,
   onSelfManagePreferenceChange,
@@ -72,6 +71,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   const { setRawName, createConnector, generateConnectorName, setFormDirty } =
     useActions(NewConnectorLogic);
   const { connector } = useValues(ConnectorViewLogic);
+  const { isAgentlessEnabled } = useValues(KibanaLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -107,7 +107,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Connector' }
                   )}
                 >
-                  <ChooseConnector selfManaged={selfManagePreference} />
+                  <ChooseConnector selfManaged={selfManagePreference} disabled={!!connector} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={5}>
@@ -138,7 +138,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   <EuiFieldText
                     data-test-subj="enterpriseSearchStartStepFieldText"
                     fullWidth
-                    name="first"
+                    name="connectorName"
                     value={rawName}
                     onChange={handleNameChange}
                     disabled={!!connector}
@@ -173,9 +173,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                 }
               >
                 <EuiFieldText
+                  disabled={!!connector}
                   data-test-subj="enterpriseSearchStartStepFieldText"
                   fullWidth
-                  name="first"
+                  name="connectorDescription"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -213,7 +214,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   )}
                   checked={selfManagePreference === 'native'}
                   disabled={
-                    selectedConnector?.isNative === false || isRunningLocally || isFormDirty
+                    selectedConnector?.isNative === false || !isAgentlessEnabled || isFormDirty
                   }
                   onChange={() => onSelfManagePreferenceChange('native')}
                   name="setUp"
@@ -222,7 +223,6 @@ export const StartStep: React.FC<StartStepProps> = ({
               <EuiFlexItem grow={false}>
                 <ConnectorDescriptionPopover
                   showIsOnlySelfManaged={selectedConnector?.isNative === false}
-                  isRunningLocally={isRunningLocally}
                   isNative
                 />
               </EuiFlexItem>

@@ -22,7 +22,7 @@ import {
 } from '../../types';
 
 import { genericErrorResponse } from '../schema/errors';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { ListResponseSchema } from '../schema/utils';
 
 import {
@@ -36,8 +36,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        fleet: { readEnrollmentTokens: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENTS.ALL, FLEET_API_PRIVILEGES.SETUP],
+            },
+          ],
+        },
       },
       summary: `Get an enrollment API key`,
       description: `Get an enrollment API key by ID.`,
@@ -66,8 +72,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .delete({
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Revoke an enrollment API key`,
       description: `Revoke an enrollment API key by ID by marking it as inactive.`,
@@ -96,8 +104,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
-      fleetAuthz: {
-        fleet: { readEnrollmentTokens: true },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENTS.ALL, FLEET_API_PRIVILEGES.SETUP],
+            },
+          ],
+        },
       },
       summary: `Get enrollment API keys`,
       options: {
@@ -128,8 +142,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Create an enrollment API key`,
       options: {

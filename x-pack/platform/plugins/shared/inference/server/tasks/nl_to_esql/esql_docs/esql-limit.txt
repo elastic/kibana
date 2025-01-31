@@ -56,6 +56,19 @@ FROM employees
 | LIMIT 5
 ```
 
+`LIMIT` can and should be used as soon as possible in the query
+
+For example this query uses SORT and LIMIT as soon as it can and before further computations:
+
+```esql
+FROM sets
+| EVAL count = MV_COUNT(values)
+| SORT count DESC
+| LIMIT 5
+| EVAL min = MV_MIN(values), max = MV_MAX(values), avg = MV_AVG(value)
+| KEEP set_id, min, max, avg
+```
+
 ## Limitations
 
 There is no way to achieve pagination with LIMIT, there is no offset parameter.

@@ -21,7 +21,7 @@ import { AssetCriticalityLevel } from '../../asset_criticality/common.gen';
 
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z.object({
-  '@timestamp': z.string().datetime(),
+  '@timestamp': z.string().datetime().optional(),
   entity: z.object({
     name: z.string(),
     source: z.string(),
@@ -41,11 +41,16 @@ export const UserEntity = z.object({
       criticality: AssetCriticalityLevel,
     })
     .optional(),
+  event: z
+    .object({
+      ingested: z.string().datetime().optional(),
+    })
+    .optional(),
 });
 
 export type HostEntity = z.infer<typeof HostEntity>;
 export const HostEntity = z.object({
-  '@timestamp': z.string().datetime(),
+  '@timestamp': z.string().datetime().optional(),
   entity: z.object({
     name: z.string(),
     source: z.string(),
@@ -66,7 +71,37 @@ export const HostEntity = z.object({
       criticality: AssetCriticalityLevel,
     })
     .optional(),
+  event: z
+    .object({
+      ingested: z.string().datetime().optional(),
+    })
+    .optional(),
 });
 
-export type Entity = z.infer<typeof Entity>;
-export const Entity = z.union([UserEntity, HostEntity]);
+export type ServiceEntity = z.infer<typeof ServiceEntity>;
+export const ServiceEntity = z.object({
+  '@timestamp': z.string().datetime().optional(),
+  entity: z.object({
+    name: z.string(),
+    source: z.string(),
+  }),
+  service: z.object({
+    name: z.string(),
+    risk: EntityRiskScoreRecord.optional(),
+  }),
+  asset: z
+    .object({
+      criticality: AssetCriticalityLevel,
+    })
+    .optional(),
+  event: z
+    .object({
+      ingested: z.string().datetime().optional(),
+    })
+    .optional(),
+});
+
+export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity]);
+
+export type Entity = z.infer<typeof EntityInternal>;
+export const Entity = EntityInternal as z.ZodType<Entity>;

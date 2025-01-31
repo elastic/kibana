@@ -584,9 +584,6 @@ describe('getAuthzFromRequest', () => {
     jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
       isEnabled: () => true,
     } as any);
-    jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
-      subfeaturePrivileges: true,
-    } as any);
   });
   it('should not authorize access if RBAC is not enabled', async () => {
     mockSecurity.authz.mode.useRbacForRequest.mockReturnValue(false);

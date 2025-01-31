@@ -46,7 +46,7 @@ describe('export_csv', () => {
 
   function render() {
     const renderer = createFleetTestRendererMock();
-    return renderer.renderHook(() => useExportCSV(true));
+    return renderer.renderHook(() => useExportCSV());
   }
 
   beforeEach(() => {

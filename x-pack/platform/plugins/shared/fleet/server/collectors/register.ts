@@ -38,7 +38,12 @@ export interface Usage {
 
 export interface FleetUsage extends Usage, AgentData {
   fleet_server_config: { policies: Array<{ input_config: any }> };
-  agent_policies: { count: number; output_types: string[] };
+  agent_policies: {
+    count: number;
+    output_types: string[];
+    count_with_global_data_tags: number;
+    count_with_non_default_space: number;
+  };
   agent_logs_panics_last_hour: AgentPanicLogsData['agent_logs_panics_last_hour'];
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
@@ -55,6 +60,7 @@ export const fetchFleetUsage = async (
   if (!soClient || !esClient) {
     return;
   }
+
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),

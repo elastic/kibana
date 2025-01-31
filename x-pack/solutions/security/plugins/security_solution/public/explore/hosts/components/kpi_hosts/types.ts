@@ -9,9 +9,3 @@ export interface HostsKpiProps {
   from: string;
   to: string;
 }
-
-export enum HostsKpiChartColors {
-  uniqueSourceIps = '#D36086',
-  uniqueDestinationIps = '#9170B8',
-  hosts = '#6092C0',
-}

@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash/fp';
-import { EuiProgress } from '@elastic/eui';
+import { EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -30,13 +30,6 @@ import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_ful
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
-
-const TimelineTemplateBadge = styled.div`
-  background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
-  color: #fff;
-  padding: 10px 15px;
-  font-size: 0.8em;
-`;
 
 const TimelineBody = styled.div`
   height: 100%;
@@ -206,9 +199,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         <TimelineSavingProgress timelineId={timelineId} />
         <TimelineBody data-test-subj="timeline-body">
           {timelineType === TimelineTypeEnum.template && (
-            <TimelineTemplateBadge className="timeline-template-badge">
-              {i18n.TIMELINE_TEMPLATE}
-            </TimelineTemplateBadge>
+            <EuiPanel color="accent" grow={false} paddingSize="s">
+              <EuiText size="xs" color="accent">
+                {i18n.TIMELINE_TEMPLATE}
+              </EuiText>
+            </EuiPanel>
           )}
           {resolveConflictComponent}
           <HideShowContainer

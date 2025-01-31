@@ -72,7 +72,6 @@ export type SearchEnrichments = (params: {
 export type GetIsRiskScoreAvailable = (params: {
   spaceId: string;
   services: RuleServices;
-  isNewRiskScoreModuleInstalled: boolean;
 }) => Promise<boolean>;
 
 export type IsIndexExist = (params: { services: RuleServices; index: string }) => Promise<boolean>;
@@ -80,7 +79,6 @@ export type IsIndexExist = (params: { services: RuleServices; index: string }) =
 export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     spaceId: string;
-    isNewRiskScoreModuleInstalled: boolean;
   }
 ) => Promise<EventsMapByEnrichments>;
 

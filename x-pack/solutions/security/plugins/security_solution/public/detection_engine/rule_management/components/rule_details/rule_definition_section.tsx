@@ -771,15 +771,6 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if ('threat_mapping' in rule && rule.threat_mapping) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="threatMappingPropertyTitle">{i18n.THREAT_MAPPING_FIELD_LABEL}</span>
-      ),
-      description: <ThreatMapping threatMapping={rule.threat_mapping} />,
-    });
-  }
-
   if ('threat_filters' in rule && rule.threat_filters && rule.threat_filters.length > 0) {
     definitionSectionListItems.push({
       title: (
@@ -819,6 +810,15 @@ const prepareDefinitionSectionListItems = (
           {getQueryLanguageLabel(rule.threat_language)}
         </span>
       ),
+    });
+  }
+
+  if ('threat_mapping' in rule && rule.threat_mapping) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="threatMappingPropertyTitle">{i18n.THREAT_MAPPING_FIELD_LABEL}</span>
+      ),
+      description: <ThreatMapping threatMapping={rule.threat_mapping} />,
     });
   }
 

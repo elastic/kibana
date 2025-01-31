@@ -21,6 +21,7 @@ import { CheckPermissionsRequestSchema, CheckPermissionsResponseSchema } from '.
 import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
 import { type FleetConfigType } from '../../config';
 import { genericErrorResponse } from '../schema/errors';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -32,12 +33,10 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
   };
 
   const isServerless = appContextService.getCloud()?.isServerlessEnabled;
-  const isSubfeaturePrivilegesEnabled =
-    appContextService.getExperimentalFeatures().subfeaturePrivileges ?? false;
 
   if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
-  } else if (isSubfeaturePrivilegesEnabled) {
+  } else {
     const fleetContext = await context.fleet;
     if (
       !fleetContext.authz.fleet.all &&
@@ -45,34 +44,6 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
       !fleetContext.authz.fleet.readAgentPolicies &&
       !fleetContext.authz.fleet.readSettings
     ) {
-      return response.ok({
-        body: {
-          success: false,
-          error: 'MISSING_PRIVILEGES',
-        } as CheckPermissionsResponse,
-      });
-    }
-    // check the manage_service_account cluster privilege only on stateful
-    else if (request.query.fleetServerSetup && !isServerless) {
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
-        body: { cluster: ['manage_service_account'] },
-      });
-
-      if (!hasAllPrivileges) {
-        return response.ok({
-          body: {
-            success: false,
-            error: 'MISSING_FLEET_SERVER_SETUP_PRIVILEGES',
-          } as CheckPermissionsResponse,
-        });
-      }
-    }
-
-    return response.ok({ body: { success: true } as CheckPermissionsResponse });
-  } else {
-    const fleetContext = await context.fleet;
-    if (!fleetContext.authz.fleet.all) {
       return response.ok({
         body: {
           success: false,
@@ -188,14 +159,40 @@ export const GenerateServiceTokenResponseSchema = schema.object({
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
-
+  router.versioned
+    .get({
+      path: '/internal/fleet/telemetry/usage',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {},
+      },
+      getTelemetryUsageHandler
+    );
   if (experimentalFeatures.useSpaceAwareness) {
     router.versioned
       .post({
         path: '/internal/fleet/enable_space_awareness',
         access: 'internal',
-        fleetAuthz: {
-          fleet: { all: true },
+        security: {
+          authz: {
+            requiredPrivileges: [
+              FLEET_API_PRIVILEGES.AGENTS.ALL,
+              FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+              FLEET_API_PRIVILEGES.SETTINGS.ALL,
+            ],
+          },
         },
       })
       .addVersion(
@@ -236,8 +233,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: APP_API_ROUTES.AGENT_POLICIES_SPACES,
       access: 'internal',
-      fleetAuthz: {
-        fleet: { readAgentPolicies: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ],
+        },
       },
     })
     .addVersion(
@@ -251,8 +250,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   router.versioned
     .post({
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
       },
       summary: `Create a service token`,
       options: {
@@ -276,4 +277,17 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       generateServiceTokenHandler
     );
+};
+const getTelemetryUsageHandler: FleetRequestHandler = async (context, request, response) => {
+  const fetchUsage = appContextService.getFetchUsage();
+  if (!fetchUsage) {
+    throw new Error('Fetch usage is not initialized.');
+  }
+  const usage = await fetchUsage(new AbortController());
+
+  return response.ok({
+    body: {
+      usage,
+    },
+  });
 };

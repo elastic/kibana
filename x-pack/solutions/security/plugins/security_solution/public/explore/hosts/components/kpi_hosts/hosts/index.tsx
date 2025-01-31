@@ -5,36 +5,43 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 
 import type { StatItems } from '../../../../components/stat_items';
-import { kpiHostAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_area';
+import { getKpiHostAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_area';
 import { kpiHostMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_metric';
 import { KpiBaseComponent } from '../../../../components/kpi';
 import type { HostsKpiProps } from '../types';
-import { HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 
 export const ID = 'hostsKpiHostsQuery';
 
-export const hostsStatItems: Readonly<StatItems[]> = [
-  {
-    key: 'hosts',
-    fields: [
+export const useGetHostsStatItems: () => Readonly<StatItems[]> = () => {
+  const { euiTheme } = useEuiTheme();
+  return useMemo(
+    () => [
       {
         key: 'hosts',
-        color: HostsKpiChartColors.hosts,
-        icon: 'storage',
-        lensAttributes: kpiHostMetricLensAttributes,
+        fields: [
+          {
+            key: 'hosts',
+            color: euiTheme.colors.vis.euiColorVis1,
+            icon: 'storage',
+            lensAttributes: kpiHostMetricLensAttributes,
+          },
+        ],
+        enableAreaChart: true,
+        description: i18n.HOSTS,
+        getAreaChartLensAttributes: getKpiHostAreaLensAttributes,
       },
     ],
-    enableAreaChart: true,
-    description: i18n.HOSTS,
-    areaChartLensAttributes: kpiHostAreaLensAttributes,
-  },
-];
+    [euiTheme.colors.vis.euiColorVis1]
+  );
+};
 
 const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({ from, to }) => {
+  const hostsStatItems = useGetHostsStatItems();
   return <KpiBaseComponent id={ID} statItems={hostsStatItems} from={from} to={to} />;
 };
 

@@ -7916,7 +7916,7 @@
           "<number, string, unknown>; }>]>; }>, ",
           "APMRouteHandlerResources",
           ", ",
-          "GroupResourceNodesResponse",
+          "ServiceMapResponse",
           ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/observability_overview/has_data\": ",

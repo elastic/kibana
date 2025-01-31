@@ -4,40 +4,64 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { jsonRt } from '@kbn/io-ts-utils';
-import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { joinByKey } from '@kbn/observability-utils-common/array/join_by_key';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import { orderBy } from 'lodash';
-import type { InventoryEntity } from '../../../common/entities';
-import { entityColumnIdsRt } from '../../../common/entities';
-import { createAlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
+import moment from 'moment';
+import { DATA_STREAM_TYPE } from '@kbn/dataset-quality-plugin/common/es_fields';
+import { joinByKey } from '@kbn/observability-utils-common/array/join_by_key';
+import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
+import {
+  type InventoryEntity,
+  entityColumnIdsRt,
+  MAX_NUMBER_OF_ENTITIES,
+} from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
-import { getEntityGroupsBy } from './get_entity_groups';
-import { getEntityTypes } from './get_entity_types';
-import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
-import { getLatestEntities } from './get_latest_entities';
+import { createAlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
 import { getLatestEntitiesAlerts } from './get_latest_entities_alerts';
 
 export const getEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/types',
+  params: t.partial({
+    query: t.partial({
+      includeEntityTypes: jsonRt.pipe(t.array(t.string)),
+      excludeEntityTypes: jsonRt.pipe(t.array(t.string)),
+      kuery: t.string,
+    }),
+  }),
   security: {
     authz: {
       requiredPrivileges: ['inventory'],
     },
   },
-  handler: async ({ context, logger }) => {
-    const coreContext = await context.core;
-    const inventoryEsClient = createObservabilityEsClient({
-      client: coreContext.elasticsearch.client.asCurrentUser,
-      logger,
-      plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
+  handler: async ({ plugins, request, params }) => {
+    const entityManagerStart = await plugins.entityManager.start();
+
+    const entityManagerClient = await entityManagerStart.getScopedClient({ request });
+    const { includeEntityTypes, excludeEntityTypes, kuery } = params?.query ?? {};
+
+    const rawEntityTypes = await entityManagerClient.v2.readTypeDefinitions();
+    const hasIncludedEntityTypes = (includeEntityTypes ?? []).length > 0;
+    const entityTypes = rawEntityTypes.filter((entityType) =>
+      hasIncludedEntityTypes
+        ? includeEntityTypes?.includes(entityType.id)
+        : !excludeEntityTypes?.includes(entityType.id)
+    );
+    const entityCount = await entityManagerClient.v2.countEntities({
+      start: moment().subtract(15, 'm').toISOString(),
+      end: moment().toISOString(),
+      types: entityTypes.map((entityType) => entityType.id),
+      filters: kuery ? [kuery] : undefined,
     });
 
-    const entityTypes = await getEntityTypes({ inventoryEsClient });
-    return { entityTypes };
+    const entityTypesWithCount = entityTypes
+      .map((entityType) => ({
+        ...entityType,
+        count: entityCount.types[entityType.id],
+      }))
+      .filter((entityType) => entityType.count > 0);
+
+    return { entityTypes: entityTypesWithCount, totalEntities: entityCount.total };
   },
 });
 
@@ -48,10 +72,10 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       t.type({
         sortField: entityColumnIdsRt,
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        entityType: t.string,
       }),
       t.partial({
         kuery: t.string,
-        entityTypes: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
   }),
@@ -62,42 +86,60 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
   },
   handler: async ({
     params,
-    context,
-    logger,
     plugins,
     request,
+    logger,
+    context,
   }): Promise<{ entities: InventoryEntity[] }> => {
-    const coreContext = await context.core;
-    const inventoryEsClient = createObservabilityEsClient({
-      client: coreContext.elasticsearch.client.asCurrentUser,
-      logger,
-      plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
-    });
+    const entityManagerStart = await plugins.entityManager.start();
+    const { client: clusterClient } = (await context.core).elasticsearch;
 
-    const { sortDirection, sortField, kuery, entityTypes } = params.query;
+    const { sortDirection, sortField, kuery, entityType } = params.query;
 
-    const [alertsClient, latestEntities] = await Promise.all([
+    const [entityManagerClient, alertsClient] = await Promise.all([
+      entityManagerStart.getScopedClient({ request }),
       createAlertsClient({ plugins, request }),
-      getLatestEntities({
-        inventoryEsClient,
-        sortDirection,
-        sortField,
-        kuery,
-        entityTypes,
-      }),
     ]);
 
-    const identityFieldsPerEntityType = getIdentityFieldsPerEntityType(latestEntities);
+    const METADATA_BY_TYPE: { [key: string]: string[] } = {
+      default: [DATA_STREAM_TYPE],
+      [BUILT_IN_ENTITY_TYPES.CONTAINER_V2]: [DATA_STREAM_TYPE, 'cloud.provider'],
+      [BUILT_IN_ENTITY_TYPES.HOST_V2]: [DATA_STREAM_TYPE, 'cloud.provider'],
+      [BUILT_IN_ENTITY_TYPES.SERVICE_V2]: [DATA_STREAM_TYPE, 'agent.name'],
+    };
+
+    const [{ entities: rawEntities }, identityFieldsBySource] = await Promise.all([
+      entityManagerClient.v2.searchEntities({
+        start: moment().subtract(15, 'm').toISOString(),
+        end: moment().toISOString(),
+        limit: MAX_NUMBER_OF_ENTITIES,
+        type: entityType,
+        metadata_fields: METADATA_BY_TYPE[entityType] || METADATA_BY_TYPE.default,
+        filters: kuery ? [kuery] : [],
+      }),
+      entityManagerStart.v2.identityFieldsBySource(entityType, clusterClient, logger),
+    ]);
 
     const alerts = await getLatestEntitiesAlerts({
-      identityFieldsPerEntityType,
+      identityFieldsBySource,
       alertsClient,
     });
 
+    const entities: InventoryEntity[] = rawEntities.map((entity) => {
+      return {
+        entityId: entity['entity.id'],
+        entityType: entity['entity.type'],
+        entityDisplayName: entity['entity.display_name'],
+        entityLastSeenTimestamp: entity['entity.last_seen_timestamp'] as string,
+        entityIdentityFields: identityFieldsBySource,
+        ...entity,
+      };
+    });
+
     const joined = joinByKey(
-      [...latestEntities, ...alerts] as InventoryEntity[],
-      [...identityFieldsPerEntityType.values()].flat()
-    ).filter((latestEntity) => latestEntity.entityId);
+      [...entities, ...alerts] as InventoryEntity[],
+      [...Object.values(identityFieldsBySource)].flat()
+    ).filter((latestEntity: InventoryEntity) => latestEntity.entityId);
 
     return {
       entities:
@@ -112,50 +154,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
   },
 });
 
-export const groupEntitiesByRoute = createInventoryServerRoute({
-  endpoint: 'GET /internal/inventory/entities/group_by/{field}',
-  params: t.intersection([
-    t.type({ path: t.type({ field: t.literal(ENTITY_TYPE) }) }),
-    t.partial({
-      query: t.partial({
-        includeEntityTypes: jsonRt.pipe(t.array(t.string)),
-        excludeEntityTypes: jsonRt.pipe(t.array(t.string)),
-        kuery: t.string,
-      }),
-    }),
-  ]),
-  security: {
-    authz: {
-      requiredPrivileges: ['inventory'],
-    },
-  },
-  handler: async ({ params, context, logger }) => {
-    const coreContext = await context.core;
-    const inventoryEsClient = createObservabilityEsClient({
-      client: coreContext.elasticsearch.client.asCurrentUser,
-      logger,
-      plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
-    });
-
-    const { field } = params.path;
-    const { kuery, includeEntityTypes, excludeEntityTypes } = params.query ?? {};
-
-    const groups = await getEntityGroupsBy({
-      inventoryEsClient,
-      field,
-      kuery,
-      includeEntityTypes,
-      excludeEntityTypes,
-    });
-
-    const entitiesCount = groups.reduce((acc, group) => acc + group.count, 0);
-
-    return { groupBy: field, groups, entitiesCount };
-  },
-});
-
 export const entitiesRoutes = {
   ...listLatestEntitiesRoute,
   ...getEntityTypesRoute,
-  ...groupEntitiesByRoute,
 };

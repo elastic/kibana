@@ -36,6 +36,10 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE = getDataTe
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS = getDataTestSubjectSelector(
   'securitySolutionFlyoutMitreAttackDetails'
 );
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE =
+  getDataTestSubjectSelector('securitySolutionFlyoutWorkflowStatusTitle');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS =
+  getDataTestSubjectSelector('securitySolutionFlyoutWorkflowStatusDetails');
 
 /* Investigation section */
 

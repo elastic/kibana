@@ -26,8 +26,6 @@ import {
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
-import { ExperimentalFeaturesService } from '../../../services';
-
 import { AgentRefreshContext } from './hooks';
 import {
   AgentLogs,
@@ -41,7 +39,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
-  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
   const {
     isLoading,
     isInitialRequest,
@@ -51,7 +48,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   } = useGetOneAgent(agentId, {
     pollIntervalMs: 5000,
     query: {
-      withMetrics: displayAgentMetrics,
+      withMetrics: true,
     },
   });
   const {
@@ -72,7 +69,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
     }
   }, [routeState, navigateToApp]);
-  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
   const host = agentData?.item?.local_metadata?.host;
 
@@ -156,19 +152,17 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_logs', { agentId, tabId: 'logs' }),
         isSelected: tabId === 'logs',
       },
-    ];
-    if (diagnosticFileUploadEnabled) {
-      tabs.push({
+      {
         id: 'diagnostics',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.diagnosticsTab', {
           defaultMessage: 'Diagnostics',
         }),
         href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
         isSelected: tabId === 'diagnostics',
-      });
-    }
+      },
+    ];
     return tabs;
-  }, [getHref, agentId, tabId, diagnosticFileUploadEnabled]);
+  }, [getHref, agentId, tabId]);
 
   return (
     <AgentRefreshContext.Provider

@@ -79,7 +79,7 @@ export type NewBulkItemResponse = BulkResponseItem & { error: ErrorCause & { ind
  */
 export type BulkDeleteExpectedBulkGetResult = Either<
   { type: string; id: string; error: Payload },
-  { type: string; id: string; version?: string; esRequestIndex?: number }
+  { type: string; id: string; version?: string; esRequestIndex?: number; fields?: string[] }
 >;
 
 export type ObjectToDeleteAliasesFor = Pick<

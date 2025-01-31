@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { BehaviorSubject, of } from 'rxjs';
 import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -104,6 +105,10 @@ async function mountComponent(
     query,
   });
   stateContainer.internalState.transitions.setDataView(dataView);
+  stateContainer.internalState.transitions.setDataRequestParams({
+    timeRangeAbsolute: time,
+    timeRangeRelative: time,
+  });
 
   const props = {
     dataView,
@@ -123,7 +128,9 @@ async function mountComponent(
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverLayout {...props} />
+        <EuiProvider>
+          <DiscoverLayout {...props} />
+        </EuiProvider>
       </DiscoverMainProvider>
     </KibanaContextProvider>,
     mountOptions

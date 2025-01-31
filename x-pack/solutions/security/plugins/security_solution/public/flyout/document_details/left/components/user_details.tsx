@@ -25,13 +25,14 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { CellActions } from '../../shared/components/cell_actions';
@@ -218,7 +219,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         ? [
             {
               field: 'risk',
-              name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
+              name: ENTITY_RISK_LEVEL(EntityType.host),
               truncateText: false,
               mobileOptions: { show: true },
               sortable: false,
@@ -346,7 +347,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
             name={userName}
             direction="column"
             data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
-            telemetrySuffix={'user-details'}
+            telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />

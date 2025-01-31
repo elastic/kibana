@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { timeMilliseconds } from 'd3-time';
-import { fold, map } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as runtimeTypes from 'io-ts';
 import { JsonArray } from '@kbn/utility-types';
 import { compact } from 'lodash';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
@@ -18,7 +13,6 @@ import {
   LogEntriesParams,
   LogEntryDocument,
   LogEntryQuery,
-  LogSummaryBucket,
   LOG_ENTRIES_PAGE_SIZE,
 } from '../../domains/log_entries_domain';
 import { SortedSearchHit } from '../framework';
@@ -27,21 +21,6 @@ import { ResolvedLogView } from '../../../../common/log_views';
 import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';
-
-const MAX_BUCKETS = 1000;
-
-function getBucketIntervalStarts(
-  startTimestamp: number,
-  endTimestamp: number,
-  bucketSize: number
-): Date[] {
-  // estimated number of buckets
-  const bucketCount = Math.ceil((endTimestamp - startTimestamp) / bucketSize);
-  if (bucketCount > MAX_BUCKETS) {
-    throw new Error(`Requested too many buckets: ${bucketCount} > ${MAX_BUCKETS}`);
-  }
-  return timeMilliseconds(new Date(startTimestamp), new Date(endTimestamp), bucketSize);
-}
 
 export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: KibanaFramework) {}
@@ -140,86 +119,6 @@ export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
       hasMoreAfter: sortDirection === 'asc' ? hasMore : undefined,
     };
   }
-
-  public async getContainedLogSummaryBuckets(
-    requestContext: LogsSharedPluginRequestHandlerContext,
-    resolvedLogView: ResolvedLogView,
-    startTimestamp: number,
-    endTimestamp: number,
-    bucketSize: number,
-    filterQuery?: LogEntryQuery
-  ): Promise<LogSummaryBucket[]> {
-    const bucketIntervalStarts = getBucketIntervalStarts(startTimestamp, endTimestamp, bucketSize);
-
-    const query = {
-      allow_no_indices: true,
-      index: resolvedLogView.indices,
-      ignore_unavailable: true,
-      body: {
-        aggregations: {
-          count_by_date: {
-            date_range: {
-              field: TIMESTAMP_FIELD,
-              format: TIMESTAMP_FORMAT,
-              ranges: bucketIntervalStarts.map((bucketIntervalStart) => ({
-                from: bucketIntervalStart.getTime(),
-                to: bucketIntervalStart.getTime() + bucketSize,
-              })),
-            },
-            aggregations: {
-              top_hits_by_key: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      [TIMESTAMP_FIELD]: {
-                        order: 'asc',
-                        format: 'strict_date_optional_time_nanos',
-                        numeric_type: 'date_nanos',
-                      },
-                    },
-                    { [TIEBREAKER_FIELD]: 'asc' },
-                  ],
-                  _source: false,
-                },
-              },
-            },
-          },
-        },
-        query: {
-          bool: {
-            filter: [
-              ...createQueryFilterClauses(filterQuery),
-              {
-                range: {
-                  [TIMESTAMP_FIELD]: {
-                    gte: startTimestamp,
-                    lte: endTimestamp,
-                    format: TIMESTAMP_FORMAT,
-                  },
-                },
-              },
-            ],
-          },
-        },
-        runtime_mappings: resolvedLogView.runtimeMappings,
-        size: 0,
-        track_total_hits: false,
-      },
-    };
-
-    const response = await this.framework.callWithRequest<any, {}>(requestContext, 'search', query);
-
-    return pipe(
-      LogSummaryResponseRuntimeType.decode(response),
-      map((logSummaryResponse) =>
-        logSummaryResponse.aggregations.count_by_date.buckets.map(
-          convertDateRangeBucketToSummaryBucket
-        )
-      ),
-      fold(constant([]), identity)
-    );
-  }
 }
 
 function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): LogEntryDocument[] {
@@ -244,18 +143,6 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
     };
   });
 }
-
-const convertDateRangeBucketToSummaryBucket = (
-  bucket: LogSummaryDateRangeBucket
-): LogSummaryBucket => ({
-  entriesCount: bucket.doc_count,
-  start: bucket.from || 0,
-  end: bucket.to || 0,
-  topEntryKeys: bucket.top_hits_by_key.hits.hits.map((hit) => ({
-    tiebreaker: hit.sort[1],
-    time: hit.sort[0],
-  })),
-});
 
 const createHighlightQuery = (
   highlightTerm: string | undefined,
@@ -284,9 +171,6 @@ const createFilterClauses = (
   return compact([filterQuery, highlightQuery]) as LogEntryQuery[];
 };
 
-const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
-  filterQuery ? [filterQuery] : [];
-
 function processCursor(cursor: LogEntriesParams['cursor']): {
   sortDirection: 'asc' | 'desc';
   searchAfterClause: { search_after?: readonly [string, number] };
@@ -310,35 +194,3 @@ function processCursor(cursor: LogEntriesParams['cursor']): {
 
   return { sortDirection: 'asc', searchAfterClause: {} };
 }
-
-const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
-  runtimeTypes.type({
-    doc_count: runtimeTypes.number,
-    key: runtimeTypes.string,
-    top_hits_by_key: runtimeTypes.type({
-      hits: runtimeTypes.type({
-        hits: runtimeTypes.array(
-          runtimeTypes.type({
-            sort: runtimeTypes.tuple([runtimeTypes.string, runtimeTypes.number]),
-          })
-        ),
-      }),
-    }),
-  }),
-  runtimeTypes.partial({
-    from: runtimeTypes.number,
-    to: runtimeTypes.number,
-  }),
-]);
-
-export type LogSummaryDateRangeBucket = runtimeTypes.TypeOf<
-  typeof LogSummaryDateRangeBucketRuntimeType
->;
-
-const LogSummaryResponseRuntimeType = runtimeTypes.type({
-  aggregations: runtimeTypes.type({
-    count_by_date: runtimeTypes.type({
-      buckets: runtimeTypes.array(LogSummaryDateRangeBucketRuntimeType),
-    }),
-  }),
-});

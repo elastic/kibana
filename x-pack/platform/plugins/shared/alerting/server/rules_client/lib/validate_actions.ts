@@ -76,6 +76,26 @@ export async function validateActions(
       );
     }
   }
+
+  // check for invalid Endpoint Security connectors
+  const allConnectorTypes = await actionsClient.listTypes({});
+  const endpointSecurityConnectorTypeIds = new Set(
+    allConnectorTypes
+      .filter((type) => type.subFeature === 'endpointSecurity')
+      .map((type) => type.id)
+  );
+  const endpointSecurityActionTypeIds = actionResults
+    .map((result) => result.actionTypeId)
+    .filter((id) => endpointSecurityConnectorTypeIds.has(id));
+
+  if (endpointSecurityActionTypeIds.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.endpointSecurityConnector', {
+        defaultMessage: 'Endpoint security connectors cannot be used as alerting actions',
+      })
+    );
+  }
+
   // check for actions with invalid action groups
   const { actionGroups: alertTypeActionGroups } = ruleType;
   const usedAlertActionGroups = actions.map((action) => action.group);

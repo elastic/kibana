@@ -163,7 +163,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
               <EuiFlexGroup alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color="success"
+                    color="primary"
                     data-test-subj="edit-category-submit"
                     fill
                     iconType="save"

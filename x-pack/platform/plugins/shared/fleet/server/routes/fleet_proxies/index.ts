@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
 import { API_VERSIONS } from '../../../common/constants';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { FLEET_PROXY_API_ROUTES } from '../../../common/constants';
 import {
   FleetProxyResponseSchema,
@@ -34,8 +34,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: FLEET_PROXY_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: {
-        fleet: { readSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.READ],
+        },
       },
       summary: `Get proxies`,
       options: {
@@ -63,8 +65,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: FLEET_PROXY_API_ROUTES.CREATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Create a proxy`,
       options: {
@@ -92,8 +96,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .put({
       path: FLEET_PROXY_API_ROUTES.UPDATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Update a proxy`,
       description: `Update a proxy by ID.`,
@@ -122,8 +128,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: FLEET_PROXY_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        fleet: { readSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.READ],
+        },
       },
       summary: `Get a proxy`,
       description: `Get a proxy by ID.`,
@@ -152,8 +160,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .delete({
       path: FLEET_PROXY_API_ROUTES.DELETE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Delete a proxy`,
       description: `Delete a proxy by ID`,

@@ -49,6 +49,7 @@ import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
+import { getTimelineRowTypeIndicator } from './get_row_indicator';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -136,7 +137,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     } = useKibana();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
-    const [fetchedPage, setFechedPage] = useState<number>(0);
 
     const onCloseExpandableFlyout = useCallback((id: string) => {
       setExpandedDoc((prev) => (!prev ? prev : undefined));
@@ -237,9 +237,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const handleFetchMoreRecords = useCallback(() => {
-      onFetchMoreRecords(fetchedPage + 1);
-      setFechedPage(fetchedPage + 1);
-    }, [fetchedPage, onFetchMoreRecords]);
+      onFetchMoreRecords();
+    }, [onFetchMoreRecords]);
 
     const additionalControls = useMemo(
       () => <ToolbarAdditionalControls timelineId={timelineId} updatedAt={updatedAt} />,
@@ -252,10 +251,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       (newSampleSize: number) => {
         if (newSampleSize !== sampleSize) {
           dispatch(timelineActions.updateSampleSize({ id: timelineId, sampleSize: newSampleSize }));
-          refetch();
         }
       },
-      [dispatch, sampleSize, timelineId, refetch]
+      [dispatch, sampleSize, timelineId]
     );
 
     const onUpdateRowHeight = useCallback(
@@ -426,6 +424,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
             onUpdatePageIndex={onUpdatePageIndex}
+            getRowIndicator={getTimelineRowTypeIndicator}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

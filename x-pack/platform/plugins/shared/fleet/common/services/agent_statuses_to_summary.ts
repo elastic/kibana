@@ -17,5 +17,7 @@ export function agentStatusesToSummary(
     offline: statuses.offline,
     updating: statuses.updating + statuses.enrolling + statuses.unenrolling,
     unenrolled: statuses.unenrolled,
+    orphaned: statuses.orphaned,
+    uninstalled: statuses.uninstalled,
   };
 }

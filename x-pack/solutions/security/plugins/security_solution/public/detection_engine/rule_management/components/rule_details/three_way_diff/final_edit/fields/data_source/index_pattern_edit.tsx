@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/css';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { useDefaultIndexPattern } from '../../../../../../hooks/use_default_index_pattern';
 import type { FieldHook } from '../../../../../../../../shared_imports';
 import { Field } from '../../../../../../../../shared_imports';
@@ -19,6 +19,7 @@ interface IndexPatternFieldProps {
 }
 
 export function IndexPatternField({ field }: IndexPatternFieldProps): JSX.Element {
+  const { euiTheme } = useEuiTheme();
   const defaultIndexPattern = useDefaultIndexPattern();
   const isIndexModified = !isEqual(field.value, defaultIndexPattern);
 
@@ -39,7 +40,9 @@ export function IndexPatternField({ field }: IndexPatternFieldProps): JSX.Elemen
       labelAppend={
         isIndexModified ? (
           <EuiButtonEmpty
-            className={xxsHeight}
+            className={css`
+              height: ${euiTheme.size.base};
+            `}
             size="xs"
             iconType="refresh"
             onClick={handleResetIndices}
@@ -51,7 +54,3 @@ export function IndexPatternField({ field }: IndexPatternFieldProps): JSX.Elemen
     />
   );
 }
-
-const xxsHeight = css`
-  height: 16px;
-`;

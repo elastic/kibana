@@ -103,9 +103,10 @@ describe('StepAboutRuleComponent', () => {
     defineStepDefaultOverride?: DefineStepRule;
   }) => {
     const defineStepDefault = defineStepDefaultOverride ?? stepDefineDefaultValue;
+    const aboutStepDefault = stepAboutDefaultValue;
     const { aboutStepForm } = useRuleForms({
       defineStepDefault,
-      aboutStepDefault: stepAboutDefaultValue,
+      aboutStepDefault,
       scheduleStepDefault: defaultSchedule,
       actionsStepDefault: stepActionsDefaultValue,
     });
@@ -118,7 +119,7 @@ describe('StepAboutRuleComponent', () => {
         machineLearningJobId={defineStepDefault.machineLearningJobId}
         index={defineStepDefault.index}
         dataViewId={defineStepDefault.dataViewId}
-        timestampOverride={stepAboutDefaultValue.timestampOverride}
+        timestampOverride={aboutStepDefault.timestampOverride}
         isLoading={false}
         form={aboutStepForm}
       />
@@ -191,7 +192,7 @@ describe('StepAboutRuleComponent', () => {
 
     await act(async () => {
       wrapper
-        .find('[data-test-subj="detectionEngineStepAboutThreatIndicatorPath"] input')
+        .find('[data-test-subj="ruleThreatMatchIndicatorPath"] input')
         .first()
         .simulate('change', { target: { value: '' } });
 
@@ -287,7 +288,11 @@ describe('StepAboutRuleComponent', () => {
       setup: '',
       references: [''],
       riskScore: { value: 21, mapping: [], isMappingChecked: false },
-      severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+      severity: {
+        value: 'low',
+        mapping: fillEmptySeverityMappings([]),
+        isMappingChecked: false,
+      },
       tags: [],
       threat: [
         {
@@ -349,7 +354,11 @@ describe('StepAboutRuleComponent', () => {
       setup: '',
       references: [''],
       riskScore: { value: 80, mapping: [], isMappingChecked: false },
-      severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+      severity: {
+        value: 'low',
+        mapping: fillEmptySeverityMappings([]),
+        isMappingChecked: false,
+      },
       tags: [],
       threat: [
         {

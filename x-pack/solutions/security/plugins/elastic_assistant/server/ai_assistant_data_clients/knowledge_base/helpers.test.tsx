@@ -15,19 +15,15 @@ import {
 } from './helpers';
 import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import {
+  ContentReferencesStore,
+  EsqlContentReference,
+  IndexEntry,
+} from '@kbn/elastic-assistant-common';
+import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');
-jest.mock('@kbn/zod', () => ({
-  z: {
-    string: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    number: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    boolean: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    object: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    any: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-  },
-}));
 jest.mock('lodash');
 
 describe('isModelAlreadyExistsError', () => {
@@ -153,13 +149,14 @@ describe('getStructuredToolForIndexEntry', () => {
   const mockEsClient = {} as ElasticsearchClient;
 
   const mockIndexEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' }) as IndexEntry;
+  const contentReferencesStore = contentReferencesStoreFactoryMock();
 
   it('should return a DynamicStructuredTool with correct name and schema', () => {
     const tool = getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      elserId: 'elser123',
+      contentReferencesStore,
     });
 
     expect(tool).toBeInstanceOf(DynamicStructuredTool);
@@ -177,19 +174,14 @@ describe('getStructuredToolForIndexEntry', () => {
       hits: {
         hits: [
           {
+            _index: 'exampleIndex',
+            _id: 'exampleId',
             _source: {
               field1: 'value1',
               field2: 2,
             },
-            inner_hits: {
-              'test.test': {
-                hits: {
-                  hits: [
-                    { _source: { text: 'Inner text 1' } },
-                    { _source: { text: 'Inner text 2' } },
-                  ],
-                },
-              },
+            highlight: {
+              test: ['Inner text 1', 'Inner text 2'],
             },
           },
         ],
@@ -202,14 +194,28 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      elserId: 'elser123',
+      contentReferencesStore,
     });
+
+    (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (creator: Parameters<ContentReferencesStore['add']>[0]) => {
+        const reference = creator({ id: 'exampleContentReferenceId' });
+        expect(reference.type).toEqual('EsqlQuery');
+        expect((reference as EsqlContentReference).label).toEqual('exampleIndex');
+        expect((reference as EsqlContentReference).query).toEqual(
+          'FROM exampleIndex METADATA _id\n | WHERE _id == "exampleId"'
+        );
+        return reference;
+      }
+    );
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
     const result = await tool.invoke(input, {});
 
     expect(result).toContain('Below are all relevant documents in JSON format');
-    expect(result).toContain('"text":"Inner text 1\\n --- \\nInner text 2"');
+    expect(result).toContain(
+      '"text":"Inner text 1\\n --- \\nInner text 2","citation":"{reference(exampleContentReferenceId)}"'
+    );
   });
 
   it('should log an error and return error message on Elasticsearch error', async () => {
@@ -220,7 +226,7 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
-      elserId: 'elser123',
+      contentReferencesStore,
     });
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
@@ -230,5 +236,34 @@ describe('getStructuredToolForIndexEntry', () => {
       `Error performing IndexEntry KB Similarity Search: ${mockError.message}`
     );
     expect(result).toContain(`I'm sorry, but I was unable to find any information`);
+  });
+
+  it('should match the name regex correctly', () => {
+    const tool = getStructuredToolForIndexEntry({
+      indexEntry: getCreateKnowledgeBaseEntrySchemaMock({
+        type: 'index',
+        name: `1bad-name?`,
+      }) as IndexEntry,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      contentReferencesStore,
+    });
+
+    const nameRegex = /^[a-zA-Z0-9_-]+$/;
+    expect(tool.lc_kwargs.name).toMatch(nameRegex);
+  });
+
+  it('dashes get removed before `a` is prepended', () => {
+    const tool = getStructuredToolForIndexEntry({
+      indexEntry: getCreateKnowledgeBaseEntrySchemaMock({
+        type: 'index',
+        name: `-testing`,
+      }) as IndexEntry,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      contentReferencesStore,
+    });
+
+    expect(tool.lc_kwargs.name).toMatch('testing');
   });
 });

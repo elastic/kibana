@@ -24,56 +24,74 @@ import { useStyles } from './upload_rules_panel.styles';
 
 export interface UploadRulesPanelProps {
   isUploadMore?: boolean;
+  isDisabled?: boolean;
 }
-export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(({ isUploadMore = false }) => {
-  const styles = useStyles(isUploadMore);
-  const { openFlyout } = useRuleMigrationDataInputContext();
-  const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
-    openFlyout();
-  }, [openFlyout]);
+export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(
+  ({ isUploadMore = false, isDisabled = false }) => {
+    const styles = useStyles(isUploadMore);
+    const { openFlyout } = useRuleMigrationDataInputContext();
+    const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
+      openFlyout();
+    }, [openFlyout]);
 
-  return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize={isUploadMore ? 'm' : 'l'}>
-      <EuiFlexGroup direction="row" alignItems="center" className={styles}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={SiemMigrationsIcon} className="siemMigrationsIcon" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {isUploadMore ? (
-            <EuiText size="s" className={TITLE_CLASS_NAME}>
-              <p>{i18n.START_MIGRATION_CARD_UPLOAD_MORE_TITLE}</p>
-            </EuiText>
-          ) : (
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText size="m" className={TITLE_CLASS_NAME}>
-                  <p>{i18n.START_MIGRATION_CARD_UPLOAD_TITLE}</p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <p>{i18n.START_MIGRATION_CARD_UPLOAD_DESCRIPTION}</p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <RuleMigrationsReadMore />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {isUploadMore ? (
-            <EuiButtonEmpty iconType="download" iconSide="right" onClick={onOpenFlyout}>
-              {i18n.START_MIGRATION_CARD_UPLOAD_MORE_BUTTON}
-            </EuiButtonEmpty>
-          ) : (
-            <EuiButton iconType="download" iconSide="right" onClick={onOpenFlyout}>
-              {i18n.START_MIGRATION_CARD_UPLOAD_BUTTON}
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-});
+    return (
+      <EuiPanel hasShadow={false} hasBorder paddingSize={isUploadMore ? 'm' : 'l'}>
+        <EuiFlexGroup
+          direction="row"
+          alignItems="center"
+          className={styles}
+          gutterSize={isUploadMore ? 'm' : 'l'}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={SiemMigrationsIcon} className="siemMigrationsIcon" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isUploadMore ? (
+              <EuiText size="s" className={TITLE_CLASS_NAME}>
+                <p>{i18n.START_MIGRATION_CARD_UPLOAD_MORE_TITLE}</p>
+              </EuiText>
+            ) : (
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="m" className={TITLE_CLASS_NAME}>
+                    <p>{i18n.START_MIGRATION_CARD_UPLOAD_TITLE}</p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>{i18n.START_MIGRATION_CARD_UPLOAD_DESCRIPTION}</p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <RuleMigrationsReadMore />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {isUploadMore ? (
+              <EuiButtonEmpty
+                iconType="download"
+                iconSide="right"
+                onClick={onOpenFlyout}
+                isDisabled={isDisabled}
+              >
+                {i18n.START_MIGRATION_CARD_UPLOAD_MORE_BUTTON}
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButton
+                iconType="download"
+                iconSide="right"
+                onClick={onOpenFlyout}
+                isDisabled={isDisabled}
+              >
+                {i18n.START_MIGRATION_CARD_UPLOAD_BUTTON}
+              </EuiButton>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+);
 UploadRulesPanel.displayName = 'UploadRulesPanel';
