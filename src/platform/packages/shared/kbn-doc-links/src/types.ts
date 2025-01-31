@@ -341,6 +341,9 @@ export interface DocLinks {
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
   };
+  readonly logging: {
+    readonly enableDeprecationHttpDebugLogs: string;
+  };
   readonly securitySolution: {
     readonly aiAssistant: string;
     readonly artifactControl: string;
