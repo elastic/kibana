@@ -1526,8 +1526,6 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      // we need this use case when ALERT_ANCESTORS field dropped in ES|QL query, it's not returned in ES|QL response
-      // so later when we merge source, fields and ES|QL response, it's different to a tests case above
       it('should create alert on alert when properties dropped in ES|QL query', async () => {
         const ruleOnAlert: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock(),
