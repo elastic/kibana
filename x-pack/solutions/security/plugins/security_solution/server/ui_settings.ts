@@ -42,6 +42,7 @@ import {
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ENTITY_FLYOUT,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -199,6 +200,27 @@ export const initUiSettings = (
         {
           defaultMessage:
             '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ENTITY_FLYOUT]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInEntityFlyout',
+        {
+          defaultMessage: 'Exclude cold and frozen tiers in Entity Flyout',
+        }
+      ),
+      value: true,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInEntityFlyoutDescription',
+        {
+          defaultMessage:
+            '<p>When enabled, cold and frozen tiers will be skipped in entity flyout queries</p>',
           values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),
