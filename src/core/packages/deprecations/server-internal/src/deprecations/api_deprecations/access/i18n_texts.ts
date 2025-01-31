@@ -79,7 +79,7 @@ export const getApiDeprecationMessage = (
     type: 'markdown',
     content: i18n.translate('core.deprecations.apiAccessDeprecation.enableDebugLogsMessage', {
       defaultMessage:
-        'To include information about deprecated API calls in debug logs, edit your Kibana configuration as detailed in [the documentation]({enableDeprecationHttpDebugLogsLink}).',
+        'To include information in debug logs about calls to APIs that are internal to Elastic, edit your Kibana configuration as detailed in [the documentation]({enableDeprecationHttpDebugLogsLink}).',
       values: {
         enableDeprecationHttpDebugLogsLink: docLinks.links.logging.enableDeprecationHttpDebugLogs,
       },

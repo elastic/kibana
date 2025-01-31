@@ -413,7 +413,7 @@ describe('#registerApiDeprecationsInfo', () => {
               "The API \\"POST /internal/api/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
               "Internal APIs are meant to be used by Elastic services only. You should not use them. External access to these APIs will be restricted.",
               Object {
-                "content": "To include information about deprecated API calls in debug logs, edit your Kibana configuration as detailed in [the documentation](https://www.elastic.co/guide/en/kibana/test-branch/logging-settings.html#enable-http-debug-logs).",
+                "content": "To include information in debug logs about calls to APIs that are internal to Elastic, edit your Kibana configuration as detailed in [the documentation](https://www.elastic.co/guide/en/kibana/test-branch/logging-settings.html#enable-http-debug-logs).",
                 "type": "markdown",
               },
             ],
