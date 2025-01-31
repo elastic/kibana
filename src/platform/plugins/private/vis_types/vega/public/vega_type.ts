@@ -26,7 +26,7 @@ import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
 
 import type { VisParams } from './vega_fn';
 
-export const vegaVisType = {
+export const vegaVisType: VisTypeDefinition<VisParams> = {
   name: 'vega',
   title: 'Vega',
   getInfoMessage,
@@ -68,4 +68,4 @@ export const vegaVisType = {
    * This is necessary for showing actions bar in top of vega editor
    */
   requiresSearch: true,
-} as VisTypeDefinition<VisParams>;
+};
