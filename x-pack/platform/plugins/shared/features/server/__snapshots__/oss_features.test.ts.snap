@@ -1084,6 +1084,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1253,6 +1254,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1413,6 +1415,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1564,6 +1567,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1915,6 +1919,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2066,6 +2071,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2208,6 +2214,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2377,6 +2384,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2537,6 +2545,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -2688,6 +2697,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -3039,6 +3049,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -3190,6 +3201,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
