@@ -483,7 +483,7 @@ export function LayerPanel(props: LayerPanelProps) {
   useEffect(() => {
     const abortController = new AbortController();
     const initializeChart = async () => {
-      if (isOfAggregateQueryType(query) && !dataGridAttrs) {
+      if (isTextBasedLanguage && isOfAggregateQueryType(query) && !dataGridAttrs) {
         try {
           await runQuery(query, abortController, Boolean(attributes?.state.needsRefresh));
         } catch (e) {
@@ -501,72 +501,71 @@ export function LayerPanel(props: LayerPanelProps) {
     data,
     dataGridAttrs,
     attributes?.state.needsRefresh,
+    isTextBasedLanguage,
   ]);
 
-  const getESQLEditor = () => {
-    return (
-      <>
-        {isTextBasedLanguage && canEditTextBasedQuery && (
-          <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-            <ESQLLangEditor
-              query={query as AggregateQuery}
-              onTextLangQueryChange={(q) => {
-                setQuery(q);
-              }}
-              // detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
-              hideTimeFilterInfo={hideTimeFilterInfo}
-              errors={errors}
-              warning={
-                suggestsLimitedColumns
-                  ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                      defaultMessage:
-                        'Displaying a limited portion of the available fields. Add more from the configuration panel.',
-                    })
-                  : undefined
-              }
-              editorIsInline={true}
-              hideRunQueryText
-              onTextLangQuerySubmit={async (q, a) => {
-                // do not run the suggestions if the query is the same as the previous one
-                if (q && !isEqual(q, prevQuery.current)) {
-                  // setIsVisualizationLoading(true);
-                  await runQuery(q, a);
-                }
-              }}
-              isDisabled={false}
-              allowQueryCancellation
-              isLoading={isVisualizationLoading}
-              supportsControls={parentApi !== undefined}
-              esqlVariables={esqlVariables}
-              onCancelControl={onCancelControl}
-              onSaveControl={onSaveControl}
-            />
-          </EuiFlexItem>
-        )}
-        {isTextBasedLanguage && canEditTextBasedQuery && dataGridAttrs && (
-          <ESQLDataGridAccordion
-            dataGridAttrs={dataGridAttrs}
-            isAccordionOpen={isESQLResultsAccordionOpen}
-            isTableView={attributes?.visualizationType !== 'lnsDatatable'}
-            setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+  const ESQLEditor = (
+    <>
+      {isTextBasedLanguage && canEditTextBasedQuery && (
+        <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
+          <ESQLLangEditor
             query={query as AggregateQuery}
-            onAccordionToggleCb={(status) => {
-              if (status && isSuggestionsAccordionOpen) {
-                setIsSuggestionsAccordionOpen(!status);
-              }
-              if (status && isLayerAccordionOpen) {
-                setIsLayerAccordionOpen(!status);
+            onTextLangQueryChange={(q) => {
+              setQuery(q);
+            }}
+            // detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
+            hideTimeFilterInfo={hideTimeFilterInfo}
+            errors={errors}
+            warning={
+              suggestsLimitedColumns
+                ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                    defaultMessage:
+                      'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                  })
+                : undefined
+            }
+            editorIsInline={true}
+            hideRunQueryText
+            onTextLangQuerySubmit={async (q, a) => {
+              // do not run the suggestions if the query is the same as the previous one
+              if (q && !isEqual(q, prevQuery.current)) {
+                // setIsVisualizationLoading(true);
+                await runQuery(q, a);
               }
             }}
+            isDisabled={false}
+            allowQueryCancellation
+            isLoading={isVisualizationLoading}
+            supportsControls={parentApi !== undefined}
+            esqlVariables={esqlVariables}
+            onCancelControl={onCancelControl}
+            onSaveControl={onSaveControl}
           />
-        )}
-      </>
-    );
-  };
+        </EuiFlexItem>
+      )}
+      {isTextBasedLanguage && canEditTextBasedQuery && dataGridAttrs && (
+        <ESQLDataGridAccordion
+          dataGridAttrs={dataGridAttrs}
+          isAccordionOpen={isESQLResultsAccordionOpen}
+          isTableView={attributes?.visualizationType !== 'lnsDatatable'}
+          setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+          query={query as AggregateQuery}
+          onAccordionToggleCb={(status) => {
+            if (status && isSuggestionsAccordionOpen) {
+              setIsSuggestionsAccordionOpen(!status);
+            }
+            if (status && isLayerAccordionOpen) {
+              setIsLayerAccordionOpen(!status);
+            }
+          }}
+        />
+      )}
+    </>
+  );
 
   return (
     <>
-      {editorContainer && ReactDOM.createPortal(getESQLEditor(), editorContainer)}
+      {editorContainer && ReactDOM.createPortal(ESQLEditor, editorContainer)}
       <section
         tabIndex={-1}
         ref={registerLayerRef}
@@ -622,7 +621,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
-            {!editorContainer && getESQLEditor()}
+            {!editorContainer && ESQLEditor}
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
                 {...{

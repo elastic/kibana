@@ -339,7 +339,6 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        language={''}
         isSaveable={isSaveable}
         isScrollable={false}
         isNewPanel={isNewPanel}
