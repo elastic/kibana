@@ -300,7 +300,6 @@ export const Annotations = ({
                     isHorizontal: !isHorizontal,
                     hasReducedPadding,
                     label: !isGrouped ? annotation.label : undefined,
-                    rotateClassName: isHorizontal ? 'xyAnnotationIcon_rotate90' : undefined,
                   }}
                 />
               ) : undefined

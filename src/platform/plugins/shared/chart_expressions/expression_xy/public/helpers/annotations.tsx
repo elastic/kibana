@@ -23,6 +23,8 @@ import { AxesMap, getOriginalAxisPosition } from './axes_configuration';
 
 export const LINES_MARKER_SIZE = 20;
 
+
+
 type PartialReferenceLineDecorationConfig = Pick<
   ReferenceLineDecorationConfig,
   'icon' | 'iconPosition' | 'textVisibility'
@@ -141,6 +143,11 @@ export function MarkerBody({
   );
 }
 
+const xyAnnotationIconRotate90Css = css({
+  transform: 'rotate(90deg) !important',
+  transformOrigin: 'center',
+});
+
 const xyAnnotationNumberIconCss = {
   self: css({
     borderRadius: euiThemeVars.euiSize,
@@ -194,12 +201,16 @@ export const AnnotationIcon = ({
   if (!iconConfig) {
     return null;
   }
+
+  const rotationStyle =
+    iconConfig.shouldRotate && !isHorizontal ? xyAnnotationIconRotate90Css : undefined;
+
   return (
     <EuiIcon
       {...rest}
       data-test-subj="xyVisAnnotationIcon"
       type={iconConfig.icon || type}
-      className={iconConfig.shouldRotate ? rotateClassName : undefined}
+      css={rotationStyle}
     />
   );
 };
@@ -226,7 +237,12 @@ export function Marker({
 }) {
   if (hasIcon(config.icon)) {
     return (
-      <AnnotationIcon type={config.icon} rotateClassName={rotateClassName} renderedInChart={true} />
+      <AnnotationIcon
+        type={config.icon}
+        rotateClassName={rotateClassName}
+        renderedInChart={true}
+        isHorizontal={isHorizontal}
+      />
     );
   }
 
