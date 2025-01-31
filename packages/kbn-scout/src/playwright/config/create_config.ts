@@ -39,6 +39,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
+      testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
       /* Base URL to use in actions like `await page.goto('/')`. */
