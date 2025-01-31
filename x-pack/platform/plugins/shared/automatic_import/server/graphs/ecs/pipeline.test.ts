@@ -7,7 +7,7 @@
 
 import { ecsPipelineState } from '../../../__jest__/fixtures/ecs_mapping';
 import type { EcsMappingState } from '../../types';
-import { createPipeline } from './pipeline';
+import { createPipeline, generateProcessors } from './pipeline';
 
 const state: EcsMappingState = ecsPipelineState;
 
@@ -302,5 +302,119 @@ describe('Testing pipeline templates', () => {
         },
       },
     ]);
+  });
+
+  it('should generate processors for empty mapping', () => {
+    const processors = generateProcessors({}, {});
+    expect(processors).toEqual([]);
+  });
+
+  it('should generate processors for nested fields', () => {
+    const mapping = {
+      nested: {
+        field: {
+          target: 'target.field',
+          confidence: 0.8,
+          type: 'keyword',
+          date_formats: [],
+        },
+      },
+    };
+    const samples = {
+      nested: {
+        field: 'test value',
+      },
+    };
+
+    const processors = generateProcessors(mapping, samples);
+
+    expect(processors).toHaveLength(1);
+    expect(processors[0]).toEqual({
+      rename: {
+        field: 'nested.field',
+        target_field: 'target.field',
+        ignore_missing: true,
+      },
+    });
+  });
+  it('should handle nested fields with mixed target mappings', () => {
+    const mapping = {
+      level1: {
+        no_target: {
+          field: {
+            target: 'target.field',
+            confidence: 0.8,
+            type: 'keyword',
+            date_formats: [],
+          },
+        },
+      },
+    };
+    const samples = {
+      level1: {
+        no_target: {
+          field: 'test value',
+        },
+      },
+    };
+
+    const processors = generateProcessors(mapping, samples);
+
+    expect(processors).toHaveLength(1);
+    expect(processors[0]).toEqual({
+      rename: {
+        field: 'level1.no_target.field',
+        target_field: 'target.field',
+        ignore_missing: true,
+      },
+    });
+  });
+  it('should handle multiple nested fields', () => {
+    const mapping = {
+      level1: {
+        level2: {
+          level3: {
+            field1: {
+              target: 'target.field1',
+              confidence: 0.8,
+              type: 'keyword',
+              date_formats: [],
+            },
+          },
+          field2: {
+            target: 'target.field2',
+            confidence: 0.9,
+            type: 'long',
+            date_formats: [],
+          },
+        },
+      },
+    };
+    const samples = {
+      level1: {
+        level2: {
+          field1: 'string value',
+          field2: '123',
+        },
+      },
+    };
+
+    const processors = generateProcessors(mapping, samples);
+
+    expect(processors).toHaveLength(2);
+    expect(processors[0]).toEqual({
+      rename: {
+        field: 'level1.level2.level3.field1',
+        target_field: 'target.field1',
+        ignore_missing: true,
+      },
+    });
+    expect(processors[1]).toEqual({
+      rename: {
+        field: 'level1.level2.field2',
+        target_field: 'target.field2',
+        ignore_missing: true,
+      },
+    });
   });
 });

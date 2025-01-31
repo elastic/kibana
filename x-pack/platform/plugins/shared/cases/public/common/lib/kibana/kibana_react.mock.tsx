@@ -83,7 +83,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: { save: true, show: true },
-    generalCasesV2: {
+    generalCasesV3: {
       create_cases: true,
       read_cases: true,
       update_cases: true,
@@ -93,6 +93,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       cases_settings: true,
       case_reopen: true,
       create_comment: true,
+      cases_assign: true,
     },
     visualize_v2: { save: true, show: true },
     dashboard_v2: { show: true, createNew: true },
