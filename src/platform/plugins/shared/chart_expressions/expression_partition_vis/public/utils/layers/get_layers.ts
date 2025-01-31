@@ -80,6 +80,13 @@ export const getLayers = (
     isDarkMode
   );
 
+  const categories =
+    chartType === ChartTypes.MOSAIC && columns.length === 2
+      ? getColorCategories(rows, columns[1]?.id)
+      : getColorCategories(rows, columns[0]?.id);
+
+  const colorIndexMap = new Map(categories.map((c, i) => [String(c), i]));
+
   return columns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? emptySliceLabel : col.name),
@@ -113,7 +120,8 @@ export const getLayers = (
                 isDarkMode,
                 formatter,
                 col,
-                formatters
+                formatters,
+                colorIndexMap
               ),
       },
     };

@@ -145,28 +145,14 @@ const createSeriesLayers = (
   formatters: Record<string, FieldFormat | undefined>,
   formatter: FieldFormatsStart,
   column: Partial<BucketColumns>,
-  chartType: ChartTypes
+  colorIndexMap: Map<string, number>
 ): SeriesLayer[] => {
   const seriesLayers: SeriesLayer[] = [];
   let tempParent: typeof arrayNode | (typeof arrayNode)['parent'] = arrayNode;
-  const groupsRemainingAsOther = Boolean(
-    tempParent?.parent?.children?.find((child) => child[0] === '__other__')
-  );
 
   while (tempParent.parent && tempParent.depth > 0) {
     const nodeKey = tempParent.parent.children[tempParent.sortIndex][0];
     const seriesName = String(nodeKey);
-
-    let sortIndex = tempParent.sortIndex;
-
-    if (chartType === ChartTypes.MOSAIC && groupsRemainingAsOther) {
-      const newIndex = tempParent.sortIndex + 1;
-      if (newIndex > tempParent.parent?.children?.length - 1) {
-        sortIndex = 0;
-      } else {
-        sortIndex = newIndex;
-      }
-    }
 
     /**
      * FIXME this is a bad implementation: The `parentSeries` is an array of both `string` and `RangeKey` even if its type
@@ -176,6 +162,8 @@ const createSeriesLayers = (
      */
     const isSplitParentLayer = isSplitChart && parentSeries.includes(seriesName);
     const formattedName = getNodeLabel(nodeKey, column, formatters, formatter.deserialize);
+    const colorIndex = colorIndexMap.get(seriesName) ?? tempParent.sortIndex;
+
     seriesLayers.unshift({
       // by construction and types `formattedName` should be always be a string, but I leave this Nullish Coalescing
       // because I don't trust much our formatting functions
@@ -183,7 +171,7 @@ const createSeriesLayers = (
       rankAtDepth: isSplitParentLayer
         ? // FIXME as described above this will not work correctly if the `nodeKey` is a `RangeKey`
           parentSeries.findIndex((name) => name === seriesName)
-        : sortIndex,
+        : colorIndex,
       totalSeriesAtDepth: isSplitParentLayer
         ? parentSeries.length
         : tempParent.parent.children.length,
@@ -230,7 +218,8 @@ export const getColor = (
   isDarkMode: boolean,
   formatter: FieldFormatsStart,
   column: Partial<BucketColumns>,
-  formatters: Record<string, FieldFormat | undefined>
+  formatters: Record<string, FieldFormat | undefined>,
+  colorIndexMap: Map<string, number>
 ) => {
   // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
   // therefore change it for dark mode
@@ -262,7 +251,7 @@ export const getColor = (
     formatters,
     formatter,
     column,
-    chartType
+    colorIndexMap
   );
 
   const overriddenColor = overrideColors(seriesLayers, overwriteColors, name);
