@@ -46,7 +46,7 @@ export async function addEsqlPanel({
     return dataView;
   };
 
-  const [dataView] = await Promise.all([getFallbackDataView()]);
+  const dataView = await getFallbackDataView();
 
   if (!dataView) {
     throw new IncompatibleActionError();
