@@ -9,13 +9,24 @@ import { type Datatable, type DatatableColumnMeta } from '@kbn/expressions-plugi
 import { getOriginalId } from '@kbn/transpose-utils';
 
 /**
+ * Make sure to specifically check for "top_hits" when looking for array values
+ */
+function isLastValueWithArraySupport(meta: DatatableColumnMeta): boolean {
+  return (
+    meta.sourceParams?.type !== 'filtered_metric' ||
+    (meta.sourceParams?.params as { customMetric: { type: 'top_hits' | 'top_metrics' } })
+      ?.customMetric?.type !== 'top_hits'
+  );
+}
+
+/**
  * Returns true for numerical fields
  *
  * Excludes the following types:
  *  - `range` - Stringified range
  *  - `multi_terms` - Multiple values
  *  - `filters` - Arbitrary label
- *  - `filtered_metric` - Array of values
+ *  - Last value with array values
  */
 export function isNumericField(meta?: DatatableColumnMeta): boolean {
   return (
@@ -23,7 +34,7 @@ export function isNumericField(meta?: DatatableColumnMeta): boolean {
     meta.params?.id !== 'range' &&
     meta.params?.id !== 'multi_terms' &&
     meta.sourceParams?.type !== 'filters' &&
-    meta.sourceParams?.type !== 'filtered_metric'
+    isLastValueWithArraySupport(meta)
   );
 }
 
