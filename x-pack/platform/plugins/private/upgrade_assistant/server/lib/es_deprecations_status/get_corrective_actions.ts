@@ -13,19 +13,36 @@ interface Action {
 }
 
 interface Actions {
-  actions: Action[];
+  actions?: Action[];
 }
 
-interface ReindexRequired {
+interface IndexMetadata {
+  actions?: Action[];
   reindex_required?: boolean;
 }
+interface MlActionMetadata {
+  actions?: Action[];
+  snapshot_id: string;
+  job_id: string;
+}
+interface DataStreamActionMetadata {
+  actions?: Action[];
+  total_backing_indices: number;
+  reindex_required: boolean;
 
-export type EsMetadata = Actions &
-  ReindexRequired & {
-    [key: string]: string;
-  };
+  // Action required before moving to 9.0
+  indices_requiring_upgrade_count?: number;
+  indices_requiring_upgrade?: string[];
+
+  // Action not required before moving to 9.0
+  ignored_indices_requiring_upgrade?: string[];
+  ignored_indices_requiring_upgrade_count?: number;
+}
+
+export type EsMetadata = Actions | MlActionMetadata | DataStreamActionMetadata | IndexMetadata;
 
 export const getCorrectiveAction = (
+  deprecationType: EnrichedDeprecationInfo['type'],
   message: string,
   metadata?: EsMetadata,
   indexName?: string
@@ -39,8 +56,42 @@ export const getCorrectiveAction = (
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
+  const requiresDataStreamsAction = deprecationType === 'data_streams';
 
-  if (metadata?.reindex_required === true) {
+  if (requiresDataStreamsAction) {
+    const {
+      total_backing_indices: totalBackingIndices,
+      indices_requiring_upgrade_count: indicesRequiringUpgradeCount = 0,
+      indices_requiring_upgrade: indicesRequiringUpgrade = [],
+
+      ignored_indices_requiring_upgrade: ignoredIndicesRequiringUpgrade = [],
+      ignored_indices_requiring_upgrade_count: ignoredIndicesRequiringUpgradeCount = 0,
+
+      reindex_required: reindexRequired,
+    } = metadata as DataStreamActionMetadata;
+
+    /**
+     * If there are no indices requiring upgrade, or reindexRequired = false.
+     * Then we don't need to show the corrective action
+     */
+    if (indicesRequiringUpgradeCount < 1 || !reindexRequired) {
+      return;
+    }
+
+    return {
+      type: 'dataStream',
+      metadata: {
+        ignoredIndicesRequiringUpgrade,
+        ignoredIndicesRequiringUpgradeCount,
+        totalBackingIndices,
+        indicesRequiringUpgradeCount,
+        indicesRequiringUpgrade,
+        reindexRequired,
+      },
+    };
+  }
+
+  if ((metadata as IndexMetadata)?.reindex_required === true) {
     return {
       type: 'reindex',
     };
@@ -61,7 +112,7 @@ export const getCorrectiveAction = (
   }
 
   if (requiresMlAction) {
-    const { snapshot_id: snapshotId, job_id: jobId } = metadata!;
+    const { snapshot_id: snapshotId, job_id: jobId } = metadata as MlActionMetadata;
 
     return {
       type: 'mlSnapshot',
