@@ -284,7 +284,10 @@ export function initializeEditApi(
         );
       },
       isReadOnlyEnabled: () => {
-        return Boolean(parentApi && apiHasAppContext(parentApi) && canShowConfig());
+        return {
+          read: Boolean(parentApi && apiHasAppContext(parentApi) && canShowConfig()),
+          write: Boolean(capabilities.dashboard?.showWriteControls),
+        };
       },
       onShowConfig: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
