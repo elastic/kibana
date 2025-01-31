@@ -15,7 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   const { createIndex, deleteAllIndices } = indicesHelpers(getService);
   const { getIndexSettings, updateIndexSettings } = settingsApi(getService);
 
-  describe('settings', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/208873
+  describe.skip('settings', () => {
     after(async () => await deleteAllIndices());
 
     it('should fetch an index settings', async () => {

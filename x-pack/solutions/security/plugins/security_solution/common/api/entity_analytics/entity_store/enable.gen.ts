@@ -29,6 +29,10 @@ export const InitEntityStoreRequestBody = z.object({
   entityTypes: z.array(EntityType).optional(),
   enrichPolicyExecutionInterval: Interval.optional(),
   /**
+   * The field to use as the timestamp.
+   */
+  timestampField: z.string().optional().default('@timestamp'),
+  /**
    * The amount of time the transform looks back to calculate the aggregations.
    */
   lookbackPeriod: z

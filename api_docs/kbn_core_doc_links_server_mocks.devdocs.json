@@ -22,7 +22,7 @@
         "tags": [],
         "label": "docLinksServiceMock",
         "description": [],
-        "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
+        "path": "src/core/packages/doc-links/server-mocks/src/doc_links_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<DocLinksServiceContract>"
             ],
-            "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
+            "path": "src/core/packages/doc-links/server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -53,7 +53,7 @@
               "() => ",
               "DocLinksServiceSetup"
             ],
-            "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
+            "path": "src/core/packages/doc-links/server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -70,7 +70,7 @@
               "() => ",
               "DocLinksServiceSetup"
             ],
-            "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
+            "path": "src/core/packages/doc-links/server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

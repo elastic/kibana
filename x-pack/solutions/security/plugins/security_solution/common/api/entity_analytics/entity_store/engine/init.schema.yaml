@@ -35,7 +35,10 @@ paths:
                   type: string
                 enrichPolicyExecutionInterval:
                   $ref: '../common.schema.yaml#/components/schemas/Interval'
-
+                timestampField:
+                  type: string
+                  description: The field to use as the timestamp for the entity type.
+                  default: '@timestamp'
                 lookbackPeriod: 
                   type: string
                   default: 24h
