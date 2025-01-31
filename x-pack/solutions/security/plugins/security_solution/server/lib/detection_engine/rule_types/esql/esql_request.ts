@@ -23,10 +23,12 @@ export interface EsqlTable {
 export const performEsqlRequest = async ({
   esClient,
   requestParams,
+  queryString,
 }: {
   logger?: Logger;
   esClient: ElasticsearchClient;
   requestParams: Record<string, unknown>;
+  queryString?: { drop_null_columns?: boolean };
 }): Promise<EsqlTable> => {
   const search = async () => {
     try {
@@ -36,6 +38,7 @@ export const performEsqlRequest = async ({
         body: {
           ...requestParams,
         },
+        querystring: queryString,
       });
       return {
         rawResponse,

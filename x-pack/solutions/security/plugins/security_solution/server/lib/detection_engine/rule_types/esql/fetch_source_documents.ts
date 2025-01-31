@@ -15,7 +15,8 @@ import type { SignalSource } from '../types';
 interface FetchedDocument {
   fields: estypes.SearchHit['fields'];
   _source?: SignalSource;
-  _index: string;
+  _index: estypes.SearchHit['_index'];
+  _version: estypes.SearchHit['_version'];
 }
 
 interface FetchSourceDocumentsArgs {
@@ -85,7 +86,12 @@ export const fetchSourceDocuments = async ({
 
   return response.hits.hits.reduce<Record<string, FetchedDocument>>((acc, hit) => {
     if (hit._id) {
-      acc[hit._id] = { fields: hit.fields, _source: hit._source, _index: hit._index };
+      acc[hit._id] = {
+        fields: hit.fields,
+        _source: hit._source,
+        _index: hit._index,
+        _version: hit._version,
+      };
     }
     return acc;
   }, {});

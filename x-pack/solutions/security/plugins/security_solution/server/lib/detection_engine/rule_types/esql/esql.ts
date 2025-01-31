@@ -110,10 +110,11 @@ export const esqlExecutor = async ({
           secondaryTimestamp,
           exceptionFilter,
         });
+        const esqlQueryString = { drop_null_columns: true };
 
         if (isLoggedRequestsEnabled) {
           loggedRequests.push({
-            request: logEsqlRequest(esqlRequest),
+            request: logEsqlRequest(esqlRequest, esqlQueryString),
             description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
           });
         }
@@ -129,6 +130,7 @@ export const esqlExecutor = async ({
         const response = await performEsqlRequest({
           esClient: services.scopedClusterClient.asCurrentUser,
           requestParams: esqlRequest,
+          queryString: esqlQueryString,
         });
 
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
@@ -185,6 +187,7 @@ export const esqlExecutor = async ({
             fields: sourceDocument?.fields,
             _id: _id ?? '',
             _index: _index || sourceDocument?._index || '',
+            _version: sourceDocument?._version,
           };
         });
 
