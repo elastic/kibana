@@ -54,10 +54,8 @@ import {
   indexToViewIndex,
   isConnectorIndex,
   isConnectorViewIndex,
-  isCrawlerIndex,
 } from '../../utils/indices';
 
-import { CrawlerLogic } from './crawler/crawler_logic';
 import { IndexNameLogic } from './index_name_logic';
 
 type StartSyncApiActions = Actions<StartSyncArgs, {}>;
@@ -154,8 +152,6 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         'apiSuccess as startAccessControlSyncApiSuccess',
         'makeRequest as makeStartAccessControlSyncRequest',
       ],
-      CrawlerLogic,
-      ['fetchCrawlerData'],
     ],
     values: [
       IndexNameLogic,
@@ -175,10 +171,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       const { indexName } = IndexNameLogic.values;
       actions.makeFetchIndexRequest({ indexName });
     },
-    fetchIndexApiSuccess: (index) => {
-      if (isCrawlerIndex(index) && index.name === values.indexName) {
-        actions.fetchCrawlerData();
-      }
+    fetchIndexApiSuccess: () => {
       if (values.recheckIndexLoading) {
         actions.resetRecheckIndexLoading();
         flashSuccessToast(
@@ -253,10 +246,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
   selectors: ({ selectors }) => ({
     connector: [
       () => [selectors.indexData],
-      (index) =>
-        index && (isConnectorViewIndex(index) || isCrawlerIndex(index))
-          ? index.connector
-          : undefined,
+      (index) => (index && isConnectorViewIndex(index) ? index.connector : undefined),
     ],
     connectorError: [
       () => [selectors.connector],
