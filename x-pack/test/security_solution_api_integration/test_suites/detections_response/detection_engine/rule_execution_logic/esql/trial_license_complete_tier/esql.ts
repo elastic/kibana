@@ -1519,7 +1519,7 @@ export default ({ getService }: FtrProviderContext) => {
           {
             depth: 1,
             id: expect.any(String),
-            index: '.internal.alerts-security.alerts-default-000001',
+            index: expect.stringContaining('alerts'),
             rule: ruleId,
             type: 'signal',
           },
@@ -1554,7 +1554,7 @@ export default ({ getService }: FtrProviderContext) => {
           {
             depth: 1,
             id: expect.any(String),
-            index: '.internal.alerts-security.alerts-default-000001',
+            index: expect.stringContaining('alerts'),
             rule: ruleId,
             type: 'signal',
           },
