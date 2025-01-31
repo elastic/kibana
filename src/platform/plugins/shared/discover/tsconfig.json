@@ -1,3 +1,4 @@
+
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
@@ -120,7 +121,9 @@
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/background-search"
+    "@kbn/background-search",
+    "@kbn/grouping",
+    "@kbn/core-notifications-browser",
   ],
   "exclude": ["target/**/*"]
 }
