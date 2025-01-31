@@ -337,7 +337,11 @@ describe('AgentlessConnectorsInfraService', () => {
       ];
 
       packagePolicyService.fetchAllItems.mockResolvedValue(
-        getMockPolicyFetchAllItems([[firstPackagePolicy], [secondPackagePolicy], [thirdPackagePolicy]])
+        getMockPolicyFetchAllItems([
+          [firstPackagePolicy],
+          [secondPackagePolicy],
+          [thirdPackagePolicy],
+        ])
       );
 
       const policies = await service.getConnectorPackagePolicies();
