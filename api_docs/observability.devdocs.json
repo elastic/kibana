@@ -14202,6 +14202,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.casesFeatureIdV3",
+        "type": "string",
+        "tags": [],
+        "label": "casesFeatureIdV3",
+        "description": [],
+        "signature": [
+          "\"observabilityCasesV3\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.defaultApmServiceEnvironment",
         "type": "string",
         "tags": [],
