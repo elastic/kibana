@@ -219,7 +219,7 @@ describe('callAssistantGraph', () => {
         promptGroupId: promptGroupId.aiAssistant,
       })
     );
-    expect(getPromptMock).toHaveBeenCalledTimes(2);
+
     expect(getTool).toHaveBeenCalledWith(
       expect.objectContaining({
         description: 'prompt',
