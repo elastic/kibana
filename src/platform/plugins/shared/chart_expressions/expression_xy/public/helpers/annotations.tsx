@@ -10,6 +10,8 @@
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -139,11 +141,18 @@ export function MarkerBody({
   );
 }
 
+const xyAnnotationNumberIconStyles = css({
+  borderRadius: euiThemeVars.euiSize,
+  minWidth: euiThemeVars.euiSize,
+  height: euiThemeVars.euiSize,
+  backgroundColor: 'currentColor',
+});
+
 function NumberIcon({ number }: { number: number }) {
   return (
     <EuiFlexGroup
       justifyContent="spaceAround"
-      className="xyAnnotationNumberIcon"
+      css={xyAnnotationNumberIconStyles}
       data-test-subj="xyVisGroupedAnnotationIcon"
       gutterSize="none"
       alignItems="center"
