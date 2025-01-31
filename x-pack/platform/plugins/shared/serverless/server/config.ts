@@ -53,6 +53,12 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     developer: true,
   },
+  deprecations: ({ unused }) => [
+    unused('developer', { level: 'critical' }),
+    unused('developer.projectSwitcher', { level: 'critical' }),
+    unused('developer.projectSwitcher.enabled', { level: 'critical' }),
+    unused('developer.projectSwitcher.currentType', { level: 'critical' }),
+  ],
 };
 
 export type ServerlessConfig = TypeOf<typeof configSchema>;

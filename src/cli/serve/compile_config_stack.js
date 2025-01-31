@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 
-import { readFileSync, writeFileSync, statSync, existsSync } from 'fs';
+import { statSync } from 'fs';
 import { resolve } from 'path';
 import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { getConfigFromFiles } from '@kbn/config';
@@ -35,11 +35,6 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
 
   if (dev && devConfig !== false) {
     configs.push(resolveConfig('kibana.dev.yml'));
-  }
-
-  if (dev && serverless) {
-    writeProjectSwitcherConfig('serverless.recent.dev.yml', serverless);
-    configs.push(resolveConfig('serverless.recent.dev.yml'));
   }
 
   // Filter out all config paths that didn't exist
@@ -79,27 +74,6 @@ function resolveConfig(fileName) {
     return filePath;
   } else {
     return null;
-  }
-}
-
-/**
- * @param {string} fileName
- * @param {object} opts
- */
-function writeProjectSwitcherConfig(fileName, serverlessOption) {
-  const path = resolve(getConfigDirectory(), fileName);
-  const configAlreadyExists = existsSync(path);
-
-  const preserveExistingConfig = serverlessOption === true;
-  const serverlessMode = validateServerlessMode(serverlessOption) || 'es';
-
-  if (configAlreadyExists && preserveExistingConfig) {
-    return;
-  } else {
-    const content = `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\nserverless: ${serverlessMode}\n`;
-    if (!configAlreadyExists || readFileSync(path).toString() !== content) {
-      writeFileSync(path, content);
-    }
   }
 }
 
