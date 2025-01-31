@@ -15,8 +15,9 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsProgressBarData, GroupBySelection } from './types';
@@ -59,6 +60,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   addFilter,
   groupBySelection,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
@@ -114,6 +116,14 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
     );
   };
 
+  const color = useMemo(
+    () =>
+      euiTheme.themeName === 'EUI_THEME_BOREALIS'
+        ? euiTheme.colors.vis.euiColorVis6
+        : euiTheme.colors.vis.euiColorVis9,
+    [euiTheme]
+  );
+
   return (
     <>
       <StyledEuiFlexGroup alignItems="center" gutterSize="xs">
@@ -160,7 +170,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                             </EuiText>
                           }
                           max={1}
-                          color={`vis6`}
+                          color={color}
                           size="s"
                           value={item.percentage}
                           label={
