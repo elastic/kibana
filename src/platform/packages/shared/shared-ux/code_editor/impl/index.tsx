@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { CodeEditorProps } from './code_editor';
 export type { CodeEditorProps } from './code_editor';
-// export * from './languages/constants';
+export * from './react_monaco_editor/languages/supported';
 
 const LazyCodeEditorBase = React.lazy(() =>
   import(/* webpackChunkName: "code-editor-entry" */ './code_editor').then((m) => ({
