@@ -52,6 +52,15 @@ export const HEALTH_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
         status: {
           type: 'keyword',
         },
+        health: {
+          properties: {
+            rollupTransform: { type: 'keyword' },
+            summaryTransform: { type: 'keyword' },
+            delay: { type: 'keyword' },
+            staleTime: { type: 'keyword' },
+            version: { type: 'keyword' },
+          },
+        },
         data: {
           properties: {
             summaryUpdatedAt: {

@@ -17,10 +17,12 @@ import {
   SLO_CREATE_PATH,
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
+  SLOS_MANAGEMENT_PATH,
   SLO_SETTINGS_PATH,
 } from '../../common/locators/paths';
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
+import { SloManagementPage } from '../pages/slo_management/slo_management_page';
 
 export const getRoutes = (
   isServerless?: boolean
@@ -78,6 +80,13 @@ export const getRoutes = (
           },
         }
       : {}),
+    [SLOS_MANAGEMENT_PATH]: {
+      handler: () => {
+        return <SloManagementPage />;
+      },
+      params: {},
+      exact: true,
+    },
     [SLO_DETAIL_PATH]: {
       handler: () => {
         return <SloDetailsPage />;

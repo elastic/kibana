@@ -19,7 +19,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { SLOConfig } from '../../types';
-import { ComputeHealth } from '../ops_management/compute_health';
+import { ComputeHealth } from '../management/compute_health';
 
 export const TYPE = 'slo:health-task';
 export const VERSION = '1.0.0';

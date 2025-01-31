@@ -192,6 +192,7 @@ export class SLOPlugin
 
   public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+    const isHealthEnabled = this.initContext.config.get().healthEnabled;
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
@@ -218,6 +219,7 @@ export class SLOPlugin
     });
 
     return {
+      isHealthEnabled,
       getCreateSLOFlyout,
     };
   }

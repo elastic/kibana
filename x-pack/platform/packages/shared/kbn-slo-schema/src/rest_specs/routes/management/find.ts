@@ -11,7 +11,7 @@ import { sloHealthResponseSchema } from '../../slo_health';
 const findSLOHealthParamsSchema = t.partial({
   query: t.partial({
     query: t.string,
-    filter: t.string,
+    filters: t.string,
     sortBy: t.literal('status'),
     sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
     searchAfter: t.string,

@@ -23,4 +23,4 @@ export * from './put_settings';
 export * from './get_suggestions';
 export * from './get_slo_health';
 
-export * from './health/find';
+export * from './management/find';

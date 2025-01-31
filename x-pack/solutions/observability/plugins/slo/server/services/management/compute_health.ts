@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger, SavedObject, SavedObjectsClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
@@ -14,7 +15,7 @@ import {
   sloDefinitionSchema,
 } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/lib/Either';
-import { find, flatMap, groupBy, merge } from 'lodash';
+import { Dictionary, find, flatMap, groupBy, merge } from 'lodash';
 import moment from 'moment';
 import {
   HEALTH_INDEX_NAME,
@@ -85,35 +86,12 @@ export class ComputeHealth {
 
       const health: SLOHealth[] = sloDefinitions.map((sloDefinition) => {
         const rollupTransformId = getSLOTransformId(sloDefinition.id, sloDefinition.revision);
-        const rollupTransform = {
-          id: rollupTransformId,
-          state: toTransformStatsState(transformStatsById[rollupTransformId][0]?.state),
-          reason: transformStatsById[rollupTransformId][0]?.reason ?? 'unknown',
-          health: {
-            status: toTransformHealthStatus(
-              transformStatsById[rollupTransformId][0]?.health?.status
-            ),
-            // @ts-ignore transformStats response type is not properly typed
-            issues: transformStatsById[rollupTransformId][0]?.health?.issues,
-          },
-        };
-
         const summaryTransformId = getSLOSummaryTransformId(
           sloDefinition.id,
           sloDefinition.revision
         );
-        const summaryTransform = {
-          id: summaryTransformId,
-          state: toTransformStatsState(transformStatsById[summaryTransformId][0]?.state),
-          reason: transformStatsById[summaryTransformId][0]?.reason,
-          health: {
-            status: toTransformHealthStatus(
-              transformStatsById[summaryTransformId][0]?.health?.status
-            ),
-            // @ts-ignore transformStats response type is not properly typed
-            issues: transformStatsById[summaryTransformId][0]?.health?.issues,
-          },
-        };
+        const rollupTransform = this.toTransformStats(rollupTransformId, transformStatsById);
+        const summaryTransform = this.toTransformStats(summaryTransformId, transformStatsById);
 
         const summaryResult = find(
           summaryResults.aggregations?.bySlo.buckets,
@@ -144,15 +122,23 @@ export class ComputeHealth {
           revision: sloDefinition.revision,
           version: sloDefinition.version,
           instances: summaryResult?.doc_count ?? 0,
-          status: overallStatus,
           spaceId: getSLOSpaceId(sloDefinition.id),
           createdAt: createdAt.toISOString(),
+          status: overallStatus,
+          health: {
+            rollupTransform: this.isTransformHealthyRunning(rollupTransform) ? 'healthy' : 'failed',
+            summaryTransform: this.isTransformHealthyRunning(summaryTransform)
+              ? 'healthy'
+              : 'failed',
+            delay: this.isDelayDegraded(delay, sloDefinition) ? 'degraded' : 'healthy',
+            staleTime: this.isStaleTimeDegraded(staleTime) ? 'degraded' : 'healthy',
+            version: isOutdatedVersion ? 'degraded' : 'healthy',
+          },
           data: {
             summaryUpdatedAt: summaryUpdatedAt.toISOString(),
             lastRollupIngestedAt: lastRollupIngestedAt.toISOString(),
             delay,
             staleTime,
-            outdatedVersion: isOutdatedVersion,
             summaryTransform,
             rollupTransform,
           },
@@ -183,6 +169,53 @@ export class ComputeHealth {
     });
   }
 
+  private toTransformStats(
+    transformId: string,
+    transformStatsById: Dictionary<TransformGetTransformStatsTransformStats[]>
+  ) {
+    function toTransformHealthStatus(status?: string): TransformHealthStatus {
+      switch (status?.toLocaleLowerCase()) {
+        case 'green':
+          return 'green';
+        case 'yellow':
+          return 'yellow';
+        case 'red':
+          return 'red';
+        default:
+          return 'unknown';
+      }
+    }
+
+    function toTransformStatsState(state?: string): TransformStatsState {
+      switch (state?.toLocaleLowerCase()) {
+        case 'started':
+          return 'started';
+        case 'indexing':
+          return 'indexing';
+        case 'stopped':
+          return 'stopped';
+        case 'stopping':
+          return 'stopping';
+        case 'aborting':
+          return 'aborting';
+        case 'failed':
+        default:
+          return 'failed';
+      }
+    }
+
+    return {
+      id: transformId,
+      state: toTransformStatsState(transformStatsById[transformId][0]?.state),
+      reason: transformStatsById[transformId][0]?.reason ?? 'unknown',
+      health: {
+        status: toTransformHealthStatus(transformStatsById[transformId][0]?.health?.status),
+        // @ts-ignore transformStats response type is not properly typed
+        issues: transformStatsById[transformId][0]?.health?.issues ?? [],
+      },
+    };
+  }
+
   private computeStatus(
     rollupTransform: TransformStats,
     summaryTransform: TransformStats,
@@ -191,32 +224,19 @@ export class ComputeHealth {
     isOutdatedVersion: boolean,
     sloDefinition: SLODefinition
   ) {
-    if (
-      rollupTransform.health.status !== 'green' ||
-      !['started', 'indexing'].includes(rollupTransform.state)
-    ) {
-      return 'unhealthy';
+    if (!this.isTransformHealthyRunning(rollupTransform)) {
+      return 'failed';
     }
 
-    if (
-      summaryTransform.health.status !== 'green' ||
-      !['started', 'indexing'].includes(summaryTransform.state)
-    ) {
-      return 'unhealthy';
+    if (!this.isTransformHealthyRunning(summaryTransform)) {
+      return 'failed';
     }
 
-    const sloDelay = getDelayInSecondsFromSLO(sloDefinition) * 1000;
-    const DELAY_BUFFER = 5 * 60 * 1000;
-    if (delay > sloDelay + 2 * DELAY_BUFFER) {
-      return 'unhealthy';
-    }
-
-    if (delay > sloDelay + DELAY_BUFFER) {
+    if (this.isDelayDegraded(delay, sloDefinition)) {
       return 'degraded';
     }
 
-    const STALE_TIME_DEGRADED = 24 * 60 * 60 * 1000;
-    if (staleTime > STALE_TIME_DEGRADED) {
+    if (this.isStaleTimeDegraded(staleTime)) {
       return 'degraded';
     }
 
@@ -225,6 +245,21 @@ export class ComputeHealth {
     }
 
     return 'healthy';
+  }
+
+  private isStaleTimeDegraded(staleTime: number) {
+    const STALE_TIME_DEGRADED = 24 * 60 * 60 * 1000;
+    return staleTime > STALE_TIME_DEGRADED;
+  }
+
+  private isDelayDegraded(delay: number, sloDefinition: SLODefinition) {
+    const sloDelay = getDelayInSecondsFromSLO(sloDefinition) * 1000;
+    const DELAY_BUFFER = 5 * 60 * 1000;
+    return delay > sloDelay + 2 * DELAY_BUFFER;
+  }
+
+  private isTransformHealthyRunning(transform: TransformStats) {
+    return transform.health.status === 'green' && ['started', 'indexing'].includes(transform.state);
   }
 
   private async getData(sloDefinitions: SLODefinition[]) {
@@ -309,36 +344,5 @@ export class ComputeHealth {
     }
 
     return result.right;
-  }
-}
-
-function toTransformHealthStatus(status?: string): TransformHealthStatus {
-  switch (status?.toLocaleLowerCase()) {
-    case 'green':
-      return 'green';
-    case 'yellow':
-      return 'yellow';
-    case 'red':
-      return 'red';
-    default:
-      return 'unknown';
-  }
-}
-
-function toTransformStatsState(state?: string): TransformStatsState {
-  switch (state?.toLocaleLowerCase()) {
-    case 'started':
-      return 'started';
-    case 'indexing':
-      return 'indexing';
-    case 'stopped':
-      return 'stopped';
-    case 'stopping':
-      return 'stopping';
-    case 'aborting':
-      return 'aborting';
-    case 'failed':
-    default:
-      return 'failed';
   }
 }

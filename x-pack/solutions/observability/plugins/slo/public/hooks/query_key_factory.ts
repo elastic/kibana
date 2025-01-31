@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Indicator } from '@kbn/slo-schema';
+import type { FindSLOHealthParams, Indicator } from '@kbn/slo-schema';
 
 interface SloListFilter {
   kqlQuery: string;
@@ -56,6 +56,7 @@ export const sloKeys = {
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
+
   burnRates: (
     sloId: string,
     instanceId: string | undefined,
@@ -76,6 +77,8 @@ export const sloKeys = {
     excludeStale?: boolean;
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  managementAll: ['slo', 'management'] as const,
+  managementHealth: (params: any) => [...sloKeys.managementAll, 'health', params] as const,
 };
 
 export type SloKeys = typeof sloKeys;

@@ -9,6 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FindSLOHealthParams, FindSLOHealthResponse } from '@kbn/slo-schema';
 import { HEALTH_INDEX_PATTERN } from '../../../common/constants';
+import { SLOHealth } from '../../domain/models';
 
 export class FindSLOHealth {
   constructor(
@@ -18,12 +19,19 @@ export class FindSLOHealth {
   ) {}
 
   public async execute(params: FindSLOHealthParams): Promise<FindSLOHealthResponse> {
-    const result = await this.esClient.search({
+    const parsedFilters = parseFilters(params.filters);
+    this.logger.info(`Finding SLO health with filters: ${JSON.stringify(parsedFilters, null, 2)}`);
+    const result = await this.esClient.search<SLOHealth>({
       index: HEALTH_INDEX_PATTERN,
       track_total_hits: true,
       query: {
         bool: {
-          filter: [{ term: { spaceId: this.spaceId } }, getElasticsearchQueryOrThrow(params.query)],
+          filter: [
+            { term: { spaceId: this.spaceId } },
+            getElasticsearchQueryOrThrow(params.query),
+            ...(parsedFilters.filter ?? []),
+          ],
+          must_not: parsedFilters.must_not ?? [],
         },
       },
       sort: [
@@ -40,20 +48,29 @@ export class FindSLOHealth {
       search_after: toSearchAfter(params.searchAfter),
     });
 
-    // @ts-ignore
-    const results = result.hits.hits.map((doc) => doc._source);
+    const results = result.hits.hits.map((doc) => doc._source).filter(Boolean) as SLOHealth[];
 
     return {
       // @ts-ignore
-      total: result.hits.total?.value ?? 0,
+      total: result.hits.total.value,
       size: result.hits.hits.length,
       searchAfter:
         result.hits.hits.length > 0
           ? JSON.stringify(result.hits.hits[result.hits.hits.length - 1].sort)
           : undefined,
-      // @ts-ignore
       results,
     };
+  }
+}
+
+export function parseFilters(filters?: string) {
+  if (!filters) {
+    return {};
+  }
+  try {
+    return JSON.parse(filters);
+  } catch (e) {
+    return {};
   }
 }
 
