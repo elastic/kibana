@@ -63,10 +63,8 @@ export interface UseBulkEditResponseProps {
 export function useBulkEditResponse(props: UseBulkEditResponseProps) {
   const { onSearchPopulate } = props;
   const {
-    i18n: i18nStart,
-    theme,
-    userProfile,
     notifications: { toasts },
+    ...startServices
   } = useKibana().services;
 
   const onSearchPopulateInternal = useCallback(
@@ -125,11 +123,7 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
       if (numberOfErrors === total) {
         toasts.addDanger({
           title: failureMessage(numberOfErrors, translationMap[property]),
-          text: toMountPoint(renderToastErrorBody(response), {
-            i18n: i18nStart,
-            theme,
-            userProfile,
-          }),
+          text: toMountPoint(renderToastErrorBody(response), { coreStart: startServices }),
         });
         return;
       }
@@ -137,10 +131,10 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
       // Some failure
       toasts.addWarning({
         title: someSuccessMessage(numberOfSuccess, numberOfErrors, translationMap[property]),
-        text: toMountPoint(renderToastErrorBody(response), { i18n: i18nStart, theme, userProfile }),
+        text: toMountPoint(renderToastErrorBody(response), { coreStart: startServices }),
       });
     },
-    [i18nStart, theme, userProfile, toasts, renderToastErrorBody]
+    [startServices, toasts, renderToastErrorBody]
   );
 
   return useMemo(() => {
