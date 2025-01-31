@@ -14,7 +14,7 @@ Previous versions: {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}
 [discrete]
 ==== {esql} in Discover
 
-preview:[] In 8.11 we are introducing link:https://www.elastic.co/guide/en/elasticsearch/reference/master/esql.html[{es} Query Language ({esql})], Elastic’s new piped language for data exploration and investigation. {esql} transforms, enriches, and simplifies your data exploration process. 
+preview:[] In 8.11 we are introducing link:{ref}/esql.html[{es} Query Language ({esql})], Elastic's new piped language for data exploration and investigation. {esql} transforms, enriches, and simplifies your data exploration process. 
 
 [role="screenshot"]
 image::images/esql-demo.gif[A short video demo of {esql}]
@@ -32,7 +32,7 @@ Here is what you can expect:
 
 {esql} in **Discover** brings efficiency and power to your data investigations, streamlining your path to insights. 
 
-Learn more about {esql}’s capabilities in the link:{ref-bare}/master/esql.html[{es} {esql} documentation]. 
+Learn more about {esql}'s capabilities in the link:{ref}/esql.html[{es} {esql} documentation]. 
 
 
 [role="screenshot"]
