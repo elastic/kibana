@@ -21,6 +21,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
@@ -170,18 +171,20 @@ export function LensEditConfigurationFlyout({
       })
     );
     // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references = extractReferencesFromState({
-      activeDatasources: Object.keys(datasourceStates).reduce(
-        (acc, id) => ({
-          ...acc,
-          [id]: datasourceMap[id],
-        }),
-        {}
-      ),
-      datasourceStates,
-      visualizationState: visualization.state,
-      activeVisualization,
-    });
+    const references = !textBasedMode
+      ? extractReferencesFromState({
+          activeDatasources: Object.keys(datasourceStates).reduce(
+            (acc, id) => ({
+              ...acc,
+              [id]: datasourceMap[id],
+            }),
+            {}
+          ),
+          datasourceStates,
+          visualizationState: visualization.state,
+          activeVisualization,
+        })
+      : [];
     const attrs: TypedLensSerializedState['attributes'] = {
       ...attributes,
       state: {
@@ -238,6 +241,7 @@ export function LensEditConfigurationFlyout({
     visualizationState: visualization,
   });
 
+  const textBasedMode = isOfAggregateQueryType(attributes.state.query);
   const editorContainer = useRef(null);
 
   const isSaveable = useMemo(() => {
@@ -341,6 +345,7 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isSaveable={isSaveable}
         isScrollable={false}
+        language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
       >
         <EuiFlexGroup

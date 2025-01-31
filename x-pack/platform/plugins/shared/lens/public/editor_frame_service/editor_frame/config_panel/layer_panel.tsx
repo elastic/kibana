@@ -311,7 +311,8 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
-  const isTextBasedLanguage = datasource?.isTextBasedLanguage() || false;
+  const isTextBasedLanguage =
+    datasource?.isTextBasedLanguage() || isOfAggregateQueryType(attributes?.state.query) || false;
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -419,7 +420,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const dispatch = useLensDispatch();
 
   const layers = useMemo(
-    () => activeDatasource.getLayers(datasourceState),
+    () => activeDatasource?.getLayers(datasourceState),
     [activeDatasource, datasourceState]
   );
 
