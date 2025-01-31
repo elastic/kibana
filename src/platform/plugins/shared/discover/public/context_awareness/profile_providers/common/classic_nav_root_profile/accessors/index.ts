@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './get_log_level_color';
-export * from './get_log_level_coalesed_value';
-export * from './get_available_resource_fields';
-export * from './get_all_logs_data_view_spec';
+export { getDefaultAdHocDataViews } from './get_default_ad_hoc_data_views';

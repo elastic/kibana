@@ -7,7 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './get_log_level_color';
-export * from './get_log_level_coalesed_value';
-export * from './get_available_resource_fields';
-export * from './get_all_logs_data_view_spec';
+import { i18n } from '@kbn/i18n';
+
+export const ALL_LOGS_DATA_VIEW_ID = 'discover-observability-root-profile-all-logs';
+
+export const getAllLogsDataViewSpec = ({
+  allLogsIndexPattern,
+}: {
+  allLogsIndexPattern: string;
+}) => ({
+  id: ALL_LOGS_DATA_VIEW_ID,
+  name: i18n.translate('discover.observabilitySolution.allLogsDataViewName', {
+    defaultMessage: 'All logs',
+  }),
+  title: allLogsIndexPattern,
+  timeFieldName: '@timestamp',
+});

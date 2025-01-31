@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SolutionType } from '../../../../profiles';
-import { getDefaultAdHocDataViews } from './get_default_ad_hoc_data_views';
+import { getAllLogsDataViewSpec } from './get_all_logs_data_view_spec';
 
-describe('getDefaultAdHocDataViews', () => {
+describe('getAllLogsDataViewSpec', () => {
   it('must return "discover-observability-root-profile-all-logs" for the "All logs" data view ID or bookmarks will break', () => {
-    const dataViews = getDefaultAdHocDataViews!(() => [], {
-      context: { solutionType: SolutionType.Observability, allLogsIndexPattern: 'logs-*' },
-    })();
-    expect(dataViews).toEqual([
+    const dataView = getAllLogsDataViewSpec({ allLogsIndexPattern: 'logs-*' });
+    expect(dataView).toEqual(
       expect.objectContaining({
         id: 'discover-observability-root-profile-all-logs',
         name: 'All logs',
-      }),
-    ]);
+      })
+    );
   });
 });
