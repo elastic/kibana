@@ -35,6 +35,7 @@ export const GridRow = ({
   const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
   const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getKeysInOrder(currentRow.panels)
@@ -83,12 +84,16 @@ export const GridRow = ({
             const displayedGridLayout = proposedGridLayout ?? gridLayout;
             return {
               title: displayedGridLayout[rowIndex].title,
+              isCollapsed: displayedGridLayout[rowIndex].isCollapsed,
               panelIds: Object.keys(displayedGridLayout[rowIndex].panels),
             };
           }),
           pairwise()
         )
         .subscribe(([oldRowData, newRowData]) => {
+          if (oldRowData.isCollapsed !== newRowData.isCollapsed) {
+            setIsCollapsed(newRowData.isCollapsed);
+          }
           if (
             oldRowData.panelIds.length !== newRowData.panelIds.length ||
             !(
@@ -118,33 +123,27 @@ export const GridRow = ({
         }
       });
 
-      /**
-       * Handle collapsed state via class name
-       */
-      const collapsedStateSubscription = gridLayoutStateManager.gridLayout$
-        .pipe(
-          map((gridLayout) => gridLayout[rowIndex].isCollapsed),
-          distinctUntilChanged()
-        )
-        .subscribe((isCollapsed) => {
-          if (!containerRef.current) return;
-          if (isCollapsed) {
-            containerRef.current.classList.add('kbnGridRowContainer--collapsed');
-          } else {
-            containerRef.current.classList.remove('kbnGridRowContainer--collapsed');
-          }
-        });
-
       return () => {
         interactionStyleSubscription.unsubscribe();
         gridLayoutSubscription.unsubscribe();
         rowStateSubscription.unsubscribe();
-        collapsedStateSubscription.unsubscribe();
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [rowIndex]
   );
+
+  /**
+   * Set a class for the collapsed state in order to control styles of header
+   */
+  useEffect(() => {
+    if (!containerRef.current) return;
+    if (isCollapsed) {
+      containerRef.current.classList.add('kbnGridRowContainer--collapsed');
+    } else {
+      containerRef.current.classList.remove('kbnGridRowContainer--collapsed');
+    }
+  }, [isCollapsed]);
 
   /**
    * Memoize panel children components (independent of their order) to prevent unnecessary re-renders
@@ -172,10 +171,6 @@ export const GridRow = ({
       ref={containerRef}
       css={css`
         height: 100%;
-
-        &.kbnGridRowContainer--collapsed .kbnGridRow {
-          display: none;
-        }
       `}
       className="kbnGridRowContainer"
     >
@@ -190,25 +185,26 @@ export const GridRow = ({
           }}
         />
       )}
-
-      <div
-        className={'kbnGridRow'}
-        ref={(element: HTMLDivElement | null) =>
-          (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
-        }
-        css={css`
-          height: 100%;
-          display: grid;
-          position: relative;
-          justify-items: stretch;
-          transition: background-color 300ms linear;
-          ${initialStyles};
-        `}
-      >
-        {/* render the panels **in order** for accessibility, using the memoized panel components */}
-        {panelIdsInOrder.map((panelId) => children[panelId])}
-        <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />
-      </div>
+      {!isCollapsed && (
+        <div
+          className={'kbnGridRow'}
+          ref={(element: HTMLDivElement | null) =>
+            (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
+          }
+          css={css`
+            height: 100%;
+            display: grid;
+            position: relative;
+            justify-items: stretch;
+            transition: background-color 300ms linear;
+            ${initialStyles};
+          `}
+        >
+          {/* render the panels **in order** for accessibility, using the memoized panel components */}
+          {panelIdsInOrder.map((panelId) => children[panelId])}
+          <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />
+        </div>
+      )}
     </div>
   );
 };

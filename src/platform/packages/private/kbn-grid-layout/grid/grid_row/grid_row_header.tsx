@@ -89,9 +89,10 @@ export const GridRowHeader = ({
         gutterSize="xs"
         alignItems="center"
         css={css`
+          height: calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}));
           padding: ${euiTheme.size.s} 0px;
 
-          border-bottom: none;
+          border-bottom: 1px solid transparent; // prevents layout shift
           .kbnGridRowContainer--collapsed & {
             border-bottom: ${euiTheme.border.thin};
           }
@@ -135,6 +136,7 @@ export const GridRowHeader = ({
         <GridRowTitle
           rowIndex={rowIndex}
           readOnly={readOnly}
+          toggleIsCollapsed={toggleIsCollapsed}
           editTitleOpen={editTitleOpen}
           setEditTitleOpen={setEditTitleOpen}
           gridLayoutStateManager={gridLayoutStateManager}
