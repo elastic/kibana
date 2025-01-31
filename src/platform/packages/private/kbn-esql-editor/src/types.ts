@@ -15,6 +15,9 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -44,6 +47,8 @@ export interface ESQLEditorProps {
   dataTestSubj?: string;
   /** Hide the Run query information which appears on the footer*/
   hideRunQueryText?: boolean;
+  /** Hide the Run query button which appears when editor is inlined*/
+  hideRunQueryButton?: boolean;
   /** This is used for applications (such as the inline editing flyout in dashboards)
    * which want to add the editor without being part of the Unified search component
    * It renders a submit query button inside the editor
@@ -69,6 +74,16 @@ export interface ESQLEditorProps {
 
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
+  /** The editor supports the creation of controls,
+   * This flag should be set to true to display the "Create control" suggestion
+   **/
+  supportsControls?: boolean;
+  /** Function to be called after the control creation **/
+  onSaveControl?: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
+  /** Function to be called after cancelling the control creation **/
+  onCancelControl?: () => void;
+  /** The available ESQL variables from the page context this editor was opened in */
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export interface JoinIndicesAutocompleteResult {
@@ -81,15 +96,27 @@ export interface JoinIndexAutocompleteItem {
   aliases: string[];
 }
 
+interface ESQLVariableService {
+  areSuggestionsEnabled: boolean;
+  esqlVariables: ESQLControlVariable[];
+  enableSuggestions: () => void;
+  disableSuggestions: () => void;
+  clearVariables: () => void;
+  addVariable: (variable: ESQLControlVariable) => void;
+}
+
 export interface EsqlPluginStartBase {
   getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  variablesService: ESQLVariableService;
 }
 
 export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   storage: Storage;
+  uiActions: UiActionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;

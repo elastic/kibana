@@ -29,7 +29,7 @@ jest.mock('./dashboard_grid_item', () => {
         const dashboardApi = mockUseDashboardApi();
 
         const [expandedPanelId, focusedPanelId] = mockUseBatchedPublishingSubjects(
-          dashboardApi.expandedPanelId,
+          dashboardApi.expandedPanelId$,
           dashboardApi.focusedPanelId$
         );
 

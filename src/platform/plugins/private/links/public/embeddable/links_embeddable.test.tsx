@@ -217,9 +217,9 @@ describe('getLinksEmbeddableFactory', () => {
           },
           references: [],
         });
-        expect(api.libraryId$.value).toBe('123');
-        expect(api.defaultPanelTitle!.value).toBe('links 001');
-        expect(api.defaultPanelDescription!.value).toBe('some links');
+        expect(await api.canUnlinkFromLibrary()).toBe(true);
+        expect(api.defaultTitle$?.value).toBe('links 001');
+        expect(api.defaultDescription$?.value).toBe('some links');
       });
     });
 
@@ -236,8 +236,7 @@ describe('getLinksEmbeddableFactory', () => {
 
       await waitFor(async () => {
         const api = onApiAvailable.mock.calls[0][0];
-        api.unlinkFromLibrary();
-        expect(await api.serializeState()).toEqual({
+        expect(await api.getSerializedStateByValue()).toEqual({
           rawState: {
             title: 'my links',
             description: 'just a few links',
@@ -251,7 +250,6 @@ describe('getLinksEmbeddableFactory', () => {
           },
           references,
         });
-        expect(api.libraryId$.value).toBeUndefined();
       });
     });
   });
@@ -329,7 +327,7 @@ describe('getLinksEmbeddableFactory', () => {
           references,
         });
 
-        expect(api.libraryId$.value).toBeUndefined();
+        expect(await api.canLinkToLibrary()).toBe(true);
       });
     });
     test('save to library', async () => {
@@ -355,8 +353,7 @@ describe('getLinksEmbeddableFactory', () => {
           options: { references },
         });
         expect(newId).toBe('333');
-        expect(api.libraryId$.value).toBe('333');
-        expect(await api.serializeState()).toEqual({
+        expect(await api.getSerializedStateByReference(newId)).toEqual({
           rawState: {
             savedObjectId: '333',
             title: 'my links',

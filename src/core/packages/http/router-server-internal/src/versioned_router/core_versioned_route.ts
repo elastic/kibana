@@ -25,6 +25,7 @@ import type {
 } from '@kbn/core-http-server';
 import { Request } from '@hapi/hapi';
 import { Logger } from '@kbn/logging';
+import { Env } from '@kbn/config';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import {
@@ -34,7 +35,7 @@ import {
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
-import { injectVersionHeader } from '../util';
+import { injectResponseHeaders, injectVersionHeader } from '../util';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
@@ -44,9 +45,10 @@ import { RequestHandlerEnhanced, Router } from '../router';
 import { kibanaResponseFactory as responseFactory } from '../response';
 import { validateHapiRequest } from '../route';
 import { RouteValidator } from '../validator';
+import { getWarningHeaderMessageFromRouteDeprecation } from '../get_warning_header_message';
 
 interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
-  isDev: boolean;
+  env: Env;
   useVersionResolutionStrategyForInternalPaths: Map<string, boolean>;
   defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
 }
@@ -86,7 +88,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   private useDefaultStrategyForPath: boolean;
   private isPublic: boolean;
-  private isDev: boolean;
+  private env: Env;
   private enableQueryVersion: boolean;
   private defaultSecurityConfig: RouteSecurity | undefined;
   private defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
@@ -98,13 +100,13 @@ export class CoreVersionedRoute implements VersionedRoute {
     internalOptions: InternalVersionedRouteConfig<Method>
   ) {
     const {
-      isDev,
+      env,
       useVersionResolutionStrategyForInternalPaths,
       defaultHandlerResolutionStrategy,
       ...options
     } = internalOptions;
     this.isPublic = options.access === 'public';
-    this.isDev = isDev;
+    this.env = env;
     this.defaultHandlerResolutionStrategy = defaultHandlerResolutionStrategy;
     this.useDefaultStrategyForPath =
       this.isPublic || useVersionResolutionStrategyForInternalPaths.has(path);
@@ -146,7 +148,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     if (!maybeVersion) {
       if (this.useDefaultStrategyForPath) {
         version = this.getDefaultVersion();
-      } else if (!this.isDev && !this.isPublic) {
+      } else if (!this.env.mode.dev && !this.isPublic) {
         // When in production, we default internal routes to v1 to allow
         // gracefully onboarding of un-versioned to versioned routes
         version = '1';
@@ -211,9 +213,22 @@ export class CoreVersionedRoute implements VersionedRoute {
       return injectVersionHeader(version, error);
     }
 
-    const response = await handler.fn(kibanaRequest, responseFactory);
+    let response = await handler.fn(kibanaRequest, responseFactory);
 
-    if (this.isDev && validation?.response?.[response.status]?.body) {
+    // we don't want to overwrite the header value
+    if (handler.options.options?.deprecated && !response.options.headers?.warning) {
+      response = injectResponseHeaders(
+        {
+          warning: getWarningHeaderMessageFromRouteDeprecation(
+            handler.options.options.deprecated,
+            this.env.packageInfo.version
+          ),
+        },
+        response
+      );
+    }
+
+    if (this.env.mode.dev && validation?.response?.[response.status]?.body) {
       const { [response.status]: responseValidation, unsafe } = validation.response;
       try {
         const validator = RouteValidator.from({
@@ -235,7 +250,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   private validateVersion(version: string) {
     // We do an additional check here while we only have a single allowed public version
     // for all public Kibana HTTP APIs
-    if (this.isDev && this.isPublic) {
+    if (this.env.mode.dev && this.isPublic) {
       const message = isAllowedPublicVersion(version);
       if (message) {
         throw new Error(message);

@@ -187,6 +187,15 @@ export const useLatestVulnerabilitiesGrouping = ({
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
     runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
+    rootAggregations: [
+      {
+        ...(!isNoneGroup([currentSelectedGroup]) && {
+          nullGroupItems: {
+            missing: { field: currentSelectedGroup },
+          },
+        }),
+      },
+    ],
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({

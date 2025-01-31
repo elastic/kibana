@@ -149,8 +149,8 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
         `}
         title={
           slo.summary.summaryUpdatedAt
-            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastUpdatedLabel', {
-                defaultMessage: '{status}, Last updated: {value}',
+            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastSummaryUpdatedLabel', {
+                defaultMessage: '{status}, Last summary updated: {value}',
                 values: {
                   status: slo.summary.status,
                   value: moment(slo.summary.summaryUpdatedAt).fromNow(),

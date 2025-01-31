@@ -56,6 +56,7 @@ describe('streamGraph', () => {
       input: 'input',
       responseLanguage: 'English',
       llmType: 'openai',
+      connectorId: '123',
     },
     logger: mockLogger,
     onLlmResponse: mockOnLlmResponse,
@@ -97,8 +98,8 @@ describe('streamGraph', () => {
       const response = await streamGraph(requestArgs);
 
       expect(response).toBe(mockResponseWithHeaders);
-      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
       await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
         expect(mockOnLlmResponse).toHaveBeenCalledWith(
           'final message',
           { transactionId: 'transactionId', traceId: 'traceId' },
@@ -129,8 +130,8 @@ describe('streamGraph', () => {
       const response = await streamGraph(requestArgs);
 
       expect(response).toBe(mockResponseWithHeaders);
-      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
       await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
         expect(mockOnLlmResponse).not.toHaveBeenCalled();
       });
     });
@@ -157,8 +158,8 @@ describe('streamGraph', () => {
       const response = await streamGraph(requestArgs);
 
       expect(response).toBe(mockResponseWithHeaders);
-      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
       await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
         expect(mockOnLlmResponse).toHaveBeenCalledWith(
           'final message',
           { transactionId: 'transactionId', traceId: 'traceId' },
@@ -189,8 +190,8 @@ describe('streamGraph', () => {
       const response = await streamGraph(requestArgs);
 
       expect(response).toBe(mockResponseWithHeaders);
-      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
       await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
         expect(mockOnLlmResponse).toHaveBeenCalledWith(
           'content',
           { transactionId: 'transactionId', traceId: 'traceId' },
@@ -217,8 +218,10 @@ describe('streamGraph', () => {
       const response = await streamGraph(requestArgs);
 
       expect(response).toBe(mockResponseWithHeaders);
-      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
-      expect(mockOnLlmResponse).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+        expect(mockOnLlmResponse).not.toHaveBeenCalled();
+      });
     });
   });
 

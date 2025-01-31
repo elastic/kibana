@@ -6,25 +6,25 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath } from '../../../common';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
-import type { PluginsSetup } from '../../plugin';
-import type { SpacesServiceStart } from '../../spaces_service/spaces_service';
+import type { SpacesServiceStart } from '../../spaces_service';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { withSpaceSolutionDisabledFeatures } from '../utils/space_solution_disabled_features';
 
 export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];
-  features: PluginsSetup['features'];
+  getFeatures: () => Promise<FeaturesPluginStart>;
   getSpacesService: () => SpacesServiceStart;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
-  features,
+  getFeatures,
   getSpacesService,
   log,
   http,
@@ -38,7 +38,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
     const spaceId = spacesService.getSpaceId(request);
 
-    // The root of kibana is also the root of the defaut space,
+    // The root of kibana is also the root of the default space,
     // since the default space does not have a URL Identifier (i.e., `/s/foo`).
     const isRequestingKibanaRoot = path === '/' && spaceId === DEFAULT_SPACE_ID;
     const isRequestingSpaceRoot = path === '/' && spaceId !== DEFAULT_SPACE_ID;
@@ -106,7 +106,10 @@ export function initSpacesOnPostAuthRequestInterceptor({
         }
       }
 
-      const allFeatures = features.getKibanaFeatures();
+      // The Spaces client returns migrated feature IDs in `disabledFeatures`, so we need to omit
+      // deprecated features. Otherwise, apps granted by deprecated features will be considered
+      // available when they shouldn't be, since their IDs won't be present in `disabledFeatures`.
+      const allFeatures = (await getFeatures()).getKibanaFeatures({ omitDeprecated: true });
       const disabledFeatureKeys = withSpaceSolutionDisabledFeatures(
         allFeatures,
         space.disabledFeatures,

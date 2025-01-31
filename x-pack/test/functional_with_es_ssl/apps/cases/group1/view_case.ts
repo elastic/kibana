@@ -41,7 +41,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
-  describe.skip('View case', () => {
+  describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
@@ -581,12 +581,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
       });
 
-      /**
-       * There is this bug https://github.com/elastic/kibana/issues/157280
-       * where this test randomly reproduces thus making the test flaky.
-       * Skipping for now until we fix it.
-       */
-      it.skip('should persist the draft of new comment while description is updated', async () => {
+      it('should persist the draft of new comment while description is updated', async () => {
         let commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -786,6 +781,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await header.waitUntilLoadingHasFinished();
 
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
 
@@ -1277,7 +1274,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
       });
 
-      afterEach(async () => {
+      after(async () => {
         await cases.api.deleteAllCases();
       });
 

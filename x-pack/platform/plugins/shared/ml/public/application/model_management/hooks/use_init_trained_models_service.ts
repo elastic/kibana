@@ -13,13 +13,16 @@ import type { ModelDeploymentParams } from '../trained_models_service';
 import type { TrainedModelsService } from '../trained_models_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { useSavedObjectsApiService } from '../../services/ml_api_service/saved_objects';
 
 /**
  * Hook that initializes the shared TrainedModelsService instance with storage
  * for tracking active operations. The service is destroyed when no components
  * are using it and all operations are complete.
  */
-export function useInitTrainedModelsService(): TrainedModelsService {
+export function useInitTrainedModelsService(
+  canManageSpacesAndSavedObjects: boolean
+): TrainedModelsService {
   const {
     services: {
       mlServices: { trainedModelsService },
@@ -27,6 +30,8 @@ export function useInitTrainedModelsService(): TrainedModelsService {
   } = useMlKibana();
 
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
+
+  const savedObjectsApiService = useSavedObjectsApiService();
 
   const initialDeployingState = useMemo(() => [], []);
 
@@ -42,8 +47,15 @@ export function useInitTrainedModelsService(): TrainedModelsService {
   );
 
   useEffect(() => {
-    trainedModelsService.initStorage(deployingModels$, setDeployingModels);
-    trainedModelsService.initToastNotifications(displayErrorToast, displaySuccessToast);
+    trainedModelsService.init({
+      deployingModels$,
+      setDeployingModels,
+      displayErrorToast,
+      displaySuccessToast,
+      savedObjectsApiService,
+      canManageSpacesAndSavedObjects,
+    });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

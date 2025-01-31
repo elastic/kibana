@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchNavigation',
   ]);
   const es = getService('es');
-  const security = getService('security');
   const browser = getService('browser');
   const retry = getService('retry');
   const spaces = getService('spaces');
@@ -88,17 +87,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should have basic example texts', async () => {
             await pageObjects.searchIndexDetailsPage.expectHasSampleDocuments();
           });
-
-          it('should have other example texts when mapping changed', async () => {
-            await es.indices.putMapping({
-              index: indexNameCodeExample,
-              properties: {
-                text: { type: 'text' },
-                number: { type: 'integer' },
-              },
-            });
-            await pageObjects.searchIndexDetailsPage.expectSampleDocumentsWithCustomMappings();
-          });
         });
 
         describe('API key details', () => {
@@ -124,6 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should have quick stats', async () => {
           await pageObjects.searchIndexDetailsPage.expectQuickStats();
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStatus();
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStorage('227b');
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappings();
           await es.indices.putMapping({
             index: indexName,
@@ -199,6 +189,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should be able to delete document', async () => {
             await pageObjects.searchIndexDetailsPage.changeTab('dataTab');
             await pageObjects.searchIndexDetailsPage.clickFirstDocumentDeleteAction();
+
+            // re-open page to refresh queries for test (these will auto-refresh,
+            // but waiting for that will make this test flakey)
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
             await pageObjects.searchIndexDetailsPage.expectAddDocumentCodeExamples();
             await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(0);
           });
@@ -350,7 +344,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await esDeleteAllIndices(indexName);
           await es.indices.create({ index: indexName });
-          await security.testUser.setRoles(['index_management_user']);
         });
         beforeEach(async () => {
           // Navigate to search solution space

@@ -12,6 +12,7 @@ import type { Filter } from '@kbn/es-query';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { extractTimelineCapabilities } from '../../common/utils/timeline_capabilities';
 import { sourcererSelectors } from '../../common/store';
 import { sourcererActions } from '../../common/store/actions';
 import { inputsActions } from '../../common/store/inputs';
@@ -36,6 +37,7 @@ import { useDiscoverInTimelineContext } from '../../common/components/discover_i
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
+import { useKibana } from '../../common/lib/kibana';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -61,7 +63,10 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
   const { dataViewId: timelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
   const { setDiscoverAppState } = useDiscoverState();
-
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
@@ -242,7 +247,7 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
     : ACTION_CANNOT_INVESTIGATE_IN_TIMELINE;
   const isDisabled = !isTimelineBottomBarVisible;
 
-  if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
+  if (!hasAccessToTimeline) {
     return null;
   }
 

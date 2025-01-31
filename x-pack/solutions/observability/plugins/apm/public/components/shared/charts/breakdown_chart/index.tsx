@@ -26,6 +26,7 @@ import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
+import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import type { Annotation } from '../../../../../common/annotations';
 import {
   asAbsoluteDateTime,
@@ -142,7 +143,7 @@ export function BreakdownChart({
         )}
 
         {timeseries?.length ? (
-          timeseries.map((serie) => {
+          timeseries.map((serie, index) => {
             return (
               <AreaSeries
                 timeZone={timeZone}
@@ -156,7 +157,7 @@ export function BreakdownChart({
                 data={serie.data}
                 stackAccessors={['x']}
                 stackMode={yAxisType === 'percentage' ? 'percentage' : undefined}
-                color={serie.areaColor}
+                color={getVizColorForIndex(index, euiTheme)}
                 curve={CurveType.CURVE_MONOTONE_X}
               />
             );

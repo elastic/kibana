@@ -9,8 +9,10 @@ import {
   getESQLAdHocDataview,
   getESQLResults,
   formatESQLColumns,
+  mapVariableToColumn,
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -48,7 +50,8 @@ export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
   deps: LensPluginStartDependencies,
-  abortController?: AbortController
+  abortController?: AbortController,
+  esqlVariables: ESQLControlVariable[] = []
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
@@ -68,6 +71,7 @@ export const getGridAttrs = async (
     filter,
     dropNullColumns: true,
     timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+    variables: esqlVariables,
   });
 
   const columns = formatESQLColumns(results.response.columns);
@@ -85,28 +89,38 @@ export const getSuggestions = async (
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
-  setErrors: (errors: Error[]) => void,
+  setErrors?: (errors: Error[]) => void,
   abortController?: AbortController,
-  setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void
+  setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
+  esqlVariables: ESQLControlVariable[] = [],
+  shouldUpdateAttrs = true
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
       query,
       adHocDataViews,
       deps,
-      abortController
+      abortController,
+      esqlVariables
     );
+    const updatedWithVariablesColumns = esqlVariables.length
+      ? mapVariableToColumn(query.esql, esqlVariables, columns)
+      : columns;
 
     setDataGridAttrs?.({
       rows,
       dataView,
-      columns,
+      columns: updatedWithVariablesColumns,
     });
+
+    if (!shouldUpdateAttrs) {
+      return;
+    }
 
     const context = {
       dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
-      textBasedColumns: columns,
+      textBasedColumns: updatedWithVariablesColumns,
       query,
     };
 
@@ -124,9 +138,15 @@ export const getSuggestions = async (
       suggestion: firstSuggestion,
       dataView,
     }) as TypedLensSerializedState['attributes'];
-    return attrs;
+    return {
+      ...attrs,
+      state: {
+        ...attrs.state,
+        needsRefresh: false,
+      },
+    };
   } catch (e) {
-    setErrors([e]);
+    setErrors?.([e]);
   }
   return undefined;
 };

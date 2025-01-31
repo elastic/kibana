@@ -68,6 +68,7 @@ export class RemoteClustersUIPlugin
 
           const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
           const cloudBaseUrl: string = cloud?.baseUrl ?? '';
+          const cloudDeploymentUrl: string = cloud?.deploymentUrl ?? '';
 
           const { renderApp } = await import('./application');
           const unmountAppCallback = await renderApp(
@@ -75,6 +76,7 @@ export class RemoteClustersUIPlugin
             {
               isCloudEnabled,
               cloudBaseUrl,
+              cloudDeploymentUrl,
               executionContext,
               canUseAPIKeyTrustModel: this.canUseApiKeyTrustModel,
             },

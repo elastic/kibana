@@ -11,7 +11,7 @@ import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
-export const FLEET_INSTALL_FORMAT_VERSION = '1.4.0';
+export const FLEET_INSTALL_FORMAT_VERSION = '1.4.1';
 
 export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.1';
 

@@ -7,36 +7,37 @@
 
 import * as t from 'io-ts';
 import {
+  CheckAndLoadIntegrationResponse,
   DataStreamDetails,
+  DataStreamDocsStat,
+  DataStreamRolloverResponse,
   DataStreamSettings,
   DataStreamStat,
-  NonAggregatableDatasets,
-  DegradedFieldResponse,
   DatasetUserPrivileges,
-  DegradedFieldValues,
   DegradedFieldAnalysis,
-  DataStreamDocsStat,
+  DegradedFieldResponse,
+  DegradedFieldValues,
+  NonAggregatableDatasets,
   UpdateFieldLimitResponse,
-  DataStreamRolloverResponse,
-  CheckAndLoadIntegrationResponse,
 } from '../../../common/api_types';
-import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
-import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { datasetQualityPrivileges } from '../../services';
+import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
+import { createDatasetQualityESClient } from '../../utils';
+import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
+import { checkAndLoadIntegration } from './check_and_load_integration';
+import { failedDocsRouteRepository } from './failed_docs/routes';
 import { getDataStreamDetails } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
-import { getDataStreamsStats } from './get_data_streams_stats';
-import { getDegradedDocsPaginated } from './get_degraded_docs';
-import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
-import { getDegradedFields } from './get_degraded_fields';
-import { getDegradedFieldValues } from './get_degraded_field_values';
-import { analyzeDegradedField } from './get_degraded_field_analysis';
 import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
+import { getDataStreamsStats } from './get_data_streams_stats';
 import { getAggregatedDatasetPaginatedResults } from './get_dataset_aggregated_paginated_results';
-import { updateFieldLimit } from './update_field_limit';
-import { createDatasetQualityESClient } from '../../utils';
 import { getDataStreamSettings } from './get_datastream_settings';
-import { checkAndLoadIntegration } from './check_and_load_integration';
+import { getDegradedDocsPaginated } from './get_degraded_docs';
+import { analyzeDegradedField } from './get_degraded_field_analysis';
+import { getDegradedFieldValues } from './get_degraded_field_values';
+import { getDegradedFields } from './get_degraded_fields';
+import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
+import { updateFieldLimit } from './update_field_limit';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -50,6 +51,13 @@ const statsRoute = createDatasetQualityServerRoute({
   }),
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
   },
   async handler(resources): Promise<{
     datasetUserPrivileges: DatasetUserPrivileges;
@@ -110,6 +118,13 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<{
     degradedDocs: DataStreamDocsStat[];
   }> {
@@ -136,6 +151,13 @@ const totalDocsRoute = createDatasetQualityServerRoute({
   }),
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
   },
   async handler(resources): Promise<{
     totalDocs: DataStreamDocsStat[];
@@ -176,6 +198,13 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<NonAggregatableDatasets> {
     const { context, params } = resources;
     const coreContext = await context.core;
@@ -199,6 +228,13 @@ const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
   }),
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
   },
   async handler(resources): Promise<NonAggregatableDatasets> {
     const { context, params } = resources;
@@ -227,6 +263,13 @@ const degradedFieldsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<DegradedFieldResponse> {
     const { context, params } = resources;
     const { dataStream } = params.path;
@@ -254,6 +297,13 @@ const degradedFieldValuesRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<DegradedFieldValues> {
     const { context, params } = resources;
     const { dataStream, degradedField } = params.path;
@@ -278,6 +328,13 @@ const dataStreamSettingsRoute = createDatasetQualityServerRoute({
   }),
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
   },
   async handler(resources): Promise<DataStreamSettings> {
     const { context, params } = resources;
@@ -306,8 +363,15 @@ const checkAndLoadIntegrationRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<CheckAndLoadIntegrationResponse> {
-    const { context, params, plugins, logger } = resources;
+    const { context, params, plugins, logger, request } = resources;
     const { dataStream } = params.path;
     const coreContext = await context.core;
 
@@ -315,7 +379,7 @@ const checkAndLoadIntegrationRoute = createDatasetQualityServerRoute({
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const fleetPluginStart = await plugins.fleet.start();
-    const packageClient = fleetPluginStart.packageService.asInternalUser;
+    const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const integration = await checkAndLoadIntegration({
       esClient,
@@ -338,6 +402,13 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   }),
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
   },
   async handler(resources): Promise<DataStreamDetails> {
     const { context, params, getEsCapabilities } = resources;
@@ -375,6 +446,13 @@ const analyzeDegradedFieldRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<DegradedFieldAnalysis> {
     const { context, params } = resources;
     const coreContext = await context.core;
@@ -404,6 +482,13 @@ const updateFieldLimitRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<UpdateFieldLimitResponse> {
     const { context, params } = resources;
     const coreContext = await context.core;
@@ -428,6 +513,13 @@ const rolloverDataStream = createDatasetQualityServerRoute({
   }),
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
   },
   async handler(resources): Promise<DataStreamRolloverResponse> {
     const { context, params } = resources;
@@ -457,4 +549,5 @@ export const dataStreamsRouteRepository = {
   ...analyzeDegradedFieldRoute,
   ...updateFieldLimitRoute,
   ...rolloverDataStream,
+  ...failedDocsRouteRepository,
 };

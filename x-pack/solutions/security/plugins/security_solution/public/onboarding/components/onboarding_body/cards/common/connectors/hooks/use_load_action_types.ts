@@ -7,11 +7,11 @@
 
 import { useMemo } from 'react';
 import { useLoadActionTypes as loadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { IToasts } from '@kbn/core-notifications-browser';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { AIActionTypeIds } from '../constants';
 
-export const useFilteredActionTypes = (http: HttpSetup, toasts: IToasts) => {
+export const useFilteredActionTypes = () => {
+  const { http, toasts } = useAssistantContext();
   const { data } = loadActionTypes({ http, toasts });
   return useMemo(() => data?.filter(({ id }) => AIActionTypeIds.includes(id)), [data]);
 };

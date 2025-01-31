@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, SavedObjectsClientContract } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
+import type { SiemRuleMigrationsClientDependencies } from '../types';
 import type { getRuleMigrationAgent } from './agent';
 
 export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;
@@ -18,16 +16,13 @@ export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;
 export interface RuleMigrationTaskCreateClientParams {
   currentUser: AuthenticatedUser;
   dataClient: RuleMigrationsDataClient;
+  dependencies: SiemRuleMigrationsClientDependencies;
 }
 
 export interface RuleMigrationTaskStartParams {
   migrationId: string;
   connectorId: string;
   invocationConfig: RunnableConfig;
-  inferenceClient: InferenceClient;
-  actionsClient: ActionsClient;
-  rulesClient: RulesClient;
-  soClient: SavedObjectsClientContract;
 }
 
 export interface RuleMigrationTaskCreateAgentParams extends RuleMigrationTaskStartParams {

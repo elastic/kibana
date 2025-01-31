@@ -8,7 +8,7 @@
 import type { CSSProperties, PropsWithChildren } from 'react';
 import React, { useState, useRef, useEffect, createContext, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import cytoscape, { type Stylesheet } from 'cytoscape';
+import cytoscape, { type StylesheetJson } from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
 import { useCytoscapeOptions } from './cytoscape_options';
@@ -35,7 +35,7 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
       setCy(cytoscape({ ...options, container: ref.current }));
     } else {
       // update styles for existing instance
-      cy.style(options.style as unknown as Stylesheet);
+      cy.style(options.style as StylesheetJson);
     }
   }, [options, cy]);
 

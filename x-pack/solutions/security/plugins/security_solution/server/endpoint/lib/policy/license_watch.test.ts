@@ -22,7 +22,9 @@ import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
 
-const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
+const MockPackagePolicyWithEndpointPolicy = (
+  cb?: (p: PolicyConfig) => PolicyConfig
+): PackagePolicy => {
   const packagePolicy = createPackagePolicyMock();
   if (!cb) {
     // eslint-disable-next-line no-param-reassign
@@ -30,6 +32,7 @@ const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): Packa
   }
   const policyConfig = cb(policyFactory());
   packagePolicy.inputs[0].config = { policy: { value: policyConfig } };
+
   return packagePolicy;
 };
 
@@ -78,19 +81,19 @@ describe('Policy-Changing license watcher', () => {
     // set up the mocked package policy service to return and do what we want
     packagePolicySvcMock.list
       .mockResolvedValueOnce({
-        items: Array.from({ length: 100 }, () => MockPPWithEndpointPolicy()),
+        items: Array.from({ length: 100 }, () => MockPackagePolicyWithEndpointPolicy()),
         total: TOTAL,
         page: 1,
         perPage: 100,
       })
       .mockResolvedValueOnce({
-        items: Array.from({ length: 100 }, () => MockPPWithEndpointPolicy()),
+        items: Array.from({ length: 100 }, () => MockPackagePolicyWithEndpointPolicy()),
         total: TOTAL,
         page: 2,
         perPage: 100,
       })
       .mockResolvedValueOnce({
-        items: Array.from({ length: TOTAL - 200 }, () => MockPPWithEndpointPolicy()),
+        items: Array.from({ length: TOTAL - 200 }, () => MockPackagePolicyWithEndpointPolicy()),
         total: TOTAL,
         page: 3,
         perPage: 100,
@@ -113,7 +116,7 @@ describe('Policy-Changing license watcher', () => {
     // mock a Policy with a higher-tiered feature enabled
     packagePolicySvcMock.list.mockResolvedValueOnce({
       items: [
-        MockPPWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+        MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
           pc.windows.popup.malware.message = CustomMessage;
           return pc;
         }),

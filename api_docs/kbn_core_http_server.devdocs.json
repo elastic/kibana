@@ -3657,6 +3657,14 @@
                 "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/node_disk_space.ts"
               },
               {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+              },
+              {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/settings/register_load_route.ts"
               },
@@ -4002,38 +4010,6 @@
               },
               {
                 "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/stats.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/stats.ts"
               },
               {
@@ -4059,6 +4035,18 @@
               {
                 "plugin": "searchPlayground",
                 "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
+              },
+              {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
+              },
+              {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -4099,10 +4087,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/vulnerabilities_dashboard/vulnerabilities_dashboard.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
               },
               {
                 "plugin": "apmDataAccess",
@@ -4305,8 +4289,8 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts"
               },
               {
                 "plugin": "alerting",
@@ -5509,6 +5493,22 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/find/find_backfill_route.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/find/find_gaps_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/fill/fill_gap_by_id_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route.ts"
+              },
+              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alerts_group_aggregations.ts"
               },
@@ -5771,6 +5771,14 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/cluster_settings.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
               },
               {
                 "plugin": "watcher",
@@ -6065,50 +6073,6 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
                 "plugin": "searchIndices",
                 "path": "x-pack/solutions/search/plugins/search_indices/server/routes/indices.ts"
               },
@@ -6131,6 +6095,10 @@
               {
                 "plugin": "searchPlayground",
                 "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -6175,10 +6143,6 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -6369,8 +6333,8 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts"
               },
               {
                 "plugin": "actions",
@@ -6539,6 +6503,54 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/fill/fill_gap_by_id_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/fill/fill_gap_by_id_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/fill/fill_gap_by_id_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/find/find_gaps_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/find/find_gaps_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/find/find_gaps_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -7318,39 +7330,15 @@
               },
               {
                 "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/telemetry.ts"
               },
               {
-                "plugin": "searchInferenceEndpoints",
-                "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -7377,8 +7365,8 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -7621,8 +7609,8 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -7985,26 +7973,6 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_entry_points.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_sitemaps.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
                 "plugin": "searchIndices",
                 "path": "x-pack/solutions/search/plugins/search_indices/server/routes/documents.ts"
               },
@@ -8013,12 +7981,16 @@
                 "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
               },
               {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/solutions/search/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_extraction_rules.ts"
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "ftrApis",
@@ -8041,8 +8013,8 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -9502,6 +9474,20 @@
             "path": "src/core/packages/http/server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRouteOptions.excludeFromRateLimiter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeFromRateLimiter",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9989,6 +9975,23 @@
             "tags": [],
             "label": "statusCode",
             "description": [],
+            "path": "src/core/packages/http/server/src/lifecycle/on_pre_response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.OnPreResponseInfo.headers",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "So any pre response handler can check the headers if needed, to avoid an overwrite for example"
+            ],
+            "signature": [
+              "ResponseHeaders",
+              " | undefined"
+            ],
             "path": "src/core/packages/http/server/src/lifecycle/on_pre_response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11240,6 +11243,24 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouteConfigOptions.excludeFromRateLimiter",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "excludeFromRateLimiter",
+            "description": [
+              "\nWhether the rate limiter should never throttle this route.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteConfigOptions.discontinued",
             "type": "string",
             "tags": [],
@@ -11424,7 +11445,7 @@
             "tags": [],
             "label": "message",
             "description": [
-              "\nThe description message to be displayed for the deprecation.\nCheck the README for writing deprecations in `src/core/server/deprecations/README.mdx`"
+              "\nThe description message to be displayed for the deprecation.\nThis will also appear in the '299 Kibana-{version} {message}' header warning when someone calls the route.\nKeep the message concise to avoid long header values. It is recommended to keep the message under 255 characters.\nCheck the README for writing deprecations in `src/core/server/deprecations/README.mdx`"
             ],
             "signature": [
               "string | undefined"
@@ -12778,8 +12799,8 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
               },
               {
                 "plugin": "canvas",
@@ -12876,6 +12897,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
               {
                 "plugin": "maps",
@@ -13626,18 +13651,6 @@
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/results/get_index_results.ts"
               },
               {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/solutions/security/plugins/kubernetes_security/server/routes/aggregate.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/solutions/security/plugins/kubernetes_security/server/routes/count.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/solutions/security/plugins/kubernetes_security/server/routes/multi_terms_aggregate.ts"
-              },
-              {
                 "plugin": "sessionView",
                 "path": "x-pack/solutions/security/plugins/session_view/server/routes/alerts_route.ts"
               },
@@ -13746,8 +13759,8 @@
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/__mocks__/mock_server.ts"
               },
               {
                 "plugin": "canvas",
@@ -13798,12 +13811,12 @@
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router_mock_route.test.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/versioned_router_mock_route.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router_mock_route.test.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/versioned_router_mock_route.test.ts"
               }
             ],
             "returnComment": [],
@@ -13889,8 +13902,8 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
               },
               {
                 "plugin": "canvas",
@@ -13927,6 +13940,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
               {
                 "plugin": "ml",
@@ -14053,6 +14070,10 @@
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/update_route.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_update_rules/route.ts"
               },
@@ -14065,8 +14086,8 @@
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/__mocks__/mock_server.ts"
               },
               {
                 "plugin": "canvas",
@@ -14150,6 +14171,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/post.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/query.ts"
               },
               {
                 "plugin": "dataViews",
@@ -14240,8 +14265,8 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
               },
               {
                 "plugin": "canvas",
@@ -14312,6 +14337,10 @@
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
               },
               {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/local_shipper/initialize_local_shipper.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/field_histograms/register_route.ts"
               },
@@ -14364,40 +14393,44 @@
                 "path": "x-pack/platform/plugins/shared/aiops/server/routes/categorization_field_validation/define_route.ts"
               },
               {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/ecs_routes.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/build_integration_routes.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/categorization_routes.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/related_routes.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/pipeline_routes.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/analyze_logs_routes.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/cel_routes.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/analyze_api_route.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/ecs_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/build_integration_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/categorization_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/related_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/pipeline_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/analyze_logs_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/cel_routes.ts"
-              },
-              {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/routes/analyze_api_route.ts"
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
               {
                 "plugin": "maps",
@@ -14849,6 +14882,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/routes/timelines/create_timelines/index.ts"
               },
               {
@@ -14873,6 +14910,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_actions/route.ts"
               },
               {
@@ -14890,18 +14935,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15033,7 +15066,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/install_translated.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/enablement.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15204,12 +15237,12 @@
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/platform/plugins/shared/cloud/server/routes/set_cloud_data_route.test.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/__mocks__/mock_server.ts"
               },
               {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/set_cloud_data_route.test.ts"
               },
               {
                 "plugin": "canvas",
@@ -15275,8 +15308,8 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
               },
               {
                 "plugin": "logsShared",
@@ -15331,8 +15364,8 @@
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.ts"
               },
               {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/__mocks__/mock_server.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",
@@ -15422,8 +15455,8 @@
                 "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
               },
               {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts"
               },
               {
                 "plugin": "canvas",
@@ -15432,6 +15465,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/delete.ts"
+              },
+              {
+                "plugin": "fileUpload",
+                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
               },
               {
                 "plugin": "logsShared",
@@ -15550,6 +15587,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/delete.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -15560,6 +15601,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/delete_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15578,8 +15623,8 @@
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/server/__mocks__/mock_server.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/__mocks__/mock_server.ts"
               },
               {
                 "plugin": "canvas",

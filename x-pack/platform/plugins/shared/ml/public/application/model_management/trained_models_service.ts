@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subscription, of, from, merge, pairwise, delay, EMPTY } from 'rxjs';
+import { Subscription, of, from, merge, pairwise, delay, EMPTY, combineLatest } from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
@@ -38,6 +38,7 @@ import type {
   AdaptiveAllocationsParams,
 } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
+import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 
 interface ModelDownloadStatus {
   [modelId: string]: ModelDownloadState;
@@ -50,6 +51,15 @@ export interface ModelDeploymentParams {
   deploymentParams: CommonDeploymentParams;
   state: 'downloading' | 'deploying';
   adaptiveAllocationsParams?: AdaptiveAllocationsParams;
+}
+
+interface TrainedModelsServiceInit {
+  deployingModels$: BehaviorSubject<ModelDeploymentParams[]>;
+  setDeployingModels: (deploymentModels: ModelDeploymentParams[]) => void;
+  displayErrorToast: (error: ErrorType, title?: string) => void;
+  displaySuccessToast: (toast: { title: string; text: string }) => void;
+  savedObjectsApiService: SavedObjectsApiService;
+  canManageSpacesAndSavedObjects: boolean;
 }
 
 export class TrainedModelsService {
@@ -72,13 +82,19 @@ export class TrainedModelsService {
   private _deployingModels$ = new BehaviorSubject<ModelDeploymentParams[]>([]);
   private destroySubscription?: Subscription;
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
+  private savedObjectsApiService!: SavedObjectsApiService;
+  private canManageSpacesAndSavedObjects!: boolean;
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
-  public initStorage(
-    deployingModels$: BehaviorSubject<ModelDeploymentParams[]>,
-    setDeployingModels: (deploymentModels: ModelDeploymentParams[]) => void
-  ) {
+  public init({
+    deployingModels$,
+    setDeployingModels,
+    displayErrorToast,
+    displaySuccessToast,
+    savedObjectsApiService,
+    canManageSpacesAndSavedObjects,
+  }: TrainedModelsServiceInit) {
     // Always cancel any pending destroy when trying to initialize
     if (this.destroySubscription) {
       this.destroySubscription.unsubscribe();
@@ -89,20 +105,16 @@ export class TrainedModelsService {
 
     this.subscription = new Subscription();
     this.isInitialized = true;
+    this.canManageSpacesAndSavedObjects = canManageSpacesAndSavedObjects;
 
     this.setDeployingModels = setDeployingModels;
     this._deployingModels$ = deployingModels$;
+    this.displayErrorToast = displayErrorToast;
+    this.displaySuccessToast = displaySuccessToast;
+    this.savedObjectsApiService = savedObjectsApiService;
 
     this.setupFetchingSubscription();
     this.setupDeploymentSubscription();
-  }
-
-  public initToastNotifications(
-    displayErrorToast: (error: ErrorType, title?: string) => void,
-    displaySuccessToast: (toast: { title: string; text: string }) => void
-  ) {
-    this.displayErrorToast = displayErrorToast;
-    this.displaySuccessToast = displaySuccessToast;
   }
 
   public readonly isLoading$ = this._isLoading$.pipe(distinctUntilChanged());
@@ -260,16 +272,20 @@ export class TrainedModelsService {
     this.abortedDownloads.add(modelId);
   }
 
-  private mergeModelItems(newItems: TrainedModelUIItem[]) {
+  private mergeModelItems(
+    items: TrainedModelUIItem[],
+    spaces: Record<string, string[]>
+  ): TrainedModelUIItem[] {
     const existingItems = this.modelItems;
 
-    return newItems.map((item) => {
+    return items.map((item) => {
       const prevItem = existingItems.find((i) => i.model_id === item.model_id);
+      const baseItem = { ...item, spaces: spaces[item.model_id] };
 
-      if (!prevItem || !isBaseNLPModelItem(prevItem) || !isBaseNLPModelItem(item)) return item;
+      if (!prevItem || !isBaseNLPModelItem(prevItem) || !isBaseNLPModelItem(item)) return baseItem;
 
       if (prevItem.state === MODEL_STATE.DOWNLOADING) {
-        return { ...item, state: prevItem.state, downloadState: prevItem.downloadState };
+        return { ...baseItem, state: prevItem.state, downloadState: prevItem.downloadState };
       }
 
       if (
@@ -278,10 +294,10 @@ export class TrainedModelsService {
           this.activeDeployments.some((deployment) => deployment.modelId === item.model_id)) &&
         item.state !== MODEL_STATE.STARTED
       ) {
-        return { ...item, state: prevItem.state };
+        return { ...baseItem, state: prevItem.state };
       }
 
-      return item;
+      return baseItem;
     });
   }
 
@@ -299,9 +315,9 @@ export class TrainedModelsService {
     this.subscription.add(
       fetchTrigger$
         .pipe(
+          tap(() => this._isLoading$.next(true)),
           switchMap(() => {
-            this._isLoading$.next(true);
-            return from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
+            const modelsList$ = from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
               catchError((error) => {
                 this.displayErrorToast?.(
                   error,
@@ -309,18 +325,31 @@ export class TrainedModelsService {
                     defaultMessage: 'Error loading trained models',
                   })
                 );
-                return of([]);
-              }),
-              finalize(() => {
-                this._isLoading$.next(false);
+                return of([] as TrainedModelUIItem[]);
               })
+            );
+
+            const spaces$ = this.canManageSpacesAndSavedObjects
+              ? from(this.savedObjectsApiService.trainedModelsSpaces()).pipe(
+                  catchError(() => of({})),
+                  map(
+                    (spaces) =>
+                      ('trainedModels' in spaces ? spaces.trainedModels : {}) as Record<
+                        string,
+                        string[]
+                      >
+                  )
+                )
+              : of({} as Record<string, string[]>);
+
+            return combineLatest([modelsList$, spaces$]).pipe(
+              finalize(() => this._isLoading$.next(false))
             );
           })
         )
-        .subscribe((fetchedItems) => {
-          const updatedItems = this.mergeModelItems(fetchedItems);
+        .subscribe(([items, spaces]) => {
+          const updatedItems = this.mergeModelItems(items, spaces);
           this._modelItems$.next(updatedItems);
-
           this.startDownloadStatusPolling();
         })
     );

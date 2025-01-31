@@ -13,7 +13,7 @@ import {
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
 } from '../../common/constants';
 import {
   ADD_RULES,
@@ -38,7 +38,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   links: [
     {
       id: SecurityPageName.rules,
@@ -79,7 +79,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [`${SERVER_APP_ID}.showEndpointExceptions`],
+      capabilities: [`${SECURITY_FEATURE_ID}.showEndpointExceptions`],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
@@ -100,7 +100,7 @@ export const links: LinkItem = {
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
-      capabilities: [`${SERVER_APP_ID}.show`],
+      capabilities: [`${SECURITY_FEATURE_ID}.show`],
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
           defaultMessage: 'MITRE ATT&CK Coverage',

@@ -387,6 +387,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
           defaultMessage: 'Request',
         }),
         content: <RequestTab />,
+        'data-test-subj': 'stepReviewRequestTab',
       },
     ];
 
@@ -397,6 +398,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
           defaultMessage: 'Preview',
         }),
         content: <PreviewTab template={template} />,
+        'data-test-subj': 'stepReviewPreviewTab',
       });
     }
 
