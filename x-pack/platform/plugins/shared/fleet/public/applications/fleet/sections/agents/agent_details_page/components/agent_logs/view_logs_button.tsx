@@ -54,14 +54,14 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
         from: getTimeRangeStartFromTime(startTime ? startTime : defaultStartTime),
         to: getTimeRangeEndFromTime(endTime ? endTime : defaultEndTime),
       },
-      filter: logStreamQuery,
+      query: { language: 'kuery', query: logStreamQuery },
     });
   }, [endTime, logStreamQuery, discoverLogsLocator, startTime]);
 
   return authz.fleet.readAgents && discoverLogsLocator ? (
-    <EuiButton href={logsUrl} iconType="popout" data-test-subj="viewInLogsBtn">
+    <EuiButton href={logsUrl} iconType="discoverApp" data-test-subj="viewInLogsBtn">
       <FormattedMessage
-        id="xpack.fleet.agentLogs.openInLogsUiLinkText"
+        id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
         defaultMessage="Open in Discover"
       />
     </EuiButton>
