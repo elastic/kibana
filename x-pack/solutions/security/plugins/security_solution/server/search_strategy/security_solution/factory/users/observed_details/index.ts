@@ -16,15 +16,16 @@ import type { ObservedUserDetailsStrategyResponse } from '../../../../../../comm
 import { formatUserItem } from './helpers';
 
 export const observedUserDetails: SecuritySolutionFactory<UsersQueries.observedDetails> = {
-  buildDsl: (options) => buildObservedUserDetailsQuery(options),
+  buildDsl: buildObservedUserDetailsQuery,
   parse: async (
     options,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<unknown>,
+    deps
   ): Promise<ObservedUserDetailsStrategyResponse> => {
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {
-      dsl: [inspectStringifyObject(buildObservedUserDetailsQuery(options))],
+      dsl: [inspectStringifyObject(deps?.dsl)],
     };
 
     if (aggregations == null) {

@@ -16,15 +16,16 @@ import type { ObservedServiceDetailsStrategyResponse } from '../../../../../../c
 import { formatServiceItem } from './helpers';
 
 export const observedServiceDetails: SecuritySolutionFactory<ServicesQueries.observedDetails> = {
-  buildDsl: (options) => buildObservedServiceDetailsQuery(options),
+  buildDsl: buildObservedServiceDetailsQuery,
   parse: async (
     options,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<unknown>,
+    deps
   ): Promise<ObservedServiceDetailsStrategyResponse> => {
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {
-      dsl: [inspectStringifyObject(buildObservedServiceDetailsQuery(options))],
+      dsl: [inspectStringifyObject(deps?.dsl)],
     };
 
     if (aggregations == null) {

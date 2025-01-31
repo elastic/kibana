@@ -7,7 +7,7 @@
 
 import { get } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/search-types';
+import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/search-types';
 import type {
   IScopedClusterClient,
   KibanaRequest,
@@ -19,7 +19,6 @@ import type {
   HostsQueries,
   EndpointFields,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
-
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
 import { buildHostDetailsQuery } from './query.host_details.dsl';
@@ -27,7 +26,7 @@ import { formatHostItem, getHostEndpoint } from './helpers';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
-  buildDsl: (options) => buildHostDetailsQuery(options),
+  buildDsl: buildHostDetailsQuery,
   parse: async (
     options,
     response: IEsSearchResponse<HostAggEsData>,
@@ -36,12 +35,13 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
       request: KibanaRequest;
+      dsl: ISearchRequestParams;
     }
   ): Promise<HostDetailsStrategyResponse> => {
     const aggregations = get('aggregations', response.rawResponse);
 
     const inspect = {
-      dsl: [inspectStringifyObject(buildHostDetailsQuery(options))],
+      dsl: [inspectStringifyObject(deps?.dsl)],
     };
 
     if (aggregations == null) {

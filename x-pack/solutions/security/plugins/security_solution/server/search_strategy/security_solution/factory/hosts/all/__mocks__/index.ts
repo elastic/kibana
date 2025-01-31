@@ -712,4 +712,5 @@ export const mockDeps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,
+  dsl: {} as SearchStrategyDependencies,
 };

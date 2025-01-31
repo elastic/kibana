@@ -7,21 +7,27 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
+import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ENTITY_FLYOUT } from '../../../../../../common/constants';
 import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
 import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 
-export const buildHostDetailsQuery = ({
-  hostName,
-  defaultIndex,
-  timerange: { from, to },
-}: HostDetailsRequestOptions): ISearchRequestParams => {
+export const buildHostDetailsQuery = async (
+  { hostName, defaultIndex, timerange: { from, to } }: HostDetailsRequestOptions,
+  deps?: SearchStrategyDependencies
+): Promise<ISearchRequestParams> => {
+  const isColdFrozenTierDisabled = await deps?.uiSettingsClient.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ENTITY_FLYOUT
+  );
+
   const esFields = reduceFields(HOST_DETAILS_FIELDS, {
     ...hostFieldsMap,
     ...cloudFieldsMap,
   });
 
-  const filter = [
+  const filter: QueryDslQueryContainer[] = [
     { term: { 'host.name': hostName } },
     {
       range: {
@@ -33,6 +39,18 @@ export const buildHostDetailsQuery = ({
       },
     },
   ];
+
+  if (isColdFrozenTierDisabled) {
+    filter.push({
+      bool: {
+        must_not: {
+          terms: {
+            _tier: ['data_frozen', 'data_cold'],
+          },
+        },
+      },
+    });
+  }
 
   const dslQuery = {
     allow_no_indices: true,
