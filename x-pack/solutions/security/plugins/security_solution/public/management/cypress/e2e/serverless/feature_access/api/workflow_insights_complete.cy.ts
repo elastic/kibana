@@ -9,7 +9,7 @@ import { fetchRunningDefendInsights, fetchWorkflowInsights } from '../../../../t
 import { login, ROLE } from '../../../../tasks/login';
 
 // Unskip when defendInsights assistant feature is enabled by default
-describe.skip(
+describe(
   'Workflow Insights APIs',
   {
     tags: ['@serverless', '@skipInServerlessMKI'], // remove @skipInServerlessMKI once changes are merged

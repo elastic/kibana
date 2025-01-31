@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiScreenReaderOnly, transparentize, useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/presentation-publishing';
 import React, { useCallback, useMemo } from 'react';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
@@ -91,35 +90,22 @@ export const PresentationPanelHeader = <
       className={'embPanel__header'}
       css={captionStyles}
     >
-      <h2
+      <div
         className="embPanel__title"
         ref={memoizedSetDragHandle}
         data-test-subj="dashboardPanelTitle"
         css={headerStyles}
       >
-        <EuiScreenReaderOnly>
-          <span id={headerId}>
-            {panelTitle
-              ? i18n.translate('presentationPanel.ariaLabel', {
-                  defaultMessage: 'Panel: {title}',
-                  values: {
-                    title: panelTitle,
-                  },
-                })
-              : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
-                  defaultMessage: 'Untitled panel',
-                })}
-          </span>
-        </EuiScreenReaderOnly>
         <PresentationPanelTitle
           api={api}
+          headerId={headerId}
           viewMode={viewMode}
           hideTitle={hideTitle}
           panelTitle={panelTitle}
           panelDescription={panelDescription}
         />
         {showBadges && badgeElements}
-      </h2>
+      </div>
       {showNotifications && notificationElements}
     </figcaption>
   );

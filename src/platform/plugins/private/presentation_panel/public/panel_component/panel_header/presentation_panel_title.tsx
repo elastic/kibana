@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiLink, EuiToolTip, euiTextTruncate, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiLink,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+  euiTextTruncate,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
@@ -21,12 +28,14 @@ import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_ac
 
 export const PresentationPanelTitle = ({
   api,
+  headerId,
   viewMode,
   hideTitle,
   panelTitle,
   panelDescription,
 }: {
   api: unknown;
+  headerId: string;
   hideTitle?: boolean;
   panelTitle?: string;
   panelDescription?: string;
@@ -83,6 +92,7 @@ export const PresentationPanelTitle = ({
     if (!panelDescription) {
       return panelTitleElement;
     }
+
     return (
       <EuiToolTip
         title={panelTitle}
@@ -100,17 +110,36 @@ export const PresentationPanelTitle = ({
           `,
         }}
       >
-        <>
-          {panelTitleElement}
+        <div data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
+          {!hideTitle ? (
+            <h2>
+              <EuiScreenReaderOnly>
+                <span id={headerId}>
+                  {panelTitle
+                    ? i18n.translate('presentationPanel.ariaLabel', {
+                        defaultMessage: 'Panel: {title}',
+                        values: {
+                          title: panelTitle,
+                        },
+                      })
+                    : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
+                        defaultMessage: 'Untitled panel',
+                      })}
+                </span>
+              </EuiScreenReaderOnly>
+              {panelTitleElement}&nbsp;
+            </h2>
+          ) : null}
           <EuiIcon
             type="iInCircle"
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
+            tabIndex={0}
           />
-        </>
+        </div>
       </EuiToolTip>
     );
-  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, euiTheme.size]);
+  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, headerId, euiTheme.size.xs]);
 
   return describedPanelTitleElement;
 };
