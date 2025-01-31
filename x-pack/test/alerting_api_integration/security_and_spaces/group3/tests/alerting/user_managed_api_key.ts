@@ -581,7 +581,8 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         expect(response.statusCode).to.eql(204);
 
         const invalidateResponse = await es.security.invalidateApiKey({
-          body: { ids: ['abc'], owner: false },
+          ids: ['abc'],
+          owner: false,
         });
         expect(invalidateResponse.previously_invalidated_api_keys).to.eql([]);
       });
@@ -594,7 +595,8 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         expect(response.status).to.eql(204);
 
         const invalidateResponse = await es.security.invalidateApiKey({
-          body: { ids: ['abc'], owner: false },
+          ids: ['abc'],
+          owner: false,
         });
         expect(invalidateResponse.previously_invalidated_api_keys).to.eql([]);
       });
@@ -609,7 +611,8 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         expect(response.statusCode).to.eql(200);
 
         const invalidateResponse = await es.security.invalidateApiKey({
-          body: { ids: ['abc'], owner: false },
+          ids: ['abc'],
+          owner: false,
         });
         expect(invalidateResponse.previously_invalidated_api_keys).to.eql([]);
       });
@@ -623,7 +626,8 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         expect(response.status).to.eql(200);
 
         const invalidateResponse = await es.security.invalidateApiKey({
-          body: { ids: ['abc'], owner: false },
+          ids: ['abc'],
+          owner: false,
         });
         expect(invalidateResponse.previously_invalidated_api_keys).to.eql([]);
       });

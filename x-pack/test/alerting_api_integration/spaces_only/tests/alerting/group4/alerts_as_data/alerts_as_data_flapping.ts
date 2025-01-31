@@ -758,18 +758,16 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
   async function queryForAlertDocs<T>(ruleId: string): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      body: {
-        sort: [
-          {
-            '@timestamp': 'desc',
-          },
-        ],
-        query: {
-          bool: {
-            must: {
-              term: {
-                [ALERT_RULE_UUID]: { value: ruleId },
-              },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      query: {
+        bool: {
+          must: {
+            term: {
+              [ALERT_RULE_UUID]: { value: ruleId },
             },
           },
         },

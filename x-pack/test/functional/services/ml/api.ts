@@ -99,12 +99,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async hasJobResults(jobId: string): Promise<boolean> {
       const body = await es.search({
         index: '.ml-anomalies-*',
-        body: {
-          size: 1,
-          query: {
-            match: {
-              job_id: jobId,
-            },
+        size: 1,
+        query: {
+          match: {
+            job_id: jobId,
           },
         },
       });
@@ -139,28 +137,26 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async hasDetectorResults(jobId: string, detectorIndex: number): Promise<boolean> {
       const body = await es.search({
         index: '.ml-anomalies-*',
-        body: {
-          size: 1,
-          query: {
-            bool: {
-              must: [
-                {
-                  match: {
-                    job_id: jobId,
-                  },
+        size: 1,
+        query: {
+          bool: {
+            must: [
+              {
+                match: {
+                  job_id: jobId,
                 },
-                {
-                  match: {
-                    result_type: 'record',
-                  },
+              },
+              {
+                match: {
+                  result_type: 'record',
                 },
-                {
-                  match: {
-                    detector_index: detectorIndex,
-                  },
+              },
+              {
+                match: {
+                  detector_index: detectorIndex,
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       });
@@ -187,23 +183,21 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async hasForecastResults(jobId: string): Promise<boolean> {
       const body = await es.search({
         index: '.ml-anomalies-*',
-        body: {
-          size: 1,
-          query: {
-            bool: {
-              must: [
-                {
-                  match: {
-                    job_id: jobId,
-                  },
+        size: 1,
+        query: {
+          bool: {
+            must: [
+              {
+                match: {
+                  job_id: jobId,
                 },
-                {
-                  match: {
-                    result_type: 'model_forecast',
-                  },
+              },
+              {
+                match: {
+                  result_type: 'model_forecast',
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       });
@@ -278,10 +272,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       const body = await es.indices.create({
         index: indices,
-        body: {
-          ...(mappings ? { mappings } : {}),
-          ...(settings ? { settings } : {}),
-        },
+        ...(mappings ? { mappings } : {}),
+        ...(settings ? { settings } : {}),
       });
       expect(body)
         .to.have.property('acknowledged')
@@ -546,9 +538,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await retry.tryForTime(30 * 1000, async () => {
         const body = await es.search({
           index: indices,
-          body: {
-            size: 1,
-          },
+          size: 1,
         });
 
         if (body.hits.hits.length > 0) {
@@ -761,10 +751,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async hasNotifications(query: object) {
       const body = await es.search({
         index: '.ml-notifications*',
-        body: {
-          size: 10000,
-          query,
-        },
+        size: 10000,
+        query,
       });
 
       return body.hits.hits.length > 0;
@@ -1281,11 +1269,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       const body = await es.search<Annotation>({
         index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-        body: {
-          query: {
-            match: {
-              job_id: jobId,
-            },
+        query: {
+          match: {
+            job_id: jobId,
           },
         },
       });
@@ -1319,12 +1305,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       const body = await es.search({
         index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-        body: {
-          size: 1,
-          query: {
-            match: {
-              _id: annotationId,
-            },
+        size: 1,
+        query: {
+          match: {
+            _id: annotationId,
           },
         },
       });

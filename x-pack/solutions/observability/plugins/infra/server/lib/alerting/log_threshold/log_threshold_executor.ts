@@ -764,7 +764,7 @@ export const getGroupedESQuery = (
       index,
       allow_no_indices: true,
       ignore_unavailable: true,
-      body,
+      ...body,
     };
   } else {
     const aggregations = {
@@ -809,7 +809,7 @@ export const getGroupedESQuery = (
       index,
       allow_no_indices: true,
       ignore_unavailable: true,
-      body,
+      ...body,
     };
   }
 };

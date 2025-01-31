@@ -67,10 +67,8 @@ export const initHelpers = (getService: FtrProviderContext['getService']) => {
     return await es.deleteByQuery({
       index: DEPRECATION_LOGS_INDEX,
       refresh: true,
-      body: {
-        query: {
-          ids: { values: docIds },
-        },
+      query: {
+        ids: { values: docIds },
       },
     });
   };

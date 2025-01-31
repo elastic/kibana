@@ -539,7 +539,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }

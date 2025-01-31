@@ -61,25 +61,23 @@ export default function ({ getService }: FtrProviderContext) {
         await es.deleteByQuery({
           index: testHistoryIndex,
           refresh: true,
-          body: { query: { term: { type: 'task' } } },
+          query: { term: { type: 'task' } },
         });
       } else {
         await es.indices.create({
           index: testHistoryIndex,
-          body: {
-            mappings: {
-              properties: {
-                type: {
-                  type: 'keyword',
-                },
-                taskId: {
-                  type: 'keyword',
-                },
-                params: taskManagerIndexMapping.params,
-                state: taskManagerIndexMapping.state,
-                runAt: taskManagerIndexMapping.runAt,
-              } as Record<string, estypes.MappingProperty>,
-            },
+          mappings: {
+            properties: {
+              type: {
+                type: 'keyword',
+              },
+              taskId: {
+                type: 'keyword',
+              },
+              params: taskManagerIndexMapping.params,
+              state: taskManagerIndexMapping.state,
+              runAt: taskManagerIndexMapping.runAt,
+            } as Record<string, estypes.MappingProperty>,
           },
         });
       }
@@ -137,10 +135,8 @@ export default function ({ getService }: FtrProviderContext) {
       return es
         .search({
           index: testHistoryIndex,
-          body: {
-            query: {
-              term: { type: 'task' },
-            },
+          query: {
+            term: { type: 'task' },
           },
         })
         .then((result) =>

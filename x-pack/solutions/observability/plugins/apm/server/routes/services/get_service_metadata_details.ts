@@ -10,6 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
 import { getAgentName } from '@kbn/elastic-agent-utils';
+import type { SortOptions } from '@elastic/elasticsearch/lib/api/types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   CLOUD_AVAILABILITY_ZONE,
@@ -103,7 +104,10 @@ export async function getServiceMetadataDetails({
     apm: {
       events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric],
     },
-    sort: [{ _score: { order: 'desc' as const } }, { '@timestamp': { order: 'desc' as const } }],
+    sort: [
+      { _score: { order: 'desc' as const } },
+      { '@timestamp': { order: 'desc' as const } },
+    ] as SortOptions[],
     track_total_hits: 1,
     size: 1,
     query: { bool: { filter, should } },

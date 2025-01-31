@@ -89,10 +89,8 @@ export async function queryForAlertDocs<T>(
 ): Promise<Array<SearchHit<T>>> {
   const searchResult = await es.search({
     index,
-    body: {
-      sort: [{ [ALERT_ORIGINAL_TIME]: { order: 'asc' } }],
-      query: { match_all: {} },
-    },
+    sort: [{ [ALERT_ORIGINAL_TIME]: { order: 'asc' } }],
+    query: { match_all: {} },
   });
   return searchResult.hits.hits as Array<SearchHit<T>>;
 }
@@ -100,22 +98,20 @@ export async function queryForAlertDocs<T>(
 export async function searchScheduledTask(es: Client, id: string) {
   const searchResult = await es.search({
     index: '.kibana_task_manager',
-    body: {
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                'task.id': `task:${id}`,
-              },
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              'task.id': `task:${id}`,
             },
-            {
-              terms: {
-                'task.scope': ['alerting'],
-              },
+          },
+          {
+            terms: {
+              'task.scope': ['alerting'],
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

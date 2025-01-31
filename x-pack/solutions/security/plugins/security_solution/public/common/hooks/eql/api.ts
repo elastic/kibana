@@ -68,7 +68,9 @@ export const validateEql = async ({
         {
           params: {
             index: dataViewTitle,
-            body: { query, runtime_mappings: runtimeMappings, size: 0 },
+            query,
+            runtime_mappings: runtimeMappings,
+            size: 0,
             // Prevent passing empty string values
             timestamp_field: eqlOptions?.timestampField ? eqlOptions.timestampField : undefined,
             tiebreaker_field: eqlOptions?.tiebreakerField ? eqlOptions.tiebreakerField : undefined,

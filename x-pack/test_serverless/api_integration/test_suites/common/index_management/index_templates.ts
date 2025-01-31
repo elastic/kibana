@@ -45,9 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         templateName = `template-${getRandomString()}`;
         const indexTemplate = {
           name: templateName,
-          body: {
-            index_patterns: ['test*'],
-          },
+          index_patterns: ['test*'],
         };
         // Create a new index template to test against
         try {

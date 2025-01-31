@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
           expectedJobProperties[i].modelBytes,
           `model_bytes should be equal to ${JSON.stringify(expectedJobProperties[i].modelBytes)})`
         );
-        expect(job.datafeed_config.timing_stats.total_search_time_ms).to.eql(
+        expect(job.datafeed_config.timing_stats?.total_search_time_ms).to.eql(
           expectedJobProperties[i].datafeedTotalSearchTimeMs,
           `datafeed total_search_time_ms should be equal to ${JSON.stringify(
             expectedJobProperties[i].datafeedTotalSearchTimeMs
@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
             expectedJobPropertiesWithSpace[i].modelBytes
           )})`
         );
-        expect(job.datafeed_config.timing_stats.total_search_time_ms).to.eql(
+        expect(job.datafeed_config.timing_stats?.total_search_time_ms).to.eql(
           expectedJobPropertiesWithSpace[i].datafeedTotalSearchTimeMs,
           `datafeed total_search_time_ms should be equal to ${JSON.stringify(
             expectedJobPropertiesWithSpace[i].datafeedTotalSearchTimeMs

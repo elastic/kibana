@@ -67,91 +67,89 @@ export const useNetworkTimingsPrevious24Hours = (
   const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        runtime_mappings: runTimeMappings,
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    lte: moment(timestamp).toISOString(),
-                    gte: moment(timestamp).subtract(24, 'hours').toISOString(),
-                  },
+      size: 0,
+      runtime_mappings: runTimeMappings,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  lte: moment(timestamp).toISOString(),
+                  gte: moment(timestamp).subtract(24, 'hours').toISOString(),
                 },
               },
-              {
-                term: {
-                  'synthetics.type': 'journey/network_info',
-                },
-              },
-              {
-                term: {
-                  'synthetics.step.index': stepIndex,
-                },
-              },
-              {
-                term: {
-                  config_id: configId,
-                },
-              },
-            ],
-            must_not: [
-              {
-                term: {
-                  'monitor.check_group': checkGroupId,
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          testRuns: {
-            terms: {
-              field: 'monitor.check_group',
-              size: 10000,
             },
-            aggs: {
-              dns: {
-                sum: {
-                  field: SYNTHETICS_DNS_TIMINGS,
-                },
+            {
+              term: {
+                'synthetics.type': 'journey/network_info',
               },
-              ssl: {
-                sum: {
-                  field: SYNTHETICS_SSL_TIMINGS,
-                },
+            },
+            {
+              term: {
+                'synthetics.step.index': stepIndex,
               },
-              blocked: {
-                sum: {
-                  field: SYNTHETICS_BLOCKED_TIMINGS,
-                },
+            },
+            {
+              term: {
+                config_id: configId,
               },
-              connect: {
-                sum: {
-                  field: SYNTHETICS_CONNECT_TIMINGS,
-                },
+            },
+          ],
+          must_not: [
+            {
+              term: {
+                'monitor.check_group': checkGroupId,
               },
-              receive: {
-                sum: {
-                  field: SYNTHETICS_RECEIVE_TIMINGS,
-                },
+            },
+          ],
+        },
+      },
+      aggs: {
+        testRuns: {
+          terms: {
+            field: 'monitor.check_group',
+            size: 10000,
+          },
+          aggs: {
+            dns: {
+              sum: {
+                field: SYNTHETICS_DNS_TIMINGS,
               },
-              send: {
-                sum: {
-                  field: SYNTHETICS_SEND_TIMINGS,
-                },
+            },
+            ssl: {
+              sum: {
+                field: SYNTHETICS_SSL_TIMINGS,
               },
-              wait: {
-                sum: {
-                  field: SYNTHETICS_WAIT_TIMINGS,
-                },
+            },
+            blocked: {
+              sum: {
+                field: SYNTHETICS_BLOCKED_TIMINGS,
               },
-              total: {
-                sum: {
-                  field: SYNTHETICS_TOTAL_TIMINGS,
-                },
+            },
+            connect: {
+              sum: {
+                field: SYNTHETICS_CONNECT_TIMINGS,
+              },
+            },
+            receive: {
+              sum: {
+                field: SYNTHETICS_RECEIVE_TIMINGS,
+              },
+            },
+            send: {
+              sum: {
+                field: SYNTHETICS_SEND_TIMINGS,
+              },
+            },
+            wait: {
+              sum: {
+                field: SYNTHETICS_WAIT_TIMINGS,
+              },
+            },
+            total: {
+              sum: {
+                field: SYNTHETICS_TOTAL_TIMINGS,
               },
             },
           },

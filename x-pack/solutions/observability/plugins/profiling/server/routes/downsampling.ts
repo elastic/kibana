@@ -79,11 +79,9 @@ export async function findDownsampledIndex({
   try {
     const resp = await client.search('find_downsampled_index', {
       index: getFullDownsampledIndex(index, initialExp, 5),
-      body: {
-        query: filter,
-        size: 0,
-        track_total_hits: true,
-      },
+      query: filter,
+      size: 0,
+      track_total_hits: true,
     });
     sampleCountFromInitialExp = resp.hits.total.value;
   } catch (e) {

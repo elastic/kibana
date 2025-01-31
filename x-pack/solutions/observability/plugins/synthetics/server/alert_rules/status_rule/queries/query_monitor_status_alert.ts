@@ -69,56 +69,54 @@ export async function queryMonitorStatusAlert({
     async (i) => {
       const idsToQuery = (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize);
       const params = createEsParams({
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                ...(includeRetests ? [SUMMARY_FILTER] : [FINAL_SUMMARY_FILTER]),
-                getTimespanFilter({ from: range.from, to: range.to }),
-                {
-                  terms: {
-                    'monitor.id': idsToQuery,
-                  },
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...(includeRetests ? [SUMMARY_FILTER] : [FINAL_SUMMARY_FILTER]),
+              getTimespanFilter({ from: range.from, to: range.to }),
+              {
+                terms: {
+                  'monitor.id': idsToQuery,
                 },
-              ] as QueryDslQueryContainer[],
-            },
-          },
-          aggs: {
-            id: {
-              terms: {
-                field: 'monitor.id',
-                size: idSize,
               },
-              aggs: {
-                location: {
-                  terms: {
-                    field: 'observer.name',
-                    size: monitorLocationIds.length || 100,
-                  },
-                  aggs: {
-                    downChecks: {
-                      filter: {
-                        range: {
-                          'summary.down': {
-                            gte: '1',
-                          },
+            ] as QueryDslQueryContainer[],
+          },
+        },
+        aggs: {
+          id: {
+            terms: {
+              field: 'monitor.id',
+              size: idSize,
+            },
+            aggs: {
+              location: {
+                terms: {
+                  field: 'observer.name',
+                  size: monitorLocationIds.length || 100,
+                },
+                aggs: {
+                  downChecks: {
+                    filter: {
+                      range: {
+                        'summary.down': {
+                          gte: '1',
                         },
                       },
                     },
-                    totalChecks: {
-                      top_hits: {
-                        size: numberOfChecks,
-                        sort: [
-                          {
-                            '@timestamp': {
-                              order: 'desc',
-                            },
+                  },
+                  totalChecks: {
+                    top_hits: {
+                      size: numberOfChecks,
+                      sort: [
+                        {
+                          '@timestamp': {
+                            order: 'desc',
                           },
-                        ],
-                        _source: {
-                          includes: fields,
                         },
+                      ],
+                      _source: {
+                        includes: fields,
                       },
                     },
                   },
@@ -130,7 +128,7 @@ export async function queryMonitorStatusAlert({
       });
 
       if (monitorLocationIds.length > 0) {
-        params.body.query.bool.filter.push({
+        params.query.bool.filter.push({
           terms: {
             'observer.name': monitorLocationIds,
           },

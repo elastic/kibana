@@ -42,7 +42,9 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async createIndices(
       indices: string,
-      params: IndicesCreateRequest['body'] = {} as NonNullable<IndicesCreateRequest['body']>
+      params: Omit<IndicesCreateRequest, 'index'> = {} as NonNullable<
+        Omit<IndicesCreateRequest, 'index'>
+      >
     ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {

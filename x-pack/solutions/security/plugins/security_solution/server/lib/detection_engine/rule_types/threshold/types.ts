@@ -29,18 +29,14 @@ export interface ThresholdLeafAggregates {
 export type ThresholdMultiBucketAggregationResult = ESSearchResponse<
   SignalSource,
   {
-    body: {
-      aggregations: ReturnType<typeof buildThresholdMultiBucketAggregation>;
-    };
+    aggregations: ReturnType<typeof buildThresholdMultiBucketAggregation>;
   }
 >;
 
 export type ThresholdSingleBucketAggregationResult = ESSearchResponse<
   SignalSource,
   {
-    body: {
-      aggregations: ReturnType<typeof buildThresholdSingleBucketAggregation>;
-    };
+    aggregations: ReturnType<typeof buildThresholdSingleBucketAggregation>;
   }
 >;
 

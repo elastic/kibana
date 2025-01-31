@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ESSearchResponse } from '@kbn/es-types';
+import { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { createAsyncAction } from '../utils/actions';
 
 export interface EsActionPayload {
-  params: esTypes.SearchRequest;
+  params: ESSearchRequest;
   name: string;
 }
 

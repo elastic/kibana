@@ -94,7 +94,7 @@ export const getLastSuccessfulCheck = async ({
     location,
   });
 
-  const { body: result } = await syntheticsEsClient.search({ body: lastSuccessCheckParams });
+  const { body: result } = await syntheticsEsClient.search(lastSuccessCheckParams);
 
   if (result.hits.total.value < 1) {
     return null;

@@ -175,44 +175,42 @@ export function registerTransactionErrorRateRuleType({
 
       const searchParams = {
         index,
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: dateStart,
-                    },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateStart,
                   },
                 },
-                ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-                {
-                  terms: {
-                    [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
-                  },
-                },
-                ...termFilterQuery,
-                ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
-              ],
-            },
-          },
-          aggs: {
-            series: {
-              multi_terms: {
-                terms: [...getGroupByTerms(allGroupByFields)],
-                size: 1000,
-                order: { _count: 'desc' as const },
               },
-              aggs: {
-                outcomes: {
-                  terms: {
-                    field: EVENT_OUTCOME,
-                  },
-                  aggs: getApmAlertSourceFieldsAgg(),
+              ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+              {
+                terms: {
+                  [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
                 },
+              },
+              ...termFilterQuery,
+              ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
+            ],
+          },
+        },
+        aggs: {
+          series: {
+            multi_terms: {
+              terms: [...getGroupByTerms(allGroupByFields)],
+              size: 1000,
+              order: { _count: 'desc' as const },
+            },
+            aggs: {
+              outcomes: {
+                terms: {
+                  field: EVENT_OUTCOME,
+                },
+                aggs: getApmAlertSourceFieldsAgg(),
               },
             },
           },

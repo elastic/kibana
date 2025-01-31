@@ -563,7 +563,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
   ): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index,
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }

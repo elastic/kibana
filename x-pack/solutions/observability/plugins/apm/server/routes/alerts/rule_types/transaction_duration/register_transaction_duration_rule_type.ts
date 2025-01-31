@@ -179,40 +179,38 @@ export function registerTransactionDurationRuleType({
 
       const searchParams = {
         index,
-        body: {
-          track_total_hits: false,
-          size: 0,
-          _source: false as const,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: dateStart,
-                    },
+        track_total_hits: false,
+        size: 0,
+        _source: false as const,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateStart,
                   },
                 },
-                ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-                ...termFilterQuery,
-                ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
-              ] as QueryDslQueryContainer[],
-            },
+              },
+              ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+              ...termFilterQuery,
+              ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
+            ] as QueryDslQueryContainer[],
           },
-          aggs: {
-            series: {
-              multi_terms: {
-                terms: [...getGroupByTerms(allGroupByFields)],
-                size: 1000,
-                ...getMultiTermsSortOrder(ruleParams.aggregationType),
-              },
-              aggs: {
-                ...averageOrPercentileAgg({
-                  aggregationType: ruleParams.aggregationType,
-                  transactionDurationField: field,
-                }),
-                ...getApmAlertSourceFieldsAgg(),
-              },
+        },
+        aggs: {
+          series: {
+            multi_terms: {
+              terms: [...getGroupByTerms(allGroupByFields)],
+              size: 1000,
+              ...getMultiTermsSortOrder(ruleParams.aggregationType),
+            },
+            aggs: {
+              ...averageOrPercentileAgg({
+                aggregationType: ruleParams.aggregationType,
+                transactionDurationField: field,
+              }),
+              ...getApmAlertSourceFieldsAgg(),
             },
           },
         },

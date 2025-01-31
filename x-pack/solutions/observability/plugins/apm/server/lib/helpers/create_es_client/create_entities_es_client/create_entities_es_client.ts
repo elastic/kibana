@@ -111,9 +111,7 @@ export async function createEntitiesESClient({
               index: [SERVICE_ENTITIES_LATEST_ALIAS],
               ignore_unavailable: true,
             },
-            {
-              ...params.body,
-            },
+            params,
           ];
 
           return searchParams;

@@ -49,27 +49,25 @@ export function inpQuery(
     end,
   });
   return mergeProjection(projection, {
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [...projection.body.query.bool.filter],
+    size: 0,
+    query: {
+      bool: {
+        filter: [...projection.query.bool.filter],
+      },
+    },
+    aggs: {
+      inp: {
+        percentiles: {
+          field: INP_FIELD,
+          percents: [percentile],
         },
       },
-      aggs: {
-        inp: {
-          percentiles: {
-            field: INP_FIELD,
-            percents: [percentile],
-          },
-        },
 
-        inpRanks: {
-          percentile_ranks: {
-            field: INP_FIELD,
-            values: [200, 500],
-            keyed: false,
-          },
+      inpRanks: {
+        percentile_ranks: {
+          field: INP_FIELD,
+          values: [200, 500],
+          keyed: false,
         },
       },
     },

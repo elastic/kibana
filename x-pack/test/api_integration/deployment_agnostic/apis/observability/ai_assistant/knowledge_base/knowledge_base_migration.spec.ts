@@ -57,10 +57,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       index: '.kibana-observability-ai-assistant-kb*',
       // Add fields parameter to include inference metadata
       fields: ['_inference_fields'],
-      body: {
-        query: {
-          match_all: {},
-        },
+      query: {
+        match_all: {},
       },
     })) as SearchResponse<KnowledgeBaseEntry & SemanticTextField>;
 

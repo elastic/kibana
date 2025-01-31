@@ -19,20 +19,18 @@ export async function getSavedObjectFromES<T>(
   return await es.search<T>(
     {
       index: ALL_SAVED_OBJECT_INDICES,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { ...query },
-              {
-                term: {
-                  type: {
-                    value: savedObjectType,
-                  },
+      query: {
+        bool: {
+          filter: [
+            { ...query },
+            {
+              term: {
+                type: {
+                  value: savedObjectType,
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
     },

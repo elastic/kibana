@@ -27,7 +27,7 @@ export async function createCustomRole({
   // the security API. They are preserved when updating the role below
   if ('applications' in role) {
     const esClient = getEsClient(elasticsearch);
-    await esClient.security.putRole({ name: roleName, body: role });
+    await esClient.security.putRole({ name: roleName, ...role });
   }
 
   await callKibana({

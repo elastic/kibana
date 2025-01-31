@@ -156,35 +156,30 @@ export const buildEventsSearchQuery = ({
     allow_no_indices: true,
     index,
     ignore_unavailable: true,
-    body: {
-      track_total_hits: trackTotalHits,
-      size,
-      query: {
-        bool: {
-          filter: filterWithTime,
-        },
+    track_total_hits: trackTotalHits,
+    size,
+    query: {
+      bool: {
+        filter: filterWithTime,
       },
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-        ...docFields,
-      ],
-      ...(aggregations ? { aggregations } : {}),
-      runtime_mappings: runtimeMappings,
-      sort,
-      ...overrideBody,
     },
+    fields: [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+      ...docFields,
+    ],
+    ...(aggregations ? { aggregations } : {}),
+    runtime_mappings: runtimeMappings,
+    sort,
+    ...overrideBody,
   };
 
   if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
     return {
       ...searchQuery,
-      body: {
-        ...searchQuery.body,
-        search_after: searchAfterSortIds,
-      },
+      search_after: searchAfterSortIds,
     };
   }
   return searchQuery;

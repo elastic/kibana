@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should update datafeed with correct space', async () => {
       await updateDatafeed(
-        { datafeed_id: datafeedIdSpace1, body: { query_delay: newQueryDelay } },
+        { datafeed_id: datafeedIdSpace1, query_delay: newQueryDelay },
         USER.ML_POWERUSER_ALL_SPACES,
         200,
         idSpace1
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not update datafeed with incorrect space', async () => {
       await updateDatafeed(
-        { datafeed_id: datafeedIdSpace1, body: { query_delay: newQueryDelay } },
+        { datafeed_id: datafeedIdSpace1, query_delay: newQueryDelay },
         USER.ML_POWERUSER_ALL_SPACES,
         404,
         idSpace2
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not be updatable by ml viewer user', async () => {
       await updateDatafeed(
-        { datafeed_id: datafeedIdSpace1, body: { query_delay: newQueryDelay } },
+        { datafeed_id: datafeedIdSpace1, query_delay: newQueryDelay },
         USER.ML_VIEWER_ALL_SPACES,
         403,
         idSpace1

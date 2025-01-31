@@ -87,23 +87,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         await es.indices.create({
           index: indices.metric,
-          body: {
-            mappings: apmDependenciesMapping,
-          },
+          mappings: apmDependenciesMapping,
         });
 
         await es.indices.create({
           index: indices.transaction,
-          body: {
-            mappings: apmDependenciesMapping,
-          },
+          mappings: apmDependenciesMapping,
         });
 
         await es.indices.create({
           index: indices.span,
-          body: {
-            mappings: apmDependenciesMapping,
-          },
+          mappings: apmDependenciesMapping,
         });
 
         const docs = [

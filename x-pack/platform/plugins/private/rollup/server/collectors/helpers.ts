@@ -36,13 +36,11 @@ export async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: El
     index: kibanaIndex,
     ignore_unavailable: true,
     filter_path: ['hits.hits._id'],
-    body: {
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'index-pattern.type': DataViewType.ROLLUP,
-            },
+    query: {
+      bool: {
+        filter: {
+          term: {
+            'index-pattern.type': DataViewType.ROLLUP,
           },
         },
       },
@@ -71,13 +69,11 @@ const getSavedObjectsList = async ({
   filter: ESFilterProps;
 }) => {
   const esResponse = await esClient.search({
-    body: {
-      search_after: searchAfter,
-      sort: [{ updated_at: 'asc' }],
-      query: {
-        bool: {
-          filter,
-        },
+    search_after: searchAfter,
+    sort: [{ updated_at: 'asc' }],
+    query: {
+      bool: {
+        filter,
       },
     },
     ignore_unavailable: true,

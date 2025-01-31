@@ -37,13 +37,11 @@ export const buildObservedServiceDetailsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggregations: {
-        ...buildFieldsTermAggregation(SERVICE_FIELDS),
-      },
-      query: { bool: { filter } },
-      size: 0,
+    aggregations: {
+      ...buildFieldsTermAggregation(SERVICE_FIELDS),
     },
+    query: { bool: { filter } },
+    size: 0,
   };
 
   return dslQuery;

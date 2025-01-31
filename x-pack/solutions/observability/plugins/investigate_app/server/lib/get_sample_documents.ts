@@ -47,31 +47,29 @@ export async function getSampleDocuments({
       index: indexPatterns,
       track_total_hits: true,
       size: count,
-      body: {
-        query: {
-          bool: {
-            should: [
-              {
-                function_score: {
-                  functions: [
-                    {
-                      random_score: {},
-                    },
-                  ],
-                },
+      query: {
+        bool: {
+          should: [
+            {
+              function_score: {
+                functions: [
+                  {
+                    random_score: {},
+                  },
+                ],
               },
-            ],
-            must: [...rangeQuery(start, end), ...(dslFilter ?? [])],
-          },
+            },
+          ],
+          must: [...rangeQuery(start, end), ...(dslFilter ?? [])],
         },
-        sort: {
-          _score: {
-            order: 'desc',
-          },
-        },
-        _source: false,
-        fields: ['*' as const],
       },
+      sort: {
+        _score: {
+          order: 'desc',
+        },
+      },
+      _source: false,
+      fields: ['*' as const],
     })
     .then((response) => {
       const hits = response.hits.total as estypes.SearchTotalHits;

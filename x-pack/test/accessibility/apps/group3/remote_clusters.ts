@@ -162,11 +162,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         before(async () => {
-          await esClient.cluster.putSettings({ settings });
+          await esClient.cluster.putSettings(settings);
         });
 
         after(async () => {
-          await esClient.cluster.putSettings({ settings: getDeleteClusterPayload(clusterName) });
+          await esClient.cluster.putSettings(getDeleteClusterPayload(clusterName));
         });
 
         it('renders the list view with remote clusters', async () => {

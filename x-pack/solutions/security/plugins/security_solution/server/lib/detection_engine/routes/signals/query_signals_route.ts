@@ -67,16 +67,14 @@ export const querySignalsRoute = (
           const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
           const result = await esClient.search({
             index: indexPattern,
-            body: {
-              query,
-              aggs: aggs as Record<string, AggregationsAggregationContainer>,
-              _source,
-              fields,
-              track_total_hits,
-              size,
-              runtime_mappings: runtime_mappings as MappingRuntimeFields,
-              sort: sort as Sort,
-            },
+            query,
+            aggs: aggs as Record<string, AggregationsAggregationContainer>,
+            _source,
+            fields,
+            track_total_hits,
+            size,
+            runtime_mappings: runtime_mappings as MappingRuntimeFields,
+            sort: sort as Sort,
             ignore_unavailable: true,
           });
           return response.ok({ body: result });

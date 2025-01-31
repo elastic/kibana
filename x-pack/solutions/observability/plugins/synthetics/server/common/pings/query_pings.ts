@@ -102,7 +102,7 @@ export async function queryPings<F>(
       body: {
         hits: { hits, total },
       },
-    } = await syntheticsEsClient.search({ body: searchBody });
+    } = await syntheticsEsClient.search(searchBody);
 
     return {
       total: total.value,
@@ -114,7 +114,7 @@ export async function queryPings<F>(
     body: {
       hits: { hits, total },
     },
-  } = await syntheticsEsClient.search({ body: searchBody });
+  } = await syntheticsEsClient.search(searchBody);
 
   const pings: Ping[] = hits.map((doc: any) => {
     const { _id, _source } = doc;

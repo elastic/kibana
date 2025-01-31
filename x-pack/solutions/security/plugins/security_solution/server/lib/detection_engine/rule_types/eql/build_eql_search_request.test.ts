@@ -445,7 +445,7 @@ describe('buildEqlSearchRequest', () => {
         eventCategoryOverride: undefined,
         exceptionFilter: undefined,
       });
-      expect(request?.body?.tiebreaker_field).toEqual(`host.name`);
+      expect(request?.tiebreaker_field).toEqual(`host.name`);
     });
 
     test('should not pass a tiebreaker field with a valid value', async () => {
@@ -463,7 +463,7 @@ describe('buildEqlSearchRequest', () => {
         eventCategoryOverride: undefined,
         exceptionFilter: undefined,
       });
-      expect(request?.body?.tiebreaker_field).toEqual(undefined);
+      expect(request?.tiebreaker_field).toEqual(undefined);
     });
   });
 });

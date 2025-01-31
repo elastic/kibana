@@ -12,41 +12,39 @@ import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_c
 
 const indexTemplate: IndicesPutIndexTemplateRequest = {
   name: 'apm-source-map',
-  body: {
-    version: 1,
-    index_patterns: [APM_SOURCE_MAP_INDEX],
-    template: {
-      settings: {
-        index: {
-          number_of_shards: 1,
-          auto_expand_replicas: '0-1',
-          hidden: true,
-        },
+  version: 1,
+  index_patterns: [APM_SOURCE_MAP_INDEX],
+  template: {
+    settings: {
+      index: {
+        number_of_shards: 1,
+        auto_expand_replicas: '0-1',
+        hidden: true,
       },
-      mappings: {
-        dynamic: 'strict',
-        properties: {
-          fleet_id: {
-            type: 'keyword',
-          },
-          created: {
-            type: 'date',
-          },
-          content: {
-            type: 'binary',
-          },
-          content_sha256: {
-            type: 'keyword',
-          },
-          'file.path': {
-            type: 'keyword',
-          },
-          'service.name': {
-            type: 'keyword',
-          },
-          'service.version': {
-            type: 'keyword',
-          },
+    },
+    mappings: {
+      dynamic: 'strict',
+      properties: {
+        fleet_id: {
+          type: 'keyword',
+        },
+        created: {
+          type: 'date',
+        },
+        content: {
+          type: 'binary',
+        },
+        content_sha256: {
+          type: 'keyword',
+        },
+        'file.path': {
+          type: 'keyword',
+        },
+        'service.name': {
+          type: 'keyword',
+        },
+        'service.version': {
+          type: 'keyword',
         },
       },
     },

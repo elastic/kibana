@@ -100,9 +100,9 @@ export const getEventCount = async ({
     secondaryTimestamp,
     searchAfterSortIds: undefined,
     runtimeMappings: undefined,
-  }).body?.query;
+  }).query;
   const response = await esClient.count({
-    body: { query: eventSearchQueryBodyQuery },
+    query: eventSearchQueryBodyQuery,
     ignore_unavailable: true,
     index,
   });

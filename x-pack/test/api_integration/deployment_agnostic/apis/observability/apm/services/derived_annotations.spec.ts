@@ -41,37 +41,35 @@ export default function annotationApiTests({ getService }: DeploymentAgnosticFtr
 
         await es.indices.create({
           index: indexName,
-          body: {
-            mappings: {
-              properties: {
-                service: {
-                  properties: {
-                    name: {
-                      type: 'keyword',
-                    },
-                    version: {
-                      type: 'keyword',
-                    },
-                    environment: {
-                      type: 'keyword',
-                    },
+          mappings: {
+            properties: {
+              service: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  version: {
+                    type: 'keyword',
+                  },
+                  environment: {
+                    type: 'keyword',
                   },
                 },
-                transaction: {
-                  properties: {
-                    type: {
-                      type: 'keyword',
-                    },
-                    duration: {
-                      type: 'long',
-                    },
+              },
+              transaction: {
+                properties: {
+                  type: {
+                    type: 'keyword',
+                  },
+                  duration: {
+                    type: 'long',
                   },
                 },
-                processor: {
-                  properties: {
-                    event: {
-                      type: 'keyword',
-                    },
+              },
+              processor: {
+                properties: {
+                  event: {
+                    type: 'keyword',
                   },
                 },
               },

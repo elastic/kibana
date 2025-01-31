@@ -274,54 +274,52 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
   function getEventLogExecuteQuery(start: string, actionId: string) {
     return {
       index: '.kibana-event-log*',
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'event.provider': {
-                    value: 'actions',
-                  },
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'event.provider': {
+                  value: 'actions',
                 },
               },
-              {
-                term: {
-                  'event.action': 'execute',
+            },
+            {
+              term: {
+                'event.action': 'execute',
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: start,
                 },
               },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: start,
-                  },
-                },
-              },
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      filter: [
-                        {
-                          term: {
-                            'kibana.saved_objects.id': {
-                              value: actionId,
-                            },
+            },
+            {
+              nested: {
+                path: 'kibana.saved_objects',
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          'kibana.saved_objects.id': {
+                            value: actionId,
                           },
                         },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': 'action',
-                          },
+                      },
+                      {
+                        term: {
+                          'kibana.saved_objects.type': 'action',
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
     };

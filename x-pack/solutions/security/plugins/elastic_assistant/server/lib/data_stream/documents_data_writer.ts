@@ -209,24 +209,22 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     authenticatedUser?: AuthenticatedUser
   ) => {
     const responseToDelete = await this.options.esClient.search({
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      ids: {
-                        values: documentsToDelete,
-                      },
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    ids: {
+                      values: documentsToDelete,
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
-            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
-          },
+            },
+          ],
+          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
         },
       },
       _source: false,

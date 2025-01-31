@@ -43,10 +43,8 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
 };
 
 export type APMLogEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 type APMEventWrapper<T> = Omit<T, 'index'> & {

@@ -165,7 +165,7 @@ class SecurityWorkflowInsightsService {
     const response = await this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
       id,
-      body: insight,
+      document: insight,
       refresh: 'wait_for',
       op_type: 'create',
     });
@@ -193,7 +193,7 @@ class SecurityWorkflowInsightsService {
     const response = await this.esClient.update<SecurityWorkflowInsight>({
       index,
       id,
-      body: { doc: insight },
+      doc: insight,
       refresh: 'wait_for',
     });
 
@@ -209,15 +209,13 @@ class SecurityWorkflowInsightsService {
     const termFilters = params ? buildEsQueryParams(params) : [];
     const response = await this.esClient.search<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
-      body: {
-        query: {
-          bool: {
-            must: termFilters,
-          },
+      query: {
+        bool: {
+          must: termFilters,
         },
-        size,
-        from,
       },
+      size,
+      from,
     });
 
     return response?.hits?.hits ?? [];

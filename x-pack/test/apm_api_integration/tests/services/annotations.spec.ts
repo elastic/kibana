@@ -211,25 +211,23 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         await es.indices.create({
           index: transactionIndexName,
-          body: {
-            mappings: {
-              properties: {
-                service: {
-                  properties: {
-                    name: {
-                      type: 'keyword',
-                    },
-                    version: {
-                      type: 'keyword',
-                    },
-                    environment: {
-                      type: 'keyword',
-                    },
+          mappings: {
+            properties: {
+              service: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  version: {
+                    type: 'keyword',
+                  },
+                  environment: {
+                    type: 'keyword',
                   },
                 },
-                '@timestamp': {
-                  type: 'date',
-                },
+              },
+              '@timestamp': {
+                type: 'date',
               },
             },
           },

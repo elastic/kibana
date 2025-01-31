@@ -68,7 +68,7 @@ export const fetchSourceDocuments = async ({
 
   const response = await esClient.search({
     index,
-    body: searchBody,
+    ...searchBody,
     ignore_unavailable: ignoreUnavailable,
   });
 

@@ -54,7 +54,7 @@ export const getJourneySteps = async ({
     },
     size: 500,
   };
-  const { body: result } = await syntheticsEsClient.search({ body: params }, 'getJourneySteps');
+  const { body: result } = await syntheticsEsClient.search(params, 'getJourneySteps');
 
   const steps = result.hits.hits.map(
     ({ _id, _source }) => Object.assign({ _id }, _source) as ResultType

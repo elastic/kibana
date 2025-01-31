@@ -287,15 +287,13 @@ export default function ({ getService }: FtrProviderContext) {
           it('should fail when role already exists', async function () {
             await es.security.putRole({
               name: 'test_role',
-              body: {
-                cluster: ['monitor'],
-                indices: [
-                  {
-                    names: ['beats-*'],
-                    privileges: ['write'],
-                  },
-                ],
-              },
+              cluster: ['monitor'],
+              indices: [
+                {
+                  names: ['beats-*'],
+                  privileges: ['write'],
+                },
+              ],
             });
 
             await supertestAdminWithApiKey
@@ -317,41 +315,39 @@ export default function ({ getService }: FtrProviderContext) {
         it('should get roles', async function () {
           await es.security.putRole({
             name: 'role_to_get',
-            body: {
-              cluster: ['manage'],
-              indices: [
-                {
-                  names: ['logstash-*'],
-                  privileges: ['read', 'view_index_metadata'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'kibana-.kibana',
-                  privileges: [
-                    'feature_dashboard_v2.read',
-                    'feature_discover_v2.all',
-                    'feature_ml.all',
-                  ],
-                  resources: ['space:marketing', 'space:sales'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                foo: 'test-metadata',
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
               },
-              transient_metadata: {
-                enabled: true,
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
               },
+              {
+                application: 'kibana-.kibana',
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
+                resources: ['space:marketing', 'space:sales'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
             },
           });
 
@@ -397,61 +393,57 @@ export default function ({ getService }: FtrProviderContext) {
         it('should get roles by space id', async function () {
           await es.security.putRole({
             name: 'space_role_not_to_get',
-            body: {
-              cluster: ['manage'],
-              indices: [
-                {
-                  names: ['logstash-*'],
-                  privileges: ['read', 'view_index_metadata'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: [
-                    'feature_dashboard_v2.read',
-                    'feature_discover_v2.all',
-                    'feature_ml.all',
-                  ],
-                  resources: ['space:marketing', 'space:sales'],
-                },
-              ],
-              metadata: {
-                foo: 'test-metadata',
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
               },
-              transient_metadata: {
-                enabled: true,
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
+                resources: ['space:marketing', 'space:sales'],
               },
+            ],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
             },
           });
 
           await es.security.putRole({
             name: 'space_role_to_get',
-            body: {
-              cluster: ['manage'],
-              indices: [
-                {
-                  names: ['logstash-*'],
-                  privileges: ['read', 'view_index_metadata'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: [
-                    'feature_dashboard_v2.read',
-                    'feature_discover_v2.all',
-                    'feature_ml.all',
-                  ],
-                  resources: ['space:engineering', 'space:sales'],
-                },
-              ],
-              metadata: {
-                foo: 'test-metadata',
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
               },
-              transient_metadata: {
-                enabled: true,
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
+                resources: ['space:engineering', 'space:sales'],
               },
+            ],
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
             },
           });
 
@@ -485,29 +477,27 @@ export default function ({ getService }: FtrProviderContext) {
         it('should update a role with elasticsearch, kibana and other applications privileges', async function () {
           await es.security.putRole({
             name: 'role_to_update',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
 
@@ -584,15 +574,13 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should update a role adding DLS and FLS privileges`, async function () {
           await es.security.putRole({
             name: 'role_to_update_with_dls_fls',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-            },
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
+              },
+            ],
           });
 
           await supertestAdminWithApiKey
@@ -628,29 +616,27 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should not update a role with 'run as' privileges`, async function () {
           await es.security.putRole({
             name: 'role_to_update',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
 
@@ -724,29 +710,27 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should not update a role with remote cluster privileges`, async function () {
           await es.security.putRole({
             name: 'role_to_update',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
 
@@ -825,29 +809,27 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should not update a role with remote index privileges`, async function () {
           await es.security.putRole({
             name: 'role_to_update',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
 
@@ -928,29 +910,27 @@ export default function ({ getService }: FtrProviderContext) {
         it('should delete an existing role', async function () {
           await es.security.putRole({
             name: 'role_to_delete',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['read'],
-                  resources: ['*'],
-                },
-                {
-                  application: 'apm',
-                  privileges: ['apm-privilege'],
-                  resources: ['*'],
-                },
-              ],
-              metadata: {
-                bar: 'old-metadata',
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
               },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read'],
+                resources: ['*'],
+              },
+              {
+                application: 'apm',
+                privileges: ['apm-privilege'],
+                resources: ['*'],
+              },
+            ],
+            metadata: {
+              bar: 'old-metadata',
             },
           });
           await supertestAdminWithApiKey.delete('/api/security/role/role_to_delete').expect(204);

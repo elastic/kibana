@@ -218,7 +218,7 @@ const addIndexAliases = async ({
       };
     }),
   };
-  await esClient.indices.updateAliases({ body: aliasActions });
+  await esClient.indices.updateAliases(aliasActions);
 };
 
 /**

@@ -57,16 +57,14 @@ export const getThreatList = async ({
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
   >({
-    body: {
-      ...threatListConfig,
-      query: queryFilter,
-      search_after: searchAfter,
-      runtime_mappings: runtimeMappings,
-      sort: getSortForThreatList({
-        index,
-        listItemIndex: listClient.getListItemName(),
-      }),
-    },
+    ...threatListConfig,
+    query: queryFilter,
+    search_after: searchAfter,
+    runtime_mappings: runtimeMappings,
+    sort: getSortForThreatList({
+      index,
+      listItemIndex: listClient.getListItemName(),
+    }),
     track_total_hits: false,
     size: calculatedPerPage,
     pit: { id: pitId },
@@ -109,9 +107,7 @@ export const getThreatListCount = async ({
     fields: indexFields,
   });
   const response = await esClient.count({
-    body: {
-      query: queryFilter,
-    },
+    query: queryFilter,
     ignore_unavailable: true,
     index,
   });

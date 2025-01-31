@@ -156,12 +156,10 @@ const getFetchEntityPromise = ({
   return shouldFetch
     ? entitiesEsClient
         .search<{ source_index: string[]; entity: EntitiesLatest['entity'] }>(index, {
-          body: {
-            query: {
-              bool: {
-                should: shouldMatch,
-                minimum_should_match: 1,
-              },
+          query: {
+            bool: {
+              should: shouldMatch,
+              minimum_should_match: 1,
             },
           },
         })

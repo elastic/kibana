@@ -27,30 +27,26 @@ export default function ({ getService }: FtrProviderContext) {
       try {
         await es.indices.create({
           index: INDEX_A_NAME,
-          body: {
-            mappings: {
-              properties: {
-                email: {
-                  type: 'text',
-                },
-                firstName: {
-                  type: 'text',
-                },
+          mappings: {
+            properties: {
+              email: {
+                type: 'text',
+              },
+              firstName: {
+                type: 'text',
               },
             },
           },
         });
         await es.indices.create({
           index: INDEX_B_NAME,
-          body: {
-            mappings: {
-              properties: {
-                email: {
-                  type: 'text',
-                },
-                age: {
-                  type: 'long',
-                },
+          mappings: {
+            properties: {
+              email: {
+                type: 'text',
+              },
+              age: {
+                type: 'long',
               },
             },
           },
@@ -62,10 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
       try {
         await es.indices.putIndexTemplate({
           name: DATA_STREAM_TEMPLATE,
-          body: {
-            index_patterns: ['data-stream-*'],
-            data_stream: {},
-          },
+          index_patterns: ['data-stream-*'],
+          data_stream: {},
         });
         await es.indices.createDataStream({
           name: DATA_STREAM_A_NAME,

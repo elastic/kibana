@@ -57,7 +57,7 @@ export const ensureMigrationCleanupPolicy = async ({
   if (!policyExists) {
     await esClient.ilm.putLifecycle({
       name: policy,
-      body: migrationCleanupPolicy,
+      ...migrationCleanupPolicy,
     });
   }
 };

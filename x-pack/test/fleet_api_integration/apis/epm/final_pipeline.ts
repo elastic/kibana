@@ -69,17 +69,15 @@ export default function (providerContext: FtrProviderContext) {
     it('should correctly update the final pipeline', async () => {
       await es.ingest.putPipeline({
         id: FINAL_PIPELINE_ID,
-        body: {
-          description: 'Test PIPELINE WITHOUT version',
-          processors: [
-            {
-              set: {
-                field: 'my-keyword-field',
-                value: 'foo',
-              },
+        description: 'Test PIPELINE WITHOUT version',
+        processors: [
+          {
+            set: {
+              field: 'my-keyword-field',
+              value: 'foo',
             },
-          ],
-        },
+          },
+        ],
       });
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
@@ -102,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
     it('all docs should contain event.ingested without sub-seconds', async () => {
       const res = await es.index({
         index: 'logs-log.log-test',
-        body: {
+        document: {
           '@timestamp': '2020-01-01T09:09:00',
           message: 'hello',
         },
@@ -122,7 +120,7 @@ export default function (providerContext: FtrProviderContext) {
     it('For a doc written without api key should write the correct api key status', async () => {
       const res = await es.index({
         index: 'logs-log.log-test',
-        body: {
+        document: {
           message: 'message-test-1',
           '@timestamp': '2020-01-01T09:09:00',
           agent: {
@@ -145,7 +143,7 @@ export default function (providerContext: FtrProviderContext) {
     it('removes event.original if preserve_original_event is not set', async () => {
       const res = await es.index({
         index: 'logs-log.log-test',
-        body: {
+        document: {
           message: 'message-test-1',
           event: {
             original: JSON.stringify({ foo: 'bar' }),
@@ -171,7 +169,7 @@ export default function (providerContext: FtrProviderContext) {
     it('preserves event.original if preserve_original_event is set', async () => {
       const res = await es.index({
         index: 'logs-log.log-test',
-        body: {
+        document: {
           message: 'message-test-1',
           event: {
             original: JSON.stringify({ foo: 'bar' }),
@@ -236,10 +234,8 @@ export default function (providerContext: FtrProviderContext) {
         // Create an API key
         const apiKeyRes = await es.security.createApiKey(
           {
-            body: {
-              name: `test api key`,
-              ...(scenario.apiKey || {}),
-            },
+            name: `test api key`,
+            ...(scenario.apiKey || {}),
           },
           {
             headers: { 'es-security-runas-user': 'elastic' }, // run as elastic suer

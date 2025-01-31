@@ -1379,7 +1379,7 @@ export default function ({ getService }: FtrProviderContext) {
             );
             const result = await esClient.search({
               index,
-              body: searchBody,
+              ...searchBody,
             });
 
             expect(result.hits).to.be.ok();
@@ -1403,7 +1403,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           const result = await esClient.search({
             index,
-            body: searchBody,
+            ...searchBody,
           });
 
           expect(result.hits).to.be.ok();
@@ -1427,7 +1427,7 @@ export default function ({ getService }: FtrProviderContext) {
             );
             const result = await esClient.search({
               index,
-              body: searchBody,
+              ...searchBody,
             });
 
             expect(result.hits).to.be.ok();
@@ -1450,7 +1450,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           const result = await esClient.search({
             index,
-            body: searchBody,
+            ...searchBody,
           });
 
           expect(result.hits).to.be.ok();

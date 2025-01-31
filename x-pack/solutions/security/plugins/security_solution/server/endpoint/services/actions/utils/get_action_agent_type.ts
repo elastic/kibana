@@ -22,11 +22,9 @@ export const getActionAgentType = async (
   const response = await esClient
     .search<LogsEndpointAction>({
       index: ENDPOINT_ACTIONS_INDEX,
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { action_id: actionId } }],
-          },
+      query: {
+        bool: {
+          filter: [{ term: { action_id: actionId } }],
         },
       },
       _source: ['EndpointActions.input_type'],

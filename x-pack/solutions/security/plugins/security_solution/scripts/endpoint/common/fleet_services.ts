@@ -190,9 +190,7 @@ export const checkInFleetAgent = async (
     id: agentId,
     refresh: 'wait_for',
     retry_on_conflict: 5,
-    body: {
-      doc: update,
-    },
+    doc: update,
   });
 };
 

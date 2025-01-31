@@ -51,10 +51,8 @@ export const buildRiskScoreQuery = ({
     track_total_hits: true,
     size: querySize,
     from: cursorStart,
-    body: {
-      query: { bool: { filter } },
-      sort: getQueryOrder(sort),
-    },
+    query: { bool: { filter } },
+    sort: getQueryOrder(sort),
   };
 
   return dslQuery;

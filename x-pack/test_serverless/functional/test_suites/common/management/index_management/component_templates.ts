@@ -41,12 +41,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         before(async () => {
           await es.cluster.putComponentTemplate({
             name: TEST_COMPONENT_TEMPLATE,
-            body: {
-              template: {
-                settings: {
-                  index: {
-                    number_of_shards: 1,
-                  },
+            template: {
+              settings: {
+                index: {
+                  number_of_shards: 1,
                 },
               },
             },

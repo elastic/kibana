@@ -38,7 +38,7 @@ export const useMonitorDetail = (
         ],
       },
     },
-    sort: [{ '@timestamp': 'desc' }],
+    sort: [{ '@timestamp': 'desc' as const }],
   };
   const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
     params,

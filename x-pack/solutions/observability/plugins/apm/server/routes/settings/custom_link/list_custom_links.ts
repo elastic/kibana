@@ -35,20 +35,18 @@ export async function listCustomLinks({
   const params = {
     index: APM_CUSTOM_LINK_INDEX,
     size: 500,
-    body: {
-      query: {
-        bool: {
-          filter: esFilters,
+    query: {
+      bool: {
+        filter: esFilters,
+      },
+    },
+    sort: [
+      {
+        'label.keyword': {
+          order: 'asc' as const,
         },
       },
-      sort: [
-        {
-          'label.keyword': {
-            order: 'asc' as const,
-          },
-        },
-      ],
-    },
+    ],
   };
   const resp = await internalESClient.search<CustomLinkES>('list_custom_links', params);
   const customLinks = resp.hits.hits.map((item) =>

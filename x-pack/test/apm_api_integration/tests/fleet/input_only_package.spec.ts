@@ -59,11 +59,9 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     const esClientScoped = createEsClientWithToken(token.value);
     return esClientScoped.security.createApiKey({
-      body: {
-        name: API_KEY_NAME,
-        role_descriptors: {
-          apmFleetPermissions: permissions,
-        },
+      name: API_KEY_NAME,
+      role_descriptors: {
+        apmFleetPermissions: permissions,
       },
     });
   }

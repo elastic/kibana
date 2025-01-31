@@ -155,49 +155,47 @@ export class OverviewStatusService {
       do {
         const result = await this.routeContext.syntheticsEsClient.search(
           {
-            body: {
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    FINAL_SUMMARY_FILTER,
-                    getRangeFilter({ from: range.from, to: range.to }),
-                    getTimespanFilter({ from: 'now-15m', to: 'now' }),
-                    ...this.getEsDataFilters(),
-                  ] as QueryDslQueryContainer[],
-                },
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  FINAL_SUMMARY_FILTER,
+                  getRangeFilter({ from: range.from, to: range.to }),
+                  getTimespanFilter({ from: 'now-15m', to: 'now' }),
+                  ...this.getEsDataFilters(),
+                ] as QueryDslQueryContainer[],
               },
-              aggs: {
-                monitors: {
-                  composite: {
-                    size: SUMMARIES_PAGE_SIZE,
-                    sources: asMutableArray([
-                      {
-                        monitorId: {
-                          terms: {
-                            field: 'monitor.id',
-                          },
+            },
+            aggs: {
+              monitors: {
+                composite: {
+                  size: SUMMARIES_PAGE_SIZE,
+                  sources: asMutableArray([
+                    {
+                      monitorId: {
+                        terms: {
+                          field: 'monitor.id',
                         },
                       },
-                      {
-                        locationId: {
-                          terms: {
-                            field: 'observer.name',
-                          },
+                    },
+                    {
+                      locationId: {
+                        terms: {
+                          field: 'observer.name',
                         },
                       },
-                    ] as const),
-                    after: afterKey,
-                  },
-                  aggs: {
-                    status: {
-                      top_metrics: {
-                        metrics: {
-                          field: 'monitor.status',
-                        },
-                        sort: {
-                          '@timestamp': 'desc',
-                        },
+                    },
+                  ] as const),
+                  after: afterKey,
+                },
+                aggs: {
+                  status: {
+                    top_metrics: {
+                      metrics: {
+                        field: 'monitor.status',
+                      },
+                      sort: {
+                        '@timestamp': 'desc',
                       },
                     },
                   },

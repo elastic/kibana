@@ -19,11 +19,9 @@ const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.
 async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
   const response = (await es.search({
     index: APM_ALERTS_INDEX,
-    body: {
-      query: {
-        term: {
-          'kibana.alert.rule.uuid': ruleId,
-        },
+    query: {
+      term: {
+        'kibana.alert.rule.uuid': ruleId,
       },
     },
   })) as SearchResponse<ApmAlertFields, Record<string, AggregationsAggregate>>;

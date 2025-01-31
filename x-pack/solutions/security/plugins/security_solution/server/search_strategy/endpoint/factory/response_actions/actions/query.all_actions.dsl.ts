@@ -32,29 +32,27 @@ export const buildResponseActionsQuery = (
     allow_no_indices: true,
     index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
     ignore_unavailable: true,
-    body: {
-      fields,
-      _source: false,
-      query: {
-        bool: {
-          minimum_should_match: 2,
-          should: [
-            { term: { type: 'INPUT_ACTION' } },
-            { terms: { alert_ids: alertIds } },
-            {
-              terms: { 'data.alert_id': alertIds },
-            },
-          ] as estypes.QueryDslQueryContainer[],
+    fields,
+    _source: false,
+    query: {
+      bool: {
+        minimum_should_match: 2,
+        should: [
+          { term: { type: 'INPUT_ACTION' } },
+          { terms: { alert_ids: alertIds } },
+          {
+            terms: { 'data.alert_id': alertIds },
+          },
+        ] as estypes.QueryDslQueryContainer[],
+      },
+    },
+    sort: [
+      {
+        [sort.field]: {
+          order: sort.order,
         },
       },
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.order,
-          },
-        },
-      ],
-    },
+    ],
   };
 
   return dslQuery;

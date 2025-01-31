@@ -89,7 +89,7 @@ export const updateUnderlyingMapping = async ({ logger, esClient, index }: Updat
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, body: simulatedMapping }),
+      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
       { logger }
     );
     logger.info(`Update mappings for ${index}`);

@@ -134,12 +134,10 @@ const updateSignalsStatusByIds = async (
   esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     refresh: true,
-    body: {
-      script: getUpdateSignalStatusScript(status, user),
-      query: {
-        bool: {
-          filter: { terms: { _id: signalsId } },
-        },
+    script: getUpdateSignalStatusScript(status, user),
+    query: {
+      bool: {
+        filter: { terms: { _id: signalsId } },
       },
     },
     ignore_unavailable: true,
@@ -162,12 +160,10 @@ const updateSignalsStatusByQuery = async (
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
     refresh: true,
-    body: {
-      script: getUpdateSignalStatusScript(status, user),
-      query: {
-        bool: {
-          filter: query,
-        },
+    script: getUpdateSignalStatusScript(status, user),
+    query: {
+      bool: {
+        filter: query,
       },
     },
     ignore_unavailable: true,

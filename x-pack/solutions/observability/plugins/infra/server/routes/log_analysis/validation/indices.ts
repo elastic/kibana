@@ -53,9 +53,7 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
               fields: fields.map((field) => field.name),
               ignore_unavailable: true,
               index,
-              body: {
-                runtime_mappings: runtimeMappings,
-              },
+              runtime_mappings: runtimeMappings,
             });
 
             if (fieldCaps.indices.length === 0) {

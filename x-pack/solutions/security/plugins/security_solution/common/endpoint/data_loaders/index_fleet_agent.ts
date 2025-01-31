@@ -131,19 +131,17 @@ export const deleteIndexedFleetAgents = async (
       .deleteByQuery({
         index: `${indexedData.fleetAgentsIndex}-*`,
         wait_for_completion: true,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    'local_metadata.elastic.agent.id': indexedData.agents.map(
-                      (agent) => agent.local_metadata.elastic.agent.id
-                    ),
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'local_metadata.elastic.agent.id': indexedData.agents.map(
+                    (agent) => agent.local_metadata.elastic.agent.id
+                  ),
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       })

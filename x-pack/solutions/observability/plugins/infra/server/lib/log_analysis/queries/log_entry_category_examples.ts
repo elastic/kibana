@@ -21,36 +21,34 @@ export const createLogEntryCategoryExamplesQuery = (
   exampleCount: number
 ): estypes.SearchRequest => ({
   ...defaultRequestParameters,
-  body: {
-    size: exampleCount,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              [timestampField]: {
-                gte: startTime,
-                lte: endTime,
-                format: 'epoch_millis',
-              },
+  size: exampleCount,
+  query: {
+    bool: {
+      filter: [
+        {
+          range: {
+            [timestampField]: {
+              gte: startTime,
+              lte: endTime,
+              format: 'epoch_millis',
             },
           },
-          {
-            match: {
-              message: {
-                query: categoryQuery,
-                operator: 'and',
-              },
+        },
+        {
+          match: {
+            message: {
+              query: categoryQuery,
+              operator: 'and',
             },
           },
-        ],
-      },
+        },
+      ],
     },
-    runtime_mappings: runtimeMappings,
-    sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
-    _source: false,
-    fields: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],
   },
+  runtime_mappings: runtimeMappings,
+  sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
+  _source: false,
+  fields: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],
   index: indices,
 });
 

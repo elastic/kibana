@@ -339,13 +339,11 @@ export const deleteIndexedEndpointAndFleetActions = async (
         .deleteByQuery({
           index: `${indexedData.actionsIndex}-*`,
           wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
-                ],
-              },
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
+              ],
             },
           },
         })
@@ -354,13 +352,11 @@ export const deleteIndexedEndpointAndFleetActions = async (
         .deleteByQuery({
           index: `${indexedData.endpointActionsIndex}-*`,
           wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
-                ],
-              },
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: indexedData.actions.map((action) => action.action_id) } },
+              ],
             },
           },
         })
@@ -374,17 +370,15 @@ export const deleteIndexedEndpointAndFleetActions = async (
         .deleteByQuery({
           index: `${indexedData.responsesIndex}-*`,
           wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      action_id: indexedData.actionResponses.map((action) => action.action_id),
-                    },
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    action_id: indexedData.actionResponses.map((action) => action.action_id),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         })
@@ -393,17 +387,15 @@ export const deleteIndexedEndpointAndFleetActions = async (
         .deleteByQuery({
           index: `${indexedData.endpointActionResponsesIndex}-*`,
           wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      action_id: indexedData.actionResponses.map((action) => action.action_id),
-                    },
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    action_id: indexedData.actionResponses.map((action) => action.action_id),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         })

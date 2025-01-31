@@ -321,10 +321,13 @@ export class ClusterClientAdapter<
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.putTemplate({
         name: indexTemplateName,
-        ...currentIndexTemplate,
-        settings: {
-          ...currentIndexTemplate.settings,
-          'index.hidden': true,
+        body: {
+          ...currentIndexTemplate,
+          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+          settings: {
+            ...currentIndexTemplate.settings,
+            'index.hidden': true,
+          },
         },
       });
     } catch (err) {

@@ -115,7 +115,7 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
   async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }
