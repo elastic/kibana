@@ -5,34 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 
-import { AlertStatus } from './types';
-
-export const ACTIVE_ALERTS: AlertStatus = {
-  id: ALERT_STATUS_ACTIVE,
-  label: i18n.translate('xpack.observabilityAiAssistant.alertConnector.alertStatus.active', {
-    defaultMessage: 'Active',
-  }),
-};
-
-export const RECOVERED_ALERTS: AlertStatus = {
-  id: ALERT_STATUS_RECOVERED,
-  label: i18n.translate('xpack.observabilityAiAssistant.alertConnector.alertStatus.recovered', {
-    defaultMessage: 'Recovered',
-  }),
-};
-
-export const UNTRACKED_ALERTS: AlertStatus = {
-  id: ALERT_STATUS_UNTRACKED,
-  label: i18n.translate('xpack.observabilityAiAssistant.alertConnector.alertStatus.untracked', {
-    defaultMessage: 'Untracked',
-  }),
-};
-
-export const ALERT_STATUSES = [ACTIVE_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS];
+export const ALERT_STATUSES = [ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS_UNTRACKED];

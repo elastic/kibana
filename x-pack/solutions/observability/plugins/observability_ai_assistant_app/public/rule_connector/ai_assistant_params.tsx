@@ -48,7 +48,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
         'prompts',
         [
           {
-            statuses: ALERT_STATUSES.map(({ id }) => id),
+            statuses: ALERT_STATUSES,
             message: actionParams.message || '',
           },
         ],
@@ -76,7 +76,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
       const prompts = [
         ...actionParams.prompts,
         {
-          statuses: ALERT_STATUSES.map(({ id }) => id),
+          statuses: ALERT_STATUSES,
           message: '',
         },
       ];
@@ -136,7 +136,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
               fullWidth
               id={`addNewActionConnectorActionGroup-${index}`}
               data-test-subj={`addNewActionConnectorActionGroup-${index}`}
-              options={ALERT_STATUSES.map(({ id }) => ({
+              options={ALERT_STATUSES.map((id) => ({
                 label: id,
               }))}
               selectedOptions={prompt.statuses.map((id) => ({ label: id }))}

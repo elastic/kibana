@@ -228,7 +228,7 @@ async function executeAlertsChatCompletion(
     recovered: [...(params.alerts?.recovered || [])],
   };
 
-  if (ALERT_STATUSES.some((status) => prompt.statuses.includes(status.id))) {
+  if (ALERT_STATUSES.some((status) => prompt.statuses.includes(status))) {
     alerts.new = alerts.new.filter((alert) =>
       prompt.statuses.includes(get(alert, 'kibana.alert.status'))
     );
@@ -408,7 +408,7 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
           ? params.prompts
           : [
               {
-                statuses: ALERT_STATUSES.map((status) => status.id),
+                statuses: ALERT_STATUSES,
                 message: params.message || '',
               },
             ],

@@ -8,8 +8,9 @@
 import { AlertHit } from '@kbn/alerting-plugin/server/types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
-import { ACTIVE_ALERTS, ALERT_STATUSES } from '../../common/constants';
+import { ALERT_STATUSES } from '../../common/constants';
 import {
   getObsAIAssistantConnectorAdapter,
   getObsAIAssistantConnectorType,
@@ -100,7 +101,7 @@ describe('observabilityAIAssistant rule_connector', () => {
 
       expect(params).toEqual({
         connector: '.azure',
-        prompts: [{ message: 'hello', statuses: ALERT_STATUSES.map(({ id }) => id) }],
+        prompts: [{ message: 'hello', statuses: ALERT_STATUSES }],
         rule: { id: 'foo', name: 'bar', tags: [], ruleUrl: 'http://myrule.com' },
         alerts: {
           new: [{ _id: 'new_alert' }],
@@ -174,7 +175,7 @@ describe('observabilityAIAssistant rule_connector', () => {
                 'kibana.alert.uuid': 'alert_uuid',
                 'kibana.alert.rule.uuid': 'rule_uuid',
                 'kibana.alert.start': new Date().toISOString(),
-                'kibana.alert.status': ACTIVE_ALERTS.id,
+                'kibana.alert.status': ALERT_STATUS_ACTIVE,
                 'kibana.space_ids': ['default'],
               },
             ],
@@ -244,7 +245,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       const message = 'hello';
       const params = buildActionParams({
         connector: 'azure-open-ai',
-        prompts: [{ message, statuses: ALERT_STATUSES.map(({ id }) => id) }],
+        prompts: [{ message, statuses: ALERT_STATUSES }],
       });
 
       const connectorType = getObsAIAssistantConnectorType(
@@ -278,8 +279,8 @@ describe('observabilityAIAssistant rule_connector', () => {
       const params = buildActionParams({
         connector: 'azure-open-ai',
         prompts: [
-          { message, statuses: ALERT_STATUSES.map(({ id }) => id) },
-          { message: message2, statuses: ALERT_STATUSES.map(({ id }) => id) },
+          { message, statuses: ALERT_STATUSES },
+          { message: message2, statuses: ALERT_STATUSES },
         ],
       });
 
