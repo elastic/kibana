@@ -17,7 +17,6 @@ import {
   DragDropContextProps,
   EuiFormRow,
   EuiPanel,
-  EuiSpacer,
   EuiButtonEmpty,
   EuiDraggable,
   EuiFlexGroup,

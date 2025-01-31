@@ -73,7 +73,7 @@ const discardUnsavedChangesLabel = i18n.translate(
 );
 
 const keepEditingLabel = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorCancelLabel',
+  'xpack.streams.streamDetailView.managementTab.enrichment.discardUnsavedChangesKeepEditing',
   { defaultMessage: 'Keep editing' }
 );
 

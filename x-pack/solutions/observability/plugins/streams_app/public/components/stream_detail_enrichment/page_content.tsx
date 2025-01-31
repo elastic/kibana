@@ -10,7 +10,6 @@ import {
   DragDropContextProps,
   EuiPanel,
   EuiResizableContainer,
-  EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
