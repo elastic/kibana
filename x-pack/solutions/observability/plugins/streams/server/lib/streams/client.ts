@@ -502,6 +502,27 @@ export class StreamsClient {
   }
 
   /**
+   * Make sure there is a stream definition for a given stream.
+   * If the data stream exists but the stream definition does not, it creates an empty stream definition.
+   * If the stream definition exists, it is a noop.
+   * If the data stream does not exist or the user does not have access, it throws.
+   */
+  async ensureStream(name: string): Promise<void> {
+    const [streamDefinition, dataStream] = await Promise.all([
+      this.getStoredStreamDefinition(name).catch((error) => {
+        if (isElasticsearch404(error)) {
+          return undefined;
+        }
+        throw error;
+      }),
+      this.getDataStream(name),
+    ]);
+    if (dataStream && !streamDefinition) {
+      await this.updateStoredStream(this.getDataStreamAsIngestStream(dataStream));
+    }
+  }
+
+  /**
    * Returns a stream definition for the given name:
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
@@ -513,7 +534,26 @@ export class StreamsClient {
    * - the user does not have access to the stream
    */
   async getStream(name: string): Promise<StreamDefinition> {
-    const definition = await Promise.all([
+    const definition = await this.getStoredStreamDefinition(name)
+      .catch(async (error) => {
+        if (isElasticsearch404(error)) {
+          const dataStream = await this.getDataStream(name);
+          return this.getDataStreamAsIngestStream(dataStream);
+        }
+        throw error;
+      })
+      .catch(async (error) => {
+        if (isElasticsearch404(error)) {
+          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
+        }
+        throw error;
+      });
+
+    return definition;
+  }
+
+  private async getStoredStreamDefinition(name: string): Promise<StreamDefinition> {
+    return await Promise.all([
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         const source = response._source;
         assertsSchema(streamDefinitionSchema, source);
@@ -526,25 +566,9 @@ export class StreamsClient {
           }
         }
       ),
-    ])
-      .then(([wiredDefinition]) => {
-        return wiredDefinition;
-      })
-      .catch(async (error) => {
-        if (isElasticsearch404(error)) {
-          const dataStream = await this.getDataStream(name);
-          return await this.getDataStreamAsIngestStream(dataStream);
-        }
-        throw error;
-      })
-      .catch(async (error) => {
-        if (isElasticsearch404(error)) {
-          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
-        }
-        throw error;
-      });
-
-    return definition;
+    ]).then(([wiredDefinition]) => {
+      return wiredDefinition;
+    });
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
@@ -560,9 +584,7 @@ export class StreamsClient {
    * Creates an on-the-fly ingest stream definition
    * from a concrete data stream.
    */
-  private async getDataStreamAsIngestStream(
-    dataStream: IndicesDataStream
-  ): Promise<UnwiredStreamDefinition> {
+  private getDataStreamAsIngestStream(dataStream: IndicesDataStream): UnwiredStreamDefinition {
     const definition: UnwiredStreamDefinition = {
       name: dataStream.name,
       ingest: {
