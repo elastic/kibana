@@ -8,7 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ML_ACTIVE_MODEL_DEPLOYMENTS } from '../../../../common/types/storage';
+import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '../../../../common/types/storage';
 import type { ModelDeploymentParams } from '../trained_models_service';
 import type { TrainedModelsService } from '../trained_models_service';
 import { useMlKibana } from '../../contexts/kibana';
@@ -33,46 +33,43 @@ export function useInitTrainedModelsService(
 
   const savedObjectsApiService = useSavedObjectsApiService();
 
-  const initialDeployingState = useMemo(() => [], []);
+  const initialScheduledDeployments = useMemo(() => [], []);
 
-  const [deployingModels, setDeployingModels] = useStorage<
-    typeof ML_ACTIVE_MODEL_DEPLOYMENTS,
+  const [scheduledDeployments, setScheduledDeployments] = useStorage<
+    typeof ML_SCHEDULED_MODEL_DEPLOYMENTS,
     ModelDeploymentParams[]
-  >(ML_ACTIVE_MODEL_DEPLOYMENTS, initialDeployingState);
+  >(ML_SCHEDULED_MODEL_DEPLOYMENTS, initialScheduledDeployments);
 
-  const deployingModels$ = useMemo(
-    () => new BehaviorSubject<ModelDeploymentParams[]>(deployingModels),
+  const scheduledDeployments$ = useMemo(
+    () => new BehaviorSubject<ModelDeploymentParams[]>(scheduledDeployments),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  useEffect(() => {
+  useEffect(function initTrainedModelsService() {
     trainedModelsService.init({
-      deployingModels$,
-      setDeployingModels,
+      scheduledDeployments$,
+      setScheduledDeployments,
       displayErrorToast,
       displaySuccessToast,
       savedObjectsApiService,
       canManageSpacesAndSavedObjects,
     });
 
+    return () => {
+      trainedModelsService.destroy();
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
     function syncSubject() {
-      deployingModels$.next(deployingModels);
+      scheduledDeployments$.next(scheduledDeployments);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deployingModels, trainedModelsService]
+    [scheduledDeployments, trainedModelsService]
   );
-
-  useEffect(() => {
-    return () => {
-      trainedModelsService.destroy();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return trainedModelsService;
 }

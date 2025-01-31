@@ -49,13 +49,12 @@ const DOWNLOAD_POLL_INTERVAL = 3000;
 export interface ModelDeploymentParams {
   modelId: string;
   deploymentParams: CommonDeploymentParams;
-  state: 'downloading' | 'deploying';
   adaptiveAllocationsParams?: AdaptiveAllocationsParams;
 }
 
 interface TrainedModelsServiceInit {
-  deployingModels$: BehaviorSubject<ModelDeploymentParams[]>;
-  setDeployingModels: (deploymentModels: ModelDeploymentParams[]) => void;
+  scheduledDeployments$: BehaviorSubject<ModelDeploymentParams[]>;
+  setScheduledDeployments: (deployments: ModelDeploymentParams[]) => void;
   displayErrorToast: (error: ErrorType, title?: string) => void;
   displaySuccessToast: (toast: { title: string; text: string }) => void;
   savedObjectsApiService: SavedObjectsApiService;
@@ -75,11 +74,11 @@ export class TrainedModelsService {
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
   public isInitialized = false;
-  private setDeployingModels?: (deployingModels: ModelDeploymentParams[]) => void;
+  private setScheduledDeployments?: (deployingModels: ModelDeploymentParams[]) => void;
   private displayErrorToast?: (error: ErrorType, title?: string) => void;
   private displaySuccessToast?: (toast: { title: string; text: string }) => void;
   private subscription!: Subscription;
-  private _deployingModels$ = new BehaviorSubject<ModelDeploymentParams[]>([]);
+  private _scheduledDeployments$ = new BehaviorSubject<ModelDeploymentParams[]>([]);
   private destroySubscription?: Subscription;
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
   private savedObjectsApiService!: SavedObjectsApiService;
@@ -88,8 +87,8 @@ export class TrainedModelsService {
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
   public init({
-    deployingModels$,
-    setDeployingModels,
+    scheduledDeployments$,
+    setScheduledDeployments,
     displayErrorToast,
     displaySuccessToast,
     savedObjectsApiService,
@@ -107,8 +106,8 @@ export class TrainedModelsService {
     this.isInitialized = true;
     this.canManageSpacesAndSavedObjects = canManageSpacesAndSavedObjects;
 
-    this.setDeployingModels = setDeployingModels;
-    this._deployingModels$ = deployingModels$;
+    this.setScheduledDeployments = setScheduledDeployments;
+    this._scheduledDeployments$ = scheduledDeployments$;
     this.displayErrorToast = displayErrorToast;
     this.displaySuccessToast = displaySuccessToast;
     this.savedObjectsApiService = savedObjectsApiService;
@@ -125,11 +124,11 @@ export class TrainedModelsService {
   );
 
   public get activeDeployments$(): Observable<ModelDeploymentParams[]> {
-    return this._deployingModels$;
+    return this._scheduledDeployments$;
   }
 
   public get activeDeployments(): ModelDeploymentParams[] {
-    return this._deployingModels$.getValue();
+    return this._scheduledDeployments$.getValue();
   }
 
   public get modelItems(): TrainedModelUIItem[] {
@@ -154,10 +153,9 @@ export class TrainedModelsService {
       modelId,
       deploymentParams,
       adaptiveAllocationsParams,
-      state: 'downloading' as const,
     };
-    const currentDeployments = this._deployingModels$.getValue();
-    this.setDeployingModels?.([...currentDeployments, newDeployment]);
+    const currentDeployments = this._scheduledDeployments$.getValue();
+    this.setScheduledDeployments?.([...currentDeployments, newDeployment]);
   }
 
   public downloadModel(modelId: string) {
@@ -246,7 +244,7 @@ export class TrainedModelsService {
   public cleanupModelOperations(modelId: string) {
     this.markDownloadAborted(modelId);
     this.cancelDeployment$.next(modelId);
-    this.setDeployingModels?.(
+    this.setScheduledDeployments?.(
       this.activeDeployments.filter((deployment) => deployment.modelId !== modelId)
     );
   }
@@ -304,7 +302,7 @@ export class TrainedModelsService {
   private setupFetchingSubscription() {
     const fetchTrigger$ = merge(
       this._reloadSubject$,
-      this._deployingModels$.pipe(
+      this._scheduledDeployments$.pipe(
         pairwise(),
         filter(([prev, curr]) => {
           return prev.length !== curr.length;
@@ -356,7 +354,7 @@ export class TrainedModelsService {
   }
 
   private setupDeploymentSubscription() {
-    const deploymentSubscription = this._deployingModels$
+    const deploymentSubscription = this._scheduledDeployments$
       .pipe(
         filter((deployments) => deployments.length > 0),
         withLatestFrom(this._modelItems$),
@@ -399,13 +397,13 @@ export class TrainedModelsService {
                   finalize(() => {
                     this.deploymentInProgress.delete(deployment.modelId);
 
-                    const currentDeployingModels = this._deployingModels$.getValue();
+                    const currentScheduledDeployments = this._scheduledDeployments$.getValue();
 
-                    const updated = currentDeployingModels.filter(
+                    const updated = currentScheduledDeployments.filter(
                       (model) => model.modelId !== deployment.modelId
                     );
 
-                    this.setDeployingModels?.(updated);
+                    this.setScheduledDeployments?.(updated);
                   })
                 );
               }),
@@ -557,10 +555,10 @@ export class TrainedModelsService {
     // Reset behavior subjects to initial values
     this._modelItems$.next([]);
     this.downloadStatus$.next({});
-    this._deployingModels$.next([]);
+    this._scheduledDeployments$.next([]);
 
     // Clear callbacks
-    this.setDeployingModels = undefined;
+    this.setScheduledDeployments = undefined;
     this.displayErrorToast = undefined;
     this.displaySuccessToast = undefined;
 
