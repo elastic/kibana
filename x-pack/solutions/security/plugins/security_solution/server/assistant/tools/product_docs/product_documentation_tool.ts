@@ -40,7 +40,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
-      description: toolDetails.description,
+      description: params.description || toolDetails.description,
       schema: z.object({
         query: z.string().describe(
           `The query to use to retrieve documentation

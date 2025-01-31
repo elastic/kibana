@@ -34,7 +34,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
-      description: toolDetails.description,
+      description: params.description || toolDetails.description,
       schema: z.object({
         question: z
           .string()

@@ -40,7 +40,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
-      description: toolDetails.description,
+      description: params.description || toolDetails.description,
       schema: z.object({
         query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
       }),

@@ -67,7 +67,7 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
 
     return new DynamicTool({
       name: 'DefendInsightsTool',
-      description: DEFEND_INSIGHTS_TOOL_DESCRIPTION,
+      description: params.description || DEFEND_INSIGHTS_TOOL_DESCRIPTION,
       func: async () => {
         if (llm == null) {
           throw new Error('LLM is required for Defend Insights');

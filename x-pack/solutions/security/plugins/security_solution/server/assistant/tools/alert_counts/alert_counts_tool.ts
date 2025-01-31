@@ -35,7 +35,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
       params as AlertCountsToolParams;
     return new DynamicStructuredTool({
       name: 'AlertCountsTool',
-      description: ALERT_COUNTS_TOOL_DESCRIPTION,
+      description: params.description || ALERT_COUNTS_TOOL_DESCRIPTION,
       schema: z.object({}),
       func: async () => {
         const query = getAlertsCountQuery(alertsIndexPattern);

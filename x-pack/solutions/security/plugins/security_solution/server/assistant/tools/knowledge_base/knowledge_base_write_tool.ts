@@ -40,7 +40,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
-      description: toolDetails.description,
+      description: params.description || toolDetails.description,
       schema: z.object({
         name: z
           .string()
