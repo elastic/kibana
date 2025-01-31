@@ -59,32 +59,30 @@ describe('useStepWaterfallMetrics', () => {
 
     expect(searchHook).toHaveBeenCalledWith(
       {
-        body: {
-          _source: false,
-          fields: ['browser.*'],
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    'synthetics.step.index': 1,
-                  },
+        _source: false,
+        fields: ['browser.*'],
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'synthetics.step.index': 1,
                 },
-                {
-                  term: {
-                    'monitor.check_group': '44D-444FFF-444-FFF-3333',
-                  },
+              },
+              {
+                term: {
+                  'monitor.check_group': '44D-444FFF-444-FFF-3333',
                 },
-                {
-                  term: {
-                    'synthetics.type': 'step/metrics',
-                  },
+              },
+              {
+                term: {
+                  'synthetics.type': 'step/metrics',
                 },
-              ],
-            },
+              },
+            ],
           },
-          size: 1000,
         },
+        size: 1000,
         index: 'heartbeat-*',
       },
       ['heartbeat-*', '44D-444FFF-444-FFF-3333', true],

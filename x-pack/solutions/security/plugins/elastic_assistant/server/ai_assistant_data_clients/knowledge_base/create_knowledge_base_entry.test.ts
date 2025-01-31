@@ -66,7 +66,7 @@ describe('createKnowledgeBaseEntry', () => {
       telemetry,
     });
     expect(esClient.create).toHaveBeenCalledWith({
-      body: {
+      document: {
         '@timestamp': '2024-01-28T04:20:02.394Z',
         created_at: '2024-01-28T04:20:02.394Z',
         created_by: 'my_profile_uid',
@@ -118,7 +118,7 @@ describe('createKnowledgeBaseEntry', () => {
       telemetry,
     });
     expect(esClient.create).toHaveBeenCalledWith({
-      body: {
+      document: {
         '@timestamp': '2024-01-28T04:20:02.394Z',
         created_at: '2024-01-28T04:20:02.394Z',
         created_by: 'my_profile_uid',

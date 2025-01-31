@@ -310,7 +310,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
 
           await es.bulk({
             refresh: 'wait_for',
-            body: getArtificialLogsWithDeviation(
+            operations: getArtificialLogsWithDeviation(
               dataGenerator,
               deviationType,
               textField,

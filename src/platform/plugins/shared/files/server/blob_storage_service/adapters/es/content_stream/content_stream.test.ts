@@ -85,15 +85,13 @@ describe('ContentStream', () => {
         const data = await new Promise((resolve) => stream.once('data', resolve));
 
         expect(client.search).toHaveBeenCalledWith({
-          body: {
-            _source: false,
-            query: {
-              term: {
-                _id: 'something.0',
-              },
+          _source: false,
+          query: {
+            term: {
+              _id: 'something.0',
             },
-            size: 1,
           },
+          size: 1,
           index: 'somewhere',
         });
         expect(data).toEqual(Buffer.from('some content'));

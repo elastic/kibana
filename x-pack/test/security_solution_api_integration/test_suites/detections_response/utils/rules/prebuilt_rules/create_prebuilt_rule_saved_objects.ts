@@ -89,7 +89,7 @@ export const createPrebuiltRuleAssetSavedObjects = async (
 ): Promise<void> => {
   await es.bulk({
     refresh: true,
-    body: rules.flatMap((doc) => [
+    operations: rules.flatMap((doc) => [
       {
         index: {
           _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -116,7 +116,7 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
 ): Promise<void> => {
   await es.bulk({
     refresh: true,
-    body: rules.flatMap((doc) => [
+    operations: rules.flatMap((doc) => [
       {
         index: {
           _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,

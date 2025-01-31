@@ -68,7 +68,7 @@ describe('Elasticsearch Errors', () => {
           index: 'existing_index_with_write_block',
           id: 'some-id',
           op_type: 'index',
-          body: {
+          document: {
             hello: 'dolly',
           },
         },
@@ -98,7 +98,7 @@ describe('Elasticsearch Errors', () => {
     it('correctly identify errors from bulk index operations', async () => {
       const res = await client.bulk({
         refresh: 'wait_for',
-        body: [
+        operations: [
           {
             index: {
               _index: 'existing_index_with_write_block',
@@ -119,7 +119,7 @@ describe('Elasticsearch Errors', () => {
     it('correctly identify errors from bulk create operations', async () => {
       const res = await client.bulk({
         refresh: 'wait_for',
-        body: [
+        operations: [
           {
             create: {
               _index: 'existing_index_with_write_block',

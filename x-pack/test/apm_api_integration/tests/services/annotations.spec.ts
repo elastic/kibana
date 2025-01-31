@@ -235,7 +235,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
         await es.index({
           index: transactionIndexName,
-          body: {
+          document: {
             '@timestamp': new Date(2020, 4, 2, 18, 30).toISOString(),
             processor: {
               event: 'transaction',
@@ -250,7 +250,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
         await es.index({
           index: transactionIndexName,
-          body: {
+          document: {
             '@timestamp': new Date(2020, 4, 2, 19, 30).toISOString(),
             processor: {
               event: 'transaction',

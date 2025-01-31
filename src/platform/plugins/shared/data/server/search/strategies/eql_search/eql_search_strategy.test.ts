@@ -94,7 +94,7 @@ describe('EQL search strategy', () => {
         const [[request, requestOptions]] = mockEqlSearch.mock.calls;
 
         expect(request).toEqual({
-          body: { query: 'process where 1 == 1' },
+          query: 'process where 1 == 1',
           ignore_unavailable: true,
           index: 'logstash-*',
           keep_alive: '60000ms',

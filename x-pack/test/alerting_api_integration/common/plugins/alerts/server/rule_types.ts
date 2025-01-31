@@ -121,7 +121,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
   await services.scopedClusterClient.asCurrentUser.index({
     index: params.index,
     refresh: 'wait_for',
-    body: {
+    document: {
       state,
       params,
       reference: params.reference,

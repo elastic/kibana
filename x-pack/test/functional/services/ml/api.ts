@@ -1327,7 +1327,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const params = {
         index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
         id,
-        body: annotationRequestBody,
+        document: annotationRequestBody,
         refresh: 'wait_for',
       } as const;
       const body = await es.index(params);
@@ -1781,7 +1781,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const params = {
         index: '.ml-stats-000001',
         id: 'noop_job_test_id',
-        body: {
+        document: {
           type: 'analytics_memory_usage',
           job_id: 'noop_job',
           timestamp: 1687437633705,

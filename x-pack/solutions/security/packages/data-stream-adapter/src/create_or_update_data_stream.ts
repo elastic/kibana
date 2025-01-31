@@ -38,10 +38,11 @@ const updateTotalFieldLimitSetting = async ({
   logger.debug(`Updating total field limit setting for ${indexName} data stream.`);
 
   try {
-    const body = { 'index.mapping.total_fields.limit': totalFieldsLimit };
-    await retryTransientEsErrors(() => esClient.indices.putSettings({ index: indexName, body }), {
-      logger,
-    });
+    const settings = { 'index.mapping.total_fields.limit': totalFieldsLimit };
+    await retryTransientEsErrors(
+      () => esClient.indices.putSettings({ index: indexName, settings }),
+      { logger }
+    );
   } catch (err) {
     logger.error(
       `Failed to PUT index.mapping.total_fields.limit settings for ${indexName}: ${err.message}`
@@ -82,7 +83,8 @@ const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: Up
       () =>
         esClient.indices.putMapping({
           index: indexName,
-          ...simulatedMapping,
+          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+          body: simulatedMapping,
           write_index_only: writeIndexOnly,
         }),
       { logger }

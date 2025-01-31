@@ -245,7 +245,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await es.bulk({
           index: esIndexPrefix,
-          body: Array<{
+          operations: Array<{
             a: string;
             b: string;
             '@timestamp': string;

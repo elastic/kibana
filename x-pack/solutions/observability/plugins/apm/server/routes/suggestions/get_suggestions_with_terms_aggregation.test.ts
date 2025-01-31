@@ -76,11 +76,9 @@ const expectWildcardQueryPresenceInFilters = (params: {
   const expectation = present ? expect.arrayContaining : expect.not.arrayContaining;
 
   return expect.objectContaining({
-    body: expect.objectContaining({
-      query: expect.objectContaining({
-        bool: expect.objectContaining({
-          filter: expectation([expect.objectContaining(wildcardQuery)]),
-        }),
+    query: expect.objectContaining({
+      bool: expect.objectContaining({
+        filter: expectation([expect.objectContaining(wildcardQuery)]),
       }),
     }),
   });

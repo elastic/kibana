@@ -72,13 +72,11 @@ describe('Policy Response Services', () => {
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                filter: expect.objectContaining({
-                  term: expect.objectContaining({
-                    'agent.id': '1-2-3',
-                  }),
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.objectContaining({
+                term: expect.objectContaining({
+                  'agent.id': '1-2-3',
                 }),
               }),
             }),

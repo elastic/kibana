@@ -61,27 +61,25 @@ describe('terms agg suggestions', () => {
 
     expect(args).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "aggs": Object {
-            "suggestions": Object {
-              "terms": Object {
-                "execution_hint": "map",
-                "field": "field_name",
-                "include": "query.*",
-                "shard_size": 10,
-              },
+        "aggs": Object {
+          "suggestions": Object {
+            "terms": Object {
+              "execution_hint": "map",
+              "field": "field_name",
+              "include": "query.*",
+              "shard_size": 10,
             },
           },
-          "query": Object {
-            "bool": Object {
-              "filter": Array [],
-            },
-          },
-          "size": 0,
-          "terminate_after": 98430,
-          "timeout": "4513ms",
         },
         "index": "index",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [],
+          },
+        },
+        "size": 0,
+        "terminate_after": 98430,
+        "timeout": "4513ms",
       }
     `);
     expect(result).toMatchInlineSnapshot(`
@@ -107,27 +105,25 @@ describe('terms agg suggestions', () => {
 
     expect(args).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "aggs": Object {
-            "suggestions": Object {
-              "terms": Object {
-                "execution_hint": "map",
-                "field": "fieldName",
-                "include": "query.*",
-                "shard_size": 10,
-              },
+        "aggs": Object {
+          "suggestions": Object {
+            "terms": Object {
+              "execution_hint": "map",
+              "field": "fieldName",
+              "include": "query.*",
+              "shard_size": 10,
             },
           },
-          "query": Object {
-            "bool": Object {
-              "filter": Array [],
-            },
-          },
-          "size": 0,
-          "terminate_after": 98430,
-          "timeout": "4513ms",
         },
         "index": "index",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [],
+          },
+        },
+        "size": 0,
+        "terminate_after": 98430,
+        "timeout": "4513ms",
       }
     `);
     expect(result).toMatchInlineSnapshot(`

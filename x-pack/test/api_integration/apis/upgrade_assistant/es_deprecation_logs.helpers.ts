@@ -44,12 +44,12 @@ export const initHelpers = (getService: FtrProviderContext['getService']) => {
   const createDeprecationLog = async (isElasticProduct = false) => {
     const id = getRandomString();
 
-    const body = {
+    const document = {
       ...deprecationMock,
     };
 
     if (isElasticProduct) {
-      (body as any)[DEPRECATION_LOGS_ORIGIN_FIELD] = 'kibana';
+      (document as any)[DEPRECATION_LOGS_ORIGIN_FIELD] = 'kibana';
     }
 
     await es.index({
@@ -57,7 +57,7 @@ export const initHelpers = (getService: FtrProviderContext['getService']) => {
       index: DEPRECATION_LOGS_INDEX,
       op_type: 'create',
       refresh: true,
-      body,
+      document,
     });
 
     return id;

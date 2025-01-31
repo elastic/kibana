@@ -81,14 +81,12 @@ describe('When initializing file client via createESFileClient()', () => {
     it('should use es.search() to retrieve file metadata', async () => {
       await fileClient.get({ id: '123' });
       expect(esClient.search).toHaveBeenCalledWith({
-        body: {
-          query: {
-            term: {
-              _id: '123',
-            },
+        query: {
+          term: {
+            _id: '123',
           },
-          size: 1,
         },
+        size: 1,
         index: 'file-meta',
       });
     });

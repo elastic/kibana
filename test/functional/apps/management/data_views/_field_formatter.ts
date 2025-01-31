@@ -440,7 +440,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const docResult = await es.index({
           index: indexTitle,
-          body: { seconds: 1234 },
+          document: { seconds: 1234 },
           refresh: 'wait_for',
         });
 
@@ -491,7 +491,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const docResult = await es.index({
         index: indexTitle,
-        body: specs.reduce((properties, spec, index) => {
+        document: specs.reduce((properties, spec, index) => {
           properties[`${index}`] = spec.fieldValue;
           return properties;
         }, {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>),

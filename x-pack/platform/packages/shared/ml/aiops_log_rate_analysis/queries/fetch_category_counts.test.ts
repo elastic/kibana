@@ -28,33 +28,31 @@ describe('getCategoryCountRequest', () => {
 
     expect(query).toEqual({
       index: 'the-index',
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
-              {
-                bool: {
-                  should: [
-                    {
-                      match: {
-                        'the-field-name': {
-                          auto_generate_synonyms_phrase_query: false,
-                          fuzziness: 0,
-                          operator: 'and',
-                          query: 'runTask ended no files to process',
-                        },
+      query: {
+        bool: {
+          filter: [
+            { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'the-field-name': {
+                        auto_generate_synonyms_phrase_query: false,
+                        fuzziness: 0,
+                        operator: 'and',
+                        query: 'runTask ended no files to process',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
-        size: 0,
-        track_total_hits: true,
       },
+      size: 0,
+      track_total_hits: true,
     });
   });
 });

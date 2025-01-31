@@ -106,7 +106,7 @@ export async function generateAgent(
   await es.index({
     index: '.fleet-agents',
     id,
-    body: {
+    document: {
       id,
       active: true,
       last_checkin: new Date().toISOString(),

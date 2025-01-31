@@ -46,7 +46,7 @@ export const buildTopNFlowQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    agwgregations: getFlowTargetAggs(sort, flowTarget, querySize),
+    aggregations: getFlowTargetAggs(sort, flowTarget, querySize),
     query,
     _source: false,
     fields: [

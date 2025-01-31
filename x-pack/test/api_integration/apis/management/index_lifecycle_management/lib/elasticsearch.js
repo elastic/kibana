@@ -37,7 +37,7 @@ export const initElasticsearchHelpers = (getService) => {
   // Data streams
   const createDataStream = (dataStream = getRandomString(), document) => {
     dataStreamsCreated.push(dataStream);
-    return es.index({ index: dataStream, body: document }, { meta: true });
+    return es.index({ index: dataStream, document }, { meta: true });
   };
 
   const deleteDataStream = (dataStream) => {

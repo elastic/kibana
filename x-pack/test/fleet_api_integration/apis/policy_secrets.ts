@@ -245,7 +245,7 @@ export default function (providerContext: FtrProviderContext) {
       const agentResponse = await es.index({
         index: '.fleet-agents',
         refresh: true,
-        body: {
+        document: {
           access_api_key_id: 'api-key-3',
           active: true,
           policy_id: policyId,

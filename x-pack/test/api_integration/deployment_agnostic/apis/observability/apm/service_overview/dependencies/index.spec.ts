@@ -187,7 +187,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           }),
         ];
 
-        const bulkActions = docs.reduce(
+        const operations = docs.reduce(
           (prev, doc) => {
             return [...prev, { index: { _index: indices[doc.processor.event] } }, doc];
           },
@@ -202,7 +202,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         );
 
         await es.bulk({
-          body: bulkActions,
+          operations,
           refresh: 'wait_for',
         });
 

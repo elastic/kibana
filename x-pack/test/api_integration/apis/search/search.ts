@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       await es.index({
         index: 'search-api-test',
         id: 'search-api-test-doc',
-        body: { message: 'test doc' },
+        document: { message: 'test doc' },
         refresh: 'wait_for',
       });
     });

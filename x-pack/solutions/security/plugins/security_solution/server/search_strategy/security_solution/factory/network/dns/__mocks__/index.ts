@@ -143,62 +143,60 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignore_unavailable: true,
-          body: {
-            aggregations: {
-              dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
-              dns_name_query_count: {
-                terms: {
-                  field: 'dns.question.registered_domain',
-                  size: 1000000,
-                },
-                aggs: {
+          aggregations: {
+            dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
+            dns_name_query_count: {
+              terms: {
+                field: 'dns.question.registered_domain',
+                size: 1000000,
+              },
+              aggs: {
+                bucket_sort: {
                   bucket_sort: {
-                    bucket_sort: {
-                      sort: [
-                        {
-                          unique_domains: {
-                            order: 'desc',
-                          },
+                    sort: [
+                      {
+                        unique_domains: {
+                          order: 'desc',
                         },
-                        { _key: { order: 'asc' } },
-                      ],
-                      from: 0,
-                      size: 10,
-                    },
-                  },
-                  unique_domains: { cardinality: { field: 'dns.question.name' } },
-                  dns_bytes_in: { sum: { field: 'source.bytes' } },
-                  dns_bytes_out: { sum: { field: 'destination.bytes' } },
-                },
-              },
-            },
-            query: {
-              bool: {
-                filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-13T09:00:43.249Z',
-                        lte: '2020-09-14T09:00:43.249Z',
-                        format: 'strict_date_optional_time',
                       },
-                    },
+                      { _key: { order: 'asc' } },
+                    ],
+                    from: 0,
+                    size: 10,
                   },
-                ],
-                must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
+                },
+                unique_domains: { cardinality: { field: 'dns.question.name' } },
+                dns_bytes_in: { sum: { field: 'source.bytes' } },
+                dns_bytes_out: { sum: { field: 'destination.bytes' } },
               },
             },
-            _source: false,
-            fields: [
-              'dns.question.registered_domain',
-              {
-                field: '@timestamp',
-                format: 'strict_date_optional_time',
-              },
-            ],
-            size: 0,
           },
+          query: {
+            bool: {
+              filter: [
+                { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-13T09:00:43.249Z',
+                      lte: '2020-09-14T09:00:43.249Z',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
+              must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
+            },
+          },
+          _source: false,
+          fields: [
+            'dns.question.registered_domain',
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+          size: 0,
           track_total_hits: false,
         },
         null,
@@ -223,61 +221,59 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignore_unavailable: true,
-  body: {
-    aggregations: {
-      dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
-      dns_name_query_count: {
-        terms: {
-          field: 'dns.question.registered_domain',
-          size: 1000000,
-        },
-        aggs: {
+  aggregations: {
+    dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
+    dns_name_query_count: {
+      terms: {
+        field: 'dns.question.registered_domain',
+        size: 1000000,
+      },
+      aggs: {
+        bucket_sort: {
           bucket_sort: {
-            bucket_sort: {
-              sort: [
-                {
-                  unique_domains: {
-                    order: 'desc',
-                  },
+            sort: [
+              {
+                unique_domains: {
+                  order: 'desc',
                 },
-                { _key: { order: 'asc' } },
-              ],
-              from: 0,
-              size: 10,
-            },
-          },
-          unique_domains: { cardinality: { field: 'dns.question.name' } },
-          dns_bytes_in: { sum: { field: 'source.bytes' } },
-          dns_bytes_out: { sum: { field: 'destination.bytes' } },
-        },
-      },
-    },
-    query: {
-      bool: {
-        filter: [
-          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-          {
-            range: {
-              '@timestamp': {
-                gte: '2020-09-13T09:00:43.249Z',
-                lte: '2020-09-14T09:00:43.249Z',
-                format: 'strict_date_optional_time',
               },
-            },
+              { _key: { order: 'asc' } },
+            ],
+            from: 0,
+            size: 10,
           },
-        ],
-        must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
+        },
+        unique_domains: { cardinality: { field: 'dns.question.name' } },
+        dns_bytes_in: { sum: { field: 'source.bytes' } },
+        dns_bytes_out: { sum: { field: 'destination.bytes' } },
       },
     },
-    _source: false,
-    fields: [
-      'dns.question.registered_domain',
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
-    size: 0,
   },
+  query: {
+    bool: {
+      filter: [
+        { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+        {
+          range: {
+            '@timestamp': {
+              gte: '2020-09-13T09:00:43.249Z',
+              lte: '2020-09-14T09:00:43.249Z',
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
+      ],
+      must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
+    },
+  },
+  _source: false,
+  fields: [
+    'dns.question.registered_domain',
+    {
+      field: '@timestamp',
+      format: 'strict_date_optional_time',
+    },
+  ],
+  size: 0,
   track_total_hits: false,
 };

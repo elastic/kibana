@@ -41,66 +41,61 @@ describe('getOpenAndAcknowledgedAlertsQuery', () => {
 
     expect(query).toEqual({
       allow_no_indices: true,
-      body: {
-        fields: [
-          { field: 'field1', include_unmapped: true },
-          { field: 'field2', include_unmapped: true },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  must: [],
-                  filter: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            match_phrase: {
-                              'kibana.alert.workflow_status': 'open',
-                            },
+      fields: [
+        { field: 'field1', include_unmapped: true },
+        { field: 'field2', include_unmapped: true },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                must: [],
+                filter: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match_phrase: {
+                            'kibana.alert.workflow_status': 'open',
                           },
-                          {
-                            match_phrase: {
-                              'kibana.alert.workflow_status': 'acknowledged',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-24h',
-                          lte: 'now',
-                          format: 'strict_date_optional_time',
                         },
+                        {
+                          match_phrase: {
+                            'kibana.alert.workflow_status': 'acknowledged',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: 'now-24h',
+                        lte: 'now',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                  ],
-                  should: [],
-                  must_not: [
-                    {
-                      exists: {
-                        field: 'kibana.alert.building_block_type',
-                      },
+                  },
+                ],
+                should: [],
+                must_not: [
+                  {
+                    exists: {
+                      field: 'kibana.alert.building_block_type',
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
-        runtime_mappings: {},
-        size: 10,
-        sort: [
-          { 'kibana.alert.risk_score': { order: 'desc' } },
-          { '@timestamp': { order: 'desc' } },
-        ],
-        _source: false,
       },
+      runtime_mappings: {},
+      size: 10,
+      sort: [{ 'kibana.alert.risk_score': { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
+      _source: false,
       ignore_unavailable: true,
       index: ['alerts-*'],
     });

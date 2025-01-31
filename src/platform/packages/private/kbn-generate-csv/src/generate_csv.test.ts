@@ -402,7 +402,7 @@ describe('CsvGenerator', () => {
 
       expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
       expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
-        body: { id: mockCursorId },
+        id: mockCursorId,
       });
     });
 

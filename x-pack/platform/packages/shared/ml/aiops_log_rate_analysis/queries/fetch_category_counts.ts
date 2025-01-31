@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -62,8 +62,7 @@ export const getCategoryCountMSearchRequest = (
 ): estypes.MsearchRequestItem[] =>
   categories.flatMap((category) => [
     { index: params.index },
-    getCategoryCountRequest(params, fieldName, category, from, to)
-      .body as estypes.MsearchMultisearchBody,
+    omit(getCategoryCountRequest(params, fieldName, category, from, to), ['index']),
   ]);
 
 export const fetchCategoryCounts = async (

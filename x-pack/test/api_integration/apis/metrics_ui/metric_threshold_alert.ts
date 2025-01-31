@@ -1359,7 +1359,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await esClient.index({
           index,
-          body: {},
+          document: {},
         });
       });
       const aggs = ['avg', 'min', 'max', 'rate', 'cardinality', 'count'];

@@ -65,15 +65,13 @@ describe('EsIndexFilesMetadataClient', () => {
       await metaClient.update({ id: '123', metadata: generateMetadata() });
 
       expect(esClient.search).toHaveBeenCalledWith({
-        body: {
-          _source: false,
-          query: {
-            term: {
-              _id: '123',
-            },
+        _source: false,
+        query: {
+          term: {
+            _id: '123',
           },
-          size: 1,
         },
+        size: 1,
         index: 'foo',
       });
       expect(esClient.update).toHaveBeenCalledWith(expect.objectContaining({ index: 'foo-00001' }));

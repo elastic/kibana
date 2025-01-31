@@ -114,12 +114,12 @@ export const makePing = async (
     baseDoc.tls = makeTls(tls as any);
   }
 
-  const doc = mogrify(merge(baseDoc, fields));
+  const document = mogrify(merge(baseDoc, fields));
 
   await es.index({
     index: customIndex || DEFAULT_INDEX_NAME,
     refresh,
-    body: doc,
+    document,
   });
 
   return doc;

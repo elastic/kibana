@@ -21,42 +21,40 @@ describe('getIndexTemplate', () => {
 
     expect(indexTemplate).toEqual({
       name: defaultParams.name,
-      body: {
-        index_patterns: defaultParams.indexPatterns,
-        composed_of: defaultParams.componentTemplateRefs,
-        template: {
-          settings: {
-            hidden: true,
-            auto_expand_replicas: '0-1',
-            'index.mapping.ignore_malformed': true,
-            'index.mapping.total_fields.limit': defaultParams.totalFieldsLimit,
-          },
-          mappings: {
-            dynamic: false,
-            _meta: {
-              kibana: {
-                version: defaultParams.kibanaVersion,
-              },
-              managed: true,
-              namespace: 'default',
+      index_patterns: defaultParams.indexPatterns,
+      composed_of: defaultParams.componentTemplateRefs,
+      template: {
+        settings: {
+          hidden: true,
+          auto_expand_replicas: '0-1',
+          'index.mapping.ignore_malformed': true,
+          'index.mapping.total_fields.limit': defaultParams.totalFieldsLimit,
+        },
+        mappings: {
+          dynamic: false,
+          _meta: {
+            kibana: {
+              version: defaultParams.kibanaVersion,
             },
+            managed: true,
+            namespace: 'default',
           },
         },
-        _meta: {
-          kibana: {
-            version: defaultParams.kibanaVersion,
-          },
-          managed: true,
-          namespace: 'default',
-        },
-        priority: 7,
       },
+      _meta: {
+        kibana: {
+          version: defaultParams.kibanaVersion,
+        },
+        managed: true,
+        namespace: 'default',
+      },
+      priority: 7,
     });
   });
 
   it('should create data stream index template with given parameters and defaults', () => {
     const indexTemplate = getIndexTemplate({ ...defaultParams, isDataStream: true });
-    expect(indexTemplate.body).toEqual(
+    expect(indexTemplate).toEqual(
       expect.objectContaining({
         data_stream: { hidden: true },
       })

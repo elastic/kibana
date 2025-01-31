@@ -443,7 +443,8 @@ export class ClusterClientAdapter<
       const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
 
       if (simulatedMapping != null) {
-        await esClient.indices.putMapping({ index: name, ...simulatedMapping });
+        // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+        await esClient.indices.putMapping({ index: name, body: simulatedMapping });
         this.logger.debug(`Successfully updated concrete index mappings for ${name}`);
       }
     } catch (err) {

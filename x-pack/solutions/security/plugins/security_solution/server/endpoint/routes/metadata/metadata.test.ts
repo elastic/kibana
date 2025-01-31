@@ -178,8 +178,7 @@ describe('test endpoint routes', () => {
 
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(esSearchMock.mock.calls[0][0]?.index).toEqual(METADATA_UNITED_INDEX);
-      // @ts-expect-error partial definition
-      expect(esSearchMock.mock.calls[0][0]?.body?.query).toEqual({
+      expect(esSearchMock.mock.calls[0][0]?.query).toEqual({
         bool: {
           must: [
             {

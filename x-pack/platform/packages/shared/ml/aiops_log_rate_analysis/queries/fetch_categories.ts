@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -119,8 +119,7 @@ export const fetchCategories = async (
 
   const searches: estypes.MsearchRequestItem[] = fieldNames.flatMap((fieldName) => [
     { index: params.index },
-    getCategoryRequest(params, fieldName, randomSamplerWrapper)
-      .body as estypes.MsearchMultisearchBody,
+    omit(getCategoryRequest(params, fieldName, randomSamplerWrapper), ['index']),
   ]);
 
   let mSearchResponse;

@@ -54,7 +54,7 @@ describe('queryPings', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
       const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
-      expect(searchParams.body.size).toEqual(sizeParam ?? 25);
+      expect(searchParams.size).toEqual(sizeParam ?? 25);
     }
   );
 

@@ -111,7 +111,7 @@ export default function annotationApiTests({ getService }: DeploymentAgnosticFtr
 
         await es.bulk({
           index: indexName,
-          body: docs.flatMap((doc) => [{ index: {} }, doc]),
+          operations: docs.flatMap((doc) => [{ index: {} }, doc]),
           refresh: true,
         });
 

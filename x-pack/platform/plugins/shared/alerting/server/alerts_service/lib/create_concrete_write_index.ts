@@ -90,7 +90,8 @@ const updateUnderlyingMapping = async ({
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
+      // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+      () => esClient.indices.putMapping({ index, body: simulatedMapping }),
       { logger }
     );
 

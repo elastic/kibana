@@ -159,15 +159,13 @@ describe('SampleDataInstaller', () => {
       expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledTimes(1);
       expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: 'kibana_sample_data_test_single_data_index',
-        body: {
-          mappings: {
-            properties: {
-              someField: { type: 'keyword' },
-            },
+        mappings: {
+          properties: {
+            someField: { type: 'keyword' },
           },
-          settings: {
-            index: {},
-          },
+        },
+        settings: {
+          index: {},
         },
       });
     });
