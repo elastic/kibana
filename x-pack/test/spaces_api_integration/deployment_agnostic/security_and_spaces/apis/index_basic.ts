@@ -9,25 +9,16 @@ import { createUsersAndRoles } from '../../../common/lib/create_users_and_roles'
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProviderContext) {
-  const config = getService('config');
-  const license = config.get('esTestCluster.license');
   const es = getService('es');
   const supertest = getService('supertest');
-  // Should we enabled when custom roles can be provisioned for MKI
-  // See: https://github.com/elastic/kibana/issues/207361
-  const tags = ['skipMKI'];
-
-  if (license === 'basic') {
-    tags.push('skipFIPS');
-  }
 
   describe('spaces api with security', function () {
-    this.tags(tags);
+    this.tags('skipFIPS');
+
     before(async () => {
-      if (license === 'basic') {
-        await createUsersAndRoles(es, supertest);
-      }
+      await createUsersAndRoles(es, supertest);
     });
+
     loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
