@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   } = datastreamsHelpers(getService);
 
   // Failing: See https://github.com/elastic/kibana/issues/209014
-  describe.skip('Data streams', function () {
+  describe('Data streams', function () {
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
@@ -195,13 +195,17 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
-            { enabled: true, indexMode: 'logsdb' },
-            { enabled: false, indexMode: 'standard' },
-            { enabled: null, indexMode: 'standard' }, // In stateful Kibana, the cluster.logsdb.enabled setting is false by default, so standard index mode
+            { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
+            { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
+            // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
+            { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
+            // In stateful Kibana, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+            { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
           ];
 
-          logsdbSettings.forEach(({ enabled, indexMode }) => {
-            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
+            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled} and logs.prior_logs_usage is ${prior_logs_usage}`, async () => {
               await es.cluster.putSettings({
                 body: {
                   persistent: {
@@ -209,6 +213,9 @@ export default function ({ getService }: FtrProviderContext) {
                       logsdb: {
                         enabled,
                       },
+                    },
+                    logsdb: {
+                      prior_logs_usage,
                     },
                   },
                 },
