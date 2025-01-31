@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import type { AuthzEnabled, HttpServiceSetup, Logger, RouteAuthz } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
@@ -203,8 +197,11 @@ export class ProductFeaturesService {
     const notesProductFeaturesConfig = configurator.notes();
     this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
 
-    const siemMigrationsProductFeaturesConfig = configurator.siemMigrations();
-    this.siemMigrationsProductFeatures.setConfig(siemMigrationsProductFeaturesConfig);
+    let siemMigrationsProductFeaturesConfig = new Map();
+    if (!this.experimentalFeatures.siemMigrationsDisabled) {
+      siemMigrationsProductFeaturesConfig = configurator.siemMigrations();
+      this.siemMigrationsProductFeatures.setConfig(siemMigrationsProductFeaturesConfig);
+    }
 
     this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([
