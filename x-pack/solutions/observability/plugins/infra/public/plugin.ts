@@ -35,7 +35,7 @@ import {
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_LEGACY_GROUP } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   INVENTORY_LOCATOR_ID,
@@ -373,7 +373,7 @@ export class Plugin implements InfraClientPluginClass {
     if (isLogsStreamEnabled) {
       plugins.uiActions.registerAction<EmbeddableApiContext>({
         id: ADD_LOG_STREAM_ACTION_ID,
-        grouping: [ADD_PANEL_LEGACY_GROUP],
+        grouping: [ADD_PANEL_OTHER_GROUP],
         order: 30,
         getDisplayName: () =>
           i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
