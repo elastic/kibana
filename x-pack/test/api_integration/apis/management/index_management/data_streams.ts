@@ -194,7 +194,11 @@ export default function ({ getService }: FtrProviderContext) {
             await deleteDataStream(logsdbDataStreamName);
           });
 
-          const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+          const logsdbSettings: Array<{
+            enabled: boolean | null;
+            prior_logs_usage: boolean;
+            indexMode: string;
+          }> = [
             { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
             { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
             // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
