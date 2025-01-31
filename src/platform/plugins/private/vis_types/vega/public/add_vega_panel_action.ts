@@ -34,7 +34,7 @@ export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
       });
     },
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],
-    getDisplayName: () => vegaVisType.title,
+    getDisplayName: () => vegaVisType.titleInWizard,
     getDisplayNameTooltip: () => vegaVisType.description,
   };
 }

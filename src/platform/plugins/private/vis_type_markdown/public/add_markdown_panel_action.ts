@@ -34,7 +34,7 @@ export function getAddMarkdownPanelAction(deps: MarkdownStartDependencies) {
       });
     },
     grouping: [ADD_PANEL_ANNOTATION_GROUP],
-    getDisplayName: () => markdownVisType.title,
+    getDisplayName: () => markdownVisType.titleInWizard,
     getDisplayNameTooltip: () => markdownVisType.description,
   };
 }
