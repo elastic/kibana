@@ -31,6 +31,7 @@ import type {
   ClickTriggerEvent,
   BrushTriggerEvent,
   MultiClickTriggerEvent,
+  NavigateTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
@@ -1441,6 +1442,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
   event: (
     event:
       | ClickTriggerEvent
+      | NavigateTriggerEvent
       | BrushTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent

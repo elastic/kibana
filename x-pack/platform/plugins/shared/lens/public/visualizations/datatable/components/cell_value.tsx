@@ -41,12 +41,13 @@ export const createGridCell = (
   fitRowToContent?: boolean
 ) => {
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
-    const { table, alignments, handleFilterClick } = useContext(DataContext);
+    const { table, alignments, handleFilterClick, handleNavigationClick } = useContext(DataContext);
     const rawRowValue = table?.rows[rowIndex]?.[columnId];
     const rowValue = getParsedValue(rawRowValue);
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
     const {
       oneClickFilter,
+      navigateOnClick,
       colorMode = 'none',
       palette,
       colorMapping,
@@ -96,6 +97,27 @@ export const createGridCell = (
           <EuiLink
             onClick={() => {
               handleFilterClick?.(columnId, rawRowValue, colIndex, rowIndex);
+            }}
+          >
+            {content}
+          </EuiLink>
+        </div>
+      );
+    }
+
+    if (navigateOnClick && handleNavigationClick) {
+      // Should also check if there are any Drilldowns configured to navigate with
+      return (
+        <div
+          data-test-subj="lnsTableCellContent"
+          className={classNames({
+            'lnsTableCell--multiline': fitRowToContent,
+            [`lnsTableCell--${currentAlignment}`]: true,
+          })}
+        >
+          <EuiLink
+            onClick={() => {
+              handleNavigationClick(columnId, rawRowValue, colIndex, rowIndex);
             }}
           >
             {content}

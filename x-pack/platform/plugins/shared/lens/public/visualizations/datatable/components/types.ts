@@ -81,4 +81,11 @@ export interface DataContextType {
     rowIndex: number,
     negate?: boolean
   ) => void;
+  handleNavigationClick?: (
+    field: string,
+    value: unknown,
+    colIndex: number,
+    rowIndex: number,
+    negate?: boolean
+  ) => void;
 }

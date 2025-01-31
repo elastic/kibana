@@ -54,6 +54,7 @@ import { createGridCell } from './cell_value';
 import {
   buildSchemaDetectors,
   createGridFilterHandler,
+  createGridNavigationHandler,
   createGridHideHandler,
   createGridResizeHandler,
   createGridSortingConfig,
@@ -181,6 +182,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [dispatchEvent]
   );
 
+  const onNavigate = useCallback(
+    (data: ClickTriggerEvent['data']) => {
+      dispatchEvent({ name: 'navigate', data });
+    },
+    [dispatchEvent]
+  );
+
   const onEditAction = useCallback(
     (
       data:
@@ -221,6 +229,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const handleFilterClick = useMemo(
     () => (isInteractive ? createGridFilterHandler(firstTableRef, onClickValue) : undefined),
     [firstTableRef, onClickValue, isInteractive]
+  );
+
+  const handleNavigationClick = useMemo(
+    () => (isInteractive ? createGridNavigationHandler(firstTableRef, onNavigate) : undefined),
+    [firstTableRef, onNavigate, isInteractive]
   );
 
   const columnCellValueActions = useMemo(
@@ -532,6 +545,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           alignments,
           minMaxByColumnId,
           handleFilterClick,
+          handleNavigationClick,
         }}
       >
         <EuiDataGrid

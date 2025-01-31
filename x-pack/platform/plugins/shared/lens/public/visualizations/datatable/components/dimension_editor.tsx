@@ -306,40 +306,76 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
         </EuiFormRow>
       )}
       {props.groupId === 'rows' && (
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
-            defaultMessage: 'Directly filter on click',
-          })}
-          display="columnCompressed"
-        >
-          <EuiSwitch
-            compressed
+        <>
+          <EuiFormRow
+            fullWidth
             label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
               defaultMessage: 'Directly filter on click',
             })}
-            showLabel={false}
-            data-test-subj="lns-table-column-one-click-filter"
-            checked={Boolean(column?.oneClickFilter)}
-            disabled={column.hidden}
-            onChange={() => {
-              const newState = {
-                ...localState,
-                columns: localState.columns.map((currentColumn) => {
-                  if (currentColumn.columnId === accessor) {
-                    return {
-                      ...currentColumn,
-                      oneClickFilter: !column.oneClickFilter,
-                    };
-                  } else {
-                    return currentColumn;
-                  }
-                }),
-              };
-              setLocalState(newState);
-            }}
-          />
-        </EuiFormRow>
+            display="columnCompressed"
+          >
+            <EuiSwitch
+              compressed
+              label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
+                defaultMessage: 'Directly filter on click',
+              })}
+              showLabel={false}
+              data-test-subj="lns-table-column-one-click-filter"
+              checked={Boolean(column?.oneClickFilter)}
+              disabled={column.hidden}
+              onChange={() => {
+                const newState = {
+                  ...localState,
+                  columns: localState.columns.map((currentColumn) => {
+                    if (currentColumn.columnId === accessor) {
+                      return {
+                        ...currentColumn,
+                        oneClickFilter: !column.oneClickFilter,
+                      };
+                    } else {
+                      return currentColumn;
+                    }
+                  }),
+                };
+                setLocalState(newState);
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.lens.table.columnNavigationClickLabel', {
+              defaultMessage: 'Navigate on click',
+            })}
+            display="columnCompressed"
+          >
+            <EuiSwitch
+              compressed
+              label={i18n.translate('xpack.lens.table.columnNavigationClickLabel', {
+                defaultMessage: 'Navigate on click',
+              })}
+              showLabel={false}
+              data-test-subj="lns-table-column-navigation-click"
+              checked={Boolean(column?.navigateOnClick)}
+              disabled={column.hidden}
+              onChange={() => {
+                const newState = {
+                  ...localState,
+                  columns: localState.columns.map((currentColumn) => {
+                    if (currentColumn.columnId === accessor) {
+                      return {
+                        ...currentColumn,
+                        navigateOnClick: !column.navigateOnClick,
+                      };
+                    } else {
+                      return currentColumn;
+                    }
+                  }),
+                };
+                setLocalState(newState);
+              }}
+            />
+          </EuiFormRow>
+        </>
       )}
     </>
   );
