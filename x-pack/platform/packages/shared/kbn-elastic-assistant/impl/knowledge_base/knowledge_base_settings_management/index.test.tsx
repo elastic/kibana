@@ -270,7 +270,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             description: 'Test description',
             queryDescription: 'Test query instruction',
           },
-        ]
+        ],
       },
       isFetching: false,
       refetch: jest.fn(),
@@ -287,22 +287,21 @@ describe('KnowledgeBaseSettingsManagement', () => {
       expect(screen.getByText('aaaaa')).toBeInTheDocument();
     });
 
-
     // Order ascending
-    userEvent.click(screen.getByText("Name"))
+    userEvent.click(screen.getByText('Name'));
 
     waitFor(() => {
       expect(screen.getByText('AAAAA').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(4);
       expect(screen.getByText('aaaaa').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(4);
-    })
+    });
 
     // Order decending
-    userEvent.click(screen.getByText("Name"))
+    userEvent.click(screen.getByText('Name'));
 
     waitFor(() => {
       expect(screen.getByText('AAAAA').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(2);
       expect(screen.getByText('aaaaa').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(2);
-    })
+    });
   });
 
   it('opens the flyout when add document button is clicked', async () => {
