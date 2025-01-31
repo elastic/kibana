@@ -49,5 +49,5 @@ export * from './app_plugin/save_modal_container';
 export * from './chart_info_api';
 
 export * from './trigger_actions/open_in_discover_helpers';
-export * from './trigger_actions/open_lens_config/create_action_helpers';
+export * from './trigger_actions/open_lens_config/add_esql_panel';
 export * from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers';

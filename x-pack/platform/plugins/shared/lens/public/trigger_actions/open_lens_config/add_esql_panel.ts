@@ -32,18 +32,12 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
-export async function isCreateActionCompatible(core: CoreStart) {
-  return core.uiSettings.get(ENABLE_ESQL);
-}
-
-export async function executeCreateAction({
+export async function addEsqlPanel({
   deps,
-  core,
   api,
   editorFrameService,
 }: {
   deps: LensPluginStartDependencies;
-  core: CoreStart;
   api: PresentationContainer;
   editorFrameService: EditorFrameService;
 }) {
@@ -54,12 +48,9 @@ export async function executeCreateAction({
     return dataView;
   };
 
-  const [isCompatibleAction, dataView] = await Promise.all([
-    isCreateActionCompatible(core),
-    getFallbackDataView(),
-  ]);
+  const [dataView] = await Promise.all([getFallbackDataView()]);
 
-  if (!isCompatibleAction || !dataView) {
+  if (!dataView) {
     throw new IncompatibleActionError();
   }
 

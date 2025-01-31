@@ -10,7 +10,7 @@ import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { EditorFrameService } from '../../editor_frame_service';
 import { createMockStartDependencies } from '../../editor_frame_service/mocks';
-import { CreateESQLPanelAction } from './create_action';
+import { AddESQLPanelAction } from './add_esql_panel_action';
 
 describe('create Lens panel action', () => {
   const core = coreMock.createStart();
@@ -27,13 +27,13 @@ describe('create Lens panel action', () => {
 
   describe('compatibility check', () => {
     it('is incompatible if ui setting for ES|QL is off', async () => {
-      const configurablePanelAction = new CreateESQLPanelAction(
+      const action = new AddESQLPanelAction(
         mockStartDependencies,
         core,
         mockGetEditorFrameService
       );
 
-      const isCompatible = await configurablePanelAction.isCompatible({
+      const isCompatible = await action.isCompatible({
         embeddable: mockPresentationContainer,
       });
 
@@ -51,13 +51,13 @@ describe('create Lens panel action', () => {
         },
       } as CoreStart;
 
-      const createESQLAction = new CreateESQLPanelAction(
+      const action = new AddESQLPanelAction(
         mockStartDependencies,
         updatedCore,
         mockGetEditorFrameService
       );
 
-      const isCompatible = await createESQLAction.isCompatible({
+      const isCompatible = await action.isCompatible({
         embeddable: mockPresentationContainer,
       });
 

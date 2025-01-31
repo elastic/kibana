@@ -10,14 +10,12 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { EditorFrameService } from '../../editor_frame_service';
+import { ACTION_CREATE_ESQL_CHART } from './constants';
 
-const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
-
-export const getAsyncHelpers = async () => await import('../../async_services');
-
-export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
+export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
   public id = ACTION_CREATE_ESQL_CHART;
   public order = 50;
@@ -42,20 +40,16 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (!apiIsPresentationContainer(embeddable)) return false;
-    const { isCreateActionCompatible } = await getAsyncHelpers();
-
-    return isCreateActionCompatible(this.core);
+    return apiIsPresentationContainer(embeddable) && this.core.uiSettings.get(ENABLE_ESQL);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-    const { executeCreateAction } = await getAsyncHelpers();
+    const { addEsqlPanel } = await import('../../async_services');
     const editorFrameService = await this.getEditorFrameService();
 
-    executeCreateAction({
+    addEsqlPanel({
       deps: this.startDependencies,
-      core: this.core,
       api: embeddable,
       editorFrameService,
     });
