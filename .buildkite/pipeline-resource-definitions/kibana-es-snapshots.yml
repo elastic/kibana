@@ -51,7 +51,7 @@ spec:
         Daily build (9.0):
           cronline: 0 22 * * * America/New_York
           message: Daily build
-          branch: 9.0
+          branch: '9.0'
         Daily build (8.x):
           cronline: 0 22 * * * America/New_York
           message: Daily build
