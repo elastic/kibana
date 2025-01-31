@@ -25,7 +25,7 @@ export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderCo
     createMultiNamespaceTestCases,
   } = copyToSpaceTestSuiteFactory(context);
 
-  describe('copy to spaces', () => {
+  describe('copy to spaces', function () {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
