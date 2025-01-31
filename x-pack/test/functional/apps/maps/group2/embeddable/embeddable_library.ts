@@ -9,11 +9,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
-  const { dashboard, header, maps } = getPageObjects([
-    'dashboard',
-    'header',
-    'maps',
-  ]);
+  const { dashboard, header, maps } = getPageObjects(['dashboard', 'header', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
