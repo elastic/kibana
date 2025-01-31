@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import useEvent from 'react-use/lib/useEvent';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
 import { useFindMatches } from './matches/use_find_matches';
@@ -133,8 +134,8 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   );
 
   // listens for the cmd+f or ctrl+f keydown event to open the input
-  useEffect(() => {
-    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+  const handleGlobalKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       if (
         (event.metaKey || event.ctrlKey) &&
         event.key === 'f' &&
@@ -150,14 +151,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           ) as HTMLInputElement
         )?.focus();
       }
-    };
+    },
+    [showInput, shouldOverrideCmdF]
+  );
 
-    document.addEventListener('keydown', handleGlobalKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleGlobalKeyDown);
-    };
-  }, [showInput, shouldOverrideCmdF]);
+  useEvent('keydown', handleGlobalKeyDown);
 
   // returns focus to the button when the input was cancelled by pressing the escape key
   useEffect(() => {
