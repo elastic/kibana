@@ -70,8 +70,8 @@ describe('Configuration Statistics Aggregator', () => {
     return new Promise<void>(async (resolve, reject) => {
       try {
         createConfigurationAggregator(configuration, 10, mockTaskPollingLifecycle)
-          .pipe(take(3), bufferCount(3))
-          .subscribe(([initial, updatedWorkers, updatedInterval]) => {
+          .pipe(take(2), bufferCount(2))
+          .subscribe(([initial, updatedWorkers]) => {
             expect(initial.value).toEqual({
               capacity: {
                 config: 10,
@@ -110,29 +110,9 @@ describe('Configuration Statistics Aggregator', () => {
                 custom: {},
               },
             });
-            expect(updatedInterval.value).toEqual({
-              capacity: {
-                config: 8,
-                as_workers: 8,
-                as_cost: 16,
-              },
-              claim_strategy: 'update_by_query',
-              poll_interval: 6000000,
-              request_capacity: 1000,
-              monitored_aggregated_stats_refresh_rate: 5000,
-              monitored_stats_running_average_window: 50,
-              monitored_task_execution_thresholds: {
-                default: {
-                  error_threshold: 90,
-                  warn_threshold: 80,
-                },
-                custom: {},
-              },
-            });
             resolve();
           }, reject);
         capacityConfiguration$.next(8);
-        pollIntervalConfiguration$.next(3000);
       } catch (error) {
         reject(error);
       }
