@@ -13,25 +13,31 @@ import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_impor
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { useAppContext } from '../../../app_context';
 import { IndexTable } from './index_table';
+import useObservable from 'react-use/lib/useObservable';
 
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
-    core: { executionContext },
+    core: { executionContext, chrome },
     services: { extensionsService },
+    plugins: { cloud },
   } = useAppContext();
 
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'indexManagementIndicesTab',
   });
-
+  const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   useEffect(() => {
-    if (!extensionsService.indexDetailsPageRoute) {
+    if (cloud?.isServerlessEnabled) {
       breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
     } else {
-      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indicesList);
+      if (activeSolutionId === 'es') {
+        breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indicesList);
+      } else {
+        breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
+      }
     }
-  }, []);
+  }, [activeSolutionId, cloud]);
 
   return (
     <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">

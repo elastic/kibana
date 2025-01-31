@@ -109,6 +109,7 @@ export const navigateToIndexDetailsPage = (
   } else {
     const route = extensionsService.indexDetailsPageRoute.renderRoute(indexName, tabId);
     application.navigateToUrl(http.basePath.prepend(route));
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indicesList, [ {text: indexName}]);
+    console.log("indexName", indexName)
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indicesList, { text: indexName });
   }
 };

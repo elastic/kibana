@@ -230,7 +230,7 @@ class BreadcrumbService {
       : [...this.breadcrumbs.home!];
 
     if (additionalBreadcrumb) {
-      newBreadcrumbs.push(additionalBreadcrumb)
+      newBreadcrumbs.push(additionalBreadcrumb);
     }
 
     // Pop off last breadcrumb
