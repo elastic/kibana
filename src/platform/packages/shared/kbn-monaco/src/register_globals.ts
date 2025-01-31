@@ -29,10 +29,17 @@ const langSpecificWorkerIds = [
   ConsoleOutputLang.ID,
 ];
 
+declare module 'monaco-editor/esm/vs/editor/editor.api' {
+  export interface Environment {
+    // add typing for exposing monaco on the MonacoEnvironment property
+    monaco: typeof monaco;
+  }
+}
+
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
 window.MonacoEnvironment = {
-  // @ts-expect-error needed for functional tests so that we can get value from 'editor'
+  // passed for use in functional and unit tests so that we can verify values from 'editor'
   monaco,
   getWorkerUrl: monacoBundleDir
     ? (_: string, languageId: string) => {
