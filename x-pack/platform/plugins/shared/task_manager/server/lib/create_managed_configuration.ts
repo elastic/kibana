@@ -200,15 +200,9 @@ function countErrors(
           SavedObjectsErrorHelpers.isGeneralError(e) ||
           isEsCannotExecuteScriptError(e) ||
           getMsearchStatusCode(e) === 429 ||
-          getMsearchStatusCode(e) === 500 ||
-          getMsearchStatusCode(e) === 502 ||
-          getMsearchStatusCode(e) === 503 ||
-          getMsearchStatusCode(e) === 504 ||
+          (getMsearchStatusCode(e) !== undefined && getMsearchStatusCode(e)! >= 500) ||
           getBulkUpdateStatusCode(e) === 429 ||
-          getBulkUpdateStatusCode(e) === 500 ||
-          getBulkUpdateStatusCode(e) === 502 ||
-          getBulkUpdateStatusCode(e) === 503 ||
-          getBulkUpdateStatusCode(e) === 504 ||
+          (getBulkUpdateStatusCode(e) !== undefined && getBulkUpdateStatusCode(e)! >= 500) ||
           isClusterBlockException(e)
       )
     )

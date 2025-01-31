@@ -249,6 +249,17 @@ describe('createManagedConfiguration()', () => {
     });
 
     describe('mget claim strategy', () => {
+      test('should not decrease configuration at the next interval when an error without status code is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(new Error());
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+      });
+
       test('should decrease configuration at the next interval when an msearch 429 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(429));
@@ -271,9 +282,31 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
 
+      test('should decrease configuration at the next interval when an msearch 502 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(new MsearchError(502));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
       test('should decrease configuration at the next interval when an msearch 503 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(503));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when an msearch 504 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(new MsearchError(504));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
