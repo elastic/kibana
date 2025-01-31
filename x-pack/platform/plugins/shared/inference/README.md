@@ -52,6 +52,7 @@ The list of inference connector types:
 - `.gen-ai`: OpenAI connector
 - `.bedrock`: Bedrock Claude connector
 - `.gemini`: Vertex Gemini connector
+- `.inference`: Elastic Inference Endpoint connector
 
 ## Usage examples
 
@@ -76,7 +77,7 @@ class MyPlugin {
 
         const inferenceClient = pluginsStart.inference.getClient({ request });
 
-        const chatResponse = inferenceClient.chatComplete({
+        const chatResponse = await inferenceClient.chatComplete({
           connectorId: request.body.connectorId,
           system: `Here is my system message`,
           messages: [
@@ -112,7 +113,7 @@ const inferenceClient = myStartDeps.inference.getClient({
   }
 });
 
-const chatResponse = inferenceClient.chatComplete({
+const chatResponse = await inferenceClient.chatComplete({
   messages: [{ role: MessageRole.User, content: 'Do something' }],
 });
 ```
@@ -134,7 +135,7 @@ In standard mode, the API returns a promise resolving with the full LLM response
 The response will also contain the token count info, if available.
 
 ```ts
-const chatResponse = inferenceClient.chatComplete({
+const chatResponse = await inferenceClient.chatComplete({
   connectorId: 'some-gen-ai-connector',
   system: `Here is my system message`,
   messages: [
@@ -209,7 +210,7 @@ The description and schema of a tool will be converted and sent to the LLM, so i
 to be explicit about what each tool does.
 
 ```ts
-const chatResponse = inferenceClient.chatComplete({
+const chatResponse = await inferenceClient.chatComplete({
   connectorId: 'some-gen-ai-connector',
   system: `Here is my system message`,
   messages: [
