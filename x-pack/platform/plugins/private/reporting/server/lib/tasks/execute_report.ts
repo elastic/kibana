@@ -428,6 +428,7 @@ export class ExecuteReportTask implements ReportingTask {
          * If any error happens, additional retry attempts may be picked up by a separate instance
          */
         run: async () => {
+          this.logger.info(`STARTING REPORT TASK - ${JSON.stringify(reportTaskParams)}`);
           let report: SavedReport | undefined;
           const isLastAttempt = taskAttempts >= this.getMaxAttempts();
 
@@ -470,7 +471,7 @@ export class ExecuteReportTask implements ReportingTask {
           const maxAttempts = this.getMaxAttempts();
           const logger = this.logger.get(jobId);
 
-          logger.debug(
+          logger.info(
             `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
           );
           logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);

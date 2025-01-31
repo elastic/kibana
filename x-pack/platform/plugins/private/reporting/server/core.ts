@@ -50,7 +50,7 @@ import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
+import { ExecuteReportTask, RunScheduledReportTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 
@@ -93,6 +93,7 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private executeTask: ExecuteReportTask;
+  private runScheduledReportTask: RunScheduledReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
   private exportTypesRegistry = new ExportTypesRegistry();
@@ -114,6 +115,7 @@ export class ReportingCore {
       this.exportTypesRegistry.register(et);
     });
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
+    this.runScheduledReportTask = new RunScheduledReportTask(this, config, this.logger);
 
     this.getContract = () => ({
       registerExportTypes: (id) => id,
@@ -138,9 +140,12 @@ export class ReportingCore {
       et.setup(setupDeps);
     });
 
-    const { executeTask } = this;
+    const { executeTask, runScheduledReportTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
+    });
+    setupDeps.taskManager.registerTaskDefinitions({
+      [runScheduledReportTask.TYPE]: runScheduledReportTask.getTaskDefinition(),
     });
   }
 
@@ -156,9 +161,11 @@ export class ReportingCore {
     });
 
     const { taskManager } = startDeps;
-    const { executeTask } = this;
+    const { executeTask, runScheduledReportTask } = this;
     // enable this instance to generate reports
-    await Promise.all([executeTask.init(taskManager)]);
+    await Promise.all([executeTask.init(taskManager), runScheduledReportTask.init(taskManager)]);
+
+    await this.runScheduledReportTask.scheduleTask();
   }
 
   public pluginStop() {

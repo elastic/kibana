@@ -170,6 +170,13 @@ export interface ReportSource {
   metrics?: TaskRunMetrics;
 }
 
+export interface ScheduledReportSource {
+  created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
+  schedule: string; // describes the schedule, should we use rRule?
+  next_run_at: string; // next time this report should run
+  // need other stuff here so that we can create a new ReportSource every time
+}
+
 /*
  * The document created by Reporting to store in the .reporting index
  */
