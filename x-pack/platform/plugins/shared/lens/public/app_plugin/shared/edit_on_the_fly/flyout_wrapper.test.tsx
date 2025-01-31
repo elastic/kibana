@@ -54,6 +54,21 @@ describe('Flyout wrapper', () => {
       expect(screen.queryByRole('button', { name: 'Edit in Lens' })).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Apply changes' })).not.toBeInTheDocument();
     });
+
+    it('should show the correct panel title for a creation panel scenario', async () => {
+      mountFlyoutWrapper();
+      expect(screen.getByText('Create Lens visualization')).toBeInTheDocument();
+    });
+
+    it('should show the correct panel title for an editing panel scenario', async () => {
+      mountFlyoutWrapper({ isNewPanel: false });
+      expect(screen.getByText('Edit Lens visualization')).toBeInTheDocument();
+    });
+
+    it('should show the correct panel title for a show panel scenario', async () => {
+      mountFlyoutWrapper({ isNewPanel: false, isReadOnly: true });
+      expect(screen.getByText('Audit Lens visualization')).toBeInTheDocument();
+    });
   });
 
   describe('not inline mode', () => {

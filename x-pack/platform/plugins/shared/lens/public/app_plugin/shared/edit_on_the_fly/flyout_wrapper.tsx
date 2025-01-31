@@ -27,6 +27,28 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutWrapperProps } from './types';
 
+function getPanelTitle(
+  language: string | undefined,
+  { isNewPanel, isReadOnly }: { isNewPanel?: boolean; isReadOnly?: boolean }
+) {
+  if (isReadOnly) {
+    return i18n.translate('xpack.lens.config.showVisualizationLabel', {
+      defaultMessage: 'Audit {lang} visualization',
+      values: { lang: language },
+    });
+  }
+  if (isNewPanel) {
+    return i18n.translate('xpack.lens.config.createVisualizationLabel', {
+      defaultMessage: 'Create {lang} visualization',
+      values: { lang: language },
+    });
+  }
+  return i18n.translate('xpack.lens.config.editVisualizationLabel', {
+    defaultMessage: 'Edit {lang} visualization',
+    values: { lang: language },
+  });
+}
+
 export const FlyoutWrapper = ({
   children,
   isInlineFlyoutVisible,
@@ -57,15 +79,7 @@ export const FlyoutWrapper = ({
                 <h2>
                   <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      {isNewPanel
-                        ? i18n.translate('xpack.lens.config.createVisualizationLabel', {
-                            defaultMessage: 'Create {lang} visualization',
-                            values: { lang: language },
-                          })
-                        : i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                            defaultMessage: 'Edit {lang} visualization',
-                            values: { lang: language },
-                          })}
+                      {getPanelTitle(language, { isNewPanel, isReadOnly })}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
