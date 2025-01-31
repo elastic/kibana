@@ -82,6 +82,8 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
+      ilm_policies: {},
+      templates: {},
     });
 
     await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
@@ -98,6 +100,8 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
+      ilm_policies: {},
+      templates: {},
     });
 
     await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
@@ -123,6 +127,9 @@ describe('getESUpgradeStatus', () => {
         ],
       },
       data_streams: {},
+      // @ts-expect-error not in types yet
+      ilm_policies: {},
+      templates: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
@@ -214,6 +221,9 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
+      // @ts-expect-error not in types yet
+      ilm_policies: {},
+      templates: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
@@ -244,6 +254,9 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
+      // @ts-expect-error not in types yet
+      ilm_policies: {},
+      templates: {},
     });
 
     esClient.asCurrentUser.healthReport.mockResponse({

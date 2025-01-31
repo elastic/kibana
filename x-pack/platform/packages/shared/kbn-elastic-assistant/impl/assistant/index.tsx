@@ -30,6 +30,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { isEmpty } from 'lodash';
+import useEvent from 'react-use/lib/useEvent';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
 import { useDataStreamApis } from './use_data_stream_apis';
@@ -91,6 +92,11 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     currentUserAvatar,
     setLastConversationId,
+    contentReferencesVisible,
+    showAnonymizedValues,
+    setContentReferencesVisible,
+    setShowAnonymizedValues,
+    assistantFeatures: { contentReferencesEnabled },
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -204,7 +210,6 @@ const AssistantComponent: React.FC<Props> = ({
   ]);
 
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
-  const [showAnonymizedValues, setShowAnonymizedValues] = useState<boolean>(false);
 
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
@@ -216,6 +221,28 @@ const AssistantComponent: React.FC<Props> = ({
       }, 0);
     }
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
+
+  // Keyboard shortcuts to toggle the visibility of content references and anonymized values
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.altKey && event.code === 'KeyC') {
+        event.preventDefault();
+        setContentReferencesVisible(!contentReferencesVisible);
+      }
+      if (event.altKey && event.code === 'KeyA') {
+        event.preventDefault();
+        setShowAnonymizedValues(!showAnonymizedValues);
+      }
+    },
+    [
+      setContentReferencesVisible,
+      contentReferencesVisible,
+      setShowAnonymizedValues,
+      showAnonymizedValues,
+    ]
+  );
+
+  useEvent('keydown', onKeyDown);
 
   // Show missing connector callout if no connectors are configured
 
@@ -265,10 +292,6 @@ const AssistantComponent: React.FC<Props> = ({
   // @ts-ignore-expect-error
   codeBlockContainers.forEach((e) => (e.style.minHeight = '85px'));
   ////
-
-  const onToggleShowAnonymizedValues = useCallback(() => {
-    setShowAnonymizedValues((prevValue) => !prevValue);
-  }, [setShowAnonymizedValues]);
 
   const {
     abortStream,
@@ -376,6 +399,8 @@ const AssistantComponent: React.FC<Props> = ({
             setIsStreaming,
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
+            contentReferencesVisible,
+            contentReferencesEnabled,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -403,8 +428,10 @@ const AssistantComponent: React.FC<Props> = ({
       setIsStreaming,
       currentUserAvatar,
       currentSystemPrompt?.content,
+      contentReferencesVisible,
       euiTheme.size.l,
       selectedPromptContextsCount,
+      contentReferencesEnabled,
     ]
   );
 
@@ -463,9 +490,7 @@ const AssistantComponent: React.FC<Props> = ({
                   defaultConnector={defaultConnector}
                   isDisabled={isDisabled || isLoadingChatSend}
                   isSettingsModalVisible={isSettingsModalVisible}
-                  onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  showAnonymizedValues={showAnonymizedValues}
                   onCloseFlyout={onCloseFlyout}
                   onChatCleared={handleOnChatCleared}
                   chatHistoryVisible={chatHistoryVisible}

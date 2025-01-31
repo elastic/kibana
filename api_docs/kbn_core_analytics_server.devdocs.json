@@ -675,8 +675,8 @@
                 "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "integrationAssistant",
-                "path": "x-pack/platform/plugins/shared/integration_assistant/public/services/telemetry/service.ts"
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.ts"
               },
               {
                 "plugin": "reporting",
@@ -721,10 +721,6 @@
               {
                 "plugin": "datasetQuality",
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "osquery",
@@ -804,11 +800,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/task/field_retention_enrichment_task.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/task/field_retention_enrichment_task.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -816,7 +816,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1075,8 +1079,8 @@
                 "path": "src/platform/packages/shared/shared-ux/chrome/navigation/mocks/storybook.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-browser-mocks",
-                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1183,8 +1187,8 @@
                 "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-browser-mocks",
-                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1211,12 +1215,12 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.test.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "security",
@@ -1487,8 +1491,8 @@
                 "path": "src/core/packages/status/server-internal/src/status_service.test.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "actions",
@@ -1905,8 +1909,8 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-browser-mocks",
-                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "security",
@@ -1993,12 +1997,12 @@
                 "path": "src/core/packages/execution-context/browser-internal/src/execution_context_service.test.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
-                "plugin": "@kbn/core-analytics-server-mocks",
-                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/server-mocks/src/analytics_service.mock.ts"
               },
               {
                 "plugin": "@kbn/core",
