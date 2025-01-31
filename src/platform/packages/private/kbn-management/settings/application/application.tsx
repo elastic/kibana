@@ -60,10 +60,7 @@ export const SettingsApplication = () => {
   const { addUrlToHistory, getSections, getToastsService, getCapabilities, setBadge, spaces } =
     useServices();
 
-  console.log(spaces); // logs undefined
   const currentSolution = useSolutionView(spaces);
-
-  const currentSolutionTest = 'security';
 
   const queryParam = getQueryParam(window.location.href);
   const [query, setQuery] = useState<Query>(Query.parse(queryParam));
@@ -75,8 +72,8 @@ export const SettingsApplication = () => {
     addUrlToHistory(search);
   };
 
-  const [spaceAllFields, globalAllFields] = useScopeFields(currentSolutionTest);
-  const [spaceFilteredFields, globalFilteredFields] = useScopeFields(currentSolutionTest, query);
+  const [spaceAllFields, globalAllFields] = useScopeFields(currentSolution);
+  const [spaceFilteredFields, globalFilteredFields] = useScopeFields(currentSolution, query);
 
   const {
     spaceSettings: { save: canSaveSpaceSettings },
