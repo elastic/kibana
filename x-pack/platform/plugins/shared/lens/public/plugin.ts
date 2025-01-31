@@ -696,8 +696,7 @@ export class LensPlugin {
         });
       }
     );
-    startDependencies.uiActions.addTriggerActionAsync(
-      ADD_PANEL_TRIGGER,
+    startDependencies.uiActions.registerActionAsync(
       'addLensPanelAction',
       async () => {
         const { getAddLensPanelAction } = await import(
@@ -706,6 +705,12 @@ export class LensPlugin {
         return getAddLensPanelAction(startDependencies);
       }
     );
+    startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
+    if (startDependencies.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+      // the create action if the Canvas-specific trigger does indeed exist.
+      startDependencies.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addLensPanelAction');
+    }
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {

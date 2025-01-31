@@ -8,51 +8,11 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { EditorMenu } from '../editor_menu.component';
-
-const testVisTypes: BaseVisType[] = [
-  { title: 'TSVB', icon: '', description: 'Description of TSVB', name: 'tsvb' } as BaseVisType,
-  {
-    titleInWizard: 'Custom visualization',
-    title: 'Vega',
-    icon: '',
-    description: 'Description of Vega',
-    name: 'vega',
-  } as BaseVisType,
-];
-
-const testVisTypeAliases: VisTypeAlias[] = [
-  {
-    title: 'Lens',
-    alias: {
-      app: 'lens',
-      path: 'path/to/lens',
-    },
-    icon: 'lensApp',
-    name: 'lens',
-    description: 'Description of Lens app',
-    stage: 'production',
-  },
-  {
-    title: 'Maps',
-    alias: {
-      app: 'maps',
-      path: 'path/to/maps',
-    },
-    icon: 'gisApp',
-    name: 'maps',
-    description: 'Description of Maps app',
-    stage: 'production',
-  },
-];
 
 storiesOf('components/WorkpadHeader/EditorMenu', module).add('default', () => (
   <EditorMenu
     addPanelActions={[]}
-    promotedVisTypes={testVisTypes}
-    visTypeAliases={testVisTypeAliases}
-    createNewVisType={() => action('createNewVisType')}
     createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
   />
 ));

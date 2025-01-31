@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
@@ -18,10 +19,13 @@ import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
 // @ts-expect-error unconverted file
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
+import { CANVAS_APP } from '../../../common/lib';
 
 export const useCanvasApi: () => CanvasContainerApi = () => {
   const selectedPageId = useSelector(getSelectedPage);
   const dispatch = useDispatch();
+
+  const { pathname, search, hash } = useLocation();
 
   const createNewEmbeddable = useCallback(
     (type: string, embeddableInput: EmbeddableInput) => {
@@ -36,8 +40,19 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
     [selectedPageId, dispatch]
   );
 
+  const getAppContext = useCallback(
+    () => ({
+      getCurrentPath: () => {
+        return `${pathname}${search}${hash}`;
+      },
+      currentAppId: CANVAS_APP,
+    }),
+    [pathname, search, hash]
+  );
+
   const getCanvasApi = useCallback((): CanvasContainerApi => {
     return {
+      getAppContext,
       viewMode$: new BehaviorSubject<ViewMode>('edit'), // always in edit mode
       addNewPanel: async ({
         panelType,
@@ -57,7 +72,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
        * is injected in `x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx`
        */
     } as unknown as CanvasContainerApi;
-  }, [createNewEmbeddable]);
+  }, [createNewEmbeddable, getAppContext]);
 
   return useMemo(() => getCanvasApi(), [getCanvasApi]);
 };

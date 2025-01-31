@@ -107,9 +107,15 @@ export class VegaPlugin implements Plugin<void, void> {
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
 
-    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'addVegaPanelAction', async () => {
+    deps.uiActions.registerActionAsync('addVegaPanelAction', async () => {
       const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
       return getAddVegaPanelAction(deps);
     });
+    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addVegaPanelAction');
+    if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+      // the create action if the Canvas-specific trigger does indeed exist.
+      deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addVegaPanelAction');
+    }
   }
 }

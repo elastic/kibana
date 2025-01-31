@@ -45,9 +45,15 @@ export class MarkdownPlugin implements Plugin<void, void> {
   }
 
   public start(core: CoreStart, deps: MarkdownStartDependencies) {
-    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'addMarkdownAction', async () => {
+    deps.uiActions.registerActionAsync('addMarkdownAction', async () => {
       const { getAddMarkdownPanelAction } = await import('./add_markdown_panel_action');
       return getAddMarkdownPanelAction(deps);
     });
+    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addMarkdownAction');
+    if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+      // the create action if the Canvas-specific trigger does indeed exist.
+      deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addMarkdownAction');
+    }
   }
 }

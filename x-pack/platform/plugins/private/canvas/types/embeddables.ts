@@ -28,4 +28,5 @@ export type CanvasContainerApi = PublishesViewMode &
   HasDisableTriggers &
   HasType &
   HasSerializedChildState &
-  Partial<HasAppContext & PublishesUnifiedSearch>;
+  HasAppContext &
+  Partial<PublishesUnifiedSearch>;

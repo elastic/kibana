@@ -47,7 +47,6 @@
     "@kbn/presentation-util-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/features-plugin",
     "@kbn/lens-plugin",
     "@kbn/maps-plugin",

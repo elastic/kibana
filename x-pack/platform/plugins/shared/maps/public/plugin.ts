@@ -257,11 +257,15 @@ export class MapsPlugin
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, synchronizeMovementAction);
 
-    if (core.application.capabilities.maps_v2.save) {
-      plugins.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'addMapPanelAction', async () => {
-        const { getAddMapPanelAction } = await import('./trigger_actions/add_map_panel_action');
-        return getAddMapPanelAction(plugins);
-      });
+    plugins.uiActions.registerActionAsync('addMapPanelAction', async () => {
+      const { getAddMapPanelAction } = await import('./trigger_actions/add_map_panel_action');
+      return getAddMapPanelAction(plugins);
+    });
+    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addMapPanelAction');
+    if (plugins.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+      // the create action if the Canvas-specific trigger does indeed exist.
+      plugins.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addMapPanelAction');
     }
 
     if (!core.application.capabilities.maps_v2.save) {

@@ -15,7 +15,7 @@ import { vegaVisType } from './vega_type';
 export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
   return {
     id: 'addVegaPanelAction',
-    getIconType: () => vegaVisType.icon,
+    getIconType: () => vegaVisType.icon as string,
     order: 0,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {
