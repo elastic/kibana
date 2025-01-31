@@ -35,7 +35,10 @@ export const useFields = (
     isOverridden: (key) => isOverriddenSetting(key, scope),
   });
   if (solution) {
-    fields = fields.filter((field) => field.solution === undefined || field.solution === solution);
+    fields = fields.filter(
+      (field) =>
+        solution === 'classic' || field.solution === undefined || field.solution === solution
+    );
   }
   if (query) {
     const clauses: Clause[] = query.ast.clauses.map((clause) =>
