@@ -35,5 +35,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     type: 'array',
     schema: schema.arrayOf(schema.string()),
     requiresPageReload: true,
+    solution: 'observability',
   },
 };

@@ -23,13 +23,20 @@ import { useSettings } from './use_settings';
  * @param query The {@link Query} to execute for filtering the fields.
  * @returns An array of {@link FieldDefinition} objects.
  */
-export const useFields = (scope: UiSettingsScope, query?: Query): FieldDefinition[] => {
+export const useFields = (
+  scope: UiSettingsScope,
+  solution: string,
+  query?: Query
+): FieldDefinition[] => {
   const { isCustomSetting, isOverriddenSetting } = useServices();
   const settings = useSettings(scope);
-  const fields = getFieldDefinitions(settings, {
+  let fields = getFieldDefinitions(settings, {
     isCustom: (key) => isCustomSetting(key, scope),
     isOverridden: (key) => isOverriddenSetting(key, scope),
   });
+  if (solution) {
+    fields = fields.filter((field) => field.solution === undefined || field.solution === solution);
+  }
   if (query) {
     const clauses: Clause[] = query.ast.clauses.map((clause) =>
       // If the clause value contains `:` and is not a category filter, add it as a term clause

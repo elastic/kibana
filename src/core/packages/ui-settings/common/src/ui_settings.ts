@@ -50,6 +50,8 @@ export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
 
+export type SolutionFieldType = 'search' | 'security' | 'observability';
+
 /**
  * UiSettings parameters defined by the plugins.
  * @public
@@ -116,6 +118,7 @@ export interface UiSettingsParams<T = unknown> {
    * scoped to a namespace. The default value is 'namespace'
    */
   scope?: UiSettingsScope;
+  solution?: SolutionFieldType;
 }
 
 /**

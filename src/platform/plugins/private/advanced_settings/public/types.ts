@@ -24,3 +24,7 @@ export interface AdvancedSettingsPluginSetup {
   home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
+
+export interface AdvancedSettingsPluginStart {
+  spaces?: SpacesPluginStart;
+}

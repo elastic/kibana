@@ -26,6 +26,7 @@ import { i18nTexts } from './i18n_texts';
 import { Tab } from './tab';
 import { readOnlyBadge } from './read_only_badge';
 import { useScopeFields } from './hooks/use_scope_fields';
+import { useSolutionView } from './hooks/use_solution_view';
 import { QueryInput, QueryInputProps } from './query_input';
 import { useServices } from './services';
 
@@ -56,8 +57,13 @@ function getQueryParam(url: string) {
  * Component for displaying the {@link SettingsApplication} component.
  */
 export const SettingsApplication = () => {
-  const { addUrlToHistory, getSections, getToastsService, getCapabilities, setBadge } =
+  const { addUrlToHistory, getSections, getToastsService, getCapabilities, setBadge, spaces } =
     useServices();
+
+  console.log(spaces); // logs undefined
+  const currentSolution = useSolutionView(spaces);
+
+  const currentSolutionTest = 'security';
 
   const queryParam = getQueryParam(window.location.href);
   const [query, setQuery] = useState<Query>(Query.parse(queryParam));
@@ -69,8 +75,8 @@ export const SettingsApplication = () => {
     addUrlToHistory(search);
   };
 
-  const [spaceAllFields, globalAllFields] = useScopeFields();
-  const [spaceFilteredFields, globalFilteredFields] = useScopeFields(query);
+  const [spaceAllFields, globalAllFields] = useScopeFields(currentSolutionTest);
+  const [spaceFilteredFields, globalFilteredFields] = useScopeFields(currentSolutionTest, query);
 
   const {
     spaceSettings: { save: canSaveSpaceSettings },

@@ -88,6 +88,7 @@ export interface FieldDefinition<
   type: T;
   /** An identifier of the field when it has an unsaved change. */
   unsavedFieldId: string;
+  solution: string;
 }
 
 /**

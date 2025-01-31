@@ -24,6 +24,7 @@ import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { RegistryEntry, SectionRegistryStart } from '@kbn/management-settings-section-registry';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { ChromeBadge, ChromeStart } from '@kbn/core-chrome-browser';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export interface Services {
   getAllowlistedSettings: (scope: UiSettingsScope) => Record<string, UiSettingMetadata>;
@@ -35,6 +36,7 @@ export interface Services {
   isCustomSetting: (key: string, scope: UiSettingsScope) => boolean;
   isOverriddenSetting: (key: string, scope: UiSettingsScope) => boolean;
   addUrlToHistory: (url: string) => void;
+  spaces: SpacesPluginStart;
 }
 
 export type SettingsApplicationServices = Services & FormServices;
@@ -57,6 +59,7 @@ export interface KibanaDependencies {
   };
   application: Pick<ApplicationStart, 'capabilities'>;
   chrome: Pick<ChromeStart, 'setBadge'>;
+  spaces: SpacesPluginStart;
 }
 
 export type SettingsApplicationKibanaDependencies = KibanaDependencies & FormKibanaDependencies;
@@ -87,6 +90,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
     isCustomSetting,
     isOverriddenSetting,
     addUrlToHistory,
+    spaces,
   } = services;
 
   return (
@@ -101,6 +105,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
         isCustomSetting,
         isOverriddenSetting,
         addUrlToHistory,
+        spaces,
       }}
     >
       <FormProvider
@@ -129,6 +134,7 @@ export const SettingsApplicationKibanaProvider: FC<
     sectionRegistry,
     application,
     chrome,
+    spaces,
   } = dependencies;
   const { client, globalClient } = settings;
 
@@ -191,6 +197,7 @@ export const SettingsApplicationKibanaProvider: FC<
     isOverriddenSetting,
     subscribeToUpdates,
     addUrlToHistory: (url: string) => history.push({ pathname: '', search: url }),
+    spaces,
   };
 
   return (

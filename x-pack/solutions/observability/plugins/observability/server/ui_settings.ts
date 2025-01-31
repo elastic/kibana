@@ -73,6 +73,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [maxSuggestions]: {
     category: [observabilityFeatureId],
@@ -84,6 +85,7 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Maximum number of suggestions fetched in autocomplete selection boxes.',
     }),
     schema: schema.number(),
+    solution: 'observability',
   },
   [enableComparisonByDefault]: {
     category: [observabilityFeatureId],
@@ -96,6 +98,7 @@ export const uiSettings: Record<string, UiSettings> = {
         'Determines whether the comparison feature is enabled or disabled by default in the APM app.',
     }),
     schema: schema.boolean(),
+    solution: 'observability',
   },
   [defaultApmServiceEnvironment]: {
     category: [observabilityFeatureId],
@@ -109,6 +112,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: '',
     schema: schema.string(),
+    solution: 'observability',
   },
   [apmProgressiveLoading]: {
     category: [observabilityFeatureId],
@@ -162,6 +166,7 @@ export const uiSettings: Record<string, UiSettings> = {
       ),
     },
     showInLabs: true,
+    solution: 'observability',
   },
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
@@ -183,6 +188,7 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: false,
     type: 'boolean',
     showInLabs: true,
+    solution: 'observability',
   },
   [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
@@ -194,6 +200,7 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Limit the number of services in a given service group',
     }),
     schema: schema.number({ min: 1 }),
+    solution: 'observability',
   },
   [apmTraceExplorerTab]: {
     category: [observabilityFeatureId],
@@ -215,6 +222,7 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+    solution: 'observability',
   },
   [apmLabsButton]: {
     category: [observabilityFeatureId],
@@ -229,6 +237,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     requiresPageReload: true,
     type: 'boolean',
+    solution: 'observability',
   },
   [enableInfrastructureProfilingIntegration]: {
     category: [observabilityFeatureId],
@@ -243,6 +252,7 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.boolean(),
+    solution: 'observability',
   },
   [enableInfrastructureAssetCustomDashboards]: {
     category: [observabilityFeatureId],
@@ -261,6 +271,7 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.boolean(),
+    solution: 'observability',
   },
   [enableAwsLambdaMetrics]: {
     category: [observabilityFeatureId],
@@ -279,6 +290,7 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+    solution: 'observability',
   },
   [enableAgentExplorerView]: {
     category: [observabilityFeatureId],
@@ -295,6 +307,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     requiresPageReload: true,
     type: 'boolean',
+    solution: 'observability',
   },
   [apmEnableTableSearchBar]: {
     category: [observabilityFeatureId],
@@ -312,6 +325,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     requiresPageReload: true,
     type: 'boolean',
+    solution: 'observability',
   },
   [entityCentricExperience]: {
     category: [observabilityFeatureId],
@@ -328,6 +342,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     requiresPageReload: true,
     type: 'boolean',
+    solution: 'observability',
   },
   [apmEnableServiceInventoryTableSearchBar]: {
     category: [observabilityFeatureId],
@@ -348,6 +363,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     requiresPageReload: true,
     type: 'boolean',
+    solution: 'observability',
   },
   [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],
@@ -363,6 +379,7 @@ export const uiSettings: Record<string, UiSettings> = {
       arm: schema.number(),
       x86_64: schema.number(),
     }),
+    solution: 'observability',
   },
   [apmAWSLambdaRequestCostPerMillion]: {
     category: [observabilityFeatureId],
@@ -371,6 +388,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
+    solution: 'observability',
   },
   [apmEnableServiceMetrics]: {
     category: [observabilityFeatureId],
@@ -385,6 +403,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [apmEnableContinuousRollups]: {
     category: [observabilityFeatureId],
@@ -399,6 +418,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [enableCriticalPath]: {
     category: [observabilityFeatureId],
@@ -416,6 +436,7 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+    solution: 'observability',
   },
   [syntheticsThrottlingEnabled]: {
     category: [observabilityFeatureId],
@@ -437,6 +458,7 @@ export const uiSettings: Record<string, UiSettings> = {
     ),
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [enableLegacyUptimeApp]: {
     category: [observabilityFeatureId],
@@ -450,6 +472,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [apmEnableProfilingIntegration]: {
     category: [observabilityFeatureId],
@@ -459,6 +482,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: false,
+    solution: 'observability',
   },
   [profilingShowErrorFrames]: {
     category: [observabilityFeatureId],
@@ -468,6 +492,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [profilingPervCPUWattX86]: {
     category: [observabilityFeatureId],
@@ -480,6 +505,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [profilingPervCPUWattArm64]: {
     category: [observabilityFeatureId],
@@ -495,6 +521,7 @@ export const uiSettings: Record<string, UiSettings> = {
     ),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [profilingDatacenterPUE]: {
     category: [observabilityFeatureId],
@@ -519,6 +546,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [profilingCo2PerKWH]: {
     category: [observabilityFeatureId],
@@ -542,6 +570,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [profilingAWSCostDiscountRate]: {
     category: [observabilityFeatureId],
@@ -558,6 +587,7 @@ export const uiSettings: Record<string, UiSettings> = {
           "If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.",
       }
     ),
+    solution: 'observability',
   },
   [profilingAzureCostDiscountRate]: {
     category: [observabilityFeatureId],
@@ -574,6 +604,7 @@ export const uiSettings: Record<string, UiSettings> = {
           'If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.',
       }
     ),
+    solution: 'observability',
   },
   [profilingCostPervCPUPerHour]: {
     category: [observabilityFeatureId],
@@ -589,6 +620,7 @@ export const uiSettings: Record<string, UiSettings> = {
     ),
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [apmEnableTransactionProfiling]: {
     category: [observabilityFeatureId],
@@ -598,6 +630,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
+    solution: 'observability',
   },
   [profilingFetchTopNFunctionsFromStacktraces]: {
     category: [observabilityFeatureId],
@@ -613,6 +646,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     schema: schema.boolean(),
     requiresPageReload: false,
+    solution: 'observability',
   },
   [searchExcludedDataTiers]: {
     category: [observabilityFeatureId],
@@ -632,6 +666,7 @@ export const uiSettings: Record<string, UiSettings> = {
       schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
     ),
     requiresPageReload: false,
+    solution: 'observability',
   },
 };
 

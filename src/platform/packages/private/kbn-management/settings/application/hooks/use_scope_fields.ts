@@ -17,8 +17,11 @@ import { useFields } from './use_fields';
  * @param query The {@link Query} to execute for filtering the fields.
  * @returns Two arrays of {@link FieldDefinition} objects.
  */
-export const useScopeFields = (query?: Query): [FieldDefinition[], FieldDefinition[]] => {
-  const spaceFields = useFields('namespace', query);
-  const globalFields = useFields('global', query);
+export const useScopeFields = (
+  solution: string,
+  query?: Query
+): [FieldDefinition[], FieldDefinition[]] => {
+  const spaceFields = useFields('namespace', solution, query);
+  const globalFields = useFields('global', solution, query);
   return [spaceFields, globalFields];
 };
