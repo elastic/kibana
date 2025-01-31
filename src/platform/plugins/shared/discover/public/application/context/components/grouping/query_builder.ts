@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import type { NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup, getGroupingQuery } from '@kbn/grouping';
 
+type RunTimeMappings =
+  | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
+  | undefined;
 interface DataGroupingQueryParams {
   additionalFilters?: Array<{
     bool: BoolQuery;
@@ -18,7 +22,7 @@ interface DataGroupingQueryParams {
   from: string;
   pageIndex: number;
   pageSize: number;
-  // runtimeMappings: RunTimeMappings;
+  runtimeMappings?: RunTimeMappings;
   selectedGroup: string;
   uniqueValue: string;
   to: string;
@@ -29,7 +33,7 @@ export const getDataGroupingQuery = ({
   from,
   pageIndex,
   pageSize,
-  // runtimeMappings,
+  runtimeMappings,
   selectedGroup,
   uniqueValue,
   to,
@@ -42,7 +46,7 @@ export const getDataGroupingQuery = ({
       ? getAggregationsByGroupField(selectedGroup)
       : [],
     pageNumber: pageIndex * pageSize,
-    // runtimeMappings,
+    runtimeMappings,
     uniqueValue,
     size: pageSize,
     sort: [{ unitsCount: { order: 'desc' } }],
