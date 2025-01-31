@@ -22,7 +22,7 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { type SavedQueryMenuVisibility, canShowSavedQuery } from './lib/can_show_saved_query';
+import { canShowSavedQuery } from './lib/can_show_saved_query';
 import type { UnifiedSearchPublicPluginStart } from '../types';
 
 export interface StatefulSearchBarDeps {
@@ -41,7 +41,12 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = 
   appName: string;
   useDefaultBehaviors?: boolean;
   savedQueryId?: string;
-  saveQueryMenuVisibility?: SavedQueryMenuVisibility;
+  /**
+   * Determines if saving queries is allowed within the saved query management popover (still requires privileges).
+   * This does not impact if queries can be loaded, which is determined by the saved query management read privilege.
+   * Defaults to false.
+   */
+  allowSavingQueries?: boolean;
   onSavedQueryIdChange?: (savedQueryId?: string) => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
 };
@@ -155,7 +160,7 @@ export function createSearchBar({
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return <QT extends AggregateQuery | Query = Query>(props: StatefulSearchBarProps<QT>) => {
-    const { useDefaultBehaviors } = props;
+    const { useDefaultBehaviors, allowSavingQueries } = props;
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
@@ -200,7 +205,7 @@ export function createSearchBar({
     }, [query, timeRange, useDefaultBehaviors]);
 
     const showSaveQuery = canShowSavedQuery({
-      saveQueryMenuVisibility: props.saveQueryMenuVisibility,
+      allowSavingQueries,
       query,
       core,
     });
