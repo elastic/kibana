@@ -14,7 +14,10 @@ import {
   createGetApiDeprecations,
 } from './register_api_depercation_info';
 import { buildApiDeprecationId } from './api_deprecation_id';
-import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
+import type {
+  RouterAccessDeprecatedApiDetails,
+  RouterDeprecatedApiDetails,
+} from '@kbn/core-http-server';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import {
   coreUsageDataServiceMock,
@@ -77,6 +80,19 @@ describe('#registerApiDeprecationsInfo', () => {
           routePath: '/api/test/',
           routeVersion: '123',
         } as RouterDeprecatedApiDetails,
+        overrides
+      );
+
+    const createInternalRouteDetails = (
+      overrides?: Partial<RouterAccessDeprecatedApiDetails>
+    ): RouterAccessDeprecatedApiDetails =>
+      _.merge(
+        {
+          routeAccess: 'internal',
+          routeMethod: 'post',
+          routePath: '/internal/api/',
+          routeVersion: '1.0.0',
+        } as RouterAccessDeprecatedApiDetails,
         overrides
       );
 
@@ -353,6 +369,55 @@ describe('#registerApiDeprecationsInfo', () => {
               },
             ],
             "title": "The \\"GET /api/test_never_resolved/\\" route is removed",
+          },
+        ]
+      `);
+    });
+
+    it('returns internal route access deprecation', async () => {
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http, docLinks });
+      const deprecatedRoute = createInternalRouteDetails({});
+      http.getRegisteredDeprecatedApis.mockReturnValue([deprecatedRoute]);
+      usageClientMock.getDeprecatedApiUsageStats.mockResolvedValue([
+        createApiUsageStat(buildApiDeprecationId(deprecatedRoute), {
+          totalMarkedAsResolved: 0,
+          markedAsResolvedLastCalledAt: undefined,
+        }),
+      ]);
+
+      const deprecations = await getDeprecations();
+      expect(deprecations).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "apiId": "1.0.0|post|/internal/api",
+            "correctiveActions": Object {
+              "manualSteps": Array [
+                "Identify the origin of these API calls.",
+                "Delete any requests you have that use this API. Check the learn more link for possible alternatives.",
+                "Once you have successfully stopped using this API, mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.",
+              ],
+              "mark_as_resolved_api": Object {
+                "apiTotalCalls": 13,
+                "routeMethod": "post",
+                "routePath": "/internal/api/",
+                "routeVersion": "1.0.0",
+                "timestamp": 2024-10-17T12:06:41.224Z,
+                "totalMarkedAsResolved": 0,
+              },
+            },
+            "deprecationType": "api",
+            "documentationUrl": undefined,
+            "domainId": "core.http.access-deprecations",
+            "level": "warning",
+            "message": Array [
+              "The API \\"POST /internal/api/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              "Internal APIs are meant to be used by Elastic services only. You should not use them. External access to these APIs will be restricted.",
+              Object {
+                "content": "To include information about deprecated API calls in debug logs, edit your Kibana configuration as detailed in [the documentation](https://www.elastic.co/guide/en/kibana/test-branch/logging-settings.html#enable-http-debug-logs).",
+                "type": "markdown",
+              },
+            ],
+            "title": "The \\"POST /internal/api/\\" API is internal to Elastic",
           },
         ]
       `);
