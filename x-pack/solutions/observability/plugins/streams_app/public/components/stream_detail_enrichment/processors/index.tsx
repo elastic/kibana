@@ -70,18 +70,15 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
   const type = useWatch({ control: methods.control, name: 'type' });
 
   useEffect(() => {
-    const { unsubscribe } = methods.watch((value) => {
-      const processingDefinition = convertFormStateToProcessor(value as ProcessorFormState);
-      onWatchProcessor({
-        id: 'draft',
-        status: 'draft',
-        type: value.type as ProcessorType,
-        ...processingDefinition,
+    if (isOpen) {
+      const { unsubscribe } = methods.watch((value) => {
+        const draftProcessor = createDraftProcessorFromForm(value as ProcessorFormState);
+        onWatchProcessor(draftProcessor);
+        setHasChanges(!isEqual(defaultValues, value));
       });
-      setHasChanges(!isEqual(defaultValues, value));
-    });
-    return () => unsubscribe();
-  }, [defaultValues, methods, onWatchProcessor]);
+      return () => unsubscribe();
+    }
+  }, [defaultValues, isOpen, methods, onWatchProcessor]);
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessor(data);
@@ -94,6 +91,12 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
     methods.reset();
     onWatchProcessor({ id: 'draft', deleteIfExists: true });
     closePanel();
+  };
+
+  const handleOpen = () => {
+    const draftProcessor = createDraftProcessorFromForm(defaultValues);
+    onWatchProcessor(draftProcessor);
+    openPanel();
   };
 
   const confirmDiscardAndClose = useDiscardConfirm(handleCancel);
@@ -130,7 +133,7 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
         buttonContent={buttonContent}
         buttonElement="div"
         forceState={isOpen ? 'open' : 'closed'}
-        onToggle={openPanel}
+        onToggle={handleOpen}
         extraAction={
           isOpen ? (
             <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -172,6 +175,19 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
     </EuiPanel>
   );
 }
+
+const createDraftProcessorFromForm = (
+  formState: ProcessorFormState
+): ProcessorDefinitionWithUIAttributes => {
+  const processingDefinition = convertFormStateToProcessor(formState);
+
+  return {
+    id: 'draft',
+    status: 'draft',
+    type: formState.type,
+    ...processingDefinition,
+  };
+};
 
 export function EditProcessorPanel({
   onDeleteProcessor,

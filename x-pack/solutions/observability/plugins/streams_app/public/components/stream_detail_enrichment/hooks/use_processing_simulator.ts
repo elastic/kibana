@@ -36,6 +36,7 @@ export interface UseProcessingSimulatorProps {
 }
 
 export interface UseProcessingSimulatorReturnType {
+  hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
   samples: Array<Record<PropertyKey, unknown>>;
@@ -82,10 +83,7 @@ export const useProcessingSimulator = ({
             );
           }
 
-          if (
-            isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor)) &&
-            processor.status === 'draft'
-          ) {
+          if (processor.status === 'draft') {
             setLiveDraftProcessors((prevLiveDraftProcessors) => {
               const newLiveDraftProcessors = prevLiveDraftProcessors.slice();
 
@@ -152,6 +150,17 @@ export const useProcessingSimulator = ({
         return Promise.resolve(null);
       }
 
+      const processing = liveDraftProcessors.map(processorConverter.toAPIDefinition);
+
+      const hasValidProcessors = processing.every((processor) =>
+        isSchema(processorDefinitionSchema, processor)
+      );
+
+      // Each processor should meet the minimum schema requirements to run the simulation
+      if (!hasValidProcessors) {
+        return Promise.resolve(null);
+      }
+
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
         signal,
         params: {
@@ -174,7 +183,10 @@ export const useProcessingSimulator = ({
     return getTableColumns(liveDraftProcessors, detectedFields);
   }, [liveDraftProcessors, simulation, simulationError]);
 
+  const hasLiveChanges = !isEmpty(liveDraftProcessors);
+
   return {
+    hasLiveChanges,
     isLoading: isLoadingSamples || isLoadingSimulation,
     error: simulationError as IHttpFetchError<ResponseErrorBody> | undefined,
     refreshSamples,

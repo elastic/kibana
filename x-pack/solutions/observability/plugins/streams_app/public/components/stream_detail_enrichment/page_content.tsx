@@ -55,8 +55,15 @@ export function StreamDetailEnrichmentContent({
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
 
-  const { isLoading, refreshSamples, simulation, samples, tableColumns, watchProcessor } =
-    useProcessingSimulator({ definition, processors });
+  const {
+    hasLiveChanges,
+    isLoading,
+    refreshSamples,
+    samples,
+    simulation,
+    tableColumns,
+    watchProcessor,
+  } = useProcessingSimulator({ definition, processors });
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -66,7 +73,7 @@ export function StreamDetailEnrichmentContent({
   };
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasChanges,
+    hasUnsavedChanges: hasChanges || hasLiveChanges,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,

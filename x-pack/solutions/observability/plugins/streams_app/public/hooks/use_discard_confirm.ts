@@ -13,14 +13,14 @@ const defaultMessage = i18n.translate('xpack.streams.cancelModal.message', {
   defaultMessage: 'Are you sure you want to discard your changes?',
 });
 
-export const useDiscardConfirm = (
-  handler: () => void,
+export const useDiscardConfirm = <THandler extends (..._args: any[]) => any>(
+  handler: THandler,
   options: OverlayModalConfirmOptions & { message?: string } = {}
 ) => {
   const { core } = useKibana();
   const { message = defaultMessage, ...optionsOverride } = options;
 
-  return async () => {
+  return async (...args: Parameters<THandler>) => {
     const hasCancelled = await core.overlays.openConfirm(message, {
       buttonColor: 'danger',
       title: i18n.translate('xpack.streams.cancelModal.title', {
@@ -35,6 +35,6 @@ export const useDiscardConfirm = (
       ...optionsOverride,
     });
 
-    if (hasCancelled) handler();
+    if (hasCancelled) handler(...args);
   };
 };
