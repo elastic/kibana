@@ -153,7 +153,7 @@ function needsTypeConversion(sample: unknown, expected: KnownESType): boolean {
   return false;
 }
 
-function generateProcessors(
+export function generateProcessors(
   ecsMapping: object,
   samples: object,
   basePath: FieldPath = []
