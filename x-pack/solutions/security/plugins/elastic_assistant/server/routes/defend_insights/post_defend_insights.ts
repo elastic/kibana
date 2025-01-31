@@ -20,6 +20,11 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { IRouter, Logger } from '@kbn/core/server';
 
+import { getPrompt } from '@kbn/security-ai-prompts';
+import {
+  localToolPrompts,
+  promptGroupId as toolsGroupId,
+} from '@kbn/security-solution-plugin/server/assistant/tools/alert_counts/prompts';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
@@ -71,6 +76,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
         const resp = buildResponse(response);
 
         const ctx = await context.resolve(['licensing', 'elasticAssistant']);
+        const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
         const assistantContext = ctx.elasticAssistant;
 
@@ -158,8 +164,20 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             onNewReplacements,
             request,
           });
-
-          const toolInstance = assistantTool.getTool(assistantToolParams);
+          let description: string | undefined;
+          try {
+            description = await getPrompt({
+              actionsClient,
+              connectorId: apiConfig.connectorId,
+              localPrompts: localToolPrompts,
+              promptId: assistantTool.name,
+              promptGroupId: toolsGroupId,
+              savedObjectsClient,
+            });
+          } catch (e) {
+            logger.error(`Failed to get prompt for tool: ${assistantTool.name}`);
+          }
+          const toolInstance = assistantTool.getTool({ ...assistantToolParams, description });
 
           const { currentInsight, defendInsightId } = await createDefendInsight(
             endpointIds,
