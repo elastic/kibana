@@ -25,7 +25,7 @@ export const FIELD_TYPE_MAP = {
   },
   match_only_text: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableTextType', {
-      defaultMessage: 'Text',
+      defaultMessage: 'Text (match_only_text)',
     }),
   },
   long: {
@@ -43,7 +43,9 @@ export const FIELD_TYPE_MAP = {
       defaultMessage: 'IP',
     }),
   },
-};
+} as const;
+
+export type FieldTypeOption = keyof typeof FIELD_TYPE_MAP;
 
 export const FIELD_STATUS_MAP = {
   inherited: {

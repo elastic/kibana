@@ -7,43 +7,26 @@
 
 import { EuiSelect } from '@elastic/eui';
 import React from 'react';
-import { SchemaEditorEditingState } from '../hooks/use_editing_state';
 
-type FieldFormTypeProps = Pick<SchemaEditorEditingState, 'nextFieldType' | 'setNextFieldType'> & {
-  isLoadingRecommendation: boolean;
-  recommendation?: string;
-};
+import { FIELD_TYPE_MAP, FieldTypeOption } from '../configuration_maps';
 
-const TYPE_OPTIONS = {
-  long: 'Long',
-  double: 'Double',
-  keyword: 'Keyword',
-  match_only_text: 'Text (match_only_text)',
-  boolean: 'Boolean',
-  ip: 'IP',
-  date: 'Date',
-} as const;
+interface FieldFormTypeProps {
+  onChange: (value: FieldTypeOption) => void;
+  value?: FieldTypeOption;
+}
 
-type FieldTypeOption = keyof typeof TYPE_OPTIONS;
-
-export const FieldFormType = ({
-  nextFieldType: value,
-  setNextFieldType: onChange,
-  isLoadingRecommendation,
-  recommendation,
-}: FieldFormTypeProps) => {
+export const FieldFormType = ({ value, onChange }: FieldFormTypeProps) => {
   return (
     <EuiSelect
-      disabled={!value && isLoadingRecommendation}
-      isLoading={isLoadingRecommendation}
+      disabled={!value}
       data-test-subj="streamsAppFieldFormTypeSelect"
       hasNoInitialSelection={!value}
       onChange={(event) => {
         onChange(event.target.value as FieldTypeOption);
       }}
       value={value}
-      options={Object.entries(TYPE_OPTIONS).map(([optionKey, optionValue]) => ({
-        text: optionValue,
+      options={Object.entries(FIELD_TYPE_MAP).map(([optionKey, optionConfig]) => ({
+        text: optionConfig.label,
         value: optionKey,
       }))}
     />

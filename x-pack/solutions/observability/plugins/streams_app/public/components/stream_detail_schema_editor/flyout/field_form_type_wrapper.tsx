@@ -61,12 +61,7 @@ export const FieldFormTypeWrapper = ({
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         {isEditing ? (
-          <FieldFormType
-            nextFieldType={nextFieldType}
-            setNextFieldType={setNextFieldType}
-            isLoadingRecommendation={loading}
-            recommendation={fieldsMetadata?.[selectedFieldName]?.type}
-          />
+          <FieldFormType value={nextFieldType} onChange={setNextFieldType} />
         ) : selectedFieldType ? (
           <FieldType type={selectedFieldType} />
         ) : (
