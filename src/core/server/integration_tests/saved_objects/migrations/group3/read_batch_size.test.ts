@@ -55,7 +55,7 @@ describe('migration v2 - read batch size', () => {
       expect(logs).toMatch('[.kibana] Migration completed');
     });
 
-    it('IS TROUBLESOME does not reduce the read batchSize in half if no batches exceeded maxReadBatchSizeBytes', async () => {
+    it('does not reduce the read batchSize in half if no batches exceeded maxReadBatchSizeBytes', async () => {
       root = createRoot({ maxReadBatchSizeBytes: 50000 });
       await root.preboot();
       await root.setup();
