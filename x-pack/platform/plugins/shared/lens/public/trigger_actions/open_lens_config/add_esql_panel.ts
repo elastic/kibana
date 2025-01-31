@@ -5,14 +5,12 @@
  * 2.0.
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   getESQLAdHocDataview,
   getIndexForESQLQuery,
-  ENABLE_ESQL,
   getESQLQueryColumns,
   getInitialESQLQuery,
 } from '@kbn/esql-utils';

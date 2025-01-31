@@ -7,7 +7,6 @@
 
 import { EmbeddableApiContext, apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { APP_ID, getBasePath } from '../../common/constants';
 import { LensPluginStartDependencies } from '../plugin';
 import { lensVisTypeAlias } from '../vis_type_alias';
 
@@ -19,8 +18,8 @@ export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {
       const stateTransferService = deps.embeddable.getStateTransfer();
-      stateTransferService.navigateToEditor(APP_ID, {
-        path: getBasePath(),
+      stateTransferService.navigateToEditor(lensVisTypeAlias.alias!.app, {
+        path: lensVisTypeAlias.alias!.path,
         state: {
           originatingApp: apiHasAppContext(embeddable)
             ? embeddable.getAppContext().currentAppId

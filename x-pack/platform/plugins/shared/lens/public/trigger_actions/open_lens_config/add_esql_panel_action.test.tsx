@@ -27,11 +27,7 @@ describe('create Lens panel action', () => {
 
   describe('compatibility check', () => {
     it('is incompatible if ui setting for ES|QL is off', async () => {
-      const action = new AddESQLPanelAction(
-        mockStartDependencies,
-        core,
-        mockGetEditorFrameService
-      );
+      const action = new AddESQLPanelAction(mockStartDependencies, core, mockGetEditorFrameService);
 
       const isCompatible = await action.isCompatible({
         embeddable: mockPresentationContainer,

@@ -73,7 +73,7 @@ import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/
 import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { APP_NAME, APP_ICON_SOLUTION, APP_ID } from '../common/constants';
-import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { mapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import {
   setIsCloudEnabled,
@@ -192,7 +192,7 @@ export class MapsPlugin
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations.registerAlias(getMapsVisTypeAlias());
+    plugins.visualizations.registerAlias(mapsVisTypeAlias);
 
     core.application.register({
       id: APP_ID,

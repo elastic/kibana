@@ -698,7 +698,7 @@ export class LensPlugin {
     );
     startDependencies.uiActions.addTriggerActionAsync(
       ADD_PANEL_TRIGGER,
-      'addMapPanelAction',
+      'addLensPanelAction',
       async () => {
         const { getAddLensPanelAction } = await import(
           './trigger_actions/add_panel_actions_module'
