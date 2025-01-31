@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { map, pairwise, skip, combineLatest, distinctUntilChanged } from 'rxjs';
-import { css } from '@emotion/react';
+import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
@@ -167,13 +167,7 @@ export const GridRow = ({
   }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex]);
 
   return (
-    <div
-      ref={containerRef}
-      css={css`
-        height: 100%;
-      `}
-      className="kbnGridRowContainer"
-    >
+    <div ref={containerRef} css={styles.fullHeight} className="kbnGridRowContainer">
       {rowIndex !== 0 && (
         <GridRowHeader
           rowIndex={rowIndex}
@@ -191,14 +185,7 @@ export const GridRow = ({
           ref={(element: HTMLDivElement | null) =>
             (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
           }
-          css={css`
-            height: 100%;
-            display: grid;
-            position: relative;
-            justify-items: stretch;
-            transition: background-color 300ms linear;
-            ${initialStyles};
-          `}
+          css={[styles.fullHeight, styles.gridRow, initialStyles]}
         >
           {/* render the panels **in order** for accessibility, using the memoized panel components */}
           {panelIdsInOrder.map((panelId) => children[panelId])}
@@ -207,4 +194,16 @@ export const GridRow = ({
       )}
     </div>
   );
+};
+
+const styles = {
+  gridRow: css({
+    display: 'grid',
+    position: 'relative',
+    justifyItems: 'stretch',
+    transition: 'background-color 300ms linear',
+  }),
+  fullHeight: css({
+    height: '100%',
+  }),
 };

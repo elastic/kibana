@@ -49,7 +49,6 @@ export const GridRowTitle = ({
 
   const updateTitle = useCallback(
     (title: string) => {
-      console.log('ON SAVE');
       const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.getValue());
       newLayout[rowIndex].title = title;
       gridLayoutStateManager.gridLayout$.next(newLayout);
