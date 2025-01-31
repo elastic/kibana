@@ -160,6 +160,8 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
+  const textBasedMode = isOfAggregateQueryType(attributes.state.query);
+
   const onApply = useCallback(() => {
     if (visualization.activeId == null) {
       return;
@@ -216,6 +218,7 @@ export function LensEditConfigurationFlyout({
     onApplyCallback?.(attrs);
     closeFlyout?.();
   }, [
+    textBasedMode,
     visualization.activeId,
     savedObjectId,
     closeFlyout,
@@ -241,7 +244,6 @@ export function LensEditConfigurationFlyout({
     visualizationState: visualization,
   });
 
-  const textBasedMode = isOfAggregateQueryType(attributes.state.query);
   const editorContainer = useRef(null);
 
   const isSaveable = useMemo(() => {
