@@ -19,11 +19,10 @@ import type {
   EuiContextMenuPanelItemDescriptor,
   EuiDataGridColumnSortingConfig,
   EuiDataGridProps,
-  Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useToggle from 'react-use/lib/useToggle';
 import { isRootStreamDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
+import { useBoolean } from '@kbn/react-hooks';
 import { FieldType } from './field_type';
 import { FieldStatusBadge } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
@@ -35,7 +34,6 @@ interface FieldsTableContainerProps {
   definition: WiredStreamGetResponse;
   unmappedFieldsResult?: string[];
   isLoadingUnmappedFields: boolean;
-  query?: Query;
   editingState: SchemaEditorEditingState;
   unpromotingState: SchemaEditorUnpromotingState;
   queryAndFiltersState: SchemaEditorQueryAndFiltersState;
@@ -74,11 +72,12 @@ export const EMPTY_CONTENT = '-----';
 export const FieldsTableContainer = ({
   definition,
   unmappedFieldsResult,
-  query,
   editingState,
   unpromotingState,
   queryAndFiltersState,
 }: FieldsTableContainerProps) => {
+  const { query } = queryAndFiltersState;
+
   const inheritedFields = useMemo(() => {
     return Object.entries(definition.inherited_fields).map(([name, field]) => ({
       name,
@@ -193,18 +192,20 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
 
               let actions: ActionsCellActionsDescriptor[] = [];
 
+              const viewFieldAction: ActionsCellActionsDescriptor = {
+                name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
+                  defaultMessage: 'View field',
+                }),
+                disabled: editingState.isSaving,
+                onClick: (fieldEntry: FieldEntry) => {
+                  editingState.selectField(fieldEntry, false);
+                },
+              };
+
               switch (field.status) {
                 case 'mapped':
                   actions = [
-                    {
-                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                        defaultMessage: 'View field',
-                      }),
-                      disabled: editingState.isSaving,
-                      onClick: (fieldEntry: FieldEntry) => {
-                        editingState.selectField(fieldEntry, false);
-                      },
-                    },
+                    viewFieldAction,
                     {
                       name: i18n.translate('xpack.streams.actions.editFieldLabel', {
                         defaultMessage: 'Edit field',
@@ -227,15 +228,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
                   break;
                 case 'unmapped':
                   actions = [
-                    {
-                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                        defaultMessage: 'View field',
-                      }),
-                      disabled: editingState.isSaving,
-                      onClick: (fieldEntry: FieldEntry) => {
-                        editingState.selectField(fieldEntry, false);
-                      },
-                    },
+                    viewFieldAction,
                     {
                       name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
                         defaultMessage: 'Map field',
@@ -248,17 +241,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
                   ];
                   break;
                 case 'inherited':
-                  actions = [
-                    {
-                      name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
-                        defaultMessage: 'View field',
-                      }),
-                      disabled: editingState.isSaving,
-                      onClick: (fieldEntry: FieldEntry) => {
-                        editingState.selectField(fieldEntry, false);
-                      },
-                    },
-                  ];
+                  actions = [viewFieldAction];
                   break;
               }
 
@@ -269,9 +252,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
                       id: 0,
                       title: i18n.translate(
                         'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTitle',
-                        {
-                          defaultMessage: 'Actions',
-                        }
+                        { defaultMessage: 'Field actions' }
                       ),
                       items: actions.map((action) => ({
                         name: action.name,
@@ -294,9 +275,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
     <EuiDataGrid
       aria-label={i18n.translate(
         'xpack.streams.streamDetailSchemaEditor.fieldsTable.actionsTitle',
-        {
-          defaultMessage: 'Preview',
-        }
+        { defaultMessage: 'Preview' }
       )}
       columns={Object.entries(COLUMNS).map(([columnId, value]) => ({
         id: columnId,
@@ -347,7 +326,7 @@ export const ActionsCell = ({ panels }: { panels: EuiContextMenuPanelDescriptor[
     prefix: 'fieldsTableContextMenuPopover',
   });
 
-  const [popoverIsOpen, togglePopoverIsOpen] = useToggle(false);
+  const [popoverIsOpen, { off: closePopover, toggle }] = useBoolean(false);
 
   return (
     <EuiPopover
@@ -362,13 +341,12 @@ export const ActionsCell = ({ panels }: { panels: EuiContextMenuPanelDescriptor[
           )}
           data-test-subj="streamsAppActionsButton"
           iconType="boxesVertical"
-          onClick={() => {
-            togglePopoverIsOpen();
-          }}
+          onClick={toggle}
         />
       }
       isOpen={popoverIsOpen}
-      closePopover={() => togglePopoverIsOpen(false)}
+      closePopover={closePopover}
+      panelPaddingSize="none"
     >
       <EuiContextMenu
         initialPanelId={0}
@@ -381,7 +359,7 @@ export const ActionsCell = ({ panels }: { panels: EuiContextMenuPanelDescriptor[
               if (item.onClick) {
                 item.onClick(event as any);
               }
-              togglePopoverIsOpen(false);
+              closePopover();
             },
           })),
         }))}

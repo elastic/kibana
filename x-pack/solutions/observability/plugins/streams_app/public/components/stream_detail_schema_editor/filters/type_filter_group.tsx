@@ -8,7 +8,7 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { FIELD_TYPE_MAP } from '../configuration_maps';
 import { FilterGroup } from './filter_group';
 import { ChangeFilterGroups } from '../hooks/use_query_and_filters';
@@ -25,7 +25,7 @@ export const FieldTypeFilterGroup = ({
 }: {
   onChangeFilterGroup: ChangeFilterGroups;
 }) => {
-  const [items, setItems] = useState<Array<{ label: string; key?: string }>>(() =>
+  const [items, setItems] = useState<EuiSelectableOption[]>(() =>
     Object.entries(FIELD_TYPE_MAP).map(([key, value]) => {
       return {
         label: value.label,

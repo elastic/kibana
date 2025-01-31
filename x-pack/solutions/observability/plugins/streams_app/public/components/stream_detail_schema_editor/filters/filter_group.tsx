@@ -54,11 +54,7 @@ export const FilterGroup = ({
         closePopover={() => togglePopover(false)}
         panelPaddingSize="none"
       >
-        <EuiSelectable
-          aria-label={filterGroupButtonLabel}
-          options={items}
-          onChange={(...args) => onChange(...args)}
-        >
+        <EuiSelectable aria-label={filterGroupButtonLabel} options={items} onChange={onChange}>
           {(list) => (
             <div
               css={{

@@ -92,7 +92,7 @@ const Content = ({
 
   return (
     <EuiFlexItem>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="m">
         {isLoadingDefinition || isLoadingUnmappedFields ? (
           <EuiPortal>
             <EuiProgress size="xs" color="accent" position="fixed" />
@@ -122,11 +122,9 @@ const Content = ({
           className={css`
             overflow: auto;
           `}
-          grow
         >
           <FieldsTableContainer
             definition={definition}
-            query={queryAndFiltersState.query}
             unmappedFieldsResult={unmappedFieldsValue?.unmappedFields}
             isLoadingUnmappedFields={isLoadingUnmappedFields}
             editingState={editingState}
