@@ -341,7 +341,13 @@ export const createVagrantHostVmClient = (
   };
 
   const destroy = async (): Promise<void> => {
-    const destroyResponse = await execa.command(`vagrant destroy -f`, execaOptions);
+    let destroyResponse;
+    try {
+      destroyResponse = await execa.command(`vagrant destroy -f`, execaOptions);
+    } catch (err) {
+      log.error(`Error destroying VM [${name}]:\n${dump(err)}`);
+      throw err;
+    }
 
     log.debug(`VM [${name}] was destroyed successfully`, destroyResponse);
   };
@@ -369,8 +375,61 @@ export const createVagrantHostVmClient = (
   };
 
   const stop = async () => {
-    const response = await execa.command(`vagrant suspend`, execaOptions);
-    log.verbose('vagrant suspend response:\n', response);
+    let response;
+    try {
+      // Check for running Vagrant/Ruby processes before suspending
+      let vagrantProcesses = await execa.command(`ps aux | grep vagrant`, execaOptions);
+      let rubyProcesses = await execa.command(`ps aux | grep ruby`, execaOptions);
+
+      log.warning(`Checking for running Vagrant processes:\n${vagrantProcesses.stdout}`);
+      log.warning(`Checking for running Ruby processes:\n${rubyProcesses.stdout}`);
+
+      // If there are other Vagrant processes, wait and retry
+      const maxRetries = 5;
+      let retries = 0;
+      while (
+        (vagrantProcesses.stdout.includes('vagrant') || rubyProcesses.stdout.includes('ruby')) &&
+        retries < maxRetries
+      ) {
+        log.warning(
+          `Another Vagrant or Ruby process is running. Waiting before attempting suspend... (${
+            retries + 1
+          }/${maxRetries})`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds before retrying
+
+        // Check again after waiting
+        vagrantProcesses = await execa.command(`ps aux | grep vagrant`, execaOptions);
+        rubyProcesses = await execa.command(`ps aux | grep ruby`, execaOptions);
+        retries++;
+      }
+
+      // If still locked after retries, force kill the processes
+      if (vagrantProcesses.stdout.includes('vagrant') || rubyProcesses.stdout.includes('ruby')) {
+        log.error(
+          `Vagrant is still locked after ${maxRetries} attempts. Force killing stuck processes...`
+        );
+        await execa.command(`pkill -f vagrant`, execaOptions);
+        await execa.command(`pkill -f ruby`, execaOptions);
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait a bit before proceeding
+      }
+
+      // Ensure VM is in a valid state before suspending
+      const status = await execa.command(`vagrant status`, execaOptions);
+      log.warning(`VM [${name}] status:`, status.stdout);
+
+      if (!status.stdout.includes('running')) {
+        log.warning(`VM is not running. Skipping suspend.`);
+        return;
+      }
+
+      // Attempt to suspend the VM
+      response = await execa.command(`vagrant suspend`, execaOptions);
+    } catch (err) {
+      log.error(`Error stopping VM [${name}]:\n${dump(err)}`);
+      throw err;
+    }
+    log.verbose('vagrant suspend response:\n', response.stdout);
   };
 
   const upload: HostVm['upload'] = async (localFilePath, destFilePath) => {

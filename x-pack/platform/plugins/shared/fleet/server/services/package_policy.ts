@@ -2124,11 +2124,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyPostDelete');
     const errorsThrown: Error[] = [];
 
+    logger.error('External callbacks', externalCallbacks);
     if (externalCallbacks && externalCallbacks.size > 0) {
       for (const callback of externalCallbacks) {
         // Failures from an external callback should not prevent other external callbacks from being
         // executed. Errors (if any) will be collected and `throw`n after processing the entire set
         try {
+          logger.warning('Deleted Policies try running callback', deletedPackagePolicies);
           await callback(deletedPackagePolicies, soClient, esClient, context, request);
         } catch (error) {
           errorsThrown.push(error);
