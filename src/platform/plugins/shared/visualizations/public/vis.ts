@@ -94,8 +94,8 @@ export class Vis<TVisParams extends VisParams = VisParams> {
 
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
-      const newType = await getTypes().get<TVisParams>(state.type);
-      if (!newType) {
+      const newVisType = await getTypes().get<TVisParams>(state.type);
+      if (!newVisType) {
         throw new Error(
           i18n.translate('visualizations.visualizationTypeInvalidMessage', {
             defaultMessage: 'Invalid visualization type "{visType}"',
@@ -105,7 +105,7 @@ export class Vis<TVisParams extends VisParams = VisParams> {
           })
         );
       }
-      this.type = newType;
+      this.type = newVisType;
       typeChanged = true;
     }
     if (state.title !== undefined) {
