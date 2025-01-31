@@ -17,7 +17,6 @@ export function getAddMapPanelAction(deps: MapsPluginStartDependencies) {
     order: mapsVisTypeAlias.order,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {
-      debugger;
       const stateTransferService = deps.embeddable.getStateTransfer();
       stateTransferService.navigateToEditor(mapsVisTypeAlias.alias.app, {
         path: mapsVisTypeAlias.alias.path,
