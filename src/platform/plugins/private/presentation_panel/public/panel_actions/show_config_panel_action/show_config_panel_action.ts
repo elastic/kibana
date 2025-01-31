@@ -80,10 +80,11 @@ export class ShowConfigPanelAction
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable) || !embeddable.isReadOnlyEnabled().read) return false;
     // check if the embeddable allows the read only mode even when the view mode is 'view'
     return Boolean(
-      getInheritedViewMode(embeddable) === 'view' && embeddable.isReadOnlyEnabled().read
+      isApiCompatible(embeddable) &&
+        getInheritedViewMode(embeddable) === 'view' &&
+        embeddable.isReadOnlyEnabled().read
     );
   }
 
