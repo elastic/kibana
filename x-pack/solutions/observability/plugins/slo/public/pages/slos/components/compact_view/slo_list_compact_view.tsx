@@ -76,9 +76,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const spaceId = useSpace();
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
-  const sloIdsAndInstanceIds = sloList.map(
-    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
-  );
+  const sloIdsAndInstanceIds = sloList.map((slo) => [slo.id, slo.instanceId] as [string, string]);
 
   const { data: permissions } = usePermissions();
   const filteredRuleTypes = useGetFilteredRuleTypes();
@@ -441,8 +439,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const historicalSliData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
-              historicalSummary.sloId === slo.id &&
-              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+              historicalSummary.sloId === slo.id && historicalSummary.instanceId === slo.instanceId
           )?.data,
           'sli_value'
         );
@@ -475,8 +472,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const errorBudgetBurnDownData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
-              historicalSummary.sloId === slo.id &&
-              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+              historicalSummary.sloId === slo.id && historicalSummary.instanceId === slo.instanceId
           )?.data,
           'error_budget_remaining'
         );
