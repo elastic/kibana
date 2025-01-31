@@ -55,8 +55,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('vega chart', () => {
       it('code-editor correct syntax highlight langs', async () => {
         const hasRequiredLanguages = await browser.execute(() => {
-          // @ts-ignore
           const langs: Array<{ id: string }> =
+            // @ts-ignore
             window.MonacoEnvironment?.monaco?.languages?.getLanguages() ?? [];
           return langs.some((l) => l?.id === 'hjson') && langs.some((l) => l?.id === 'xjson');
         });
