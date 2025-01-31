@@ -25,7 +25,7 @@ describe('Show config panel action', () => {
       embeddable: {
         viewMode$: viewModeSubject,
         onShowConfig: jest.fn(),
-        isReadOnlyEnabled: jest.fn().mockReturnValue(true),
+        isReadOnlyEnabled: jest.fn().mockReturnValue({ read: true, write: false }),
         getTypeDisplayName: jest.fn().mockReturnValue('A very fun panel type'),
       },
     };
@@ -62,5 +62,31 @@ describe('Show config panel action', () => {
     action.subscribeToCompatibilityChanges(context, onChange);
     updateViewMode('edit');
     expect(onChange).toHaveBeenCalledWith(false, action);
+  });
+
+  it('should show a different icon based on the write permissions', () => {
+    expect(action.getIconType(context)).toBe('glasses');
+    expect(
+      action.getIconType({
+        ...context,
+        embeddable: {
+          ...context.embeddable,
+          isReadOnlyEnabled: jest.fn().mockReturnValue({ read: true, write: true }),
+        },
+      })
+    ).toBe('pencil');
+  });
+
+  it('should show a different label based on the write permissions', () => {
+    expect(action.getDisplayName(context)).toBe('Configuration');
+    expect(
+      action.getDisplayName({
+        ...context,
+        embeddable: {
+          ...context.embeddable,
+          isReadOnlyEnabled: jest.fn().mockReturnValue({ read: true, write: true }),
+        },
+      })
+    ).toBe('Edit A very fun panel type');
   });
 });

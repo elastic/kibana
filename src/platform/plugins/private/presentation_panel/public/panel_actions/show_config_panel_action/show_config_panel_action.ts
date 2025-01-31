@@ -42,9 +42,18 @@ export class ShowConfigPanelAction
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return i18n.translate('presentationPanel.action.showConfigPanel.displayName', {
-      defaultMessage: 'Configuration',
-    });
+    // check permissions to show a dynamic name
+    const { write } = embeddable.isReadOnlyEnabled();
+    return write
+      ? i18n.translate('presentationPanel.action.editPanel.displayName', {
+          defaultMessage: 'Edit {value}',
+          values: {
+            value: embeddable.getTypeDisplayName(),
+          },
+        })
+      : i18n.translate('presentationPanel.action.showConfigPanel.displayName', {
+          defaultMessage: 'Configuration',
+        });
   }
 
   public subscribeToCompatibilityChanges(
@@ -54,7 +63,7 @@ export class ShowConfigPanelAction
     if (!isApiCompatible(embeddable)) return;
     return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
       onChange(
-        viewMode === 'view' && isApiCompatible(embeddable) && embeddable.isReadOnlyEnabled(),
+        viewMode === 'view' && isApiCompatible(embeddable) && embeddable.isReadOnlyEnabled().read,
         this
       );
     });
@@ -64,14 +73,18 @@ export class ShowConfigPanelAction
     return isApiCompatible(embeddable);
   }
 
-  public getIconType() {
-    return 'wrench';
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    const { write } = embeddable.isReadOnlyEnabled();
+    return write ? 'pencil' : 'glasses';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable) || !embeddable.isReadOnlyEnabled()) return false;
+    if (!isApiCompatible(embeddable) || !embeddable.isReadOnlyEnabled().read) return false;
     // check if the embeddable allows the read only mode even when the view mode is 'view'
-    return getInheritedViewMode(embeddable) === 'view' && embeddable.isReadOnlyEnabled();
+    return Boolean(
+      getInheritedViewMode(embeddable) === 'view' && embeddable.isReadOnlyEnabled().read
+    );
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
