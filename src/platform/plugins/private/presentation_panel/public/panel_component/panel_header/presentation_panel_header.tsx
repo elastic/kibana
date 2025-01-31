@@ -53,9 +53,8 @@ export const PresentationPanelHeader = <
     [setDragHandle]
   );
 
-  const showPanelBar = Boolean(
-    (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0
-  );
+  const showPanelBar =
+    (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
 
   if (!showPanelBar) return null;
 
@@ -80,7 +79,6 @@ export const PresentationPanelHeader = <
       >
         <PresentationPanelTitle
           api={api}
-          showPanelBar={showPanelBar}
           headerId={headerId}
           viewMode={viewMode}
           hideTitle={hideTitle}

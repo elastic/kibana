@@ -94,7 +94,6 @@ export const usePresentationPanelTitleClickHandler = (titleElmRef: HTMLElement |
 
 export const PresentationPanelTitle = ({
   api,
-  showPanelBar,
   headerId,
   viewMode,
   hideTitle,
@@ -102,7 +101,6 @@ export const PresentationPanelTitle = ({
   panelDescription,
 }: {
   api: unknown;
-  showPanelBar: boolean;
   headerId: string;
   hideTitle?: boolean;
   panelTitle?: string;
@@ -163,7 +161,7 @@ export const PresentationPanelTitle = ({
       );
     }
 
-    const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
+    const ariaLabel = getAriaLabelForTitle(panelTitle);
     const ariaLabelElement = (
       <EuiScreenReaderOnly>
         <span id={headerId}>{ariaLabel}</span>
@@ -195,7 +193,7 @@ export const PresentationPanelTitle = ({
         </div>
       </EuiToolTip>
     );
-  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, headerId, showPanelBar]);
+  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, headerId]);
 
   return describedPanelTitleElement;
 };
