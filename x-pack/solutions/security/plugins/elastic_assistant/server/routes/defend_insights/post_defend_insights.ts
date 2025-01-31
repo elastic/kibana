@@ -164,19 +164,15 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             onNewReplacements,
             request,
           });
-          let description: string | undefined;
-          try {
-            description = await getPrompt({
-              actionsClient,
-              connectorId: apiConfig.connectorId,
-              localPrompts: localToolPrompts,
-              promptId: assistantTool.name,
-              promptGroupId: toolsGroupId,
-              savedObjectsClient,
-            });
-          } catch (e) {
-            logger.error(`Failed to get prompt for tool: ${assistantTool.name}`);
-          }
+
+          const description = await getPrompt({
+            actionsClient,
+            connectorId: apiConfig.connectorId,
+            localPrompts: localToolPrompts,
+            promptId: assistantTool.name,
+            promptGroupId: toolsGroupId,
+            savedObjectsClient,
+          });
           const toolInstance = assistantTool.getTool({ ...assistantToolParams, description });
 
           const { currentInsight, defendInsightId } = await createDefendInsight(

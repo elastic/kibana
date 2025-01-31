@@ -12,6 +12,7 @@ import { invokeGraph, streamGraph } from './helpers';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { getPrompt } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import {
   createOpenAIToolsAgent,
@@ -20,12 +21,18 @@ import {
 } from 'langchain/agents';
 import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { AssistantTool, AssistantToolParams } from '../../../..';
+import { promptGroupId as toolsGroupId } from '@kbn/security-solution-plugin/server/assistant/tools/alert_counts/prompts';
+import { promptDictionary } from '../../../prompt';
+import { promptGroupId } from '../../../prompt/local_prompt_object';
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
 jest.mock('@kbn/langchain/server/tracers/apm');
 jest.mock('@kbn/langchain/server/tracers/telemetry');
+jest.mock('@kbn/security-ai-prompts');
 const getDefaultAssistantGraphMock = getDefaultAssistantGraph as jest.Mock;
+const getPromptMock = getPrompt as jest.Mock;
 describe('callAssistantGraph', () => {
   const mockDataClients = {
     anonymizationFieldsDataClient: {
@@ -92,6 +99,7 @@ describe('callAssistantGraph', () => {
     (mockDataClients?.anonymizationFieldsDataClient?.findDocuments as jest.Mock).mockResolvedValue(
       getFindAnonymizationFieldsResultWithSingleHit()
     );
+    getPromptMock.mockResolvedValue('prompt');
   });
 
   it('calls invokeGraph with correct parameters for non-streaming', async () => {
@@ -165,6 +173,51 @@ describe('callAssistantGraph', () => {
       replacements: [],
       status: 'ok',
     });
+  });
+
+  it('calls getPrompt for each tool and the default system prompt', async () => {
+    const mockTool: AssistantTool = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      sourceRegister: 'sourceRegister',
+      isSupported: (params: AssistantToolParams) => true,
+      getTool: (params: AssistantToolParams) => null,
+    };
+    const params = {
+      ...defaultParams,
+      assistantTools: [
+        { ...mockTool, name: 'test-tool' },
+        { ...mockTool, name: 'test-tool2' },
+      ],
+    };
+    await callAssistantGraph(params);
+
+    expect(getPromptMock).toHaveBeenCalledTimes(3);
+    expect(getPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'test-model',
+        provider: 'openai',
+        promptId: 'test-tool',
+        promptGroupId: toolsGroupId,
+      })
+    );
+    expect(getPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'test-model',
+        provider: 'openai',
+        promptId: 'test-tool2',
+        promptGroupId: toolsGroupId,
+      })
+    );
+    expect(getPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'test-model',
+        provider: 'openai',
+        promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
+      })
+    );
   });
 
   describe('agentRunnable', () => {
