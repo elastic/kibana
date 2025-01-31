@@ -62,15 +62,15 @@ const getIdentifier = (node: WalkerAstNode): ESQLIdentifier =>
  */
 export const summarizeCommand = (command: ESQLAstJoinCommand): JoinCommandSummary => {
   const firstArg = command.args[0];
-  let index: ESQLIdentifier | undefined;
+  let index: ESQLSource | undefined;
   let alias: ESQLIdentifier | undefined;
   const conditions: ESQLAstExpression[] = [];
 
   if (isAsExpression(firstArg)) {
-    index = getIdentifier(firstArg.args[0]);
+    index = getSource(firstArg.args[0]);
     alias = getIdentifier(firstArg.args[1]);
   } else {
-    index = getIdentifier(firstArg);
+    index = getSource(firstArg);
   }
 
   const on = generic.commands.options.find(command, ({ name }) => name === 'on');

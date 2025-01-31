@@ -71,12 +71,26 @@ const suggestFields = async (
 
   for (const commonField of intersection) {
     commonField.sortText = '1';
-    commonField.kind = 'Issue';
     commonField.documentation = {
       value: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.join.sharedField', {
         defaultMessage: 'Field shared between the source and the lookup index',
       }),
     };
+
+    let detail = commonField.detail || '';
+
+    if (detail) {
+      detail += ' ';
+    }
+
+    detail += i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.join.commonFieldNote',
+      {
+        defaultMessage: '(common field)',
+      }
+    );
+
+    commonField.detail = detail;
   }
 
   return [...intersection, ...union];
