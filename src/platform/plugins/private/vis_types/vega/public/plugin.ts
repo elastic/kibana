@@ -16,6 +16,8 @@ import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
 
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   setNotifications,
   setData,
@@ -28,7 +30,7 @@ import {
 } from './services';
 
 import { createVegaFn } from './vega_fn';
-import { createVegaTypeDefinition } from './vega_type';
+import { vegaVisType } from './vega_type';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
@@ -36,8 +38,6 @@ import type { ConfigSchema } from '../server/config';
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -95,13 +95,10 @@ export class VegaPlugin implements Plugin<void, void> {
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
     expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
 
-    visualizations.createBaseVisualization(createVegaTypeDefinition());
+    visualizations.createBaseVisualization(vegaVisType);
   }
 
-  public start(
-    core: CoreStart,
-    deps: VegaPluginStartDependencies
-  ) {
+  public start(core: CoreStart, deps: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setData(deps.data);
     setDataViews(deps.dataViews);

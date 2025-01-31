@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { EmbeddableApiContext, apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { VegaPluginStartDependencies } from './plugin';
+import { vegaVisType } from './vega_type';
 
 export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
   return {
     id: 'addVegaPanelAction',
-    getIconType: () =>  'visVega',
+    getIconType: () => vegaVisType.icon,
     order: 0,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {
@@ -23,21 +23,18 @@ export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
       stateTransferService.navigateToEditor('visualize', {
         path: '#/create?type=vega',
         state: {
-          originatingApp: apiHasAppContext(embeddable) ? embeddable.getAppContext().currentAppId : '',
-          originatingPath:  apiHasAppContext(embeddable) ? embeddable.getAppContext().getCurrentPath?.() : undefined,
+          originatingApp: apiHasAppContext(embeddable)
+            ? embeddable.getAppContext().currentAppId
+            : '',
+          originatingPath: apiHasAppContext(embeddable)
+            ? embeddable.getAppContext().getCurrentPath?.()
+            : undefined,
           searchSessionId: deps.data.search.session.getSessionId(),
         },
       });
     },
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],
-    getDisplayName: () =>
-      i18n.translate('visTypeVega.type.vegaTitleInWizard', {
-        defaultMessage: 'Custom visualization',
-      }),
-    getDisplayNameTooltip: () =>
-      i18n.translate('visTypeVega.type.vegaDescription', {
-        defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
-        description: 'Vega and Vega-Lite are product names and should not be translated',
-      })
+    getDisplayName: () => vegaVisType.title,
+    getDisplayNameTooltip: () => vegaVisType.description,
   };
-};
+}
