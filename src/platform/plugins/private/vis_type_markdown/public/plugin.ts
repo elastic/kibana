@@ -11,7 +11,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import { markdownVisDefinition } from './markdown_vis';
+import { markdownVisType } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
 import type { ConfigSchema } from '../server/config';
 import { getMarkdownVisRenderer } from './markdown_renderer';
@@ -39,7 +39,7 @@ export class MarkdownPlugin implements Plugin<void, void> {
   }
 
   public setup(core: CoreSetup, { expressions, visualizations }: MarkdownSetupDependencies) {
-    visualizations.createBaseVisualization(markdownVisDefinition);
+    visualizations.createBaseVisualization(markdownVisType);
     expressions.registerRenderer(getMarkdownVisRenderer({ getStartDeps: core.getStartServices }));
     expressions.registerFunction(createMarkdownVisFn);
   }

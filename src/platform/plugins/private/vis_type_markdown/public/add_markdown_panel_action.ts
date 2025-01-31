@@ -10,13 +10,13 @@
 import { EmbeddableApiContext, apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { MarkdownStartDependencies } from './plugin';
-import { markdownVisDefinition } from './markdown_vis';
+import { markdownVisType } from './markdown_vis';
 
 export function getAddMarkdownPanelAction(deps: MarkdownStartDependencies) {
   return {
     id: 'addMarkdownPanelAction',
-    getIconType: () =>  markdownVisDefinition.icon,
-    order: markdownVisDefinition.order,
+    getIconType: () => markdownVisType.icon,
+    order: markdownVisType.order,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {
       const stateTransferService = deps.embeddable.getStateTransfer();
@@ -30,7 +30,7 @@ export function getAddMarkdownPanelAction(deps: MarkdownStartDependencies) {
       });
     },
     grouping: [ADD_PANEL_ANNOTATION_GROUP],
-    getDisplayName: () => markdownVisDefinition.title,
-    getDisplayNameTooltip: () => markdownVisDefinition.description
+    getDisplayName: () => markdownVisType.title,
+    getDisplayNameTooltip: () => markdownVisType.description
   };
 };
