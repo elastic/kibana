@@ -49,13 +49,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     unused('canDeployEntSearch', { level: 'warning' }),
     (deprecationConfig, fromPath, addDeprecation, context) => {
       [
-        deprecate('host', '9.0.0', {
-          documentationUrl: context.docLinks.enterpriseSearch.upgrade9x,
-          level: 'critical',
-          title: i18n.translate('xpack.enterpriseSearch.deprecations.config.hostTitle', {
-            defaultMessage: 'Enterprise Search host(s) must be removed',
-          }),
-        }),
         deprecate('ssl', '9.0.0', {
           documentationUrl: context.docLinks.enterpriseSearch.upgrade9x,
           level: 'critical',
