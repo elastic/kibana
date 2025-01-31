@@ -34,7 +34,6 @@ export function getAddMapPanelAction(deps: MapsPluginStartDependencies) {
     },
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],
     getDisplayName: () => mapsVisTypeAlias.title,
-    getDisplayNameTooltip: () =>
-      mapsVisTypeAlias.description,
+    getDisplayNameTooltip: () => mapsVisTypeAlias.description,
   };
 }

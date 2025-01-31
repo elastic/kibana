@@ -32,18 +32,20 @@ jest.mock('../../../services/kibana_services', () => ({
         id: 'myVis',
         type: '',
         order: 10,
-        grouping: [{
-          id: 'visualizations',
-          order: 1000,
-          getDisplayName: () => 'Visualizations',
-        },],
+        grouping: [
+          {
+            id: 'visualizations',
+            order: 1000,
+            getDisplayName: () => 'Visualizations',
+          },
+        ],
         getDisplayName: () => 'myVis',
         getIconType: () => 'empty',
         execute: () => {},
         isCompatible: async () => true,
       },
     ],
-  }
+  },
 }));
 
 describe('getMenuItemGroups', () => {

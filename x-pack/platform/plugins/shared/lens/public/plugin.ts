@@ -696,15 +696,10 @@ export class LensPlugin {
         });
       }
     );
-    startDependencies.uiActions.registerActionAsync(
-      'addLensPanelAction',
-      async () => {
-        const { getAddLensPanelAction } = await import(
-          './trigger_actions/add_panel_actions_module'
-        );
-        return getAddLensPanelAction(startDependencies);
-      }
-    );
+    startDependencies.uiActions.registerActionAsync('addLensPanelAction', async () => {
+      const { getAddLensPanelAction } = await import('./trigger_actions/add_panel_actions_module');
+      return getAddLensPanelAction(startDependencies);
+    });
     startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
     if (startDependencies.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach

@@ -11,13 +11,13 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
+import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { markdownVisType } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
 import type { ConfigSchema } from '../server/config';
 import { getMarkdownVisRenderer } from './markdown_renderer';
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 interface MarkdownSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;

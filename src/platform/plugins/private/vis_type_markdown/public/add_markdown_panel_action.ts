@@ -23,14 +23,18 @@ export function getAddMarkdownPanelAction(deps: MarkdownStartDependencies) {
       stateTransferService.navigateToEditor('visualize', {
         path: '#/create?type=markdown',
         state: {
-          originatingApp: apiHasAppContext(embeddable) ? embeddable.getAppContext().currentAppId : '',
-          originatingPath:  apiHasAppContext(embeddable) ? embeddable.getAppContext().getCurrentPath?.() : undefined,
+          originatingApp: apiHasAppContext(embeddable)
+            ? embeddable.getAppContext().currentAppId
+            : '',
+          originatingPath: apiHasAppContext(embeddable)
+            ? embeddable.getAppContext().getCurrentPath?.()
+            : undefined,
           searchSessionId: deps.data.search.session.getSessionId(),
         },
       });
     },
     grouping: [ADD_PANEL_ANNOTATION_GROUP],
     getDisplayName: () => markdownVisType.title,
-    getDisplayNameTooltip: () => markdownVisType.description
+    getDisplayNameTooltip: () => markdownVisType.description,
   };
-};
+}
