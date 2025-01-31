@@ -26,7 +26,6 @@ export default function ({ getService }: FtrProviderContext) {
     getDatastream,
   } = datastreamsHelpers(getService);
 
-  // Failing: See https://github.com/elastic/kibana/issues/209014
   describe('Data streams', function () {
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
