@@ -70,8 +70,6 @@ export const buildPreviousThresholdAlertRequest = ({
   bucketByFields: string[];
 }): estypes.SearchRequest => {
   return {
-    // We should switch over to @elastic/elasticsearch/lib/api/types instead of typesWithBodyKey where possible,
-    // but api/types doesn't have a complete type for `sort`
     size: 10000,
     sort: [
       {
