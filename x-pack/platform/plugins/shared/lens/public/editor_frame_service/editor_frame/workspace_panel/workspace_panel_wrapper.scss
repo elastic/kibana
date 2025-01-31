@@ -16,15 +16,15 @@
   }
 
   .lnsWorkspacePanelWrapper__pageContentBody {
-    overflow: hidden;
-    flex-grow: 1;
     display: flex;
+    flex-grow: 1;
     align-items: stretch;
     justify-content: stretch;
+    overflow: hidden;
+    height: 100%;
     border: $euiBorderThin;
     border-radius: $euiBorderRadius;
     background: $euiColorEmptyShade;
-    height: 100%;
     @include euiScrollBar;
     &>* {
       flex: 1 1 100%;
