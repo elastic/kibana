@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, IScopedClusterClient } from '@kbn/core/server';
 
+import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type { ExperimentalFeatures } from '../../../common';
 
 interface AssetInventoryClientOpts {
@@ -15,10 +16,23 @@ interface AssetInventoryClientOpts {
   experimentalFeatures: ExperimentalFeatures;
 }
 
+const ASSET_INVENTORY_STATUS: Record<string, string> = {
+  DISABLED: 'disabled',
+  INITIALIZING: 'initializing',
+  INSUFFICIENT_PRIVILEGES: 'insufficient_privileges',
+  EMPTY: 'empty',
+  READY: 'ready',
+};
+
 // AssetInventoryDataClient is responsible for managing the asset inventory,
 // including initializing and cleaning up resources such as Elasticsearch ingest pipelines.
 export class AssetInventoryDataClient {
-  constructor(private readonly options: AssetInventoryClientOpts) {}
+  private esClient: ElasticsearchClient;
+
+  constructor(private readonly options: AssetInventoryClientOpts) {
+    const { clusterClient } = this.options;
+    this.esClient = clusterClient.asCurrentUser;
+  }
 
   // Enables the asset inventory by deferring the initialization to avoid blocking the main thread.
   public async enable() {
@@ -34,11 +48,7 @@ export class AssetInventoryDataClient {
 
   // Initializes the asset inventory by validating experimental feature flags and triggering asynchronous setup.
   public async init() {
-    const { experimentalFeatures, logger } = this.options;
-
-    if (!experimentalFeatures.assetInventoryStoreEnabled) {
-      throw new Error('Universal entity store is not enabled');
-    }
+    const { logger } = this.options;
 
     logger.debug(`Initializing asset inventory`);
 
@@ -47,7 +57,7 @@ export class AssetInventoryDataClient {
     );
   }
 
-  // Sets up the necessary resources for asset inventory, including creating Elasticsearch ingest pipelines.
+  // Sets up the necessary resources for asset inventory.
   private async asyncSetup() {
     const { logger } = this.options;
     try {
@@ -71,5 +81,56 @@ export class AssetInventoryDataClient {
       logger.error(`Error deleting asset inventory: ${err.message}`);
       throw err;
     }
+  }
+
+  public async status(entityStoreStatus: GetEntityStoreStatusResponse) {
+    const entityEngineStatus = entityStoreStatus.status;
+
+    let status = ASSET_INVENTORY_STATUS.DISABLED;
+
+    if (entityEngineStatus === 'not_installed') {
+    } else {
+      console.log({ entityEngineStatus });
+      const universalEntityEngineStatus = entityStoreStatus.engines.find(
+        (engine) => engine.type === 'universal'
+      );
+      console.log({ universalEntityEngineStatus });
+      const universalTransformStatusResponse = await this.esClient.transform.getTransformStats(
+        {
+          transform_id: 'entities-v1-latest-security_universal_default',
+        },
+        { maxRetries: 0 }
+      );
+      console.log({ universalTransformStatusResponse });
+      const transformStatus = {
+        documents_indexed:
+          universalTransformStatusResponse?.transforms?.[0]?.stats?.documents_indexed,
+        documents_processed:
+          universalTransformStatusResponse?.transforms?.[0]?.stats?.documents_processed,
+        state: universalTransformStatusResponse?.transforms?.[0]?.state,
+        trigger_count: universalTransformStatusResponse?.transforms?.[0]?.stats?.trigger_count,
+      };
+
+      if (entityEngineStatus === 'installing') {
+        status = ASSET_INVENTORY_STATUS.INITIALIZING;
+      } else {
+        if (!universalEntityEngineStatus) {
+          status = ASSET_INVENTORY_STATUS.DISABLED;
+        } else if (universalEntityEngineStatus.status === 'started') {
+          if (transformStatus.state === 'started') {
+            if (transformStatus.trigger_count > 1) {
+              if (transformStatus.documents_indexed > 0) {
+                if (transformStatus.documents_processed > 0) {
+                  status = ASSET_INVENTORY_STATUS.READY;
+                } else {
+                  status = ASSET_INVENTORY_STATUS.EMPTY;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return { status };
   }
 }
