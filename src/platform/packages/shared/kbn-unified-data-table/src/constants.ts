@@ -17,12 +17,10 @@ export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 50
 /**
  * Row height might be a value from -1 to 20
  * A value of -1 automatically adjusts the row height to fit the contents.
- * A value of 0 displays the content in a single line.
  * A value from 1 to 20 represents number of lines of Document explorer row to display.
  */
 export const ROWS_HEIGHT_OPTIONS = {
   auto: -1,
-  single: 0,
   default: 3,
 } as const;
 export const defaultRowLineHeight = '1.6em';

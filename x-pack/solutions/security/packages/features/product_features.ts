@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+export { getCasesFeature, getCasesV2Feature, getCasesV3Feature } from './src/cases';
 export { getSecurityFeature, getSecurityV2Feature } from './src/security';
-export { getCasesFeature, getCasesV2Feature } from './src/cases';
 export { getAssistantFeature } from './src/assistant';
 export { getAttackDiscoveryFeature } from './src/attack_discovery';
 export { getTimelineFeature } from './src/timeline';
