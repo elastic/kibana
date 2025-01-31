@@ -53,17 +53,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('vega chart', () => {
-
       it('code-editor correct syntax highlight langs', async () => {
-        const hasRequiredLanguages = await browser.execute(
-          () => {
-            // @ts-ignore
-            const langs: {id: string}[] = window.MonacoEnvironment?.monaco?.languages?.getLanguages() ?? [];
-            return langs.some(l => l?.id === 'hjson') && langs.some(l => l?.id === 'xjson'); 
-          }
-        );
+        const hasRequiredLanguages = await browser.execute(() => {
+          // @ts-ignore
+          const langs: Array<{ id: string }> =
+            window.MonacoEnvironment?.monaco?.languages?.getLanguages() ?? [];
+          return langs.some((l) => l?.id === 'hjson') && langs.some((l) => l?.id === 'xjson');
+        });
         expect(hasRequiredLanguages).to.be(true);
-      })
+      });
 
       describe('initial render', () => {
         it('should have some initial vega spec text', async function () {
