@@ -7,25 +7,21 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ENTITY_FLYOUT } from '../../../../../../common/constants';
 import type { ObservedServiceDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { buildFieldsTermAggregation } from '../../hosts/details/helpers';
 import { SERVICE_FIELDS } from './helpers';
+import type { SecuritySolutionSearchStrategyBuildDslDeps } from '../../types';
 
-export const buildObservedServiceDetailsQuery = async (
+export const buildObservedServiceDetailsQuery = (
   {
     serviceName,
     defaultIndex,
     timerange: { from, to },
     filterQuery,
   }: ObservedServiceDetailsRequestOptions,
-  deps?: SearchStrategyDependencies
-): Promise<ISearchRequestParams> => {
-  const isColdFrozenTierDisabled = await deps?.uiSettingsClient.get<boolean>(
-    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ENTITY_FLYOUT
-  );
+  deps: SecuritySolutionSearchStrategyBuildDslDeps
+): ISearchRequestParams => {
   const filter: QueryDslQueryContainer[] = [
     ...createQueryFilterClauses(filterQuery),
     { term: { 'service.name': serviceName } },
@@ -40,16 +36,8 @@ export const buildObservedServiceDetailsQuery = async (
     },
   ];
 
-  if (isColdFrozenTierDisabled) {
-    filter.push({
-      bool: {
-        must_not: {
-          terms: {
-            _tier: ['data_frozen', 'data_cold'],
-          },
-        },
-      },
-    });
+  if (deps.coldFrozenTierFilter) {
+    filter.push(deps.coldFrozenTierFilter);
   }
 
   const dslQuery = {

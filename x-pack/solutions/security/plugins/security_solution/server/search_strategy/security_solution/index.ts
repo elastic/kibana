@@ -13,9 +13,21 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { z } from '@kbn/zod';
 import type { ISearchRequestParams } from '@kbn/search-types';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ENTITY_FLYOUT } from '../../../common/constants';
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import { securitySolutionFactory } from './factory';
 import type { EndpointAppContext } from '../../endpoint/types';
+
+// TODO move this to a better place
+const EXCLUDE_COLD_FROZEN_TIERS_FILTER = {
+  bool: {
+    must_not: {
+      terms: {
+        _tier: ['data_frozen', 'data_cold'],
+      },
+    },
+  },
+};
 
 export const securitySolutionSearchStrategyProvider = (
   data: PluginStart,
@@ -33,10 +45,16 @@ export const securitySolutionSearchStrategyProvider = (
       // NOTE: without this parameter, .hits.hits can be empty
       options.retrieveResults = true;
 
-      // Ensures that DSL is a promise
-      const dslPromise: Promise<ISearchRequestParams> = new Promise((resolve) =>
-        resolve(queryFactory.buildDsl(parsedRequest, deps))
-      );
+      // Provide the ability to exclude cold and frozen tiers
+      const dslPromise: Promise<ISearchRequestParams> = deps?.uiSettingsClient
+        .get<boolean>(EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ENTITY_FLYOUT)
+        .then((excludeColdFrozenTier) => {
+          return queryFactory.buildDsl(parsedRequest, {
+            coldFrozenTierFilter: excludeColdFrozenTier
+              ? EXCLUDE_COLD_FROZEN_TIERS_FILTER
+              : undefined,
+          });
+        });
 
       return from(dslPromise).pipe(
         map((dsl) => {

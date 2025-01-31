@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core/server';
 import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/search-types';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type {
   FactoryQueryTypes,
   StrategyRequestType,
@@ -20,11 +20,14 @@ import type {
 } from '../../../../common/search_strategy/security_solution';
 import type { EndpointAppContext } from '../../../endpoint/types';
 
+export interface SecuritySolutionSearchStrategyBuildDslDeps {
+  coldFrozenTierFilter: QueryDslQueryContainer | undefined;
+}
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
   buildDsl: (
     options: StrategyRequestType<T>,
-    deps?: SearchStrategyDependencies
-  ) => ISearchRequestParams | Promise<ISearchRequestParams>;
+    deps: SecuritySolutionSearchStrategyBuildDslDeps
+  ) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
     response: IEsSearchResponse,
