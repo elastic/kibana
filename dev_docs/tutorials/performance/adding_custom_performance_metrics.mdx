@@ -420,6 +420,34 @@ The data is available to be analyzed on the production telemetry cluster.
 
 [Dashboard](<https://stack-telemetry.elastic.dev/s/apm/app/dashboards#/view/f240fff6-fac9-491b-81d1-ac39006c5c94?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15h,to:now))>)
 
+## Analysis for Flattened Fields 
+
+ 
+Flattened fields, like `meta`, are not directly aggregatable in Elasticsearch. To enable data aggregation, you need to create a runtime field.
+
+Here’s a step-by-step guide to set up a runtime field for `meta.query_range_secs`:
+
+
+
+1. Go to Discover and select the appropriate data view(e.g,  `ebt-kibana-*-performance-metrics`).
+
+2. Click "Add a New Field" 
+  - Type: {type}
+  - Field Name: {runtime_field_name}
+
+3. Define the runtime field logic using the following script:
+```
+def meta = doc["meta"].size();  
+if (meta > 0) {  
+    def range = doc["meta.query_range_secs"].size();  
+    if (range > 0) {  
+        // Emit the value of 'meta.query_range_secs'
+        emit(Double.parseDouble(doc["meta.query_range_secs"].value));  
+    }  
+}
+```
+
+
 # Analytics Client
 
 Holds the public APIs to report events, enrich the events' context and set up the transport mechanisms. Please checkout package documentation to get more information about
