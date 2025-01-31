@@ -32,6 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover unsaved changes badge', function describeIndexTests() {
+    // see details: https://github.com/elastic/kibana/issues/208982
+    this.tags(['failsOnMKI']);
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
