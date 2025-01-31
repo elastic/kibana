@@ -340,7 +340,7 @@ https://kbn.test.co in the same window.`);
       await expect(finishSAMLHandshake(params, retryCount)).rejects.toThrow(
         'SAML callback failed: expected 302, got 400'
       );
-      expect(axios.request).toHaveBeenCalledTimes(2);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(2);
     });
   });
 });

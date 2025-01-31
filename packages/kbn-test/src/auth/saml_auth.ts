@@ -287,31 +287,29 @@ export const finishSAMLHandshake = async (params: SAMLCallbackParams, retriesCou
         );
       }
 
-      // disable retry if not 5xx errors
-      if (authResponse.status < 500) {
-        attemptsLeft = -1;
-      }
-
-      throw new Error(`SAML callback failed: expected 302, got ${authResponse.status}`);
+      throw new Error(`SAML callback failed: expected 302, got ${authResponse.status}`, {
+        cause: {
+          status: authResponse.status, // use response status to retry on 5xx errors
+        },
+      });
     } catch (ex) {
       cleanException(kbnHost, ex);
-
-      // exit for non 5xx errors
-      if (attemptsLeft === -1) {
+      // retry for 5xx errors
+      if (ex?.cause?.status >= 500) {
+        if (--attemptsLeft > 0) {
+          // randomize delay to avoid retrying API call in parallel workers concurrently
+          const attemptDelay = randomInt(500, 2_500);
+          // log only error message
+          log.error(`${ex.message}\nWaiting ${attemptDelay} ms before the next attempt`);
+          await delay(attemptDelay);
+        } else {
+          throw new Error(`Retry failed after ${retriesCount} attempts: ${ex.message}`);
+        }
+      } else {
+        // exit for non 5xx errors
         // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
         log.error(`Request sent: ${util.inspect(request)}`);
         throw ex;
-      }
-
-      // retry for 5xx errors
-      if (--attemptsLeft > 0) {
-        // randomize delay to avoid retrying API call in parallel workers concurrently
-        const attemptDelay = randomInt(500, 2_500);
-        // log only error message
-        log.error(`${ex.message}\nWaiting ${attemptDelay} ms before the next attempt`);
-        await delay(attemptDelay);
-      } else {
-        throw new Error(`Retry failed after ${retriesCount} attempts: ${ex.message}`);
       }
     }
   }
