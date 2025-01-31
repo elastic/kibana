@@ -31,6 +31,21 @@ import {
 } from './constants';
 import { securityWorkflowInsightsFieldMap } from './field_map_configurations';
 
+export interface FileEventDoc {
+  process: {
+    code_signature?: {
+      subject_name: string;
+      trusted: boolean;
+    };
+    Ext?: {
+      code_signature?: Array<{
+        subject_name: string;
+        trusted: boolean;
+      }>;
+    };
+  };
+}
+
 export function createDatastream(kibanaVersion: string): DataStreamSpacesAdapter {
   const ds = new DataStreamSpacesAdapter(DATA_STREAM_PREFIX, {
     kibanaVersion,
@@ -217,3 +232,32 @@ export const checkIfRemediationExists = async ({
 
   return !!response?.total && response.total > 0;
 };
+
+export function getValidCodeSignature(
+  os: string,
+  hit: FileEventDoc | undefined
+): { field: string; value: string } | null {
+  if (os === 'windows') {
+    const codeSignatures = hit?.process?.Ext?.code_signature || [];
+    for (const codeSignature of codeSignatures) {
+      if (
+        codeSignature.trusted &&
+        codeSignature.subject_name &&
+        codeSignature.subject_name !== 'Microsoft Windows Hardware Compatibility Publisher'
+      ) {
+        return {
+          field: 'process.Ext.code_signature',
+          value: codeSignature.subject_name,
+        };
+      }
+    }
+  } else {
+    if (hit?.process?.code_signature?.trusted && hit.process.code_signature.subject_name) {
+      return {
+        field: 'process.code_signature',
+        value: hit.process.code_signature.subject_name,
+      };
+    }
+  }
+  return null;
+}

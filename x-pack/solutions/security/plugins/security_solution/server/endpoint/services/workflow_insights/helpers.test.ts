@@ -28,6 +28,7 @@ import {
   TargetType,
 } from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointMetadataService } from '../metadata';
+import type { FileEventDoc } from './helpers';
 import {
   buildEsQueryParams,
   checkIfRemediationExists,
@@ -35,6 +36,7 @@ import {
   createPipeline,
   generateInsightId,
   generateTrustedAppsFilter,
+  getValidCodeSignature,
   groupEndpointIdsByOS,
 } from './helpers';
 import {
@@ -369,6 +371,7 @@ describe('helpers', () => {
       expect(filter).toBe('');
     });
   });
+
   describe('checkIfRemediationExists', () => {
     it('should return false for non-incompatible_antivirus types', async () => {
       const insight = getDefaultInsight({
@@ -419,6 +422,96 @@ describe('helpers', () => {
         sortOrder: 'desc',
       });
       expect(result).toBe(true);
+    });
+  });
+
+  describe('getValidCodeSignature', () => {
+    it('should return the first trusted signature for Windows', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [{ subject_name: 'Valid Cert', trusted: true }],
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({
+        field: 'process.Ext.code_signature',
+        value: 'Valid Cert',
+      });
+    });
+
+    it('should return the first trusted signature for Windows, skipping Microsoft Windows Hardware Compatibility Publisher', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'Microsoft Windows Hardware Compatibility Publisher', trusted: true },
+              { subject_name: 'Valid Cert', trusted: false },
+              { subject_name: 'Valid Cert2', trusted: true },
+            ],
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({
+        field: 'process.Ext.code_signature',
+        value: 'Valid Cert2',
+      });
+    });
+
+    it('should return null if no valid trusted signature is found for Windows', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'Microsoft Windows Hardware Compatibility Publisher', trusted: true },
+            ],
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should return the subject name for macOS when code signature is present', () => {
+      const os = 'macos';
+      const codeSignatureSearchHit = {
+        process: {
+          code_signature: { subject_name: 'Apple Inc.', trusted: true },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({ field: 'process.code_signature', value: 'Apple Inc.' });
+    });
+
+    it('should return null if no code signature is present for macOS', () => {
+      const os = 'macos';
+      const codeSignatureSearchHit = {
+        process: {},
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should return null if code_signature field is empty for macOS', () => {
+      const os = 'macos';
+      const codeSignatureSearchHit = {
+        process: {
+          code_signature: {},
+        },
+      } as FileEventDoc;
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
     });
   });
 });
