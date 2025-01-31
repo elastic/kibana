@@ -20,10 +20,11 @@ import type { SecuritySolutionFactory } from '../types';
 import { buildFirstOrLastSeenQuery } from './query.first_or_last_seen.dsl';
 
 export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery> = {
-  buildDsl: (options) => buildFirstOrLastSeenQuery(options),
+  buildDsl: buildFirstOrLastSeenQuery,
   parse: async (
     options,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<unknown>,
+    deps
   ): Promise<FirstLastSeenStrategyResponse> => {
     firstLastSeenRequestOptionsSchema.parse(options);
 
@@ -35,7 +36,7 @@ export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery>
     );
 
     const inspect = {
-      dsl: [inspectStringifyObject(buildFirstOrLastSeenQuery(options))],
+      dsl: [inspectStringifyObject(deps?.dsl)],
     };
 
     const { order } = options;

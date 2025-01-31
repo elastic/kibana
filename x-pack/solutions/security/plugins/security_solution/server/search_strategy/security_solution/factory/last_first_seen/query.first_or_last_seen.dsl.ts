@@ -8,11 +8,19 @@
 import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
 
 import { createQueryFilterClauses } from '../../../../utils/build_query';
+import type { SecuritySolutionSearchStrategyBuildDslDeps } from '../types';
 
-export const buildFirstOrLastSeenQuery = (options: FirstLastSeenRequestOptions) => {
+export const buildFirstOrLastSeenQuery = (
+  options: FirstLastSeenRequestOptions,
+  deps: SecuritySolutionSearchStrategyBuildDslDeps
+) => {
   const { field, value, defaultIndex, order, filterQuery } = options;
 
   const filter = [...createQueryFilterClauses(filterQuery), { term: { [field]: value } }];
+
+  if (deps.coldFrozenTierFilter) {
+    filter.push(deps.coldFrozenTierFilter);
+  }
 
   const dslQuery = {
     allow_no_indices: true,
