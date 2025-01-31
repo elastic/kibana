@@ -8,7 +8,7 @@
 import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
@@ -85,7 +85,7 @@ export function ErrorGroupList({
   const { offset, rangeFrom, rangeTo } = query;
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
-  const [hasTableLoaded, setHasTableLoaded] = useState(false);
+  const hasTableLoaded = useRef(false);
   const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
 
   const {
@@ -106,7 +106,7 @@ export function ErrorGroupList({
     if (
       mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
       detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      !hasTableLoaded
+      !hasTableLoaded.current
     ) {
       if (onLoadTable) {
         onLoadTable();
@@ -118,14 +118,12 @@ export function ErrorGroupList({
           },
         });
       }
-      setHasTableLoaded(true);
+      hasTableLoaded.current = true;
     }
   }, [
     mainStatisticsStatus,
     detailedStatisticsStatus,
     onLoadTable,
-    hasTableLoaded,
-    setHasTableLoaded,
     rangeFrom,
     rangeTo,
     onPageReady,

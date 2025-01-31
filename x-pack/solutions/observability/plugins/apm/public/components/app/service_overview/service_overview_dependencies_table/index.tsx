@@ -9,7 +9,7 @@ import { EuiIconTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FETCH_STATUS, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
@@ -55,7 +55,7 @@ export function ServiceOverviewDependenciesTable({
   const { serviceName, transactionType } = useApmServiceContext();
   const { onPageReady } = usePerformanceContext();
   const trackEvent = useUiTracker();
-  const [hasTableLoaded, setHasTableLoaded] = useState(false);
+  const hasTableLoaded = useRef(false);
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -81,7 +81,7 @@ export function ServiceOverviewDependenciesTable({
   useEffect(() => {
     // this component is used both for the service overview tab and the transactions tab,
     // onLoadTable will be defined if it's the service overview tab
-    if (status === FETCH_STATUS.SUCCESS && !hasTableLoaded) {
+    if (status === FETCH_STATUS.SUCCESS && !hasTableLoaded.current) {
       if (onLoadTable) {
         onLoadTable();
       } else {
@@ -92,9 +92,9 @@ export function ServiceOverviewDependenciesTable({
           },
         });
       }
-      setHasTableLoaded(true);
+      hasTableLoaded.current = true;
     }
-  }, [status, onLoadTable, hasTableLoaded, setHasTableLoaded, onPageReady, rangeFrom, rangeTo]);
+  }, [status, onLoadTable, onPageReady, rangeFrom, rangeTo]);
 
   const dependencies =
     data?.serviceDependencies.map((dependency) => {
