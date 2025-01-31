@@ -185,7 +185,7 @@ export const useTopNavLinks = ({
       entries.unshift(esqLDataViewTransitionToggle);
     }
 
-    if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
+    if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
       const saveSearch = {
         id: 'save',
         label: i18n.translate('discover.localMenu.saveTitle', {

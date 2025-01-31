@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get, uniq } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { DefaultDraggable } from '../../../../common/components/draggables';
 
