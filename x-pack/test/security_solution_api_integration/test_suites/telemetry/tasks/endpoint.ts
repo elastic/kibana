@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('Endpoint metrics and info task.', function() {
+  describe('Endpoint metrics and info task.', function () {
     describe('@ess @serverless Execution', () => {
       this.tags('skipServerless');
       beforeEach(async () => {
