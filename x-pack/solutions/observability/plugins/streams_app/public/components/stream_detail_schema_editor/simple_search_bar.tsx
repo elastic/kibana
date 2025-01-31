@@ -19,11 +19,9 @@ export const SimpleSearchBar = ({
   return (
     <EuiSearchBar
       query={query}
+      onChange={onChange}
       box={{
         incremental: true,
-      }}
-      onChange={(nextQuery) => {
-        onChange(nextQuery);
       }}
     />
   );
