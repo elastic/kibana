@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
-
+import React from 'react';
+import {
+  BulkActionTypeEnum,
+  BulkActionsDryRunErrCodeEnum,
+} from '../../../../../../common/api/detection_engine/rule_management';
+import { TestProviders } from '../../../../../common/mock';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
-import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
-
-const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  return (
-    <IntlProvider locale="en">
-      <>{children}</>
-    </IntlProvider>
-  );
-};
 
 describe('Component BulkEditRuleErrorsList', () => {
   test('should not render component if no errors present', () => {
     const { container } = render(
       <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={[]} />,
       {
-        wrapper: Wrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -49,7 +41,7 @@ describe('Component BulkEditRuleErrorsList', () => {
     render(
       <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={ruleErrors} />,
       {
-        wrapper: Wrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -59,19 +51,19 @@ describe('Component BulkEditRuleErrorsList', () => {
 
   test.each([
     [
-      BulkActionsDryRunErrCode.IMMUTABLE,
+      BulkActionsDryRunErrCodeEnum.IMMUTABLE,
       '2 prebuilt Elastic rules (editing prebuilt rules is not supported)',
     ],
     [
-      BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN,
+      BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN,
       "2 machine learning rules (these rules don't have index patterns)",
     ],
     [
-      BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN,
+      BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN,
       "2 ES|QL rules (these rules don't have index patterns)",
     ],
     [
-      BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+      BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
       "2 machine learning rules can't be edited (test failure)",
     ],
     [undefined, "2 rules can't be edited (test failure)"],
@@ -86,7 +78,7 @@ describe('Component BulkEditRuleErrorsList', () => {
     render(
       <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.edit} ruleErrors={ruleErrors} />,
       {
-        wrapper: Wrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -95,11 +87,11 @@ describe('Component BulkEditRuleErrorsList', () => {
 
   test.each([
     [
-      BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE,
+      BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_FEATURE,
       '2 rules (Manual rule run feature is disabled)',
     ],
     [
-      BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE,
+      BulkActionsDryRunErrCodeEnum.MANUAL_RULE_RUN_DISABLED_RULE,
       '2 rules (Cannot schedule manual rule run for disabled rules)',
     ],
   ])('should render correct message for "%s" errorCode', (errorCode, value) => {
@@ -113,7 +105,7 @@ describe('Component BulkEditRuleErrorsList', () => {
     render(
       <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.run} ruleErrors={ruleErrors} />,
       {
-        wrapper: Wrapper,
+        wrapper: TestProviders,
       }
     );
 
