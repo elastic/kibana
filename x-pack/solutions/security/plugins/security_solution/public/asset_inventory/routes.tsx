@@ -16,19 +16,9 @@ import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { DataViewContext } from './hooks/data_view_context';
-import { mockData } from './sample_data';
+import { AssetInventoryProvider } from './provider';
 
-const AllAssetsLazy = lazy(() => import('./pages/all_assets'));
-
-const rows = [
-  ...mockData,
-  ...mockData,
-  ...mockData,
-  ...mockData,
-  ...mockData,
-  ...mockData,
-  ...mockData,
-] as typeof mockData;
+const AssetsPageLazy = lazy(() => import('./pages'));
 
 // Initializing react-query
 const queryClient = new QueryClient({
@@ -58,12 +48,9 @@ export const AssetInventoryRoutes = () => {
           <DataViewContext.Provider value={dataViewContextValue}>
             <SecuritySolutionPageWrapper noPadding>
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllAssetsLazy
-                  rows={rows}
-                  isLoading={false}
-                  loadMore={() => {}}
-                  flyoutComponent={() => <></>}
-                />
+                <AssetInventoryProvider>
+                  <AssetsPageLazy />
+                </AssetInventoryProvider>
               </Suspense>
             </SecuritySolutionPageWrapper>
           </DataViewContext.Provider>

@@ -141,7 +141,7 @@ export interface AllAssetsProps {
   'data-test-subj'?: string;
 }
 
-const AllAssets = ({
+export const AllAssets = ({
   rows,
   isLoading,
   loadMore,
@@ -434,6 +434,3 @@ const AllAssets = ({
     </I18nProvider>
   );
 };
-
-// we need to use default exports to import it via React.lazy
-export default AllAssets; // eslint-disable-line import/no-default-export
