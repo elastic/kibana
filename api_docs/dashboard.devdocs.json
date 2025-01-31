@@ -840,6 +840,14 @@
             "text": "PublishesSavedObjectId"
           },
           " & ",
+          {
+            "pluginId": "@kbn/esql-variables-types",
+            "scope": "public",
+            "docId": "kibKbnEsqlVariablesTypesPluginApi",
+            "section": "def-public.PublishesESQLVariables",
+            "text": "PublishesESQLVariables"
+          },
+          " & ",
           "PublishesSearchSession",
           " & ",
           {
@@ -2134,17 +2142,6 @@
             "type": "boolean",
             "tags": [],
             "label": "showWriteControls",
-            "description": [],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardCapabilities.saveQuery",
-            "type": "boolean",
-            "tags": [],
-            "label": "saveQuery",
             "description": [],
             "path": "src/platform/plugins/shared/dashboard/common/types.ts",
             "deprecated": false,

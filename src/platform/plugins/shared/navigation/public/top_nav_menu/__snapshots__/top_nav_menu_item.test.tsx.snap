@@ -28,6 +28,6 @@ exports[`TopNavMenu Should render emphasized item which should be clickable 1`] 
   onClick={[Function]}
   size="s"
 >
-  Test
+  <ButtonContainer />
 </EuiButton>
 `;

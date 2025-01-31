@@ -480,6 +480,40 @@ NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning
 and <<server-ssl-supportedProtocols, `server.ssl.supportedProtocols`>>, if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of
 the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration.
 
+[[server-rate-limiter-enabled]] `server.rateLimiter.enabled`::
+Enables rate-limiting of requests to the {kib} server based on Node.js' Event Loop Utilization.
+If the average event loop utilization for the specified term exceeds the configured threshold, the server will respond with a `429 Too Many Requests` status code.
++
+This functionality should be used carefully as it may impact the server's availability.
+The configuration options vary per environment, so it is recommended to enable this option in a testing environment first, adjust the rate-limiter configuration, and then roll it out to production.
++
+*Default: `false`*
+
+`server.rateLimiter.elu`::
+The Event Loop Utilization (ELU) threshold for rate-limiting requests to the {kib} server.
+The ELU is a value between 0 and 1, representing the average event loop utilization over the specified term.
+If the average ELU exceeds this threshold, the server will respond with a `429 Too Many Requests` status code.
++
+In a multi-instance environment with autoscaling, this value is usually between 0.6 and 0.8 to give the autoscaler enough time to react.
+This value can be higher in a single-instance environment but should not exceed 1.0. In general, the lower the value, the more aggressive the rate limiting.
+And the highest possible option should be used to prevent the {kib} server from being terminated.
+
+`server.rateLimiter.term`::
+This value is one of `short`, `medium`, or `long`, representing the term over which the average event loop utilization is calculated.
+It uses exponential moving averages (EMA) to smooth out the utilization values.
+Each term corresponds to `15s`, `30s`, and `60s`, respectively.
++
+The term value also changes the way the rate limiter sees the trend in the load:
++
+- `short`: `elu.short > server.rateLimiter.term`;
+- `medium`: `elu.short > server.rateLimiter.elu AND elu.medium > server.rateLimiter.elu`;
+- `long`: `elu.short > server.rateLimiter.elu AND elu.medium > server.rateLimiter.elu AND elu.long > server.rateLimiter.elu`.
+
++
+This behavior prevents requests from being throttled if the load starts decreasing.
+In general, the shorter the term, the more aggressive the rate limiting.
+In the multi-instance environment, the `medium` term makes the most sense as it gives the {kib} server enough time to spin up a new instance and prevents the existing instances from being terminated.
+
 [[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp`::
 Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
@@ -657,7 +691,6 @@ include::{kibana-root}/docs/settings/alert-action-settings.asciidoc[]
 include::{kibana-root}/docs/settings/apm-settings.asciidoc[]
 include::{kibana-root}/docs/settings/banners-settings.asciidoc[]
 include::{kibana-root}/docs/settings/cases-settings.asciidoc[leveloffset=+1]
-include::{kibana-root}/docs/settings/enterprise-search-settings.asciidoc[]
 include::{kibana-root}/docs/settings/fleet-settings.asciidoc[]
 include::{kibana-root}/docs/settings/i18n-settings.asciidoc[]
 include::{kibana-root}/docs/settings/logging-settings.asciidoc[]

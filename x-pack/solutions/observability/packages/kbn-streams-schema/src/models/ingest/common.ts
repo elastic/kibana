@@ -25,23 +25,3 @@ export const elasticsearchAssetSchema: z.Schema<ElasticsearchAsset> = z.object({
   type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
   id: NonEmptyString,
 });
-
-export interface IngestStreamLifecycleDLM {
-  type: 'dlm';
-  data_retention?: string;
-}
-
-export interface IngestStreamLifecycleILM {
-  type: 'ilm';
-  policy: string;
-}
-
-export type IngestStreamLifecycle = IngestStreamLifecycleDLM | IngestStreamLifecycleILM;
-
-export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.discriminatedUnion(
-  'type',
-  [
-    z.object({ type: z.literal('dlm'), data_retention: z.optional(NonEmptyString) }),
-    z.object({ type: z.literal('ilm'), policy: NonEmptyString }),
-  ]
-);
