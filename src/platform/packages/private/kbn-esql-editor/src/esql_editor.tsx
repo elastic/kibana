@@ -23,7 +23,7 @@ import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
@@ -31,9 +31,12 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import {
+  type ESQLRealField,
+  ESQLVariableType,
+  type ESQLControlVariable,
+} from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -89,6 +92,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   isLoading,
   isDisabled,
   hideRunQueryText,
+  hideRunQueryButton,
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
@@ -116,6 +120,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
     uiActions,
+    data,
   } = kibana.services;
 
   const variablesService = kibana.services?.esql?.variablesService;
@@ -384,7 +389,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart, undefined, AbortController?]) => ({
+      (...args: [{ esql: string }, ExpressionsStart, TimeRange, AbortController?]) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
@@ -418,11 +423,12 @@ export const ESQLEditor = memo(function ESQLEditor({
           };
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
+          const timeRange = data.query.timefilter.timefilter.getTime();
           try {
             const table = await memoizedFieldsFromESQL(
               esqlQuery,
               expressions,
-              undefined,
+              timeRange,
               abortController
             ).result;
             const columns: ESQLRealField[] =
@@ -466,19 +472,21 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     query.esql,
     memoizedSources,
     dataViews,
     core,
     esqlFieldsCache,
+    data.query.timefilter.timefilter,
     memoizedFieldsFromESQL,
     expressions,
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    variablesService,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    variablesService?.esqlVariables,
+    variablesService?.areSuggestionsEnabled,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -679,7 +687,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const editorPanel = (
     <>
-      {Boolean(editorIsInline) && (
+      {Boolean(editorIsInline) && !hideRunQueryButton && (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}

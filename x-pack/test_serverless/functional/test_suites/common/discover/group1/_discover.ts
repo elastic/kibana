@@ -32,6 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover test', function describeIndexTests() {
+    // see details: https://github.com/elastic/kibana/issues/208982
+    this.tags(['failsOnMKI']);
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

@@ -19,7 +19,8 @@ import { casesQueriesKeys } from './constants';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('usePostPushToService', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/207248
+describe.skip('usePostPushToService', () => {
   const connector = {
     id: '123',
     name: 'My connector',

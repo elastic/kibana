@@ -1806,6 +1806,9 @@ describe('Exception helpers', () => {
           };
         }),
         {
+          id: 'Endpoint.policy.applied.artifacts.global.channel',
+        },
+        {
           id: 'user.name',
         },
         {
