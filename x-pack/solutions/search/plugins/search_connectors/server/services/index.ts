@@ -104,11 +104,11 @@ export class AgentlessConnectorsInfraService {
                 this.logger.debug(`Policy ${policy.id} is missing service_type, skipping`);
                 continue;
               }
-              if (input.compiled_input.connector_id == null && input.compiled_input.service_type == null) {
+              if (input.compiled_input.connector_id == null) {
                 this.logger.debug(`Policy ${policy.id} is missing connector_id, skipping`);
-                continue;
+            
               }
-              if (input.compiled_input.connector_name == null && input.compiled_input.service_type == null) {
+              if (input.compiled_input.connector_name == null) {
                 this.logger.debug(`Policy ${policy.id} is missing connector_name`);
                 // No need to skip, that's fine
               }
