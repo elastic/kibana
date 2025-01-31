@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+export { promptType } from './src/saved_object_mappings';
+export { getPrompt, getPromptsByGroupId, resolveProviderAndModel } from './src/get_prompt';
 export {
-  encodePathParams,
-  generateEncodedPath,
-  useDecodedParams,
-} from '../../../shared/encode_path_params';
+  type PromptArray,
+  type Prompt,
+  type GetPromptArgs,
+  type GetPromptsByGroupIdArgs,
+} from './src/types';
