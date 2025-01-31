@@ -17,7 +17,7 @@ import { HasTypeDisplayName } from './has_type';
  */
 export interface HasReadOnlyCapabilities extends HasTypeDisplayName {
   onShowConfig: () => Promise<void>;
-  isReadOnlyEnabled: () => boolean;
+  isReadOnlyEnabled: () => { read: boolean; write: boolean };
 }
 
 /**
