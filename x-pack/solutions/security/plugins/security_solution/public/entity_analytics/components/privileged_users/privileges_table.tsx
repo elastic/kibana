@@ -53,6 +53,10 @@ const getTableColumns = () => [
     name: 'Action',
   },
   {
+    field: 'group.name',
+    name: 'Group',
+  },
+  {
     field: 'event.outcome',
     name: 'Outcome',
   },

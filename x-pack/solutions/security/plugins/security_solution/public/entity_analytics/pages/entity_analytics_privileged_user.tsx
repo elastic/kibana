@@ -62,7 +62,7 @@ const EntityAnalyticsPrivilegedUserComponent = () => {
       <SecuritySolutionPageWrapper noPadding={false}>
         <HeaderPage title={PRIVILEGED_USER_MONITORING} />
         <EuiCallOut
-          title="This page is a proof of concept only!"
+          title="This page is a throwaway proof of concept only!"
           color="warning"
           iconType="alert"
           size="s"

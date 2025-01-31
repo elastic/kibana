@@ -49,6 +49,12 @@ export const privilegedUsersFlyoutRoute = (
             },
           }));
 
+          const targetUserNamesFilter = request.body.userNames.map((userName) => ({
+            term: {
+              'target.user.name': userName,
+            },
+          }));
+
           const loginsResponse = await esClient.search({
             body: {
               sort: [
@@ -81,7 +87,7 @@ export const privilegedUsersFlyoutRoute = (
               ],
               query: {
                 bool: {
-                  should: userNamesFilter,
+                  should: [...userNamesFilter, ...targetUserNamesFilter],
                   minimum_should_match: 1,
                 },
               },
