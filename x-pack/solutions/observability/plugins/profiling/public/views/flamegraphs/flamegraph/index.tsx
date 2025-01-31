@@ -59,7 +59,7 @@ export function FlameGraphView() {
 
   const { onPageReady } = usePerformanceContext();
 
-  if (state.status !== AsyncStatus.Loading) {
+  if (state.status === AsyncStatus.Settled) {
     onPageReady({
       meta: {
         rangeFrom,

@@ -70,7 +70,7 @@ export function TopNFunctionsView() {
     });
   }
 
-  if (state.status !== AsyncStatus.Loading) {
+  if (state.status === AsyncStatus.Settled) {
     onPageReady({
       meta: {
         rangeFrom,

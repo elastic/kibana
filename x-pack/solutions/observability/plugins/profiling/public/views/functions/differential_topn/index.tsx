@@ -149,11 +149,7 @@ export function DifferentialTopNFunctionsView() {
     });
   }
 
-  function isLoading() {
-    return state.status === AsyncStatus.Loading || comparisonState.status === AsyncStatus.Loading;
-  }
-
-  if (!isLoading()) {
+  if (state.status === AsyncStatus.Settled || comparisonState.status === AsyncStatus.Settled) {
     onPageReady({
       meta: {
         rangeFrom,
@@ -180,7 +176,10 @@ export function DifferentialTopNFunctionsView() {
             />
             <EuiSpacer />
             <FramesSummary
-              isLoading={isLoading()}
+              isLoading={
+                state.status === AsyncStatus.Loading ||
+                comparisonState.status === AsyncStatus.Loading
+              }
               baseValue={
                 state.data
                   ? {
