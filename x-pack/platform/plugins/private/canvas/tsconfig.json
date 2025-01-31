@@ -88,7 +88,8 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/visualizations-plugin"
   ],
   "exclude": ["target/**/*"]
 }
