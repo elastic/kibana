@@ -6,6 +6,7 @@
  */
 
 import React, { lazy } from 'react';
+import { isEmpty } from 'lodash';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
@@ -42,7 +43,7 @@ export function getConnectorType(
         if (!prompt.message) {
           errors.push(MESSAGE_REQUIRED);
         }
-        if (!prompt.statuses || prompt.statuses.length === 0) {
+        if (isEmpty(prompt.statuses)) {
           errors.push(STATUS_REQUIRED);
         }
 
