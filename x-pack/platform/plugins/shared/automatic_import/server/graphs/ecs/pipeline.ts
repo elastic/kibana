@@ -167,10 +167,9 @@ function generateProcessors(
 
   for (const [key, value] of Object.entries(ecsMapping)) {
     const currentPath = [...basePath, key];
-
-    if (value !== null && typeof value === 'object' && value?.target !== null) {
+    if (value !== null && !Array.isArray(value) && typeof value === 'object') {
       const valueKeys = new Set(Object.keys(value));
-      if ([...valueFieldKeys].every((k) => valueKeys.has(k))) {
+      if (value?.target != null && [...valueFieldKeys].every((k) => valueKeys.has(k))) {
         const processor = generateProcessor(
           currentPath,
           value as ECSField,
