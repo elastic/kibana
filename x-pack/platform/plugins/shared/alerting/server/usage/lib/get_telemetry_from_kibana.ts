@@ -25,6 +25,7 @@ import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
 import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -376,30 +377,11 @@ export async function getTotalCountAggregations({
       },
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    let returnedErrorMessage = errorMessage;
-    const errorStr = JSON.stringify(err);
-    const logMessage = `Error executing alerting telemetry task: getTotalCountAggregations - ${err}`;
-    const logOptions = {
-      tags: ['alerting', 'telemetry-failed'],
-      error: { stack_trace: err.stack },
-    };
-
-    // If error string contains "no_shard_available_action_exception", debug log it
-    if (errorStr.includes('no_shard_available_action_exception')) {
-      // the no_shard_available_action_exception can be wordy and the error message returned from this function
-      // gets stored in the task state so lets simplify
-      returnedErrorMessage = 'no_shard_available_action_exception';
-      if (logger.isLevelEnabled('debug')) {
-        logger.debug(logMessage, logOptions);
-      }
-    } else {
-      logger.warn(logMessage, logOptions);
-    }
+    const errorMessage = parseAndLogError(err, `getTotalCountAggregations`, logger);
 
     return {
       hasErrors: true,
-      errorMessage: returnedErrorMessage,
+      errorMessage,
       count_total: 0,
       count_by_type: {},
       count_rules_by_execution_status: { success: 0, error: 0, warning: 0 },
@@ -503,30 +485,11 @@ export async function getTotalCountInUse({
       countNamespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    let returnedErrorMessage = errorMessage;
-    const errorStr = JSON.stringify(err);
-    const logMessage = `Error executing alerting telemetry task: getTotalCountInUse - ${err}`;
-    const logOptions = {
-      tags: ['alerting', 'telemetry-failed'],
-      error: { stack_trace: err.stack },
-    };
-
-    // If error string contains "no_shard_available_action_exception", debug log it
-    if (errorStr.includes('no_shard_available_action_exception')) {
-      // the no_shard_available_action_exception can be wordy and the error message returned from this function
-      // gets stored in the task state so lets simplify
-      returnedErrorMessage = 'no_shard_available_action_exception';
-      if (logger.isLevelEnabled('debug')) {
-        logger.debug(logMessage, logOptions);
-      }
-    } else {
-      logger.warn(logMessage, logOptions);
-    }
+    const errorMessage = parseAndLogError(err, `getTotalCountInUse`, logger);
 
     return {
       hasErrors: true,
-      errorMessage: returnedErrorMessage,
+      errorMessage,
       countTotal: 0,
       countByType: {},
       countNamespaces: 0,
@@ -573,30 +536,11 @@ export async function getMWTelemetry({
       count_mw_with_filter_alert_toggle_on: countMWWithFilterAlertToggleON,
     };
   } catch (err) {
-    const errorMessage = err?.message ? err.message : err.toString();
-    let returnedErrorMessage = errorMessage;
-    const errorStr = JSON.stringify(err);
-    const logMessage = `Error executing alerting telemetry task: getTotalMWCount - ${err}`;
-    const logOptions = {
-      tags: ['alerting', 'telemetry-failed'],
-      error: { stack_trace: err.stack },
-    };
-
-    // If error string contains "no_shard_available_action_exception", debug log it
-    if (errorStr.includes('no_shard_available_action_exception')) {
-      // the no_shard_available_action_exception can be wordy and the error message returned from this function
-      // gets stored in the task state so lets simplify
-      returnedErrorMessage = 'no_shard_available_action_exception';
-      if (logger.isLevelEnabled('debug')) {
-        logger.debug(logMessage, logOptions);
-      }
-    } else {
-      logger.warn(logMessage, logOptions);
-    }
+    const errorMessage = parseAndLogError(err, `getTotalMWCount`, logger);
 
     return {
       hasErrors: true,
-      errorMessage: returnedErrorMessage,
+      errorMessage,
       count_mw_total: 0,
       count_mw_with_repeat_toggle_on: 0,
       count_mw_with_filter_alert_toggle_on: 0,

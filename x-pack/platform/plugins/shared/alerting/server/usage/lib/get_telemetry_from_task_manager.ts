@@ -14,6 +14,7 @@ import type {
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -122,30 +123,11 @@ export async function getFailedAndUnrecognizedTasksPerDay({
       countFailedAndUnrecognizedTasks: totalFailedAndUnrecognizedTasks ?? 0,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    let returnedErrorMessage = errorMessage;
-    const errorStr = JSON.stringify(err);
-    const logMessage = `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${err}`;
-    const logOptions = {
-      tags: ['alerting', 'telemetry-failed'],
-      error: { stack_trace: err.stack },
-    };
-
-    // If error string contains "no_shard_available_action_exception", debug log it
-    if (errorStr.includes('no_shard_available_action_exception')) {
-      // the no_shard_available_action_exception can be wordy and the error message returned from this function
-      // gets stored in the task state so lets simplify
-      returnedErrorMessage = 'no_shard_available_action_exception';
-      if (logger.isLevelEnabled('debug')) {
-        logger.debug(logMessage, logOptions);
-      }
-    } else {
-      logger.warn(logMessage, logOptions);
-    }
+    const errorMessage = parseAndLogError(err, `getFailedAndUnrecognizedTasksPerDay`, logger);
 
     return {
       hasErrors: true,
-      errorMessage: returnedErrorMessage,
+      errorMessage,
       countFailedAndUnrecognizedTasks: 0,
       countFailedAndUnrecognizedTasksByStatus: {},
       countFailedAndUnrecognizedTasksByStatusByType: {},
