@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { SourceDestinationArrows } from '../../source_destination/source_destination_arrows';
 import {
