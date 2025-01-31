@@ -5,50 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
+
+export { config, configSchema, type ConfigType } from './config';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { EnterpriseSearchPlugin } = await import('./plugin');
   return new EnterpriseSearchPlugin(initializerContext);
 };
-
-export const configSchema = schema.object({
-  accessCheckTimeout: schema.number({ defaultValue: 5000 }),
-  accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
-  customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  enabled: schema.boolean({ defaultValue: true }),
-  hasConnectors: schema.boolean({ defaultValue: true }),
-  hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
-  hasDocumentLevelSecurityEnabled: schema.boolean({ defaultValue: true }),
-  hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
-  hasNativeConnectors: schema.boolean({ defaultValue: true }),
-  hasWebCrawler: schema.boolean({ defaultValue: false }),
-  host: schema.maybe(schema.string()),
-  isCloud: schema.boolean({ defaultValue: false }),
-  ssl: schema.object({
-    certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
-    ),
-    verificationMode: schema.oneOf(
-      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-      { defaultValue: 'full' }
-    ),
-  }),
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
-});
-
-export type ConfigType = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ unused }) => [unused('canDeployEntSearch', { level: 'warning' })],
-  exposeToBrowser: {
-    host: true,
-    ui: true,
-  },
-  schema: configSchema,
-};
-
-export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
