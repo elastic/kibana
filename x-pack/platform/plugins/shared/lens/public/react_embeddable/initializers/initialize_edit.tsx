@@ -203,7 +203,7 @@ export function initializeEditApi(
   };
 
   const canShowConfig = () => {
-    return isReadOnly(viewMode$) && Boolean(capabilities.visualize.show);
+    return isReadOnly(viewMode$) && Boolean(capabilities.visualize_v2.show);
   };
 
   // this will force the embeddable to toggle the inline editing feature
@@ -286,7 +286,7 @@ export function initializeEditApi(
       isReadOnlyEnabled: () => {
         return {
           read: Boolean(parentApi && apiHasAppContext(parentApi) && canShowConfig()),
-          write: Boolean(capabilities.dashboard?.showWriteControls),
+          write: Boolean(capabilities.dashboard_v2?.showWriteControls),
         };
       },
       onShowConfig: async () => {

@@ -57,7 +57,7 @@ describe('edit features', () => {
     it('should not be editable if visualize library privileges do not allow it', () => {
       const editApi = createEditApi({
         capabilities: {
-          visualize: {
+          visualize_v2: {
             // cannot save
             save: false,
             saveQuery: true,
@@ -65,7 +65,7 @@ describe('edit features', () => {
             show: true,
             createShortUrl: true,
           },
-          dashboard: {
+          dashboard_v2: {
             // cannot edit in dashboard
             showWriteControls: false,
           },
@@ -90,7 +90,7 @@ describe('edit features', () => {
       const editApi = createEditApi(
         {
           capabilities: {
-            visualize: {
+            visualize_v2: {
               // cannot save
               save: false,
               saveQuery: true,
@@ -98,7 +98,7 @@ describe('edit features', () => {
               show: true,
               createShortUrl: true,
             },
-            dashboard: {
+            dashboard_v2: {
               // cannot edit in dashboard
               showWriteControls: false,
             },
@@ -114,7 +114,7 @@ describe('edit features', () => {
       const editApi = createEditApi(
         {
           capabilities: {
-            visualize: {
+            visualize_v2: {
               // cannot save
               save: false,
               saveQuery: true,
@@ -122,7 +122,7 @@ describe('edit features', () => {
               show: false,
               createShortUrl: true,
             },
-            dashboard: {
+            dashboard_v2: {
               // cannot edit in dashboard
               showWriteControls: false,
             },
@@ -138,7 +138,7 @@ describe('edit features', () => {
       const editApi = createEditApi(
         {
           capabilities: {
-            visualize: {
+            visualize_v2: {
               // can save a visualization but not edit in dashboard (see below)
               save: true,
               saveQuery: true,
@@ -146,7 +146,7 @@ describe('edit features', () => {
               show: false,
               createShortUrl: true,
             },
-            dashboard: {
+            dashboard_v2: {
               // cannot edit in dashboard
               showWriteControls: false,
             },
