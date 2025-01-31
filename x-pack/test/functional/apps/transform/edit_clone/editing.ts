@@ -104,8 +104,6 @@ export default function ({ getService }: FtrProviderContext) {
       },
     ];
 
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
         it('opens the edit flyout for an existing transform', async () => {
@@ -217,7 +215,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('updates the transform and displays it correctly in the job list', async () => {
-          // await delay(100000000);
           await transform.testExecution.logTestStep('should update the transform');
           await transform.editFlyout.assertUpdateTransformButtonExists();
           await transform.editFlyout.assertUpdateTransformButtonEnabled(true);
