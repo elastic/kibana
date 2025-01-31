@@ -13,15 +13,19 @@ The `KibanaRenderContextProvider` is designed to be used with ad-hoc renders of 
 
 When Kibana starts, the `KibanaRootContextProvider` is used by the `RenderService` to initialize EUI and Emotion... it should only be rendered _once_.  Still, there are times when you need to render a new component tree and need things like `i18n` and the current theme to be made available in a consistent way.  The `KibanaRenderContextProvider` is designed to be used in these cases.  In addition, it allows us to abstract away any changes or other complexities with React context that we may introduce in the future.
 
-```ts 
+### Usage
+
+#### First usage example: passing the `coreStart` prop:
+
+```tsx
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { MyComponent } from './my_component';
 
-const App = ({i18n, theme}: CoreStart) => {
+const App = (core: CoreStart) => {
   return (
-    <KibanaRenderContextProvider {...{i18n, theme}}>
+    <KibanaRenderContextProvider coreStart={core}>
       <MyComponent />
     </KibanaRenderContextProvider>
   );
@@ -29,3 +33,32 @@ const App = ({i18n, theme}: CoreStart) => {
 
 ReactDOM.render(<App />, document.getElementById('some_node'));
 ```
+
+### Different forms of passing CoreStart service dependencies
+
+`KibanaRenderContextProvider` encapsulates features that depend on CoreStart services. The original form of
+passing the services required each dependent service to be passed separate. This form is now deprecated:
+
+#### Second usage example: passing CoreStart service dependencies separately (deprecated):
+
+```tsx
+import ReactDOM from 'react-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
+import { MyComponent } from './my_component';
+
+const App = ({i18n, theme, analytics, userProfile, executionContext}: CoreStart) => {
+  // NOTE: this is deprecated, avoid passing services separately!
+  return (
+    <KibanaRenderContextProvider {...{i18n, theme, analytics, userProfile, executionContext}}>
+      <MyComponent />
+    </KibanaRenderContextProvider>
+  );
+};
+
+ReactDOM.render(<App />, document.getElementById('some_node'));
+```
+
+We discourage passing the dependent services separately because that heavily impacts the codebase whenever new
+features are encapsulated in `KibanaRenderContextProvider`. The encouraged way to pass the CoreStart services is
+to use the `coreStart` prop, as shown in the first example.
