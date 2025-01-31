@@ -41,6 +41,9 @@ export interface DefendInsightsToolParams extends AssistantToolParams {
 export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
   id: DEFEND_INSIGHTS_TOOL_ID,
   name: 'defendInsightsTool',
+  // note: this description is overwritten when `getTool` is called
+  // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
+  // local definitions can be overwritten by security-ai-prompt integration definitions
   description: DEFEND_INSIGHTS_TOOL_DESCRIPTION,
   sourceRegister: APP_UI_ID,
 

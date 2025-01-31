@@ -21,10 +21,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { IRouter, Logger } from '@kbn/core/server';
 
 import { getPrompt } from '@kbn/security-ai-prompts';
-import {
-  localToolPrompts,
-  promptGroupId as toolsGroupId,
-} from '@kbn/security-solution-plugin/server/assistant/tools/alert_counts/prompts';
+import { localToolPrompts, promptGroupId } from '../../lib/prompt/tool_prompts';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
@@ -170,7 +167,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             connectorId: apiConfig.connectorId,
             localPrompts: localToolPrompts,
             promptId: assistantTool.name,
-            promptGroupId: toolsGroupId,
+            promptGroupId,
             savedObjectsClient,
           });
           const toolInstance = assistantTool.getTool({ ...assistantToolParams, description });

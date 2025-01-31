@@ -22,7 +22,7 @@ import {
 import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AssistantTool, AssistantToolParams } from '../../../..';
-import { promptGroupId as toolsGroupId } from '@kbn/security-solution-plugin/server/assistant/tools/alert_counts/prompts';
+import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptDictionary } from '../../../prompt';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 jest.mock('./graph');

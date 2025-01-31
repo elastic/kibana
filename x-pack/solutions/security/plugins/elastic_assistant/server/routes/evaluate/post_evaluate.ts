@@ -32,10 +32,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
-import {
-  localToolPrompts,
-  promptGroupId as toolsGroupId,
-} from '@kbn/security-solution-plugin/server/assistant/tools/alert_counts/prompts';
+import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';

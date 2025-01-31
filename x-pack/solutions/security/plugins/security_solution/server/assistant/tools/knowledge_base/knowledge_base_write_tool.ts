@@ -20,6 +20,9 @@ export interface KnowledgeBaseWriteToolParams extends AssistantToolParams {
 }
 
 const toolDetails = {
+  // note: this description is overwritten when `getTool` is called
+  // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
+  // local definitions can be overwritten by security-ai-prompt integration definitions
   description:
     "Call this for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Input will be the summarized knowledge base entry to store, a short UI friendly name for the entry, and whether or not the entry is required.",
   id: 'knowledge-base-write-tool',

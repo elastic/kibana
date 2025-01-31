@@ -14,6 +14,9 @@ import { knowledgeBaseReference, contentReferenceString } from '@kbn/elastic-ass
 import { APP_UI_ID } from '../../../../common';
 
 const toolDetails = {
+  // note: this description is overwritten when `getTool` is called
+  // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
+  // local definitions can be overwritten by security-ai-prompt integration definitions
   description:
     'Call this for knowledge from Elastic Security Labs content, which contains information on malware, attack techniques, and more.',
   id: 'security-labs-knowledge-base-tool',
