@@ -196,7 +196,27 @@ export const GridExample = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <AddEmbeddableButton pageApi={mockDashboardApi} uiActions={uiActions} />{' '}
+                  <AddEmbeddableButton pageApi={mockDashboardApi} uiActions={uiActions} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => {
+                      mockDashboardApi.rows$.next([
+                        ...mockDashboardApi.rows$.getValue(),
+                        {
+                          title: i18n.translate('examples.gridExample.defaultSectionTitle', {
+                            defaultMessage: 'New collapsible section',
+                          }),
+                          collapsed: false,
+                        },
+                      ]);
+                    }}
+                    disabled={viewMode !== 'edit'}
+                  >
+                    {i18n.translate('examples.gridExample.addRowButton', {
+                      defaultMessage: 'Add collapsible section',
+                    })}
+                  </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover

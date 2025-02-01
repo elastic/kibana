@@ -80,7 +80,7 @@ export const GridRowHeader = ({
            * Add actions at the end of the header section when the layout is editable + the section title
            * is not in edit mode
            */
-          !readOnly && !editTitleOpen && (
+          !editTitleOpen && (
             <>
               <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
                 <EuiText color="subdued" size="s">{`(${
@@ -92,30 +92,38 @@ export const GridRowHeader = ({
                   Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels).length
                 } panels)`}</EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  className="kbnGridLayout--deleteRowIcon"
-                  onClick={() => {
-                    const panelCount = Object.keys(
-                      gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
-                    ).length;
-                    if (!panelCount) {
-                      deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowIndex);
-                    } else {
-                      setDeleteModalVisible(true);
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={[styles.hiddenOnCollapsed, styles.floatToRight]}>
-                <EuiButtonIcon
-                  iconType="move"
-                  color="text"
-                  className="kbnGridLayout--moveRowIcon"
-                />
-              </EuiFlexItem>
+              {!readOnly && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      className="kbnGridLayout--deleteRowIcon"
+                      onClick={() => {
+                        const panelCount = Object.keys(
+                          gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
+                        ).length;
+                        if (!Boolean(panelCount)) {
+                          const newLayout = deleteRow(
+                            gridLayoutStateManager.gridLayout$.getValue(),
+                            rowIndex
+                          );
+                          gridLayoutStateManager.gridLayout$.next(newLayout);
+                        } else {
+                          setDeleteModalVisible(true);
+                        }
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} css={[styles.hiddenOnCollapsed, styles.floatToRight]}>
+                    <EuiButtonIcon
+                      iconType="move"
+                      color="text"
+                      className="kbnGridLayout--moveRowIcon"
+                    />
+                  </EuiFlexItem>
+                </>
+              )}
             </>
           )
         }

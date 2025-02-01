@@ -89,9 +89,15 @@ export const GridRowTitle = ({
               </EuiTitle>
             </EuiLink>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="pencil" onClick={() => setEditTitleOpen(true)} color="text" />
-          </EuiFlexItem>
+          {!readOnly && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="pencil"
+                onClick={() => setEditTitleOpen(true)}
+                color="text"
+              />
+            </EuiFlexItem>
+          )}
         </>
       )}
     </>
