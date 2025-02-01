@@ -122,56 +122,54 @@ describe('get()', () => {
     expect(esClientMock.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "_source": undefined,
-            "aggs": undefined,
-            "fields": Array [
-              "kibana.alert.rule.rule_type_id",
-              "kibana.alert.rule.consumer",
-              "kibana.alert.workflow_status",
-              "kibana.space_ids",
-            ],
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "_id": "1",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "term": Object {
-                      "kibana.space_ids": "test_default_space_id",
-                    },
-                  },
-                ],
-                "must": Array [],
-                "must_not": Array [],
-                "should": Array [],
-              },
-            },
-            "runtime_mappings": undefined,
-            "size": undefined,
-            "sort": Array [
-              Object {
-                "@timestamp": Object {
-                  "order": "asc",
-                  "unmapped_type": "date",
-                },
-              },
-            ],
-            "track_total_hits": undefined,
-          },
+          "_source": undefined,
+          "aggs": undefined,
+          "fields": Array [
+            "kibana.alert.rule.rule_type_id",
+            "kibana.alert.rule.consumer",
+            "kibana.alert.workflow_status",
+            "kibana.space_ids",
+          ],
           "ignore_unavailable": true,
           "index": ".alerts-observability.apm.alerts",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "_id": "1",
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "kibana.space_ids": "test_default_space_id",
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          },
+          "runtime_mappings": undefined,
           "seq_no_primary_term": true,
+          "size": undefined,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+                "unmapped_type": "date",
+              },
+            },
+          ],
+          "track_total_hits": undefined,
         },
       ]
     `);

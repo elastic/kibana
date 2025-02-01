@@ -45,10 +45,8 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
       .toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "runtime_mappings": Object {
-            "foo": Object {},
-          },
+        "runtime_mappings": Object {
+          "foo": Object {},
         },
       }
     `);
@@ -73,6 +71,9 @@ describe('extendSearchParamsWithRuntimeFields', () => {
           "runtime_mappings": Object {
             "test": Object {},
           },
+        },
+        "runtime_mappings": Object {
+          "foo": Object {},
         },
       }
     `);
