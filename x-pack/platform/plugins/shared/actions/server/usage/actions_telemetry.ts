@@ -386,30 +386,11 @@ export async function getInUseTotalCount(
       countNamespaces: namespacesList.size,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    let returnedErrorMessage = errorMessage;
-    const errorStr = JSON.stringify(err);
-    const logMessage = `Error executing actions telemetry task: getInUseTotalCount - ${err}`;
-    const logOptions = {
-      tags: ['actions', 'telemetry-failed'],
-      error: { stack_trace: err.stack },
-    };
-
-    // If error string contains "no_shard_available_action_exception", debug log it
-    if (errorStr.includes('no_shard_available_action_exception')) {
-      // the no_shard_available_action_exception can be wordy and the error message returned from this function
-      // gets stored in the task state so lets simplify
-      returnedErrorMessage = 'no_shard_available_action_exception';
-      if (logger.isLevelEnabled('debug')) {
-        logger.debug(logMessage, logOptions);
-      }
-    } else {
-      logger.warn(logMessage, logOptions);
-    }
+    const errorMessage = parseAndLogError(err, `getInUseTotalCount`, logger);
 
     return {
       hasErrors: true,
-      errorMessage: returnedErrorMessage,
+      errorMessage,
       countTotal: 0,
       countByType: {},
       countByAlertHistoryConnectorType: 0,
@@ -672,30 +653,11 @@ export async function getExecutionsPerDayCount(
       ),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    let returnedErrorMessage = errorMessage;
-    const errorStr = JSON.stringify(err);
-    const logMessage = `Error executing actions telemetry task: getExecutionsPerDayCount - ${err}`;
-    const logOptions = {
-      tags: ['actions', 'telemetry-failed'],
-      error: { stack_trace: err.stack },
-    };
-
-    // If error string contains "no_shard_available_action_exception", debug log it
-    if (errorStr.includes('no_shard_available_action_exception')) {
-      // the no_shard_available_action_exception can be wordy and the error message returned from this function
-      // gets stored in the task state so lets simplify
-      returnedErrorMessage = 'no_shard_available_action_exception';
-      if (logger.isLevelEnabled('debug')) {
-        logger.debug(logMessage, logOptions);
-      }
-    } else {
-      logger.warn(logMessage, logOptions);
-    }
+    const errorMessage = parseAndLogError(err, `getExecutionsPerDayCount`, logger);
 
     return {
       hasErrors: true,
-      errorMessage: returnedErrorMessage,
+      errorMessage,
       countTotal: 0,
       countByType: {},
       countFailed: 0,
