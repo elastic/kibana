@@ -14,6 +14,7 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { EditorFrameService } from '../../editor_frame_service';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
+import { addEsqlPanel } from '../../async_services';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -45,7 +46,6 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-    const { addEsqlPanel } = await import('../../async_services');
     const editorFrameService = await this.getEditorFrameService();
 
     addEsqlPanel({

@@ -686,7 +686,7 @@ export class LensPlugin {
       ADD_PANEL_TRIGGER,
       ACTION_CREATE_ESQL_CHART,
       async () => {
-        const { AddESQLPanelAction } = await import('./trigger_actions/add_panel_actions_module');
+        const { AddESQLPanelAction } = await import('./async_services');
         return new AddESQLPanelAction(startDependencies, core, async () => {
           if (!this.editorFrameService) {
             await this.initEditorFrameService();
@@ -697,7 +697,7 @@ export class LensPlugin {
       }
     );
     startDependencies.uiActions.registerActionAsync('addLensPanelAction', async () => {
-      const { getAddLensPanelAction } = await import('./trigger_actions/add_panel_actions_module');
+      const { getAddLensPanelAction } = await import('./async_services');
       return getAddLensPanelAction(startDependencies);
     });
     startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
