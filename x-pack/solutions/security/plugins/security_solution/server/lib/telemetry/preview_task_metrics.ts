@@ -46,7 +46,6 @@ export class PreviewTaskMetricsService implements ITaskMetricsService {
   public async end(trace: Trace, error?: Error): Promise<void> {
     this.logger.info('Simulating TaskMetricsService.end');
     const metric = this.composite.createTaskMetric(trace, error);
-    const result = this.sender.simulateSendAsync(TelemetryChannel.TASK_METRICS, [metric]);
-    this.sentMessages = [...this.sentMessages, ...result];
+    this.sender.simulateSendAsync(TelemetryChannel.TASK_METRICS, [metric]);
   }
 }

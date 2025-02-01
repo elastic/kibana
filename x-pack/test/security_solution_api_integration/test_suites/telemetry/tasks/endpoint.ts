@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
           return stats.endpoints as any[];
         });
         expect(endpoints).to.not.be(undefined);
-        expect(endpoints).to.length(5);
+        expect(endpoints).to.length(4);
       });
 
       it('should execute send mandatory fields', async () => {
@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
           return stats.endpoints as any[];
         });
         expect(endpoints).to.not.be(undefined);
-        expect(endpoints).to.length(5);
+        expect(endpoints).to.length(4);
         const metrics = endpoints.flat().filter((endpoint) => {
           return endpoint.endpoint_metrics !== undefined;
         });
