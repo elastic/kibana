@@ -9,7 +9,6 @@
 
 import { BrowserAuthFixture, LoginFunction } from '.';
 import { PROJECT_DEFAULT_ROLES } from '../../../../common';
-import { serviceLoadedMsg } from '../../../utils';
 import { coreWorkerFixtures } from '../../worker';
 import { ScoutSpaceParallelFixture } from '../../worker/scout_space';
 
@@ -50,7 +49,7 @@ export const browserAuthParallelFixture = coreWorkerFixtures.extend<
       return loginAs(roleName);
     };
 
-    log.debug(serviceLoadedMsg(`browserAuth:${scoutSpace.id}`));
+    log.serviceLoaded(`browserAuth:${scoutSpace.id}`);
     await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
   },
 });
