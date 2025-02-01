@@ -7,7 +7,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import type { RuleMigrationTranslationStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../common/siem_migrations/constants';
 import type { InstallMigrationRulesResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -17,41 +17,44 @@ import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_t
 import { installMigrationRules } from '../api';
 import { useTranslatedRuleTelemetry } from '../hooks/use_translated_rule_telemetry';
 
-export const INSTALL_MIGRATION_RULES_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION_INSTALL_PATH];
+export const INSTALL_MIGRATION_RULE_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION_INSTALL_PATH];
 
-interface InstallMigrationRulesParams {
-  ids?: string[];
+interface InstallMigrationRuleParams {
+  ruleMigration: RuleMigration;
   enabled?: boolean;
 }
 
-export const useInstallMigrationRules = (
-  migrationId: string,
-  translationStats?: RuleMigrationTranslationStats
-) => {
+export const useInstallMigrationRule = (migrationId: string) => {
   const { addError, addSuccess } = useAppToasts();
 
-  const { reportTranslatedRuleBulkInstall } = useTranslatedRuleTelemetry();
+  const { reportTranslatedRuleInstall } = useTranslatedRuleTelemetry();
   const reportTelemetry = useCallback(
-    (data: InstallMigrationRulesParams, error?: Error) => {
-      const { ids, enabled } = data;
-      reportTranslatedRuleBulkInstall({
+    (data: InstallMigrationRuleParams, error?: Error) => {
+      const { ruleMigration, enabled } = data;
+      const prebuiltRuleId = ruleMigration.elastic_rule?.prebuilt_rule_id;
+      reportTranslatedRuleInstall({
         migrationId,
+        ruleMigrationId: ruleMigration.id,
+        author: prebuiltRuleId ? 'elastic' : 'custom',
+        ...(prebuiltRuleId && ruleMigration.elastic_rule
+          ? { prebuiltRule: { id: prebuiltRuleId, title: ruleMigration.elastic_rule.title } }
+          : {}),
         enabled: !!enabled,
-        count: ids?.length ?? translationStats?.rules.success.installable ?? 0,
         result: error ? 'failed' : 'success',
         errorMessage: error?.message,
       });
     },
-    [migrationId, reportTranslatedRuleBulkInstall, translationStats?.rules.success.installable]
+    [migrationId, reportTranslatedRuleInstall]
   );
 
   const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
   const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
 
-  return useMutation<InstallMigrationRulesResponse, Error, InstallMigrationRulesParams>(
-    ({ ids, enabled }) => installMigrationRules({ migrationId, ids, enabled }),
+  return useMutation<InstallMigrationRulesResponse, Error, InstallMigrationRuleParams>(
+    ({ ruleMigration, enabled }) =>
+      installMigrationRules({ migrationId, ids: [ruleMigration.id], enabled }),
     {
-      mutationKey: INSTALL_MIGRATION_RULES_MUTATION_KEY,
+      mutationKey: INSTALL_MIGRATION_RULE_MUTATION_KEY,
       onSuccess: ({ installed }, variables) => {
         addSuccess(i18n.INSTALL_MIGRATION_RULES_SUCCESS(installed));
         reportTelemetry(variables);
