@@ -11,10 +11,16 @@ import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
+  inspectStatusRuleAction,
   updateDefaultAlertingAction,
 } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { enableDefaultAlertingAPI, getDefaultAlertingAPI, updateDefaultAlertingAPI } from './api';
+import {
+  enableDefaultAlertingAPI,
+  getDefaultAlertingAPI,
+  inspectStatusAlertAPI,
+  updateDefaultAlertingAPI,
+} from './api';
 
 export function* getDefaultAlertingEffect() {
   yield takeLeading(
@@ -62,6 +68,19 @@ export function* updateDefaultAlertingEffect() {
       updateDefaultAlertingAPI,
       updateDefaultAlertingAction.success,
       updateDefaultAlertingAction.fail,
+      successMessage,
+      failureMessage
+    )
+  );
+}
+
+export function* inspectStatusRuleEffect() {
+  yield takeLeading(
+    inspectStatusRuleAction.get,
+    fetchEffectFactory(
+      inspectStatusAlertAPI,
+      inspectStatusRuleAction.success,
+      inspectStatusRuleAction.fail,
       successMessage,
       failureMessage
     )

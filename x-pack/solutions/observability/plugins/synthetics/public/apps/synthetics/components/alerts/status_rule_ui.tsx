@@ -10,6 +10,7 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { StatusRuleViz } from './status_rule_viz';
 import { FieldFilters } from './common/field_filters';
 import { AlertSearchBar } from './query_bar';
 import { StatusRuleExpression } from './status_rule_expression';
@@ -34,6 +35,7 @@ export const StatusRuleComponent: React.FC<{
       <FieldFilters ruleParams={ruleParams} setRuleParams={setRuleParams} />
       <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
       <EuiSpacer size="m" />
+      <StatusRuleViz ruleParams={ruleParams} />
     </>
   );
 };

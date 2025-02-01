@@ -37,7 +37,6 @@ import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
   getAllMonitors,
   processMonitors,
@@ -67,20 +66,19 @@ export class StatusRuleExecutor {
   ruleName: string;
 
   constructor(
+    esClient: SyntheticsEsClient,
     server: SyntheticsServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient,
     options: StatusRuleExecutorOptions
   ) {
     const { services, params, previousStartedAt, rule } = options;
-    const { scopedClusterClient, savedObjectsClient } = services;
+    const { savedObjectsClient } = services;
     this.ruleName = rule.name;
     this.logger = server.logger;
     this.previousStartedAt = previousStartedAt;
     this.params = params;
     this.soClient = savedObjectsClient;
-    this.esClient = new SyntheticsEsClient(this.soClient, scopedClusterClient.asCurrentUser, {
-      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
-    });
+    this.esClient = esClient;
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
     this.hasCustomCondition = !isEmpty(this.params);
@@ -97,6 +95,7 @@ export class StatusRuleExecutor {
     this.dateFormat = await uiSettingsClient.get('dateFormat');
     const timezone = await uiSettingsClient.get('dateFormat:tz');
     this.tz = timezone === 'Browser' ? 'UTC' : timezone;
+    return await this.getMonitors();
   }
 
   async getMonitors() {
@@ -425,6 +424,8 @@ export class StatusRuleExecutor {
       context,
     });
   }
+
+  getRuleThresholdOverview = async () => {};
 }
 
 export const getDoesMonitorMeetLocationThreshold = ({

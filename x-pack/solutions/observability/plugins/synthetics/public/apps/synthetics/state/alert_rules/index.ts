@@ -12,20 +12,27 @@ import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
+  inspectStatusRuleAction,
   updateDefaultAlertingAction,
 } from './actions';
 
 export interface DefaultAlertingState {
+  inspectData?: any;
   data?: DEFAULT_ALERT_RESPONSE;
   success: boolean | null;
   loading: boolean;
   error: IHttpSerializedFetchError | null;
+  inspectLoading: boolean;
+  inspectError?: IHttpSerializedFetchError | null;
 }
 
 const initialSettingState: DefaultAlertingState = {
   success: null,
   loading: false,
   error: null,
+  inspectData: undefined,
+  inspectLoading: false,
+  inspectError: null,
 };
 
 export const defaultAlertingReducer = createReducer(initialSettingState, (builder) => {
@@ -60,6 +67,18 @@ export const defaultAlertingReducer = createReducer(initialSettingState, (builde
       state.error = action.payload;
       state.loading = false;
       state.success = false;
+    })
+    .addCase(inspectStatusRuleAction.get, (state) => {
+      state.inspectLoading = true;
+    })
+    .addCase(inspectStatusRuleAction.success, (state, action) => {
+      state.inspectData = action.payload;
+      state.inspectLoading = false;
+      state.inspectError = null;
+    })
+    .addCase(inspectStatusRuleAction.fail, (state, action) => {
+      state.inspectError = action.payload;
+      state.inspectLoading = false;
     });
 });
 
