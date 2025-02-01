@@ -38,6 +38,8 @@ interface SetUpRuleUpgradeParams {
   deps: SetUpRuleUpgradeDeps;
 }
 
+export const DEFAULT_TEST_RULE_ID = 'test-rule';
+
 export async function setUpRuleUpgrade({
   assets,
   removeInstalledAssets,
@@ -48,7 +50,7 @@ export async function setUpRuleUpgrade({
   for (const ruleAssets of rulesAssets) {
     await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
       createRuleAssetSavedObjectOfType(ruleAssets.installed.type, {
-        rule_id: 'rule-1',
+        rule_id: DEFAULT_TEST_RULE_ID,
         version: 1,
         ...ruleAssets.installed,
       }),
@@ -60,7 +62,7 @@ export async function setUpRuleUpgrade({
   for (const ruleAssets of rulesAssets) {
     if (Object.keys(ruleAssets.patch).length > 0) {
       await patchRule(deps.supertest, deps.log, {
-        rule_id: 'rule-1',
+        rule_id: DEFAULT_TEST_RULE_ID,
         ...ruleAssets.patch,
       });
     }
@@ -73,7 +75,7 @@ export async function setUpRuleUpgrade({
   for (const ruleAssets of rulesAssets) {
     await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
       createRuleAssetSavedObjectOfType(ruleAssets.upgrade.type, {
-        rule_id: 'rule-1',
+        rule_id: DEFAULT_TEST_RULE_ID,
         version: 2,
         ...ruleAssets.upgrade,
       }),
