@@ -92,6 +92,7 @@ function updateExistingIndex({
 }) {
   return client.indices.putMapping({
     index,
-    ...mappings,
+    // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+    body: mappings,
   });
 }

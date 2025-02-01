@@ -2037,10 +2037,12 @@ describe('EPM template', () => {
       expect(putMappingsCalls).toHaveLength(1);
       expect(putMappingsCalls[0][0]).toEqual({
         index: 'test-constant.keyword-default',
-        properties: {
-          some_keyword_field: {
-            type: 'constant_keyword',
-            value: 'some_value',
+        body: {
+          properties: {
+            some_keyword_field: {
+              type: 'constant_keyword',
+              value: 'some_value',
+            },
           },
         },
         write_index_only: true,
@@ -2085,6 +2087,7 @@ describe('EPM template', () => {
       expect(putMappingsCalls).toHaveLength(1);
       expect(putMappingsCalls[0][0]).toEqual({
         index: 'test-constant.keyword-default',
+        body: {},
         write_index_only: true,
       });
     });
