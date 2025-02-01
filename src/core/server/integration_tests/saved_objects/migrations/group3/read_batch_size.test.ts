@@ -21,14 +21,14 @@ const logFilePath = join(__dirname, 'read_batch_size.log');
 
 // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163254
 // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163255
-describe.skip('migration v2 - read batch size', () => {
+describe('migration v2 - read batch size', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   let logs: string;
 
   beforeEach(async () => {
     esServer = await startElasticsearch({
-      dataArchive: join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
+      dataArchive: join(__dirname, '..', 'archives', '8.18_with_sample_data_logs.zip'),
     });
     await clearLog(logFilePath);
   });
