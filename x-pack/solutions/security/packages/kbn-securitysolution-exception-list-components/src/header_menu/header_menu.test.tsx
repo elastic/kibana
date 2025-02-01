@@ -119,15 +119,15 @@ describe('HeaderMenu', () => {
   it('should render custom Actions', () => {
     const customActions = getSecurityLinkAction('headerMenuTest');
     const wrapper = render(
-      <EuiThemeProvider>
-        <HeaderMenu
-          iconType="boxesHorizontal"
-          disableActions={false}
-          emptyButton
-          actions={customActions}
-          useCustomActions
-        />
-      </EuiThemeProvider>
+      <HeaderMenu
+        iconType="boxesHorizontal"
+        disableActions={false}
+        emptyButton
+        actions={customActions}
+        useCustomActions
+      />,
+
+      { wrapper: EuiThemeProvider }
     );
 
     expect(wrapper.container).toMatchSnapshot();

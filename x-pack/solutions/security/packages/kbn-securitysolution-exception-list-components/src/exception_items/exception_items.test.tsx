@@ -139,26 +139,25 @@ describe('ExceptionsViewerItems', () => {
   describe('securityLinkAnchorComponent, formattedDateComponent, exceptionsUtilityComponent and getFormattedComments', () => {
     it('it should render sent securityLinkAnchorComponent', () => {
       const wrapper = render(
-        <EuiThemeProvider>
-          <ExceptionItems
-            viewerStatus={'' as ViewerStatus}
-            exceptions={[getExceptionListItemSchemaMock()]}
-            listType={ExceptionListTypeEnum.DETECTION}
-            ruleReferences={ruleReferences}
-            isReadOnly={false}
-            pagination={pagination}
-            lastUpdated={Date.now()}
-            onCreateExceptionListItem={onCreateExceptionListItem}
-            onDeleteException={onDeleteException}
-            onEditExceptionItem={onEditExceptionItem}
-            onPaginationChange={onPaginationChange}
-            securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-            formattedDateComponent={() => null}
-            exceptionsUtilityComponent={() => null}
-            getFormattedComments={() => []}
-            showValueListModal={MockedShowValueListModal}
-          />
-        </EuiThemeProvider>
+        <ExceptionItems
+          viewerStatus={'' as ViewerStatus}
+          exceptions={[getExceptionListItemSchemaMock()]}
+          listType={ExceptionListTypeEnum.DETECTION}
+          ruleReferences={ruleReferences}
+          isReadOnly={false}
+          pagination={pagination}
+          lastUpdated={Date.now()}
+          onCreateExceptionListItem={onCreateExceptionListItem}
+          onDeleteException={onDeleteException}
+          onEditExceptionItem={onEditExceptionItem}
+          onPaginationChange={onPaginationChange}
+          securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+          formattedDateComponent={() => null}
+          exceptionsUtilityComponent={() => null}
+          getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
+        />,
+        { wrapper: EuiThemeProvider }
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
       fireEvent.click(wrapper.getByTestId('exceptionItemCardMetaInfoEmptyButton'));
