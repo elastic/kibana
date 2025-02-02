@@ -10,7 +10,15 @@ import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from './permission
 
 describe('permissions', () => {
   describe('isReadOnlyPermissions', () => {
-    const tests = [['update'], ['create'], ['delete'], ['push'], ['all']];
+    const tests = [
+      ['update'],
+      ['create'],
+      ['delete'],
+      ['push'],
+      ['all'],
+      ['assign'],
+      ['createComment'],
+    ];
 
     it('returns true if the user has only read permissions', async () => {
       expect(isReadOnlyPermissions(readCasesPermissions())).toBe(true);
@@ -31,7 +39,13 @@ describe('permissions', () => {
 
   describe('getAllPermissionsExceptFrom', () => {
     it('returns the correct permissions', async () => {
-      expect(getAllPermissionsExceptFrom('create')).toEqual(['read', 'update', 'delete', 'push']);
+      expect(getAllPermissionsExceptFrom('create')).toEqual([
+        'read',
+        'update',
+        'delete',
+        'push',
+        'assign',
+      ]);
     });
   });
 });
