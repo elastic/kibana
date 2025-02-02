@@ -5,12 +5,14 @@
  * 2.0.
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
+import type { CoreStart } from '@kbn/core/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   getESQLAdHocDataview,
   getIndexForESQLQuery,
+  ENABLE_ESQL,
   getESQLQueryColumns,
   getInitialESQLQuery,
 } from '@kbn/esql-utils';
@@ -30,12 +32,18 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
-export async function addEsqlPanel({
+export async function isCreateActionCompatible(core: CoreStart) {
+  return core.uiSettings.get(ENABLE_ESQL);
+}
+
+export async function executeCreateAction({
   deps,
+  core,
   api,
   editorFrameService,
 }: {
   deps: LensPluginStartDependencies;
+  core: CoreStart;
   api: PresentationContainer;
   editorFrameService: EditorFrameService;
 }) {
@@ -46,9 +54,12 @@ export async function addEsqlPanel({
     return dataView;
   };
 
-  const dataView = await getFallbackDataView();
+  const [isCompatibleAction, dataView] = await Promise.all([
+    isCreateActionCompatible(core),
+    getFallbackDataView(),
+  ]);
 
-  if (!dataView) {
+  if (!isCompatibleAction || !dataView) {
     throw new IncompatibleActionError();
   }
 
