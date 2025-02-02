@@ -448,7 +448,7 @@
             "label": "kibana",
             "description": [],
             "signature": [
-              "{ readonly askElastic: string; readonly createGithubIssue: string; readonly feedback: string; readonly guide: string; readonly autocompleteSuggestions: string; readonly secureSavedObject: string; readonly xpackSecurity: string; readonly dashboardImportExport: string; }"
+              "{ readonly askElastic: string; readonly createGithubIssue: string; readonly feedback: string; readonly guide: string; readonly autocompleteSuggestions: string; readonly secureSavedObject: string; readonly xpackSecurity: string; readonly dashboardImportExport: string; readonly upgradeNotes: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -516,6 +516,20 @@
             "description": [],
             "signature": [
               "{ readonly protocol: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.logging",
+            "type": "Object",
+            "tags": [],
+            "label": "logging",
+            "description": [],
+            "signature": [
+              "{ readonly enableDeprecationHttpDebugLogs: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
