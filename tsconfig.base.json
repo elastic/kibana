@@ -1972,6 +1972,8 @@
       "@kbn/try-in-console/*": ["src/platform/packages/shared/kbn-try-in-console/*"],
       "@kbn/ts-projects": ["packages/kbn-ts-projects"],
       "@kbn/ts-projects/*": ["packages/kbn-ts-projects/*"],
+      "@kbn/ts-tracing": ["x-pack/platform/packages/private/kbn-ts-tracing"],
+      "@kbn/ts-tracing/*": ["x-pack/platform/packages/private/kbn-ts-tracing/*"],
       "@kbn/ts-type-check-cli": ["packages/kbn-ts-type-check-cli"],
       "@kbn/ts-type-check-cli/*": ["packages/kbn-ts-type-check-cli/*"],
       "@kbn/typed-react-router-config": ["src/platform/packages/shared/kbn-typed-react-router-config"],

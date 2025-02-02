@@ -1525,6 +1525,7 @@
     "@kbn/test-suites-xpack-performance": "link:x-pack/performance",
     "@kbn/tooling-log": "link:packages/kbn-tooling-log",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",
+    "@kbn/ts-tracing": "link:x-pack/platform/packages/private/kbn-ts-tracing",
     "@kbn/ts-type-check-cli": "link:packages/kbn-ts-type-check-cli",
     "@kbn/validate-next-docs-cli": "link:packages/kbn-validate-next-docs-cli",
     "@kbn/web-worker-stub": "link:packages/kbn-web-worker-stub",

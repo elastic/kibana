@@ -7804,6 +7804,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ts-tracing@link:x-pack/platform/packages/private/kbn-ts-tracing":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ts-type-check-cli@link:packages/kbn-ts-type-check-cli":
   version "0.0.0"
   uid ""

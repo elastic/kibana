@@ -124,9 +124,12 @@ run(
           relative,
           '--pretty',
           ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
+          ...(flagsReader.string('generateTrace')
+            ? ['--generateTrace', flagsReader.string('generateTrace')!]
+            : []),
         ],
         env: {
-          NODE_OPTIONS: '--max-old-space-size=8192',
+          NODE_OPTIONS: '--max-old-space-size=16192',
         },
         cwd: REPO_ROOT,
         wait: true,
@@ -163,7 +166,7 @@ run(
         node scripts/type_check --project packages/kbn-pm/tsconfig.json
     `,
     flags: {
-      string: ['project'],
+      string: ['project', 'generateTraces'],
       boolean: ['clean-cache', 'cleanup'],
       help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
@@ -173,6 +176,7 @@ run(
                                   files in place makes subsequent executions faster because ts can
                                   identify that none of the imports have changed (it uses creation/update
                                   times) but cleaning them prevents leaving garbage around the repo.
+        --generateTrace         Generate traces into the specified folder
       `,
     },
   }
