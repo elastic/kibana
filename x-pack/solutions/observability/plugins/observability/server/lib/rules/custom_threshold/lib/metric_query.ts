@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EsQueryConfig, Filter } from '@kbn/es-query';
 import {
@@ -24,6 +25,7 @@ import {
 } from '../utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { wrapInCurrentPeriod } from './wrap_in_period';
+import { isPopulatedObject } from './is_populated_object';
 
 export const calculateCurrentTimeFrame = (
   metricParams: CustomMetricExpressionParams,
@@ -76,6 +78,7 @@ export const getElasticsearchMetricQuery = (
   alertOnGroupDisappear: boolean,
   searchConfiguration: SearchConfigurationType,
   esQueryConfig: EsQueryConfig,
+  runtimeMappings?: estypes.MappingRuntimeFields,
   lastPeriodEnd?: number,
   groupBy?: string | string[],
   afterKey?: Record<string, string>,
@@ -211,6 +214,7 @@ export const getElasticsearchMetricQuery = (
   return {
     track_total_hits: true,
     query,
+    ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     size: 0,
     aggs,
   };
