@@ -37,79 +37,146 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
   for (const ruleType of RULE_TYPES) {
     describe('"kql_query" with inline query', () => {
       describe('non-customized w/o an upgrade (AAA diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: ruleType,
-                query: 'process.name:*.exe',
-                language: 'kuery',
+        describe('without filters', () => {
+          beforeEach(async () => {
+            await setUpRuleUpgrade({
+              assets: {
+                installed: {
+                  type: ruleType,
+                  query: 'process.name:*.exe',
+                  language: 'kuery',
+                },
+                patch: {},
+                upgrade: {
+                  type: ruleType,
+                  query: 'process.name:*.exe',
+                  language: 'kuery',
+                },
               },
-              patch: {},
-              upgrade: {
-                type: ruleType,
-                query: 'process.name:*.exe',
-                language: 'kuery',
-              },
-            },
-            deps,
+              deps,
+            });
           });
-        });
 
-        it('does NOT return upgrade review', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
+          it('does NOT return upgrade review', async () => {
+            const response = await reviewPrebuiltRulesToUpgrade(supertest);
 
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 0,
-            num_rules_with_non_solvable_conflicts: 0,
+            expect(response.stats).toMatchObject({
+              num_rules_to_upgrade_total: 1,
+              num_rules_with_conflicts: 0,
+              num_rules_with_non_solvable_conflicts: 0,
+            });
+            expect(response.rules[0].diff).toMatchObject({
+              num_fields_with_updates: 1,
+              num_fields_with_conflicts: 0,
+              num_fields_with_non_solvable_conflicts: 0,
+            });
+            expect(response.rules[0].diff.fields).not.toMatchObject({
+              kql_query: expect.anything(),
+            });
           });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 1,
-            num_fields_with_conflicts: 0,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).not.toMatchObject({
-            kql_query: expect.anything(),
-          });
-        });
 
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
-              {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 0,
-                version: 2,
-                fields: {
-                  kql_query: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: {
-                      type: KqlQueryType.inline_query,
-                      query: 'resolved:*',
-                      language: 'kuery',
-                      filters: [],
+          it('upgrades to RESOLVED value', async () => {
+            const response = await performUpgradePrebuiltRules(es, supertest, {
+              mode: ModeEnum.SPECIFIC_RULES,
+              rules: [
+                {
+                  rule_id: DEFAULT_TEST_RULE_ID,
+                  revision: 0,
+                  version: 2,
+                  fields: {
+                    kql_query: {
+                      pick_version: 'RESOLVED',
+                      resolved_value: {
+                        type: KqlQueryType.inline_query,
+                        query: 'resolved:*',
+                        language: 'kuery',
+                        filters: [],
+                      },
                     },
                   },
                 },
-              },
-            ],
-          });
+              ],
+            });
 
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
+            const upgradedRule = await securitySolutionApi.readRule({
+              query: { rule_id: DEFAULT_TEST_RULE_ID },
+            });
 
-          expect(response.results.updated[0]).toMatchObject({
-            type: ruleType,
-            query: 'resolved:*',
-            language: 'kuery',
+            expect(response.results.updated[0]).toMatchObject({
+              type: ruleType,
+              query: 'resolved:*',
+              language: 'kuery',
+            });
+            expect(upgradedRule.body).toMatchObject({
+              type: ruleType,
+              query: 'resolved:*',
+              language: 'kuery',
+            });
           });
-          expect(upgradedRule.body).toMatchObject({
-            type: ruleType,
-            query: 'resolved:*',
-            language: 'kuery',
+        });
+
+        describe('with filters', () => {
+          describe('and filters have "alias" field set to null for installed rules', () => {
+            it('does NOT return upgrade review', async () => {
+              const FILTER = {
+                meta: {
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'test',
+                  params: {
+                    query: 'value',
+                  },
+                },
+                query: {
+                  term: {
+                    field: 'value',
+                  },
+                },
+              };
+
+              await setUpRuleUpgrade({
+                assets: {
+                  installed: {
+                    type: ruleType,
+                    filters: [FILTER],
+                  },
+                  patch: {
+                    type: ruleType,
+                    filters: [
+                      {
+                        ...FILTER,
+                        meta: {
+                          ...FILTER.meta,
+                          alias: null,
+                        },
+                      },
+                    ],
+                  },
+                  upgrade: {
+                    type: ruleType,
+                    filters: [FILTER],
+                  },
+                },
+                deps,
+              });
+
+              const response = await reviewPrebuiltRulesToUpgrade(supertest);
+
+              expect(response.stats).toMatchObject({
+                num_rules_to_upgrade_total: 1,
+                num_rules_with_conflicts: 0,
+                num_rules_with_non_solvable_conflicts: 0,
+              });
+              expect(response.rules[0].diff).toMatchObject({
+                num_fields_with_updates: 1,
+                num_fields_with_conflicts: 0,
+                num_fields_with_non_solvable_conflicts: 0,
+              });
+              expect(response.rules[0].diff.fields).not.toMatchObject({
+                kql_query: expect.anything(),
+              });
+            });
           });
         });
       });
