@@ -12,6 +12,7 @@ import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
+import { SolutionView } from '@kbn/spaces-plugin/common';
 import { useServices } from '../services';
 import { CATEGORY_FIELD } from '../query_input';
 import { useSettings } from './use_settings';
@@ -25,7 +26,7 @@ import { useSettings } from './use_settings';
  */
 export const useFields = (
   scope: UiSettingsScope,
-  solution: string,
+  solution?: SolutionView,
   query?: Query
 ): FieldDefinition[] => {
   const { isCustomSetting, isOverriddenSetting } = useServices();
@@ -34,11 +35,8 @@ export const useFields = (
     isCustom: (key) => isCustomSetting(key, scope),
     isOverridden: (key) => isOverriddenSetting(key, scope),
   });
-  if (solution) {
-    fields = fields.filter(
-      (field) =>
-        solution === 'classic' || field.solution === undefined || field.solution === solution
-    );
+  if (solution && solution !== 'classic') {
+    fields = fields.filter((field) => field.solution === undefined || field.solution === solution);
   }
   if (query) {
     const clauses: Clause[] = query.ast.clauses.map((clause) =>

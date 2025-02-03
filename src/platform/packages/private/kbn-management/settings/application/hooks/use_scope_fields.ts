@@ -9,6 +9,7 @@
 
 import { Query } from '@elastic/eui';
 import { FieldDefinition } from '@kbn/management-settings-types';
+import { SolutionView } from '@kbn/spaces-plugin/common';
 import { useFields } from './use_fields';
 
 /**
@@ -18,7 +19,7 @@ import { useFields } from './use_fields';
  * @returns Two arrays of {@link FieldDefinition} objects.
  */
 export const useScopeFields = (
-  solution: string,
+  solution?: SolutionView,
   query?: Query
 ): [FieldDefinition[], FieldDefinition[]] => {
   const spaceFields = useFields('namespace', solution, query);

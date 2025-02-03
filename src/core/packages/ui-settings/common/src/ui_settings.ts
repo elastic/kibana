@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Type } from '@kbn/config-schema';
 import type { UiCounterMetricType } from '@kbn/analytics';
+import { SolutionView } from '@kbn/spaces-plugin/common';
 
 /**
  * UI element type to represent the settings.
@@ -49,8 +50,6 @@ export interface DeprecationSettings {
 export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
-
-export type SolutionFieldType = 'search' | 'security' | 'observability';
 
 /**
  * UiSettings parameters defined by the plugins.
@@ -118,7 +117,7 @@ export interface UiSettingsParams<T = unknown> {
    * scoped to a namespace. The default value is 'namespace'
    */
   scope?: UiSettingsScope;
-  solution?: SolutionFieldType;
+  solution?: SolutionView;
 }
 
 /**
