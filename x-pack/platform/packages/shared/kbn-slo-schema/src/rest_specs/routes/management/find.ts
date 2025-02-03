@@ -8,12 +8,15 @@
 import * as t from 'io-ts';
 import { sloHealthResponseSchema } from '../../slo_health';
 
+const findSLOHealthSortBySchema = t.literal('status');
+const findSLOHealthSortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
+
 const findSLOHealthParamsSchema = t.partial({
   query: t.partial({
     query: t.string,
     filters: t.string,
-    sortBy: t.literal('status'),
-    sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+    sortBy: findSLOHealthSortBySchema,
+    sortDirection: findSLOHealthSortDirectionSchema,
     searchAfter: t.string,
     size: t.string,
   }),
@@ -28,5 +31,7 @@ const findSLOHealthResponseSchema = t.type({
 
 export type FindSLOHealthParams = t.TypeOf<typeof findSLOHealthParamsSchema.props.query>;
 export type FindSLOHealthResponse = t.OutputOf<typeof findSLOHealthResponseSchema>;
+export type FindSLOHealthSortBy = t.TypeOf<typeof findSLOHealthSortBySchema>;
+export type FindSLOHealthSortDirection = t.TypeOf<typeof findSLOHealthSortDirectionSchema>;
 
 export { findSLOHealthParamsSchema, findSLOHealthResponseSchema };
