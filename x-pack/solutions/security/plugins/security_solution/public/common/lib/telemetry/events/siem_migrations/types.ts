@@ -8,9 +8,16 @@
 import type { RootSchema } from '@kbn/core/public';
 
 export enum SiemMigrationsEventTypes {
-  TranslatedRuleUpdate = 'Translated Rule Update',
-  TranslatedRuleInstall = 'Translated Rule Install',
-  TranslatedRuleBulkInstall = 'Translated Rule Bulk Install',
+  SetupConnectorSelected = 'SIEM Migrations: Connector selected',
+  SetupRulesQueryCopied = 'SIEM Migrations: Rules query copied',
+  SetupRulesUploaded = 'SIEM Migrations: Rules uploaded',
+  SetupMacrosQueryCopied = 'SIEM Migrations: Macros query copied',
+  SetupMacrosUploaded = 'SIEM Migrations: Macros uploaded',
+  SetupLookupsQueryCopied = 'SIEM Migrations: Lookups query copied',
+  SetupLookupsUploaded = 'SIEM Migrations: Lookups uploaded',
+  TranslatedRuleUpdate = 'SIEM Migrations: Translated Rule Update',
+  TranslatedRuleInstall = 'SIEM Migrations: Translated Rule Install',
+  TranslatedRuleBulkInstall = 'SIEM Migrations: Translated Rule Bulk Install',
 }
 
 export interface BaseReportActionParams {
