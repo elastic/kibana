@@ -210,9 +210,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_sync',
       validate: {
-        body: schema.object({
-          nextSyncConfig: schema.maybe(schema.string()),
-        }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -220,12 +217,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startSync(
-        client,
-        request.params.connectorId,
-        SyncJobType.FULL,
-        request.body.nextSyncConfig
-      );
+      await startSync(client, request.params.connectorId, SyncJobType.FULL);
       return response.ok();
     })
   );
