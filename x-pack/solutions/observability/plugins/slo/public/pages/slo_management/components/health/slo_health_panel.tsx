@@ -6,6 +6,7 @@
  */
 
 import {
+  Criteria,
   EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
@@ -36,10 +37,14 @@ export function SloHealthPanel() {
   const [filters, setFilters] = useState<Filter[]>([]);
   const [sortBy, setSortBy] = useState<FindSLOHealthSortBy>('status');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const { isLoading, isError, data } = useFetchSloHealth({
     query,
     filters,
+    page: pageIndex + 1,
+    size: pageSize,
     sortBy,
     sortDirection,
   });
@@ -139,6 +144,7 @@ export function SloHealthPanel() {
           </EuiFlexGroup>
         </EuiToolTip>
       ),
+      truncateText: true,
       render: (item: SLOHealthResponse) => {
         return (
           <HealthWrapper status={item.health.delay}>
@@ -153,6 +159,7 @@ export function SloHealthPanel() {
       },
     },
     {
+
       name: (
         <EuiToolTip content="Elapsted time since the latest summary update. If the time is too high or keep increasing, the rollup or summary transform should be checked.">
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -163,6 +170,7 @@ export function SloHealthPanel() {
           </EuiFlexGroup>
         </EuiToolTip>
       ),
+      truncateText: true,
       render: (item: SLOHealthResponse) => {
         return (
           <HealthWrapper status={item.health.staleTime}>
@@ -216,6 +224,22 @@ export function SloHealthPanel() {
     },
   ];
 
+  const onTableChange = ({ page }: Criteria<SLOHealthResponse>) => {
+    if (page) {
+      const { index, size } = page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
+  };
+
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount: data?.total ?? 0,
+    pageSizeOptions: [10, 25, 50, 100],
+    showPerPageOptions: true,
+  };
+
   return (
     <EuiPanel hasBorder={true}>
       <SloHealthSearchBar
@@ -233,6 +257,8 @@ export function SloHealthPanel() {
           items={data?.results ?? []}
           rowHeader="status"
           columns={columns}
+          pagination={pagination}
+          onChange={onTableChange}
         />
       )}
     </EuiPanel>

@@ -18,12 +18,14 @@ const findSLOHealthParamsSchema = t.partial({
     sortBy: findSLOHealthSortBySchema,
     sortDirection: findSLOHealthSortDirectionSchema,
     searchAfter: t.string,
+    page: t.string,
     size: t.string,
   }),
 });
 
 const findSLOHealthResponseSchema = t.type({
   searchAfter: t.union([t.string, t.undefined]),
+  page: t.union([t.number, t.undefined]),
   size: t.number,
   total: t.number,
   results: t.array(sloHealthResponseSchema),

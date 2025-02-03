@@ -20,7 +20,6 @@ export class FindSLOHealth {
 
   public async execute(params: FindSLOHealthParams): Promise<FindSLOHealthResponse> {
     const parsedFilters = parseFilters(params.filters);
-    this.logger.info(`Finding SLO health with filters: ${JSON.stringify(parsedFilters, null, 2)}`);
     const result = await this.esClient.search<SLOHealth>({
       index: HEALTH_INDEX_PATTERN,
       track_total_hits: true,
@@ -44,8 +43,7 @@ export class FindSLOHealth {
           },
         },
       ],
-      size: toSize(params.size),
-      search_after: toSearchAfter(params.searchAfter),
+      ...toPaginationQuery(params),
     });
 
     const results = result.hits.hits.map((doc) => doc._source).filter(Boolean) as SLOHealth[];
@@ -55,9 +53,10 @@ export class FindSLOHealth {
       total: result.hits.total.value,
       size: result.hits.hits.length,
       searchAfter:
-        result.hits.hits.length > 0
+        !params.page && result.hits.hits.length > 0
           ? JSON.stringify(result.hits.hits[result.hits.hits.length - 1].sort)
           : undefined,
+      page: params.page ? toPage(params.page) : undefined,
       results,
     };
   }
@@ -91,6 +90,15 @@ function toSize(size?: string): number {
   return parsedSize < 0 ? 0 : parsedSize > 100 ? 100 : parsedSize;
 }
 
+function toPage(page?: string): number {
+  const parsedPage = Number(page);
+  if (isNaN(parsedPage)) {
+    return 1;
+  }
+
+  return parsedPage < 1 ? 1 : parsedPage;
+}
+
 function toSearchAfter(searchAfter?: string): any | undefined {
   if (!searchAfter) {
     return undefined;
@@ -109,4 +117,22 @@ function getElasticsearchQueryOrThrow(query: string = '') {
   } catch (err) {
     throw new Error(`Invalid KQL: ${query}`);
   }
+}
+
+function toPaginationQuery(
+  params: FindSLOHealthParams
+): { size: number; search_after?: Array<string | number> } | { size: number; from: number } {
+  const size = toSize(params.size);
+  if (params.searchAfter) {
+    return {
+      size,
+      search_after: toSearchAfter(params.searchAfter),
+    };
+  }
+
+  const page = toPage(params.page);
+  return {
+    size,
+    from: (page - 1) * size,
+  };
 }

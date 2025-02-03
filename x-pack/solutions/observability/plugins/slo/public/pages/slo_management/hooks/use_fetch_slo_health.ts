@@ -20,12 +20,14 @@ interface UseFetchSloHealth {
   isError: boolean;
 }
 
-type Props = Omit<FindSLOHealthParams, 'filters'> & {
+type Props = Omit<FindSLOHealthParams, 'filters' | 'page' | 'size'> & {
   filters?: Filter[];
+  page: number;
+  size: number;
 };
 
 export function useFetchSloHealth(params: Props): UseFetchSloHealth {
-  const { query, filters = [], sortBy, sortDirection, searchAfter, size } = params;
+  const { query, filters = [], sortBy, sortDirection, searchAfter, page, size } = params;
   const { sloClient } = usePluginContext();
 
   const { dataView } = useCreateDataView({
@@ -58,7 +60,8 @@ export function useFetchSloHealth(params: Props): UseFetchSloHealth {
               sortBy,
               sortDirection,
               searchAfter,
-              size,
+              size: String(size),
+              page: String(page),
             },
           },
           signal,
