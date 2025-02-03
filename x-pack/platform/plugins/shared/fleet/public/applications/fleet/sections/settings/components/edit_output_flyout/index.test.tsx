@@ -319,7 +319,9 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should render the flyout if the output provided is a remote ES output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -333,6 +335,8 @@ describe('EditOutputFlyout', () => {
       id: 'outputR',
       is_default: false,
       is_default_monitoring: false,
+      kibana_url: 'http://localhost',
+      sync_integrations: true,
     });
 
     remoteEsOutputLabels.forEach((label) => {
@@ -345,10 +349,18 @@ describe('EditOutputFlyout', () => {
     );
 
     expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
+
+    expect(utils.queryByTestId('kibanaAPIKeyCallout')).not.toBeNull();
+    expect(
+      (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
+    ).toEqual('http://localhost');
+    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).not.toBeNull();
   });
 
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -364,11 +376,13 @@ describe('EditOutputFlyout', () => {
       is_default_monitoring: false,
       service_token: '1234',
       hosts: ['https://localhost:9200'],
+      kibana_api_key: 'key',
     });
 
     expect((utils.getByTestId('serviceTokenSecretInput') as HTMLInputElement).value).toEqual(
       '1234'
     );
+    expect((utils.getByTestId('kibanaAPIKeySecretInput') as HTMLInputElement).value).toEqual('key');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
 
@@ -376,8 +390,9 @@ describe('EditOutputFlyout', () => {
       expect(mockSendPutOutput).toHaveBeenCalledWith(
         'outputR',
         expect.objectContaining({
-          secrets: { service_token: '1234' },
+          secrets: { service_token: '1234', kibana_api_key: 'key' },
           service_token: undefined,
+          kibana_api_key: undefined,
         })
       );
     });

@@ -1013,7 +1013,7 @@
               {
                 "parentPluginId": "share",
                 "id": "def-public.ShareContext.showPublicUrlSwitch.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "anonymousUserCapabilities",
                 "description": [],

@@ -13,7 +13,11 @@ import { registerConfigDataRoute } from './config_data';
 describe('Enterprise Search Config Data API', () => {
   let mockRouter: MockRouter;
 
-  beforeEach(() => {});
+  beforeEach(() => {
+    jest.resetAllMocks();
+
+    mockDependencies.getStartServices.mockResolvedValue([{}, {}]);
+  });
 
   describe('GET /internal/enterprise_search/config_data', () => {
     it('returns an initial set of config data', async () => {
@@ -60,6 +64,40 @@ describe('Enterprise Search Config Data API', () => {
             ...DEFAULT_INITIAL_APP_DATA.features,
             hasDocumentLevelSecurityEnabled: false,
             hasIncrementalSyncEnabled: false,
+          },
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+
+    it('has native connectors enabled when agentless is available', async () => {
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/internal/enterprise_search/config_data',
+      });
+
+      registerConfigDataRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+      mockDependencies.getStartServices.mockResolvedValue([
+        {},
+        {
+          cloud: { isCloudEnabled: true },
+          fleet: {
+            agentless: { enabled: true },
+          },
+        },
+      ]);
+
+      await mockRouter.callRoute({});
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          ...DEFAULT_INITIAL_APP_DATA,
+          features: {
+            ...DEFAULT_INITIAL_APP_DATA.features,
+            hasNativeConnectors: true,
           },
         },
         headers: { 'content-type': 'application/json' },

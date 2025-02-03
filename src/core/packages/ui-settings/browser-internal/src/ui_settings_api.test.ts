@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @ts-expect-error
-import fetchMock from 'fetch-mock/es5/client';
+import fetchMock from 'fetch-mock';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs';
 
