@@ -357,7 +357,7 @@ createApmServerRoute({
   },
 })
 ```
-You can modify [the rule](https://github.com/elastic/kibana/blob/6a50066e00ae38a64c5365fd66b4dc32857ba1fc/packages/kbn-eslint-plugin-eslint/rules/no_deprecated_authz_config.js#L312-#L315) to handle your case by adding the following code:
+You can modify [the rule](https://github.com/elastic/kibana/blob/6a50066e00ae38a64c5365fd66b4dc32857ba1fc/src/dev/packages/eslint-plugin-eslint/rules/no_deprecated_authz_config.js#L312-#L315) to handle your case by adding the following code:
 ```ts
 callee.type === 'Identifier' && callee.name === 'createApmServerRoute'
 ```

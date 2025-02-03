@@ -371,7 +371,7 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
+        'src/dev/packages/eslint-config/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -724,7 +724,7 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js',
+        'src/dev/packages/ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -756,7 +756,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-eslint-plugin-eslint/**/*',
+        'src/dev/packages/eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
         '**/jest.config.js',
@@ -1860,8 +1860,8 @@ module.exports = {
         'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
         'test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
-        'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
+        'src/dev/packages/mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
+        'src/dev/packages/mock-idp-utils/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
@@ -1947,7 +1947,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-config-schema',
         'src/platform/plugins/shared/saved_objects_management/**',
         'src/platform/packages/shared/kbn-analytics/**',
-        'packages/kbn-telemetry-tools/**',
+        'src/dev/packages/telemetry-tools/**',
         'src/platform/plugins/private/kibana_usage_collection/**',
         'src/platform/plugins/shared/usage_collection/**',
         'src/platform/plugins/shared/telemetry/**',
@@ -2015,9 +2015,9 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-{package-*,repo-*,dep-*}/**/*',
-        'packages/kbn-validate-next-docs-cli/**/*',
-        'packages/kbn-find-used-node-modules/**/*',
+        'src/dev/packages/{repo-*,dep-*}/**/*',
+        'src/dev/packages/validate-next-docs-cli/**/*',
+        'src/dev/packages/find-used-node-modules/**/*',
       ],
       rules: {
         'max-classes-per-file': 'off',
@@ -2048,7 +2048,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
+      files: ['src/dev/packages/dependency-usage/**/*.{ts,tsx}'],
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',
@@ -2057,7 +2057,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-dependency-ownership/**/*.{ts,tsx}'],
+      files: ['src/dev/packages/dependency-ownership/**/*.{ts,tsx}'],
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',

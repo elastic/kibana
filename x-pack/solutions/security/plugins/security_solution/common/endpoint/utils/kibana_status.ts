@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import type { StatusResponse } from '@kbn/core-status-common';

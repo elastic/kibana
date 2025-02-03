@@ -10,8 +10,8 @@
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
-!/packages/kbn-import-resolver/src/__fixtures__/node_modules
-!/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
+!/src/dev/packages/import-resolver/src/__fixtures__/node_modules
+!/src/dev/packages/import-resolver/src/__fixtures__/packages/box/node_modules
 trash
 /optimize
 /built_assets
@@ -132,9 +132,8 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
-src/platform/packages/**/package-map.json
-/packages/**/config-paths.json
-/packages/kbn-synthetic-package-map/
+**/packages/**/package-map.json
+**/packages/**/config-paths.json
 **/.synthetics/
 **/.journeys/
 **/.rca/

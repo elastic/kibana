@@ -3980,19 +3980,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-common-types@link:packages/kbn-ambient-common-types":
+"@kbn/ambient-common-types@link:src/dev/packages/ambient-common-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ftr-types@link:packages/kbn-ambient-ftr-types":
+"@kbn/ambient-ftr-types@link:src/dev/packages/ambient-ftr-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-storybook-types@link:packages/kbn-ambient-storybook-types":
+"@kbn/ambient-storybook-types@link:src/dev/packages/ambient-storybook-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ui-types@link:packages/kbn-ambient-ui-types":
+"@kbn/ambient-ui-types@link:src/dev/packages/ambient-ui-types":
   version "0.0.0"
   uid ""
 
@@ -4032,11 +4032,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace-client@link:packages/kbn-apm-synthtrace-client":
+"@kbn/apm-synthtrace-client@link:src/dev/packages/apm-synthtrace-client":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace@link:packages/kbn-apm-synthtrace":
+"@kbn/apm-synthtrace@link:src/dev/packages/apm-synthtrace":
   version "0.0.0"
   uid ""
 
@@ -4068,19 +4068,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/axe-config@link:packages/kbn-axe-config":
+"@kbn/axe-config@link:src/dev/packages/axe-config":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-preset@link:packages/kbn-babel-preset":
+"@kbn/babel-preset@link:src/dev/packages/babel-preset":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-register@link:packages/kbn-babel-register":
+"@kbn/babel-register@link:src/dev/packages/babel-register":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-transform@link:packages/kbn-babel-transform":
+"@kbn/babel-transform@link:src/dev/packages/babel-transform":
   version "0.0.0"
   uid ""
 
@@ -4088,7 +4088,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-runner@link:packages/kbn-bazel-runner":
+"@kbn/bazel-runner@link:src/dev/packages/bazel-runner":
   version "0.0.0"
   uid ""
 
@@ -4104,7 +4104,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/capture-oas-snapshot-cli@link:packages/kbn-capture-oas-snapshot-cli":
+"@kbn/capture-oas-snapshot-cli@link:src/dev/packages/capture-oas-snapshot-cli":
   version "0.0.0"
   uid ""
 
@@ -4144,31 +4144,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/check-mappings-update-cli@link:packages/kbn-check-mappings-update-cli":
+"@kbn/check-mappings-update-cli@link:src/dev/packages/check-mappings-update-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
+"@kbn/check-prod-native-modules-cli@link:src/dev/packages/check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-core@link:packages/kbn-ci-stats-core":
+"@kbn/ci-stats-core@link:src/dev/packages/ci-stats-core":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-performance-metrics@link:packages/kbn-ci-stats-performance-metrics":
+"@kbn/ci-stats-performance-metrics@link:src/dev/packages/ci-stats-performance-metrics":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-reporter@link:packages/kbn-ci-stats-reporter":
+"@kbn/ci-stats-reporter@link:src/dev/packages/ci-stats-reporter":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-shipper-cli@link:packages/kbn-ci-stats-shipper-cli":
+"@kbn/ci-stats-shipper-cli@link:src/dev/packages/ci-stats-shipper-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
+"@kbn/cli-dev-mode@link:src/dev/packages/cli-dev-mode":
   version "0.0.0"
   uid ""
 
@@ -4232,7 +4232,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-owners@link:packages/kbn-code-owners":
+"@kbn/code-owners@link:src/dev/packages/code-owners":
   version "0.0.0"
   uid ""
 
@@ -5248,7 +5248,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cypress-config@link:packages/kbn-cypress-config":
+"@kbn/cypress-config@link:src/dev/packages/cypress-config":
   version "0.0.0"
   uid ""
 
@@ -5384,23 +5384,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dependency-ownership@link:packages/kbn-dependency-ownership":
+"@kbn/dependency-ownership@link:src/dev/packages/dependency-ownership":
   version "0.0.0"
   uid ""
 
-"@kbn/dependency-usage@link:packages/kbn-dependency-usage":
+"@kbn/dependency-usage@link:src/dev/packages/dependency-usage":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-errors@link:packages/kbn-dev-cli-errors":
+"@kbn/dev-cli-errors@link:src/dev/packages/dev-cli-errors":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-runner@link:packages/kbn-dev-cli-runner":
+"@kbn/dev-cli-runner@link:src/dev/packages/dev-cli-runner":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-proc-runner@link:packages/kbn-dev-proc-runner":
+"@kbn/dev-proc-runner@link:src/dev/packages/dev-proc-runner":
   version "0.0.0"
   uid ""
 
@@ -5408,7 +5408,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-utils@link:packages/kbn-dev-utils":
+"@kbn/dev-utils@link:src/dev/packages/dev-utils":
   version "0.0.0"
   uid ""
 
@@ -5444,7 +5444,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/docs-utils@link:packages/kbn-docs-utils":
+"@kbn/docs-utils@link:src/dev/packages/docs-utils":
   version "0.0.0"
   uid ""
 
@@ -5536,7 +5536,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-archiver@link:packages/kbn-es-archiver":
+"@kbn/es-archiver@link:src/dev/packages/es-archiver":
   version "0.0.0"
   uid ""
 
@@ -5556,35 +5556,35 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es@link:packages/kbn-es":
+"@kbn/es@link:src/dev/packages/es":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-config@link:packages/kbn-eslint-config":
+"@kbn/eslint-config@link:src/dev/packages/eslint-config":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-css@link:packages/kbn-eslint-plugin-css":
+"@kbn/eslint-plugin-css@link:src/dev/packages/eslint-plugin-css":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-disable@link:packages/kbn-eslint-plugin-disable":
+"@kbn/eslint-plugin-disable@link:src/dev/packages/eslint-plugin-disable":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-eslint@link:packages/kbn-eslint-plugin-eslint":
+"@kbn/eslint-plugin-eslint@link:src/dev/packages/eslint-plugin-eslint":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-i18n@link:packages/kbn-eslint-plugin-i18n":
+"@kbn/eslint-plugin-i18n@link:src/dev/packages/eslint-plugin-i18n":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-imports@link:packages/kbn-eslint-plugin-imports":
+"@kbn/eslint-plugin-imports@link:src/dev/packages/eslint-plugin-imports":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-telemetry@link:packages/kbn-eslint-plugin-telemetry":
+"@kbn/eslint-plugin-telemetry@link:src/dev/packages/eslint-plugin-telemetry":
   version "0.0.0"
   uid ""
 
@@ -5668,7 +5668,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expect@link:packages/kbn-expect":
+"@kbn/expect@link:src/dev/packages/expect":
   version "0.0.0"
   uid ""
 
@@ -5740,7 +5740,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/failed-test-reporter-cli@link:packages/kbn-failed-test-reporter-cli":
+"@kbn/failed-test-reporter-cli@link:src/dev/packages/failed-test-reporter-cli":
   version "0.0.0"
   uid ""
 
@@ -5808,7 +5808,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/find-used-node-modules@link:packages/kbn-find-used-node-modules":
+"@kbn/find-used-node-modules@link:src/dev/packages/find-used-node-modules":
   version "0.0.0"
   uid ""
 
@@ -5828,15 +5828,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-services@link:packages/kbn-ftr-common-functional-services":
+"@kbn/ftr-common-functional-services@link:src/dev/packages/ftr-common-functional-services":
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-ui-services@link:packages/kbn-ftr-common-functional-ui-services":
+"@kbn/ftr-common-functional-ui-services@link:src/dev/packages/ftr-common-functional-ui-services":
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-screenshot-filename@link:packages/kbn-ftr-screenshot-filename":
+"@kbn/ftr-screenshot-filename@link:src/dev/packages/ftr-screenshot-filename":
   version "0.0.0"
   uid ""
 
@@ -5844,7 +5844,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/gen-ai-functional-testing@link:packages/kbn-gen-ai-functional-testing":
+"@kbn/gen-ai-functional-testing@link:src/dev/packages/gen-ai-functional-testing":
   version "0.0.0"
   uid ""
 
@@ -5852,7 +5852,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-console-definitions@link:packages/kbn-generate-console-definitions":
+"@kbn/generate-console-definitions@link:src/dev/packages/generate-console-definitions":
   version "0.0.0"
   uid ""
 
@@ -5860,11 +5860,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate@link:packages/kbn-generate":
+"@kbn/generate@link:src/dev/packages/generate":
   version "0.0.0"
   uid ""
 
-"@kbn/get-repo-files@link:packages/kbn-get-repo-files":
+"@kbn/get-repo-files@link:src/dev/packages/get-repo-files":
   version "0.0.0"
   uid ""
 
@@ -5968,11 +5968,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/import-locator@link:packages/kbn-import-locator":
+"@kbn/import-locator@link:src/dev/packages/import-locator":
   version "0.0.0"
   uid ""
 
-"@kbn/import-resolver@link:packages/kbn-import-resolver":
+"@kbn/import-resolver@link:src/dev/packages/import-resolver":
   version "0.0.0"
   uid ""
 
@@ -6088,15 +6088,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/jest-serializers@link:packages/kbn-jest-serializers":
+"@kbn/jest-serializers@link:src/dev/packages/jest-serializers":
   version "0.0.0"
   uid ""
 
-"@kbn/journeys@link:packages/kbn-journeys":
+"@kbn/journeys@link:src/dev/packages/journeys":
   version "0.0.0"
   uid ""
 
-"@kbn/json-ast@link:packages/kbn-json-ast":
+"@kbn/json-ast@link:src/dev/packages/json-ast":
   version "0.0.0"
   uid ""
 
@@ -6132,7 +6132,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-manifest-schema@link:packages/kbn-kibana-manifest-schema":
+"@kbn/kibana-manifest-schema@link:src/dev/packages/kibana-manifest-schema":
   version "0.0.0"
   uid ""
 
@@ -6196,11 +6196,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lint-packages-cli@link:packages/kbn-lint-packages-cli":
+"@kbn/lint-packages-cli@link:src/dev/packages/lint-packages-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/lint-ts-projects-cli@link:packages/kbn-lint-ts-projects-cli":
+"@kbn/lint-ts-projects-cli@link:src/dev/packages/lint-ts-projects-cli":
   version "0.0.0"
   uid ""
 
@@ -6248,11 +6248,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/managed-vscode-config-cli@link:packages/kbn-managed-vscode-config-cli":
+"@kbn/managed-vscode-config-cli@link:src/dev/packages/managed-vscode-config-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/managed-vscode-config@link:packages/kbn-managed-vscode-config":
+"@kbn/managed-vscode-config@link:src/dev/packages/managed-vscode-config":
   version "0.0.0"
   uid ""
 
@@ -6304,7 +6304,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
+"@kbn/management-storybook-config@link:src/dev/packages/management-storybook-config":
   version "0.0.0"
   uid ""
 
@@ -6312,7 +6312,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/manifest@link:packages/kbn-manifest":
+"@kbn/manifest@link:src/dev/packages/manifest":
   version "0.0.0"
   uid ""
 
@@ -6468,11 +6468,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mock-idp-plugin@link:packages/kbn-mock-idp-plugin":
+"@kbn/mock-idp-plugin@link:src/dev/packages/mock-idp-plugin":
   version "0.0.0"
   uid ""
 
-"@kbn/mock-idp-utils@link:packages/kbn-mock-idp-utils":
+"@kbn/mock-idp-utils@link:src/dev/packages/mock-idp-utils":
   version "0.0.0"
   uid ""
 
@@ -6604,7 +6604,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-bundler@link:packages/kbn-openapi-bundler":
+"@kbn/openapi-bundler@link:src/dev/packages/openapi-bundler":
   version "0.0.0"
   uid ""
 
@@ -6612,15 +6612,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-generator@link:packages/kbn-openapi-generator":
+"@kbn/openapi-generator@link:src/dev/packages/openapi-generator":
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer-webpack-helpers@link:packages/kbn-optimizer-webpack-helpers":
+"@kbn/optimizer-webpack-helpers@link:src/dev/packages/optimizer-webpack-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer@link:packages/kbn-optimizer":
+"@kbn/optimizer@link:src/dev/packages/optimizer":
   version "0.0.0"
   uid ""
 
@@ -6648,31 +6648,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/peggy-loader@link:packages/kbn-peggy-loader":
+"@kbn/peggy-loader@link:src/dev/packages/peggy-loader":
   version "0.0.0"
   uid ""
 
-"@kbn/peggy@link:packages/kbn-peggy":
+"@kbn/peggy@link:src/dev/packages/peggy":
   version "0.0.0"
   uid ""
 
-"@kbn/performance-testing-dataset-extractor@link:packages/kbn-performance-testing-dataset-extractor":
+"@kbn/performance-testing-dataset-extractor@link:src/dev/packages/performance-testing-dataset-extractor":
   version "0.0.0"
   uid ""
 
-"@kbn/picomatcher@link:packages/kbn-picomatcher":
+"@kbn/picomatcher@link:src/dev/packages/picomatcher":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-check@link:packages/kbn-plugin-check":
+"@kbn/plugin-check@link:src/dev/packages/plugin-check":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-generator@link:packages/kbn-plugin-generator":
+"@kbn/plugin-generator@link:src/dev/packages/plugin-generator":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
+"@kbn/plugin-helpers@link:src/dev/packages/plugin-helpers":
   version "0.0.0"
   uid ""
 
@@ -6768,7 +6768,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/relocate@link:packages/kbn-relocate":
+"@kbn/relocate@link:src/dev/packages/relocate":
   version "0.0.0"
   uid ""
 
@@ -6780,7 +6780,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-file-maps@link:packages/kbn-repo-file-maps":
+"@kbn/repo-file-maps@link:src/dev/packages/repo-file-maps":
   version "0.0.0"
   uid ""
 
@@ -6788,7 +6788,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-linter@link:packages/kbn-repo-linter":
+"@kbn/repo-linter@link:src/dev/packages/repo-linter":
   version "0.0.0"
   uid ""
 
@@ -6796,15 +6796,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-path@link:packages/kbn-repo-path":
+"@kbn/repo-path@link:src/dev/packages/repo-path":
   version "0.0.0"
   uid ""
 
-"@kbn/repo-source-classifier-cli@link:packages/kbn-repo-source-classifier-cli":
+"@kbn/repo-source-classifier-cli@link:src/dev/packages/repo-source-classifier-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/repo-source-classifier@link:packages/kbn-repo-source-classifier":
+"@kbn/repo-source-classifier@link:src/dev/packages/repo-source-classifier":
   version "0.0.0"
   uid ""
 
@@ -6988,15 +6988,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-info@link:packages/kbn-scout-info":
+"@kbn/scout-info@link:src/dev/packages/scout-info":
   version "0.0.0"
   uid ""
 
-"@kbn/scout-reporting@link:packages/kbn-scout-reporting":
+"@kbn/scout-reporting@link:src/dev/packages/scout-reporting":
   version "0.0.0"
   uid ""
 
-"@kbn/scout@link:packages/kbn-scout":
+"@kbn/scout@link:src/dev/packages/scout":
   version "0.0.0"
   uid ""
 
@@ -7324,7 +7324,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+"@kbn/serverless-storybook-config@link:src/platform/packages/private/serverless/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -7344,7 +7344,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/set-map@link:packages/kbn-set-map":
+"@kbn/set-map@link:src/dev/packages/set-map":
   version "0.0.0"
   uid ""
 
@@ -7572,11 +7572,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/some-dev-log@link:packages/kbn-some-dev-log":
+"@kbn/some-dev-log@link:src/dev/packages/some-dev-log":
   version "0.0.0"
   uid ""
 
-"@kbn/sort-package-json@link:packages/kbn-sort-package-json":
+"@kbn/sort-package-json@link:src/dev/packages/sort-package-json":
   version "0.0.0"
   uid ""
 
@@ -7632,11 +7632,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stdio-dev-helpers@link:packages/kbn-stdio-dev-helpers":
+"@kbn/stdio-dev-helpers@link:src/dev/packages/stdio-dev-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/storybook@link:packages/kbn-storybook":
+"@kbn/storybook@link:src/dev/packages/storybook":
   version "0.0.0"
   uid ""
 
@@ -7652,7 +7652,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/styled-components-mapping-cli@link:packages/kbn-styled-components-mapping-cli":
+"@kbn/styled-components-mapping-cli@link:src/dev/packages/styled-components-mapping-cli":
   version "0.0.0"
   uid ""
 
@@ -7700,11 +7700,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
+"@kbn/telemetry-tools@link:src/dev/packages/telemetry-tools":
   version "0.0.0"
   uid ""
 
-"@kbn/test-eui-helpers@link:packages/kbn-test-eui-helpers":
+"@kbn/test-eui-helpers@link:src/dev/packages/test-eui-helpers":
   version "0.0.0"
   uid ""
 
@@ -7712,11 +7712,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-jest-helpers@link:packages/kbn-test-jest-helpers":
+"@kbn/test-jest-helpers@link:src/dev/packages/test-jest-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
+"@kbn/test-subj-selector@link:src/dev/packages/test-subj-selector":
   version "0.0.0"
   uid ""
 
@@ -7736,7 +7736,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:packages/kbn-test":
+"@kbn/test@link:src/dev/packages/test":
   version "0.0.0"
   uid ""
 
@@ -7772,7 +7772,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tooling-log@link:packages/kbn-tooling-log":
+"@kbn/tooling-log@link:src/dev/packages/tooling-log":
   version "0.0.0"
   uid ""
 
@@ -7804,11 +7804,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ts-projects@link:packages/kbn-ts-projects":
+"@kbn/ts-projects@link:src/dev/packages/ts-projects":
   version "0.0.0"
   uid ""
 
-"@kbn/ts-type-check-cli@link:packages/kbn-ts-type-check-cli":
+"@kbn/ts-type-check-cli@link:src/dev/packages/ts-type-check-cli":
   version "0.0.0"
   uid ""
 
@@ -7956,7 +7956,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/validate-next-docs-cli@link:packages/kbn-validate-next-docs-cli":
+"@kbn/validate-next-docs-cli@link:src/dev/packages/validate-next-docs-cli":
   version "0.0.0"
   uid ""
 
@@ -8028,11 +8028,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/web-worker-stub@link:packages/kbn-web-worker-stub":
+"@kbn/web-worker-stub@link:src/dev/packages/web-worker-stub":
   version "0.0.0"
   uid ""
 
-"@kbn/whereis-pkg-cli@link:packages/kbn-whereis-pkg-cli":
+"@kbn/whereis-pkg-cli@link:src/dev/packages/whereis-pkg-cli":
   version "0.0.0"
   uid ""
 
@@ -8040,7 +8040,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/yarn-lock-validator@link:packages/kbn-yarn-lock-validator":
+"@kbn/yarn-lock-validator@link:src/dev/packages/yarn-lock-validator":
   version "0.0.0"
   uid ""
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export { setupJUnitReportGeneration } from '@kbn/test';
 
 export { generateNoticeFromSource } from './notice';

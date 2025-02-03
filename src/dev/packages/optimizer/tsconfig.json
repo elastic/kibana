@@ -1,0 +1,34 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "../../../../typings/**/*"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*",
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/dev-utils",
+    "@kbn/core-ui-settings-common",
+    "@kbn/optimizer-webpack-helpers",
+    "@kbn/std",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/tooling-log",
+    "@kbn/ci-stats-reporter",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+    "@kbn/jest-serializers",
+    "@kbn/repo-packages",
+  ]
+}

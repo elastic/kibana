@@ -17,7 +17,7 @@ import { REPO_ROOT } from './paths.mjs';
 import { cleanPaths } from './clean.mjs';
 import { indent } from './indent.mjs';
 
-const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
+const BAZEL_RUNNER_SRC = '../../../src/dev/packages/bazel-runner/index.js';
 
 const BAZEL_TARGETS = [
   '//src/platform/packages/private/kbn-ui-shared-deps-npm:shared_built_assets',

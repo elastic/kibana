@@ -8,7 +8,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const babelJest = require('babel-jest');
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line import/no-extraneous-dependencies, @kbn/imports/no_boundary_crossing
 const rootTransformerConfig = require('@kbn/test/src/jest/transforms/babel/transformer_config');
 
 module.exports = babelJest.default.createTransformer({

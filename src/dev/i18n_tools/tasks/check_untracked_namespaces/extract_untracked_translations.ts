@@ -33,7 +33,7 @@ export async function* extractUntrackedMessages(rootPath: string, definedPathsFo
       '**/__fixtures__/**',
       '**/src/platform/packages/shared/kbn-i18n/**',
       '**/src/platform/packages/shared/kbn-i18n-react/**',
-      '**/packages/kbn-plugin-generator/template/**',
+      '**/src/dev/packages/plugin-generator/template/**',
       '**/test/**',
       '**/scripts/**',
       '**/src/dev/**',

@@ -37,7 +37,7 @@ webpack_cli(
   name = "target_workers",
   data = SRCS + SHARED_DEPS + [
     "//:.browserslistrc",
-    "//packages/kbn-babel-preset",
+    "//src/dev/packages/babel-preset:kbn-babel-preset",
     "@npm//terser-webpack-plugin",
     "@npm//@babel/runtime",
     "@npm//babel-loader",

@@ -52,7 +52,7 @@ describe('Util: isValidIndexName()', () => {
     expect(isValidIndexName('a'.repeat(255))).toBe(true);
     expect(isValidIndexName('a'.repeat(256))).toBe(false);
     // multi-byte character test
-    // this test relies on TextEncoder being mocked here 'packages/kbn-test/src/jest/setup/polyfills.jsdom.js'
+    // this test relies on TextEncoder being mocked here 'src/dev/packages/test/src/jest/setup/polyfills.jsdom.js'
     expect(isValidIndexName('あ'.repeat(255))).toBe(false);
   });
 });

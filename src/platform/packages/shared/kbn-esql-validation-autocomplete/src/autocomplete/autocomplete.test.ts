@@ -71,7 +71,7 @@ describe('autocomplete', () => {
   // Enrich the function to work with .only and .skip as regular test function
   //
   // DO NOT CHANGE THE NAME OF THIS FUNCTION WITHOUT ALSO CHANGING
-  // THE LINTER RULE IN packages/kbn-eslint-config/typescript.js
+  // THE LINTER RULE IN src/dev/packages/eslint-config/typescript.js
   //
   const testSuggestions = Object.assign(_testSuggestionsFn.bind(null, {}), {
     skip: (...args: TestArgs) => {

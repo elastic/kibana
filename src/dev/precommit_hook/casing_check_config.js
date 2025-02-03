@@ -41,8 +41,8 @@ export const IGNORE_FILE_GLOBS = [
   'src/platform/packages/shared/kbn-utility-types/test-d/**/*',
   'Dockerfile*',
   'vars/*',
-  'packages/kbn-test/jest-preset.js',
-  'packages/kbn-test/*/jest-preset.js',
+  'src/dev/packages/test/jest-preset.js',
+  'src/dev/packages/test/*/jest-preset.js',
   'test/package/Vagrantfile',
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
@@ -80,7 +80,7 @@ export const IGNORE_FILE_GLOBS = [
   '.buildkite/**/*',
 
   // generator templates use weird filenames based on the requirements for the files they're generating
-  'packages/kbn-generate/templates/**/*',
+  'src/dev/packages/generate/templates/**/*',
 
   // ecs templates
   '**/ecs/fields/**/*',
@@ -99,9 +99,9 @@ export const IGNORE_FILE_GLOBS = [
  * @type {Array}
  */
 export const KEBAB_CASE_DIRECTORY_GLOBS = [
-  'packages/*',
   'x-pack',
   'x-pack/packages/*',
+  'src/dev/packages/*/*',
   'src/core/packages/*/*',
   'src/platform/packages/private/*',
   'src/platform/packages/shared/*',
@@ -129,12 +129,12 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
 export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
-  'packages/*',
+  'src/dev/packages/*',
   'x-pack/packages/ai-infra/*',
-  'packages/kbn-pm/src/utils/__fixtures__/*',
-  'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
+  'kbn-pm/src/utils/__fixtures__/*',
+  'src/dev/packages/check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
   'x-pack/dev-tools',
-  'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'src/dev/packages/optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',
   'typings/**/*',
 ];
@@ -145,7 +145,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
  *
  * @type {Array}
  */
-export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
+export const REMOVE_EXTENSION = ['src/dev/packages/plugin-generator/template/**/*.ejs'];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!
