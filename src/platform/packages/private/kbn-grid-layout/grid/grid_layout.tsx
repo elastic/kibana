@@ -24,23 +24,29 @@ import { resolveGridRow } from './utils/resolve_grid_row';
 export interface GridLayoutProps {
   layout: GridLayoutData;
   gridSettings: GridSettings;
+  expandedPanelId?: string;
+  accessMode?: GridAccessMode;
+
   renderPanelContents: (
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
-  expandedPanelId?: string;
-  accessMode?: GridAccessMode;
+  onRowAdded?: (rowId: string, rowRef: HTMLDivElement | null) => void;
+
   className?: string; // this makes it so that custom CSS can be passed via Emotion
 }
 
 export const GridLayout = ({
   layout,
   gridSettings,
-  renderPanelContents,
-  onLayoutChange,
   expandedPanelId,
   accessMode = 'EDIT',
+
+  renderPanelContents,
+  onLayoutChange,
+  onRowAdded,
+
   className,
 }: GridLayoutProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
@@ -100,6 +106,13 @@ export const GridLayout = ({
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
+          if (onRowAdded && layoutBefore.length < layoutAfter.length) {
+            console.log(gridLayoutStateManager.rowRefs.current.length);
+            onRowAdded(
+              `kbnGridLayoutRow--${layoutAfter.length}`,
+              gridLayoutStateManager.rowRefs.current[layoutAfter.length]
+            );
+          }
         }
       });
 

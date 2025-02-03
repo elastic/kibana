@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -84,9 +84,8 @@ export const GridRow = ({
           map(([proposedGridLayout, gridLayout]) => {
             const displayedGridLayout = proposedGridLayout ?? gridLayout;
             return {
-              title: displayedGridLayout[rowIndex].title,
-              isCollapsed: displayedGridLayout[rowIndex].isCollapsed,
-              panelIds: Object.keys(displayedGridLayout[rowIndex].panels),
+              isCollapsed: displayedGridLayout[rowIndex]?.isCollapsed ?? false,
+              panelIds: Object.keys(displayedGridLayout[rowIndex]?.panels ?? {}),
             };
           }),
           pairwise()
@@ -106,7 +105,7 @@ export const GridRow = ({
             setPanelIdsInOrder(
               getKeysInOrder(
                 (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-                  gridLayoutStateManager.gridLayout$.getValue())[rowIndex].panels
+                  gridLayoutStateManager.gridLayout$.getValue())[rowIndex]?.panels ?? {}
               )
             );
           }
@@ -118,6 +117,7 @@ export const GridRow = ({
        * reasons (screen readers and focus management).
        */
       const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe((gridLayout) => {
+        if (!gridLayout[rowIndex]) return;
         const newPanelIdsInOrder = getKeysInOrder(gridLayout[rowIndex].panels);
         if (panelIdsInOrder.join() !== newPanelIdsInOrder.join()) {
           setPanelIdsInOrder(newPanelIdsInOrder);
@@ -157,6 +157,7 @@ export const GridRow = ({
 
   return (
     <div
+      id={`kbnGridLayoutRow--${rowIndex}`}
       css={styles.fullHeight}
       className={classNames('kbnGridRowContainer', {
         'kbnGridRowContainer--collapsed': isCollapsed,

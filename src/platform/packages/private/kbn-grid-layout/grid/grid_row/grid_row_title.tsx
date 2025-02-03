@@ -35,7 +35,7 @@ export const GridRowTitle = ({
   useEffect(() => {
     const titleSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
-        map((gridLayout) => gridLayout[rowIndex].title),
+        map((gridLayout) => gridLayout[rowIndex]?.title ?? ''),
         distinctUntilChanged()
       )
       .subscribe((title) => {
