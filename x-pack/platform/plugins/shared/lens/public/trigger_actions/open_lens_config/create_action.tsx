@@ -12,10 +12,9 @@ import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { generateId } from '../../id_generator';
 import type { LensApi } from '../../react_embeddable/types';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
-
-export const getAsyncHelpers = async () => await import('../../async_services');
 
 export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -39,9 +38,7 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(embeddable)) return false;
-    const { isCreateActionCompatible } = await getAsyncHelpers();
-
-    return isCreateActionCompatible(this.core);
+    return this.core.uiSettings.get(ENABLE_ESQL);
   }
 
   public async execute({ embeddable: parentApi }: EmbeddableApiContext) {
