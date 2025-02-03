@@ -127,7 +127,7 @@ type Exact<T, U> = T extends U
 
 // The storage settings need to support the application payload type, but it's OK if the
 // storage document can hold more fields than the application document.
-// To keep the type safety of the application type in the consuming code, bot the storage
+// To keep the type safety of the application type in the consuming code, both the storage
 // settings and the application type are passed to the IStorageClient type.
 // The IStorageClient type then checks if the application type is a subset of the storage
 // document type. If this is not the case, the IStorageClient type is set to never, which
