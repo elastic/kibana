@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { tryCatch, fold } from 'fp-ts/lib/Either';
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
-import { ReindexStep } from '../../../common/types';
+import { ReindexStep, DataStreamReindexStatus } from '../../../common/types';
 
 export const validateRegExpString = (s: string) =>
   pipe(
@@ -99,5 +99,35 @@ export const getReindexProgressLabel = (
       break;
     }
   }
+  return `${percentsComplete}%`;
+};
+
+export const getDataStreamReindexProgress = (
+  status: DataStreamReindexStatus,
+  reindexTaskPercComplete: number | null
+): number => {
+  switch (status) {
+    case DataStreamReindexStatus.notStarted:
+      return 0;
+
+    case DataStreamReindexStatus.fetchFailed:
+    case DataStreamReindexStatus.failed:
+    case DataStreamReindexStatus.cancelled:
+    case DataStreamReindexStatus.inProgress: {
+      return reindexTaskPercComplete !== null ? Math.round(reindexTaskPercComplete * 100) : 0;
+    }
+    case DataStreamReindexStatus.completed: {
+      return 100;
+    }
+  }
+
+  return 0;
+};
+
+export const getDataStreamReindexProgressLabel = (
+  status: DataStreamReindexStatus,
+  reindexTaskPercComplete: number | null
+): string => {
+  const percentsComplete = getDataStreamReindexProgress(status, reindexTaskPercComplete);
   return `${percentsComplete}%`;
 };

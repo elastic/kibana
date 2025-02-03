@@ -103,8 +103,8 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   );
 
   const showDiscoverLink = useMemo(
-    () => capabilities.discover?.show !== undefined && discoverLocator !== undefined,
-    [capabilities.discover?.show, discoverLocator]
+    () => capabilities.discover_v2?.show !== undefined && discoverLocator !== undefined,
+    [capabilities.discover_v2?.show, discoverLocator]
   );
 
   const generateDiscoverUrl = useCallback(

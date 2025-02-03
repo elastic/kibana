@@ -50,7 +50,7 @@ const AS_PLAIN_TEXT: EuiComboBoxSingleSelectionShape = { asPlainText: true };
  */
 export const EvaluationSettings: React.FC = React.memo(() => {
   const { actionTypeRegistry, http, setTraceOptions, toasts, traceOptions } = useAssistantContext();
-  const { data: connectors } = useLoadConnectors({ http });
+  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true });
   const { mutate: performEvaluation, isLoading: isPerformingEvaluation } = usePerformEvaluation({
     http,
     toasts,

@@ -8,12 +8,32 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { serviceLoadedMsg } from '../../playwright/utils';
 
-export function createLogger() {
-  const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
+export class ScoutLogger extends ToolingLog {
+  constructor() {
+    super({ level: 'verbose', writeTo: process.stdout }, { context: 'scout' });
+    this.serviceLoaded('logger');
+  }
 
-  log.debug(serviceLoadedMsg('logger'));
+  /**
+   * Used to log when a service/fixture is loaded
+   * @param name unique name of the service
+   */
+  public serviceLoaded(name: string) {
+    this.debug(`[service] ${name}`);
+  }
+}
 
-  return log;
+let loggerInstance: ScoutLogger | null = null;
+
+/**
+ * Singleton logger instance to share across the Scout components
+ * @returns {ScoutLogger}
+ */
+export function getLogger(): ScoutLogger {
+  if (!loggerInstance) {
+    loggerInstance = new ScoutLogger();
+  }
+
+  return loggerInstance;
 }
