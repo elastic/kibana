@@ -38,7 +38,7 @@ interface SecurityFlyoutPanelsCommonParams {
 type FlyoutParams =
   | {
       id: typeof UniversalEntityPanelKey;
-      params: { entity: InventoryFlyoutProps['entity'] };
+      params: { entity: UniversalEntityEcs };
     }
   | { id: typeof UserPanelKey; params: { userName: string } & SecurityFlyoutPanelsCommonParams }
   | { id: typeof HostPanelKey; params: { hostName: string } & SecurityFlyoutPanelsCommonParams }
@@ -48,11 +48,11 @@ type FlyoutParams =
     };
 
 const getFlyoutParamsByEntity = (
-  entity: InventoryFlyoutProps['entity'],
+  entity: UniversalEntityEcs,
   scopeId?: string,
   contextId?: string
 ): FlyoutParams => {
-  const entitiesFlyoutParams: Record<InventoryFlyoutProps['entity']['type'], FlyoutParams> = {
+  const entitiesFlyoutParams: Record<UniversalEntityEcs['type'], FlyoutParams> = {
     universal: { id: UniversalEntityPanelKey, params: { entity } },
     user: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
     host: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },
