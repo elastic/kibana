@@ -84,7 +84,10 @@ export function WiredStreamDetailManagement({
     },
     lifecycle: {
       content: (
-        <StreamDetailLifecycle definition={legacyDefinition} refreshDefinition={refreshDefinition} />
+        <StreamDetailLifecycle
+          definition={legacyDefinition}
+          refreshDefinition={refreshDefinition}
+        />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
         defaultMessage: 'Data retention',
