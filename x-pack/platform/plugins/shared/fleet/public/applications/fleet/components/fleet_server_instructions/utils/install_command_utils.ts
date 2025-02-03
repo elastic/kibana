@@ -122,21 +122,21 @@ export function getInstallCommandForPlatform({
   }
 
   if (isProductionDeployment) {
-    const certificateAuthorities = fleetServerHost?.certificate_authorities
-      ? `'${fleetServerHost?.certificate_authorities}'`
+    const certificateAuthorities = fleetServerHost?.ssl?.certificate_authorities
+      ? `'${fleetServerHost?.ssl?.certificate_authorities}'`
       : '<PATH_TO_CA>';
-    const fleetServerCert = fleetServerHost?.certificate
-      ? `'${fleetServerHost?.certificate}'`
+    const fleetServerCert = fleetServerHost?.ssl?.certificate
+      ? `'${fleetServerHost?.ssl?.certificate}'`
       : '<PATH_TO_FLEET_SERVER_CERT>';
-    const certificateKey = fleetServerHost?.certificate_key
-      ? `'${fleetServerHost?.certificate_key}'`
+    const certificateKey = fleetServerHost?.ssl?.key
+      ? `'${fleetServerHost?.ssl?.key}'`
       : '<PATH_TO_FLEET_SERVER_CERT_KEY>';
 
     commandArguments.push(['certificate-authorities', certificateAuthorities]);
 
     if (!sslCATrustedFingerprint) {
-      const esCert = fleetServerHost?.es_certificate
-        ? `'${fleetServerHost?.es_certificate}'`
+      const esCert = fleetServerHost?.ssl?.es_certificate
+        ? `'${fleetServerHost?.ssl?.es_certificate}'`
         : '<PATH_TO_ES_CERT>';
       commandArguments.push(['fleet-server-es-ca', esCert]);
     }

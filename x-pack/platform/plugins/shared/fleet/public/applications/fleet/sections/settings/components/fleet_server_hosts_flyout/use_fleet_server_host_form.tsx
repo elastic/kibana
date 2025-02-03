@@ -256,24 +256,17 @@ export function useFleetServerHostsForm(
             (val) => val !== ''
           ),
         },
-        ...(!sslKeyInput.value &&
-          sslKeySecretInput.value && {
-            secrets: {
-              ssl: {
-                key: sslKeySecretInput.value,
-              },
+        ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
+          (!sslESKeyInput.value && sslESKeySecretInput.value)) && {
+          secrets: {
+            ssl: {
+              key: sslKeySecretInput.value || undefined,
+              es_key: sslESKeySecretInput.value || undefined,
             },
-          }),
-        ...(!sslESKeyInput.value &&
-          sslESKeySecretInput.value && {
-            secrets: {
-              ssl: {
-                es_key: sslESKeySecretInput.value,
-              },
-            },
-          }),
+          },
+        }),
       };
-      console.log('data', data);
+
       if (fleetServerHost) {
         const res = await sendPutFleetServerHost(fleetServerHost.id, data);
         if (res.error) {

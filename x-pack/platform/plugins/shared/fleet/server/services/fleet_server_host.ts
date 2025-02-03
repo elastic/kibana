@@ -83,6 +83,9 @@ export async function createFleetServerHost(
   if (fleetServerHost.host_urls) {
     data.host_urls = fleetServerHost.host_urls.map(normalizeHostsForAgents);
   }
+  if (fleetServerHost.ssl) {
+    data.ssl = JSON.stringify(fleetServerHost.ssl);
+  }
 
   // Store secret values if enabled; if not, store plain text values
   if (await isSecretStorageEnabled(esClient, soClient)) {
@@ -90,11 +93,8 @@ export async function createFleetServerHost(
       await extractAndWriteFleetServerHostsSecrets({
         fleetServerHost,
         esClient,
-        // secretHashes: fleetServerHost.is_preconfigured ? options?.secretHashes : undefined,
       });
-
-    if (fleetServerHostWithSecrets.secrets)
-      fleetServerHost.secrets = fleetServerHostWithSecrets.secrets;
+    if (fleetServerHostWithSecrets.secrets) data.secrets = fleetServerHostWithSecrets.secrets;
   } else {
     if (
       (!fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) ||
@@ -103,7 +103,6 @@ export async function createFleetServerHost(
       data.ssl = JSON.stringify({ ...fleetServerHost.ssl, ...fleetServerHost.secrets.ssl });
     }
   }
-  logger.debug(`Creating fleet server host with ${data}`);
   const res = await soClient.create<FleetServerHostSOAttributes>(
     FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     data,
@@ -242,7 +241,6 @@ export async function updateFleetServerHost(
       oldFleetServerHost: originalItem,
       fleetServerHostUpdate: data,
       esClient,
-      // secretHashes: data.is_preconfigured ? secretHashes : undefined,
     });
 
     updateData.secrets = secretsRes.fleetServerHostUpdate.secrets;

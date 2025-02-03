@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+export type FleetServerHostSecret =
+  | string
+  | {
+      id: string;
+      hash?: string;
+    };
 export interface NewFleetServerHost {
   name: string;
   host_urls: string[];
@@ -22,8 +28,8 @@ export interface NewFleetServerHost {
   } | null;
   secrets?: {
     ssl?: {
-      key?: { id: string };
-      es_key?: { id: string };
+      key?: FleetServerHostSecret;
+      es_key?: FleetServerHostSecret;
     };
   };
 }

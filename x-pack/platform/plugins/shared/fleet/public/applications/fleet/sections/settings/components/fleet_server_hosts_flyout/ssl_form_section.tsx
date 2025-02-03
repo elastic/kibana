@@ -30,9 +30,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
     sslESKey: false,
   });
 
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
-    'disabled'
-  );
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
   const fleetStatus = useFleetStatus();
   if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
     setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);

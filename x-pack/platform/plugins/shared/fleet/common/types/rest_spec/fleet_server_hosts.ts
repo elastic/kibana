@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FleetServerHost } from '../models';
+import type { FleetServerHost, FleetServerHostSecret } from '../models';
 
 import type { ListResult } from './common';
 
@@ -21,6 +21,20 @@ export interface PutFleetServerHostsRequest {
     is_default?: boolean;
     is_internal?: boolean;
     proxy_id?: string | null;
+    ssl?: {
+      certificate_authorities?: string[];
+      certificate?: string;
+      key?: string;
+      es_certificate_authorities?: string[];
+      es_certificate?: string;
+      es_key?: string;
+    } | null;
+    secrets?: {
+      ssl?: {
+        key?: FleetServerHostSecret;
+        es_key?: FleetServerHostSecret;
+      };
+    };
   };
 }
 
@@ -32,6 +46,20 @@ export interface PostFleetServerHostsRequest {
     is_default?: boolean;
     is_internal?: boolean;
     proxy_id?: string | null;
+    ssl?: {
+      certificate_authorities?: string[];
+      certificate?: string;
+      key?: string;
+      es_certificate_authorities?: string[];
+      es_certificate?: string;
+      es_key?: string;
+    } | null;
+    secrets?: {
+      ssl?: {
+        key?: FleetServerHostSecret;
+        es_key?: FleetServerHostSecret;
+      };
+    };
   };
 }
 

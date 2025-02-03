@@ -146,24 +146,16 @@ export const useFleetServerHost = (): FleetServerHostForm => {
           (val) => val !== ''
         ),
       },
-      ...(!sslKeyInput.value &&
-        sslKeySecretInput.value && {
-          secrets: {
-            ssl: {
-              key: sslKeySecretInput.value,
-            },
+      ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
+        (!sslESKeyInput.value && sslESKeySecretInput.value)) && {
+        secrets: {
+          ssl: {
+            key: sslKeySecretInput.value || undefined,
+            es_key: sslESKeySecretInput.value || undefined,
           },
-        }),
-      ...(!sslESKeyInput.value &&
-        sslESKeySecretInput.value && {
-          secrets: {
-            ssl: {
-              es_key: sslESKeySecretInput.value,
-            },
-          },
-        }),
+        },
+      }),
     };
-
     const res = await sendPostFleetServerHost(newFleetServerHost);
     if (res.error) {
       throw res.error;

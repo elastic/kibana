@@ -857,7 +857,6 @@ function getPolicyWithSecretReferences(
 }
 
 // Fleet server hosts functions
-
 function getFleetServerHostsSecretPaths(
   fleetServerHost: NewFleetServerHost | Partial<FleetServerHost>
 ): FleetServerHostSecretPath[] {
@@ -867,6 +866,12 @@ function getFleetServerHostsSecretPaths(
     secretPaths.push({
       path: 'secrets.ssl.key',
       value: fleetServerHost.secrets.ssl.key,
+    });
+  }
+  if (fleetServerHost?.secrets?.ssl?.es_key) {
+    secretPaths.push({
+      path: 'secrets.ssl.es_key',
+      value: fleetServerHost.secrets.ssl.es_key,
     });
   }
 
@@ -931,6 +936,42 @@ export async function deleteFleetServerHostsSecrets(opts: {
   }
 }
 
+export function diffFleetServerHostsSecretPaths(
+  oldPaths: FleetServerHostSecretPath[],
+  newPaths: FleetServerHostSecretPath[]
+): {
+  toCreate: FleetServerHostSecretPath[];
+  toDelete: FleetServerHostSecretPath[];
+  noChange: FleetServerHostSecretPath[];
+} {
+  const toCreate: FleetServerHostSecretPath[] = [];
+  const toDelete: FleetServerHostSecretPath[] = [];
+  const noChange: FleetServerHostSecretPath[] = [];
+  const newPathsByPath = keyBy(newPaths, 'path');
+
+  for (const oldPath of oldPaths) {
+    if (!newPathsByPath[oldPath.path]) {
+      toDelete.push(oldPath);
+    }
+
+    const newPath = newPathsByPath[oldPath.path];
+    if (newPath && newPath.value) {
+      const newValue = newPath.value;
+      if (typeof newValue === 'string') {
+        toCreate.push(newPath);
+        toDelete.push(oldPath);
+      } else {
+        noChange.push(newPath);
+      }
+    }
+    delete newPathsByPath[oldPath.path];
+  }
+
+  const remainingNewPaths = Object.values(newPathsByPath);
+
+  return { toCreate: [...toCreate, ...remainingNewPaths], toDelete, noChange };
+}
+
 export async function extractAndUpdateFleetServerHostsSecrets(opts: {
   oldFleetServerHost: NewFleetServerHost;
   fleetServerHostUpdate: Partial<NewFleetServerHost>;
@@ -949,7 +990,7 @@ export async function extractAndUpdateFleetServerHostsSecrets(opts: {
     return { fleetServerHostUpdate, secretReferences: [], secretsToDelete: [] };
   }
 
-  const { toCreate, toDelete, noChange } = diffOutputSecretPaths(
+  const { toCreate, toDelete, noChange } = diffFleetServerHostsSecretPaths(
     oldSecretPaths,
     updatedSecretPaths
   );
