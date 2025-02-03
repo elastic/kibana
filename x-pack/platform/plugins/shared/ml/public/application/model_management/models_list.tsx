@@ -122,14 +122,14 @@ export const ModelsList: FC<Props> = ({
 
   const items = useObservable(trainedModelsService.modelItems$, trainedModelsService.modelItems);
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
-  const activeDeployments = useObservable(
-    trainedModelsService.activeDeployments$,
-    trainedModelsService.activeDeployments
+  const scheduledDeployments = useObservable(
+    trainedModelsService.scheduledDeployments$,
+    trainedModelsService.scheduledDeployments
   );
 
   // Navigation blocker when there are active operations
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: activeDeployments.length > 0,
+    hasUnsavedChanges: scheduledDeployments.length > 0,
     blockSpaNavigation: false,
   });
 

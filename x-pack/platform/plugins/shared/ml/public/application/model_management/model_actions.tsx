@@ -74,9 +74,9 @@ export function useModelActions({
   const cloudInfo = useCloudCheck();
 
   const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
-  const activeDeployments = useObservable(
-    trainedModelsService.activeDeployments$,
-    trainedModelsService.activeDeployments
+  const scheduledDeployments = useObservable(
+    trainedModelsService.scheduledDeployments$,
+    trainedModelsService.scheduledDeployments
   );
 
   const [
@@ -219,7 +219,7 @@ export function useModelActions({
         isPrimary: true,
         color: 'success',
         enabled: (item) => {
-          const isModelBeingDeployed = activeDeployments.some(
+          const isModelBeingDeployed = scheduledDeployments.some(
             (deployment) => deployment.modelId === item.model_id
           );
 
@@ -513,7 +513,7 @@ export function useModelActions({
       urlLocator,
       navigateToUrl,
       navigateToPath,
-      activeDeployments,
+      scheduledDeployments,
       canStartStopTrainedModels,
       canCreateTrainedModels,
       getUserInputModelDeploymentParams,
