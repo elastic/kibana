@@ -14,6 +14,8 @@ import {
   ResponseError,
   SystemIndicesMigrationStatus,
   ReindexStatusResponse,
+  DataStreamReindexStatusResponse,
+  DataStreamMetadata,
 } from '../../../common/types';
 import {
   API_BASE_PATH,
@@ -206,6 +208,41 @@ export class ApiService {
     }>({
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
       method: 'get',
+    });
+  }
+
+  public async getDataStreamReindexStatus(dataStreamName: string) {
+    return await this.sendRequest<DataStreamReindexStatusResponse>({
+      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}`,
+      method: 'get',
+    });
+  }
+
+  public async getDataStreamMetadata(dataStreamName: string) {
+    return await this.sendRequest<DataStreamMetadata>({
+      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}/metadata`,
+      method: 'get',
+    });
+  }
+
+  public async startDataStreamReindexTask(dataStreamName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}`,
+      method: 'post',
+    });
+  }
+
+  public async cancelDataStreamReindexTask(dataStreamName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}/cancel`,
+      method: 'post',
+    });
+  }
+
+  public async pauseDataStreamReindexTask(dataStreamName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}/pause`,
+      method: 'post',
     });
   }
 
