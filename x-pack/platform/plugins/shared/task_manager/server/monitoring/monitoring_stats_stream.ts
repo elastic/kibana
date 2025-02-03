@@ -81,15 +81,15 @@ export function createAggregators({
   taskStore,
   elasticsearchAndSOAvailability$,
   config,
-  managedConfig,
   logger,
   taskDefinitions,
   adHocTaskCounter,
+  startingCapacity,
   taskPollingLifecycle,
   ephemeralTaskLifecycle,
 }: CreateMonitoringStatsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [
-    createConfigurationAggregator(config, managedConfig),
+    createConfigurationAggregator(config, startingCapacity, taskPollingLifecycle),
 
     createWorkloadAggregator({
       taskStore,
