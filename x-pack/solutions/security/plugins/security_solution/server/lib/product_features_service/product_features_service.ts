@@ -21,6 +21,7 @@ import {
   getCasesFeature,
   getSecurityFeature,
   getCasesV2Feature,
+  getCasesV3Feature,
   getSecurityV2Feature,
   getTimelineFeature,
   getNotesFeature,
@@ -46,6 +47,7 @@ export class ProductFeaturesService {
   private securityV2ProductFeatures: ProductFeatures;
   private casesProductFeatures: ProductFeatures;
   private casesProductV2Features: ProductFeatures;
+  private casesProductFeaturesV3: ProductFeatures;
   private securityAssistantProductFeatures: ProductFeatures;
   private attackDiscoveryProductFeatures: ProductFeatures;
   private timelineProductFeatures: ProductFeatures;
@@ -103,6 +105,18 @@ export class ProductFeaturesService {
       casesV2Feature.baseKibanaSubFeatureIds
     );
 
+    const casesV3Feature = getCasesV3Feature({
+      uiCapabilities: casesUiCapabilities,
+      apiTags: casesApiTags,
+      savedObjects: { files: filesSavedObjectTypes },
+    });
+    this.casesProductFeaturesV3 = new ProductFeatures(
+      this.logger,
+      casesV3Feature.subFeaturesMap,
+      casesV3Feature.baseKibanaFeature,
+      casesV3Feature.baseKibanaSubFeatureIds
+    );
+
     const assistantFeature = getAssistantFeature(this.experimentalFeatures);
     this.securityAssistantProductFeatures = new ProductFeatures(
       this.logger,
@@ -148,6 +162,7 @@ export class ProductFeaturesService {
     this.securityV2ProductFeatures.init(featuresSetup);
     this.casesProductFeatures.init(featuresSetup);
     this.casesProductV2Features.init(featuresSetup);
+    this.casesProductFeaturesV3.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
     this.attackDiscoveryProductFeatures.init(featuresSetup);
     this.timelineProductFeatures.init(featuresSetup);
@@ -162,6 +177,7 @@ export class ProductFeaturesService {
     const casesProductFeaturesConfig = configurator.cases();
     this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
     this.casesProductV2Features.setConfig(casesProductFeaturesConfig);
+    this.casesProductFeaturesV3.setConfig(casesProductFeaturesConfig);
 
     const securityAssistantProductFeaturesConfig = configurator.securityAssistant();
     this.securityAssistantProductFeatures.setConfig(securityAssistantProductFeaturesConfig);

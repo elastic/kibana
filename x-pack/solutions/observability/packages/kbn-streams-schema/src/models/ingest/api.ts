@@ -19,17 +19,20 @@ import {
   WiredIngest,
   WiredStreamDefinition,
   unwiredIngestSchema,
+  unwiredStreamDefinitionSchema,
   unwiredStreamDefinitionSchemaBase,
   wiredIngestSchema,
+  wiredStreamDefinitionSchema,
   wiredStreamDefinitionSchemaBase,
 } from './base';
-import {
-  ElasticsearchAsset,
-  IngestStreamLifecycle,
-  elasticsearchAssetSchema,
-  ingestStreamLifecycleSchema,
-} from './common';
+import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
 import { createIsNarrowSchema, createAsSchemaOrThrow } from '../../helpers';
+import {
+  UnwiredIngestStreamEffectiveLifecycle,
+  WiredIngestStreamEffectiveLifecycle,
+  unwiredIngestStreamEffectiveLifecycleSchema,
+  wiredIngestStreamEffectiveLifecycleSchema,
+} from './lifecycle';
 
 /**
  * Ingest get response
@@ -71,18 +74,17 @@ const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
 /**
  * Stream get response
  */
-interface IngestStreamGetResponseBase extends StreamGetResponseBase {
-  lifecycle: IngestStreamLifecycle;
-}
-
-interface WiredStreamGetResponse extends IngestStreamGetResponseBase {
-  stream: Omit<WiredStreamDefinition, 'name'>;
+interface WiredStreamGetResponse extends StreamGetResponseBase {
+  stream: WiredStreamDefinition;
   inherited_fields: InheritedFieldDefinition;
+  effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
 }
 
-interface UnwiredStreamGetResponse extends IngestStreamGetResponseBase {
-  stream: Omit<UnwiredStreamDefinition, 'name'>;
+interface UnwiredStreamGetResponse extends StreamGetResponseBase {
+  stream: UnwiredStreamDefinition;
   elasticsearch_assets: ElasticsearchAsset[];
+  data_stream_exists: boolean;
+  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
 
 type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
@@ -120,26 +122,22 @@ const ingestStreamUpsertRequestSchema: z.Schema<IngestStreamUpsertRequest> = z.u
   unwiredStreamUpsertRequestSchema,
 ]);
 
-const ingestStreamGetResponseSchemaBase: z.Schema<IngestStreamGetResponseBase> = z.intersection(
+const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.intersection(
   streamGetResponseSchemaBase,
   z.object({
-    lifecycle: ingestStreamLifecycleSchema,
-  })
-);
-
-const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.intersection(
-  ingestStreamGetResponseSchemaBase,
-  z.object({
-    stream: wiredStreamDefinitionSchemaBase,
+    stream: wiredStreamDefinitionSchema,
     inherited_fields: inheritedFieldDefinitionSchema,
+    effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 
 const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.intersection(
-  ingestStreamGetResponseSchemaBase,
+  streamGetResponseSchemaBase,
   z.object({
-    stream: unwiredStreamDefinitionSchemaBase,
+    stream: unwiredStreamDefinitionSchema,
     elasticsearch_assets: z.array(elasticsearchAssetSchema),
+    data_stream_exists: z.boolean(),
+    effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 
@@ -155,7 +153,7 @@ const isWiredStreamGetResponse = createIsNarrowSchema(
 
 const isUnWiredStreamGetResponse = createIsNarrowSchema(
   ingestStreamGetResponseSchema,
-  wiredStreamGetResponseSchema
+  unwiredStreamGetResponseSchema
 );
 
 const asWiredStreamGetResponse = createAsSchemaOrThrow(

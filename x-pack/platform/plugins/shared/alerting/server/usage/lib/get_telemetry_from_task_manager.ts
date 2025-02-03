@@ -10,10 +10,11 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -42,54 +43,56 @@ export async function getFailedAndUnrecognizedTasksPerDay({
     const query = {
       index: taskManagerIndex,
       size: 0,
-      query: {
-        bool: {
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      'task.status': 'unrecognized',
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'task.status': 'unrecognized',
+                      },
                     },
-                  },
-                  {
-                    term: {
-                      'task.status': 'failed',
+                    {
+                      term: {
+                        'task.status': 'failed',
+                      },
                     },
-                  },
-                ],
-              },
-            },
-            {
-              wildcard: {
-                'task.taskType': {
-                  value: 'alerting:*',
+                  ],
                 },
               },
-            },
-            {
-              range: {
-                'task.runAt': {
-                  gte: 'now-1d',
+              {
+                wildcard: {
+                  'task.taskType': {
+                    value: 'alerting:*',
+                  },
                 },
               },
-            },
-          ],
-        },
-      },
-      aggs: {
-        by_status: {
-          terms: {
-            field: 'task.status',
-            size: 10,
+              {
+                range: {
+                  'task.runAt': {
+                    gte: 'now-1d',
+                  },
+                },
+              },
+            ],
           },
-          aggs: {
-            by_task_type: {
-              terms: {
-                field: 'task.taskType',
-                // Use number of alerting rule types because we're filtering by 'alerting:'
-                size: NUM_ALERTING_RULE_TYPES,
+        },
+        aggs: {
+          by_status: {
+            terms: {
+              field: 'task.status',
+              size: 10,
+            },
+            aggs: {
+              by_task_type: {
+                terms: {
+                  field: 'task.taskType',
+                  // Use number of alerting rule types because we're filtering by 'alerting:'
+                  size: NUM_ALERTING_RULE_TYPES,
+                },
               },
             },
           },
@@ -120,16 +123,8 @@ export async function getFailedAndUnrecognizedTasksPerDay({
       countFailedAndUnrecognizedTasks: totalFailedAndUnrecognizedTasks ?? 0,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getFailedAndUnrecognizedTasksPerDay`, logger);
+
     return {
       hasErrors: true,
       errorMessage,

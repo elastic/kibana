@@ -45,7 +45,14 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
   );
 
   // some models (Claude not to name it) can have their toolCall index not start at 0, so we remove the null elements
-  message.tool_calls = message.tool_calls.filter((call) => !!call);
+  message.tool_calls = message.tool_calls
+    .filter((call) => !!call)
+    .map((call) => {
+      if (call.function.arguments === '') {
+        call.function.arguments = '{}';
+      }
+      return call;
+    });
 
   return message;
 };

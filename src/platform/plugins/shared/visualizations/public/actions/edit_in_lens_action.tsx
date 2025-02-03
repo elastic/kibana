@@ -42,8 +42,7 @@ import {
   getUsageCollection,
 } from '../services';
 import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
-
-export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
+import { ACTION_EDIT_IN_LENS } from './constants';
 
 const displayName = i18n.translate('visualizations.actions.editInLens.displayName', {
   defaultMessage: 'Convert to Lens',
@@ -146,7 +145,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
       return false;
 
     const vis = embeddable.getVis();
-    const { visualize } = getCapabilities();
+    const { visualize_v2: visualize } = getCapabilities();
     if (!vis || !visualize.show) {
       return false;
     }

@@ -935,10 +935,10 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.CanExpandPanels.expandedPanelId",
+            "id": "def-public.CanExpandPanels.expandedPanelId$",
             "type": "Object",
             "tags": [],
-            "label": "expandedPanelId",
+            "label": "expandedPanelId$",
             "description": [],
             "signature": [
               "{ source: ",

@@ -132,7 +132,7 @@ export const NextSteps = ({
   return (
     <>
       <EuiSpacer size="m" />
-      {nextStepsCards.length > 0 && (
+      {(nextStepsCards.length > 0 || connectorCards.length > 0) && (
         <EuiFlexGroup alignItems="center" direction="row" wrap={true}>
           {nextStepsCards}
           {connectorCards}

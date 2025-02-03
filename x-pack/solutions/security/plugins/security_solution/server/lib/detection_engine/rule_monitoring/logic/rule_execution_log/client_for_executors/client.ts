@@ -176,6 +176,7 @@ export const createRuleExecutionLogClientForExecutors = (
       total_search_duration_ms: totalSearchDurationMs,
       total_indexing_duration_ms: totalIndexingDurationMs,
       execution_gap_duration_s: executionGapDurationS,
+      gap_range: gapRange,
     } = metrics ?? {};
 
     if (totalSearchDurationMs) {
@@ -188,6 +189,10 @@ export const createRuleExecutionLogClientForExecutors = (
 
     if (executionGapDurationS) {
       ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
+    }
+
+    if (gapRange) {
+      ruleMonitoringService.setLastRunMetricsGapRange(gapRange);
     }
 
     if (newStatus === RuleExecutionStatusEnum.failed) {
@@ -256,6 +261,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
           total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
           total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
           execution_gap_duration_s: normalizeGap(metrics.executionGap),
+          gap_range: metrics.gapRange ?? undefined,
         }
       : undefined,
     userError,

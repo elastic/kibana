@@ -9,7 +9,7 @@ import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
   MappingRuntimeFields,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,

@@ -49,7 +49,7 @@ describe('<TYPE> JOIN command', () => {
         commandType: 'lookup',
         args: [
           {
-            type: 'identifier',
+            type: 'source',
             name: 'languages_lookup',
           },
           {},
@@ -70,7 +70,7 @@ describe('<TYPE> JOIN command', () => {
             name: 'as',
             args: [
               {
-                type: 'identifier',
+                type: 'source',
                 name: 'languages_lookup',
               },
               {
@@ -160,7 +160,7 @@ describe('<TYPE> JOIN command', () => {
         commandType: 'lookup',
         args: [
           {
-            type: 'identifier',
+            type: 'source',
             name: 'languages_lookup',
           },
           {
@@ -180,7 +180,7 @@ describe('<TYPE> JOIN command', () => {
     it('correctly extracts node positions', () => {
       const text = `FROM employees | LOOKUP JOIN index AS alias ON on_1, on_2 | LIMIT 1`;
       const query = EsqlQuery.fromSrc(text);
-      const node1 = Walker.match(query.ast, { type: 'identifier', name: 'index' });
+      const node1 = Walker.match(query.ast, { type: 'source', name: 'index' });
       const node2 = Walker.match(query.ast, { type: 'identifier', name: 'alias' });
       const node3 = Walker.match(query.ast, { type: 'column', name: 'on_1' });
       const node4 = Walker.match(query.ast, { type: 'column', name: 'on_2' });

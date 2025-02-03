@@ -110,14 +110,14 @@ const CasesByStatusComponent: React.FC = () => {
   const barColors = useMemo(
     () => ({
       empty: euiTheme.colors.vis.euiColorVis8,
-      open: euiTheme.colors.primary,
-      'in-progress': euiTheme.colors.warning,
+      open: euiTheme.colors.success,
+      'in-progress': euiTheme.colors.primary,
       closed: euiTheme.colors.borderBaseSubdued,
     }),
     [
       euiTheme.colors.vis.euiColorVis8,
       euiTheme.colors.primary,
-      euiTheme.colors.warning,
+      euiTheme.colors.success,
       euiTheme.colors.borderBaseSubdued,
     ]
   );

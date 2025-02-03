@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CustomSortingOptions } from '@kbn/content-management-table-list-view-table';
 import { VisualizationListItem } from '../..';
 
 const getBadge = (item: VisualizationListItem) => {
@@ -87,6 +88,26 @@ export const getCustomColumn = () => {
           {record.error}
         </EuiBadge>
       ),
+  };
+};
+
+export const getCustomSortingOptions = (): CustomSortingOptions => {
+  return {
+    field: 'typeTitle',
+    sortingLabels: [
+      {
+        label: i18n.translate('visualizations.listing.table.sortingByTypeColumnNameAsc', {
+          defaultMessage: 'Type A-Z',
+        }),
+        direction: 'asc',
+      },
+      {
+        label: i18n.translate('visualizations.listing.table.sortingByTypeColumnNameDesc', {
+          defaultMessage: 'Type Z-A',
+        }),
+        direction: 'desc',
+      },
+    ],
   };
 };
 

@@ -16,7 +16,7 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { size, colors, font, border } = euiTheme;
@@ -56,7 +56,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
         flexShrink: 0,
         marginRight: size.xs,
         '&:hover, &:focus, &:focus-within': {
-          backgroundColor: transparentize(euiVars.buttonsBackgroundNormalDefaultPrimary, 0.2), // TODO: Borealis migration - replace transparentize with color token
+          backgroundColor: transparentize(euiTheme.colors.backgroundFilledPrimary, 0.2), // TODO: Borealis migration - replace transparentize with color token
         },
       },
       '&& .euiFlexItem': {
@@ -100,7 +100,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       processPanel,
       processAlertDisplayContainer,
     };
-  }, [euiTheme, isInvestigated, isSelected, euiVars]);
+  }, [euiTheme, isInvestigated, isSelected]);
 
   return cached;
 };
