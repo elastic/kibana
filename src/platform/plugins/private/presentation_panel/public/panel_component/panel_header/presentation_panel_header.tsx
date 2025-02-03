@@ -7,26 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiScreenReaderOnly } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
-import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
-import { placeholderTitle } from './presentation_panel_title';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
-
-const getAriaLabelForTitle = (title?: string) => {
-  return title
-    ? i18n.translate('presentationPanel.enhancedAriaLabel', {
-        defaultMessage: 'Panel: {title}',
-        values: { title: title || placeholderTitle },
-      })
-    : i18n.translate('presentationPanel.ariaLabel', {
-        defaultMessage: 'Panel',
-      });
-};
 
 export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPanelApi> = {
   api: ApiType;
@@ -72,13 +58,6 @@ export const PresentationPanelHeader = <
 
   if (!showPanelBar) return null;
 
-  const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
-  const ariaLabelElement = (
-    <EuiScreenReaderOnly>
-      <span id={headerId}>{ariaLabel}</span>
-    </EuiScreenReaderOnly>
-  );
-
   const headerClasses = classNames('embPanel__header', {
     'embPanel--dragHandle': viewMode === 'edit',
     'embPanel__header--floater': !showPanelBar,
@@ -93,17 +72,21 @@ export const PresentationPanelHeader = <
       className={headerClasses}
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
     >
-      <h2 ref={memoizedSetDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
-        {ariaLabelElement}
+      <div
+        ref={memoizedSetDragHandle}
+        data-test-subj="dashboardPanelTitle"
+        className={titleClasses}
+      >
         <PresentationPanelTitle
           api={api}
+          headerId={headerId}
           viewMode={viewMode}
           hideTitle={hideTitle}
           panelTitle={panelTitle}
           panelDescription={panelDescription}
         />
         {showBadges && badgeElements}
-      </h2>
+      </div>
       {showNotifications && notificationElements}
     </figcaption>
   );

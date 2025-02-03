@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiPortal } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiPortal, EuiButton } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useEditingState } from './hooks/use_editing_state';
 import { SchemaEditorFlyout } from './flyout';
@@ -90,6 +91,11 @@ const Content = ({
     reset();
   }, [definition.stream.name, reset]);
 
+  const refreshData = useCallback(() => {
+    refreshDefinition();
+    refreshUnmappedFields();
+  }, [refreshDefinition, refreshUnmappedFields]);
+
   return (
     <EuiFlexItem>
       <EuiFlexGroup direction="column">
@@ -115,6 +121,17 @@ const Content = ({
               <FieldStatusFilterGroup
                 onChangeFilterGroup={queryAndFiltersState.changeFilterGroups}
               />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="streamsAppContentRefreshButton"
+                iconType="refresh"
+                onClick={refreshData}
+              >
+                {i18n.translate('xpack.streams.schemaEditor.refreshDataButtonLabel', {
+                  defaultMessage: 'Refresh',
+                })}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

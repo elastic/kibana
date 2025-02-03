@@ -85,6 +85,18 @@ export const sendBulkGetAgentPolicies = (
   });
 };
 
+export const sendBulkGetAgentPoliciesForRq = (
+  ids: string[],
+  options?: { full?: boolean; ignoreMissing?: boolean }
+) => {
+  return sendRequestForRq<BulkGetAgentPoliciesResponse>({
+    path: agentPolicyRouteService.getBulkGetPath(),
+    method: 'post',
+    body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
 export const sendGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
   return sendRequest<GetAgentPoliciesResponse>({
     path: agentPolicyRouteService.getListPath(),

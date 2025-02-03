@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
   return {
-    testFiles: [resolve(__dirname, './tests/onboarding_token.ts')],
+    testFiles: [resolve(__dirname, './tests/onboarding.ts')],
 
     services,
     pageObjects,

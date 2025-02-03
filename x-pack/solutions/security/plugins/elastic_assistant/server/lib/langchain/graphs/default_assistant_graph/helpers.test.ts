@@ -56,6 +56,7 @@ describe('streamGraph', () => {
       input: 'input',
       responseLanguage: 'English',
       llmType: 'openai',
+      provider: 'openai',
       connectorId: '123',
     },
     logger: mockLogger,
@@ -291,6 +292,7 @@ describe('streamGraph', () => {
         inputs: {
           ...requestArgs.inputs,
           llmType: 'gemini',
+          provider: 'gemini',
         },
       });
 
@@ -306,6 +308,7 @@ describe('streamGraph', () => {
         inputs: {
           ...requestArgs.inputs,
           llmType: 'bedrock',
+          provider: 'bedrock',
         },
       });
 

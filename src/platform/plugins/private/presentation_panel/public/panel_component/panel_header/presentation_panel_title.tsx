@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import { once } from 'lodash';
 import React, { useMemo, useEffect, useRef, useState } from 'react';
@@ -35,6 +35,17 @@ import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_ac
 export const placeholderTitle = i18n.translate('presentationPanel.placeholderTitle', {
   defaultMessage: '[No Title]',
 });
+
+const getAriaLabelForTitle = (title?: string) => {
+  return title
+    ? i18n.translate('presentationPanel.enhancedAriaLabel', {
+        defaultMessage: 'Panel: {title}',
+        values: { title: title || placeholderTitle },
+      })
+    : i18n.translate('presentationPanel.ariaLabel', {
+        defaultMessage: 'Panel',
+      });
+};
 
 const createDocumentMouseMoveListener = once(() => fromEvent<MouseEvent>(document, 'mousemove'));
 const createDocumentMouseUpListener = once(() => fromEvent<MouseEvent>(document, 'mouseup'));
@@ -83,18 +94,21 @@ export const usePresentationPanelTitleClickHandler = (titleElmRef: HTMLElement |
 
 export const PresentationPanelTitle = ({
   api,
+  headerId,
   viewMode,
   hideTitle,
   panelTitle,
   panelDescription,
 }: {
   api: unknown;
+  headerId: string;
   hideTitle?: boolean;
   panelTitle?: string;
   panelDescription?: string;
   viewMode?: ViewMode;
 }) => {
   const [panelTitleElmRef, setPanelTitleElmRef] = useState<HTMLElement | null>(null);
+
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
     const titleClassNames = classNames('embPanel__titleText', {
@@ -146,6 +160,14 @@ export const PresentationPanelTitle = ({
         </span>
       );
     }
+
+    const ariaLabel = getAriaLabelForTitle(panelTitle);
+    const ariaLabelElement = (
+      <EuiScreenReaderOnly>
+        <span id={headerId}>{ariaLabel}</span>
+      </EuiScreenReaderOnly>
+    );
+
     return (
       <EuiToolTip
         title={!hideTitle ? panelTitle || undefined : undefined}
@@ -155,17 +177,23 @@ export const PresentationPanelTitle = ({
         anchorClassName="embPanel__titleTooltipAnchor"
         anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
       >
-        <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
-          {!hideTitle ? <>{panelTitleElement}&nbsp;</> : null}
+        <div data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
+          {!hideTitle ? (
+            <h2>
+              {ariaLabelElement}
+              {panelTitleElement}&nbsp;
+            </h2>
+          ) : null}
           <EuiIcon
             type="iInCircle"
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
+            tabIndex={0}
           />
-        </span>
+        </div>
       </EuiToolTip>
     );
-  }, [hideTitle, panelDescription, panelTitle, panelTitleElement]);
+  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, headerId]);
 
   return describedPanelTitleElement;
 };

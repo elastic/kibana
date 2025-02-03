@@ -43,6 +43,33 @@ xpack.features.overrides:
           privileges: [ "all" ]
         - feature: "maps_v2"
           privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siem:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+        - feature: "maps_v2"
+          privileges: [ "all" ]
         - feature: "savedQueryManagement"
           privileges: [ "all" ]
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
@@ -58,33 +85,6 @@ xpack.features.overrides:
         - feature: "maps_v2"
           privileges: [ "read" ]
         - feature: "savedQueryManagement"
-          privileges: [ "read" ]
-
-  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
-  siem:
-    privileges:
-      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
-      ### Visualize features.
-      all.composedOf:
-        - feature: "discover"
-          privileges: [ "all" ]
-        - feature: "dashboard"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
-        - feature: "maps"
-          privileges: [ "all" ]
-      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
-      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
-      ### Dashboard, and Visualize apps.
-      read.composedOf:
-        - feature: "discover"
-          privileges: [ "read" ]
-        - feature: "dashboard"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
-        - feature: "maps"
           privileges: [ "read" ]
 
 ## Cloud settings

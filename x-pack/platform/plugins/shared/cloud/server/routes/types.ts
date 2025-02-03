@@ -16,5 +16,14 @@ export interface CloudDataAttributes {
   onboardingData: {
     solutionType?: SolutionType;
     token: string;
+    security?: CloudSecurityAnswer;
+  };
+}
+
+export interface CloudSecurityAnswer {
+  useCase: 'siem' | 'cloud' | 'edr' | 'other';
+  migration?: {
+    value: boolean;
+    type?: 'splunk' | 'other';
   };
 }

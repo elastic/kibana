@@ -3,6 +3,7 @@
 exports[`getUnitedEntityDefinition host entityManagerDefinition 1`] = `
 Object {
   "displayNameTemplate": "{{host.name}}",
+  "filter": "",
   "id": "security_host_test",
   "identityFields": Array [
     Object {
@@ -231,6 +232,7 @@ Object {
 exports[`getUnitedEntityDefinition service entityManagerDefinition 1`] = `
 Object {
   "displayNameTemplate": "{{service.name}}",
+  "filter": "",
   "id": "security_service_test",
   "identityFields": Array [
     Object {
@@ -469,6 +471,7 @@ Object {
 exports[`getUnitedEntityDefinition user entityManagerDefinition 1`] = `
 Object {
   "displayNameTemplate": "{{user.name}}",
+  "filter": "",
   "id": "security_user_test",
   "identityFields": Array [
     Object {
