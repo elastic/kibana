@@ -15,8 +15,11 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
   - [Scenarios](#scenarios)
     - [Rule upgrade field preview](#rule-upgrade-field-preview)
     - [Rule upgrade field preview Diff View options](#rule-upgrade-field-preview-diff-view-options)
+    - [Field editing](#field-editing)
+    - [Rule upgrade button](#rule-upgrade-button)
     - [Rule upgrade after field preview](#rule-upgrade-after-field-preview)
-    - [Misc](#misc)
+    - [Rule type upgrade](#rule-type-upgrade)
+    - [Concurrency control](#concurrency-control)
 
 ## Useful information
 
@@ -349,6 +352,57 @@ Examples:
  - ABB = a customized field diff that has a matching upgrade
  - ABC solvable = customized field diff that has an upgrade with a solvable conflict
  - ABC non-solvable = customized field diff that has an upgrade with a non-solvable conflict
+```
+
+### Rule upgrade button
+
+#### Rule upgrade button is disabled when num of conflicts >= 1
+
+**Automation**: 1 Cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule has customizations
+And it has an upgrade resulting to conflicts
+When user opens the Rule Update Flyout
+Then user should see INACTIVE CTA to upgrade the prebuilt rule
+When user hover on the INACTIVE CTA
+Then explanation tooltip appears
+When user resolves all conflicts
+Then the INACTIVE CTA becomes ACTIVE
+```
+
+#### Rule upgrade button is disabled when num fields in edit mode >= 1
+
+**Automation**: 1 Cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And it has an upgrade without conflicts
+When user opens the Rule Update Flyout
+Then user should see ACTIVE CTA to upgrade the prebuilt rule
+When user switch one or more fields to edit mode
+Then user should see INACTIVE CTA
+When user hover on the INACTIVE CTA
+Then explanation tooltip appears
+When user every field in readonly mode
+Then the INACTIVE CTA becomes ACTIVE
+```
+
+#### Rule upgrade button is disabled when num of conflicts >= 1 or num fields in edit mode >= 1
+
+**Automation**: 1 Cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule has customizations
+And it has an upgrade resulting to conflicts
+When user opens the Rule Update Flyout
+Then user should see INACTIVE CTA to upgrade the prebuilt rule
+When user resolves all conflicts
+Then the INACTIVE CTA becomes ACTIVE
+When user switches one or more fields to edit mode
+Then user should see INACTIVE CTA
 ```
 
 ### Rule upgrade after field preview
