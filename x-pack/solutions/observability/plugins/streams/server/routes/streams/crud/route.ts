@@ -9,6 +9,7 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import {
   StreamDefinition,
   StreamGetResponse,
+  isWiredStreamDefinition,
   streamUpsertRequestSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
@@ -151,8 +152,11 @@ export const editStreamRoute = createServerRoute({
       throw badData('Streams are not enabled');
     }
 
-    if (!hasSupportedStreamsRoot(params.path.id)) {
-      throw badRequest('Cannot create a stream with a different root than "logs"');
+    if (
+      isWiredStreamDefinition({ ...params.body.stream, name: params.path.id }) &&
+      !hasSupportedStreamsRoot(params.path.id)
+    ) {
+      throw badRequest('Cannot create wired stream due to unsupported root stream');
     }
 
     return await streamsClient.upsertStream({

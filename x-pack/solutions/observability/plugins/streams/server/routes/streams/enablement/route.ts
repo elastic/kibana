@@ -33,7 +33,7 @@ export const enableStreamsRoute = createServerRoute({
       return await streamsClient.enableStreams();
     } catch (error) {
       if (error instanceof NameTakenError) {
-        throw conflict(`Cannot enable Streams, root stream "logs" already exists`);
+        throw conflict(`Cannot enable Streams, failed to create root stream: ${error.message}`);
       }
 
       throw error;
