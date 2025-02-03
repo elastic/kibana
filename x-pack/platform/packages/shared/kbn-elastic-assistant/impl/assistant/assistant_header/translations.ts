@@ -97,7 +97,7 @@ export const ANONYMIZE_VALUES_TOOLTIP = i18n.translate(
 
 export const SHOW_CITATIONS_TOOLTIP = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip',
-  { 
+  {
     values: { keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c' },
     defaultMessage: 'Keyboard shortcut: {keyboardShortcut}',
   }
