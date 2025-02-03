@@ -1,3 +1,5 @@
+$schema: https://moonrepo.dev/schemas/project.json
+
 fileGroups:
   sharedGlobals: []
   default:
@@ -9,6 +11,50 @@ tasks:
     deps:
       - ^:greet
     script: echo "Hello from $MOON_PROJECT_ROOT!"
+  jest:
+    description: Run jest tests
+    command: node
+    options:
+      runFromWorkspaceRoot: true
+      mergeArgs: append
+    args:
+      - scripts/jest.js
+      - '--passWithNoTests'
+  jestCI:
+    description: Run jest tests (in band)
+    command: node
+    options:
+      runFromWorkspaceRoot: true
+      mergeArgs: append
+    args:
+      - scripts/jest.js
+      - '--passWithNoTests'
+      - '--runInBand'
+  lint:
+    script: |
+      cd $MOON_WORKSPACE_ROOT && node scripts/eslint.js $MOON_PROJECT_ROOT --no-error-on-unmatched-pattern
+    deps: []
+    inputs:
+      # Source and test files
+      - 'src/**/*'
+      - 'tests/**/*'
+      # Other config files
+      - '*.config.*'
+      # Project configs, any format, any depth
+      - '**/.eslintrc.*'
+      # Root configs, any format
+      - '/.eslintignore'
+      - '/.eslintrc.*'
+  lint_with_types:
+    options:
+      runFromWorkspaceRoot: true
+    command: node
+    args:
+      - $workspaceRoot/scripts/eslint_with_types.js
+      - '--project'
+      - $projectRoot/tsconfig.json
+    env:
+      NODE_OPTIONS: '--max-old-space-size=8192'
   typecheck:
     command:
       - 'tsc'
@@ -32,3 +78,7 @@ tasks:
     outputs:
       # Matches `compilerOptions.outDir`
       - 'lib'
+  env:
+    script: env
+  ping:
+    script: cd $MOON_WORKSPACE_ROOT && echo $MOON_PROJECT_ID >> ping.log

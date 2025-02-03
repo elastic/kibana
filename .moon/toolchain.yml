@@ -5,16 +5,19 @@ $schema: 'https://moonrepo.dev/schemas/toolchain.json'
 # extends: './shared/toolchain.yml'
 
 node:
-  version: 20.15.1
+  version: 20.18.2
   packageManager: yarn
   yarn:
     version: 1.22.21
+    installArgs:
+      - '--non-interactive'
   inferTasksFromScripts: true
   dependencyVersionFormat: link
   rootPackageOnly: true
   syncPackageManagerField: true
   syncVersionManagerConfig: nvm
   dedupeOnLockfileChange: false
+  syncProjectWorkspaceDependencies: true
 
 
 # Configures how moon integrates with TypeScript.

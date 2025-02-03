@@ -13,9 +13,6 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-npm
-dependsOn:
-  - '@kbn/repo-info'
-  - '@kbn/ui-shared-deps-src'
 tags:
   - platform
   - shared-common
@@ -27,4 +24,5 @@ fileGroups:
     - '!**/*.config.js'
     - '!target/**/*'
 tasks:
-  lint: {}
+  jest:
+    script: echo 'stubbed:noop'

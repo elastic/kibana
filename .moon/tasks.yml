@@ -1,8 +1,5 @@
 $schema: https://moonrepo.dev/schemas/tasks.json
 
-implicitDeps:
-  - '^:build'
-
 tasks:
   genTypecheckConfig:
     script: "node $MOON_WORKSPACE_ROOT/scripts/type_check.js --project $MOON_PROJECT_ROOT/tsconfig.json --config-only"

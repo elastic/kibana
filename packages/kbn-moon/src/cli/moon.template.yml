@@ -6,26 +6,24 @@ language: typescript
 
 tasks:
   jest:
-    args:
-      - --jestConfig
-      - $projectRoot/jest.config.js
-  lint: {}
-  typecheck:
-    deps:
-      - '^:typecheck'
-      - 'genTypecheckConfig'
-    command: tsc
-    args:
-      - --project
-      - ./tsconfig.type_check.json
-      - --pretty
-      - --noEmit
-      - --skipLibCheck
-      - --incremental
-      - --tsBuildInfoFile
-      - target/types/tsconfig.type_check.tsbuildinfo
-    inputs:
-      - '@group(src)'
-      - '@group(globalTsConfigs)'
-    outputs:
-      - target
+    description: Run jest tests for the project
+#  lint: {}
+#  typecheck:
+#    deps:
+#      - '^:typecheck'
+#      - 'genTypecheckConfig'
+#    command: tsc
+#    args:
+#      - --project
+#      - ./tsconfig.type_check.json
+#      - --pretty
+#      - --noEmit
+#      - --skipLibCheck
+#      - --incremental
+#      - --tsBuildInfoFile
+#      - target/types/tsconfig.type_check.tsbuildinfo
+#    inputs:
+#      - '@group(src)'
+#      - '@group(globalTsConfigs)'
+#    outputs:
+#      - target

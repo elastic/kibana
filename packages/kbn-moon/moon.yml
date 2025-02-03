@@ -13,7 +13,6 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-moon
-dependsOn: []
 tags:
   - common
   - shared-common
@@ -24,4 +23,5 @@ fileGroups:
     - '**/*.tsx'
     - '!target/**/*'
 tasks:
-  lint: {}
+  jest:
+    script: echo 'stubbed:noop'

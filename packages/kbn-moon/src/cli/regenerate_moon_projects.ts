@@ -124,10 +124,16 @@ async function updateProjectJestConfig(projectConfig: any, params: { log: Toolin
     log.warning(
       `Could not find jest config for ${projectConfig.name} @ ${projectConfig.project.metadata.sourceRoot}`
     );
-    delete projectConfig.tasks.jest;
+    projectConfig.tasks.jest = { script: `echo 'stubbed:noop'` };
+    projectConfig.tasks.jestCI = { script: `echo 'stubbed:noop'` };
   } else {
     projectConfig.tasks.jest = {
-      args: ['--config', `${jestConfigName}`],
+      args: ['--config', `$projectRoot/${jestConfigName}`],
+      inputs: ['@group(src)'],
+    };
+    projectConfig.tasks.jestCI = {
+      args: ['--config', `$projectRoot/${jestConfigName}`],
+      inputs: ['@group(src)'],
     };
   }
 }
@@ -197,11 +203,12 @@ export function regenerateMoonProjects() {
             allPackageIds,
           });
         } else {
-          delete projectConfig.tasks.typecheck;
+          projectConfig.tasks.typecheck = { script: `echo 'stubbed:noop'` };
+          projectConfig.tasks.lint_with_types = { script: `echo 'stubbed:noop'` };
           log.warning(`Skipping ${pkg.name} - no tsconfig.json found.`);
         }
 
-        delete projectConfig.tasks.typecheck;
+        // delete projectConfig.tasks.typecheck;
 
         await updateProjectJestConfig(projectConfig, {
           log,

@@ -20,6 +20,8 @@ import { TS_PROJECTS } from '@kbn/ts-projects';
 export const ROOT_REFS_CONFIG_PATH = Path.resolve(REPO_ROOT, 'tsconfig.refs.json');
 export const REF_CONFIG_PATHS = [ROOT_REFS_CONFIG_PATH];
 
+export const ROOT_TSCONFIG_PATH = Path.resolve(REPO_ROOT, 'tsconfig.json');
+
 async function isRootRefsConfigSelfManaged() {
   try {
     const currentRefsFile = await Fsp.readFile(ROOT_REFS_CONFIG_PATH, 'utf-8');
@@ -34,15 +36,12 @@ async function isRootRefsConfigSelfManaged() {
 }
 
 function generateTsConfig(refs: string[]) {
-  return dedent`
-    // This file is automatically updated when you run \`node scripts/type_check\`.
-    {
-      "include": [],
-      "references": [
-${refs.map((p) => `        { "path": ${JSON.stringify(p)} },`).join('\n')}
-      ]
-    }
-  `;
+  const header = `// This file is automatically updated when you run \`node scripts/type_check\`.`;
+  const tsConfig = {
+    include: [],
+    references: refs.map((p) => ({ path: p })),
+  };
+  return dedent(`${header}\n${JSON.stringify(tsConfig, null, 2)}`);
 }
 
 export async function updateRootRefsConfig(log: ToolingLog) {
@@ -62,6 +61,28 @@ export async function updateRootRefsConfig(log: ToolingLog) {
 
   log.debug('updating', ROOT_REFS_CONFIG_PATH);
   await Fsp.writeFile(ROOT_REFS_CONFIG_PATH, generateTsConfig(refs) + '\n');
+}
+
+export async function updateRootTsconfigForMoon(log: ToolingLog) {
+  // read the current root tsconfig with comments
+  const tsconfigFile = await Fsp.readFile(ROOT_TSCONFIG_PATH, 'utf-8');
+  // eslint-disable-next-line no-eval
+  const rootRefsConfigJson = eval(`(0, (${tsconfigFile}))`);
+  const refs = TS_PROJECTS.flatMap((p) => {
+    if (p.isTypeCheckDisabled()) {
+      return [];
+    }
+
+    return `${normalize(Path.relative(REPO_ROOT, p.directory)) || '.'}`;
+  }).sort((a, b) => a.localeCompare(b));
+
+  const rootTsConfig = {
+    ...rootRefsConfigJson,
+    references: refs.map((p) => ({ path: p })),
+  };
+
+  log.debug('updating', ROOT_TSCONFIG_PATH);
+  await Fsp.writeFile(ROOT_TSCONFIG_PATH, JSON.stringify(rootTsConfig, null, 2));
 }
 
 export async function cleanupRootRefsConfig() {

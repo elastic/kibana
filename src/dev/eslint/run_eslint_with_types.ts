@@ -43,12 +43,14 @@ export function runEslintWithTypes() {
           return false;
         }
 
-        if (projectFilter && project.path !== projectFilter) {
+        if (!projectFilter) {
+          return true;
+        } else if (project.path === projectFilter) {
+          return true;
+        } else {
           log.verbose(`[${project.name}] skipping because it doesn't match --project`);
           return false;
         }
-
-        return true;
       });
 
       if (!projects.length) {

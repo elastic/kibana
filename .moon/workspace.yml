@@ -15,3 +15,6 @@ projects:
 vcs:
   defaultBranch: main
   manager: git
+
+hasher:
+  batchSize: 1500

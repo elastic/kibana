@@ -55,12 +55,13 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    const expectedCommandLine = process.env.CI
-      ? 'node scripts/jest --config=packages/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests'
-      : 'node node_modules/jest-worker/build/workers/processChild.js';
+
+    const isForcedSerialRun = process.argv.includes('--runInBand');
 
     expect(testsuite.$).toMatchObject({
-      'command-line': expectedCommandLine,
+      'command-line': isForcedSerialRun ?
+        expect.stringContaining('scripts/jest') :
+        expect.stringContaining('node_modules/jest-worker/build/workers/processChild.js'),
       failures: '2',
       name: 'test',
       skipped: '1',
@@ -69,6 +70,14 @@ describe('dev/mocha/junit report generation', () => {
       time: testsuite.$.time,
       timestamp: testsuite.$.timestamp,
     });
+
+    if (!isForcedSerialRun) {
+      // the command line is only processChild.js, no more info to validate here;
+    } else {
+      const commandLine = testsuite.$['command-line'];
+      expect(commandLine).toMatch(/--config.packages\/kbn-test\/jest\.config\.js/)
+      expect(commandLine).toMatch(/--passWithNoTests/)
+    }
 
     // there are actually only three tests, but since the hook failed
     // it is reported as a test failure

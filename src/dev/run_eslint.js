@@ -11,6 +11,8 @@ import yargs from 'yargs';
 
 import { eslintBinPath } from './eslint';
 
+process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
+
 let quiet = true;
 if (process.argv.includes('--no-quiet')) {
   quiet = false;
@@ -18,11 +20,11 @@ if (process.argv.includes('--no-quiet')) {
   process.argv.push('--quiet');
 }
 
-const options = yargs(process.argv).argv;
-process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
-
-if (!options._.length && !options.printConfig) {
-  process.argv.push('.');
+if (!(process.argv.includes('--help') || process.argv.includes('-h'))) {
+  const options = yargs(process.argv).argv;
+  if (!(options._.length || options.printConfig)) {
+    process.argv.push('.');
+  }
 }
 
 if (!process.argv.includes('--no-cache')) {

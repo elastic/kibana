@@ -170,3 +170,5 @@ x-pack/test/security_solution_playwright/.env
 # moon
 .moon/cache
 .moon/docker
+# temporarily ignore configs, while we're locally working with them
+moon.yml
