@@ -26,7 +26,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import {
-  createOpenAIFunctionsAgent,
+  createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
@@ -332,26 +332,27 @@ export const postEvaluateRoute = (
                 savedObjectsClient,
               });
 
-              const agentRunnable = isOpenAI
-                ? await createOpenAIFunctionsAgent({
-                    llm,
-                    tools,
-                    prompt: formatPrompt(defaultSystemPrompt),
-                    streamRunnable: false,
-                  })
-                : llmType && ['bedrock', 'gemini'].includes(llmType)
-                ? createToolCallingAgent({
-                    llm,
-                    tools,
-                    prompt: formatPrompt(defaultSystemPrompt),
-                    streamRunnable: false,
-                  })
-                : await createStructuredChatAgent({
-                    llm,
-                    tools,
-                    prompt: formatPromptStructured(defaultSystemPrompt),
-                    streamRunnable: false,
-                  });
+              const agentRunnable =
+                isOpenAI || llmType === 'inference'
+                  ? await createOpenAIToolsAgent({
+                      llm,
+                      tools,
+                      prompt: formatPrompt(defaultSystemPrompt),
+                      streamRunnable: false,
+                    })
+                  : llmType && ['bedrock', 'gemini'].includes(llmType)
+                  ? createToolCallingAgent({
+                      llm,
+                      tools,
+                      prompt: formatPrompt(defaultSystemPrompt),
+                      streamRunnable: false,
+                    })
+                  : await createStructuredChatAgent({
+                      llm,
+                      tools,
+                      prompt: formatPromptStructured(defaultSystemPrompt),
+                      streamRunnable: false,
+                    });
 
               return {
                 connectorId: connector.id,

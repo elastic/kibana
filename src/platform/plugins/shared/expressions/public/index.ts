@@ -117,3 +117,5 @@ export {
   parseExpression,
   createDefaultInspectorAdapters,
 } from '../common';
+
+export { isSourceParamsESQL } from '../common/expression_types';
