@@ -19,52 +19,67 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { WiredStreamDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { SchemaEditorEditingState } from '../hooks/use_editing_state';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { SamplePreviewTable } from './sample_preview_table';
 import { FieldSummary } from './field_summary';
+import { SchemaField } from '../types';
 
-export type SchemaEditorFlyoutProps = {
-  streamsRepositoryClient: StreamsRepositoryClient;
-  definition: WiredStreamGetResponse;
-} & SchemaEditorEditingState;
+export interface SchemaEditorFlyoutProps {
+  field: SchemaField;
+  stream: WiredStreamDefinition;
+  onSave: () => void;
+  onCancel: () => void;
+  withFieldSimulation?: boolean;
+}
+// export type SchemaEditorFlyoutProps = {
+//   streamsRepositoryClient: StreamsRepositoryClient;
+//   definition: WiredStreamGetResponse;
+// } & SchemaEditorEditingState;
 
-export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
-  const {
-    definition,
-    streamsRepositoryClient,
-    selectedField,
-    reset,
-    nextFieldDefinition,
-    isEditing,
-    isSaving,
-    saveChanges,
-  } = props;
+export const SchemaEditorFlyout = ({
+  field,
+  stream,
+  onCancel,
+  onSave,
+  withFieldSimulation = false,
+}: SchemaEditorFlyoutProps) => {
+  // const {
+  //   definition,
+  //   streamsRepositoryClient,
+  //   selectedField,
+  //   reset,
+  //   nextFieldDefinition,
+  //   isEditing,
+  // } = props;
+
+  const [{ loading: isSaving }, saveChanges] = useAsyncFn(async () => {
+    if (onSave) return onSave();
+  }, [onSave]);
 
   return (
-    <EuiFlyout onClose={() => reset()} maxWidth="500px">
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{selectedField?.name}</h2>
+          <h2>{field.name}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <FieldSummary {...props} />
-          {isEditing && definition.stream.ingest.routing.length > 0 ? (
+          {isEditing && stream.ingest.routing.length > 0 ? (
             <EuiFlexItem grow={false}>
-              <ChildrenAffectedCallout childStreams={definition.stream.ingest.routing} />
+              <ChildrenAffectedCallout childStreams={stream.ingest.routing} />
             </EuiFlexItem>
           ) : null}
-          <EuiFlexItem grow={false}>
-            <SamplePreviewTable
-              definition={definition}
-              nextFieldDefinition={nextFieldDefinition}
-              streamsRepositoryClient={streamsRepositoryClient}
-            />
-          </EuiFlexItem>
+          {withFieldSimulation && (
+            <EuiFlexItem grow={false}>
+              <SamplePreviewTable stream={stream} nextFieldDefinition={nextFieldDefinition} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
@@ -73,7 +88,7 @@ export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
           <EuiButtonEmpty
             data-test-subj="streamsAppSchemaEditorFlyoutCloseButton"
             iconType="cross"
-            onClick={reset}
+            onClick={onCancel}
             flush="left"
           >
             {i18n.translate('xpack.streams.schemaEditorFlyout.closeButtonLabel', {
@@ -82,7 +97,7 @@ export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
           </EuiButtonEmpty>
           <EuiButton
             data-test-subj="streamsAppSchemaEditorFieldSaveButton"
-            isDisabled={isSaving || !saveChanges}
+            isDisabled={!onSave || isSaving}
             onClick={saveChanges}
           >
             {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {
@@ -91,6 +106,6 @@ export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

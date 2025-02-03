@@ -54,7 +54,7 @@ const FIELD_SUMMARIES = {
 
 export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
   const {
-    selectedField,
+    field,
     isEditing,
     nextFieldType,
     setNextFieldType,
@@ -65,10 +65,6 @@ export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
 
   const router = useStreamsAppRouter();
 
-  if (!selectedField) {
-    return null;
-  }
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -77,7 +73,7 @@ export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
             <span>{title} </span>
           </EuiTitle>
         </EuiFlexItem>
-        {selectedField.status !== 'inherited' && !isEditing ? (
+        {field.status !== 'inherited' && !isEditing ? (
           <EuiFlexItem grow={2}>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
@@ -95,7 +91,7 @@ export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-        ) : selectedField.status === 'inherited' ? (
+        ) : field.status === 'inherited' ? (
           <EuiFlexItem grow={2}>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
@@ -106,7 +102,7 @@ export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
                   iconType="popout"
                   href={router.link('/{key}/{tab}/{subtab}', {
                     path: {
-                      key: selectedField.parent,
+                      key: field.parent,
                       tab: 'management',
                       subtab: 'schemaEditor',
                     },

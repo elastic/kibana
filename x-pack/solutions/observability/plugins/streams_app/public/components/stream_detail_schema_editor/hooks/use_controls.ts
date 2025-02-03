@@ -20,3 +20,5 @@ export type TControls = typeof defaultControls;
 const mergeReducer = (prev: TControls, updated: Partial<TControls>) => ({ ...prev, ...updated });
 
 export const useControls = () => useReducer(mergeReducer, defaultControls);
+
+export type TControlsChangeHandler = (update: Partial<TControls>) => void;

@@ -8,12 +8,13 @@
 import { FieldDefinitionConfig, WiredStreamDefinition } from '@kbn/streams-schema';
 
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
+export type SchemaFieldType = FieldDefinitionConfig['type'];
 
 export interface SchemaField extends Omit<FieldDefinitionConfig, 'type'> {
   name: string;
   parent: string;
   status: SchemaFieldStatus;
-  type?: FieldDefinitionConfig['type'];
+  type?: SchemaFieldType;
 }
 
 export interface SchemaEditorProps {

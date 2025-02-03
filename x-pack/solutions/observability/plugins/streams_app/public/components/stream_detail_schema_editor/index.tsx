@@ -5,22 +5,16 @@
  * 2.0.
  */
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiPortal } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useEditingState } from './hooks/use_editing_state';
 import { SchemaEditorFlyout } from './flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUnpromotingState } from './hooks/use_unpromoting_state';
-import { SimpleSearchBar } from './simple_search_bar';
 import { UnpromoteFieldModal } from './unpromote_field_modal';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { FieldsTableContainer } from './fields_table';
-import { FieldTypeFilterGroup } from './filters/type_filter_group';
-import { useQueryAndFilters } from './hooks/use_query_and_filters';
-import { FieldStatusFilterGroup } from './filters/status_filter_group';
 import { SchemaEditor } from './schema_editor';
-import { SchemaField, SchemaFieldStatus } from './types';
+import { SchemaField } from './types';
 
 interface SchemaEditorProps {
   definition?: WiredStreamGetResponse;

@@ -9,22 +9,17 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import { FIELD_TYPE_MAP } from '../configuration_maps';
 import { FilterGroup } from './filter_group';
-import { ChangeFilterGroups } from '../hooks/use_query_and_filters';
+import { FIELD_TYPE_MAP } from '../constants';
+import { TControlsChangeHandler } from '../hooks/use_controls';
+import { SchemaFieldType } from '../types';
 
 const BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.fieldTypeFilterGroupButtonLabel',
-  {
-    defaultMessage: 'Type',
-  }
+  { defaultMessage: 'Type' }
 );
 
-export const FieldTypeFilterGroup = ({
-  onChangeFilterGroup,
-}: {
-  onChangeFilterGroup: ChangeFilterGroups;
-}) => {
+export const FieldTypeFilterGroup = ({ onChange }: { onChange: TControlsChangeHandler }) => {
   const [items, setItems] = useState<EuiSelectableOption[]>(() =>
     Object.entries(FIELD_TYPE_MAP).map(([key, value]) => {
       return {
@@ -37,13 +32,13 @@ export const FieldTypeFilterGroup = ({
   const onChangeItems = useCallback<Required<EuiSelectableProps>['onChange']>(
     (nextItems) => {
       setItems(nextItems);
-      onChangeFilterGroup({
+      onChange({
         type: nextItems
           .filter((nextItem) => nextItem.checked === 'on')
-          .map((item) => item.key as string),
+          .map((item) => item.key as SchemaFieldType),
       });
     },
-    [onChangeFilterGroup]
+    [onChange]
   );
 
   return (

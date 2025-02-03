@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { FIELD_STATUS_MAP, FieldStatus } from './configuration_maps';
+import { EuiBadge } from '@elastic/eui';
+import { FieldStatus, FIELD_STATUS_MAP } from './constants';
 
 export const FieldStatusBadge = ({ status }: { status: FieldStatus }) => {
   return (
-    <>
-      <EuiBadge color={FIELD_STATUS_MAP[status].color}>{FIELD_STATUS_MAP[status].label}</EuiBadge>
-    </>
+    <EuiBadge color={FIELD_STATUS_MAP[status].color}>{FIELD_STATUS_MAP[status].label}</EuiBadge>
   );
 };

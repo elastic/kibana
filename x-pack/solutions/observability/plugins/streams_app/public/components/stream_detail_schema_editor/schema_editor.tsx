@@ -7,7 +7,6 @@
 
 import React, { PropsWithChildren, useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
@@ -27,17 +26,19 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FieldNameWithIcon } from '@kbn/react-field';
 import { WiredStreamDefinition } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FieldStatusFilterGroup } from './filters/status_filter_group';
 import { FieldTypeFilterGroup } from './filters/type_filter_group';
 import { TControls, useControls } from './hooks/use_controls';
 import { SchemaEditorProps, SchemaField } from './types';
 import { FieldParent } from './field_parent';
-import { EMPTY_CONTENT } from './fields_table';
 import { FieldEntry } from './hooks/use_editing_state';
-import { FIELD_STATUS_MAP, FIELD_TYPE_MAP } from './configuration_maps';
+import { useKibana } from '../../hooks/use_kibana';
+import { EMPTY_CONTENT } from './constants';
+import { FieldStatusBadge } from './field_status';
+import { FieldType } from './field_type';
 
 const SchemaEditorContext = React.createContext<SchemaEditorProps | undefined>(undefined);
 
@@ -47,8 +48,7 @@ export function SchemaEditor({
   stream,
   withControls = false,
   withTableActions = false,
-  children,
-}: PropsWithChildren<SchemaEditorProps>) {
+}: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
 
   return (
@@ -66,7 +66,6 @@ export function SchemaEditor({
           stream={stream}
           withTableActions={withTableActions}
         />
-        {children}
       </EuiFlexGroup>
     </SchemaEditorContext.Provider>
   );
@@ -137,7 +136,7 @@ function FieldsTable({
   withTableActions,
 }: {
   fields: SchemaField[];
-  controls: Controls;
+  controls: TControls;
   stream: WiredStreamDefinition;
   withTableActions: boolean;
 }) {
@@ -236,7 +235,7 @@ const createCellRenderer =
 
     if (columnId === 'type') {
       if (!type) return EMPTY_CONTENT;
-      return <FieldNameWithIcon name={FIELD_TYPE_MAP[type].label} type={type} />;
+      return <FieldType type={type} />;
     }
 
     if (columnId === 'parent') {
@@ -244,14 +243,14 @@ const createCellRenderer =
     }
 
     if (columnId === 'status') {
-      const { color, label } = FIELD_STATUS_MAP[status];
-      return <EuiBadge color={color}>{label}</EuiBadge>;
+      return <FieldStatusBadge status={status} />;
     }
 
     return field[columnId as keyof SchemaField] || EMPTY_CONTENT;
   };
 
 export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
+  const { core } = useKibana();
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'fieldsTableContextMenuPopover',
   });
@@ -267,7 +266,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       }),
       // disabled: editingState.isSaving,
       onClick: (fieldEntry: FieldEntry) => {
-        editingState.selectField(fieldEntry, false);
+        // editingState.selectField(fieldEntry, false);
       },
     };
 
@@ -302,6 +301,12 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
               defaultMessage: 'Map field',
             }),
+            onClick: (fieldEntry: FieldEntry) => {
+              core.overlays.openFlyout(toMountPoint(<h1>{fieldEntry.name}</h1>, core), {
+                maxWidth: 500,
+                onClose: (flyout) => flyout.close(),
+              });
+            },
             // disabled: editingState.isSaving,
             // onClick: (fieldEntry: FieldEntry) => {
             //   editingState.selectField(fieldEntry, true);
@@ -330,7 +335,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         })),
       },
     ];
-  }, [field]);
+  }, [closePopover, core, field]);
 
   return (
     <EuiPopover

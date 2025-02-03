@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const EMPTY_CONTENT = '-----';
+
 export const FIELD_TYPE_MAP = {
   boolean: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableBooleanType', {

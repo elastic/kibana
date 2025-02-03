@@ -13,7 +13,7 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { FieldStatus } from '../configuration_maps';
+import { FieldStatus } from '../constants';
 
 export type SchemaEditorEditingState = ReturnType<typeof useEditingState>;
 

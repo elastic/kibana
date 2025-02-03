@@ -6,13 +6,12 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { EMPTY_CONTENT } from '../fields_table';
 import { EcsRecommendation } from './ecs_recommendation';
 import { FieldFormType } from './field_form_type';
 import { FieldEntry, SchemaEditorEditingState } from '../hooks/use_editing_state';
 import { FieldType } from '../field_type';
 import { useKibana } from '../../../hooks/use_kibana';
-import { FIELD_TYPE_MAP } from '../configuration_maps';
+import { EMPTY_CONTENT, FIELD_TYPE_MAP } from '../constants';
 
 export const FieldFormTypeWrapper = ({
   isEditing,
@@ -65,7 +64,7 @@ export const FieldFormTypeWrapper = ({
         ) : selectedFieldType ? (
           <FieldType type={selectedFieldType} />
         ) : (
-          `${EMPTY_CONTENT}`
+          EMPTY_CONTENT
         )}
       </EuiFlexItem>
       <EuiFlexItem>
