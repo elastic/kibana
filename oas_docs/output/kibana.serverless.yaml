@@ -51335,6 +51335,11 @@ components:
           type: string
       required:
         - hostStatuses
+    Security_Endpoint_Management_API_NonEmptyString:
+      description: A string that does not contain only whitespace characters
+      format: nonempty
+      minLength: 1
+      type: string
     Security_Endpoint_Management_API_Page:
       default: 1
       description: Page number
