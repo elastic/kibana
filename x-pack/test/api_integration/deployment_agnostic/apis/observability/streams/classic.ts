@@ -53,6 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(classicStream).to.eql({
         name: TEST_STREAM_NAME,
         ingest: {
+          lifecycle: { inherit: {} },
           processing: [],
           routing: [],
           unwired: {},
@@ -70,6 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 routing: [],
                 processing: [
                   {
@@ -111,7 +113,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(dashboards).to.eql([]);
 
       expect(stream).to.eql({
+        name: TEST_STREAM_NAME,
         ingest: {
+          lifecycle: { inherit: {} },
           processing: [
             {
               grok: {
@@ -187,6 +191,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 processing: [],
                 routing: [],
                 unwired: {},
