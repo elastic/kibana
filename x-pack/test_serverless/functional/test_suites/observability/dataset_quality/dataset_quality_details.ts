@@ -57,6 +57,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
   describe('Dataset quality details', function () {
+    // see details: https://github.com/elastic/kibana/issues/206734
+
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -322,23 +324,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('navigation', () => {
-      it('should go to log explorer page when the open in log explorer button is clicked', async () => {
+      it('should go to discover page when the open in discover button is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
         });
 
-        const logExplorerButton =
+        const discoverButton =
           await PageObjects.datasetQuality.getDatasetQualityDetailsHeaderButton();
 
-        await logExplorerButton.click();
+        await discoverButton.click();
 
-        // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(regularDatasetName);
+        // Confirm dataset selector text in discover
+        await retry.tryForTime(5000, async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+
+          originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        });
       });
 
-      it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
+      it('should go discover for degraded docs when the button next to breakdown selector is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
@@ -347,10 +351,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+        // Confirm dataset selector text in discover
+        await retry.tryForTime(5000, async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        });
       });
     });
 
