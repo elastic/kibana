@@ -10,7 +10,7 @@
 import { getFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableProps } from '@kbn/unified-data-table';
 
-export const getAlertEventRowIndicator: UnifiedDataTableProps['getRowIndicator'] = (
+export const getAlertEventRowIndicator: NonNullable<UnifiedDataTableProps['getRowIndicator']> = (
   row,
   euiTheme
 ) => {
