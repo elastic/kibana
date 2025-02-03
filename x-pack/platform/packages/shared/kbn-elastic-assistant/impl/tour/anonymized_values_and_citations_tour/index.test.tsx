@@ -32,7 +32,12 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-  <I18nProvider>{children}</I18nProvider>
+  <I18nProvider>
+    <div>
+      <div id="aiAssistantSettingsMenuContainer" />
+      {children}
+    </div>
+  </I18nProvider>
 );
 
 describe('AnonymizedValuesAndCitationsTour', () => {
@@ -51,15 +56,9 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       } as TourState)
     );
 
-    render(
-      <div>
-        <div id="aiAssistantSettingsMenuContainer" />
-        <AnonymizedValuesAndCitationsTour conversation={conversationWithContentReferences} />
-      </div>,
-      {
-        wrapper: Wrapper,
-      }
-    );
+    render(<AnonymizedValuesAndCitationsTour conversation={conversationWithContentReferences} />, {
+      wrapper: Wrapper,
+    });
 
     jest.runAllTimers();
 
@@ -80,15 +79,9 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       } as TourState)
     );
 
-    render(
-      <div>
-        <div id="aiAssistantSettingsMenuContainer" />
-        <AnonymizedValuesAndCitationsTour conversation={alertConvo} />
-      </div>,
-      {
-        wrapper: Wrapper,
-      }
-    );
+    render(<AnonymizedValuesAndCitationsTour conversation={alertConvo} />, {
+      wrapper: Wrapper,
+    });
 
     jest.runAllTimers();
 
@@ -109,15 +102,9 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       } as TourState)
     );
 
-    render(
-      <div>
-        <div id="aiAssistantSettingsMenuContainer" />
-        <AnonymizedValuesAndCitationsTour conversation={alertConvo} />
-      </div>,
-      {
-        wrapper: Wrapper,
-      }
-    );
+    render(<AnonymizedValuesAndCitationsTour conversation={alertConvo} />, {
+      wrapper: Wrapper,
+    });
 
     jest.runAllTimers();
 
@@ -140,15 +127,9 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       } as TourState)
     );
 
-    render(
-      <div>
-        <div id="aiAssistantSettingsMenuContainer" />
-        <AnonymizedValuesAndCitationsTour conversation={conversationWithContentReferences} />
-      </div>,
-      {
-        wrapper: Wrapper,
-      }
-    );
+    render(<AnonymizedValuesAndCitationsTour conversation={conversationWithContentReferences} />, {
+      wrapper: Wrapper,
+    });
 
     jest.runAllTimers();
 
@@ -171,15 +152,9 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       } as TourState)
     );
 
-    render(
-      <div>
-        <div id="aiAssistantSettingsMenuContainer" />
-        <AnonymizedValuesAndCitationsTour conversation={welcomeConvo} />
-      </div>,
-      {
-        wrapper: Wrapper,
-      }
-    );
+    render(<AnonymizedValuesAndCitationsTour conversation={welcomeConvo} />, {
+      wrapper: Wrapper,
+    });
 
     jest.runAllTimers();
 
