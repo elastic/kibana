@@ -15,9 +15,7 @@ export enum InferenceConnectorType {
   Inference = '.inference',
 }
 
-export const COMPLETION_TASK_TYPE = 'chat_completion';
-
-const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
+export const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
 
 /**
  * Represents a stack connector that can be used for inference.
@@ -37,38 +35,6 @@ export interface InferenceConnector {
 }
 
 /**
- * Checks if a given connector type is compatible for inference.
- *
- * Note: this check is not sufficient to assert if a given connector can be
- * used for inference, as `.inference` connectors need additional check logic.
- * Please use `isSupportedConnector` instead when possible.
- */
-export function isSupportedConnectorType(id: string): id is InferenceConnectorType {
-  return allSupportedConnectorTypes.includes(id as InferenceConnectorType);
-}
-
-/**
- * Checks if a given connector is compatible for inference.
- *
- * A connector is compatible if:
- * 1. its type is in the list of allowed types
- * 2. for inference connectors, if its taskType is "chat_completion"
- */
-export function isSupportedConnector(connector: RawConnector): connector is RawInferenceConnector {
-  if (!isSupportedConnectorType(connector.actionTypeId)) {
-    return false;
-  }
-  if (connector.actionTypeId === InferenceConnectorType.Inference) {
-    const config = connector.config ?? {};
-    // only chat_completion endpoint can be used for inference
-    if (config.taskType !== COMPLETION_TASK_TYPE) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
  * Connector types are living in the actions plugin and we can't afford
  * having dependencies from this package to some mid-level plugin,
  * so we're just using our own connector mixin type.
@@ -80,7 +46,7 @@ export interface RawConnector {
   config?: Record<string, any>;
 }
 
-interface RawInferenceConnector {
+export interface RawInferenceConnector {
   id: string;
   actionTypeId: InferenceConnectorType;
   name: string;
