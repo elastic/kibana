@@ -8,6 +8,7 @@
 export const connectorTypes: string[] = [
   '.email',
   '.index',
+  '.inference',
   '.pagerduty',
   '.swimlane',
   '.server-log',
