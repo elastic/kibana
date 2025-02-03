@@ -186,7 +186,7 @@
     "@kbn/palettes",
     "@kbn/sse-utils-server",
     "@kbn/gen-ai-functional-testing",
-    "@kbn/integration-assistant-plugin",
+    "@kbn/automatic-import-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/streams-schema",
     "@kbn/server-route-repository-utils",

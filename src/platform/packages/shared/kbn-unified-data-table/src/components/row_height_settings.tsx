@@ -9,50 +9,44 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  htmlIdGenerator,
+} from '@elastic/eui';
 
 export enum RowHeightMode {
   auto = 'auto',
-  single = 'single',
   custom = 'custom',
 }
 export interface RowHeightSettingsProps {
+  lineCountInput: number;
   rowHeight?: RowHeightMode;
-  rowHeightLines?: number;
   maxRowHeight?: number;
   label: string;
-  compressed?: boolean;
   onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
-  onChangeRowHeightLines: (newRowHeightLines: number) => void;
+  onChangeLineCountInput: (newRowHeightLines: number) => void;
   'data-test-subj'?: string;
 }
 
 const idPrefix = htmlIdGenerator()();
 
 export function RowHeightSettings({
+  lineCountInput,
   label,
   rowHeight,
-  rowHeightLines,
-  compressed,
   onChangeRowHeight,
-  onChangeRowHeightLines,
+  onChangeLineCountInput,
   maxRowHeight,
   ['data-test-subj']: dataTestSubj,
 }: RowHeightSettingsProps) {
-  const { euiTheme } = useEuiTheme();
-
   const rowHeightModeOptions = [
-    {
-      id: `${idPrefix}${RowHeightMode.single}`,
-      label: i18n.translate('unifiedDataTable.rowHeight.single', {
-        defaultMessage: 'Single',
-      }),
-      'data-test-subj': `${dataTestSubj}_rowHeight_${RowHeightMode.single}`,
-    },
     {
       id: `${idPrefix}${RowHeightMode.auto}`,
       label: i18n.translate('unifiedDataTable.rowHeight.auto', {
-        defaultMessage: 'Auto fit',
+        defaultMessage: 'Auto',
       }),
       'data-test-subj': `${dataTestSubj}_rowHeight_${RowHeightMode.auto}`,
     },
@@ -67,40 +61,40 @@ export function RowHeightSettings({
 
   return (
     <>
-      <EuiFormRow label={label} display="columnCompressed" data-test-subj={dataTestSubj}>
-        <>
+      <EuiFormRow
+        label={label}
+        aria-label={label}
+        display="columnCompressed"
+        data-test-subj={dataTestSubj}
+      >
+        <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiButtonGroup
             isFullWidth
+            css={{ flexShrink: 0, flexBasis: '66.6%' }}
             legend={label}
             buttonSize="compressed"
             options={rowHeightModeOptions}
-            idSelected={`${idPrefix}${rowHeight ?? RowHeightMode.single}`}
+            idSelected={`${idPrefix}${rowHeight ?? RowHeightMode.custom}`}
             onChange={(optionId) => {
               const newMode = optionId.replace(idPrefix, '') as RowHeightSettingsProps['rowHeight'];
               onChangeRowHeight(newMode);
             }}
             data-test-subj={`${dataTestSubj}_rowHeightButtonGroup`}
           />
-          {rowHeight === RowHeightMode.custom ? (
-            <EuiRange
-              compressed
-              fullWidth
-              showInput
-              min={1}
-              max={maxRowHeight ?? 20}
-              step={1}
-              value={rowHeightLines ?? 2}
-              onChange={(e) => {
-                const lineCount = Number(e.currentTarget.value);
-                onChangeRowHeightLines(lineCount);
-              }}
-              data-test-subj={`${dataTestSubj}_lineCountNumber`}
-              css={{
-                marginTop: compressed ? euiTheme.size.xs : euiTheme.size.m,
-              }}
-            />
-          ) : null}
-        </>
+          <EuiFieldNumber
+            compressed
+            value={lineCountInput}
+            onChange={(e) => {
+              const lineCount = Number(e.currentTarget.value);
+              onChangeLineCountInput(lineCount);
+            }}
+            min={1}
+            max={maxRowHeight ?? 20}
+            step={1}
+            disabled={rowHeight !== RowHeightMode.custom}
+            data-test-subj={`${dataTestSubj}_lineCountNumber`}
+          />
+        </EuiFlexGroup>
       </EuiFormRow>
     </>
   );
