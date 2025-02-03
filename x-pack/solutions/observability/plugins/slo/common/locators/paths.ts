@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 
 export const SLOS_BASE_PATH = '/app/slos';
 export const SLOS_PATH = '/' as const;
