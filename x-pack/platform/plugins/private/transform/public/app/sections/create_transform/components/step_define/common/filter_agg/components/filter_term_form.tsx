@@ -77,25 +77,23 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   const { data, isError, isLoading } = useDataSearch(
     {
       index: dataView!.title,
-      body: {
-        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-        query: {
-          wildcard: {
-            [selectedField!]: {
-              value: `*${searchValue}*`,
-            },
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      query: {
+        wildcard: {
+          [selectedField!]: {
+            value: `*${searchValue}*`,
           },
         },
-        aggs: {
-          field_values: {
-            terms: {
-              field: selectedField,
-              size: 10,
-            },
-          },
-        },
-        size: 0,
       },
+      aggs: {
+        field_values: {
+          terms: {
+            field: selectedField,
+            size: 10,
+          },
+        },
+      },
+      size: 0,
     },
     // Check whether fetching should be enabled
     selectedField !== undefined

@@ -14,11 +14,9 @@ import type { SearchCapabilities } from '../../search_strategies';
 
 describe('getBucketSize', () => {
   const req = {
-    body: {
-      timerange: {
-        min: '2017-01-01T00:00:00.000Z',
-        max: '2017-07-01T01:00:00.000Z',
-      },
+    timerange: {
+      min: '2017-01-01T00:00:00.000Z',
+      max: '2017-07-01T01:00:00.000Z',
     },
   } as VisTypeTimeseriesVisDataRequest;
 

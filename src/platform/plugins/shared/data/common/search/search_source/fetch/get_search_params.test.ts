@@ -34,18 +34,14 @@ describe('getSearchParams', () => {
     const searchParams = getSearchParamsFromRequest(
       {
         index: 'abc',
-        body: {
-          query: 123,
-          track_total_hits: true,
-        },
+        query: 123,
+        track_total_hits: true,
       },
       { getConfig }
     );
     expect(searchParams.index).toBe('abc');
     expect(searchParams.track_total_hits).toBe(true);
-    expect(searchParams.body).toStrictEqual({
-      query: 123,
-    });
+    expect(searchParams.query).toStrictEqual(123);
   });
 
   test('sets expand_wildcards=all if data view has allowHidden=true', () => {
@@ -61,10 +57,8 @@ describe('getSearchParams', () => {
     const searchParams = getSearchParamsFromRequest(
       {
         index,
-        body: {
-          query: 123,
-          track_total_hits: true,
-        },
+        query: 123,
+        track_total_hits: true,
       },
       { getConfig }
     );
@@ -84,10 +78,8 @@ describe('getSearchParams', () => {
     const searchParams = getSearchParamsFromRequest(
       {
         index,
-        body: {
-          query: 123,
-          track_total_hits: true,
-        },
+        query: 123,
+        track_total_hits: true,
       },
       { getConfig }
     );

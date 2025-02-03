@@ -30,11 +30,9 @@ describe('DefaultSearchStrategy', () => {
 
   beforeEach(() => {
     req = {
-      body: {
-        panels: [{}],
-        timerange: {
-          timezone: 'Europe/Berlin',
-        },
+      panels: [{}],
+      timerange: {
+        timezone: 'Europe/Berlin',
       },
     } as unknown as VisTypeTimeseriesVisDataRequest;
     defaultSearchStrategy = new DefaultSearchStrategy();

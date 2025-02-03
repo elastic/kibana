@@ -152,17 +152,15 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
   } = useDataSearch(
     {
       index: indexPattern,
-      body: {
-        fields: ['*'],
-        _source: false,
-        query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
-        from: pagination.pageIndex * pagination.pageSize,
-        size: pagination.pageSize,
-        ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...(isRuntimeMappings(combinedRuntimeMappings)
-          ? { runtime_mappings: combinedRuntimeMappings }
-          : {}),
-      },
+      fields: ['*'],
+      _source: false,
+      query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+      from: pagination.pageIndex * pagination.pageSize,
+      size: pagination.pageSize,
+      ...(Object.keys(sort).length > 0 ? { sort } : {}),
+      ...(isRuntimeMappings(combinedRuntimeMappings)
+        ? { runtime_mappings: combinedRuntimeMappings }
+        : {}),
     },
     // Check whether fetching should be enabled
     dataViewFields.length > 0

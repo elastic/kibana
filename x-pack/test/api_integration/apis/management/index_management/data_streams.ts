@@ -215,9 +215,9 @@ export default function ({ getService }: FtrProviderContext) {
                     logsdb: {
                       enabled,
                     },
-                    logsdb: {
-                      prior_logs_usage,
-                    },
+                  },
+                  logsdb: {
+                    prior_logs_usage,
                   },
                 },
               });

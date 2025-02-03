@@ -1439,7 +1439,6 @@ describe('CsvGenerator', () => {
     expect(mockDataClient.search).toBeCalledWith(
       {
         params: {
-          body: {},
           max_concurrent_shard_requests: 5,
         },
       },

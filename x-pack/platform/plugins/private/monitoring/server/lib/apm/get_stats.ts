@@ -38,14 +38,12 @@ export async function getStats(req: LegacyRequest, apmIndexPattern: string, clus
     filter_path: apmAggFilterPath,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      query: createApmQuery({
-        start,
-        end,
-        clusterUuid,
-      }),
-      aggs: apmUuidsAgg(maxBucketSize, cgroup),
-    },
+    query: createApmQuery({
+      start,
+      end,
+      clusterUuid,
+    }),
+    aggs: apmUuidsAgg(maxBucketSize, cgroup),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

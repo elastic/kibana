@@ -86,13 +86,11 @@ export function buildSearchParams({
 
   return {
     index: dataViewPattern,
-    body: {
-      query,
-      aggs,
-      fields,
-      runtime_mappings: runtimeMappings,
-      _source: fields?.length ? false : undefined,
-    },
+    query,
+    aggs,
+    fields,
+    runtime_mappings: runtimeMappings,
+    _source: fields?.length ? false : undefined,
     track_total_hits: true,
     size: size ?? 0,
   };

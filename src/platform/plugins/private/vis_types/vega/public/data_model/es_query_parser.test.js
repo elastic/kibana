@@ -225,7 +225,7 @@ describe(`EsQueryParser.parseEsRequest`, () => {
     `%context_query%=true`,
     check({ index: '_all', '%context_query%': true }, ctxArr, {
       index: '_all',
-      body: { query: ctxArr },
+      query: ctxArr,
     })
   );
 
@@ -236,24 +236,22 @@ describe(`EsQueryParser.parseEsRequest`, () => {
 
   const expectedForCtxAndTimefield = {
     index: '_all',
-    body: {
-      query: {
-        bool: {
-          must: [
-            { match_all: { c: 3 } },
-            {
-              range: {
-                abc: {
-                  format: 'strict_date_optional_time',
-                  gte: moment(rangeStart).toISOString(),
-                  lte: moment(rangeEnd).toISOString(),
-                },
+    query: {
+      bool: {
+        must: [
+          { match_all: { c: 3 } },
+          {
+            range: {
+              abc: {
+                format: 'strict_date_optional_time',
+                gte: moment(rangeStart).toISOString(),
+                lte: moment(rangeEnd).toISOString(),
               },
             },
-          ],
-          must_not: [{ d: 4 }],
-          filter: [{ f: 6 }],
-        },
+          },
+        ],
+        must_not: [{ d: 4 }],
+        filter: [{ f: 6 }],
       },
     },
   };
@@ -276,14 +274,12 @@ describe(`EsQueryParser.parseEsRequest`, () => {
     `%timefield%='abc'`,
     check({ index: '_all', '%timefield%': 'abc' }, ctxArr, {
       index: '_all',
-      body: {
-        query: {
-          range: {
-            abc: {
-              format: 'strict_date_optional_time',
-              gte: moment(rangeStart).toISOString(),
-              lte: moment(rangeEnd).toISOString(),
-            },
+      query: {
+        range: {
+          abc: {
+            format: 'strict_date_optional_time',
+            gte: moment(rangeStart).toISOString(),
+            lte: moment(rangeEnd).toISOString(),
           },
         },
       },
@@ -296,7 +292,7 @@ describe(`EsQueryParser.parseEsRequest`, () => {
     `esRequest`,
     check({ index: '_all', body: { query: 2 } }, ctxArr, {
       index: '_all',
-      body: { query: 2 },
+      query: 2,
     })
   );
 });

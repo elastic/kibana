@@ -23,12 +23,10 @@ describe('query', () => {
 
   beforeEach(() => {
     req = {
-      body: {
-        timerange: {
-          timezone: 'Europe/Minsk',
-          min: '2022-01-29T22:03:02.317Z',
-          max: '2022-02-07T09:00:00.000Z',
-        },
+      timerange: {
+        timezone: 'Europe/Minsk',
+        min: '2022-01-29T22:03:02.317Z',
+        max: '2022-02-07T09:00:00.000Z',
       },
     } as TableRequestProcessorsParams['req'];
     panel = {} as TableRequestProcessorsParams['panel'];

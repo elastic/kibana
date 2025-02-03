@@ -28,7 +28,6 @@ export async function reauthorizeAndStartTransforms(
     try {
       await esClient.transform.updateTransform(
         {
-          body: {},
           transform_id: transformId,
         },
         options ?? {}

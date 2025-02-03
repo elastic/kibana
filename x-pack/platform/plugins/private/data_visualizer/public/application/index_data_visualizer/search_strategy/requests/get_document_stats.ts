@@ -91,11 +91,9 @@ export const getDocumentCountStats = async (
 
   const getSearchParams = (aggregations: unknown, trackTotalHits = false) => ({
     index,
-    body: {
-      query,
-      ...(hasTimeField ? { aggs: aggregations } : {}),
-      ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
-    },
+    query,
+    ...(hasTimeField ? { aggs: aggregations } : {}),
+    ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
     track_total_hits: trackTotalHits,
     size: 0,
   });

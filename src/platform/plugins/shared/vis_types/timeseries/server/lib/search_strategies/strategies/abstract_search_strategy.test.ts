@@ -70,12 +70,10 @@ describe('AbstractSearchStrategy', () => {
     const responses = await abstractSearchStrategy.search(
       requestContext,
       {
-        body: {
-          searchSession: {
-            sessionId: '1',
-            isRestore: false,
-            isStored: true,
-          },
+        searchSession: {
+          sessionId: '1',
+          isRestore: false,
+          isStored: true,
         },
         events: {
           aborted$: from([]),
@@ -88,7 +86,6 @@ describe('AbstractSearchStrategy', () => {
     expect((await requestContext.search).search).toHaveBeenCalledWith(
       {
         params: {
-          body: {},
           index: 'index',
         },
         indexType: undefined,

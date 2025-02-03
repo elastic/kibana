@@ -208,7 +208,7 @@ export class ContentStream extends Duplex {
       id,
       index: REPORTING_DATA_STREAM_ALIAS,
       op_type: 'create',
-      body: {
+      document: {
         parent_id: parentId,
         '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
         output: {

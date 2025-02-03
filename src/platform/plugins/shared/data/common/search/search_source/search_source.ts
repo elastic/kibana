@@ -795,8 +795,10 @@ export class SearchSource {
     const metaFields = getConfig<string[]>(UI_SETTINGS.META_FIELDS) ?? [];
 
     const searchRequest = this.mergeProps();
+    // Keep backwards compatibility in case `body` is still provided somewhere
     searchRequest.body = searchRequest.body || {};
-    const { body, index } = searchRequest;
+    const { index, ...rest } = searchRequest;
+    const body = { ...rest, ...searchRequest.body };
     const dataView = this.getDataView(index);
 
     // get some special field types from the index pattern
@@ -887,7 +889,7 @@ export class SearchSource {
     });
 
     const bodyToReturn = {
-      ...searchRequest.body,
+      ...body,
       pit: searchRequest.pit,
       query: builtQuery,
       highlight:

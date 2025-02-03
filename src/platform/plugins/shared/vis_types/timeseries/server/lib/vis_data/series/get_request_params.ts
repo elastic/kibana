@@ -50,11 +50,9 @@ export async function getSeriesRequestParams(
 
   return {
     index: seriesIndex.indexPatternString,
-    body: {
-      ...request,
-      runtime_mappings: seriesIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
-      timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
-    },
+    ...request,
+    runtime_mappings: seriesIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+    timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
     trackingEsSearchMeta: {
       requestId: series.id,
       requestLabel: i18n.translate('visTypeTimeseries.seriesRequest.label', {
