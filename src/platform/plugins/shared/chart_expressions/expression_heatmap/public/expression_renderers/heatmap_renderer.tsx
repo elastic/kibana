@@ -111,7 +111,7 @@ export const heatmapRenderer: (
 
     render(
       <KibanaRenderContextProvider {...core}>
-        <div className="euiScrollBar" css={heatmapContainerCss} data-test-subj="heatmapChart">
+        <div className="eui-scrollBar" css={heatmapContainerCss} data-test-subj="heatmapChart">
           <HeatmapComponent
             {...config}
             onClickValue={onClickValue}
