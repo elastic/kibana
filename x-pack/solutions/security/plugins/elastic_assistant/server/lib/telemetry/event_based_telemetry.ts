@@ -316,7 +316,7 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
     unfilteredAlertsCount: {
       type: 'integer',
       _meta: {
-        description: 'Only present when hasAlerts is true, number of alerts without the filter',
+        description: 'Only present when hasFilter is true, number of alerts without the filter',
         optional: true,
       },
     },
