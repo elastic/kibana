@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { from, identity, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
+import { from, identity, switchMap, throwError } from 'rxjs';
+import { Readable, isReadable } from 'stream';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import type { InferenceConnectorAdapter } from '../../types';
 import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import type { InferenceConnectorAdapter } from '../../types';
 import { isNativeFunctionCallingSupported } from '../../utils/function_calling_support';
-import type { OpenAIRequest } from './types';
-import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
-import { processOpenAIStream } from './process_openai_stream';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
+import { processOpenAIStream } from './process_openai_stream';
+import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from './to_openai';
+import type { OpenAIRequest } from './types';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -32,6 +32,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     modelName,
     logger,
     abortSignal,
+    telemetryMetadata,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -70,6 +71,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           body: JSON.stringify(request),
           signal: abortSignal,
           stream: true,
+          telemetryMetadata,
         },
       })
     ).pipe(

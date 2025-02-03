@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { from, identity, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
+import { from, identity, switchMap, throwError } from 'rxjs';
+import { Readable, isReadable } from 'stream';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { isNativeFunctionCallingSupported } from '../../utils';
-import type { InferenceConnectorAdapter } from '../../types';
 import { parseInlineFunctionCalls } from '../../simulated_function_calling';
-import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
+import type { InferenceConnectorAdapter } from '../../types';
+import { isNativeFunctionCallingSupported } from '../../utils';
+import { emitTokenCountEstimateIfMissing, processOpenAIStream } from '../openai';
 import { createRequest } from './create_openai_request';
 
 export const inferenceAdapter: InferenceConnectorAdapter = {
@@ -27,6 +27,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     modelName,
     logger,
     abortSignal,
+    telemetryMetadata,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -50,6 +51,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         subActionParams: {
           body: request,
           signal: abortSignal,
+          telemetryMetadata,
         },
       })
     ).pipe(

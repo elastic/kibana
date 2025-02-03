@@ -250,10 +250,7 @@ export const getGenAiTokenTracking = async ({
   }
 
   // this is a non-streamed Bedrock response used by security solution
-  if (
-    actionTypeId === '.bedrock' &&
-    (validatedParams.subAction === 'invokeAI' || validatedParams.subAction === 'invokeAIRaw')
-  ) {
+  if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAI') {
     try {
       const rData = result.data as unknown as {
         message: string;
@@ -316,6 +313,23 @@ export const getGenAiTokenTracking = async ({
     }
   }
 
+  if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAIRaw') {
+    const results = result.data as unknown as {
+      content: Array<{ type: string; text: string }>;
+      usage?: { input_tokens: number; output_tokens: number };
+    };
+    if (results?.usage) {
+      return {
+        total_tokens: results.usage.input_tokens + results.usage.output_tokens,
+        prompt_tokens: results.usage.input_tokens,
+        completion_tokens: results.usage.output_tokens,
+        telemetry_metadata: telemetryMetadata,
+      };
+    } else {
+      logger.error('Response from Bedrock converse API did not contain usage object');
+      return null;
+    }
+  }
   return null;
 };
 

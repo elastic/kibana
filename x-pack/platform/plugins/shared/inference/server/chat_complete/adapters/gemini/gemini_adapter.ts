@@ -6,21 +6,21 @@
  */
 
 import * as Gemini from '@google/generative-ai';
-import { from, map, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
 import {
-  createInferenceInternalError,
   Message,
   MessageRole,
   ToolChoiceType,
   ToolOptions,
   ToolSchema,
   ToolSchemaType,
+  createInferenceInternalError,
 } from '@kbn/inference-common';
-import type { InferenceConnectorAdapter } from '../../types';
+import { from, map, switchMap, throwError } from 'rxjs';
+import { Readable, isReadable } from 'stream';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
+import type { InferenceConnectorAdapter } from '../../types';
 import { processVertexStream } from './process_vertex_stream';
-import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
+import type { GeminiMessage, GeminiToolConfig, GenerateContentResponseChunk } from './types';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -32,6 +32,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     temperature = 0,
     modelName,
     abortSignal,
+    telemetryMetadata,
   }) => {
     return from(
       executor.invoke({
@@ -45,6 +46,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
+          telemetryMetadata,
         },
       })
     ).pipe(

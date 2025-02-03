@@ -9,22 +9,20 @@ import {
   Message,
   MessageRole,
   ToolChoiceType,
-  ToolSchemaType,
   createInferenceInternalError,
-  type ToolOptions,
 } from '@kbn/inference-common';
 import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
 import { Readable, isReadable } from 'stream';
 import { InferenceConnectorAdapter } from '../../types';
+import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
+import { processCompletionChunks } from './process_completion_chunks';
+import { addNoToolUsageDirective } from './prompts';
 import {
   BedrockChunkMember,
   serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
 import { parseSerdeChunkMessage } from './serde_utils';
-import type { BedRockImagePart, BedRockMessage, BedRockTextPart, BedrockToolChoice } from './types';
-import { processCompletionChunks } from './process_completion_chunks';
-import { addNoToolUsageDirective } from './prompts';
-import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
+import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -36,6 +34,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     temperature = 0,
     modelName,
     abortSignal,
+    telemetryMetadata,
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
@@ -45,7 +44,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
       toolChoice: toolChoiceToBedrock(toolChoice),
       temperature,
-      telemetryMetadata: { pluginId: 'test', aggregateBy: 'test' },
+      telemetryMetadata,
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,

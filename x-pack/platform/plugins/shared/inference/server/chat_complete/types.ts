@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import type { Logger } from '@kbn/logging';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
@@ -14,6 +13,8 @@ import type {
   Message,
   ToolOptions,
 } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import type { Observable } from 'rxjs';
 import type { InferenceExecutor } from './utils';
 
 /**
@@ -36,12 +37,13 @@ export interface InferenceConnectorAdapter {
 export type InferenceAdapterChatCompleteOptions = {
   executor: InferenceExecutor;
   messages: Message[];
+  logger: Logger;
   system?: string;
   functionCalling?: FunctionCallingMode;
   temperature?: number;
   modelName?: string;
   abortSignal?: AbortSignal;
-  logger: Logger;
+  telemetryMetadata?: TelemetryMetadata;
 } & ToolOptions;
 
 /**
