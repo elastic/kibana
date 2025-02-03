@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { createClient } from './create_client';
-export { createChatModel } from './create_chat_model';
-export type { InferenceClient, BoundInferenceClient } from './types';
+export { isMessageContentImageUrl, isMessageContentText } from './langchain';
+export { wrapInferenceError } from './wrap_inference_error';
+export { toAsyncIterator } from './observable_to_generator';
