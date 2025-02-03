@@ -144,6 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
         expect(response.body).to.eql({
           stream: {
+            name: 'test-group',
             group: {
               members: ['logs', 'logs.test2'],
             },
