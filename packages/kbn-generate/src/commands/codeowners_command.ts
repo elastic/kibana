@@ -38,6 +38,10 @@ const ULTIMATE_PRIORITY_RULES = `
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
 `;
 
 export const CodeownersCommand: GenerateCommand = {
