@@ -21,6 +21,12 @@ export interface IngestStreamLifecycleILM {
   };
 }
 
+export interface IngestStreamLifecycleError {
+  error: {
+    message: string;
+  };
+}
+
 export interface IngestStreamLifecycleInherit {
   inherit: {};
 }
@@ -38,6 +44,7 @@ export type WiredIngestStreamEffectiveLifecycle = IngestStreamLifecycle & { from
 
 export type UnwiredIngestStreamEffectiveLifecycle =
   | IngestStreamLifecycle
+  | IngestStreamLifecycleError
   | IngestStreamLifecycleDisabled;
 
 export type IngestStreamEffectiveLifecycle =
@@ -50,6 +57,7 @@ const dslLifecycleSchema = z.object({
 const ilmLifecycleSchema = z.object({ ilm: z.object({ policy: NonEmptyString }) });
 const inheritLifecycleSchema = z.object({ inherit: z.strictObject({}) });
 const disabledLifecycleSchema = z.object({ disabled: z.strictObject({}) });
+const errorLifecycleSchema = z.object({ error: z.strictObject({ message: NonEmptyString }) });
 
 export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.union([
   dslLifecycleSchema,
@@ -69,6 +77,11 @@ export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiv
 export const isDslLifecycle = createIsNarrowSchema(
   ingestStreamEffectiveLifecycleSchema,
   dslLifecycleSchema
+);
+
+export const isErrorLifecycle = createIsNarrowSchema(
+  unwiredIngestStreamEffectiveLifecycleSchema,
+  errorLifecycleSchema
 );
 
 export const isIlmLifecycle = createIsNarrowSchema(
