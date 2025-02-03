@@ -141,12 +141,12 @@ export interface AllAssetsProps {
   'data-test-subj'?: string;
 }
 
-// TODO: Asset Inventory - adjust once we have real universal entity type and data
+// TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
 const getEntity = (row: DataTableRecord): UniversalEntityEcs => {
   return {
-    id: row.flattened['asset.name'],
-    name: row.flattened['asset.name'],
-    timestamp: row.flattened['@timestamp'],
+    id: row.flattened['asset.name'] || '',
+    name: row.flattened['asset.name'] || '',
+    timestamp: row.flattened['@timestamp'] as Date,
     type: 'universal',
   };
 };
@@ -179,10 +179,10 @@ const AllAssets = ({
     onFlyoutClose: () => setExpandedDoc(undefined),
   });
 
-  const onExpandDocClick = (hit: DataTableRecord) => {
-    if (hit) {
-      const entity = getEntity(hit);
-      setExpandedDoc(hit); // Table is expecting the same doc ref to highlight the selected row
+  const onExpandDocClick = (doc?: DataTableRecord | undefined) => {
+    if (doc) {
+      const entity = getEntity(doc);
+      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
         entity,
         scopeId: ASSET_INVENTORY_TABLE_ID,

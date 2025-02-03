@@ -12,5 +12,5 @@ export interface UniversalEntityEcs {
   id: string;
   name: string;
   type: 'universal' | 'user' | 'host' | 'service';
-  timestamp: string;
+  timestamp: Date;
 }

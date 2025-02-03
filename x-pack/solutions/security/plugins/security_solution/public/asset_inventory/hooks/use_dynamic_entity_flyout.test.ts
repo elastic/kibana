@@ -39,7 +39,7 @@ const entity = {
 describe('useDynamicEntityFlyout', () => {
   let openFlyoutMock: jest.Mock;
   let closeFlyoutMock: jest.Mock;
-  let toastsMock: jest.Mock;
+  let toastsMock: { addDanger: jest.Mock };
   let onFlyoutCloseMock: jest.Mock;
 
   beforeEach(() => {
@@ -148,7 +148,7 @@ describe('useDynamicEntityFlyout', () => {
     );
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'user' } });
+      result.current.openDynamicFlyout({ entity: { ...entity, type: 'user' } });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -160,7 +160,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'host' } });
+      result.current.openDynamicFlyout({ entity: { ...entity, type: 'host' } });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -172,7 +172,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'service' } });
+      result.current.openDynamicFlyout({ entity: { ...entity, type: 'service' } });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
