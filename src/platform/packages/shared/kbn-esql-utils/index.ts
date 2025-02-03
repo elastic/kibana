@@ -18,6 +18,7 @@ export {
   getESQLWithSafeLimit,
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
+  appendStatsByToQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
@@ -37,6 +38,7 @@ export {
   sanitazeESQLInput,
   queryCannotBeSampled,
   mapVariableToColumn,
+  getValuesFromQueryField,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

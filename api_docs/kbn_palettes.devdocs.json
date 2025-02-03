@@ -255,6 +255,41 @@
     "functions": [
       {
         "parentPluginId": "@kbn/palettes",
+        "id": "def-common.getAppendedTag",
+        "type": "Function",
+        "tags": [],
+        "label": "getAppendedTag",
+        "description": [
+          "\nText wrapper to remove text-decoration from `EuiText`"
+        ],
+        "signature": [
+          "(label?: string | undefined) => \"\" | React.JSX.Element | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.getAppendedTag.$1",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/palettes",
         "id": "def-common.getKbnPalettes",
         "type": "Function",
         "tags": [],
@@ -395,6 +430,22 @@
             "label": "name",
             "description": [
               "\nDisplay name of this palette."
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.tag",
+            "type": "string",
+            "tags": [],
+            "label": "tag",
+            "description": [
+              "\nA tag for the palette displayed opposite of the `name`."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
             "deprecated": false,

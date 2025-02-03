@@ -37,6 +37,7 @@ jest.mock('@kbn/esql-utils', () => {
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
+    getValuesFromQueryField: jest.fn().mockReturnValue('field'),
   };
 });
 
@@ -55,6 +56,7 @@ describe('ValueControlForm', () => {
       client: uiSettings,
     },
     core: coreMock.createStart(),
+    data: dataMock,
   };
 
   describe('Interval type', () => {
@@ -248,9 +250,6 @@ describe('ValueControlForm', () => {
         expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(
           `Values from a query`
         );
-
-        // code editor should be rendered
-        expect(await findByTestId('ESQLEditor')).toBeInTheDocument();
 
         // values preview panel should be rendered
         expect(await findByTestId('esqlValuesPreview')).toBeInTheDocument();

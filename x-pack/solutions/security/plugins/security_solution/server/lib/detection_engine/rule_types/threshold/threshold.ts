@@ -96,6 +96,7 @@ export const thresholdExecutor = async ({
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
+  const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
 
   return withSecuritySpan('thresholdExecutor', async () => {
     const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
@@ -140,20 +141,22 @@ export const thresholdExecutor = async ({
     });
 
     // Look for new events over threshold
-    const { buckets, searchErrors, searchDurations, warnings } = await findThresholdSignals({
-      inputIndexPattern: inputIndex,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      maxSignals: tuple.maxSignals,
-      services,
-      ruleExecutionLogger,
-      filter: esFilter,
-      threshold: ruleParams.threshold,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
-      aggregatableTimestampField,
-    });
+    const { buckets, searchErrors, searchDurations, warnings, loggedRequests } =
+      await findThresholdSignals({
+        inputIndexPattern: inputIndex,
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        maxSignals: tuple.maxSignals,
+        services,
+        ruleExecutionLogger,
+        filter: esFilter,
+        threshold: ruleParams.threshold,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+        aggregatableTimestampField,
+        isLoggedRequestsEnabled,
+      });
 
     const alertSuppression = completeRule.ruleParams.alertSuppression;
 
@@ -227,6 +230,7 @@ export const thresholdExecutor = async ({
           ...newSignalHistory,
         },
       },
+      ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
     };
   });
 };

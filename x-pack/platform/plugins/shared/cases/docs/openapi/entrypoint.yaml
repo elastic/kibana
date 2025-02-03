@@ -27,8 +27,6 @@ paths:
     $ref: paths/api@cases@configure@{configurationid}.yaml
   '/api/cases/reporters':
     $ref: 'paths/api@cases@reporters.yaml'
-  '/api/cases/status':
-    $ref: 'paths/api@cases@status.yaml'
   '/api/cases/tags':
     $ref: 'paths/api@cases@tags.yaml'
   '/api/cases/{caseId}':

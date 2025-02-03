@@ -5,11 +5,11 @@
 ++++
 
 :frontmatter-description: Prerequisites and production considerations for using {kib} {alert-features}.
-:frontmatter-tags-products: [alerting] 
-:frontmatter-tags-content-type: [other] 
+:frontmatter-tags-products: [alerting]
+:frontmatter-tags-content-type: [other]
 :frontmatter-tags-user-goals: [configure]
 
-{kib} {alert-features} are automatically enabled, but might require some additional 
+{kib} {alert-features} are automatically enabled, but might require some additional
 configuration.
 
 [float]
@@ -17,28 +17,28 @@ configuration.
 === Prerequisites
 If you are using an *on-premises* {stack} deployment:
 
-* In the `kibana.yml` configuration file, add the 
-<<general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>> 
+* In the `kibana.yml` configuration file, add the
+<<general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>>
 setting.
-* For emails to have a footer with a link back to {kib}, set the 
+* For emails to have a footer with a link back to {kib}, set the
 <<server-publicBaseUrl,`server.publicBaseUrl`>> configuration setting.
 
-If you are using an *on-premises* {stack} deployment with 
+If you are using an *on-premises* {stack} deployment with
 <<using-kibana-with-security,*security*>>:
 
-* If you are unable to access {kib} {alert-features}, ensure that you have not 
+* If you are unable to access {kib} {alert-features}, ensure that you have not
 {ref}/security-settings.html#api-key-service-settings[explicitly disabled API keys].
 
-The alerting framework uses queries that require the 
-`search.allow_expensive_queries` setting to be `true`. See the scripts 
-{ref}/query-dsl-script-query.html#_allow_expensive_queries_4[documentation]. 
+The alerting framework uses queries that require the
+`search.allow_expensive_queries` setting to be `true`. See the scripts
+{ref}/query-dsl-script-query.html#_allow_expensive_queries_4[documentation].
 
 [float]
 [[alerting-setup-production]]
 === Production considerations and scaling guidance
 
-When relying on alerting and actions as mission critical services, make sure you 
-follow the 
+When relying on alerting and actions as mission critical services, make sure you
+follow the
 <<alerting-production-considerations,alerting production considerations>>.
 
 For more information on the scalability of {alert-features}, go to
@@ -50,12 +50,11 @@ For more information on the scalability of {alert-features}, go to
 
 To use {alert-features} in a {kib} app, you must have the appropriate feature privileges:
 
-[options="header"]
-|=== 
+[discrete]
+==== Give full access to manage alerts, connectors, and rules in *{stack-manage-app}*
 
-| Action | {kib} privileges
-| Give full access to manage alerts, connectors, and rules in *{stack-manage-app}*
-a|
+**{kib} privileges**
+
 * `All` for the *Management > {stack-rules-feature}* feature.
 * `All` for the *Management > Rules Settings* feature.
 * `All` for the *Management > {connectors-feature}* feature.
@@ -77,8 +76,11 @@ For {observability} rules, you must have `all` privileges for the appropriate {o
 For Security rules, refer to {security-guide}/detections-permissions-section.html[Detections prerequisites and requirements].
 ====
 
-| Give view-only access to alerts, connectors, and rules in  *{stack-manage-app}*
-a|
+[discrete]
+==== Give view-only access to alerts, connectors, and rules in  *{stack-manage-app}*
+
+**{kib} privileges**
+
 * `Read` for the *Management > {stack-rules-feature}* feature.
 * `Read` for the *Management > Rules Settings* feature.
 * `Read` for the *Management > {connectors-feature}* feature.
@@ -92,17 +94,25 @@ For {observability} rules, you must have `read` privileges for the appropriate {
 For Security rules, refer to {security-guide}/detections-permissions-section.html[Detections prerequisites and requirements].
 ====
 
-| Give view-only access to alerts in *Discover* or *Dashboards*
-a|
+[discrete]
+==== Give view-only access to alerts in *Discover* or *Dashboards*
+
+**{kib} privileges**
+
 * `Read` index privileges for the `.alerts-*` system indices.
 
-| Revoke all access to alerts, connectors, and rules in *{stack-manage-app}*, *Discover*, or *Dashboards*
-a|
+[discrete]
+==== Revoke all access to alerts, connectors, and rules in *{stack-manage-app}*, *Discover*, or *Dashboards*
+
+**{kib} privileges**
+
 * `None` for the *Management > {stack-rules-feature}* feature.
 * `None` for the *Management > Rules Settings* feature.
 * `None` for the *Management > {connectors-feature}* feature.
 * No index privileges for the `.alerts-*` system indices.
-|===
+
+[discrete]
+==== More details
 
 For more information on configuring roles that provide access to features, go to <<kibana-feature-privileges>>.
 
@@ -113,16 +123,14 @@ For more information on configuring roles that provide access to features, go to
 Rules are authorized using an API key.
 Its credentials are used to run all background tasks associated with the rule, including condition checks like {es} queries and triggered actions.
 
-If you create or edit a rule in {kib}, an API key is created that captures a snapshot of your privileges at the time of the edit.
-The following actions regenerate the API key in {kib}:
-
-* Creating a rule
-* Updating a rule
+When you create a rule in {kib}, an API key is created that captures a snapshot of your privileges.
+Likewise when you update a rule, the API key is updated with a snapshot of your privileges at the time of the edit. 
 
 When you disable a rule, it retains the associated API key which is reused when the rule is enabled.
-If the API key is missing when you enable the rule (for example, in the case of imported rules), it generates a new key that has your security privileges.
+If the API key is missing when you enable the rule, a new key is generated that has your current security privileges.
+When you import a rule, you must enable it before you can use it and a new API key is generated at that time.
 
-You can update an API key manually in **{stack-manage-app} > {rules-ui}** or in the rule details page by selecting **Update API key** in the actions menu.
+You can generate a new API key at any time in **{stack-manage-app} > {rules-ui}** or in the rule details page by selecting **Update API key** in the actions menu.
 
 If you manage your rules by using {kib} APIs, they support support both key- and token-based authentication as described in <<api-authentication>>.
 To use key-based authentication, create API keys and use them in the header of your API calls as described in <<api-keys>>.
@@ -147,8 +155,8 @@ You can use <<action-settings>> to disable certain <<action-types>> and allowlis
 [[alerting-spaces]]
 === Space isolation
 
-Rules and connectors are isolated to the {kib} space in which they were created. 
-A rule or connector created in one space will not be visible in another. 
+Rules and connectors are isolated to the {kib} space in which they were created.
+A rule or connector created in one space will not be visible in another.
 
 [float]
 [[alerting-ccs-setup]]
