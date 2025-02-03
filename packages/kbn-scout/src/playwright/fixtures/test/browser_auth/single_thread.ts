@@ -8,7 +8,6 @@
  */
 
 import { PROJECT_DEFAULT_ROLES } from '../../../../common';
-import { serviceLoadedMsg } from '../../../utils';
 import { coreWorkerFixtures } from '../../worker';
 import { BrowserAuthFixture, LoginFunction } from '.';
 
@@ -45,7 +44,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       return loginAs(roleName);
     };
 
-    log.debug(serviceLoadedMsg('browserAuth'));
+    log.serviceLoaded('browserAuth');
     await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
   },
 });
