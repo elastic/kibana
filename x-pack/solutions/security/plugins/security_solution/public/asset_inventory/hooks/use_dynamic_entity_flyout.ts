@@ -23,7 +23,7 @@ import {
 } from '../../flyout/entity_details/shared/constants';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
-interface InventoryFlyoutSelectorProps {
+interface InventoryFlyoutProps {
   entity: UniversalEntityEcs;
   scopeId?: string;
   contextId?: string;
@@ -38,7 +38,7 @@ interface SecurityFlyoutPanelsCommonParams {
 type FlyoutParams =
   | {
       id: typeof UniversalEntityPanelKey;
-      params: { entity: InventoryFlyoutSelectorProps['entity'] };
+      params: { entity: InventoryFlyoutProps['entity'] };
     }
   | { id: typeof UserPanelKey; params: { userName: string } & SecurityFlyoutPanelsCommonParams }
   | { id: typeof HostPanelKey; params: { hostName: string } & SecurityFlyoutPanelsCommonParams }
@@ -48,17 +48,16 @@ type FlyoutParams =
     };
 
 const getFlyoutParamsByEntity = (
-  entity: InventoryFlyoutSelectorProps['entity'],
+  entity: InventoryFlyoutProps['entity'],
   scopeId?: string,
   contextId?: string
 ): FlyoutParams => {
-  const entitiesFlyoutParams: Record<InventoryFlyoutSelectorProps['entity']['type'], FlyoutParams> =
-    {
-      universal: { id: UniversalEntityPanelKey, params: { entity } },
-      user: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
-      host: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },
-      service: { id: ServicePanelKey, params: { serviceName: entity.name, scopeId, contextId } },
-    } as const;
+  const entitiesFlyoutParams: Record<InventoryFlyoutProps['entity']['type'], FlyoutParams> = {
+    universal: { id: UniversalEntityPanelKey, params: { entity } },
+    user: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
+    host: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },
+    service: { id: ServicePanelKey, params: { serviceName: entity.name, scopeId, contextId } },
+  } as const;
 
   return entitiesFlyoutParams[entity.type];
 };
@@ -68,7 +67,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
   const { notifications } = useKibana().services;
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
-  const openDynamicFlyout = ({ entity, scopeId, contextId }: InventoryFlyoutSelectorProps) => {
+  const openDynamicFlyout = ({ entity, scopeId, contextId }: InventoryFlyoutProps) => {
     const entityFlyoutParams = getFlyoutParamsByEntity(entity, scopeId, contextId);
 
     // User, Host, and Service entity flyouts rely on entity name to fetch required data
