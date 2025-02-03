@@ -15,9 +15,7 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
-
-export const ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID =
-  'CREATE_SYNTHETICS_MONITORS_OVERVIEW_EMBEDDABLE';
+import { ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID } from './constants';
 
 export function createMonitorsOverviewPanelAction(
   getStartServices: StartServicesAccessor<ClientPluginsStart>

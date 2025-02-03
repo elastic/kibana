@@ -9,6 +9,7 @@ import { CoreSetup } from '@kbn/core-lifecycle-browser';
 
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from './constants';
+import { registerSyntheticsUiActions } from './ui_actions/register_ui_actions';
 
 export const registerSyntheticsEmbeddables = (
   core: CoreSetup<ClientPluginsStart, unknown>,
@@ -47,14 +48,7 @@ export const registerSyntheticsEmbeddables = (
         return { width: 30, height: 12 };
       }
     );
-  });
 
-  const registerAsyncUiActions = async () => {
-    if (pluginsSetup.uiActions) {
-      const { registerSyntheticsUiActions } = await import('./ui_actions/register_ui_actions');
-      registerSyntheticsUiActions(core, pluginsSetup);
-    }
-  };
-  // can be done async
-  registerAsyncUiActions();
+    registerSyntheticsUiActions(core, pluginsSetup);
+  });
 };

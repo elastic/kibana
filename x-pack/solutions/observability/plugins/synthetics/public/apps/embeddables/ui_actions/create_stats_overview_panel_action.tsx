@@ -14,8 +14,8 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
-
-export const ADD_SYNTHETICS_OVERVIEW_ACTION_ID = 'CREATE_SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE';
+import { ADD_SYNTHETICS_OVERVIEW_ACTION_ID } from './constants';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 
 export function createStatusOverviewPanelAction(
   getStartServices: StartServicesAccessor<ClientPluginsStart>
@@ -26,12 +26,10 @@ export function createStatusOverviewPanelAction(
     order: 5,
     getIconType: () => 'online',
     isCompatible: async ({ embeddable }) => {
-      const { compatibilityCheck } = await import('./compatibility_check');
-      return compatibilityCheck(embeddable);
+      return apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
-      const { compatibilityCheck } = await import('./compatibility_check');
-      if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
+      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       try {
         const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
         const [coreStart, pluginStart] = await getStartServices();
