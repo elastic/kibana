@@ -163,7 +163,7 @@ tr:hover .c3:focus::before {
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-context-id=":r0:"
                           data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
                         >
                           <div
@@ -173,11 +173,11 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                              aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                               class="c2 c3"
-                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-context-id=":r0:"
                               data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
-                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-context-id=":r0:"
                               data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
                               data-test-subj="providerContainer"
                               draggable="false"
@@ -229,7 +229,7 @@ tr:hover .c3:focus::before {
                 data-test-subj="draggableWrapperDiv"
               >
                 <div
-                  data-rfd-droppable-context-id="0"
+                  data-rfd-droppable-context-id=":r0:"
                   data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
                 >
                   <div
@@ -239,11 +239,11 @@ tr:hover .c3:focus::before {
                     tabindex="0"
                   >
                     <div
-                      aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                      aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                       class="c2 c3"
-                      data-rfd-drag-handle-context-id="0"
+                      data-rfd-drag-handle-context-id=":r0:"
                       data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
-                      data-rfd-draggable-context-id="0"
+                      data-rfd-draggable-context-id=":r0:"
                       data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
                       data-test-subj="providerContainer"
                       draggable="false"
@@ -300,7 +300,7 @@ tr:hover .c3:focus::before {
                 data-test-subj="draggableWrapperDiv"
               >
                 <div
-                  data-rfd-droppable-context-id="0"
+                  data-rfd-droppable-context-id=":r0:"
                   data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
                 >
                   <div
@@ -310,11 +310,11 @@ tr:hover .c3:focus::before {
                     tabindex="0"
                   >
                     <div
-                      aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                      aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                       class="c2 c3"
-                      data-rfd-drag-handle-context-id="0"
+                      data-rfd-drag-handle-context-id=":r0:"
                       data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
-                      data-rfd-draggable-context-id="0"
+                      data-rfd-draggable-context-id=":r0:"
                       data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
                       data-test-subj="providerContainer"
                       draggable="false"
@@ -356,7 +356,7 @@ tr:hover .c3:focus::before {
                 data-test-subj="draggableWrapperDiv"
               >
                 <div
-                  data-rfd-droppable-context-id="0"
+                  data-rfd-droppable-context-id=":r0:"
                   data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
                 >
                   <div
@@ -366,11 +366,11 @@ tr:hover .c3:focus::before {
                     tabindex="0"
                   >
                     <div
-                      aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                      aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                       class="c2 c3"
-                      data-rfd-drag-handle-context-id="0"
+                      data-rfd-drag-handle-context-id=":r0:"
                       data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
-                      data-rfd-draggable-context-id="0"
+                      data-rfd-draggable-context-id=":r0:"
                       data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
                       data-test-subj="providerContainer"
                       draggable="false"
@@ -416,7 +416,7 @@ tr:hover .c3:focus::before {
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-context-id=":r0:"
                           data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
                         >
                           <div
@@ -426,11 +426,11 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                              aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                               class="c2 c3"
-                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-context-id=":r0:"
                               data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
-                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-context-id=":r0:"
                               data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
                               data-test-subj="providerContainer"
                               draggable="false"
@@ -486,7 +486,7 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-context-id=":r0:"
                       data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
                     >
                       <div
@@ -496,11 +496,11 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                           class="c2 c3"
-                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-context-id=":r0:"
                           data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
-                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-context-id=":r0:"
                           data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
                           data-test-subj="providerContainer"
                           draggable="false"
@@ -548,7 +548,7 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-context-id=":r0:"
                       data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
                     >
                       <div
@@ -558,11 +558,11 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                           class="c2 c3"
-                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-context-id=":r0:"
                           data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
-                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-context-id=":r0:"
                           data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
                           data-test-subj="providerContainer"
                           draggable="false"
@@ -605,7 +605,7 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-context-id=":r0:"
                       data-rfd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_bytes-100"
                     >
                       <div
@@ -615,11 +615,11 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                           class="c2 c3"
-                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-context-id=":r0:"
                           data-rfd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
-                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-context-id=":r0:"
                           data-rfd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
                           data-test-subj="providerContainer"
                           draggable="false"
@@ -655,7 +655,7 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-context-id=":r0:"
                       data-rfd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_packets-3"
                     >
                       <div
@@ -665,11 +665,11 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                           class="c2 c3"
-                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-context-id=":r0:"
                           data-rfd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
-                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-context-id=":r0:"
                           data-rfd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
                           data-test-subj="providerContainer"
                           draggable="false"
@@ -705,7 +705,7 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-context-id=":r0:"
                       data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
                     >
                       <div
@@ -715,11 +715,11 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                           class="c2 c3"
-                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-context-id=":r0:"
                           data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
-                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-context-id=":r0:"
                           data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
                           data-test-subj="providerContainer"
                           draggable="false"
@@ -762,7 +762,7 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-context-id=":r0:"
                       data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
                     >
                       <div
@@ -772,11 +772,11 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                           class="c2 c3"
-                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-context-id=":r0:"
                           data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
-                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-context-id=":r0:"
                           data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
                           data-test-subj="providerContainer"
                           draggable="false"
@@ -874,7 +874,7 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-context-id=":r0:"
                                                 data-rfd-droppable-id="droppableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
                                               >
                                                 <div
@@ -884,11 +884,11 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                                     class="c2 c3"
-                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-context-id=":r0:"
                                                     data-rfd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
-                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-context-id=":r0:"
                                                     data-rfd-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
@@ -990,7 +990,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
                                       >
                                         <div
@@ -1000,11 +1000,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1042,7 +1042,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
                                       >
                                         <div
@@ -1052,11 +1052,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1104,7 +1104,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
                                       >
                                         <div
@@ -1114,11 +1114,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1156,7 +1156,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
                                       >
                                         <div
@@ -1166,11 +1166,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1208,7 +1208,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
                                       >
                                         <div
@@ -1218,11 +1218,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1278,7 +1278,7 @@ tr:hover .c3:focus::before {
                           data-test-subj="draggableWrapperDiv"
                         >
                           <div
-                            data-rfd-droppable-context-id="0"
+                            data-rfd-droppable-context-id=":r0:"
                             data-rfd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
                           >
                             <div
@@ -1288,11 +1288,11 @@ tr:hover .c3:focus::before {
                               tabindex="0"
                             >
                               <div
-                                aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                 class="c2 c3"
-                                data-rfd-drag-handle-context-id="0"
+                                data-rfd-drag-handle-context-id=":r0:"
                                 data-rfd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
-                                data-rfd-draggable-context-id="0"
+                                data-rfd-draggable-context-id=":r0:"
                                 data-rfd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
                                 data-test-subj="providerContainer"
                                 draggable="false"
@@ -1341,7 +1341,7 @@ tr:hover .c3:focus::before {
                           data-test-subj="draggableWrapperDiv"
                         >
                           <div
-                            data-rfd-droppable-context-id="0"
+                            data-rfd-droppable-context-id=":r0:"
                             data-rfd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
                           >
                             <div
@@ -1351,11 +1351,11 @@ tr:hover .c3:focus::before {
                               tabindex="0"
                             >
                               <div
-                                aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                 class="c2 c3"
-                                data-rfd-drag-handle-context-id="0"
+                                data-rfd-drag-handle-context-id=":r0:"
                                 data-rfd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
-                                data-rfd-draggable-context-id="0"
+                                data-rfd-draggable-context-id=":r0:"
                                 data-rfd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
                                 data-test-subj="providerContainer"
                                 draggable="false"
@@ -1441,7 +1441,7 @@ tr:hover .c3:focus::before {
                                   data-test-subj="draggableWrapperDiv"
                                 >
                                   <div
-                                    data-rfd-droppable-context-id="0"
+                                    data-rfd-droppable-context-id=":r0:"
                                     data-rfd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
                                   >
                                     <div
@@ -1451,11 +1451,11 @@ tr:hover .c3:focus::before {
                                       tabindex="0"
                                     >
                                       <div
-                                        aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                        aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                         class="c2 c3"
-                                        data-rfd-drag-handle-context-id="0"
+                                        data-rfd-drag-handle-context-id=":r0:"
                                         data-rfd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
-                                        data-rfd-draggable-context-id="0"
+                                        data-rfd-draggable-context-id=":r0:"
                                         data-rfd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
                                         data-test-subj="providerContainer"
                                         draggable="false"
@@ -1508,7 +1508,7 @@ tr:hover .c3:focus::before {
                           data-test-subj="draggableWrapperDiv"
                         >
                           <div
-                            data-rfd-droppable-context-id="0"
+                            data-rfd-droppable-context-id=":r0:"
                             data-rfd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
                           >
                             <div
@@ -1518,11 +1518,11 @@ tr:hover .c3:focus::before {
                               tabindex="0"
                             >
                               <div
-                                aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                 class="c2 c3"
-                                data-rfd-drag-handle-context-id="0"
+                                data-rfd-drag-handle-context-id=":r0:"
                                 data-rfd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
-                                data-rfd-draggable-context-id="0"
+                                data-rfd-draggable-context-id=":r0:"
                                 data-rfd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
                                 data-test-subj="providerContainer"
                                 draggable="false"
@@ -1616,7 +1616,7 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-context-id=":r0:"
                                                 data-rfd-droppable-id="droppableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
                                               >
                                                 <div
@@ -1626,11 +1626,11 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                                     class="c2 c3"
-                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-context-id=":r0:"
                                                     data-rfd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
-                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-context-id=":r0:"
                                                     data-rfd-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
@@ -1732,7 +1732,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
                                       >
                                         <div
@@ -1742,11 +1742,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1784,7 +1784,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
                                       >
                                         <div
@@ -1794,11 +1794,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1846,7 +1846,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
                                       >
                                         <div
@@ -1856,11 +1856,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1898,7 +1898,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
                                       >
                                         <div
@@ -1908,11 +1908,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -1950,7 +1950,7 @@ tr:hover .c3:focus::before {
                                       data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-context-id=":r0:"
                                         data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
                                       >
                                         <div
@@ -1960,11 +1960,11 @@ tr:hover .c3:focus::before {
                                           tabindex="0"
                                         >
                                           <div
-                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                                             class="c2 c3"
-                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-context-id=":r0:"
                                             data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
-                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-context-id=":r0:"
                                             data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
                                             data-test-subj="providerContainer"
                                             draggable="false"
@@ -2016,7 +2016,7 @@ tr:hover .c3:focus::before {
             data-test-subj="draggableWrapperDiv"
           >
             <div
-              data-rfd-droppable-context-id="0"
+              data-rfd-droppable-context-id=":r0:"
               data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
             >
               <div
@@ -2026,11 +2026,11 @@ tr:hover .c3:focus::before {
                 tabindex="0"
               >
                 <div
-                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                  aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                   class="c2 c3"
-                  data-rfd-drag-handle-context-id="0"
+                  data-rfd-drag-handle-context-id=":r0:"
                   data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
-                  data-rfd-draggable-context-id="0"
+                  data-rfd-draggable-context-id=":r0:"
                   data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
                   data-test-subj="providerContainer"
                   draggable="false"
@@ -2101,7 +2101,7 @@ tr:hover .c3:focus::before {
             data-test-subj="draggableWrapperDiv"
           >
             <div
-              data-rfd-droppable-context-id="0"
+              data-rfd-droppable-context-id=":r0:"
               data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
             >
               <div
@@ -2111,11 +2111,11 @@ tr:hover .c3:focus::before {
                 tabindex="0"
               >
                 <div
-                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                  aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                   class="c2 c3"
-                  data-rfd-drag-handle-context-id="0"
+                  data-rfd-drag-handle-context-id=":r0:"
                   data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
-                  data-rfd-draggable-context-id="0"
+                  data-rfd-draggable-context-id=":r0:"
                   data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
                   data-test-subj="providerContainer"
                   draggable="false"
@@ -2186,7 +2186,7 @@ tr:hover .c3:focus::before {
             data-test-subj="draggableWrapperDiv"
           >
             <div
-              data-rfd-droppable-context-id="0"
+              data-rfd-droppable-context-id=":r0:"
               data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
             >
               <div
@@ -2196,11 +2196,11 @@ tr:hover .c3:focus::before {
                 tabindex="0"
               >
                 <div
-                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                  aria-describedby="rfd-hidden-text-:r0:-hidden-text-:r1:"
                   class="c2 c3"
-                  data-rfd-drag-handle-context-id="0"
+                  data-rfd-drag-handle-context-id=":r0:"
                   data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
-                  data-rfd-draggable-context-id="0"
+                  data-rfd-draggable-context-id=":r0:"
                   data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
                   data-test-subj="providerContainer"
                   draggable="false"
