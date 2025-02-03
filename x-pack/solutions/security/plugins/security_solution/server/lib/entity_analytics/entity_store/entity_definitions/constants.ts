@@ -24,4 +24,3 @@ export const DEFAULT_FIELD_HISTORY_LENGTH = 10;
 export const DEFAULT_SYNC_DELAY = '1m';
 export const DEFAULT_FREQUENCY = '1m';
 export const DEFAULT_LOOKBACK_PERIOD = '1d';
-export const DEFAULT_TIMESTAMP_FIELD = '@timestamp';

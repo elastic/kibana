@@ -139,6 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs',
         });
       });
 
@@ -176,6 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx',
         });
       });
 
@@ -209,6 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx.access',
         });
       });
 
@@ -242,6 +245,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'error',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx',
         });
       });
 
