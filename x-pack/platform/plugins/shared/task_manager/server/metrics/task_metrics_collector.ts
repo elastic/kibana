@@ -10,7 +10,7 @@ import {
   AggregationsStringTermsBucket,
   AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable, Subject } from 'rxjs';
 import { TaskStore } from '../task_store';
 import {

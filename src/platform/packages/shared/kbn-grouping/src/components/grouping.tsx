@@ -103,13 +103,15 @@ const GroupingComponent = <T,>({
 
   const groupCount = useMemo(() => data?.groupsCount?.value ?? 0, [data?.groupsCount?.value]);
   const groupCountText = useMemo(() => {
-    const hasNullGroup =
+    const hasNullGroupInCurrentPage =
       data?.groupByFields?.buckets?.some(
         (groupBucket: GroupingBucket<T>) => groupBucket.isNullGroup
       ) || false;
 
-    return `${groupsUnit(groupCount, selectedGroup, hasNullGroup)}`;
-  }, [data?.groupByFields?.buckets, groupCount, groupsUnit, selectedGroup]);
+    const hasNullGroup = Boolean(data?.nullGroupItems?.doc_count);
+
+    return `${groupsUnit(groupCount, selectedGroup, hasNullGroupInCurrentPage || hasNullGroup)}`;
+  }, [data?.groupByFields?.buckets, data?.nullGroupItems, groupCount, groupsUnit, selectedGroup]);
 
   const groupPanels = useMemo(
     () =>

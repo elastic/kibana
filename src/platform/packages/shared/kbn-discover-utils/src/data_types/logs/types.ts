@@ -37,8 +37,8 @@ export interface LogDocument extends DataTableRecord {
     'data_stream.dataset': string;
 
     'error.stack_trace'?: string;
-    'error.exception.stacktrace'?: string;
-    'error.log.stacktrace'?: string;
+    'error.exception.stacktrace.abs_path'?: string;
+    'error.log.stacktrace.abs_path'?: string;
   };
 }
 
@@ -83,8 +83,8 @@ export interface ResourceFields {
 
 export interface StackTraceFields {
   'error.stack_trace'?: string;
-  'error.exception.stacktrace'?: string;
-  'error.log.stacktrace'?: string;
+  'error.exception.stacktrace.abs_path'?: string;
+  'error.log.stacktrace.abs_path'?: string;
 }
 
 export interface SmartFieldGridColumnOptions {

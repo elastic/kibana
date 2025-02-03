@@ -144,20 +144,6 @@ it('runs expected fs operations', async () => {
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
           <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
           <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {

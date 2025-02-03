@@ -15,10 +15,6 @@ discover-app {
 
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
-
-    &.dscPage--topNavInline {
-      @include kibanaFullBodyHeight($euiSize * 3);
-    }
   }
 }
 

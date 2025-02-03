@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const ALLOW_FIELDS = [
   'alert.attributes.executionStatus.status',

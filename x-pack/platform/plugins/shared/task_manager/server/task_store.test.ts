@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
@@ -65,6 +65,7 @@ beforeEach(() => {
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;

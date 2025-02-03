@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer, SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   EuiDataGridCellPopoverElementProps,
   EuiDataGridCellProps,

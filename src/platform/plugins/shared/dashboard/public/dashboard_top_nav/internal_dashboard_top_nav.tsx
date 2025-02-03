@@ -94,14 +94,14 @@ export function InternalDashboardTopNav({
     title,
     viewMode,
   ] = useBatchedPublishingSubjects(
-    dashboardApi.dataViews,
+    dashboardApi.dataViews$,
     dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId,
+    dashboardApi.savedObjectId$,
     dashboardApi.query$,
-    dashboardApi.panelTitle,
-    dashboardApi.viewMode
+    dashboardApi.title$,
+    dashboardApi.viewMode$
   );
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
@@ -339,9 +339,7 @@ export function InternalDashboardTopNav({
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews ?? []}
-        saveQueryMenuVisibility={
-          getDashboardCapabilities().saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-        }
+        allowSavingQueries
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== 'print'}
         setMenuMountPoint={
@@ -349,7 +347,6 @@ export function InternalDashboardTopNav({
             ? setCustomHeaderActionMenu ?? undefined
             : setHeaderActionMenu
         }
-        className={fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined}
         config={
           visibilityProps.showTopNavMenu
             ? viewMode === 'edit'
