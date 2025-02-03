@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { getUnchangingComparator, initializeTitleManager } from '@kbn/presentation-publishing';
 
-import { IMAGE_CLICK_TRIGGER } from '../actions';
+import { IMAGE_CLICK_TRIGGER } from '../ui_actions/image_click_trigger';
 import { openImageEditor } from '../components/image_editor/open_image_editor';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import { FileImageMetadata } from '../imports';

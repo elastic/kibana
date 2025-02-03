@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
-import { imageClickTrigger } from '../actions';
+import { imageClickTrigger } from '../ui_actions/image_click_trigger';
 import { ImageEmbeddableApi } from '../image_embeddable/types';
 import { FileImageMetadata, FilesClient, imageEmbeddableFileKind } from '../imports';
 import { coreServices, screenshotModeService, uiActionsService } from '../services/kibana_services';
