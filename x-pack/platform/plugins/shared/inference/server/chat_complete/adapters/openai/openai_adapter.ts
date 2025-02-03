@@ -32,7 +32,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     modelName,
     logger,
     abortSignal,
-    telemetryMetadata,
+    metadata,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -71,7 +71,9 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           body: JSON.stringify(request),
           signal: abortSignal,
           stream: true,
-          telemetryMetadata,
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
       })
     ).pipe(

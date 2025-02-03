@@ -12,6 +12,7 @@ import {
   Message,
   withoutOutputUpdateEvents,
   FunctionCallingMode,
+  ChatCompleteMetadata,
 } from '@kbn/inference-common';
 import { InferenceClient } from '../../..';
 import { requestDocumentationSchema } from './shared';
@@ -22,6 +23,7 @@ export const requestDocumentation = ({
   messages,
   connectorId,
   functionCalling,
+  metadata,
   toolOptions: { tools, toolChoice },
 }: {
   outputApi: InferenceClient['output'];
@@ -29,6 +31,7 @@ export const requestDocumentation = ({
   messages: Message[];
   connectorId: string;
   functionCalling?: FunctionCallingMode;
+  metadata?: ChatCompleteMetadata;
   toolOptions: ToolOptions;
 }) => {
   const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
@@ -38,6 +41,7 @@ export const requestDocumentation = ({
     connectorId,
     stream: true,
     functionCalling,
+    metadata,
     system,
     previousMessages: messages,
     input: `Based on the previous conversation, request documentation

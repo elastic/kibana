@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
   FunctionCallingMode,
   Message,
   ToolOptions,
+  ChatCompleteMetadata,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { Observable } from 'rxjs';
@@ -43,7 +43,7 @@ export type InferenceAdapterChatCompleteOptions = {
   temperature?: number;
   modelName?: string;
   abortSignal?: AbortSignal;
-  telemetryMetadata?: TelemetryMetadata;
+  metadata?: ChatCompleteMetadata;
 } & ToolOptions;
 
 /**
