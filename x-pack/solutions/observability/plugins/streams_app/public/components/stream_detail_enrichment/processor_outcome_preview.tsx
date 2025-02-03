@@ -234,7 +234,7 @@ const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) =
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
               {
                 defaultMessage:
-                  'There are no sample documents to test the processors. Try updating the time range or ingesting more data.',
+                  "There are no sample documents to test the processors. Try updating the time range or ingesting more data, it might be possible we could not find any matching documents with the processors' source fields.",
               }
             )}
           </p>
