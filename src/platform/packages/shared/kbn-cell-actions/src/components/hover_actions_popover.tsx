@@ -161,6 +161,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
                 <ExtraActionsButton
                   onClick={onShowExtraActionsClick}
                   showTooltip={showActionTooltips}
+                  actionContext={actionContext}
                 />
               )}
             </div>

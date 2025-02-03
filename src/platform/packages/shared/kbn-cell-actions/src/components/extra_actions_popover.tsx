@@ -20,9 +20,14 @@ import { css } from '@emotion/react';
 import { EXTRA_ACTIONS_ARIA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import type { CellAction, CellActionExecutionContext } from '../types';
 
-const euiContextMenuItemCSS = css`
-  color: ${euiThemeVars.euiColorPrimaryText};
-`;
+const getEuiContextMenuItemCSS = (actionContext: CellActionExecutionContext) => {
+  if (actionContext.metadata?.extraActionsColor === 'text') {
+    return undefined;
+  }
+  return css`
+    color: ${euiThemeVars.euiColorPrimaryText};
+  `;
+};
 
 interface ActionsPopOverProps {
   anchorPosition: 'rightCenter' | 'downCenter';
@@ -114,7 +119,7 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
     () =>
       actions.map((action) => (
         <EuiContextMenuItem
-          css={euiContextMenuItemCSS}
+          css={getEuiContextMenuItemCSS(actionContext)}
           key={action.id}
           icon={action.getIconType(actionContext)}
           aria-label={action.getDisplayName(actionContext)}

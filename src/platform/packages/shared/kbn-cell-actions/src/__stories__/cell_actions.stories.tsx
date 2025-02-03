@@ -94,6 +94,25 @@ export const CellActionInline = () => (
   </CellActions>
 );
 
+export const CellActionInlineCustomStyle = () => (
+  <CellActions
+    mode={CellActionsMode.INLINE}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+    metadata={{
+      extraActionsIconType: 'boxesVertical',
+      extraActionsColor: 'text',
+    }}
+  >
+    {'Field value'}
+  </CellActions>
+);
+
 export const CellActionHoverPopoverDown = () => (
   <CellActions
     mode={CellActionsMode.HOVER_DOWN}

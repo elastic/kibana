@@ -10,24 +10,50 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { ExtraActionsButton } from './extra_actions_button';
+import type { CellActionExecutionContext } from '../types';
+
+const actionContext = {} as CellActionExecutionContext;
 
 describe('ExtraActionsButton', () => {
   it('renders', () => {
-    const { queryByTestId } = render(<ExtraActionsButton onClick={() => {}} showTooltip={false} />);
+    const { queryByTestId, container } = render(
+      <ExtraActionsButton onClick={() => {}} showTooltip={false} actionContext={actionContext} />
+    );
 
     expect(queryByTestId('showExtraActionsButton')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="boxesHorizontal"]')).toBeInTheDocument();
   });
 
   it('renders tooltip when showTooltip=true is received', () => {
-    const { container } = render(<ExtraActionsButton onClick={() => {}} showTooltip />);
+    const { container } = render(
+      <ExtraActionsButton onClick={() => {}} showTooltip actionContext={actionContext} />
+    );
     expect(container.querySelector('.euiToolTipAnchor')).not.toBeNull();
   });
 
   it('calls onClick when button is clicked', () => {
     const onClick = jest.fn();
-    const { getByTestId } = render(<ExtraActionsButton onClick={onClick} showTooltip />);
+    const { getByTestId } = render(
+      <ExtraActionsButton onClick={onClick} showTooltip actionContext={actionContext} />
+    );
 
     fireEvent.click(getByTestId('showExtraActionsButton'));
     expect(onClick).toHaveBeenCalled();
+  });
+
+  it('renders with correct icon when it is specified in the actionContext', () => {
+    const { queryByTestId, container } = render(
+      <ExtraActionsButton
+        onClick={() => {}}
+        showTooltip={false}
+        actionContext={{
+          ...actionContext,
+          metadata: { extraActionsIconType: 'boxesVertical', extraActionsColor: 'text' },
+        }}
+      />
+    );
+
+    expect(queryByTestId('showExtraActionsButton')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="boxesVertical"]')).toBeInTheDocument();
   });
 });

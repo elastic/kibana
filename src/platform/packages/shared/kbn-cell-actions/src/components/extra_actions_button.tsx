@@ -7,22 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, type EuiButtonIconProps } from '@elastic/eui';
 import React from 'react';
 import { SHOW_MORE_ACTIONS } from './translations';
+import type { CellActionExecutionContext } from '../types';
 
 interface ExtraActionsButtonProps {
   onClick: () => void;
   showTooltip: boolean;
+  actionContext: CellActionExecutionContext;
 }
 
-export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick, showTooltip }) =>
-  showTooltip ? (
+export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({
+  onClick,
+  showTooltip,
+  actionContext,
+}) => {
+  const iconType =
+    (actionContext?.metadata?.extraActionsIconType as EuiButtonIconProps['iconType']) ??
+    'boxesHorizontal';
+  const iconColor =
+    (actionContext?.metadata?.extraActionsColor as EuiButtonIconProps['color']) ?? 'primary';
+
+  return showTooltip ? (
     <EuiToolTip content={SHOW_MORE_ACTIONS}>
       <EuiButtonIcon
         data-test-subj="showExtraActionsButton"
         aria-label={SHOW_MORE_ACTIONS}
-        iconType="boxesHorizontal"
+        iconType={iconType}
+        color={iconColor}
         onClick={onClick}
       />
     </EuiToolTip>
@@ -30,7 +43,9 @@ export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick,
     <EuiButtonIcon
       data-test-subj="showExtraActionsButton"
       aria-label={SHOW_MORE_ACTIONS}
-      iconType="boxesHorizontal"
+      iconType={iconType ?? 'boxesHorizontal'}
+      color={iconColor}
       onClick={onClick}
     />
   );
+};

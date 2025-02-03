@@ -38,8 +38,14 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   const togglePopOver = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopOver = useCallback(() => setIsPopoverOpen(false), []);
   const button = useMemo(
-    () => <ExtraActionsButton onClick={togglePopOver} showTooltip={showActionTooltips} />,
-    [togglePopOver, showActionTooltips]
+    () => (
+      <ExtraActionsButton
+        onClick={togglePopOver}
+        showTooltip={showActionTooltips}
+        actionContext={actionContext}
+      />
+    ),
+    [togglePopOver, showActionTooltips, actionContext]
   );
 
   return (
