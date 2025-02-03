@@ -209,6 +209,7 @@ export function StreamDetailLifecycle({
         updateLifecycle={updateLifecycle}
         getIlmPolicies={getIlmPolicies}
         updateInProgress={updateInProgress}
+        ilmLocator={ilmLocator}
       />
 
       <EuiFlexItem
@@ -504,6 +505,7 @@ interface ModalOptions {
   getIlmPolicies: () => Promise<PolicyFromES[]>;
   definition: ReadStreamDefinition;
   updateInProgress: boolean;
+  ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }
 
 function EditLifecycleModal({
@@ -626,6 +628,7 @@ function IlmModal({
   updateLifecycle,
   updateInProgress,
   getIlmPolicies,
+  ilmLocator,
   definition: {
     stream: {
       ingest: { lifecycle: existingLifecycle },
@@ -637,6 +640,7 @@ function IlmModal({
     isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   useEffect(() => {
     const phasesDescription = (phases: Phases) => {
@@ -690,6 +694,9 @@ function IlmModal({
 
         setPolicies(policyOptions);
       })
+      .catch((error) => {
+        setErrorMessage('body' in error ? error.body.message : error.message);
+      })
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -700,7 +707,11 @@ function IlmModal({
       </EuiModalHeader>
 
       <EuiModalBody>
-        Select a pre-defined policy or visit Index Lifecycle Policies to create a new one.
+        Select a pre-defined policy or visit{' '}
+        <EuiLink target="_blank" href={ilmLocator?.getRedirectUrl({ page: 'policies_list' })}>
+          Index Lifecycle Policies
+        </EuiLink>{' '}
+        to create a new one.
         <EuiSpacer />
         <EuiPanel hasBorder hasShadow={false} paddingSize="s">
           <EuiSelectable
@@ -708,6 +719,7 @@ function IlmModal({
             singleSelection
             isLoading={isLoading}
             options={policies}
+            errorMessage={errorMessage}
             onChange={(options) => {
               setSelectedPolicy(options.find((option) => option.checked === 'on')?.label);
               setPolicies(options);
