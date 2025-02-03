@@ -152,7 +152,7 @@ export function LayerPanel(props: LayerPanelProps) {
   };
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
-  const datasourceId = datasourcePublicAPI?.datasourceId as unknown as 'formBased' | 'textBased';
+  const datasourceId = datasourcePublicAPI?.datasourceId! as 'formBased' | 'textBased';
   let layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   // try again with aliases
   if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
@@ -514,7 +514,7 @@ export function LayerPanel(props: LayerPanelProps) {
             onTextLangQueryChange={(q) => {
               setQuery(q);
             }}
-            // detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
+            detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
             hideTimeFilterInfo={hideTimeFilterInfo}
             errors={errors}
             warning={
