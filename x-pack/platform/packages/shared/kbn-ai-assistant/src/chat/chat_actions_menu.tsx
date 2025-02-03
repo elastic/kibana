@@ -119,7 +119,7 @@ export function ChatActionsMenu({
                 name: (
                   <div className="eui-textTruncate">
                     {i18n.translate('xpack.aiAssistant.chatHeader.actions.connector', {
-                      defaultMessage: 'Connector val',
+                      defaultMessage: 'Connector',
                     })}{' '}
                     <strong>
                       {
