@@ -21,11 +21,11 @@ jest.mock('../expression_wrapper', () => ({
 
 type GetValueType<Type> = Type extends PublishingSubject<infer X> ? X : never;
 
-function getDefaultProps({
+async function getDefaultProps({
   internalApiOverrides = undefined,
   apiOverrides = undefined,
 }: { internalApiOverrides?: Partial<LensInternalApi>; apiOverrides?: Partial<LensApi> } = {}) {
-  const internalApi = getLensInternalApiMock(internalApiOverrides);
+  const internalApi = await getLensInternalApiMock(internalApiOverrides);
   // provide a valid expression to render
   internalApi.updateExpressionParams(getValidExpressionParams());
   return {
@@ -36,8 +36,8 @@ function getDefaultProps({
 }
 
 describe('Lens Embeddable component', () => {
-  it('should not render the visualization if any error arises', () => {
-    const props = getDefaultProps({
+  it('should not render the visualization if any error arises', async () => {
+    const props = await getDefaultProps({
       internalApiOverrides: {
         expressionParams$: new BehaviorSubject<GetValueType<LensInternalApi['expressionParams$']>>(
           null
@@ -49,9 +49,9 @@ describe('Lens Embeddable component', () => {
     expect(screen.queryByTestId('lens-embeddable')).not.toBeInTheDocument();
   });
 
-  it('shoud not render the title if the visualization forces the title to be hidden', () => {
+  it('shoud not render the title if the visualization forces the title to be hidden', async () => {
     const getDisplayOptions = jest.fn(() => ({ noPanelTitle: true }));
-    const props = getDefaultProps({
+    const props = await getDefaultProps({
       internalApiOverrides: {
         getDisplayOptions,
       },

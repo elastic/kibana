@@ -13,9 +13,9 @@ import { initializeDashboardServices } from './initialize_dashboard_services';
 import { faker } from '@faker-js/faker';
 import { createEmptyLensState } from '../helper';
 
-function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>) {
+async function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>) {
   const services = makeEmbeddableServices();
-  const internalApiMock = getLensInternalApiMock();
+  const internalApiMock = await getLensInternalApiMock();
   const runtimeState = getLensRuntimeStateMock(runtimeOverrides);
   const stateManagementConfig = initializeStateManagement(runtimeState, internalApiMock);
   const titleManager = initializeTitleManager(runtimeState);
@@ -33,18 +33,18 @@ function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>)
 
 describe('Transformation API', () => {
   it("should not save to library if there's already a saveObjectId", async () => {
-    const api = setupDashboardServicesApi({ savedObjectId: faker.string.uuid() });
+    const api = await setupDashboardServicesApi({ savedObjectId: faker.string.uuid() });
     expect(await api.canLinkToLibrary()).toBe(false);
   });
 
   it("should save to library if there's no saveObjectId declared", async () => {
-    const api = setupDashboardServicesApi();
+    const api = await setupDashboardServicesApi();
     expect(await api.canLinkToLibrary()).toBe(true);
   });
 
   it('should not save to library for ES|QL chart types', async () => {
     // setup a state with an ES|QL query
-    const api = setupDashboardServicesApi(
+    const api = await setupDashboardServicesApi(
       createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
         esql: 'FROM index',
       })

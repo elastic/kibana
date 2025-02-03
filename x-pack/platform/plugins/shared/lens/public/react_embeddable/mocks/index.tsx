@@ -34,6 +34,7 @@ import {
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
+import { EditorFrameService } from '../../async_services';
 
 function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
@@ -206,6 +207,12 @@ export function makeEmbeddableServices(
           } as unknown as ReactEmbeddableDynamicActionsApi)
       ),
     },
+    getEditorFrameService: jest.fn(() =>
+      Promise.resolve({
+        loadVisualizations: jest.fn(),
+        loadDatasources: jest.fn(),
+      } as unknown as EditorFrameService)
+    ),
   };
 }
 
@@ -276,9 +283,9 @@ export function getValidExpressionParams(
   };
 }
 
-function getInternalApiWithFunctionWrappers() {
+async function getInternalApiWithFunctionWrappers() {
   const mockRuntimeState = getLensRuntimeStateMock();
-  const newApi = initializeInternalApi(
+  const newApi = await initializeInternalApi(
     mockRuntimeState,
     {},
     initializeTitleManager(mockRuntimeState),
@@ -295,9 +302,11 @@ function getInternalApiWithFunctionWrappers() {
   return newApi;
 }
 
-export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {
+export async function getLensInternalApiMock(
+  overrides: Partial<LensInternalApi> = {}
+): Promise<LensInternalApi> {
   return {
-    ...getInternalApiWithFunctionWrappers(),
+    ...(await getInternalApiWithFunctionWrappers()),
     ...overrides,
   };
 }

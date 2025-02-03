@@ -116,7 +116,7 @@ async function expectRerenderOnDataLoder(
     parentApi,
   };
   const getState = jest.fn(() => runtimeState);
-  const internalApi = getLensInternalApiMock();
+  const internalApi = await getLensInternalApiMock();
   const services = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
     visOverrides: { id: 'lnsXY' },
     dataOverrides: { id: 'form_based' },

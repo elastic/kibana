@@ -45,6 +45,7 @@ export function prepareInlineEditPanel(
     | 'theme'
     | 'uiSettings'
     | 'attributeService'
+    | 'getEditorFrameService'
   >,
   navigateToLensEditor?: (
     stateTransfer: EmbeddableStateTransfer,

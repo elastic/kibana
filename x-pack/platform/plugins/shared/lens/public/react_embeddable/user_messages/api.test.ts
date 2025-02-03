@@ -43,7 +43,7 @@ function createUserMessage(
   };
 }
 
-function buildUserMessagesApi(
+async function buildUserMessagesApi(
   metaInfo?: SharingSavedObjectProps,
   {
     visOverrides,
@@ -57,7 +57,7 @@ function buildUserMessagesApi(
   }
 ) {
   const api = getLensApiMock();
-  const internalApi = getLensInternalApiMock();
+  const internalApi = await getLensInternalApiMock();
   const services = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
     visOverrides,
     dataOverrides,
@@ -88,8 +88,8 @@ function buildUserMessagesApi(
 
 describe('User Messages API', () => {
   describe('resetMessages', () => {
-    it('should reset the runtime errors', () => {
-      const { userMessagesApi } = buildUserMessagesApi();
+    it('should reset the runtime errors', async () => {
+      const { userMessagesApi } = await buildUserMessagesApi();
       // add runtime messages
       const userMessageError = createUserMessage();
       const userMessageWarning = createUserMessage(['embeddableBadge'], 'warning');
@@ -102,8 +102,8 @@ describe('User Messages API', () => {
   });
 
   describe('updateValidationErrors', () => {
-    it('should basically work', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should basically work', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       internalApi.updateValidationMessages = jest.fn();
       const messages = Array(3).fill(createUserMessage());
       userMessagesApi.updateValidationErrors(messages);
@@ -112,8 +112,8 @@ describe('User Messages API', () => {
   });
 
   describe('updateMessages', () => {
-    it('should avoid to update duplicate messages', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should avoid to update duplicate messages', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       // start with these 3 messages
       const messages = Array(3)
         .fill(1)
@@ -130,8 +130,8 @@ describe('User Messages API', () => {
       expect(internalApi.updateMessages).toHaveBeenCalledTimes(2);
     });
 
-    it('should update the messages if there are new messages', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should update the messages if there are new messages', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       // start with these 3 messages
       const messages = Array(3).fill(createUserMessage());
       // update the messages
@@ -143,8 +143,8 @@ describe('User Messages API', () => {
       expect(internalApi.updateMessages).toHaveBeenCalledWith(messagesWithNewEntry);
     });
 
-    it('should update the messages when changing', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should update the messages when changing', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       // start with these 3 messages
       const messages = Array(3).fill(createUserMessage());
       // update the messages
@@ -158,16 +158,16 @@ describe('User Messages API', () => {
   });
 
   describe('updateBlockingErrors', () => {
-    it('should basically work with a regular Error', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should basically work with a regular Error', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       internalApi.updateBlockingError = jest.fn();
       const error = new Error('Something went wrong');
       userMessagesApi.updateBlockingErrors(error);
       expect(internalApi.updateBlockingError).toHaveBeenCalledWith(error);
     });
 
-    it('should work with user messages too', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should work with user messages too', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       internalApi.updateBlockingError = jest.fn();
       const userMessage = createUserMessage();
       userMessagesApi.updateBlockingErrors([userMessage]);
@@ -176,8 +176,8 @@ describe('User Messages API', () => {
       );
     });
 
-    it('should pick only the first error from a list of user messages', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should pick only the first error from a list of user messages', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       internalApi.updateBlockingError = jest.fn();
       const userMessage = createUserMessage();
       userMessagesApi.updateBlockingErrors([userMessage, createUserMessage(), createUserMessage()]);
@@ -186,8 +186,8 @@ describe('User Messages API', () => {
       );
     });
 
-    it('should clear out the error when an empty error is passed', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should clear out the error when an empty error is passed', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       internalApi.updateBlockingError = jest.fn();
       userMessagesApi.updateBlockingErrors(new Error(''));
       expect(internalApi.updateBlockingError).toHaveBeenCalledWith(undefined);
@@ -195,15 +195,15 @@ describe('User Messages API', () => {
   });
 
   describe('getUserMessages', () => {
-    it('should return empty list for no messages', () => {
-      const { userMessagesApi } = buildUserMessagesApi();
+    it('should return empty list for no messages', async () => {
+      const { userMessagesApi } = await buildUserMessagesApi();
       for (const locationId of ALL_LOCATIONS) {
         expect(userMessagesApi.getUserMessages(locationId)).toEqual([]);
       }
     });
 
-    it('should return basic validation for missing parts of the config', () => {
-      const { userMessagesApi, internalApi } = buildUserMessagesApi();
+    it('should return basic validation for missing parts of the config', async () => {
+      const { userMessagesApi, internalApi } = await buildUserMessagesApi();
       // no doc scenario
       internalApi.updateVisualizationContext({
         ...internalApi.getVisualizationContext(),
@@ -216,8 +216,8 @@ describe('User Messages API', () => {
       }
     });
 
-    it('should detect a URL conflict', () => {
-      const { userMessagesApi } = buildUserMessagesApi({ outcome: 'conflict' });
+    it('should detect a URL conflict', async () => {
+      const { userMessagesApi } = await buildUserMessagesApi({ outcome: 'conflict' });
 
       for (const locationId of ALL_LOCATIONS.filter((id) => id !== 'visualization')) {
         expect(userMessagesApi.getUserMessages(locationId)).toEqual([]);
@@ -227,8 +227,8 @@ describe('User Messages API', () => {
       );
     });
 
-    it('should filter messages based on severity criteria', () => {
-      const { userMessagesApi } = buildUserMessagesApi();
+    it('should filter messages based on severity criteria', async () => {
+      const { userMessagesApi } = await buildUserMessagesApi();
       const userMessageError = createUserMessage();
       const userMessageWarning = createUserMessage(['embeddableBadge'], 'warning');
       const userMessageInfo = createUserMessage(['embeddableBadge'], 'info');
@@ -244,8 +244,8 @@ describe('User Messages API', () => {
       );
     });
 
-    it('should filter messages based on locationId', () => {
-      const { userMessagesApi } = buildUserMessagesApi();
+    it('should filter messages based on locationId', async () => {
+      const { userMessagesApi } = await buildUserMessagesApi();
       const userMessageEmbeddable = createUserMessage(['embeddableBadge']);
       const userMessageVisualization = createUserMessage(['visualization']);
       const userMessageEmbeddableVisualization = createUserMessage([
@@ -262,10 +262,10 @@ describe('User Messages API', () => {
       expect(userMessagesApi.getUserMessages('visualizationOnEmbeddable').length).toEqual(0);
     });
 
-    it('should return deeper validation messages from both datasource and visualization', () => {
+    it('should return deeper validation messages from both datasource and visualization', async () => {
       const vizGetUserMessages = jest.fn();
       const datasourceGetUserMessages = jest.fn();
-      const { userMessagesApi } = buildUserMessagesApi(undefined, {
+      const { userMessagesApi } = await buildUserMessagesApi(undefined, {
         visOverrides: { id: 'lnsXY', getUserMessages: vizGetUserMessages },
         dataOverrides: { id: 'formBased', getUserMessages: datasourceGetUserMessages },
       });
@@ -277,8 +277,8 @@ describe('User Messages API', () => {
       expect(datasourceGetUserMessages).toHaveBeenCalled();
     });
 
-    it('should enable consumers to filter the final list of messages', () => {
-      const { userMessagesApi, onBeforeBadgesRender } = buildUserMessagesApi();
+    it('should enable consumers to filter the final list of messages', async () => {
+      const { userMessagesApi, onBeforeBadgesRender } = await buildUserMessagesApi();
       // it should not be called when no messages are avaialble
       userMessagesApi.getUserMessages('embeddableBadge');
       expect(onBeforeBadgesRender).not.toHaveBeenCalled();
@@ -291,8 +291,8 @@ describe('User Messages API', () => {
   });
 
   describe('addUserMessages', () => {
-    it('should basically work', () => {
-      const { userMessagesApi } = buildUserMessagesApi();
+    it('should basically work', async () => {
+      const { userMessagesApi } = await buildUserMessagesApi();
       expect(userMessagesApi.getUserMessages('embeddableBadge').length).toEqual(0);
       // now add a message, then check that it has been called
       const userMessageEmbeddable = createUserMessage();

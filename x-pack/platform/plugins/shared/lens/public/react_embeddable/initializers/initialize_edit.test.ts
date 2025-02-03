@@ -17,8 +17,8 @@ import { BehaviorSubject } from 'rxjs';
 import { ApplicationStart } from '@kbn/core/public';
 import { LensEmbeddableStartServices } from '../types';
 
-function createEditApi(servicesOverrides: Partial<LensEmbeddableStartServices> = {}) {
-  const internalApi = getLensInternalApiMock();
+async function createEditApi(servicesOverrides: Partial<LensEmbeddableStartServices> = {}) {
+  const internalApi = await getLensInternalApiMock();
   const runtimeState = getLensRuntimeStateMock();
   const api = getLensApiMock();
   const services = {
@@ -43,13 +43,13 @@ function createEditApi(servicesOverrides: Partial<LensEmbeddableStartServices> =
 }
 
 describe('edit features', () => {
-  it('should be editable if visualize library privileges allow it', () => {
-    const editApi = createEditApi();
+  it('should be editable if visualize library privileges allow it', async () => {
+    const editApi = await createEditApi();
     expect(editApi.api.isEditingEnabled()).toBe(true);
   });
 
-  it('should not be editable if visualize library privileges do not allow it', () => {
-    const editApi = createEditApi({
+  it('should not be editable if visualize library privileges do not allow it', async () => {
+    const editApi = await createEditApi({
       capabilities: {
         visualize_v2: {
           // cannot save

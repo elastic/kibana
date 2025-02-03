@@ -34,7 +34,7 @@ jest.mock('../../app_plugin/show_underlying_data', () => {
   };
 });
 
-function setupActionsApi(
+async function setupActionsApi(
   stateOverrides?: Partial<LensRuntimeState>,
   contextOverrides?: Omit<VisualizationContext, 'doc'>
 ) {
@@ -46,7 +46,7 @@ function setupActionsApi(
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
   const apiMock = getLensApiMock();
   // create the internal API and customize internal state
-  const internalApi = getLensInternalApiMock();
+  const internalApi = await getLensInternalApiMock();
   internalApi.updateVisualizationContext({
     ...contextOverrides,
     activeAttributes: runtimeState.attributes,
@@ -74,12 +74,12 @@ function setupActionsApi(
 describe('Dashboard actions', () => {
   describe('Drilldowns', () => {
     it('should expose drilldowns for DSL based visualization', async () => {
-      const api = setupActionsApi();
+      const api = await setupActionsApi();
       expect(api.enhancements).toBeDefined();
     });
 
     it('should not expose drilldowns for ES|QL chart types', async () => {
-      const api = setupActionsApi(
+      const api = await setupActionsApi(
         createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
           esql: 'FROM index',
         })
@@ -120,13 +120,13 @@ describe('Dashboard actions', () => {
       activeData: {},
     };
     it('should expose the "explore in discover" capability for DSL based visualization when compatible', async () => {
-      const api = setupActionsApi(undefined, visualizationContextMockOverrides);
+      const api = await setupActionsApi(undefined, visualizationContextMockOverrides);
       api.loadViewUnderlyingData();
       expect(api.canViewUnderlyingData$.getValue()).toBe(true);
     });
 
     it('should expose the "explore in discover" capability for ES|QL chart types', async () => {
-      const api = setupActionsApi(
+      const api = await setupActionsApi(
         createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
           esql: 'FROM index',
         }),
