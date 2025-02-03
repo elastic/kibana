@@ -26007,9 +26007,6 @@
         },
         "settings": {
           "index": {
-            "lifecycle": {
-              "name": "metricbeat"
-            },
             "mapping": {
               "total_fields": {
                 "limit": "10000"
