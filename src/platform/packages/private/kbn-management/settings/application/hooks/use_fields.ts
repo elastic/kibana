@@ -21,6 +21,7 @@ import { useSettings } from './use_settings';
  * React hook which retrieves settings and returns an observed collection of
  * {@link FieldDefinition} objects derived from those settings.
  * @param scope The {@link UiSettingsScope} of the settings to be retrieved.
+ * @param solution The {@link SolutionView} of the current active space.
  * @param query The {@link Query} to execute for filtering the fields.
  * @returns An array of {@link FieldDefinition} objects.
  */
