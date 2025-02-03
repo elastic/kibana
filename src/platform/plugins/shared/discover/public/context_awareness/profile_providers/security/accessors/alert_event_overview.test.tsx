@@ -58,7 +58,7 @@ describe('AlertEventOverviewAccessor', () => {
   });
 
   describe('data', () => {
-    test.only('should return Ecs description for different event types correctly', () => {
+    test('should return Ecs description for different event types correctly', () => {
       const localMockHit = {
         flattened: {
           ...mockRow,
