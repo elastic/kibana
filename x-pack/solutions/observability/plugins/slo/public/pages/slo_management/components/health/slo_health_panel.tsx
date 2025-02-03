@@ -159,7 +159,6 @@ export function SloHealthPanel() {
       },
     },
     {
-
       name: (
         <EuiToolTip content="Elapsted time since the latest summary update. If the time is too high or keep increasing, the rollup or summary transform should be checked.">
           <EuiFlexGroup alignItems="center" gutterSize="xs">

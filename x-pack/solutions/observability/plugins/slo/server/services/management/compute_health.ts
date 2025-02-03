@@ -45,6 +45,8 @@ interface SummaryAggResults {
   };
 }
 
+const BATCH_SIZE = 100;
+
 export class ComputeHealth {
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -57,7 +59,7 @@ export class ComputeHealth {
 
     const finder = await this.soClient.createPointInTimeFinder<StoredSLODefinition>({
       type: SO_SLO_TYPE,
-      perPage: 100,
+      perPage: BATCH_SIZE,
       namespaces: ['*'],
     });
     const createdAt = new Date();
@@ -292,7 +294,9 @@ export class ComputeHealth {
         },
         aggs: {
           bySlo: {
+            
             composite: {
+              size: BATCH_SIZE,
               sources: [
                 { sloId: { terms: { field: 'slo.id' } } },
                 { sloRevision: { terms: { field: 'slo.revision' } } },
