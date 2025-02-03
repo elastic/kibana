@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 1`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -92,7 +92,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 2`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -121,7 +121,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 3`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -213,7 +213,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 4`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -618,7 +618,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 5`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1023,7 +1023,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 6`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 6`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1383,7 +1383,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 7`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 7`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1425,7 +1425,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 8`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 8`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1470,7 +1470,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 9`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 9`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1513,7 +1513,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .bedrock 10`] = `
+exports[`Connector type config checks detect connector type changes for: .bedrock: connector_types 10`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1559,7 +1559,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .cases 1`] = `
+exports[`Connector type config checks detect connector type changes for: .cases: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1876,7 +1876,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .cases 2`] = `
+exports[`Connector type config checks detect connector type changes for: .cases: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1890,7 +1890,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .cases 3`] = `
+exports[`Connector type config checks detect connector type changes for: .cases: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1904,7 +1904,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .cases 4`] = `
+exports[`Connector type config checks detect connector type changes for: .cases: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1950,7 +1950,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .cases-webhook 1`] = `
+exports[`Connector type config checks detect connector type changes for: .cases-webhook: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -2615,7 +2615,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .cases-webhook 2`] = `
+exports[`Connector type config checks detect connector type changes for: .cases-webhook: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -2828,7 +2828,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .cases-webhook 3`] = `
+exports[`Connector type config checks detect connector type changes for: .cases-webhook: connector_types 3`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -3210,7 +3210,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 1`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3248,7 +3248,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 2`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3389,7 +3389,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 3`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3427,7 +3427,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 4`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 4`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -3441,7 +3441,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 5`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 5`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -3455,7 +3455,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 6`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 6`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -3469,7 +3469,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 7`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 7`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -3483,7 +3483,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 8`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 8`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3512,7 +3512,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 9`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 9`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3555,7 +3555,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .crowdstrike 10`] = `
+exports[`Connector type config checks detect connector type changes for: .crowdstrike: connector_types 10`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3601,7 +3601,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .d3security 1`] = `
+exports[`Connector type config checks detect connector type changes for: .d3security: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3679,7 +3679,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .d3security 2`] = `
+exports[`Connector type config checks detect connector type changes for: .d3security: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3757,7 +3757,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .d3security 3`] = `
+exports[`Connector type config checks detect connector type changes for: .d3security: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3786,7 +3786,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .d3security 4`] = `
+exports[`Connector type config checks detect connector type changes for: .d3security: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3815,7 +3815,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .d3security 5`] = `
+exports[`Connector type config checks detect connector type changes for: .d3security: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -3861,7 +3861,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .email 1`] = `
+exports[`Connector type config checks detect connector type changes for: .email: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -4140,7 +4140,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .email 2`] = `
+exports[`Connector type config checks detect connector type changes for: .email: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -4269,7 +4269,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .email 3`] = `
+exports[`Connector type config checks detect connector type changes for: .email: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -4469,7 +4469,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 1`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -4601,7 +4601,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 2`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -4630,7 +4630,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 3`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -4762,7 +4762,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 4`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5018,7 +5018,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 5`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5185,7 +5185,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 6`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 6`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5441,7 +5441,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 7`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 7`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5514,7 +5514,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 8`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 8`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5543,7 +5543,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .gemini 9`] = `
+exports[`Connector type config checks detect connector type changes for: .gemini: connector_types 9`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5589,7 +5589,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .index 1`] = `
+exports[`Connector type config checks detect connector type changes for: .index: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5664,7 +5664,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .index 2`] = `
+exports[`Connector type config checks detect connector type changes for: .index: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {},
@@ -5676,7 +5676,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .index 3`] = `
+exports[`Connector type config checks detect connector type changes for: .index: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5787,7 +5787,2476 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .jira 1`] = `
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 1`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "body": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "max_tokens": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "messages": Object {
+          "flags": Object {
+            "default": Array [],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "content": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "matches": Array [
+                    Object {
+                      "schema": Object {
+                        "flags": Object {
+                          "error": [Function],
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    Object {
+                      "schema": Object {
+                        "allow": Array [
+                          null,
+                        ],
+                        "flags": Object {
+                          "error": [Function],
+                          "only": true,
+                        },
+                        "type": "any",
+                      },
+                    },
+                  ],
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "type": "alternatives",
+                },
+                "name": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "role": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "tool_call_id": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "tool_calls": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "items": Array [
+                    Object {
+                      "flags": Object {
+                        "default": Object {
+                          "special": "deep",
+                        },
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "keys": Object {
+                        "function": Object {
+                          "flags": Object {
+                            "default": Object {
+                              "special": "deep",
+                            },
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "keys": Object {
+                            "arguments": Object {
+                              "flags": Object {
+                                "default": [Function],
+                                "error": [Function],
+                                "presence": "optional",
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-optional": true,
+                                },
+                              ],
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                            "name": Object {
+                              "flags": Object {
+                                "default": [Function],
+                                "error": [Function],
+                                "presence": "optional",
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-optional": true,
+                                },
+                              ],
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "id": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                      },
+                      "type": "object",
+                    },
+                  ],
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "type": "array",
+        },
+        "metadata": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-get-additional-properties": [Function],
+            },
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "key": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "value": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              },
+              "name": "entries",
+            },
+          ],
+          "type": "record",
+        },
+        "model": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "n": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "stop": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "matches": Array [
+                  Object {
+                    "schema": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "items": Array [
+                        Object {
+                          "flags": Object {
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                      ],
+                      "type": "array",
+                    },
+                  },
+                ],
+                "type": "alternatives",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "alternatives",
+        },
+        "temperature": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "tool_choice": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            },
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "default": Object {
+                    "special": "deep",
+                  },
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "keys": Object {
+                  "function": Object {
+                    "flags": Object {
+                      "default": Object {
+                        "special": "deep",
+                      },
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "keys": Object {
+                      "name": Object {
+                        "flags": Object {
+                          "error": [Function],
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                  },
+                  "type": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "alternatives",
+        },
+        "tools": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "function": Object {
+                  "flags": Object {
+                    "default": Object {
+                      "special": "deep",
+                    },
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "keys": Object {
+                    "description": Object {
+                      "flags": Object {
+                        "default": [Function],
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "metas": Array [
+                        Object {
+                          "x-oas-optional": true,
+                        },
+                      ],
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                    "name": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                    "parameters": Object {
+                      "flags": Object {
+                        "default": [Function],
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "metas": Array [
+                        Object {
+                          "x-oas-get-additional-properties": [Function],
+                        },
+                        Object {
+                          "x-oas-optional": true,
+                        },
+                      ],
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "key": Object {
+                              "flags": Object {
+                                "error": [Function],
+                              },
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "flags": Object {
+                                "error": [Function],
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-any-type": true,
+                                },
+                              ],
+                              "type": "any",
+                            },
+                          },
+                          "name": "entries",
+                        },
+                      ],
+                      "type": "record",
+                    },
+                  },
+                  "type": "object",
+                },
+                "type": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "array",
+        },
+        "top_p": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "user": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "signal": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "any",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 2`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "body": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "max_tokens": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "messages": Object {
+          "flags": Object {
+            "default": Array [],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "content": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "matches": Array [
+                    Object {
+                      "schema": Object {
+                        "flags": Object {
+                          "error": [Function],
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    Object {
+                      "schema": Object {
+                        "allow": Array [
+                          null,
+                        ],
+                        "flags": Object {
+                          "error": [Function],
+                          "only": true,
+                        },
+                        "type": "any",
+                      },
+                    },
+                  ],
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "type": "alternatives",
+                },
+                "name": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "role": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "tool_call_id": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "tool_calls": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "items": Array [
+                    Object {
+                      "flags": Object {
+                        "default": Object {
+                          "special": "deep",
+                        },
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "keys": Object {
+                        "function": Object {
+                          "flags": Object {
+                            "default": Object {
+                              "special": "deep",
+                            },
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "keys": Object {
+                            "arguments": Object {
+                              "flags": Object {
+                                "default": [Function],
+                                "error": [Function],
+                                "presence": "optional",
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-optional": true,
+                                },
+                              ],
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                            "name": Object {
+                              "flags": Object {
+                                "default": [Function],
+                                "error": [Function],
+                                "presence": "optional",
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-optional": true,
+                                },
+                              ],
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "id": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                      },
+                      "type": "object",
+                    },
+                  ],
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "type": "array",
+        },
+        "metadata": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-get-additional-properties": [Function],
+            },
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "key": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "value": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              },
+              "name": "entries",
+            },
+          ],
+          "type": "record",
+        },
+        "model": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "n": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "stop": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "matches": Array [
+                  Object {
+                    "schema": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "items": Array [
+                        Object {
+                          "flags": Object {
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                      ],
+                      "type": "array",
+                    },
+                  },
+                ],
+                "type": "alternatives",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "alternatives",
+        },
+        "temperature": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "tool_choice": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            },
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "default": Object {
+                    "special": "deep",
+                  },
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "keys": Object {
+                  "function": Object {
+                    "flags": Object {
+                      "default": Object {
+                        "special": "deep",
+                      },
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "keys": Object {
+                      "name": Object {
+                        "flags": Object {
+                          "error": [Function],
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                  },
+                  "type": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "alternatives",
+        },
+        "tools": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "function": Object {
+                  "flags": Object {
+                    "default": Object {
+                      "special": "deep",
+                    },
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "keys": Object {
+                    "description": Object {
+                      "flags": Object {
+                        "default": [Function],
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "metas": Array [
+                        Object {
+                          "x-oas-optional": true,
+                        },
+                      ],
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                    "name": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                    "parameters": Object {
+                      "flags": Object {
+                        "default": [Function],
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "metas": Array [
+                        Object {
+                          "x-oas-get-additional-properties": [Function],
+                        },
+                        Object {
+                          "x-oas-optional": true,
+                        },
+                      ],
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "key": Object {
+                              "flags": Object {
+                                "error": [Function],
+                              },
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "flags": Object {
+                                "error": [Function],
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-any-type": true,
+                                },
+                              ],
+                              "type": "any",
+                            },
+                          },
+                          "name": "entries",
+                        },
+                      ],
+                      "type": "record",
+                    },
+                  },
+                  "type": "object",
+                },
+                "type": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "array",
+        },
+        "top_p": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "user": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "signal": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "any",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 3`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "body": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "max_tokens": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "messages": Object {
+          "flags": Object {
+            "default": Array [],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "content": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "matches": Array [
+                    Object {
+                      "schema": Object {
+                        "flags": Object {
+                          "error": [Function],
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    Object {
+                      "schema": Object {
+                        "allow": Array [
+                          null,
+                        ],
+                        "flags": Object {
+                          "error": [Function],
+                          "only": true,
+                        },
+                        "type": "any",
+                      },
+                    },
+                  ],
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "type": "alternatives",
+                },
+                "name": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "role": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "tool_call_id": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "tool_calls": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "items": Array [
+                    Object {
+                      "flags": Object {
+                        "default": Object {
+                          "special": "deep",
+                        },
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "keys": Object {
+                        "function": Object {
+                          "flags": Object {
+                            "default": Object {
+                              "special": "deep",
+                            },
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "keys": Object {
+                            "arguments": Object {
+                              "flags": Object {
+                                "default": [Function],
+                                "error": [Function],
+                                "presence": "optional",
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-optional": true,
+                                },
+                              ],
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                            "name": Object {
+                              "flags": Object {
+                                "default": [Function],
+                                "error": [Function],
+                                "presence": "optional",
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-optional": true,
+                                },
+                              ],
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "id": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                      },
+                      "type": "object",
+                    },
+                  ],
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "type": "array",
+        },
+        "metadata": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-get-additional-properties": [Function],
+            },
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "key": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "value": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              },
+              "name": "entries",
+            },
+          ],
+          "type": "record",
+        },
+        "model": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "n": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "stop": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "matches": Array [
+                  Object {
+                    "schema": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  Object {
+                    "schema": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "items": Array [
+                        Object {
+                          "flags": Object {
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                      ],
+                      "type": "array",
+                    },
+                  },
+                ],
+                "type": "alternatives",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "alternatives",
+        },
+        "temperature": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "tool_choice": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            },
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "default": Object {
+                    "special": "deep",
+                  },
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "keys": Object {
+                  "function": Object {
+                    "flags": Object {
+                      "default": Object {
+                        "special": "deep",
+                      },
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "keys": Object {
+                      "name": Object {
+                        "flags": Object {
+                          "error": [Function],
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                  },
+                  "type": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "alternatives",
+        },
+        "tools": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "function": Object {
+                  "flags": Object {
+                    "default": Object {
+                      "special": "deep",
+                    },
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "keys": Object {
+                    "description": Object {
+                      "flags": Object {
+                        "default": [Function],
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "metas": Array [
+                        Object {
+                          "x-oas-optional": true,
+                        },
+                      ],
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                    "name": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
+                          },
+                          "name": "custom",
+                        },
+                      ],
+                      "type": "string",
+                    },
+                    "parameters": Object {
+                      "flags": Object {
+                        "default": [Function],
+                        "error": [Function],
+                        "presence": "optional",
+                      },
+                      "metas": Array [
+                        Object {
+                          "x-oas-get-additional-properties": [Function],
+                        },
+                        Object {
+                          "x-oas-optional": true,
+                        },
+                      ],
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "key": Object {
+                              "flags": Object {
+                                "error": [Function],
+                              },
+                              "rules": Array [
+                                Object {
+                                  "args": Object {
+                                    "method": [Function],
+                                  },
+                                  "name": "custom",
+                                },
+                              ],
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "flags": Object {
+                                "error": [Function],
+                              },
+                              "metas": Array [
+                                Object {
+                                  "x-oas-any-type": true,
+                                },
+                              ],
+                              "type": "any",
+                            },
+                          },
+                          "name": "entries",
+                        },
+                      ],
+                      "type": "record",
+                    },
+                  },
+                  "type": "object",
+                },
+                "type": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "array",
+        },
+        "top_p": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "number",
+        },
+        "user": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "signal": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "any",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 4`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "input": Object {
+      "flags": Object {
+        "default": Array [],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "type": "array",
+    },
+    "query": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 5`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "input": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 6`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "input": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "inputType": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 7`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "input": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 8`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "inferenceId": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "provider": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "providerConfig": Object {
+      "flags": Object {
+        "default": Object {},
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+    "taskType": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "taskTypeConfig": Object {
+      "flags": Object {
+        "default": Object {},
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 9`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "providerSecrets": Object {
+      "flags": Object {
+        "default": Object {},
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .inference: connector_types 10`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "subAction": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "subActionParams": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .jira: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5830,7 +8299,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .jira 2`] = `
+exports[`Connector type config checks detect connector type changes for: .jira: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5873,7 +8342,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .jira 3`] = `
+exports[`Connector type config checks detect connector type changes for: .jira: connector_types 3`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -6645,7 +9114,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 1`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -6685,7 +9154,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 2`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -8062,7 +10531,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 3`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -8127,7 +10596,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 4`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -8192,7 +10661,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 5`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -8206,7 +10675,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 6`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 6`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -9146,7 +11615,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 7`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 7`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -9286,7 +11755,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 8`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 8`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -9326,7 +11795,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 9`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint: connector_types 9`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -9372,7 +11841,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant 1`] = `
+exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -9386,7 +11855,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant 2`] = `
+exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -9400,7 +11869,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant 3`] = `
+exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -9673,7 +12142,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .opsgenie 1`] = `
+exports[`Connector type config checks detect connector type changes for: .opsgenie: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -10545,7 +13014,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .opsgenie 2`] = `
+exports[`Connector type config checks detect connector type changes for: .opsgenie: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -10664,7 +13133,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .opsgenie 3`] = `
+exports[`Connector type config checks detect connector type changes for: .opsgenie: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -10693,7 +13162,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .opsgenie 4`] = `
+exports[`Connector type config checks detect connector type changes for: .opsgenie: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -10722,7 +13191,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .opsgenie 5`] = `
+exports[`Connector type config checks detect connector type changes for: .opsgenie: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -10768,7 +13237,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .pagerduty 1`] = `
+exports[`Connector type config checks detect connector type changes for: .pagerduty: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -10821,7 +13290,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .pagerduty 2`] = `
+exports[`Connector type config checks detect connector type changes for: .pagerduty: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -10850,7 +13319,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .pagerduty 3`] = `
+exports[`Connector type config checks detect connector type changes for: .pagerduty: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11255,7 +13724,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 1`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11513,7 +13982,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 2`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11527,7 +13996,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 3`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11541,7 +14010,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 4`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11555,7 +14024,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 5`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11598,7 +14067,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 6`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient: connector_types 6`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11641,7 +14110,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 7`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient: connector_types 7`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11687,7 +14156,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 1`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11816,7 +14285,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 2`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11915,7 +14384,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 3`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11980,7 +14449,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 4`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": [Function],
@@ -12654,7 +15123,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 5`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -12689,7 +15158,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 6`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 6`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -12727,7 +15196,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 7`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 7`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -12767,7 +15236,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 8`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 8`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -18474,7 +20943,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 9`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 9`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -24181,7 +26650,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 10`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 10`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -29888,7 +32357,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 11`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 11`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -30345,7 +32814,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 12`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 12`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -30374,7 +32843,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 13`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 13`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -30403,7 +32872,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .sentinelone 14`] = `
+exports[`Connector type config checks detect connector type changes for: .sentinelone: connector_types 14`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -30449,7 +32918,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .server-log 1`] = `
+exports[`Connector type config checks detect connector type changes for: .server-log: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {},
@@ -30461,7 +32930,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .server-log 2`] = `
+exports[`Connector type config checks detect connector type changes for: .server-log: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {},
@@ -30473,7 +32942,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .server-log 3`] = `
+exports[`Connector type config checks detect connector type changes for: .server-log: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -30584,7 +33053,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow 1`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -30743,7 +33212,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow 2`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -30948,7 +33417,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow 3`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow: connector_types 3`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -31821,7 +34290,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow-itom 1`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow-itom: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -31972,7 +34441,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow-itom 2`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow-itom: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -32177,7 +34646,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow-itom 3`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow-itom: connector_types 3`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -32703,7 +35172,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow-sir 1`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow-sir: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -32862,7 +35331,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow-sir 2`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow-sir: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -33067,7 +35536,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .servicenow-sir 3`] = `
+exports[`Connector type config checks detect connector type changes for: .servicenow-sir: connector_types 3`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -34134,7 +36603,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .slack 1`] = `
+exports[`Connector type config checks detect connector type changes for: .slack: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {},
@@ -34146,7 +36615,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .slack 2`] = `
+exports[`Connector type config checks detect connector type changes for: .slack: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -34175,7 +36644,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .slack 3`] = `
+exports[`Connector type config checks detect connector type changes for: .slack: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -34215,7 +36684,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .slack_api 1`] = `
+exports[`Connector type config checks detect connector type changes for: .slack_api: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -34315,7 +36784,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .slack_api 2`] = `
+exports[`Connector type config checks detect connector type changes for: .slack_api: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -34355,7 +36824,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .slack_api 3`] = `
+exports[`Connector type config checks detect connector type changes for: .slack_api: connector_types 3`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -34692,7 +37161,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .swimlane 1`] = `
+exports[`Connector type config checks detect connector type changes for: .swimlane: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -35435,7 +37904,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .swimlane 2`] = `
+exports[`Connector type config checks detect connector type changes for: .swimlane: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -35464,7 +37933,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .swimlane 3`] = `
+exports[`Connector type config checks detect connector type changes for: .swimlane: connector_types 3`] = `
 Object {
   "flags": Object {
     "error": [Function],
@@ -35861,7 +38330,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .teams 1`] = `
+exports[`Connector type config checks detect connector type changes for: .teams: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {},
@@ -35873,7 +38342,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .teams 2`] = `
+exports[`Connector type config checks detect connector type changes for: .teams: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -35902,7 +38371,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .teams 3`] = `
+exports[`Connector type config checks detect connector type changes for: .teams: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -35942,7 +38411,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .thehive 1`] = `
+exports[`Connector type config checks detect connector type changes for: .thehive: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36214,7 +38683,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .thehive 2`] = `
+exports[`Connector type config checks detect connector type changes for: .thehive: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36410,7 +38879,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .thehive 3`] = `
+exports[`Connector type config checks detect connector type changes for: .thehive: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36477,7 +38946,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .thehive 4`] = `
+exports[`Connector type config checks detect connector type changes for: .thehive: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36506,7 +38975,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .thehive 5`] = `
+exports[`Connector type config checks detect connector type changes for: .thehive: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36552,7 +39021,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .tines 1`] = `
+exports[`Connector type config checks detect connector type changes for: .tines: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36573,7 +39042,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .tines 2`] = `
+exports[`Connector type config checks detect connector type changes for: .tines: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36692,7 +39161,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .tines 3`] = `
+exports[`Connector type config checks detect connector type changes for: .tines: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36811,7 +39280,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .tines 4`] = `
+exports[`Connector type config checks detect connector type changes for: .tines: connector_types 4`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36840,7 +39309,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .tines 5`] = `
+exports[`Connector type config checks detect connector type changes for: .tines: connector_types 5`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36883,7 +39352,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .tines 6`] = `
+exports[`Connector type config checks detect connector type changes for: .tines: connector_types 6`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36929,7 +39398,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .torq 1`] = `
+exports[`Connector type config checks detect connector type changes for: .torq: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36958,7 +39427,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .torq 2`] = `
+exports[`Connector type config checks detect connector type changes for: .torq: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -36987,7 +39456,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .torq 3`] = `
+exports[`Connector type config checks detect connector type changes for: .torq: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -37016,7 +39485,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .webhook 1`] = `
+exports[`Connector type config checks detect connector type changes for: .webhook: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -37319,7 +39788,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .webhook 2`] = `
+exports[`Connector type config checks detect connector type changes for: .webhook: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -37532,7 +40001,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .webhook 3`] = `
+exports[`Connector type config checks detect connector type changes for: .webhook: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -37568,7 +40037,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .xmatters 1`] = `
+exports[`Connector type config checks detect connector type changes for: .xmatters: connector_types 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -37629,7 +40098,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .xmatters 2`] = `
+exports[`Connector type config checks detect connector type changes for: .xmatters: connector_types 2`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -37758,7 +40227,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .xmatters 3`] = `
+exports[`Connector type config checks detect connector type changes for: .xmatters: connector_types 3`] = `
 Object {
   "flags": Object {
     "default": Object {
