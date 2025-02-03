@@ -167,7 +167,7 @@ export function bulkUpgradeAllPrebuiltRules({ getService }: FtrProviderContext):
         );
       });
 
-      it('DOES NOT upgrade in case of conflicts when <pick version> is MERGED', async () => {
+      it('UNABLE to upgrade in case of conflicts when <pick version> is MERGED', async () => {
         await setUpRuleUpgrade({
           assets: [
             {

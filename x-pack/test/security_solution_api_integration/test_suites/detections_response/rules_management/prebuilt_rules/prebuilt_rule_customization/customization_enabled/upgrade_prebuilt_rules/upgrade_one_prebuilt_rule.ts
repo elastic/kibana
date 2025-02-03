@@ -23,7 +23,7 @@ export function upgradeOnePrebuiltRule({ getService }: FtrProviderContext): void
     log,
   };
 
-  describe('one rule with historical version', () => {
+  describe('one rule with historical versions', () => {
     const RULE_TYPES = [
       'query',
       'saved_query',
@@ -216,7 +216,7 @@ export function upgradeOnePrebuiltRule({ getService }: FtrProviderContext): void
     }
 
     for (const pickVersion of ['BASE', 'CURRENT', 'MERGED'] as const) {
-      it(`DOES NOT upgrade rule when rule type changed and <pick version> is ${pickVersion}`, async () => {
+      it(`UNABLE to upgrade rule when rule type changed and <pick version> is ${pickVersion}`, async () => {
         await setUpRuleUpgrade({
           assets: {
             installed: {
@@ -262,7 +262,7 @@ export function upgradeOnePrebuiltRule({ getService }: FtrProviderContext): void
     }
 
     for (const ruleType of RULE_TYPES) {
-      it(`DOES NOT upgrade non-upgradable fields for ${ruleType} rule`, async () => {
+      it(`UNABLE to upgrade non-upgradable fields for ${ruleType} rule`, async () => {
         const NON_UPGRADABLE_FIELDS = {
           enabled: true,
           exceptions_list: [

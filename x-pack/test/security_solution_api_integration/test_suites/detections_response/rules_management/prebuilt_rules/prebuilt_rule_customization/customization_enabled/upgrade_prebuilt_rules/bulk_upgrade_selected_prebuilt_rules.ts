@@ -23,88 +23,141 @@ export function bulkUpgradeSelectedPrebuiltRules({ getService }: FtrProviderCont
 
   describe('selected rules', () => {
     describe('with historical versions', () => {
-      const TEST_DATA = [
-        {
-          globalPickVersion: 'BASE',
-          rulePickVersion: undefined,
-          expectedPickVersion: 'BASE',
-          expectedTags: ['tagA'],
-        },
-        {
-          globalPickVersion: 'CURRENT',
-          rulePickVersion: undefined,
-          expectedPickVersion: 'CURRENT',
-          expectedTags: ['tagB'],
-        },
-        {
-          globalPickVersion: 'TARGET',
-          rulePickVersion: undefined,
-          expectedPickVersion: 'TARGET',
-          expectedTags: ['tagC'],
-        },
-        {
-          globalPickVersion: undefined,
-          rulePickVersion: 'BASE',
-          expectedPickVersion: 'BASE',
-          expectedTags: ['tagA'],
-        },
-        {
-          globalPickVersion: undefined,
-          rulePickVersion: 'CURRENT',
-          expectedPickVersion: 'CURRENT',
-          expectedTags: ['tagB'],
-        },
-        {
-          globalPickVersion: undefined,
-          rulePickVersion: 'TARGET',
-          expectedPickVersion: 'TARGET',
-          expectedTags: ['tagC'],
-        },
-        {
-          globalPickVersion: 'BASE',
-          rulePickVersion: 'CURRENT',
-          expectedPickVersion: 'CURRENT',
-          expectedTags: ['tagB'],
-        },
-        {
-          globalPickVersion: 'BASE',
-          rulePickVersion: 'TARGET',
-          expectedPickVersion: 'TARGET',
-          expectedTags: ['tagC'],
-        },
-        {
-          globalPickVersion: 'CURRENT',
-          rulePickVersion: 'BASE',
-          expectedPickVersion: 'BASE',
-          expectedTags: ['tagA'],
-        },
-        {
-          globalPickVersion: 'CURRENT',
-          rulePickVersion: 'TARGET',
-          expectedPickVersion: 'TARGET',
-          expectedTags: ['tagC'],
-        },
-        {
-          globalPickVersion: 'TARGET',
-          rulePickVersion: 'BASE',
-          expectedPickVersion: 'BASE',
-          expectedTags: ['tagA'],
-        },
-        {
-          globalPickVersion: 'TARGET',
-          rulePickVersion: 'CURRENT',
-          expectedPickVersion: 'CURRENT',
-          expectedTags: ['tagB'],
-        },
-      ] as const;
+      describe('without customizations', () => {
+        beforeEach(async () => {
+          await setUpRuleUpgrade({
+            assets: [
+              {
+                installed: {
+                  type: 'query',
+                  name: 'Initial name',
+                  tags: ['tagA'],
+                  rule_id: 'rule_1',
+                  version: 1,
+                },
+                patch: {},
+                upgrade: {
+                  type: 'query',
+                  name: 'Updated name',
+                  tags: ['tagC'],
+                  rule_id: 'rule_1',
+                  version: 2,
+                },
+              },
+              {
+                installed: {
+                  type: 'query',
+                  name: 'Initial name',
+                  tags: ['tagA'],
+                  rule_id: 'rule_2',
+                  version: 1,
+                },
+                patch: {},
+                upgrade: {
+                  type: 'query',
+                  name: 'Updated name',
+                  tags: ['tagC'],
+                  rule_id: 'rule_2',
+                  version: 2,
+                },
+              },
+              // Rule rule_id: 'rule_3' isn't selected for upgrade
+              {
+                installed: {
+                  type: 'query',
+                  name: 'Initial name',
+                  tags: ['tagA'],
+                  rule_id: 'rule_3',
+                  version: 1,
+                },
+                patch: {
+                  rule_id: 'rule_3',
+                  name: 'Customized name',
+                  tags: ['tagB'],
+                },
+                upgrade: {
+                  type: 'query',
+                  name: 'Updated name',
+                  tags: ['tagC'],
+                  rule_id: 'rule_3',
+                  version: 2,
+                },
+              },
+            ],
+            deps,
+          });
+        });
 
-      for (const {
-        globalPickVersion,
-        rulePickVersion,
-        expectedPickVersion,
-        expectedTags,
-      } of TEST_DATA) {
-        it(`upgrades to ${expectedPickVersion} version when "globalPickVersion: ${globalPickVersion}" and "rulePickVersion: ${rulePickVersion}"`, async () => {
+        for (const { pickVersion, expectedName, expectedTags } of [
+          {
+            pickVersion: 'BASE',
+            expectedName: 'Initial name',
+            expectedTags: ['tagA'],
+          },
+          {
+            pickVersion: 'CURRENT',
+            expectedName: 'Initial name',
+            expectedTags: ['tagA'],
+          },
+          {
+            pickVersion: 'TARGET',
+            expectedName: 'Updated name',
+            expectedTags: ['tagC'],
+          },
+          {
+            pickVersion: 'MERGED',
+            expectedName: 'Updated name',
+            expectedTags: ['tagC'],
+          },
+        ] as const) {
+          it(`upgrades with <rulePickVersion> is MERGED`, async () => {
+            const response = await performUpgradePrebuiltRules(es, supertest, {
+              mode: ModeEnum.SPECIFIC_RULES,
+              rules: [
+                {
+                  rule_id: 'rule_1',
+                  revision: 0,
+                  version: 2,
+                  pick_version: pickVersion,
+                },
+                {
+                  rule_id: 'rule_2',
+                  revision: 0,
+                  version: 2,
+                  pick_version: pickVersion,
+                },
+              ],
+            });
+
+            expect(response.summary).toMatchObject({
+              total: 2,
+              succeeded: 2,
+              skipped: 0,
+              failed: 0,
+            });
+            expect(response.results.updated).toHaveLength(2);
+            expect(response.results.updated).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  rule_id: 'rule_1',
+                  version: 2,
+                  name: expectedName,
+                  tags: expectedTags,
+                }),
+                expect.objectContaining({
+                  rule_id: 'rule_2',
+                  version: 2,
+                  name: expectedName,
+                  tags: expectedTags,
+                }),
+              ])
+            );
+          });
+        }
+      });
+
+      describe('with customizations resulting in conflicts', () => {
+        beforeEach(async () => {
           await setUpRuleUpgrade({
             assets: [
               {
@@ -164,144 +217,140 @@ export function bulkUpgradeSelectedPrebuiltRules({ getService }: FtrProviderCont
             ],
             deps,
           });
+        });
 
+        const TEST_DATA = [
+          {
+            globalPickVersion: 'BASE',
+            rulePickVersion: undefined,
+            expectedTags: ['tagA'],
+          },
+          {
+            globalPickVersion: 'CURRENT',
+            rulePickVersion: undefined,
+            expectedTags: ['tagB'],
+          },
+          {
+            globalPickVersion: 'TARGET',
+            rulePickVersion: undefined,
+            expectedTags: ['tagC'],
+          },
+          {
+            globalPickVersion: undefined,
+            rulePickVersion: 'BASE',
+            expectedTags: ['tagA'],
+          },
+          {
+            globalPickVersion: undefined,
+            rulePickVersion: 'CURRENT',
+            expectedPickVersion: 'CURRENT',
+            expectedTags: ['tagB'],
+          },
+          {
+            globalPickVersion: undefined,
+            rulePickVersion: 'TARGET',
+            expectedTags: ['tagC'],
+          },
+          {
+            globalPickVersion: 'BASE',
+            rulePickVersion: 'CURRENT',
+            expectedTags: ['tagB'],
+          },
+          {
+            globalPickVersion: 'BASE',
+            rulePickVersion: 'TARGET',
+            expectedTags: ['tagC'],
+          },
+          {
+            globalPickVersion: 'CURRENT',
+            rulePickVersion: 'BASE',
+            expectedTags: ['tagA'],
+          },
+          {
+            globalPickVersion: 'CURRENT',
+            rulePickVersion: 'TARGET',
+            expectedTags: ['tagC'],
+          },
+          {
+            globalPickVersion: 'TARGET',
+            rulePickVersion: 'BASE',
+            expectedTags: ['tagA'],
+          },
+          {
+            globalPickVersion: 'TARGET',
+            rulePickVersion: 'CURRENT',
+            expectedTags: ['tagB'],
+          },
+        ] as const;
+
+        for (const { globalPickVersion, rulePickVersion, expectedTags } of TEST_DATA) {
+          it(`upgrades rule when "globalPickVersion is ${globalPickVersion}" and "rulePickVersion is ${rulePickVersion}"`, async () => {
+            const response = await performUpgradePrebuiltRules(es, supertest, {
+              mode: ModeEnum.SPECIFIC_RULES,
+              pick_version: globalPickVersion,
+              rules: [
+                {
+                  rule_id: 'rule_1',
+                  revision: 1,
+                  version: 2,
+                  pick_version: rulePickVersion,
+                },
+                {
+                  rule_id: 'rule_2',
+                  revision: 1,
+                  version: 2,
+                  pick_version: rulePickVersion,
+                },
+              ],
+            });
+
+            expect(response.summary).toMatchObject({
+              total: 2,
+              succeeded: 2,
+              skipped: 0,
+              failed: 0,
+            });
+            expect(response.results.updated).toHaveLength(2);
+            expect(response.results.updated).toEqual(
+              expect.arrayContaining([
+                expect.objectContaining({
+                  rule_id: 'rule_1',
+                  version: 2,
+                  tags: expectedTags,
+                }),
+                expect.objectContaining({
+                  rule_id: 'rule_2',
+                  version: 2,
+                  tags: expectedTags,
+                }),
+              ])
+            );
+          });
+        }
+
+        it(`UNABLE to upgrade rules when <rulePickVersion> is MERGED`, async () => {
           const response = await performUpgradePrebuiltRules(es, supertest, {
             mode: ModeEnum.SPECIFIC_RULES,
-            pick_version: globalPickVersion,
             rules: [
               {
                 rule_id: 'rule_1',
-                revision: 1,
+                revision: 0,
                 version: 2,
-                pick_version: rulePickVersion,
+                pick_version: 'MERGED',
               },
               {
                 rule_id: 'rule_2',
-                revision: 1,
+                revision: 0,
                 version: 2,
-                pick_version: rulePickVersion,
+                pick_version: 'MERGED',
               },
             ],
           });
 
           expect(response.summary).toMatchObject({
-            total: 2,
-            succeeded: 2,
-            skipped: 0,
-            failed: 0,
+            failed: 2,
           });
-          expect(response.results.updated).toHaveLength(2);
-          expect(response.results.updated).toEqual(
-            expect.arrayContaining([
-              expect.objectContaining({
-                rule_id: 'rule_1',
-                version: 2,
-                tags: expectedTags,
-              }),
-              expect.objectContaining({
-                rule_id: 'rule_2',
-                version: 2,
-                tags: expectedTags,
-              }),
-            ])
-          );
         });
-      }
-
-      it(`upgrades to TARGET when <rulePickVersion> is MERGED and there are no conflicts`, async () => {
-        await setUpRuleUpgrade({
-          assets: [
-            {
-              installed: {
-                type: 'query',
-                tags: ['tagA'],
-                rule_id: 'rule_1',
-                version: 1,
-              },
-              patch: {},
-              upgrade: {
-                type: 'query',
-                tags: ['tagC'],
-                rule_id: 'rule_1',
-                version: 2,
-              },
-            },
-            {
-              installed: {
-                type: 'query',
-                tags: ['tagA'],
-                rule_id: 'rule_2',
-                version: 1,
-              },
-              patch: {},
-              upgrade: {
-                type: 'query',
-                tags: ['tagC'],
-                rule_id: 'rule_2',
-                version: 2,
-              },
-            },
-            {
-              installed: {
-                type: 'query',
-                tags: ['tagA'],
-                rule_id: 'rule_3',
-                version: 1,
-              },
-              patch: {
-                rule_id: 'rule_3',
-                tags: ['tagB'],
-              },
-              upgrade: {
-                type: 'query',
-                tags: ['tagC'],
-                rule_id: 'rule_3',
-                version: 2,
-              },
-            },
-          ],
-          deps,
-        });
-
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: 'rule_1',
-              revision: 0,
-              version: 2,
-              pick_version: 'MERGED',
-            },
-            {
-              rule_id: 'rule_2',
-              revision: 0,
-              version: 2,
-              pick_version: 'MERGED',
-            },
-          ],
-        });
-
-        expect(response.summary).toMatchObject({
-          total: 2,
-          succeeded: 2,
-          skipped: 0,
-          failed: 0,
-        });
-        expect(response.results.updated).toHaveLength(2);
-        expect(response.results.updated).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              rule_id: 'rule_1',
-              version: 2,
-              tags: ['tagC'],
-            }),
-            expect.objectContaining({
-              rule_id: 'rule_2',
-              version: 2,
-              tags: ['tagC'],
-            }),
-          ])
-        );
       });
     });
 
@@ -385,7 +434,7 @@ export function bulkUpgradeSelectedPrebuiltRules({ getService }: FtrProviderCont
       }
 
       for (const pickVersion of ['BASE', 'MERGED'] as const) {
-        it(`UNABLE to upgrade to ${pickVersion} version`, async () => {
+        it(`UNABLE to upgrade rules when <rulePickVersion> is ${pickVersion}`, async () => {
           await setUpRuleUpgrade({
             assets: [
               {
