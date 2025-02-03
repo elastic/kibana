@@ -8,10 +8,9 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+import { SearchEmptyPrompt, DecorativeHorizontalStepper, EuiIconWeb } from '@kbn/search-shared-ui';
 
 import { BACK_BUTTON_LABEL, COMING_SOON_LABEL } from '../../../shared/constants';
-import CrawlerIcon from '../../../shared/icons/web_crawlers.svg';
 import { KibanaLogic } from '../../../shared/kibana';
 import { CRAWLERS_PATH } from '../../routes';
 
@@ -22,7 +21,7 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
         label: BACK_BUTTON_LABEL,
         onClickBack: () => KibanaLogic.values.navigateToUrl(CRAWLERS_PATH),
       }}
-      icon={CrawlerIcon}
+      icon={EuiIconWeb}
       title={i18n.translate('xpack.enterpriseSearch.elasticManagedWebCrawlerEmpty.title', {
         defaultMessage: 'Elastic managed web crawlers',
       })}
@@ -86,7 +85,7 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type={CrawlerIcon} />
+                          <EuiIcon color="primary" size="l" type={EuiIconWeb} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiIcon color="primary" size="l" type="logoElastic" />

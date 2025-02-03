@@ -333,6 +333,18 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: Gaps range start
+          in: query
+          name: gaps_range_start
+          required: false
+          schema:
+            type: string
+        - description: Gaps range end
+          in: query
+          name: gaps_range_end
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -1025,6 +1037,7 @@ components:
     BulkActionsDryRunErrCode:
       enum:
         - IMMUTABLE
+        - PREBUILT_CUSTOMIZATION_LICENSE
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
@@ -4282,6 +4295,19 @@ components:
           description: Duration in seconds of execution gap
           minimum: 0
           type: integer
+        gap_range:
+          description: Range of the execution gap
+          type: object
+          properties:
+            gte:
+              description: Start date of the execution gap
+              type: string
+            lte:
+              description: End date of the execution gap
+              type: string
+          required:
+            - gte
+            - lte
         total_enrichment_duration_ms:
           description: >-
             Total time spent enriching documents during current rule execution
@@ -4418,8 +4444,8 @@ components:
           type: integer
         request:
           $ref: '#/components/schemas/NonEmptyString'
-      required:
-        - request
+        request_type:
+          $ref: '#/components/schemas/NonEmptyString'
     RulePreviewLogs:
       type: object
       properties:

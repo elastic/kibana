@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
@@ -40,6 +41,12 @@ const CustomEuiCallOut = styled(EuiCallOut)`
   & .euiButtonIcon {
     margin-top: 5px; /* Lower the close button */
   }
+`;
+
+const ScrollableContainer = styled(EuiPanel)`
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 0;
 `;
 
 export const WorkflowInsightsResults = ({
@@ -102,7 +109,11 @@ export const WorkflowInsightsResults = ({
   const insights = useMemo(() => {
     if (showEmptyResultsCallout) {
       return (
-        <CustomEuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
+        <CustomEuiCallOut
+          onDismiss={hideEmptyStateCallout}
+          color={'success'}
+          data-test-subj={'workflowInsightsEmptyResultsCallout'}
+        >
           {WORKFLOW_INSIGHTS.issues.emptyResults}
         </CustomEuiCallOut>
       );
@@ -113,7 +124,13 @@ export const WorkflowInsightsResults = ({
             WORKFLOW_INSIGHTS.issues.remediationButton;
 
           return (
-            <EuiPanel paddingSize="m" hasShadow={false} hasBorder key={index}>
+            <EuiPanel
+              paddingSize="m"
+              hasShadow={false}
+              hasBorder
+              key={index}
+              data-test-subj={`workflowInsightsResult-${index}`}
+            >
               <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="warning" size="l" color="warning" />
@@ -127,7 +144,7 @@ export const WorkflowInsightsResults = ({
                     <EuiText size={'s'} color={'subdued'}>
                       {insight.message}
                     </EuiText>
-                    <EuiText size={'xs'} color={'subdued'}>
+                    <EuiText size={'xs'} color={'subdued'} css={'word-break: break-word'}>
                       {item.entries[0].type === 'match' &&
                         item.entries[0].field === 'process.executable.caseless' &&
                         item.entries[0].value}
@@ -141,6 +158,7 @@ export const WorkflowInsightsResults = ({
                     position={'top'}
                   >
                     <EuiButtonIcon
+                      data-test-subj={`workflowInsightsResult-${index}-remediation`}
                       isDisabled={!canWriteTrustedApplications}
                       aria-label={ariaLabel}
                       iconType="popout"
@@ -163,17 +181,20 @@ export const WorkflowInsightsResults = ({
     return null;
   }, [canWriteTrustedApplications, openArtifactCreationPage, results, showEmptyResultsCallout]);
 
+  const showInsights = !!(showEmptyResultsCallout || results?.length);
+
   return (
     <>
-      {showEmptyResultsCallout || results?.length ? (
+      {showInsights && (
         <>
           <EuiText size={'s'}>
             <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
           </EuiText>
           <EuiSpacer size={'s'} />
         </>
-      ) : null}
-      {insights}
+      )}
+      <ScrollableContainer hasBorder>{insights}</ScrollableContainer>
+      {showInsights && <EuiHorizontalRule />}
     </>
   );
 };

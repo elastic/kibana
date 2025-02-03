@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash/fp';
 
 import { getAlertsContextPrompt } from '../../generate/helpers/get_alerts_context_prompt';
-import { getContinuePrompt } from '../get_continue_prompt';
 
 /**
  * Returns the the initial query, or the initial query combined with a
@@ -18,11 +17,13 @@ export const getCombinedAttackDiscoveryPrompt = ({
   anonymizedAlerts,
   attackDiscoveryPrompt,
   combinedMaybePartialResults,
+  continuePrompt,
 }: {
   anonymizedAlerts: string[];
   attackDiscoveryPrompt: string;
   /** combined results that may contain incomplete JSON */
   combinedMaybePartialResults: string;
+  continuePrompt: string;
 }): string => {
   const alertsContextPrompt = getAlertsContextPrompt({
     anonymizedAlerts,
@@ -33,7 +34,7 @@ export const getCombinedAttackDiscoveryPrompt = ({
     ? alertsContextPrompt // no partial results yet
     : `${alertsContextPrompt}
 
-${getContinuePrompt()}
+${continuePrompt}
 
 """
 ${combinedMaybePartialResults}

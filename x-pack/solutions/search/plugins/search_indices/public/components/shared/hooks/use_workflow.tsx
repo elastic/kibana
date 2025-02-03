@@ -40,13 +40,25 @@ const workflowIdToIngestDataExamples = (type: WorkflowId) => {
   }
 };
 
+const WORKFLOW_LOCALSTORAGE_KEY = 'search_onboarding_workflow';
+
+function isWorkflowId(value: string | null): value is WorkflowId {
+  return value === 'default' || value === 'vector' || value === 'semantic';
+}
+
 export const useWorkflow = () => {
   // TODO: in the future this will be dynamic based on the onboarding token
   // or project sub-type
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>('default');
+  const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(
+    isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : 'default'
+  );
   return {
     selectedWorkflowId,
-    setSelectedWorkflowId,
+    setSelectedWorkflowId: (workflowId: WorkflowId) => {
+      localStorage.setItem(WORKFLOW_LOCALSTORAGE_KEY, workflowId);
+      setSelectedWorkflowId(workflowId);
+    },
     workflow: workflows.find((workflow) => workflow.id === selectedWorkflowId),
     createIndexExamples: workflowIdToCreateIndexExamples(selectedWorkflowId),
     ingestExamples: workflowIdToIngestDataExamples(selectedWorkflowId),
