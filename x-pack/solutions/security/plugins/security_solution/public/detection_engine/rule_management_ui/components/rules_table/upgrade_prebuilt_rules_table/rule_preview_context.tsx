@@ -8,6 +8,7 @@
 import { invariant } from '@formatjs/intl-utils';
 import useSet from 'react-use/lib/useSet';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 
 export interface RulePreviewContextType {
   /**
@@ -35,10 +36,13 @@ interface RulePreviewContextProviderProps {
 
 export function RulePreviewContextProvider({ children, ruleId }: RulePreviewContextProviderProps) {
   const [editedFields, { add, remove, reset }] = useSet<string>();
+  const prevRuleId = usePrevious(ruleId);
 
   useEffect(() => {
-    reset();
-  }, [reset, ruleId]);
+    if (ruleId !== prevRuleId) {
+      reset();
+    }
+  }, [reset, ruleId, prevRuleId]);
 
   const isEditingRule = editedFields.size > 0;
 
