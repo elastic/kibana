@@ -13,6 +13,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
 import {
   HostPanelKey,
@@ -70,10 +71,17 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
   const openDynamicFlyout = ({ entity, scopeId, contextId }: InventoryFlyoutSelectorProps) => {
     const entityFlyoutParams = getFlyoutParamsByEntity(entity, scopeId, contextId);
 
+    // User, Host, and Service entity flyouts rely on entity name to fetch required data
     if (entity.type !== 'universal' && !entity.name) {
       notifications.toasts.addDanger({
-        title: 'Missing Entity Name',
-        text: 'Entity name is required for User, Host, and Service entities',
+        title: i18n.translate(
+          'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',
+          { defaultMessage: 'Missing Entity Name' }
+        ),
+        text: i18n.translate(
+          'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameText',
+          { defaultMessage: 'Entity name is required for User, Host, and Service entities' }
+        ),
       });
 
       uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_ERROR);
