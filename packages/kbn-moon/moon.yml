@@ -25,3 +25,5 @@ fileGroups:
 tasks:
   jest:
     script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

@@ -9,11 +9,10 @@
     "common/**/*",
     "public/**/*",
     "scripts/**/*",
-    "scripts/**/**.json",
     "server/**/*",
     "../../../../../typings/**/*",
     // ECS and Osquery schema files
-    "public/common/schemas/*/**.json"
+    "public/common/schemas/*/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
