@@ -12,7 +12,7 @@ import { times } from 'lodash';
 import { TaskCost, TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
-import { injectTask, setupTestServers, retry } from './lib';
+import { injectTaskBulk, setupTestServers, retry } from './lib';
 import { CreateMonitoringStatsOpts } from '../monitoring';
 import { filter, map } from 'rxjs';
 import { isTaskManagerWorkerUtilizationStatEvent } from '../task_events';
@@ -173,8 +173,9 @@ describe('capacity based claiming', () => {
 
     const now = new Date();
     const runAt = new Date(now.valueOf() + 6000);
+    const tasks = [];
     for (const id of ids) {
-      await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+      tasks.push({
         id,
         taskType: '_normalCostType',
         params: {},
@@ -191,6 +192,8 @@ describe('capacity based claiming', () => {
       });
       taskIdsToRemove.push(id);
     }
+
+    await injectTaskBulk(kibanaServer.coreStart.elasticsearch.client.asInternalUser, tasks);
 
     await retry(async () => {
       expect(mockTaskTypeNormalCostRunFn).toHaveBeenCalledTimes(10);
