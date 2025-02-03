@@ -21,12 +21,14 @@ import {
 } from 'rxjs';
 import * as arrow from 'apache-arrow';
 import { chunk } from 'lodash';
+
 import type { Readable } from 'stream';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Environment } from '../../../../common/environment_rt';
+import { PARENT_ID, SPAN_TYPE } from '../../../../common/es_fields/apm';
 import {
   AGENT_NAME,
-  PARENT_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -52,7 +54,10 @@ import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 type QueryResult = {
-  'event.id': string;
+  'span.id': string;
+  'processor.event': ProcessorEvent;
+  'transaction.id': string;
+  'transaction.parent.id'?: string;
   [PARENT_ID]?: string;
 } & ConnectionNode;
 
@@ -142,7 +147,7 @@ export const useServiceMap = ({
   useEffect(() => {
     subscriptions.current.unsubscribe();
 
-    if (traceIdsRequest.status === FETCH_STATUS.SUCCESS) {
+    if (traceIdsRequest.status === FETCH_STATUS.SUCCESS && traceIdsRequest.data?.traceIds) {
       const traceIdChunks = chunk(traceIdsRequest.data?.traceIds ?? [], 50);
       setData({
         data: {
@@ -208,13 +213,23 @@ function streamIntoObservable(readable?: Readable): Observable<Uint8Array> {
   });
 }
 
+const isVector = (value: any): value is arrow.Vector => {
+  return value instanceof arrow.Vector;
+};
+
 function processTable(table: arrow.RecordBatch): QueryResult[] {
   const response: QueryResult[] = [];
 
   for (let i = 0; i < table.numRows; i++) {
     const row = table.schema.fields.reduce((acc, field) => {
-      const child = table.getChild(field.name)!;
-      acc[field.name as string] = child.get(i);
+      const child = table.getChild(field.name);
+      if (!child) {
+        return acc;
+      }
+      const value = child.get(i);
+
+      acc[field.name as string] = value;
+
       return acc;
     }, {} as QueryResult);
 
@@ -308,7 +323,7 @@ function getEventTrees({
 
   for (const entry of entryIds) {
     const treeRoot = eventsById.get(entry);
-    if (!treeRoot) {
+    if (!treeRoot || !childrenByParentId.get(entry)) {
       continue;
     }
 
@@ -327,7 +342,9 @@ function getEventTrees({
       }
     }
 
-    eventTrees.set(treeRoot.id, treeRoot);
+    if (treeRoot.children.length > 0) {
+      eventTrees.set(treeRoot.id, treeRoot);
+    }
   }
 
   return Array.from(eventTrees.values());
@@ -446,11 +463,13 @@ const processTree = ({
 
 function getEventsById({ response }: { response: QueryResult[] }) {
   return response.reduce((acc, hit) => {
-    const eventId = hit['event.id'];
+    const transactionId = hit['transaction.id'];
+    const transactionParentId = hit['transaction.parent.id'];
+    const spanId = hit[SPAN_ID];
 
-    if (!acc.has(eventId)) {
-      acc.set(eventId, {
-        id: eventId,
+    if (!acc.has(spanId)) {
+      acc.set(spanId, {
+        id: spanId,
         parentId: hit[PARENT_ID],
         [AGENT_NAME]: hit[AGENT_NAME],
         [SERVICE_NAME]: hit[SERVICE_NAME],
@@ -458,9 +477,22 @@ function getEventsById({ response }: { response: QueryResult[] }) {
         [SPAN_DESTINATION_SERVICE_RESOURCE]: hit[SPAN_DESTINATION_SERVICE_RESOURCE],
         [SPAN_ID]: hit[SPAN_ID],
         [SPAN_SUBTYPE]: hit[SPAN_SUBTYPE],
+        [SPAN_TYPE]: hit[SPAN_TYPE],
         children: [],
       });
     }
+
+    if (!acc.has(transactionId)) {
+      acc.set(transactionId, {
+        id: transactionId,
+        parentId: transactionParentId,
+        [AGENT_NAME]: hit[AGENT_NAME],
+        [SERVICE_NAME]: hit[SERVICE_NAME],
+        [SERVICE_ENVIRONMENT]: hit[SERVICE_ENVIRONMENT],
+        children: [],
+      });
+    }
+
     return acc;
   }, new Map<string, NodeItem>());
 }
