@@ -81,6 +81,39 @@ describe('Settings application', () => {
     }
   });
 
+  if (
+    ("doesn't render settings that are not applicable in the current solution",
+    async () => {
+      const services: SettingsApplicationServices = createSettingsApplicationServicesMock(
+        undefined,
+        'es'
+      );
+      services.spaces.getActiveSpace.mockReturnValue(
+        Promise.resolve({
+          solution: 'security',
+        })
+      );
+
+      const { getByTestId } = render(wrap(<SettingsApplication />, services));
+
+      // The empty state should be rendered since all settings are for es solution and current solution is security
+      expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE)).toBeInTheDocument();
+
+      // Changing current solution to es
+      services.spaces.getActiveSpace.mockReturnValue(
+        Promise.resolve({
+          solution: 'es',
+        })
+      );
+
+      // The form should be rendered
+      expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE)).not.toBeInTheDocument();
+      for (const category of spaceCategories) {
+        expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
+      }
+    })
+  );
+
   describe('Tabs', () => {
     const spaceSettingsTestSubj = `${DATA_TEST_SUBJ_PREFIX_TAB}-${SPACE_SETTINGS_TAB_ID}`;
     const globalSettingsTestSubj = `${DATA_TEST_SUBJ_PREFIX_TAB}-${GLOBAL_SETTINGS_TAB_ID}`;

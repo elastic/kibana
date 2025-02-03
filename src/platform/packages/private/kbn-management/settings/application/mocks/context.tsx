@@ -25,6 +25,7 @@ import {
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { SolutionView } from '@kbn/spaces-plugin/common';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
 
 const createRootMock = () => {
@@ -43,11 +44,12 @@ const createRootMock = () => {
 };
 
 export const createSettingsApplicationServicesMock = (
-  hasGlobalSettings?: boolean
+  hasGlobalSettings?: boolean,
+  solution?: SolutionView
 ): SettingsApplicationServices => ({
   ...createFormServicesMock(),
   getAllowlistedSettings: (scope: UiSettingsScope) =>
-    scope === 'namespace' ? getSettingsMock() : hasGlobalSettings ? getGlobalSettingsMock() : {},
+    scope === 'namespace' ? getSettingsMock(undefined, undefined, solution) : hasGlobalSettings ? getGlobalSettingsMock(undefined, undefined, solution) : {},
   getSections: () => [],
   getCapabilities: getSettingsCapabilitiesMock,
   setBadge: jest.fn(),
