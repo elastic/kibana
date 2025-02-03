@@ -358,7 +358,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessIntegration } = useAgentless();
+  const { isAgentlessIntegration, isAgentlessEnabled } = useAgentless();
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -471,7 +471,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
       headingElement: 'h2',
     },
-    ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS
+    ...(!isAgentlessEnabled ||
+    (isAgentlessEnabled && selectedSetupTechnology !== SetupTechnology.AGENTLESS)
       ? [
           {
             title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
