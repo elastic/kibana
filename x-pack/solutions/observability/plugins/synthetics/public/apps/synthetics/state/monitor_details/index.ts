@@ -67,7 +67,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(getMonitorLastRunAction.success, (state, action) => {
       state.lastRun.loading = false;
       state.lastRun.loaded = true;
-      state.lastRun.data = action.payload.pings[0];
+      state.lastRun.data = action.payload?.ping;
     })
     .addCase(getMonitorLastRunAction.fail, (state, action) => {
       state.lastRun.loading = false;

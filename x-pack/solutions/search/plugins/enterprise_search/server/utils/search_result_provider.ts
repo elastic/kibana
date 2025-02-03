@@ -9,7 +9,6 @@ import { takeUntil, of, map } from 'rxjs';
 
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
-
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
@@ -55,7 +54,7 @@ export function toSearchResult({
     : null;
   const newUrl = isCrawler
     ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`
-    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
+    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
 
   return {
     icon: iconPath || 'logoEnterpriseSearch',
@@ -90,9 +89,9 @@ export function getSearchResultProvider(
           if (!caps.catalogue.enterpriseSearch) {
             return [];
           }
-
+          const selfManagedConnectors = connectorTypes.filter((connector) => !connector.isNative);
           const services: ServiceDefinition[] = [
-            ...(config.hasConnectors ? connectorTypes : []),
+            ...(config.hasConnectors ? selfManagedConnectors : []),
 
             {
               keywords: ['esre', 'search'],
@@ -105,7 +104,7 @@ export function getSearchResultProvider(
           ];
           const result = services
             .map((service) => {
-              const { iconPath, isNative, keywords, name, serviceType } = service;
+              const { isNative, iconPath, name, keywords, serviceType } = service;
               const url = 'url' in service ? service.url : undefined;
               let score = 0;
               const searchTerm = (term || '').toLowerCase();

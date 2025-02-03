@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import {
   IngestStreamGetResponse,
   InheritedFieldDefinition,
@@ -40,16 +39,24 @@ export async function readStream({
       assetType: 'dashboard',
     }),
     streamsClient.getAncestors(name),
-    streamsClient.getDataStream(name),
+    streamsClient.getDataStream(name).catch((e) => {
+      if (e.statusCode === 404) {
+        return null;
+      }
+      throw e;
+    }),
   ]);
 
   if (isUnwiredStreamDefinition(streamDefinition)) {
     return {
-      stream: omit(streamDefinition, 'name'),
-      elasticsearch_assets: await getUnmanagedElasticsearchAssets({
-        dataStream,
-        scopedClusterClient,
-      }),
+      stream: streamDefinition,
+      elasticsearch_assets: dataStream
+        ? await getUnmanagedElasticsearchAssets({
+            dataStream,
+            scopedClusterClient,
+          })
+        : [],
+      data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       inherited_fields: {},
@@ -57,7 +64,7 @@ export async function readStream({
   }
 
   const body: WiredStreamGetResponse = {
-    stream: omit(streamDefinition, 'name'),
+    stream: streamDefinition,
     dashboards,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: ancestors.reduce((acc, def) => {
