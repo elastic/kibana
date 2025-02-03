@@ -204,7 +204,7 @@ describe('setPassword', () => {
   it('sets password for provided user', async () => {
     await nativeRealm.setPassword('kibana_system', 'foo');
     expect(mockClient.security.changePassword).toHaveBeenCalledWith({
-      body: { password: 'foo' },
+      password: 'foo',
       refresh: 'wait_for',
       username: 'kibana_system',
     });

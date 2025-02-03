@@ -80,7 +80,7 @@ export class SearchCursorPit extends SearchCursor {
 
     const searchParamsPit = {
       params: {
-        body: searchBody,
+        ...searchBody,
         max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };

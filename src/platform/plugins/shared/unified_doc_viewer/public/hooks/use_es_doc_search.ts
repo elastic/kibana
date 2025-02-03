@@ -76,7 +76,7 @@ export function useEsDocSearch({
         data.search.search({
           params: {
             index: dataView.getIndexPattern(),
-            body: buildSearchBody(id, index, dataView)?.body,
+            ...buildSearchBody(id, index, dataView),
           },
         })
       );

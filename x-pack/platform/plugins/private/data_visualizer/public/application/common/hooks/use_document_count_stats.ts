@@ -111,7 +111,7 @@ export const getDocumentCountStatsRequest = (
   };
   return {
     index,
-    body: searchBody,
+    ...searchBody,
   };
 };
 

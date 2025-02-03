@@ -166,7 +166,7 @@ export async function createDefaultSpace({ index, client }: { index: string; cli
       index,
       id: 'space:default',
       refresh: 'wait_for',
-      body: {
+      document: {
         type: 'space',
         updated_at: new Date().toISOString(),
         space: {

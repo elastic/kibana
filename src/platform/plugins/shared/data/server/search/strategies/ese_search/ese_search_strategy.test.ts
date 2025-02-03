@@ -270,7 +270,7 @@ describe('ES search strategy', () => {
       it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'foo-*', body: {} };
+        const params = { index: 'foo-*' };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
@@ -288,7 +288,7 @@ describe('ES search strategy', () => {
       it('calls the rollup API if the index is a rollup type', async () => {
         mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
 
-        const params = { index: 'foo-程', body: {} };
+        const params = { index: 'foo-程' };
         const esSearch = await enhancedEsSearchStrategyProvider(
           mockLegacyConfig$,
           mockSearchConfig,
