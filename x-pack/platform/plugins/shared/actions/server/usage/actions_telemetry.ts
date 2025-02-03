@@ -20,6 +20,7 @@ import {
   getActionExecutions,
   getActionsCount,
 } from './lib/actions_telemetry_util';
+import { parseAndLogError } from './lib/parse_and_log_error';
 
 export interface InMemoryAggRes {
   total: number;
@@ -106,9 +107,7 @@ export async function getTotalCount(
       countGenAiProviderTypes,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-
-    logger.warn(`Error executing actions telemetry task: getTotalCount - ${JSON.stringify(err)}`);
+    const errorMessage = parseAndLogError(err, `getTotalCount`, logger);
 
     return {
       hasErrors: true,
@@ -381,11 +380,8 @@ export async function getInUseTotalCount(
       countNamespaces: namespacesList.size,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
+    const errorMessage = parseAndLogError(err, `getInUseTotalCount`, logger);
 
-    logger.warn(
-      `Error executing actions telemetry task: getInUseTotalCount - ${JSON.stringify(err)}`
-    );
     return {
       hasErrors: true,
       errorMessage,
@@ -649,10 +645,8 @@ export async function getExecutionsPerDayCount(
       ),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing actions telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`
-    );
+    const errorMessage = parseAndLogError(err, `getExecutionsPerDayCount`, logger);
+
     return {
       hasErrors: true,
       errorMessage,
