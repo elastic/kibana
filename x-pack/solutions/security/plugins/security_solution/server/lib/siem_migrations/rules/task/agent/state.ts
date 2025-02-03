@@ -20,6 +20,10 @@ export const migrateRuleState = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  migrationId: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
+  }),
   original_rule: Annotation<OriginalRule>(),
   elastic_rule: Annotation<ElasticRule>({
     reducer: (state, action) => ({ ...state, ...action }),

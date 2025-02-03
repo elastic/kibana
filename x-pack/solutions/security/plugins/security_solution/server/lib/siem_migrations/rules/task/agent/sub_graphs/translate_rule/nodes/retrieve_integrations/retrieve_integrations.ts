@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { SIEM_MIGRATIONS_INTEGRATIONS_MATCH } from '../../../../../../../../telemetry/event_based/events';
 import type { RuleMigrationsRetriever } from '../../../../../retrievers';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_INTEGRATION_PROMPT } from './prompts';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetRetrieveIntegrationsNodeParams {
   model: ChatModel;
+  telemetry: AnalyticsServiceSetup;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
@@ -25,12 +28,20 @@ interface GetMatchedIntegrationResponse {
 export const getRetrieveIntegrationsNode = ({
   model,
   ruleMigrationsRetriever,
+  telemetry,
 }: GetRetrieveIntegrationsNodeParams): GraphNode => {
   return async (state) => {
     const query = state.semantic_query;
 
     const integrations = await ruleMigrationsRetriever.integrations.getIntegrations(query);
     if (integrations.length === 0) {
+      telemetry.reportEvent(SIEM_MIGRATIONS_INTEGRATIONS_MATCH.eventType, {
+        migrationId: state.migrationId,
+        preFilterIntegrationNames: [],
+        preFilterIntegrationCount: 0,
+        postFilterIntegrationNames: [],
+        postFilterIntegrationCount: 0,
+      });
       return {
         comments: [
           generateAssistantComment(
@@ -67,6 +78,14 @@ export const getRetrieveIntegrationsNode = ({
 
     if (response.match) {
       const matchedIntegration = integrations.find((r) => r.title === response.match);
+      telemetry.reportEvent(SIEM_MIGRATIONS_INTEGRATIONS_MATCH.eventType, {
+        model: model.model,
+        migrationId: state.migrationId,
+        preFilterIntegrationNames: integrations.map((r) => r.id),
+        preFilterIntegrationCount: integrations.length,
+        postFilterIntegrationName: matchedIntegration ? matchedIntegration.id : '',
+        postFilterIntegrationCount: matchedIntegration ? 1 : 0,
+      });
       if (matchedIntegration) {
         return { integration: matchedIntegration, comments };
       }

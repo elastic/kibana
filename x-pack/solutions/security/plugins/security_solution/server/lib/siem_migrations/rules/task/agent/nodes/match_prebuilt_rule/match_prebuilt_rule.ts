@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import {
@@ -12,15 +13,20 @@ import {
   DEFAULT_TRANSLATION_SEVERITY,
   RuleTranslationResult,
 } from '../../../../../../../../common/siem_migrations/constants';
+import {
+  SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
+  SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
+} from '../../../../../../telemetry/event_based/events';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
+import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
-import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
   logger: Logger;
+  telemetry: AnalyticsServiceSetup;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
@@ -32,6 +38,7 @@ interface GetMatchedRuleResponse {
 export const getMatchPrebuiltRuleNode = ({
   model,
   ruleMigrationsRetriever,
+  telemetry,
   logger,
 }: GetMatchPrebuiltRuleNodeParams): GraphNode => {
   return async (state) => {
@@ -42,6 +49,15 @@ export const getMatchPrebuiltRuleNode = ({
       techniqueIds.join(',')
     );
     if (prebuiltRules.length === 0) {
+      telemetry.reportEvent(SIEM_MIGRATIONS_PREBUILT_RULES_MATCH.eventType, {
+        model: model.model,
+        migrationId: state.migrationId,
+        preFilterRuleNames: [],
+        preFilterRuleCount: 0,
+        postFilterRuleNames: [],
+        postFilterRuleCount: 0,
+      });
+
       return {
         comments: [
           generateAssistantComment(
@@ -80,7 +96,20 @@ export const getMatchPrebuiltRuleNode = ({
 
     if (response.match) {
       const matchedRule = prebuiltRules.find((r) => r.name === response.match);
+      telemetry.reportEvent(SIEM_MIGRATIONS_PREBUILT_RULES_MATCH.eventType, {
+        model: model.model,
+        migrationId: state.migrationId,
+        preFilterRuleNames: prebuiltRules.map((r) => r.name),
+        preFilterRuleCount: prebuiltRules.length,
+        postFilterRuleNames: matchedRule ? [matchedRule.name] : '',
+        postFilterRuleCount: matchedRule ? 1 : 0,
+      });
       if (matchedRule) {
+        telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS.eventType, {
+          model: model.model,
+          migrationId: state.migrationId,
+          prebuiltMatch: true,
+        });
         return {
           comments,
           elastic_rule: {

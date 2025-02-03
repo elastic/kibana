@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { RuleMigrationsRetriever } from '../retrievers';
@@ -20,4 +21,5 @@ export interface MigrateRuleGraphParams {
   connectorId: string;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;
+  telemetry: AnalyticsServiceSetup;
 }

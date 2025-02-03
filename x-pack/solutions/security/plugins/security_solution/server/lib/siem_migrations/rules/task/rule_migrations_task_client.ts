@@ -14,6 +14,7 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import { SIEM_MIGRATIONS_MIGRATION_SUCCESS } from '../../../telemetry/event_based/events';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
@@ -92,6 +93,8 @@ export class RuleMigrationsTaskClient {
       this.logger.debug(`Sleeping ${seconds}s for migration ID:${migrationId}`);
       await withAbortRace(new Promise((resolve) => setTimeout(resolve, seconds * 1000)));
     };
+    const migrationStart = Date.now();
+    const stats = { completed: 0, failed: 0 };
 
     try {
       this.logger.debug(`Creating agent for migration ID:${migrationId}`);
@@ -101,7 +104,6 @@ export class RuleMigrationsTaskClient {
         ...invocationConfig,
         // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
       };
-
       let isDone: boolean = false;
       do {
         const ruleMigrations = await this.data.rules.takePending(migrationId, ITERATION_BATCH_SIZE);
@@ -119,7 +121,10 @@ export class RuleMigrationsTaskClient {
             try {
               const start = Date.now();
 
-              const invocationData = { original_rule: ruleMigration.original_rule };
+              const invocationData = {
+                original_rule: ruleMigration.original_rule,
+                migrationId,
+              };
 
               // using withAbortRace is a workaround for the issue with the langGraph signal not working properly
               const migrationResult = await withAbortRace<MigrateRuleState>(
@@ -137,8 +142,10 @@ export class RuleMigrationsTaskClient {
                 translation_result: migrationResult.translation_result,
                 comments: migrationResult.comments,
               });
+              stats.completed++;
             } catch (error) {
               if (error instanceof AbortError) {
+                stats.failed++;
                 throw error;
               }
               this.logger.error(
@@ -173,6 +180,15 @@ export class RuleMigrationsTaskClient {
         this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
     } finally {
+      const migrationDuration = (Date.now() - migrationStart) / 1000;
+      const telemetry = this.dependencies.telemetry;
+      telemetry.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS.eventType, {
+        migrationId,
+        completed: stats.completed,
+        failed: stats.failed,
+        total: stats.completed + stats.failed,
+        duration: migrationDuration,
+      });
       this.migrationsRunning.delete(migrationId);
       abortPromise.cleanup();
     }
@@ -204,6 +220,7 @@ export class RuleMigrationsTaskClient {
       model,
       inferenceClient,
       ruleMigrationsRetriever,
+      telemetry: this.dependencies.telemetry,
       logger: this.logger,
     });
   }
