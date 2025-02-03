@@ -46,5 +46,18 @@ const trimSubtechniqueArray = (subtechniqueArray: ThreatSubtechnique[]): ThreatS
   }));
 };
 
-const normalizeThreatReference = (reference: string): string =>
-  !reference.endsWith('/') ? `${reference}/` : reference; // Adds a trailing backslash in urls if it doesn't exist to account for any inconsitencies between our script generated data and prebuilt rules packages
+const normalizeThreatReference = (reference: string): string => {
+  try {
+    const parsed = new URL(reference);
+
+    if (!parsed.pathname.endsWith('/')) {
+      // Adds a trailing backslash in urls if it doesn't exist to account for
+      // any inconsistencies between our script generated data and prebuilt rules packages
+      parsed.pathname = `${parsed.pathname}/`;
+    }
+
+    return parsed.toString();
+  } catch {
+    return reference;
+  }
+};

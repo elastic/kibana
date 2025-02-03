@@ -25,7 +25,7 @@ describe('extractThreatArray', () => {
           technique: [
             {
               ...mockThreat.technique![0],
-              reference: 'https://attack.mitre.org/techniques/T0000',
+              reference: 'https://attack.mitre.org/techniques/T0000/',
               subtechnique: [
                 {
                   ...mockThreat.technique![0].subtechnique![0],
@@ -61,6 +61,34 @@ describe('extractThreatArray', () => {
             ],
           },
         ],
+      },
+    ]);
+  });
+
+  it('normalizes url ending backslashes with param strings', () => {
+    const mockRule = {
+      ...getRulesSchemaMock(),
+      threat: [
+        {
+          ...mockThreat,
+          tactic: {
+            ...mockThreat.tactic,
+            reference: 'https://attack.mitre.org/tactics/TA0000?query=test',
+          },
+          technique: [],
+        },
+      ],
+    };
+    const normalizedThreatArray = extractThreatArray(mockRule);
+
+    expect(normalizedThreatArray).toEqual([
+      {
+        framework: 'MITRE ATT&CK',
+        tactic: {
+          id: 'TA0000',
+          name: 'test tactic',
+          reference: 'https://attack.mitre.org/tactics/TA0000/?query=test',
+        },
       },
     ]);
   });
