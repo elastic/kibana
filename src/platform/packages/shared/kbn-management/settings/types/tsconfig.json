@@ -15,5 +15,6 @@
     "@kbn/core",
     "@kbn/core-ui-settings-common",
     "@kbn/management-settings-section-registry",
+    "@kbn/spaces-plugin",
   ]
 }
