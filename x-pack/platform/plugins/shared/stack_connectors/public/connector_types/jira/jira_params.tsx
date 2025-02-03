@@ -382,7 +382,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           messageVariables={messageVariables}
           paramsProperty={'comments'}
           inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-          optionalField={true}
+          isOptionalField
         />
         <EuiFormRow
           fullWidth
@@ -427,7 +427,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             onDocumentsChange={(json: string) => {
               editSubActionProperty('otherFields', json === '' ? null : json);
             }}
-            optionalField={true}
+            isOptionalField
           />
         </EuiFormRow>
       </>

@@ -257,7 +257,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           { defaultMessage: 'Description' }
         )}
         inputTargetValue={incident.description ?? undefined}
-        optionalField={true}
+        isOptionalField
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -269,7 +269,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           { defaultMessage: 'Additional comments' }
         )}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-        optionalField={true}
+        isOptionalField
       />
     </>
   );

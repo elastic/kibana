@@ -158,7 +158,7 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         paramsProperty={'comments'}
         label={translations.COMMENTS_LABEL}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-        optionalField={true}
+        isOptionalField
       />
     </>
   );

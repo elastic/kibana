@@ -94,7 +94,7 @@ const FormView: React.FC<FormViewProps> = ({
         paramsProperty={'description'}
         label={i18n.DESCRIPTION_FIELD_LABEL}
         inputTargetValue={subActionParams?.description}
-        optionalField={true}
+        isOptionalField
       />
       <EuiSpacer size={'m'} />
       <EuiFormRow
