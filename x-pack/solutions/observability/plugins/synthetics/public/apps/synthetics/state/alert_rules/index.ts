@@ -6,6 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import { StatusRuleInspect } from '../../../../../common/runtime_types/alert_rules/common';
 import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { IHttpSerializedFetchError } from '..';
 import {
@@ -17,7 +18,7 @@ import {
 } from './actions';
 
 export interface DefaultAlertingState {
-  inspectData?: any;
+  inspectData?: StatusRuleInspect;
   data?: DEFAULT_ALERT_RESPONSE;
   success: boolean | null;
   loading: boolean;

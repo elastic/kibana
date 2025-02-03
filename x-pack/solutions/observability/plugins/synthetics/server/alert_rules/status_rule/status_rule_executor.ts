@@ -18,6 +18,7 @@ import {
   AlertStatusConfigs,
   AlertStatusMetaData,
   StaleDownConfig,
+  StatusRuleInspect,
 } from '../../../common/runtime_types/alert_rules/common';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
@@ -134,9 +135,8 @@ export class StatusRuleExecutor {
   }
 
   async getDownChecks(prevDownConfigs: AlertStatusConfigs = {}): Promise<AlertOverviewStatus> {
-    await this.init();
     const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorLocationsMap } =
-      await this.getMonitors();
+      await this.init();
 
     const range = this.getRange(maxPeriod);
 
@@ -150,6 +150,7 @@ export class StatusRuleExecutor {
         staleDownConfigs,
         enabledMonitorQueryIds,
         pendingConfigs: {},
+        maxPeriod,
       };
     }
 
@@ -202,6 +203,7 @@ export class StatusRuleExecutor {
       ...currentStatus,
       staleDownConfigs,
       pendingConfigs: {},
+      maxPeriod,
     };
   }
 
@@ -430,7 +432,16 @@ export class StatusRuleExecutor {
     });
   }
 
-  getRuleThresholdOverview = async () => {};
+  getRuleThresholdOverview = async (): Promise<StatusRuleInspect> => {
+    const data = await this.getDownChecks({});
+    return {
+      ...data,
+      monitors: this.monitors.map((monitor) => ({
+        id: monitor.id,
+        name: monitor.attributes.name,
+      })),
+    };
+  };
 }
 
 export const getDoesMonitorMeetLocationThreshold = ({

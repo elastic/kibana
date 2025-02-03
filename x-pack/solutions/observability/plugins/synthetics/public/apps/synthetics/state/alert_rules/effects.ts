@@ -81,8 +81,10 @@ export function* inspectStatusRuleEffect() {
       inspectStatusAlertAPI,
       inspectStatusRuleAction.success,
       inspectStatusRuleAction.fail,
-      successMessage,
-      failureMessage
+      '',
+      i18n.translate('xpack.synthetics.settings.statusRule.inspect', {
+        defaultMessage: 'Failed to inspect monitor status rule type.',
+      })
     )
   );
 }

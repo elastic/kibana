@@ -56,6 +56,6 @@ export const syntheticsInspectStatusRuleRoute: SyntheticsRestApiRouteFactory = (
       getTimeRange: {} as any,
     } as StatusRuleExecutorOptions);
 
-    return await statusRule.getRuleThresoldOverview({});
+    return await statusRule.getRuleThresholdOverview();
   },
 });
