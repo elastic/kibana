@@ -119,29 +119,27 @@ url: {
   // Which indexes to search
   index: kibana_sample_data_logs
   // The body element may contain "aggs" and "query" keys
-  body: {
-    aggs: {
-      time_buckets: {
-        date_histogram: {
-          // Use date histogram aggregation on @timestamp field
-          field: @timestamp <1>
-          // interval value will depend on the time filter
-          // Use an integer to set approximate bucket count
-          interval: { %autointerval%: true }
-          // Make sure we get an entire range, even if it has no data
-          extended_bounds: {
-            min: { %timefilter%: "min" }
-            max: { %timefilter%: "max" }
-          }
-          // Use this for linear (e.g. line, area) graphs
-          // Without it, empty buckets will not show up
-          min_doc_count: 0
+  aggs: {
+    time_buckets: {
+      date_histogram: {
+        // Use date histogram aggregation on @timestamp field
+        field: @timestamp <1>
+        // interval value will depend on the time filter
+        // Use an integer to set approximate bucket count
+        interval: { %autointerval%: true }
+        // Make sure we get an entire range, even if it has no data
+        extended_bounds: {
+          min: { %timefilter%: "min" }
+          max: { %timefilter%: "max" }
         }
+        // Use this for linear (e.g. line, area) graphs
+        // Without it, empty buckets will not show up
+        min_doc_count: 0
       }
     }
-    // Speed up the response by only including aggregation results
-    size: 0
   }
+  // Speed up the response by only including aggregation results
+  size: 0
 }
 ----
 
@@ -179,42 +177,40 @@ except that the time range is shifted back by 10 minutes:
 [source,yaml]
 ----
 {
-  body: {
-    query: {
-      bool: {
-        must: [
-          // This string will be replaced
-          // with the auto-generated "MUST" clause
-          "%dashboard_context-must_clause%"
-          {
-            range: {
-              // apply timefilter (upper right corner)
-              // to the @timestamp variable
-              @timestamp: {
-                // "%timefilter%" will be replaced with
-                // the current values of the time filter
-                // (from the upper right corner)
-                "%timefilter%": true
-                // Only work with %timefilter%
-                // Shift current timefilter by 10 units back
-                shift: 10
-                // week, day (default), hour, minute, second
-                unit: minute
-              }
+  query: {
+    bool: {
+      must: [
+        // This string will be replaced
+        // with the auto-generated "MUST" clause
+        "%dashboard_context-must_clause%"
+        {
+          range: {
+            // apply timefilter (upper right corner)
+            // to the @timestamp variable
+            @timestamp: {
+              // "%timefilter%" will be replaced with
+              // the current values of the time filter
+              // (from the upper right corner)
+              "%timefilter%": true
+              // Only work with %timefilter%
+              // Shift current timefilter by 10 units back
+              shift: 10
+              // week, day (default), hour, minute, second
+              unit: minute
             }
           }
-        ]
-        must_not: [
-          // This string will be replaced with
-          // the auto-generated "MUST-NOT" clause
-          "%dashboard_context-must_not_clause%"
-        ]
-        filter: [
-          // This string will be replaced
-          // with the auto-generated "FILTER" clause
-          "%dashboard_context-filter_clause%"
-        ]
-      }
+        }
+      ]
+      must_not: [
+        // This string will be replaced with
+        // the auto-generated "MUST-NOT" clause
+        "%dashboard_context-must_not_clause%"
+      ]
+      filter: [
+        // This string will be replaced
+        // with the auto-generated "FILTER" clause
+        "%dashboard_context-filter_clause%"
+      ]
     }
   }
 }

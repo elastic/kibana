@@ -186,27 +186,25 @@ In the *Vega-Lite* spec, enter the aggregations, then click *Update*:
       %context%: true
       %timefield%: order_date
       index: kibana_sample_data_ecommerce
-      body: {
-        aggs: {
-          categories: {
-            terms: { field: "category.keyword" }
-            aggs: {
-              time_buckets: {
-                date_histogram: {
-                  field: order_date
-                  interval: {%autointerval%: true}
-                  extended_bounds: {
-                    min: {%timefilter%: "min"}
-                    max: {%timefilter%: "max"}
-                  }
-                  min_doc_count: 0
+      aggs: {
+        categories: {
+          terms: { field: "category.keyword" }
+          aggs: {
+            time_buckets: {
+              date_histogram: {
+                field: order_date
+                interval: {%autointerval%: true}
+                extended_bounds: {
+                  min: {%timefilter%: "min"}
+                  max: {%timefilter%: "max"}
                 }
+                min_doc_count: 0
               }
             }
           }
         }
-        size: 0
       }
+      size: 0
     }
     format: {property: "aggregations.categories.buckets" }
   }
@@ -428,27 +426,25 @@ The selection is controlled by a signal. To view the signal, click *Inspect* in 
       %context%: true
       %timefield%: order_date
       index: kibana_sample_data_ecommerce
-      body: {
-        aggs: {
-          categories: {
-            terms: { field: "category.keyword" }
-            aggs: {
-              time_buckets: {
-                date_histogram: {
-                  field: order_date
-                  interval: {%autointerval%: true}
-                  extended_bounds: {
-                    min: {%timefilter%: "min"}
-                    max: {%timefilter%: "max"}
-                  }
-                  min_doc_count: 0
+      aggs: {
+        categories: {
+          terms: { field: "category.keyword" }
+          aggs: {
+            time_buckets: {
+              date_histogram: {
+                field: order_date
+                interval: {%autointerval%: true}
+                extended_bounds: {
+                  min: {%timefilter%: "min"}
+                  max: {%timefilter%: "max"}
                 }
+                min_doc_count: 0
               }
             }
           }
         }
-        size: 0
       }
+      size: 0
     }
     format: {property: "aggregations.categories.buckets" }
   }
@@ -585,22 +581,20 @@ Add the {es} search query with the `data` block, then click *Update*:
         %context%: true
         %timefield%: order_date
         index: kibana_sample_data_ecommerce
-        body: {
-          aggs: {
-            time_buckets: {
-              date_histogram: {
-                field: order_date
-                fixed_interval: "3h"
-                extended_bounds: {
-                  min: {%timefilter%: "min"}
-                  max: {%timefilter%: "max"}
-                }
-                min_doc_count: 0
+        aggs: {
+          time_buckets: {
+            date_histogram: {
+              field: order_date
+              fixed_interval: "3h"
+              extended_bounds: {
+                min: {%timefilter%: "min"}
+                max: {%timefilter%: "max"}
               }
+              min_doc_count: 0
             }
           }
-          size: 0
         }
+        size: 0
       }
       format: { property: "aggregations.time_buckets.buckets" }
     }
@@ -899,22 +893,20 @@ dragging:
         %context%: true
         %timefield%: order_date
         index: kibana_sample_data_ecommerce
-        body: {
-          aggs: {
-            time_buckets: {
-              date_histogram: {
-                field: order_date
-                fixed_interval: "3h"
-                extended_bounds: {
-                  min: {%timefilter%: "min"}
-                  max: {%timefilter%: "max"}
-                }
-                min_doc_count: 0
+        aggs: {
+          time_buckets: {
+            date_histogram: {
+              field: order_date
+              fixed_interval: "3h"
+              extended_bounds: {
+                min: {%timefilter%: "min"}
+                max: {%timefilter%: "max"}
               }
+              min_doc_count: 0
             }
           }
-          size: 0
         }
+        size: 0
       }
       format: { property: "aggregations.time_buckets.buckets" }
     }
