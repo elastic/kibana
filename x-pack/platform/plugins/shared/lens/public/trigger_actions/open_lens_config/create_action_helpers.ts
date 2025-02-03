@@ -5,12 +5,10 @@
  * 2.0.
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import {
   getESQLAdHocDataview,
   getIndexForESQLQuery,
-  ENABLE_ESQL,
   getESQLQueryColumns,
   getInitialESQLQuery,
 } from '@kbn/esql-utils';
@@ -27,16 +25,12 @@ export const [getDatasourceMap, setDatasourceMap] = createGetterSetter<
   Record<string, Datasource<unknown, unknown>>
 >('DatasourceMap', false);
 
-export async function isCreateActionCompatible(core: CoreStart) {
-  return core.uiSettings.get(ENABLE_ESQL);
-}
-
 export async function createNewEsqlAttributes(
   services: Pick<LensEmbeddableStartServices, 'data' | 'dataViews' | 'getEditorFrameService'>
 ) {
   const indexName = await getIndexForESQLQuery({ dataViews: services.dataViews });
   if (!indexName) {
-    throw new Error('No data views');
+    return;
   }
   const dataView = await getESQLAdHocDataview(`from ${indexName}`, services.dataViews);
   const editorFrameService = await services.getEditorFrameService();
@@ -51,7 +45,7 @@ export async function createNewEsqlAttributes(
     ]);
 
     if (!visualizationMap && !datasourceMap) {
-      throw new Error('Lens not setup.');
+      return;
     }
 
     // persist for retrieval elsewhere
