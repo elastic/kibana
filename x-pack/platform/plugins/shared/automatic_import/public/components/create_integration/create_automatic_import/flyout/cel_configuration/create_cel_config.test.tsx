@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
+import { render, type RenderResult } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
 import { ActionsProvider } from '../../state';
 import { mockActions, mockState } from '../../mocks/state';
