@@ -461,7 +461,7 @@ export class StreamsClient {
     const { members } = definition.group;
 
     if (members.includes(definition.name)) {
-      throw new ForbiddenMemberTypeError('The same stream can not be part of the group');
+      throw new ForbiddenMemberTypeError('Group streams can not include themselves as a member');
     }
 
     await Promise.all(
