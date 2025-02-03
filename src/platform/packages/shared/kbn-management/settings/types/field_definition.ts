@@ -89,6 +89,8 @@ export interface FieldDefinition<
   type: T;
   /** An identifier of the field when it has an unsaved change. */
   unsavedFieldId: string;
+  /** The solution where this setting is applicable.
+   * If undefined, the setting must be displayed in all solutions. */
   solution?: SolutionView;
 }
 
