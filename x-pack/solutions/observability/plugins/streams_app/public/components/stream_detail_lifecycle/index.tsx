@@ -399,7 +399,12 @@ function RetentionMetadata({
   const contextualMenu = (
     <EuiPopover
       button={
-        <EuiButton size="s" fullWidth onClick={() => setMenuOpen(!isMenuOpen)}>
+        <EuiButton
+          data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
+          size="s"
+          fullWidth
+          onClick={() => setMenuOpen(!isMenuOpen)}
+        >
           Edit data retention
         </EuiButton>
       }
@@ -449,6 +454,7 @@ function RetentionMetadata({
       <EuiFlexItem grow={false}>Inherited from</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
+          data-test-subj="streamsAppRetentionMetadataLink"
           target="_blank"
           href={router.link('/{key}/{tab}/{subtab}', {
             path: { key: lifecycle.from, tab: 'management', subtab: 'lifecycle' },
@@ -550,6 +556,7 @@ function DslModal({ closeModal, updateInProgress, updateLifecycle }: ModalOption
         Specify a custom data retention period for this stream.
         <EuiSpacer />
         <EuiFieldNumber
+          data-test-subj="streamsAppDslModalFieldNumber"
           value={retentionValue}
           onChange={(e) => setRetentionValue(Number(e.target.value))}
           min={1}
@@ -562,6 +569,7 @@ function DslModal({ closeModal, updateInProgress, updateLifecycle }: ModalOption
               closePopover={() => setShowUnitMenu(false)}
               button={
                 <EuiButton
+                  data-test-subj="streamsAppDslModalButton"
                   disabled={noRetention}
                   iconType="arrowDown"
                   iconSide="right"
@@ -708,7 +716,11 @@ function IlmModal({
 
       <EuiModalBody>
         Select a pre-defined policy or visit{' '}
-        <EuiLink target="_blank" href={ilmLocator?.getRedirectUrl({ page: 'policies_list' })}>
+        <EuiLink
+          data-test-subj="streamsAppIlmModalIndexLifecyclePoliciesLink"
+          target="_blank"
+          href={ilmLocator?.getRedirectUrl({ page: 'policies_list' })}
+        >
           Index Lifecycle Policies
         </EuiLink>{' '}
         to create a new one.
@@ -832,6 +844,7 @@ function ModalFooter({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="streamsAppModalFooterCancelButton"
                 disabled={updateInProgress}
                 color="primary"
                 onClick={() => closeModal()}
@@ -842,6 +855,7 @@ function ModalFooter({
 
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="streamsAppModalFooterButton"
                 fill
                 disabled={confirmationIsDisabled}
                 isLoading={updateInProgress}
