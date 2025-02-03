@@ -22,6 +22,7 @@ import type {
 import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
@@ -51,6 +52,7 @@ export interface DeprecationsSetupDeps {
   http: InternalHttpServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
   logging: InternalLoggingServiceSetup;
+  docLinks: DocLinksServiceSetup;
 }
 
 /** @internal */
@@ -70,6 +72,7 @@ export class DeprecationsService
     http,
     coreUsageData,
     logging,
+    docLinks,
   }: DeprecationsSetupDeps): Promise<InternalDeprecationsServiceSetup> {
     this.logger.debug('Setting up Deprecations service');
 
@@ -106,6 +109,7 @@ export class DeprecationsService
       deprecationsFactory: this.deprecationsFactory,
       http,
       coreUsageData,
+      docLinks,
     });
 
     const deprecationsFactory = this.deprecationsFactory;
