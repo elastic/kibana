@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
-import { deleteAllTimelines, deleteAllPrebuiltRuleAssets } from '../../../../../utils';
+import { deleteAllPrebuiltRuleAssets } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
 import { bulkUpgradeAllPrebuiltRules } from './bulk_upgrade_all_prebuilt_rules';
 import { bulkUpgradeSelectedPrebuiltRules } from './bulk_upgrade_selected_prebuilt_rules';
@@ -20,7 +20,6 @@ export default (context: FtrProviderContext): void => {
   describe('@ess @serverless @skipInServerlessMKI upgrade prebuilt rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllTimelines(es, log);
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 

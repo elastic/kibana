@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
-import { deleteAllTimelines, deleteAllPrebuiltRuleAssets } from '../../../../../utils';
+import { deleteAllPrebuiltRuleAssets } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
 import { nameField } from './name';
 import { descriptionField } from './description';
@@ -53,7 +53,6 @@ export default (context: FtrProviderContext): void => {
   describe('@ess @serverless @skipInServerlessMKI diffable rule fields', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllTimelines(es, log);
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
