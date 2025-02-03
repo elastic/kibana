@@ -96,12 +96,21 @@ export {
   isInferenceRequestError,
   isInferenceRequestAbortedError,
 } from './src/errors';
+export { generateFakeToolCallId } from './src/utils';
+export { elasticModelDictionary } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {
   InferenceConnectorType,
   isSupportedConnectorType,
   isSupportedConnector,
+  getConnectorDefaultModel,
+  getConnectorProvider,
+  connectorToInference,
   type InferenceConnector,
 } from './src/connectors';
-export { defaultInferenceEndpoints } from './src/inference_endpoints';
+export {
+  defaultInferenceEndpoints,
+  InferenceEndpointProvider,
+  elasticModelIds,
+} from './src/inference_endpoints';

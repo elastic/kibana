@@ -16,6 +16,8 @@ import {
   transformRawData,
   getAnonymizedValue,
   ConversationResponse,
+  newContentReferencesStore,
+  pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -25,6 +27,7 @@ import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
+  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
   langChainExecute,
   performChecks,
@@ -84,8 +87,15 @@ export const chatCompleteRoute = (
             return checkResponse.response;
           }
 
+          const contentReferencesEnabled =
+            ctx.elasticAssistant.getRegisteredFeatures(
+              DEFAULT_PLUGIN_NAME
+            ).contentReferencesEnabled;
+
           const conversationsDataClient =
-            await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+            await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
+              contentReferencesEnabled,
+            });
 
           const anonymizationFieldsDataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
@@ -106,6 +116,7 @@ export const chatCompleteRoute = (
           const connector = connectors.length > 0 ? connectors[0] : undefined;
           actionTypeId = connector?.actionTypeId ?? '.gen-ai';
           const isOssModel = isOpenSourceModel(connector);
+          const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
           // replacements
           const anonymizationFieldsRes =
@@ -175,12 +186,19 @@ export const chatCompleteRoute = (
             }));
           }
 
+          const contentReferencesStore = contentReferencesEnabled
+            ? newContentReferencesStore()
+            : undefined;
+
           const onLlmResponse = async (
             content: string,
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
             if (newConversation?.id && conversationsDataClient) {
+              const contentReferences =
+                contentReferencesStore && pruneContentReferences(content, contentReferencesStore);
+
               await appendAssistantMessageToConversation({
                 conversationId: newConversation?.id,
                 conversationsDataClient,
@@ -188,6 +206,7 @@ export const chatCompleteRoute = (
                 replacements: latestReplacements,
                 isError,
                 traceData,
+                contentReferences,
               });
             }
           };
@@ -208,6 +227,7 @@ export const chatCompleteRoute = (
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,
+            contentReferencesStore,
             request: {
               ...request,
               // TODO: clean up after empty tools will be available to use
@@ -221,6 +241,7 @@ export const chatCompleteRoute = (
             response,
             telemetry,
             responseLanguage: request.body.responseLanguage,
+            savedObjectsClient,
             ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });
         } catch (err) {
