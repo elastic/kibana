@@ -8,7 +8,13 @@
  */
 
 import { joinIndices } from '../../../__tests__/helpers';
-import { getPosition, joinIndicesToSuggestions } from './util';
+import {
+  getPosition,
+  joinIndicesToSuggestions,
+  suggestionIntersection,
+  suggestionUnion,
+} from './util';
+import { SuggestionRawDefinition } from '../../types';
 
 describe('getPosition()', () => {
   test('returns correct position on complete modifier matches', () => {
@@ -65,6 +71,168 @@ describe('joinIndicesToSuggestions()', () => {
       'join_index_with_alias',
       'join_index_alias_1',
       'join_index_alias_2',
+    ]);
+  });
+});
+
+describe('suggestionIntersection()', () => {
+  test('returns shared fields between two lists', () => {
+    const intersection = suggestionIntersection(
+      [
+        { label: 'id', text: '', kind: 'Field', detail: '' },
+        { label: 'currency', text: '', kind: 'Field', detail: '' },
+        { label: 'value', text: '', kind: 'Field', detail: '' },
+        { label: 'timestamp', text: '', kind: 'Field', detail: '' },
+      ],
+      [
+        { label: 'id', text: '', kind: 'Field', detail: '' },
+        { label: 'currency', text: '', kind: 'Field', detail: '' },
+        { label: 'name', text: '', kind: 'Field', detail: '' },
+      ]
+    );
+
+    expect(intersection).toEqual([
+      {
+        label: 'id',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
+      {
+        label: 'currency',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
+    ]);
+  });
+
+  test('returns empty list if there are no shared fields', () => {
+    const intersection = suggestionIntersection(
+      [
+        { label: 'id1', text: '', kind: 'Field', detail: '' },
+        { label: 'value', text: '', kind: 'Field', detail: '' },
+        { label: 'timestamp', text: '', kind: 'Field', detail: '' },
+      ],
+      [
+        { label: 'id2', text: '', kind: 'Field', detail: '' },
+        { label: 'currency', text: '', kind: 'Field', detail: '' },
+        { label: 'name', text: '', kind: 'Field', detail: '' },
+      ]
+    );
+
+    expect(intersection).toEqual([]);
+  });
+
+  test('returns all fields, if all intersect', () => {
+    const intersection = suggestionIntersection(
+      [
+        { label: 'id1', text: '', kind: 'Field', detail: '' },
+        { label: 'value', text: '', kind: 'Field', detail: '' },
+        { label: 'timestamp', text: '', kind: 'Field', detail: '' },
+      ],
+      [
+        { label: 'id1', text: '', kind: 'Field', detail: '' },
+        { label: 'value', text: '', kind: 'Field', detail: '' },
+      ]
+    );
+
+    expect(intersection).toEqual([
+      { label: 'id1', text: '', kind: 'Field', detail: '' },
+      { label: 'value', text: '', kind: 'Field', detail: '' },
+    ]);
+  });
+
+  test('creates a clone of suggestions', () => {
+    const suggestion1: SuggestionRawDefinition = {
+      label: 'id1',
+      text: '',
+      kind: 'Field',
+      detail: '',
+    };
+    const suggestion2: SuggestionRawDefinition = {
+      label: 'id1',
+      text: '',
+      kind: 'Field',
+      detail: '',
+    };
+    const intersection = suggestionIntersection([suggestion1], [suggestion2]);
+
+    expect(intersection).toEqual([suggestion1]);
+    expect(intersection[0]).not.toBe(suggestion1);
+    expect(intersection[0]).not.toBe(suggestion2);
+  });
+});
+
+describe('suggestionUnion()', () => {
+  test('combines two sets without duplicates', () => {
+    const intersection = suggestionUnion(
+      [
+        { label: 'id', text: '', kind: 'Field', detail: '' },
+        { label: 'currency', text: '', kind: 'Field', detail: '' },
+        { label: 'value', text: '', kind: 'Field', detail: '' },
+        { label: 'timestamp', text: '', kind: 'Field', detail: '' },
+      ],
+      [
+        { label: 'id', text: '', kind: 'Field', detail: '' },
+        { label: 'currency', text: '', kind: 'Field', detail: '' },
+        { label: 'name', text: '', kind: 'Field', detail: '' },
+      ]
+    );
+
+    expect(intersection).toEqual([
+      {
+        label: 'id',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
+      {
+        label: 'currency',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
+      {
+        label: 'value',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
+      {
+        label: 'timestamp',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
+      {
+        label: 'name',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
+    ]);
+  });
+
+  test('combines two non-overlapping sets', () => {
+    const intersection = suggestionUnion(
+      [{ label: 'id', text: '', kind: 'Field', detail: '' }],
+      [{ label: 'currency', text: '', kind: 'Field', detail: '' }]
+    );
+
+    expect(intersection).toEqual([
+      {
+        label: 'id',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
+      {
+        label: 'currency',
+        text: '',
+        kind: 'Field',
+        detail: '',
+      },
     ]);
   });
 });
