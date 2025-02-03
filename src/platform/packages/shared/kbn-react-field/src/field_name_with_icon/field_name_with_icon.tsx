@@ -7,9 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FieldIcon } from './src/field_icon';
-export type { FieldIconProps } from './src/field_icon';
-export { FieldButton } from './src/field_button';
-export type { FieldButtonProps, ButtonSize } from './src/field_button';
-export { FieldNameWithIcon } from './src/field_name_with_icon';
-export type { FieldNameWithIconProps } from './src/field_name_with_icon';';
+import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
+import { FieldIcon, FieldIconProps } from '../field_icon';
+
+export interface FieldNameWithIconProps {
+  name: string;
+  type?: FieldIconProps['type'];
+}
+
+export const FieldNameWithIcon = ({ name, type }: FieldNameWithIconProps) => {
+  return type ? (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <FieldIcon type={type} />
+      {name}
+    </EuiFlexGroup>
+  ) : (
+    name
+  );
+};
