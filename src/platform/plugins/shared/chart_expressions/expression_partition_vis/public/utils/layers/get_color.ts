@@ -265,9 +265,6 @@ export const getColor = (
   }
 
   if (isTreemapOrMosaicChart(chartType)) {
-    if (layerIndex < columnsLength - 1) {
-      return defaultColor;
-    }
     // for treemap use the top layer for coloring, for mosaic use the second layer
     if (seriesLayers.length > 1) {
       if (chartType === ChartTypes.MOSAIC) {
