@@ -34,3 +34,8 @@ export interface OpenAPIConverter {
 
   is(type: unknown): boolean;
 }
+
+export type CustomOperationObject = OpenAPIV3.OperationObject<{
+  // Custom OpenAPI from ES API spec based on @availability
+  'x-state'?: 'Technical Preview' | 'Beta';
+}>;

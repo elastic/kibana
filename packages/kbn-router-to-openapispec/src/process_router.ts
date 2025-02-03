@@ -23,9 +23,11 @@ import {
   getVersionedHeaderParam,
   mergeResponseContent,
   prepareRoutes,
+  setXState,
 } from './util';
 import type { OperationIdCounter } from './operation_id_counter';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { CustomOperationObject } from './type';
 
 export const processRouter = (
   appRouter: Router,
@@ -61,7 +63,7 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
-      const operation: OpenAPIV3.OperationObject = {
+      const operation: CustomOperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
         ...(route.options.description ? { description: route.options.description } : {}),
@@ -80,6 +82,8 @@ export const processRouter = (
         parameters,
         operationId: getOpId(route.path),
       };
+
+      setXState(route.options.availability, operation);
 
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,
