@@ -37,6 +37,9 @@ export const VULNERABILITIES_FLYOUT_VISITS = 'vulnerabilities-flyout-visits';
 export const OPEN_FINDINGS_FLYOUT = 'open-findings-flyout';
 export const GROUP_BY_CLICK = 'group-by-click';
 export const CHANGE_RULE_STATE = 'change-rule-state';
+export const ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS = 'asset-inventory-expand-flyout-success';
+export const ASSET_INVENTORY_EXPAND_FLYOUT_ERROR = 'asset-inventory-expand-flyout-error';
+export const UNIVERSAL_ENTITY_FLYOUT_OPENED = 'universal-entity-flyout-opened';
 
 type CloudSecurityUiCounters =
   | typeof ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT

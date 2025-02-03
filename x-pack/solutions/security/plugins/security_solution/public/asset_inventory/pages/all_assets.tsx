@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
 import { type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -36,8 +36,9 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import type { HostEcs, ServiceEcs, UserEcs } from '@kbn/securitysolution-ecs';
-import { InventoryFlyoutSelector } from '../components/inventory_flyout_selector';
+import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
+import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
+import { useDynamicEntityFlyout } from '../hooks/use_dynamic_entity_flyout';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -138,17 +139,11 @@ export interface AllAssetsProps {
   'data-test-subj'?: string;
 }
 
-interface UniversalEntity {
-  id: string;
-  timestamp: string;
-  type: string;
-}
-
-// TODO: Asset Inventory - adjust with real entity data
-// TODO: Asset Inventory - add and use EntityEcs type
-const getEntity = (row: DataTableRecord): UniversalEntity | ServiceEcs | UserEcs | HostEcs => {
+// TODO: Asset Inventory - adjust once we have real universal entity type and data
+const getEntity = (row: DataTableRecord): UniversalEntityEcs => {
   return {
     id: row.flattened['asset.name'],
+    name: row.flattened['asset.name'],
     timestamp: row.flattened['@timestamp'],
     type: 'universal',
   };
@@ -171,17 +166,26 @@ const AllAssets = ({
     nonPersistedFilters,
   });
 
+  // Table Flyout Controls -------------------------------------------------------------------
+
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
-  const renderDocumentView = useCallback((hit: DataTableRecord) => {
-    return (
-      <InventoryFlyoutSelector
-        // @ts-ignore
-        entity={getEntity(hit)}
-        onFlyoutClose={() => setExpandedDoc(undefined)}
-      />
-    );
-  }, []);
+  const { openDynamicFlyout, closeDynamicFlyout } = useDynamicEntityFlyout({
+    onFlyoutClose: () => setExpandedDoc(undefined),
+  });
+
+  const onExpandDocClick = (hit: DataTableRecord) => {
+    if (hit) {
+      const entity = getEntity(hit);
+      setExpandedDoc(hit); // Table is expecting the same doc ref to highlight the selected row
+      openDynamicFlyout({ entity, scopeId: 'scopeId', contextId: 'contextId' });
+    } else {
+      closeDynamicFlyout();
+      setExpandedDoc(undefined);
+    }
+  };
+
+  // -----------------------------------------------------------------------------------------
 
   const {
     // columnsLocalStorageKey,
@@ -425,8 +429,8 @@ const AllAssets = ({
                 rows={rows}
                 sampleSizeState={MAX_ASSETS_TO_LOAD}
                 expandedDoc={expandedDoc}
-                setExpandedDoc={setExpandedDoc}
-                renderDocumentView={renderDocumentView}
+                setExpandedDoc={onExpandDocClick}
+                renderDocumentView={EmptyComponent}
                 sort={sort}
                 rowsPerPageState={pageSize}
                 totalHits={rows.length}

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import {
+  uiMetricService,
+  UNIVERSAL_ENTITY_FLYOUT_OPENED,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
@@ -25,11 +30,17 @@ export interface UniversalEntityPanelProps {
 }
 
 export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
+  key: 'universal-entity-panel';
   params: UniversalEntityPanelProps;
 }
 
 export const UniversalEntityPanel = (props: UniversalEntityPanelExpandableFlyoutProps) => {
   const entity = props.params.entity;
+
+  useEffect(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
+  }, [entity]);
+
   // const serviceNameFilterQuery = useMemo(
   //   () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
   //   [serviceName]
