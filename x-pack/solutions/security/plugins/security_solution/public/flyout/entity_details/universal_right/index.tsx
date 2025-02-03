@@ -19,21 +19,16 @@ import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 
 export interface UniversalEntityPanelProps {
   entity: UniversalEntityEcs;
-  contextID?: string;
-  scopeId?: string;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
 }
 
 export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  // eslint-disable-next-line react/no-unused-prop-types
   key: 'universal-entity-panel';
   params: UniversalEntityPanelProps;
 }
 
-export const UniversalEntityPanel = (props: UniversalEntityPanelExpandableFlyoutProps) => {
-  const entity = props.params.entity;
-
+export const UniversalEntityPanel = ({ entity }: UniversalEntityPanelProps) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
   }, [entity]);

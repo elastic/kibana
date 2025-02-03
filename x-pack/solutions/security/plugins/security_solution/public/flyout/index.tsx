@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
+import type { UniversalEntityPanelExpandableFlyoutProps } from './entity_details/universal_right';
 import { UniversalEntityPanel } from './entity_details/universal_right';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
@@ -182,7 +183,9 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   },
   {
     key: UniversalEntityPanelKey,
-    component: (props) => <UniversalEntityPanel {...props} />,
+    component: (props) => (
+      <UniversalEntityPanel {...(props as UniversalEntityPanelExpandableFlyoutProps).params} />
+    ),
   },
 ];
 

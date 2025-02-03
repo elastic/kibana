@@ -8,21 +8,17 @@
 import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 
+import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 interface UniversalEntityFlyoutHeaderProps {
-  entity: {
-    id: string;
-    timestamp: string;
-    type: string;
-  };
+  entity: UniversalEntityEcs;
 }
 
 export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHeaderProps) => {
-  console.log(entity);
   return (
     <FlyoutHeader data-test-subj="service-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
