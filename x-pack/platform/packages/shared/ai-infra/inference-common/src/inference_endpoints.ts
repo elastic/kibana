@@ -27,6 +27,8 @@ export enum InferenceEndpointProvider {
   GoogleVertexAI = 'googlevertexai',
   /** Open AI */
   OpenAI = 'openai',
+  /** Jina AI */
+  JinaAI = 'jinaai',
 }
 
 export const elasticModelIds = {
