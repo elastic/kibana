@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
@@ -17,7 +19,7 @@ import { ISavedObjectsRepository } from '@kbn/core/server';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
-const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
+let logger: MockedLogger;
 const savedObjectsClient = savedObjectsClientMock.create() as unknown as ISavedObjectsRepository;
 const thrownError = new Error('Fail');
 
@@ -101,6 +103,7 @@ const mockedResponse = {
 describe('kibana index telemetry', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    logger = loggerMock.create();
   });
 
   describe('getTotalCountAggregations', () => {
@@ -108,37 +111,16 @@ describe('kibana index telemetry', () => {
       esClient.search.mockResponseOnce({
         took: 4,
         timed_out: false,
-        _shards: {
-          total: 1,
-          successful: 1,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 4,
-            relation: 'eq',
-          },
-          max_score: null,
-          hits: [],
-        },
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 4, relation: 'eq' }, max_score: null, hits: [] },
         aggregations: {
           by_rule_type_id: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
-              {
-                key: '.index-threshold',
-                doc_count: 2,
-              },
-              {
-                key: 'logs.alert.document.count',
-                doc_count: 1,
-              },
-              {
-                key: 'document.test.',
-                doc_count: 1,
-              },
+              { key: '.index-threshold', doc_count: 2 },
+              { key: 'logs.alert.document.count', doc_count: 1 },
+              { key: 'document.test.', doc_count: 1 },
             ],
           },
           by_execution_status: {
@@ -259,11 +241,7 @@ describe('kibana index telemetry', () => {
         },
       });
 
-      const telemetry = await getTotalCountAggregations({
-        esClient,
-        alertIndex: 'test',
-        logger,
-      });
+      const telemetry = await getTotalCountAggregations({ esClient, alertIndex: 'test', logger });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
 
@@ -333,22 +311,110 @@ describe('kibana index telemetry', () => {
     test('should return empty results and log warning if query throws error', async () => {
       esClient.search.mockRejectedValueOnce(new Error('oh no'));
 
-      const telemetry = await getTotalCountAggregations({
-        esClient,
-        alertIndex: 'test',
-        logger,
-      });
+      const telemetry = await getTotalCountAggregations({ esClient, alertIndex: 'test', logger });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getTotalCountAggregations - {}"`
+        `"Error executing alerting telemetry task: getTotalCountAggregations - Error: oh no"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toEqual({
         errorMessage: 'oh no',
+        hasErrors: true,
+        connectors_per_alert: {
+          avg: 0,
+          max: 0,
+          min: 0,
+        },
+        count_by_type: {},
+        count_rules_by_execution_status: {
+          success: 0,
+          error: 0,
+          warning: 0,
+        },
+        count_rules_with_tags: 0,
+        count_rules_by_notify_when: {
+          on_action_group_change: 0,
+          on_active_alert: 0,
+          on_throttle_interval: 0,
+        },
+        count_rules_snoozed: 0,
+        count_rules_muted: 0,
+        count_rules_with_muted_alerts: 0,
+        count_total: 0,
+        schedule_time: {
+          avg: '0s',
+          max: '0s',
+          min: '0s',
+        },
+        schedule_time_number_s: {
+          avg: 0,
+          max: 0,
+          min: 0,
+        },
+        throttle_time: {
+          avg: '0s',
+          max: '0s',
+          min: '0s',
+        },
+        throttle_time_number_s: {
+          avg: 0,
+          max: 0,
+          min: 0,
+        },
+        count_connector_types_by_consumers: {},
+      });
+    });
+
+    test('should return empty results and log debug log if query throws search_phase_execution_exception error', async () => {
+      esClient.search.mockRejectedValueOnce(
+        new errors.ResponseError({
+          warnings: [],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          meta: {} as any,
+          body: {
+            error: {
+              root_cause: [],
+              type: 'search_phase_execution_exception',
+              reason: 'no_shard_available_action_exception',
+              phase: 'fetch',
+              grouped: true,
+              failed_shards: [],
+              caused_by: {
+                type: 'no_shard_available_action_exception',
+                reason: 'This is the nested reason',
+              },
+            },
+          },
+          statusCode: 503,
+          headers: {},
+        })
+      );
+
+      const telemetry = await getTotalCountAggregations({ esClient, alertIndex: 'test', logger });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+
+      const loggerCalls = loggingSystemMock.collect(logger);
+      expect(loggerCalls.debug).toHaveLength(2);
+      expect(loggerCalls.debug[0][0]).toEqual(
+        `query for getTotalCountAggregations - {\"index\":\"test\",\"size\":0,\"body\":{\"query\":{\"bool\":{\"filter\":[{\"term\":{\"type\":\"alert\"}}]}},\"runtime_mappings\":{\"rule_action_count\":{\"type\":\"long\",\"script\":{\"source\":\"\\n                def alert = params._source['alert'];\\n                if (alert != null) {\\n                  def actions = alert.actions;\\n                  if (actions != null) {\\n                    emit(actions.length);\\n                  } else {\\n                    emit(0);\\n                  }\\n                }\"}},\"rule_schedule_interval\":{\"type\":\"long\",\"script\":{\"source\":\"\\n                int parsed = 0;\\n                if (doc['alert.schedule.interval'].size() > 0) {\\n                  def interval = doc['alert.schedule.interval'].value;\\n\\n                  if (interval.length() > 1) {\\n                      // get last char\\n                      String timeChar = interval.substring(interval.length() - 1);\\n                      // remove last char\\n                      interval = interval.substring(0, interval.length() - 1);\\n\\n                      if (interval.chars().allMatch(Character::isDigit)) {\\n                        // using of regex is not allowed in painless language\\n                        parsed = Integer.parseInt(interval);\\n\\n                        if (timeChar.equals(\\\"s\\\")) {\\n                          parsed = parsed;\\n                        } else if (timeChar.equals(\\\"m\\\")) {\\n                          parsed = parsed * 60;\\n                        } else if (timeChar.equals(\\\"h\\\")) {\\n                          parsed = parsed * 60 * 60;\\n                        } else if (timeChar.equals(\\\"d\\\")) {\\n                          parsed = parsed * 24 * 60 * 60;\\n                        }\\n                        emit(parsed);\\n                      }\\n                  }\\n                }\\n                emit(parsed);\\n              \"}},\"rule_throttle_interval\":{\"type\":\"long\",\"script\":{\"source\":\"\\n                int parsed = 0;\\n                if (doc['alert.throttle'].size() > 0) {\\n                def throttle = doc['alert.throttle'].value;\\n\\n                if (throttle.length() > 1) {\\n                    // get last char\\n                    String timeChar = throttle.substring(throttle.length() - 1);\\n                    // remove last char\\n                    throttle = throttle.substring(0, throttle.length() - 1);\\n\\n                    if (throttle.chars().allMatch(Character::isDigit)) {\\n                      // using of regex is not allowed in painless language\\n                      parsed = Integer.parseInt(throttle);\\n\\n                      if (timeChar.equals(\\\"s\\\")) {\\n                        parsed = parsed;\\n                      } else if (timeChar.equals(\\\"m\\\")) {\\n                        parsed = parsed * 60;\\n                      } else if (timeChar.equals(\\\"h\\\")) {\\n                        parsed = parsed * 60 * 60;\\n                      } else if (timeChar.equals(\\\"d\\\")) {\\n                        parsed = parsed * 24 * 60 * 60;\\n                      }\\n                      emit(parsed);\\n                    }\\n                }\\n              }\\n              emit(parsed);\\n              \"}},\"rule_with_tags\":{\"type\":\"long\",\"script\":{\"source\":\"\\n               def rule = params._source['alert'];\\n                if (rule != null && rule.tags != null) {\\n                  if (rule.tags.size() > 0) {\\n                    emit(1);\\n                  } else {\\n                    emit(0);\\n                  }\\n                }\"}},\"rule_snoozed\":{\"type\":\"long\",\"script\":{\"source\":\"\\n                def rule = params._source['alert'];\\n                if (rule != null && rule.snoozeSchedule != null) {\\n                  if (rule.snoozeSchedule.size() > 0) {\\n                    emit(1);\\n                  } else {\\n                    emit(0);\\n                  }\\n                }\"}},\"rule_muted\":{\"type\":\"long\",\"script\":{\"source\":\"\\n                if (doc['alert.muteAll'].value == true) {\\n                  emit(1);\\n                } else {\\n                  emit(0);\\n                }\"}},\"rule_with_muted_alerts\":{\"type\":\"long\",\"script\":{\"source\":\"\\n                def rule = params._source['alert'];\\n                if (rule != null && rule.mutedInstanceIds != null) {\\n                  if (rule.mutedInstanceIds.size() > 0) {\\n                    emit(1);\\n                  } else {\\n                    emit(0);\\n                  }\\n                }\"}}},\"aggs\":{\"by_rule_type_id\":{\"terms\":{\"field\":\"alert.alertTypeId\",\"size\":33}},\"max_throttle_time\":{\"max\":{\"field\":\"rule_throttle_interval\"}},\"min_throttle_time\":{\"min\":{\"field\":\"rule_throttle_interval\"}},\"avg_throttle_time\":{\"avg\":{\"field\":\"rule_throttle_interval\"}},\"max_interval_time\":{\"max\":{\"field\":\"rule_schedule_interval\"}},\"min_interval_time\":{\"min\":{\"field\":\"rule_schedule_interval\"}},\"avg_interval_time\":{\"avg\":{\"field\":\"rule_schedule_interval\"}},\"max_actions_count\":{\"max\":{\"field\":\"rule_action_count\"}},\"min_actions_count\":{\"min\":{\"field\":\"rule_action_count\"}},\"avg_actions_count\":{\"avg\":{\"field\":\"rule_action_count\"}},\"by_execution_status\":{\"terms\":{\"field\":\"alert.executionStatus.status\"}},\"by_notify_when\":{\"terms\":{\"field\":\"alert.notifyWhen\"}},\"connector_types_by_consumers\":{\"terms\":{\"field\":\"alert.consumer\"},\"aggs\":{\"actions\":{\"nested\":{\"path\":\"alert.actions\"},\"aggs\":{\"connector_types\":{\"terms\":{\"field\":\"alert.actions.actionTypeId\"}}}}}},\"by_search_type\":{\"terms\":{\"field\":\"alert.params.searchType\"}},\"sum_rules_with_tags\":{\"sum\":{\"field\":\"rule_with_tags\"}},\"sum_rules_snoozed\":{\"sum\":{\"field\":\"rule_snoozed\"}},\"sum_rules_muted\":{\"sum\":{\"field\":\"rule_muted\"}},\"sum_rules_with_muted_alerts\":{\"sum\":{\"field\":\"rule_with_muted_alerts\"}}}}}`
+      );
+      expect(loggerCalls.debug[1][0]).toMatchInlineSnapshot(`
+        "Error executing alerting telemetry task: getTotalCountAggregations - ResponseError: search_phase_execution_exception
+        	Caused by:
+        		no_shard_available_action_exception: This is the nested reason"
+      `);
+      // logger meta
+      expect(loggerCalls.debug[1][1]?.tags).toEqual(['alerting', 'telemetry-failed']);
+      expect(loggerCalls.debug[1][1]?.error?.stack_trace).toBeDefined();
+      expect(loggerCalls.warn).toHaveLength(0);
+
+      expect(telemetry).toEqual({
+        errorMessage: 'no_shard_available_action_exception',
         hasErrors: true,
         connectors_per_alert: {
           avg: 0,
@@ -401,66 +467,32 @@ describe('kibana index telemetry', () => {
       esClient.search.mockResponseOnce({
         took: 4,
         timed_out: false,
-        _shards: {
-          total: 1,
-          successful: 1,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 4,
-            relation: 'eq',
-          },
-          max_score: null,
-          hits: [],
-        },
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 4, relation: 'eq' }, max_score: null, hits: [] },
         aggregations: {
           namespaces_count: { value: 1 },
           by_rule_type_id: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
-              {
-                key: '.index-threshold',
-                doc_count: 2,
-              },
-              {
-                key: 'logs.alert.document.count',
-                doc_count: 1,
-              },
-              {
-                key: 'document.test.',
-                doc_count: 1,
-              },
+              { key: '.index-threshold', doc_count: 2 },
+              { key: 'logs.alert.document.count', doc_count: 1 },
+              { key: 'document.test.', doc_count: 1 },
             ],
           },
           by_search_type: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
-              {
-                key: 'esQuery',
-                doc_count: 0,
-              },
-              {
-                key: 'searchSource',
-                doc_count: 1,
-              },
-              {
-                key: 'esqlQuery',
-                doc_count: 3,
-              },
+              { key: 'esQuery', doc_count: 0 },
+              { key: 'searchSource', doc_count: 1 },
+              { key: 'esqlQuery', doc_count: 3 },
             ],
           },
         },
       });
 
-      const telemetry = await getTotalCountInUse({
-        esClient,
-        alertIndex: 'test',
-        logger,
-      });
+      const telemetry = await getTotalCountInUse({ esClient, alertIndex: 'test', logger });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
 
@@ -483,17 +515,13 @@ describe('kibana index telemetry', () => {
     test('should return empty results and log warning if query throws error', async () => {
       esClient.search.mockRejectedValueOnce(new Error('oh no'));
 
-      const telemetry = await getTotalCountInUse({
-        esClient,
-        alertIndex: 'test',
-        logger,
-      });
+      const telemetry = await getTotalCountInUse({ esClient, alertIndex: 'test', logger });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getTotalCountInUse - {}"`
+        `"Error executing alerting telemetry task: getTotalCountInUse - Error: oh no"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
@@ -502,6 +530,59 @@ describe('kibana index telemetry', () => {
         countNamespaces: 0,
         countTotal: 0,
         errorMessage: 'oh no',
+        hasErrors: true,
+      });
+    });
+
+    test('should return empty results and log debug log if query throws search_phase_execution_exception error', async () => {
+      esClient.search.mockRejectedValueOnce(
+        new errors.ResponseError({
+          warnings: [],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          meta: {} as any,
+          body: {
+            error: {
+              root_cause: [],
+              type: 'search_phase_execution_exception',
+              reason: 'no_shard_available_action_exception',
+              phase: 'fetch',
+              grouped: true,
+              failed_shards: [],
+              caused_by: {
+                type: 'no_shard_available_action_exception',
+                reason: 'This is the nested reason',
+              },
+            },
+          },
+          statusCode: 503,
+          headers: {},
+        })
+      );
+
+      const telemetry = await getTotalCountInUse({ esClient, alertIndex: 'test', logger });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+
+      const loggerCalls = loggingSystemMock.collect(logger);
+      expect(loggerCalls.debug).toHaveLength(2);
+      expect(loggerCalls.debug[0][0]).toEqual(
+        `query for getTotalCountInUse - {\"index\":\"test\",\"size\":0,\"body\":{\"query\":{\"bool\":{\"filter\":[{\"term\":{\"type\":\"alert\"}},{\"term\":{\"alert.enabled\":true}}]}},\"aggs\":{\"namespaces_count\":{\"cardinality\":{\"field\":\"namespaces\"}},\"by_rule_type_id\":{\"terms\":{\"field\":\"alert.alertTypeId\",\"size\":33}},\"by_search_type\":{\"terms\":{\"field\":\"alert.params.searchType\"}}}}}`
+      );
+      expect(loggerCalls.debug[1][0]).toMatchInlineSnapshot(`
+        "Error executing alerting telemetry task: getTotalCountInUse - ResponseError: search_phase_execution_exception
+        	Caused by:
+        		no_shard_available_action_exception: This is the nested reason"
+      `);
+      // logger meta
+      expect(loggerCalls.debug[1][1]?.tags).toEqual(['alerting', 'telemetry-failed']);
+      expect(loggerCalls.debug[1][1]?.error?.stack_trace).toBeDefined();
+      expect(loggerCalls.warn).toHaveLength(0);
+
+      expect(telemetry).toStrictEqual({
+        countByType: {},
+        countNamespaces: 0,
+        countTotal: 0,
+        errorMessage: 'no_shard_available_action_exception',
         hasErrors: true,
       });
     });
@@ -515,10 +596,7 @@ describe('kibana index telemetry', () => {
           yield mockedResponse;
         }),
       });
-      const telemetry = await getMWTelemetry({
-        savedObjectsClient,
-        logger,
-      });
+      const telemetry = await getMWTelemetry({ savedObjectsClient, logger });
 
       expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -533,67 +611,63 @@ describe('kibana index telemetry', () => {
         hasErrors: false,
       });
     });
-  });
 
-  test('should throw the error', async () => {
-    savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
-      close: jest.fn(),
-      find: jest.fn().mockImplementation(async function* () {
-        throw thrownError;
-      }),
-    });
+    test('should return empty results and log warning if query throws error', async () => {
+      savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: jest.fn().mockImplementation(async function* () {
+          throw thrownError;
+        }),
+      });
 
-    const telemetry = await getMWTelemetry({
-      savedObjectsClient,
-      logger,
-    });
+      const telemetry = await getMWTelemetry({ savedObjectsClient, logger });
 
-    expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
-      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      namespaces: ['*'],
-      perPage: 100,
-      fields: ['rRule', 'scopedQuery'],
-    });
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        namespaces: ['*'],
+        perPage: 100,
+        fields: ['rRule', 'scopedQuery'],
+      });
 
-    expect(telemetry).toStrictEqual({
-      count_mw_total: 0,
-      count_mw_with_repeat_toggle_on: 0,
-      count_mw_with_filter_alert_toggle_on: 0,
-      hasErrors: true,
-      errorMessage: 'Fail',
-    });
-    expect(logger.warn).toHaveBeenCalled();
-    const loggerCall = logger.warn.mock.calls[0][0];
-    const loggerMeta = logger.warn.mock.calls[0][1];
-    expect(loggerCall).toBe('Error executing alerting telemetry task: getTotalMWCount - {}');
-    expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
-    expect(loggerMeta?.error?.stack_trace).toBeDefined();
-  });
+      expect(telemetry).toStrictEqual({
+        count_mw_total: 0,
+        count_mw_with_repeat_toggle_on: 0,
+        count_mw_with_filter_alert_toggle_on: 0,
+        hasErrors: true,
+        errorMessage: 'Fail',
+      });
 
-  test('should stop on MW max limit count', async () => {
-    savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
-      close: jest.fn(),
-      find: jest.fn().mockImplementation(async function* () {
-        yield mockedResponse;
-      }),
-    });
-    const telemetry = await getMWTelemetry({
-      savedObjectsClient,
-      logger,
-      maxDocuments: 1,
+      expect(logger.warn).toHaveBeenCalled();
+      const loggerCall = logger.warn.mock.calls[0][0];
+      const loggerMeta = logger.warn.mock.calls[0][1];
+      expect(loggerCall).toBe(
+        'Error executing alerting telemetry task: getTotalMWCount - Error: Fail'
+      );
+      expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
+      expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
 
-    expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
-      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      namespaces: ['*'],
-      perPage: 100,
-      fields: ['rRule', 'scopedQuery'],
-    });
-    expect(telemetry).toStrictEqual({
-      count_mw_total: 2,
-      count_mw_with_repeat_toggle_on: 1,
-      count_mw_with_filter_alert_toggle_on: 1,
-      hasErrors: false,
+    test('should stop on MW max limit count', async () => {
+      savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: jest.fn().mockImplementation(async function* () {
+          yield mockedResponse;
+        }),
+      });
+      const telemetry = await getMWTelemetry({ savedObjectsClient, logger, maxDocuments: 1 });
+
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        namespaces: ['*'],
+        perPage: 100,
+        fields: ['rRule', 'scopedQuery'],
+      });
+      expect(telemetry).toStrictEqual({
+        count_mw_total: 2,
+        count_mw_with_repeat_toggle_on: 1,
+        count_mw_with_filter_alert_toggle_on: 1,
+        hasErrors: false,
+      });
     });
   });
 });
