@@ -6,7 +6,7 @@
  */
 
 import { EuiTourStep } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isEmpty, throttle } from 'lodash';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Conversation } from '../../assistant_context/types';
@@ -49,25 +49,22 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
       return;
     }
 
-    const conaintsContentReferences =
+    const containsContentReferences =
       conversation.messages &&
       conversation.messages.some((message) => message.metadata?.contentReferences != null);
     const containsReplacements = !(
       conversation.replacements == null || isEmpty(conversation.replacements)
     );
-    let timer: NodeJS.Timeout | null = null;
-    if (conaintsContentReferences || containsReplacements) {
-      timer = setTimeout(() => {
+
+    if (containsContentReferences || containsReplacements) {
+      const timer = setTimeout(() => {
         setShowTour(true);
       }, 1000);
-      return;
-    }
 
-    return () => {
-      if (timer) {
+      return () => {
         clearTimeout(timer);
-      }
-    };
+      };
+    }
   }, [conversation, tourCompleted, setShowTour, showTour]);
 
   const finishTour = useCallback(() => {
@@ -75,25 +72,20 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
     setShowTour(false);
   }, [setTourCompleted, setShowTour]);
 
-  return useMemo(
-    () => (
-      <EuiTourStep
-        data-test-subj="anonymizedValuesAndCitationsTourStep"
-        panelProps={{
-          'data-test-subj': `anonymizedValuesAndCitationsTourStepPanel`,
-        }}
-        anchor={anonymizedValuesAndCitationsTourStep1.anchor}
-        content={anonymizedValuesAndCitationsTourStep1.content}
-        isStepOpen={showTour}
-        maxWidth={300}
-        onFinish={finishTour}
-        step={1}
-        stepsTotal={1}
-        title={anonymizedValuesAndCitationsTourStep1.title}
-        subtitle={anonymizedValuesAndCitationsTourStep1.subTitle}
-        anchorPosition="rightUp"
-      />
-    ),
-    [showTour, finishTour]
-  );
+  return (<EuiTourStep
+    data-test-subj="anonymizedValuesAndCitationsTourStep"
+    panelProps={{
+      'data-test-subj': `anonymizedValuesAndCitationsTourStepPanel`,
+    }}
+    anchor={anonymizedValuesAndCitationsTourStep1.anchor}
+    content={anonymizedValuesAndCitationsTourStep1.content}
+    isStepOpen={showTour}
+    maxWidth={300}
+    onFinish={finishTour}
+    step={1}
+    stepsTotal={1}
+    title={anonymizedValuesAndCitationsTourStep1.title}
+    subtitle={anonymizedValuesAndCitationsTourStep1.subTitle}
+    anchorPosition="rightUp"
+  />)
 };
