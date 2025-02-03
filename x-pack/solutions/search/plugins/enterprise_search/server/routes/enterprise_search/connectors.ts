@@ -48,7 +48,7 @@ import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
@@ -210,9 +210,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_sync',
       validate: {
-        body: schema.object({
-          nextSyncConfig: schema.maybe(schema.string()),
-        }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -220,12 +217,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startSync(
-        client,
-        request.params.connectorId,
-        SyncJobType.FULL,
-        request.body.nextSyncConfig
-      );
+      await startSync(client, request.params.connectorId, SyncJobType.FULL);
       return response.ok();
     })
   );

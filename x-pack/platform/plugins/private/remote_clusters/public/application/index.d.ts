@@ -13,6 +13,7 @@ export declare const renderApp: (
   appDependencies: {
     isCloudEnabled: boolean;
     cloudBaseUrl: string;
+    cloudDeploymentUrl: string;
     executionContext: ExecutionContextStart;
     canUseAPIKeyTrustModel: boolean;
   },

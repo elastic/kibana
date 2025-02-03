@@ -9,14 +9,13 @@
 
 import { Page, test as base } from '@playwright/test';
 import { ScoutPage } from '.';
-import { KibanaUrl, ToolingLog } from '../../worker';
+import { KibanaUrl, ScoutLogger } from '../../worker';
 import { ScoutSpaceParallelFixture } from '../../worker/scout_space';
 import { extendPlaywrightPage } from './single_thread';
-import { serviceLoadedMsg } from '../../../utils';
 
 export const scoutPageParallelFixture = base.extend<
   { page: ScoutPage },
-  { log: ToolingLog; kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture }
+  { log: ScoutLogger; kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture }
 >({
   page: async (
     {
@@ -24,7 +23,7 @@ export const scoutPageParallelFixture = base.extend<
       page,
       kbnUrl,
       scoutSpace,
-    }: { log: ToolingLog; page: Page; kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture },
+    }: { log: ScoutLogger; page: Page; kbnUrl: KibanaUrl; scoutSpace: ScoutSpaceParallelFixture },
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
@@ -33,7 +32,7 @@ export const scoutPageParallelFixture = base.extend<
     extendedPage.gotoApp = (appName: string) =>
       page.goto(kbnUrl.app(appName, { space: scoutSpace.id }));
 
-    log.debug(serviceLoadedMsg(`scoutPage:${scoutSpace.id}`));
+    log.serviceLoaded(`scoutPage:${scoutSpace.id}`);
     await use(extendedPage);
   },
 });
