@@ -280,7 +280,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       wrapper: Wrapper,
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByTestId('knowledge-base-entries-table')).toBeInTheDocument();
       expect(screen.getByText('AAAAA')).toBeInTheDocument();
       expect(screen.getByText('BBBBB')).toBeInTheDocument();
@@ -288,17 +288,17 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
 
     // Order ascending
-    userEvent.click(screen.getByText('Name'));
+    await userEvent.click(screen.getByText('Name'));
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText('AAAAA').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(4);
       expect(screen.getByText('aaaaa').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(4);
     });
 
     // Order decending
-    userEvent.click(screen.getByText('Name'));
+    await userEvent.click(screen.getByText('Name'));
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText('AAAAA').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(2);
       expect(screen.getByText('aaaaa').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(2);
     });
