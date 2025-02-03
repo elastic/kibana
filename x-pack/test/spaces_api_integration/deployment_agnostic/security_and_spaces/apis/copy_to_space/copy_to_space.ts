@@ -32,7 +32,7 @@ export default function copyToSpaceSpacesAndSecuritySuite(
     createMultiNamespaceTestCases,
   } = copyToSpaceTestSuiteFactory(context);
 
-  describe('copy to spaces', () => {
+  describe('copy to spaces', function () {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

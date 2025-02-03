@@ -31,6 +31,7 @@ import {
 import { initVegaLayer, initTmsRasterLayer } from './layers';
 
 import { maplibregl } from '@kbn/mapbox-gl';
+import { DEFAULT_EMS_ROADMAP_DESATURATED_ID } from '@kbn/maps-ems-plugin/common';
 
 jest.mock('@kbn/mapbox-gl', () => {
   const zoomTo = jest.fn();
@@ -110,7 +111,7 @@ describe('vega_map_view/view', () => {
           };
         },
         getDefaultTmsLayer() {
-          return isUserProvided ? 'TMS in config/kibana.yml' : 'road_map_desaturated';
+          return isUserProvided ? 'TMS in config/kibana.yml' : DEFAULT_EMS_ROADMAP_DESATURATED_ID;
         },
       } as unknown as IServiceSettings;
     };
