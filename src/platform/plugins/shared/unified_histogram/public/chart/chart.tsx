@@ -80,7 +80,7 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  dataLoading$?: LensEmbeddableOutput['dataLoading'];
+  dataLoading$?: LensEmbeddableOutput['dataLoading$'];
   isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -276,7 +276,7 @@ export function Chart({
 
   const canEditVisualizationOnTheFly = canCustomizeVisualization && chartVisible;
   const canSaveVisualization =
-    canEditVisualizationOnTheFly && services.capabilities.dashboard?.showWriteControls;
+    canEditVisualizationOnTheFly && services.capabilities.dashboard_v2?.showWriteControls;
 
   const actions: IconButtonGroupProps['buttons'] = [];
 

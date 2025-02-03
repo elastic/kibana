@@ -37,6 +37,7 @@ describe('getCasesConnectorType', () => {
         'cases:my-owner/deleteComment',
         'cases:my-owner/findConfigurations',
         'cases:my-owner/reopenCase',
+        'cases:my-owner/assignCase',
       ]);
     });
 
@@ -358,6 +359,7 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/deleteComment',
           'cases:securitySolution/findConfigurations',
           'cases:securitySolution/reopenCase',
+          'cases:securitySolution/assignCase',
         ]);
       });
 
@@ -379,6 +381,7 @@ describe('getCasesConnectorType', () => {
           'cases:observability/deleteComment',
           'cases:observability/findConfigurations',
           'cases:observability/reopenCase',
+          'cases:observability/assignCase',
         ]);
       });
 
@@ -400,6 +403,7 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/deleteComment',
           'cases:securitySolution/findConfigurations',
           'cases:securitySolution/reopenCase',
+          'cases:securitySolution/assignCase',
         ]);
       });
     });

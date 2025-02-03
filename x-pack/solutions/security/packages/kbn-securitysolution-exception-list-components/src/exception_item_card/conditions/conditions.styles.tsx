@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cx } from '@emotion/css';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -15,15 +14,6 @@ export const nestedGroupSpaceCss = css`
   margin-bottom: ${euiThemeVars.euiSizeXS};
   padding-top: ${euiThemeVars.euiSizeXS};
 `;
-
-export const borderCss = cx(
-  'eui-xScroll',
-  `
-  border: 1px;
-  border-color: #d3dae6;
-  border-style: solid;
-`
-);
 
 export const valueContainerCss = css`
   display: flex;

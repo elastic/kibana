@@ -85,12 +85,17 @@ export enum ProductFeatureSecurityKey {
   cloudSecurityPosture = 'cloud_security_posture',
 
   /**
-   * enables the integration assistant
+   * enables the automatic import
    */
-  integrationAssistant = 'integration_assistant',
+  automaticImport = 'automatic_import',
 
   /** Enables Endpoint Workflow Insights */
   securityWorkflowInsights = 'security_workflow_insights',
+
+  /**
+   * Enables customization of prebuilt Elastic rules
+   */
+  prebuiltRuleCustomization = 'prebuilt_rule_customization',
 }
 
 export enum ProductFeatureCasesKey {
@@ -172,6 +177,7 @@ export enum CasesSubFeatureId {
   casesSettings = 'casesSettingsSubFeature',
   createComment = 'createCommentSubFeature',
   reopenCase = 'reopenCaseSubFeature',
+  assignUsers = 'assignUsersSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */

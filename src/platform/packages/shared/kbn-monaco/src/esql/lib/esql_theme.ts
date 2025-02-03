@@ -32,6 +32,8 @@ export const buildESQLTheme = ({
           'dot',
           'opening_bracket',
           'closing_bracket',
+          'left_braces',
+          'right_braces',
           'quoted_identifier',
           'unquoted_identifier',
           'pipe',

@@ -11,7 +11,7 @@
         "label": "GridLayout",
         "description": [],
         "signature": [
-          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, }: ",
+          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, className, }: ",
           "GridLayoutProps",
           ") => React.JSX.Element"
         ],
@@ -24,7 +24,7 @@
             "id": "def-public.GridLayout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n  expandedPanelId,\n  accessMode = 'EDIT',\n}",
+            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n  expandedPanelId,\n  accessMode = 'EDIT',\n  className,\n}",
             "description": [],
             "signature": [
               "GridLayoutProps"

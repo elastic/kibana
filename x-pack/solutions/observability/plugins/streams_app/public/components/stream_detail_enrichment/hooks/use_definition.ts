@@ -11,32 +11,40 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { useBoolean } from '@kbn/react-hooks';
 import {
   ReadStreamDefinition,
-  ProcessingDefinition,
   isWiredReadStream,
   FieldDefinition,
   WiredReadStreamDefinition,
+  ProcessorDefinition,
+  getProcessorConfig,
+  IngestUpsertRequest,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { isEqual } from 'lodash';
-import { DetectedField, ProcessorDefinition } from '../types';
+import { isEqual, omit } from 'lodash';
+import { DetectedField, EnrichmentUIProcessorDefinition, ProcessingDefinition } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
+import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
 export const useDefinition = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
   const { core, dependencies } = useKibana();
 
   const { toasts } = core.notifications;
-  const { processing } = definition.stream.ingest;
+  const { processing: existingProcessorDefinitions } = definition.stream.ingest;
   const { streamsRepositoryClient } = dependencies.start.streams;
 
   const abortController = useAbortController();
   const [isSavingChanges, { on: startsSaving, off: endsSaving }] = useBoolean();
 
-  const [processors, setProcessors] = useState(() => createProcessorsList(processing));
+  const [processors, setProcessors] = useState(() =>
+    createProcessorsList(existingProcessorDefinitions)
+  );
   const [fields, setFields] = useState(() =>
     isWiredReadStream(definition) ? definition.stream.ingest.wired.fields : {}
   );
 
-  const httpProcessing = useMemo(() => processors.map(removeIdFromProcessor), [processors]);
+  const nextProcessorDefinitions = useMemo(
+    () => processors.map(convertUiDefinitionIntoApiDefinition),
+    [processors]
+  );
 
   useEffect(() => {
     // Reset processors when definition refreshes
@@ -44,19 +52,19 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   }, [definition]);
 
   const hasChanges = useMemo(
-    () => !isEqual(processing, httpProcessing),
-    [processing, httpProcessing]
+    () => !isEqual(existingProcessorDefinitions, nextProcessorDefinitions),
+    [existingProcessorDefinitions, nextProcessorDefinitions]
   );
 
   const addProcessor = (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => {
-    setProcessors((prevProcs) => prevProcs.concat(createProcessorWithId(newProcessing)));
+    setProcessors((prevProcs) => prevProcs.concat({ ...newProcessing, id: createId() }));
 
     if (isWiredReadStream(definition) && newFields) {
       setFields((currentFields) => mergeFields(definition, currentFields, newFields));
     }
   };
 
-  const updateProcessor = (id: string, processorUpdate: ProcessorDefinition) => {
+  const updateProcessor = (id: string, processorUpdate: EnrichmentUIProcessorDefinition) => {
     setProcessors((prevProcs) =>
       prevProcs.map((proc) => (proc.id === id ? processorUpdate : proc))
     );
@@ -67,14 +75,14 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   };
 
   const resetChanges = () => {
-    setProcessors(createProcessorsList(processing));
+    setProcessors(createProcessorsList(existingProcessorDefinitions));
     setFields(isWiredReadStream(definition) ? definition.stream.ingest.wired.fields : {});
   };
 
   const saveChanges = async () => {
     startsSaving();
     try {
-      await streamsRepositoryClient.fetch(`PUT /api/streams/{id}`, {
+      await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
         signal: abortController.signal,
         params: {
           path: {
@@ -83,10 +91,10 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
           body: {
             ingest: {
               ...definition.stream.ingest,
-              processing: httpProcessing,
+              processing: nextProcessorDefinitions,
               ...(isWiredReadStream(definition) && { wired: { fields } }),
             },
-          },
+          } as IngestUpsertRequest,
         },
       });
 
@@ -127,17 +135,41 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
 };
 
 const createId = htmlIdGenerator();
-const createProcessorsList = (processors: ProcessingDefinition[]): ProcessorDefinition[] =>
-  processors.map(createProcessorWithId);
+const createProcessorsList = (
+  processors: ProcessorDefinition[]
+): EnrichmentUIProcessorDefinition[] => processors.map(createProcessorWithId);
 
-const createProcessorWithId = (processor: ProcessingDefinition): ProcessorDefinition => ({
-  ...processor,
+const createProcessorWithId = (
+  processor: ProcessorDefinition
+): EnrichmentUIProcessorDefinition => ({
+  condition: alwaysToEmptyEquals(getProcessorConfig(processor).if),
+  config: {
+    ...('grok' in processor
+      ? { grok: omit(processor.grok, 'if') }
+      : { dissect: omit(processor.dissect, 'if') }),
+  },
   id: createId(),
 });
 
-const removeIdFromProcessor = (processor: ProcessorDefinition): ProcessingDefinition => {
-  const { id, ...rest } = processor;
-  return rest;
+const convertUiDefinitionIntoApiDefinition = (
+  processor: EnrichmentUIProcessorDefinition
+): ProcessorDefinition => {
+  const { id: _id, config, condition } = processor;
+
+  if ('grok' in config) {
+    return {
+      grok: {
+        ...config.grok,
+        if: emptyEqualsToAlways(condition),
+      },
+    };
+  }
+  return {
+    dissect: {
+      ...config.dissect,
+      if: emptyEqualsToAlways(condition),
+    },
+  };
 };
 
 const mergeFields = (

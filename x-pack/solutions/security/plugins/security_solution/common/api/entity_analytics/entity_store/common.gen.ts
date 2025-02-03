@@ -36,6 +36,28 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('24h'),
+  timestampField: z.string().optional(),
+  timeout: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('180s'),
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  docsPerSecond: z.number().int().optional(),
   error: z.object({}).optional(),
 });
 
@@ -80,3 +102,9 @@ export const InspectQuery = z.object({
   response: z.array(z.string()),
   dsl: z.array(z.string()),
 });
+
+/**
+ * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+ */
+export type Interval = z.infer<typeof Interval>;
+export const Interval = z.string().regex(/^[1-9]\d*[smh]$/);

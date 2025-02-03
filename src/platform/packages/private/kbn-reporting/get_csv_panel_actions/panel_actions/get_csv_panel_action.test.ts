@@ -71,7 +71,7 @@ describe('GetCsvReportPanelAction', () => {
     mockStartServicesPayload = [
       {
         ...core,
-        application: { capabilities: { dashboard: { downloadCsv: true } } },
+        application: { capabilities: { dashboard_v2: { downloadCsv: true } } },
       } as unknown as CoreStart,
       {
         data: dataPluginMock.createStartContract(),
@@ -104,7 +104,7 @@ describe('GetCsvReportPanelAction', () => {
         }),
         hasTimeRange: () => true,
         parentApi: {
-          viewMode: new BehaviorSubject('view'),
+          viewMode$: new BehaviorSubject('view'),
         },
       },
     } as EmbeddableApiContext;

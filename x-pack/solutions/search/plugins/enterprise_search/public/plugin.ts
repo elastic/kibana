@@ -58,13 +58,12 @@ import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { CONNECTORS_PATH, CRAWLERS_PATH } from './applications/enterprise_search_content/routes';
-
 import { docLinks } from './applications/shared/doc_links';
+
 import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
-  publicUrl?: string;
 }
 
 export type EnterpriseSearchPublicSetup = ReturnType<EnterpriseSearchPlugin['setup']>;
@@ -146,7 +145,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
   }
 
-  private data: ClientData = {} as ClientData;
+  private data: ClientData = {};
   private esConfig: ESConfig;
 
   private async getInitialData(http: HttpSetup) {
@@ -210,10 +209,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private isSidebarEnabled = true;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { config } = this;
-    if (!config.ui?.enabled) {
-      return;
-    }
     const { cloud, share } = plugins;
 
     core.application.register({
@@ -264,6 +259,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
       order: 1,
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -481,9 +477,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    if (!this.config.ui?.enabled) {
-      return;
-    }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
