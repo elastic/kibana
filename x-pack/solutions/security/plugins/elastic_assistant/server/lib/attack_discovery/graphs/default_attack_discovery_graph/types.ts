@@ -29,4 +29,5 @@ export interface GraphState {
   replacements: Replacements;
   start?: string | null;
   unrefinedResults: AttackDiscovery[] | null;
+  unfilteredAlertsCount: number;
 }

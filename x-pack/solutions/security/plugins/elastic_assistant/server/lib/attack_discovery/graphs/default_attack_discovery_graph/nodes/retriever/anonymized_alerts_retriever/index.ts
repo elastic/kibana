@@ -28,6 +28,7 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
   #replacements?: Replacements;
   #size?: number;
   #start?: string | null;
+  #unfilteredAlertsCount: number;
 
   constructor({
     alertsIndexPattern,
@@ -54,6 +55,7 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
   }) {
     super(fields);
 
+    this.#unfilteredAlertsCount = 0;
     this.#alertsIndexPattern = alertsIndexPattern;
     this.#anonymizationFields = anonymizationFields;
     this.#end = end;
@@ -64,12 +66,15 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
     this.#size = size;
     this.#start = start;
   }
+  public get getUnfilteredAlertsCount() {
+    return this.#unfilteredAlertsCount;
+  }
 
   async _getRelevantDocuments(
     query: string,
     runManager?: CallbackManagerForRetrieverRun
   ): Promise<Document[]> {
-    const anonymizedAlerts = await getAnonymizedAlerts({
+    const { anonymizedAlerts, unfilteredAlertsCount } = await getAnonymizedAlerts({
       alertsIndexPattern: this.#alertsIndexPattern,
       anonymizationFields: this.#anonymizationFields,
       end: this.#end,
@@ -80,6 +85,7 @@ export class AnonymizedAlertsRetriever extends BaseRetriever {
       size: this.#size,
       start: this.#start,
     });
+    this.#unfilteredAlertsCount = unfilteredAlertsCount;
 
     return anonymizedAlerts.map((alert) => ({
       pageContent: alert,

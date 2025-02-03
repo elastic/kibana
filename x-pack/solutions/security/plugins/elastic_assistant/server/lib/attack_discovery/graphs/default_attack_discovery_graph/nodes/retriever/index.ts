@@ -57,8 +57,10 @@ export const getRetrieveAnonymizedAlertsNode = ({
       .withConfig({ runName: 'runAnonymizedAlertsRetriever' })
       .invoke('');
 
+    const unfilteredAlertsCount = retriever.getUnfilteredAlertsCount;
     return {
       ...state,
+      unfilteredAlertsCount,
       anonymizedAlerts: documents,
       replacements: localReplacements,
     };

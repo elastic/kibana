@@ -130,3 +130,83 @@ export const getOpenAndAcknowledgedAlertsQuery = ({
   ignore_unavailable: true,
   index: [alertsIndexPattern],
 });
+
+interface AlertsCountQuery {
+  allow_no_indices: boolean;
+  body: {
+    query: {
+      bool: {
+        filter: Array<Record<string, unknown>>;
+      };
+    };
+  };
+  ignore_unavailable: boolean;
+  index: string[];
+}
+/**
+ * This query is to be used with the count API and returns open and acknowledged (non-building block) alerts in the last 24 hours.
+
+ */
+export const getAlertsCountQuery = ({
+  alertsIndexPattern,
+  end,
+  start,
+}: {
+  alertsIndexPattern: string;
+  end?: string | null;
+  filter?: Record<string, unknown> | null;
+  start?: string | null;
+}): AlertsCountQuery => ({
+  allow_no_indices: true,
+  body: {
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              must: [],
+              filter: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          'kibana.alert.workflow_status': 'open',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          'kibana.alert.workflow_status': 'acknowledged',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: start != null ? start : DEFAULT_START,
+                      lte: end != null ? end : DEFAULT_END,
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
+              should: [],
+              must_not: [
+                {
+                  exists: {
+                    field: 'kibana.alert.building_block_type',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  ignore_unavailable: true,
+  index: [alertsIndexPattern],
+});

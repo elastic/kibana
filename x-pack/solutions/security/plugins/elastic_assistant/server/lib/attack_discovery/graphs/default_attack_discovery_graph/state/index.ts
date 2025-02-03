@@ -106,6 +106,10 @@ export const getDefaultGraphState = ({
     value: (x?: string | null, y?: string | null) => y ?? x,
     default: () => start,
   },
+  unfilteredAlertsCount: {
+    value: (x: number, y?: number) => y ?? x,
+    default: () => 0,
+  },
   unrefinedResults: {
     value: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
     default: () => null,

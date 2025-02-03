@@ -243,8 +243,10 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
   configuredAlertsCount: number;
   discoveriesGenerated: number;
   durationMs: number;
+  hasFilter: boolean;
   model?: string;
   provider?: string;
+  unfilteredAlertsCount?: number;
 }> = {
   eventType: 'attack_discovery_success',
   schema: {
@@ -290,6 +292,13 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
         optional: false,
       },
     },
+    hasFilter: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a filter was applied to the alerts used as context',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -301,6 +310,13 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'OpenAI provider',
+        optional: true,
+      },
+    },
+    unfilteredAlertsCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Only present when hasAlerts is true, number of alerts without the filter',
         optional: true,
       },
     },

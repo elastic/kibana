@@ -62,6 +62,7 @@ export const invokeAttackDiscoveryGraph = async ({
 }): Promise<{
   anonymizedAlerts: Document[];
   attackDiscoveries: AttackDiscovery[] | null;
+  unfilteredAlertsCount: number;
 }> => {
   const llmType = getLlmType(apiConfig.actionTypeId);
   const model = apiConfig.model;
@@ -145,5 +146,9 @@ export const invokeAttackDiscoveryGraph = async ({
     maxHallucinationFailures,
   });
 
-  return { anonymizedAlerts, attackDiscoveries };
+  return {
+    anonymizedAlerts,
+    attackDiscoveries,
+    unfilteredAlertsCount: result.unfilteredAlertsCount,
+  };
 };

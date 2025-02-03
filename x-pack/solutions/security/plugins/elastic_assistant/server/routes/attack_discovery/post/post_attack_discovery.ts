@@ -149,7 +149,7 @@ export const postAttackDiscoveryRoute = (
             size,
             start,
           })
-            .then(({ anonymizedAlerts, attackDiscoveries }) =>
+            .then(({ anonymizedAlerts, attackDiscoveries, unfilteredAlertsCount }) =>
               updateAttackDiscoveries({
                 anonymizedAlerts,
                 apiConfig,
@@ -157,11 +157,13 @@ export const postAttackDiscoveryRoute = (
                 attackDiscoveryId,
                 authenticatedUser,
                 dataClient,
+                hasFilter: !!(filter && Object.keys(filter).length),
                 latestReplacements,
                 logger,
                 size,
                 startTime,
                 telemetry,
+                unfilteredAlertsCount,
               })
             )
             .catch((err) =>

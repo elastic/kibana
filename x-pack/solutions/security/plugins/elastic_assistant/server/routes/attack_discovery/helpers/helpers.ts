@@ -135,11 +135,13 @@ export const updateAttackDiscoveries = async ({
   attackDiscoveryId,
   authenticatedUser,
   dataClient,
+  hasFilter,
   latestReplacements,
   logger,
   size,
   startTime,
   telemetry,
+  unfilteredAlertsCount,
 }: {
   anonymizedAlerts: Document[];
   apiConfig: ApiConfig;
@@ -147,11 +149,13 @@ export const updateAttackDiscoveries = async ({
   attackDiscoveryId: string;
   authenticatedUser: AuthenticatedUser;
   dataClient: AttackDiscoveryDataClient;
+  hasFilter: boolean;
   latestReplacements: Replacements;
   logger: Logger;
   size: number;
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
+  unfilteredAlertsCount: number;
 }) => {
   try {
     const currentAd = await dataClient.getAttackDiscovery({
@@ -197,8 +201,10 @@ export const updateAttackDiscoveries = async ({
       configuredAlertsCount: size,
       discoveriesGenerated: updateProps.attackDiscoveries?.length ?? 0,
       durationMs,
+      hasFilter,
       model: apiConfig.model,
       provider: apiConfig.provider,
+      ...(hasFilter ? { unfilteredAlertsCount } : {}),
     });
   } catch (updateErr) {
     logger.error(updateErr);

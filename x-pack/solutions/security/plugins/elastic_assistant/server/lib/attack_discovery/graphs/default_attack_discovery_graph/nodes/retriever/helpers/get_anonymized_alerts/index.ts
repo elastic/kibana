@@ -17,6 +17,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { getAlertsCountQuery } from '@kbn/elastic-assistant-common/impl/alerts/get_open_and_acknowledged_alerts_query';
 
 export const getAnonymizedAlerts = async ({
   alertsIndexPattern,
@@ -38,9 +39,9 @@ export const getAnonymizedAlerts = async ({
   replacements?: Replacements;
   size?: number;
   start?: string | null;
-}): Promise<string[]> => {
+}): Promise<{ anonymizedAlerts: string[]; unfilteredAlertsCount: number }> => {
   if (alertsIndexPattern == null || size == null || sizeIsOutOfRange(size)) {
-    return [];
+    return { anonymizedAlerts: [], unfilteredAlertsCount: 0 };
   }
 
   const query = getOpenAndAcknowledgedAlertsQuery({
@@ -53,6 +54,15 @@ export const getAnonymizedAlerts = async ({
   });
 
   const result = await esClient.search<SearchResponse>(query);
+  let count = 0;
+  if (filter && Object.keys(filter).length) {
+    const countQuery = getAlertsCountQuery({
+      alertsIndexPattern,
+      end,
+      start,
+    });
+    count = (await esClient.count(countQuery)).count;
+  }
 
   // Accumulate replacements locally so we can, for example use the same
   // replacement for a hostname when we see it in multiple alerts:
@@ -63,13 +73,16 @@ export const getAnonymizedAlerts = async ({
     onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
   };
 
-  return result.hits?.hits?.map((x) =>
-    transformRawData({
-      anonymizationFields,
-      currentReplacements: localReplacements, // <-- the latest local replacements
-      getAnonymizedValue,
-      onNewReplacements: localOnNewReplacements, // <-- the local callback
-      rawData: getRawDataOrDefault(x.fields),
-    })
-  );
+  return {
+    anonymizedAlerts: result.hits?.hits?.map((x) =>
+      transformRawData({
+        anonymizationFields,
+        currentReplacements: localReplacements, // <-- the latest local replacements
+        getAnonymizedValue,
+        onNewReplacements: localOnNewReplacements, // <-- the local callback
+        rawData: getRawDataOrDefault(x.fields),
+      })
+    ),
+    unfilteredAlertsCount: count,
+  };
 };
