@@ -14,11 +14,16 @@ import {
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
+import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
+import { resolveProviderAndModel } from '@kbn/security-ai-prompts';
+import { promptGroupId } from '../../../prompt/local_prompt_object';
+import { getModelOrOss } from '../../../prompt/helpers';
+import { getPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import { formatPrompt, formatPromptStructured, systemPrompts } from './prompts';
+import { formatPrompt, formatPromptStructured } from './prompts';
 import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
@@ -30,6 +35,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   alertsIndexPattern,
   assistantTools = [],
   connectorId,
+  contentReferencesStore,
   conversationId,
   dataClients,
   esClient,
@@ -44,6 +50,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   onNewReplacements,
   replacements,
   request,
+  savedObjectsClient,
   size,
   systemPrompt,
   telemetry,
@@ -103,6 +110,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     alertsIndexPattern,
     anonymizationFields,
     connectorId,
+    contentReferencesStore,
     esClient,
     inference,
     isEnabledKnowledgeBase,
@@ -124,35 +132,43 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   if (isEnabledKnowledgeBase) {
     const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
       esClient,
+      contentReferencesStore,
     });
     if (kbTools) {
       tools.push(...kbTools);
     }
   }
 
+  const defaultSystemPrompt = await getPrompt({
+    actionsClient,
+    connectorId,
+    model: getModelOrOss(llmType, isOssModel, request.body.model),
+    promptId: promptDictionary.systemPrompt,
+    promptGroupId: promptGroupId.aiAssistant,
+    provider: llmType,
+    savedObjectsClient,
+  });
+
   const agentRunnable =
     isOpenAI || llmType === 'inference'
       ? await createOpenAIToolsAgent({
           llm: createLlmInstance(),
           tools,
-          prompt: formatPrompt(systemPrompts.openai, systemPrompt),
+          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
           streamRunnable: isStream,
         })
       : llmType && ['bedrock', 'gemini'].includes(llmType)
       ? await createToolCallingAgent({
           llm: createLlmInstance(),
           tools,
-          prompt:
-            llmType === 'bedrock'
-              ? formatPrompt(systemPrompts.bedrock, systemPrompt)
-              : formatPrompt(systemPrompts.gemini, systemPrompt),
+          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
           streamRunnable: isStream,
         })
       : // used with OSS models
         await createStructuredChatAgent({
           llm: createLlmInstance(),
           tools,
-          prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
+          prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt),
           streamRunnable: isStream,
         });
 
@@ -168,24 +184,36 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         logger
       )
     : undefined;
+  const { provider } =
+    !llmType || llmType === 'inference'
+      ? await resolveProviderAndModel({
+          connectorId,
+          actionsClient,
+        })
+      : { provider: llmType };
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
     dataClients,
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
     logger,
+    actionsClient,
+    savedObjectsClient,
     tools,
     replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
+    contentReferencesEnabled: Boolean(contentReferencesStore),
   });
   const inputs: GraphInputs = {
     responseLanguage,
     conversationId,
+    connectorId,
     llmType,
     isStream,
     isOssModel,
     input: latestMessage[0]?.content as string,
+    provider: provider ?? '',
   };
 
   if (isStream) {
@@ -210,6 +238,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     traceOptions,
   });
 
+  const contentReferences =
+    contentReferencesStore && pruneContentReferences(graphResponse.output, contentReferencesStore);
+
+  const metadata: MessageMetadata = {
+    ...(contentReferences ? { contentReferences } : {}),
+  };
+
+  const isMetadataPopulated = !!contentReferences;
+
   return {
     body: {
       connector_id: connectorId,
@@ -217,6 +254,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       trace_data: graphResponse.traceData,
       replacements,
       status: 'ok',
+      ...(isMetadataPopulated ? { metadata } : {}),
       ...(graphResponse.conversationId ? { conversationId: graphResponse.conversationId } : {}),
     },
     headers: {

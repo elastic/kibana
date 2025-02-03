@@ -9,12 +9,7 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import {
-  getPreviewAlerts,
-  previewRule,
-  dataGeneratorFactory,
-  setSyntheticSource,
-} from '../../../../utils';
+import { getPreviewAlerts, previewRule, dataGeneratorFactory } from '../../../../utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
@@ -39,12 +34,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless synthetic source', () => {
     describe('synthetic source limitations', () => {
-      const index = 'ecs_compliant';
+      const index = 'ecs_compliant_synthetic_source';
       const { indexListOfDocuments } = dataGeneratorFactory({ es, index, log });
 
       before(async () => {
         await esArchiver.load(`x-pack/test/functional/es_archives/security_solution/${index}`);
-        await setSyntheticSource({ es, index });
       });
 
       after(async () => {
@@ -182,13 +176,12 @@ export default ({ getService }: FtrProviderContext) => {
     // this set of tests represent corrected failed test suits in https://github.com/elastic/kibana/pull/191527#issuecomment-2360684346
     // and ensures non-ecs fields are stripped when source mode is synthetic
     describe('non ecs fields', () => {
-      const index = 'ecs_non_compliant';
+      const index = 'ecs_non_compliant_synthetic_source';
       const { indexListOfDocuments } = dataGeneratorFactory({ es, index, log });
       const timestamp = '2020-10-28T06:00:00.000Z';
 
       before(async () => {
         await esArchiver.load(`x-pack/test/functional/es_archives/security_solution/${index}`);
-        await setSyntheticSource({ es, index });
       });
 
       after(async () => {
