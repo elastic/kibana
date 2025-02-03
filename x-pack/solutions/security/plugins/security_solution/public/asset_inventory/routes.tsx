@@ -49,11 +49,7 @@ export const AssetInventoryRoutes = () => {
           <DataViewContext.Provider value={dataViewContextValue}>
             <SecuritySolutionPageWrapper noPadding>
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllAssetsLazy
-                  rows={[]}
-                  isLoading={false}
-                  loadMore={() => {}}
-                />
+                <AllAssetsLazy rows={[]} isLoading={false} loadMore={() => {}} />
               </Suspense>
             </SecuritySolutionPageWrapper>
           </DataViewContext.Provider>
