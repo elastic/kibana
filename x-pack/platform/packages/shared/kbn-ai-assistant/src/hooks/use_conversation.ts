@@ -87,15 +87,17 @@ export function useConversation({
           path: {
             conversationId: nextConversationObject.conversation.id,
           },
-          conversation: merge(
-            {
-              '@timestamp': nextConversationObject['@timestamp'],
-              conversation: {
-                id: nextConversationObject.conversation.id,
+          body: {
+            conversation: merge(
+              {
+                '@timestamp': nextConversationObject['@timestamp'],
+                conversation: {
+                  id: nextConversationObject.conversation.id,
+                },
               },
-            },
-            omit(nextConversationObject, 'conversation.last_updated', 'namespace', 'user')
-          ),
+              omit(nextConversationObject, 'conversation.last_updated', 'namespace', 'user')
+            ),
+          },
         },
       })
       .catch((err) => {
