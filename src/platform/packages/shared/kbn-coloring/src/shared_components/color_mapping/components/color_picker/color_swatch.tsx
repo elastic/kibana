@@ -163,8 +163,11 @@ export const ColorSwatch = ({
   ) : (
     <EuiColorPickerSwatch
       color={colorHex}
-      aria-label={i18n.translate('coloring.colorMapping.colorPicker.newColorAriaLabel', {
-        defaultMessage: 'Select a new color',
+      aria-label={i18n.translate('coloring.colorMapping.colorSwatch.gradientAriaLabel', {
+        defaultMessage: 'Computed gradient color',
+      })}
+      title={i18n.translate('coloring.colorMapping.colorSwatch.gradientAriaLabel', {
+        defaultMessage: 'Computed gradient color',
       })}
       disabled
       style={{

@@ -21,7 +21,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { ColorMapping } from '../../config';
 import { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
-import { ruleMatchFn } from '../../color/rule_matching';
+import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
 export const isNotNull = <T,>(value: T | null): value is NonNullable<T> => value !== null;
 const duplicateWarning = i18n.translate(
@@ -38,18 +38,18 @@ export const Match: React.FC<{
   updateRules: (rule: ColorMapping.ColorRule[]) => void;
   categories: SerializedValue[];
   specialTokens: Map<unknown, string>;
-  assignments: ColorMapping.Assignment[];
   formatter?: IFieldFormat;
   allowCustomMatch?: boolean;
+  assignmentMatcher: ColorAssignmentMatcher;
 }> = ({
   index,
   rules,
   updateRules,
   categories,
   specialTokens,
-  assignments,
   formatter,
   allowCustomMatch = false,
+  assignmentMatcher,
 }) => {
   const getOptionForRawValue = getOptionForRawValueFn(formatter);
   const availableOptions: Array<EuiComboBoxOptionOption<string>> = [];
@@ -65,21 +65,16 @@ export const Match: React.FC<{
     new Map()
   );
   const selectedOptions = rules
-    .map<EuiComboBoxOptionOption<string> | null>((rule, ruleIndex) => {
-      const previousRules = assignments
-        .slice(0, index)
-        .flatMap((a) => a.rules)
-        .concat(rules.slice(0, ruleIndex));
-
+    .map<EuiComboBoxOptionOption<string> | null>((rule) => {
       switch (rule.type) {
         case 'raw': {
           const rawValue = deserializeField(rule.value);
-          const hasPreviousMatch = previousRules.some(ruleMatchFn(rawValue));
+          const hasDuplicate = assignmentMatcher.hasDuplicate(rawValue);
           const option = getOptionForRawValue(rule.value);
           rawCategoryValueMap.set(option.key, rule.value);
           return {
             ...option,
-            append: hasPreviousMatch && (
+            append: hasDuplicate && (
               <EuiToolTip position="bottom" content={duplicateWarning}>
                 <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
               </EuiToolTip>
@@ -87,12 +82,13 @@ export const Match: React.FC<{
           };
         }
         case 'match': {
-          const hasPreviousMatch = previousRules.some(ruleMatchFn(rule.pattern));
+          const key = rule.matchCase ? rule.pattern : rule.pattern.toLowerCase();
+          const hasDuplicate = assignmentMatcher.hasDuplicate(key); // non-exhaustive for partial word match
 
           return {
             label: specialTokens.get(rule.pattern) ?? rule.pattern,
             key: rule.pattern,
-            append: hasPreviousMatch && (
+            append: hasDuplicate && (
               <EuiToolTip position="bottom" content={duplicateWarning}>
                 <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
               </EuiToolTip>
@@ -101,12 +97,12 @@ export const Match: React.FC<{
         }
         case 'regex': {
           // Note: Only basic placeholder logic, not used or fully tested
-          const hasPreviousMatch = previousRules.some(ruleMatchFn(rule.pattern));
+          const hasDuplicate = false; // need to use exhaustive search
 
           return {
             label: rule.pattern,
             key: rule.pattern,
-            append: hasPreviousMatch && (
+            append: hasDuplicate && (
               <EuiToolTip position="bottom" content={duplicateWarning}>
                 <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
               </EuiToolTip>

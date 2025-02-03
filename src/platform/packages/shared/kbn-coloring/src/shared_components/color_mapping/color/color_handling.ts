@@ -13,12 +13,12 @@ import { RawValue, SerializedValue, deserializeField } from '@kbn/data-plugin/co
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
 import { ColorMappingInputData } from '../categorical_color_mapping';
-import { assignmentMatchFn } from './rule_matching';
 import { GradientColorMode } from '../config/types';
 import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '../config/default_color_mapping';
+import { getColorAssignmentMatcher } from './assignment';
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
@@ -81,13 +81,14 @@ export function getColorFactory(
       assignmentIndex: i,
     }));
 
+  const assignmentMatcher = getColorAssignmentMatcher(assignments);
   // find all categories that don't match with an assignment
   const unassignedAutoAssignmentsMap = new Map(
     data.type === 'categories'
       ? data.categories
           .map((category: SerializedValue) => deserializeField(category))
           .filter((category: RawValue) => {
-            return !assignments.some(assignmentMatchFn(category));
+            return !assignmentMatcher.hasMatch(category);
           })
           .map((category: RawValue, i) => {
             const key = String(category);
@@ -145,7 +146,7 @@ export function getColorFactory(
     }
 
     // find the assignment where the category matches the rule
-    const matchingAssignmentIndex = assignments.findIndex(assignmentMatchFn(rawValue));
+    const matchingAssignmentIndex = assignmentMatcher.getIndex(rawValue);
 
     if (matchingAssignmentIndex > -1) {
       const assignment = assignments[matchingAssignmentIndex];

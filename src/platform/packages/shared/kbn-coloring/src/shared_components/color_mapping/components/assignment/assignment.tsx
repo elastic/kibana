@@ -26,6 +26,7 @@ import { Match } from './match';
 
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorSwatch } from '../color_picker/color_swatch';
+import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
 export function Assignment({
   data,
@@ -40,6 +41,7 @@ export function Assignment({
   specialTokens,
   formatter,
   allowCustomMatch,
+  assignmentMatcher,
 }: {
   data: ColorMappingInputData;
   index: number;
@@ -53,6 +55,7 @@ export function Assignment({
   specialTokens: Map<string, string>;
   formatter?: IFieldFormat;
   allowCustomMatch?: boolean;
+  assignmentMatcher: ColorAssignmentMatcher;
 }) {
   const dispatch = useDispatch();
 
@@ -106,8 +109,8 @@ export function Assignment({
           categories={data.type === 'categories' ? data.categories : []}
           specialTokens={specialTokens}
           formatter={formatter}
-          assignments={assignments}
           allowCustomMatch={allowCustomMatch}
+          assignmentMatcher={assignmentMatcher}
           updateRules={(rules) => {
             dispatch(
               updateAssignmentRules({

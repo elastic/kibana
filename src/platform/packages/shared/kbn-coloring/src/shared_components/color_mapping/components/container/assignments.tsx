@@ -41,7 +41,7 @@ import {
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorMapping } from '../../config';
-import { assignmentMatchFn } from '../../color/rule_matching';
+import { getColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
 export function Assignments({
   data,
@@ -67,15 +67,15 @@ export function Assignments({
   const palette = useSelector(selectPalette(palettes));
   const colorMode = useSelector(selectColorMode);
   const assignments = useSelector(selectComputedAssignments);
-
+  const assignmentMatcher = useMemo(() => getColorAssignmentMatcher(assignments), [assignments]);
   const unmatchingCategories = useMemo(() => {
     return data.type === 'categories'
       ? data.categories.filter((category) => {
           const rawValue = deserializeField(category);
-          return !assignments.some(assignmentMatchFn(rawValue));
+          return !assignmentMatcher.hasMatch(rawValue);
         })
       : [];
-  }, [data, assignments]);
+  }, [data, assignmentMatcher]);
 
   const onClickAddNewAssignment = useCallback(() => {
     const lastCategorical = assignments.findLast((a) => {
@@ -166,6 +166,7 @@ export function Assignments({
                 specialTokens={specialTokens}
                 formatter={formatter}
                 allowCustomMatch={allowCustomMatch}
+                assignmentMatcher={assignmentMatcher}
               />
             );
           })}
