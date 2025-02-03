@@ -70,6 +70,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(Boolean(props.inTableSearchTerm));
 
@@ -161,11 +162,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   useEffect(() => {
     if (shouldReturnFocusToButtonRef.current && !isInputVisible) {
       shouldReturnFocusToButtonRef.current = false;
-      (
-        containerRef.current?.querySelector(
-          `[data-test-subj="${BUTTON_TEST_SUBJ}"]`
-        ) as HTMLButtonElement
-      )?.focus();
+      buttonRef.current?.focus();
     }
   }, [isInputVisible]);
 
@@ -195,6 +192,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         >
           <EuiButtonIcon
             data-test-subj={BUTTON_TEST_SUBJ}
+            buttonRef={(node: HTMLButtonElement) => (buttonRef.current = node)}
             iconType="search"
             size="xs"
             color="text"
