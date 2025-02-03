@@ -22,13 +22,14 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  useEuiTheme,
   EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiSelectable,
   EuiSelectableOption,
   EuiHighlight,
+  EuiBadge,
+  EuiLink,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React, { ReactNode, useEffect, useState } from 'react';
@@ -38,16 +39,24 @@ import {
   ReadStreamDefinition,
   UnwiredReadStreamDefinition,
   WiredReadStreamDefinition,
+  isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
-  isUnwiredReadStream,
   isWiredReadStream,
 } from '@kbn/streams-schema';
-import { Phases, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import {
+  ILM_LOCATOR_ID,
+  IlmLocatorParams,
+  Phases,
+  PolicyFromES,
+} from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
+import { i18n } from '@kbn/i18n';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 enum LifecycleEditAction {
   None,
@@ -57,7 +66,29 @@ enum LifecycleEditAction {
 }
 
 function useLifecycleState({ definition }: { definition?: ReadStreamDefinition }) {
-  return {};
+  const [lifecycleActions, setLifecycleActions] = useState<
+    Array<{ name: string; action: LifecycleEditAction }>
+  >([]);
+
+  useEffect(() => {
+    if (!definition) return;
+
+    const actions = [{ name: 'Set specific retention days', action: LifecycleEditAction.Dsl }];
+
+    if (isWiredReadStream(definition)) {
+      actions.push({ name: 'Use a lifecycle policy', action: LifecycleEditAction.Ilm });
+    }
+
+    if (!isRoot(definition.name)) {
+      actions.push({ name: 'Reset to default', action: LifecycleEditAction.Inherit });
+    }
+
+    setLifecycleActions(actions);
+  }, [definition]);
+
+  return {
+    lifecycleActions,
+  };
 }
 
 export function StreamDetailLifecycle({
@@ -67,15 +98,14 @@ export function StreamDetailLifecycle({
   definition?: WiredReadStreamDefinition | UnwiredReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
-  const theme = useEuiTheme().euiTheme;
-  const lifecycleAppState = useLifecycleState({ definition });
-
+  const { lifecycleActions } = useLifecycleState({ definition });
   const [openEditModal, setOpenEditModal] = useState(LifecycleEditAction.None);
 
   const {
     core: { http },
     dependencies: {
       start: {
+        share,
         streams: { streamsRepositoryClient },
       },
     },
@@ -85,6 +115,7 @@ export function StreamDetailLifecycle({
     return null;
   }
   const { signal } = useAbortController();
+  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
   const getIlmPolicies = async () => {
     const response = await http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies');
@@ -161,6 +192,8 @@ export function StreamDetailLifecycle({
                   <EuiFlexItem grow={4}>
                     <RetentionMetadata
                       definition={definition}
+                      lifecycleActions={lifecycleActions}
+                      ilmLocator={ilmLocator}
                       openEditModal={(action) => {
                         setOpenEditModal(action);
                       }}
@@ -245,12 +278,17 @@ function RetentionSummary({ definition }: { definition: ReadStreamDefinition }) 
 
 function RetentionMetadata({
   definition,
+  ilmLocator,
+  lifecycleActions,
   openEditModal,
 }: {
   definition: WiredReadStreamDefinition;
+  ilmLocator?: LocatorPublic<IlmLocatorParams>;
+  lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
 }) {
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const router = useStreamsAppRouter();
 
   const Row = ({
     metadata,
@@ -258,7 +296,7 @@ function RetentionMetadata({
     button,
   }: {
     metadata: string;
-    value: string;
+    value: ReactNode;
     action?: string;
     button?: ReactNode;
   }) => {
@@ -269,9 +307,7 @@ function RetentionMetadata({
             <b>{metadata}</b>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={4}>
-          <EuiText>{value}</EuiText>
-        </EuiFlexItem>
+        <EuiFlexItem grow={4}>{value}</EuiFlexItem>
         <EuiFlexItem grow={1}>{button}</EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -297,41 +333,53 @@ function RetentionMetadata({
           {
             id: 0,
             title: 'Manage data retention',
-            items: [
-              {
-                name: 'Set specific retention days',
-                onClick: () => {
-                  setMenuOpen(false);
-                  openEditModal(LifecycleEditAction.Dsl);
-                },
+            items: lifecycleActions.map(({ name, action }) => ({
+              name,
+              onClick: () => {
+                setMenuOpen(false);
+                openEditModal(action);
               },
-              ...(isUnwiredReadStream(definition)
-                ? []
-                : [
-                    {
-                      name: 'Use a lifecycle policy',
-                      onClick: () => {
-                        setMenuOpen(false);
-                        openEditModal(LifecycleEditAction.Ilm);
-                      },
-                    },
-                  ]),
-              ...(isRoot(definition.name)
-                ? []
-                : [
-                    {
-                      name: 'Reset to default',
-                      onClick: () => {
-                        setMenuOpen(false);
-                        openEditModal(LifecycleEditAction.Inherit);
-                      },
-                    },
-                  ]),
-            ],
+            })),
           },
         ]}
       />
     </EuiPopover>
+  );
+
+  const ilmLink = isIlmLifecycle(lifecycle) ? (
+    <EuiBadge color="hollow">
+      <EuiLink
+        target="_blank"
+        data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
+        href={ilmLocator?.getRedirectUrl({
+          page: 'policy_edit',
+          policyName: lifecycle.ilm.policy,
+        })}
+      >
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
+          defaultMessage: 'ILM Policy: {name}',
+          values: { name: lifecycle.ilm.policy },
+        })}
+      </EuiLink>
+    </EuiBadge>
+  ) : null;
+
+  const lifecycleOrigin = isInheritLifecycle(definition.stream.ingest.lifecycle) ? (
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexItem grow={false}>Inherited from</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiLink
+          target="_blank"
+          href={router.link('/{key}/{tab}/{subtab}', {
+            path: { key: lifecycle.from, tab: 'management', subtab: 'lifecycle' },
+          })}
+        >
+          [{lifecycle.from}]
+        </EuiLink>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    `Local override`
   );
 
   return (
@@ -339,16 +387,30 @@ function RetentionMetadata({
       <Row
         metadata="Retention period"
         value={
-          isDslLifecycle(lifecycle)
-            ? lifecycle.dsl.data_retention ?? '∞'
-            : isIlmLifecycle(lifecycle)
-            ? 'Policy-based'
-            : 'Disabled'
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={isDisabledLifecycle(lifecycle) ? 'default' : '#BD1F70'}>
+                {isDslLifecycle(lifecycle)
+                  ? lifecycle.dsl.data_retention ?? '∞'
+                  : isIlmLifecycle(lifecycle)
+                  ? 'Policy-based'
+                  : 'Disabled'}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         button={contextualMenu}
       />
       <EuiHorizontalRule margin="m" />
-      <Row metadata="Source" value={lifecycle.from} />
+      <Row
+        metadata="Source"
+        value={
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            {ilmLink ? <EuiFlexItem grow={false}>{ilmLink}</EuiFlexItem> : null}
+            <EuiFlexItem grow={false}>{lifecycleOrigin}</EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
     </EuiPanel>
   );
 }
@@ -494,6 +556,7 @@ function IlmModal({
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
   );
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const phasesDescription = (phases: Phases) => {
@@ -531,20 +594,23 @@ function IlmModal({
       return desc.join(', ');
     };
 
-    getIlmPolicies().then((policies) => {
-      const policyOptions = policies.map(
-        ({ name, policy }): EuiSelectableOption<IlmOptionData> => ({
-          label: `${name}`,
-          searchableLabel: name,
-          checked: selectedPolicy === name ? 'on' : undefined,
-          data: {
-            phases: phasesDescription(policy.phases),
-          },
-        })
-      );
+    setIsLoading(true);
+    getIlmPolicies()
+      .then((policies) => {
+        const policyOptions = policies.map(
+          ({ name, policy }): EuiSelectableOption<IlmOptionData> => ({
+            label: `${name}`,
+            searchableLabel: name,
+            checked: selectedPolicy === name ? 'on' : undefined,
+            data: {
+              phases: phasesDescription(policy.phases),
+            },
+          })
+        );
 
-      setPolicies(policyOptions);
-    });
+        setPolicies(policyOptions);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   return (
@@ -559,6 +625,7 @@ function IlmModal({
         <EuiSelectable
           searchable
           singleSelection
+          isLoading={isLoading}
           options={policies}
           onChange={(options) => {
             setSelectedPolicy(options.find((option) => option.checked === 'on')?.label);
@@ -596,8 +663,10 @@ function IlmModal({
           fill
           disabled={!selectedPolicy}
           onClick={() => {
-            updateLifecycle({ ilm: { policy: selectedPolicy } });
-            closeModal();
+            if (selectedPolicy) {
+              updateLifecycle({ ilm: { policy: selectedPolicy } });
+              closeModal();
+            }
           }}
         >
           Attach policy
