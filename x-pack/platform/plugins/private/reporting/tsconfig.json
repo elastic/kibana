@@ -50,7 +50,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
-    "@kbn/saved-search-plugin",
   ],
   "exclude": [
     "target/**/*",
