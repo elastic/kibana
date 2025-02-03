@@ -61,7 +61,7 @@ export const createLensEmbeddableFactory = (
        * Observables and functions declared here are used internally to store mutating state values
        * This is an internal API not exposed outside of the embeddable.
        */
-      const internalApi = initializeInternalApi(initialState, parentApi, titleManager, services);
+      const internalApi = await initializeInternalApi(initialState, parentApi, titleManager, services);
 
       /**
        * Initialize various configurations required to build all the required

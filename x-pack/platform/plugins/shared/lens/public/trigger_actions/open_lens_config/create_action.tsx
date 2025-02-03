@@ -10,8 +10,8 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import type { LensPluginStartDependencies } from '../../plugin';
-import type { EditorFrameService } from '../../editor_frame_service';
+import { generateId } from '../../id_generator';
+import type { LensApi } from '../../react_embeddable/types';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 
@@ -24,11 +24,7 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public grouping = [ADD_PANEL_VISUALIZATION_GROUP];
 
-  constructor(
-    protected readonly startDependencies: LensPluginStartDependencies,
-    protected readonly core: CoreStart,
-    protected readonly getEditorFrameService: () => Promise<EditorFrameService>
-  ) {}
+  constructor(protected readonly core: CoreStart) {}
 
   public getDisplayName(): string {
     return i18n.translate('xpack.lens.app.createVisualizationLabel', {
@@ -48,16 +44,16 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
     return isCreateActionCompatible(this.core);
   }
 
-  public async execute({ embeddable }: EmbeddableApiContext) {
-    if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-    const { executeCreateAction } = await getAsyncHelpers();
-    const editorFrameService = await this.getEditorFrameService();
-
-    executeCreateAction({
-      deps: this.startDependencies,
-      core: this.core,
-      api: embeddable,
-      editorFrameService,
+  public async execute({ embeddable: parentApi }: EmbeddableApiContext) {
+    if (!apiIsPresentationContainer(parentApi)) throw new IncompatibleActionError();
+    const embeddable = await parentApi.addNewPanel<object, LensApi>({
+      panelType: 'lens',
+      initialState: {
+        id: generateId(),
+        isNewPanel: true,
+      },
     });
+    // open the flyout if embeddable has been created successfully
+    embeddable?.onEdit();
   }
 }

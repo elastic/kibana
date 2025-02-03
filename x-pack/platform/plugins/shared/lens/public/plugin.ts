@@ -382,6 +382,13 @@ export class LensPlugin {
         datasourceMap,
         theme: core.theme,
         uiSettings: core.uiSettings,
+        getEditorFrameService: async () => {
+          if (!this.editorFrameService) {
+            await this.initEditorFrameService();
+          }
+
+          return this.editorFrameService!;
+        },
       };
     };
 
@@ -683,13 +690,7 @@ export class LensPlugin {
     );
 
     // Displays the add ESQL panel in the dashboard add Panel menu
-    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core, async () => {
-      if (!this.editorFrameService) {
-        await this.initEditorFrameService();
-      }
-
-      return this.editorFrameService!;
-    });
+    const createESQLPanelAction = new CreateESQLPanelAction(core);
     startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');

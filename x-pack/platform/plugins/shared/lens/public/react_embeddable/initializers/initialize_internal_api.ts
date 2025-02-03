@@ -21,12 +21,12 @@ import type {
 import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
 import type { UserMessage } from '../../types';
 
-export function initializeInternalApi(
+export async function initializeInternalApi(
   initialState: LensRuntimeState,
   parentApi: unknown,
   titleManager: ReturnType<typeof initializeTitleManager>,
-  { visualizationMap }: LensEmbeddableStartServices
-): LensInternalApi {
+  services: LensEmbeddableStartServices
+): Promise<LensInternalApi> {
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
@@ -35,8 +35,26 @@ export function initializeInternalApi(
   }
   const [renderCount$] = buildObservableVariable<number>(0);
 
+  async function getInitialAttributes() {
+    if (initialState.attributes) {
+      return initialState.attributes;
+    }
+
+    if (initialState.isNewPanel) {
+      try {
+        const { createNewEsqlAttributes } = await import('../../async_services');
+        const attributes = await createNewEsqlAttributes(services);
+        if (attributes) return attributes;
+      } catch (error) {
+        // fallback to empty state
+      }
+    }
+
+    return createEmptyLensState().attributes;
+  }
+
   const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
-    initialState.attributes || createEmptyLensState().attributes
+    await getInitialAttributes()
   );
   const overrides$ = new BehaviorSubject(initialState.overrides);
   const disableTriggers$ = new BehaviorSubject(initialState.disableTriggers);
@@ -120,7 +138,7 @@ export function initializeInternalApi(
       }
 
       let displayOptions =
-        visualizationMap[latestAttributes.visualizationType]?.getDisplayOptions?.() ?? {};
+        services.visualizationMap[latestAttributes.visualizationType]?.getDisplayOptions?.() ?? {};
 
       if (apiHasLensComponentProps(parentApi) && parentApi.noPadding != null) {
         displayOptions = {

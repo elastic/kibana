@@ -94,6 +94,7 @@ import type { FormBasedPersistedState } from '..';
 import type { TextBasedPersistedState } from '../datasources/text_based/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 import type { MetricVisualizationState } from '../visualizations/metric/types';
+import type { EditorFrameService } from '../editor_frame_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface LensApiProps {}
@@ -145,6 +146,7 @@ export type LensEmbeddableStartServices = Simplify<
     theme: ThemeServiceStart;
     uiSettings: IUiSettingsClient;
     attributeService: LensAttributesService;
+    getEditorFrameService: () => Promise<EditorFrameService>;
   }
 >;
 

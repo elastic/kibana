@@ -7,8 +7,6 @@
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   getESQLAdHocDataview,
   getIndexForESQLQuery,
@@ -17,11 +15,8 @@ import {
   getInitialESQLQuery,
 } from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
-import type { LensPluginStartDependencies } from '../../plugin';
 import { suggestionsApi } from '../../lens_suggestions_api';
-import { generateId } from '../../id_generator';
-import type { EditorFrameService } from '../../editor_frame_service';
-import { LensApi } from '../..';
+import type { LensEmbeddableStartServices } from '../../react_embeddable/types';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
@@ -36,32 +31,15 @@ export async function isCreateActionCompatible(core: CoreStart) {
   return core.uiSettings.get(ENABLE_ESQL);
 }
 
-export async function executeCreateAction({
-  deps,
-  core,
-  api,
-  editorFrameService,
-}: {
-  deps: LensPluginStartDependencies;
-  core: CoreStart;
-  api: PresentationContainer;
-  editorFrameService: EditorFrameService;
-}) {
-  const getFallbackDataView = async () => {
-    const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
-    if (!indexName) return null;
-    const dataView = await getESQLAdHocDataview(`from ${indexName}`, deps.dataViews);
-    return dataView;
-  };
-
-  const [isCompatibleAction, dataView] = await Promise.all([
-    isCreateActionCompatible(core),
-    getFallbackDataView(),
-  ]);
-
-  if (!isCompatibleAction || !dataView) {
-    throw new IncompatibleActionError();
+export async function createNewEsqlAttributes(
+  services: Pick<LensEmbeddableStartServices, 'data' | 'dataViews' | 'getEditorFrameService'>
+) {
+  const indexName = await getIndexForESQLQuery({ dataViews: services.dataViews });
+  if (!indexName) {
+    throw new Error('No data views');
   }
+  const dataView = await getESQLAdHocDataview(`from ${indexName}`, services.dataViews);
+  const editorFrameService = await services.getEditorFrameService();
 
   let visualizationMap = getVisualizationMap();
   let datasourceMap = getDatasourceMap();
@@ -73,7 +51,7 @@ export async function executeCreateAction({
     ]);
 
     if (!visualizationMap && !datasourceMap) {
-      throw new IncompatibleActionError();
+      throw new Error('Lens not setup.');
     }
 
     // persist for retrieval elsewhere
@@ -94,9 +72,9 @@ export async function executeCreateAction({
   const abortController = new AbortController();
   const columns = await getESQLQueryColumns({
     esqlQuery,
-    search: deps.data.search.search,
+    search: services.data.search.search,
     signal: abortController.signal,
-    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+    timeRange: services.data.query.timefilter.timefilter.getAbsoluteTime(),
   });
 
   const context = {
@@ -113,7 +91,7 @@ export async function executeCreateAction({
   // Lens might not return suggestions for some cases, i.e. in case of errors
   if (!allSuggestions.length) return undefined;
   const [firstSuggestion] = allSuggestions;
-  const attrs = getLensAttributesFromSuggestion({
+  return getLensAttributesFromSuggestion({
     filters: [],
     query: defaultEsqlQuery,
     suggestion: {
@@ -122,15 +100,4 @@ export async function executeCreateAction({
     },
     dataView,
   });
-
-  const embeddable = await api.addNewPanel<object, LensApi>({
-    panelType: 'lens',
-    initialState: {
-      attributes: attrs,
-      id: generateId(),
-      isNewPanel: true,
-    },
-  });
-  // open the flyout if embeddable has been created successfully
-  embeddable?.onEdit?.();
 }
