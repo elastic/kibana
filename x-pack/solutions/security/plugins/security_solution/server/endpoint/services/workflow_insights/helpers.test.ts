@@ -443,6 +443,53 @@ describe('helpers', () => {
       });
     });
 
+    it('should return null if no trusted signatures', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [{ subject_name: 'Valid Cert', trusted: false }],
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should return null if all Windows code signatures are untrusted', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'Cert 1', trusted: false },
+              { subject_name: 'Cert 2', trusted: false },
+            ],
+          },
+        },
+      };
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should correctly process a single object code signature for Windows', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: { subject_name: 'Valid Cert', trusted: true },
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({
+        field: 'process.Ext.code_signature',
+        value: 'Valid Cert',
+      });
+    });
+
     it('should return the first trusted signature for Windows, skipping Microsoft Windows Hardware Compatibility Publisher', () => {
       const os = 'windows';
       const codeSignatureSearchHit = {
@@ -464,7 +511,7 @@ describe('helpers', () => {
       });
     });
 
-    it('should return null if no valid trusted signature is found for Windows', () => {
+    it('should return Windows publisher if this is the only signer', () => {
       const os = 'windows';
       const codeSignatureSearchHit = {
         process: {
@@ -477,7 +524,10 @@ describe('helpers', () => {
       };
 
       const result = getValidCodeSignature(os, codeSignatureSearchHit);
-      expect(result).toBeNull();
+      expect(result).toEqual({
+        field: 'process.Ext.code_signature',
+        value: 'Microsoft Windows Hardware Compatibility Publisher',
+      });
     });
 
     it('should return the subject name for macOS when code signature is present', () => {
@@ -510,6 +560,17 @@ describe('helpers', () => {
         },
       } as FileEventDoc;
 
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should return null for non-Windows when code signature is untrusted', () => {
+      const os = 'macos';
+      const codeSignatureSearchHit = {
+        process: {
+          code_signature: { subject_name: 'Apple Inc.', trusted: false },
+        },
+      };
       const result = getValidCodeSignature(os, codeSignatureSearchHit);
       expect(result).toBeNull();
     });

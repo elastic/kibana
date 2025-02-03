@@ -191,6 +191,43 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
     );
   });
 
+  it('should correctly build workflow insights for Windows with signerId provided as object', async () => {
+    (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
+      windows: ['endpoint-1'],
+    });
+    const params = generateParams('test.com');
+
+    params.esClient.search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'lqw5opMB9Ke6SNgnxRSZ',
+            _source: {
+              process: {
+                Ext: {
+                  code_signature: {
+                    trusted: true,
+                    subject_name: 'test.com',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await buildIncompatibleAntivirusWorkflowInsights(params);
+
+    expect(result).toEqual([
+      buildExpectedInsight('windows', 'process.Ext.code_signature', 'test.com'),
+    ]);
+    expect(groupEndpointIdsByOS).toHaveBeenCalledWith(
+      ['endpoint-1'],
+      params.endpointMetadataService
+    );
+  });
+
   it('should fallback to createRemediation without signer field when no valid signatures exist for Windows', async () => {
     (groupEndpointIdsByOS as jest.Mock).mockResolvedValue({
       windows: ['endpoint-1'],
