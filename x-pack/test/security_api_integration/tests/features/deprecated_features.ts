@@ -183,9 +183,12 @@ export default function ({ getService }: FtrProviderContext) {
           "dashboard",
           "discover",
           "generalCases",
+          "generalCasesV2",
           "maps",
           "observabilityCases",
+          "observabilityCasesV2",
           "securitySolutionCases",
+          "securitySolutionCasesV2",
           "siem",
           "visualize",
         ]

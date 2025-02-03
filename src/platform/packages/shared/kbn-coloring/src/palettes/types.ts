@@ -88,6 +88,10 @@ export interface PaletteDefinition<T = unknown> {
    */
   title: string;
   /**
+   * User facing tag (should be i18n-ized)
+   */
+  tag?: string;
+  /**
    * Flag indicating whether users should be able to pick this palette manually.
    */
   internal?: boolean;
