@@ -65,7 +65,15 @@ enum LifecycleEditAction {
   Inherit,
 }
 
-function useLifecycleState({ definition }: { definition?: ReadStreamDefinition }) {
+function useLifecycleState({
+  definition,
+  isServerless,
+}: {
+  definition?: ReadStreamDefinition;
+  isServerless: boolean;
+}) {
+  const [updateInProgress, setUpdateInProgress] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(LifecycleEditAction.None);
   const [lifecycleActions, setLifecycleActions] = useState<
     Array<{ name: string; action: LifecycleEditAction }>
   >([]);
@@ -73,14 +81,31 @@ function useLifecycleState({ definition }: { definition?: ReadStreamDefinition }
   useEffect(() => {
     if (!definition) return;
 
-    const actions = [{ name: 'Set specific retention days', action: LifecycleEditAction.Dsl }];
+    const actions = [
+      {
+        name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
+          defaultMessage: 'Set specific retention days',
+        }),
+        action: LifecycleEditAction.Dsl,
+      },
+    ];
 
-    if (isWiredReadStream(definition)) {
-      actions.push({ name: 'Use a lifecycle policy', action: LifecycleEditAction.Ilm });
+    if (isWiredReadStream(definition) && !isServerless) {
+      actions.push({
+        name: i18n.translate('xpack.streams.streamDetailLifecycle.setLifecyclePolicy', {
+          defaultMessage: 'Use a lifecycle policy',
+        }),
+        action: LifecycleEditAction.Ilm,
+      });
     }
 
     if (!isRoot(definition.name)) {
-      actions.push({ name: 'Reset to default', action: LifecycleEditAction.Inherit });
+      actions.push({
+        name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
+          defaultMessage: 'Reset to default',
+        }),
+        action: LifecycleEditAction.Inherit,
+      });
     }
 
     setLifecycleActions(actions);
@@ -88,6 +113,10 @@ function useLifecycleState({ definition }: { definition?: ReadStreamDefinition }
 
   return {
     lifecycleActions,
+    openEditModal,
+    setOpenEditModal,
+    updateInProgress,
+    setUpdateInProgress,
   };
 }
 
@@ -98,32 +127,44 @@ export function StreamDetailLifecycle({
   definition?: WiredReadStreamDefinition | UnwiredReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
-  const { lifecycleActions } = useLifecycleState({ definition });
-  const [openEditModal, setOpenEditModal] = useState(LifecycleEditAction.None);
-
   const {
-    core: { http },
+    core: { http, notifications },
     dependencies: {
       start: {
         share,
         streams: { streamsRepositoryClient },
       },
     },
+    isServerless,
   } = useKibana();
+
+  const {
+    lifecycleActions,
+    openEditModal,
+    setOpenEditModal,
+    updateInProgress,
+    setUpdateInProgress,
+  } = useLifecycleState({ definition, isServerless });
+
+  const { signal } = useAbortController();
 
   if (!definition) {
     return null;
   }
-  const { signal } = useAbortController();
+
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
   const getIlmPolicies = async () => {
-    const response = await http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies');
+    const response = await http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
+      signal,
+    });
     return response;
   };
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
     try {
+      setUpdateInProgress(true);
+
       const request = {
         ingest: {
           ...definition.stream.ingest,
@@ -140,7 +181,23 @@ export function StreamDetailLifecycle({
       });
 
       refreshDefinition();
-    } catch (err) {}
+      setOpenEditModal(LifecycleEditAction.None);
+
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {
+          defaultMessage: 'Stream lifecycle updated',
+        }),
+      });
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.streams.streamDetailLifecycle.failed', {
+          defaultMessage: 'Failed to update lifecycle',
+        }),
+        toastMessage: 'body' in error ? error.body.message : error.message,
+      });
+    } finally {
+      setUpdateInProgress(false);
+    }
   };
 
   return (
@@ -151,6 +208,7 @@ export function StreamDetailLifecycle({
         closeModal={() => setOpenEditModal(LifecycleEditAction.None)}
         updateLifecycle={updateLifecycle}
         getIlmPolicies={getIlmPolicies}
+        updateInProgress={updateInProgress}
       />
 
       <EuiFlexItem
@@ -185,7 +243,7 @@ export function StreamDetailLifecycle({
                 `}
               >
                 <EuiFlexItem grow={1}>
-                  <RetentionSummary definition={definition} />
+                  <RetentionSummary definition={definition} isServerless={isServerless} />
                 </EuiFlexItem>
 
                 {isWiredReadStream(definition) ? (
@@ -209,7 +267,13 @@ export function StreamDetailLifecycle({
   );
 }
 
-function RetentionSummary({ definition }: { definition: ReadStreamDefinition }) {
+function RetentionSummary({
+  definition,
+  isServerless,
+}: {
+  definition: ReadStreamDefinition;
+  isServerless: boolean;
+}) {
   const isWired = isWiredReadStream(definition);
 
   const summaryText = (() => {
@@ -217,16 +281,23 @@ function RetentionSummary({ definition }: { definition: ReadStreamDefinition }) 
     if (isInheritLifecycle(lifecycle)) {
       return (
         <p>
-          This data stream is using an inherit policy.
+          {i18n.translate('xpack.streams.streamDetailLifecycle.useInheritPolicyNote', {
+            defaultMessage: 'This data stream is using an inherit policy.',
+          })}
           <br />
-          You can override it with a custom data retention or with an ILM policy.
+          {i18n.translate('xpack.streams.streamDetailLifecycle.overridePolicyNote', {
+            defaultMessage:
+              'You can override it with a custom data retention or with an ILM policy.',
+          })}
         </p>
       );
     } else if (isDslLifecycle(lifecycle)) {
+      const usingDsl = i18n.translate('xpack.streams.streamDetailLifecycle.useDslNote', {
+        defaultMessage: 'This data stream is using a custom data retention.',
+      });
       return (
         <p>
-          This data stream is using a custom data retention
-          {isWired && !isRoot(definition.name) ? ' as an override at this level' : ''}.
+          {usingDsl}
           <br />
           {!isWired || isRoot(definition.name)
             ? 'You can modify it or use an ILM policy.'
@@ -248,9 +319,14 @@ function RetentionSummary({ definition }: { definition: ReadStreamDefinition }) 
 
     return (
       <p>
-        The retention for this data stream is disabled.
+        {i18n.translate('xpack.streams.streamDetailLifecycle.disabledPolicyNote', {
+          defaultMessage: 'The retention for this data stream is disabled.',
+        })}
+
         <br />
-        You can set a custom data retention or use an ILM policy.
+        {i18n.translate('xpack.streams.streamDetailLifecycle.overrideDisabledPolicyNote', {
+          defaultMessage: 'You can set a custom data retention or use an ILM policy.',
+        })}
       </p>
     );
   })();
@@ -269,7 +345,11 @@ function RetentionSummary({ definition }: { definition: ReadStreamDefinition }) 
       paddingSize="s"
     >
       <EuiText>
-        <h5>Retention summary</h5>
+        <h5>
+          {i18n.translate('xpack.streams.streamDetailLifecycle.retentionSummaryLabel', {
+            defaultMessage: 'Retention summary',
+          })}
+        </h5>
         {summaryText}
       </EuiText>
     </EuiPanel>
@@ -332,7 +412,6 @@ function RetentionMetadata({
         panels={[
           {
             id: 0,
-            title: 'Manage data retention',
             items: lifecycleActions.map(({ name, action }) => ({
               name,
               onClick: () => {
@@ -385,7 +464,9 @@ function RetentionMetadata({
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
       <Row
-        metadata="Retention period"
+        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionPeriodLabel', {
+          defaultMessage: 'Retention period',
+        })}
         value={
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -403,7 +484,9 @@ function RetentionMetadata({
       />
       <EuiHorizontalRule margin="m" />
       <Row
-        metadata="Source"
+        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionSourceLabel', {
+          defaultMessage: 'Source',
+        })}
         value={
           <EuiFlexGroup alignItems="center" gutterSize="s">
             {ilmLink ? <EuiFlexItem grow={false}>{ilmLink}</EuiFlexItem> : null}
@@ -420,6 +503,7 @@ interface ModalOptions {
   updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
   getIlmPolicies: () => Promise<PolicyFromES[]>;
   definition: ReadStreamDefinition;
+  updateInProgress: boolean;
 }
 
 function EditLifecycleModal({
@@ -441,7 +525,7 @@ function EditLifecycleModal({
   return <InheritModal {...options} />;
 }
 
-function DslModal({ closeModal, updateLifecycle }: ModalOptions) {
+function DslModal({ closeModal, updateInProgress, updateLifecycle }: ModalOptions) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
     { name: 'Hours', value: 'h' },
@@ -466,11 +550,13 @@ function DslModal({ closeModal, updateLifecycle }: ModalOptions) {
         <EuiFieldNumber
           value={retentionValue}
           onChange={(e) => setRetentionValue(Number(e.target.value))}
+          min={1}
           disabled={noRetention}
           fullWidth
           append={
             <EuiPopover
               isOpen={showUnitMenu}
+              panelPaddingSize="none"
               closePopover={() => setShowUnitMenu(false)}
               button={
                 <EuiButton
@@ -484,56 +570,49 @@ function DslModal({ closeModal, updateLifecycle }: ModalOptions) {
                 </EuiButton>
               }
             >
-              <EuiFlexGroup>
-                <EuiContextMenuPanel
-                  size="s"
-                  items={timeUnits.map((unit) => (
-                    <EuiFlexItem grow>
-                      <EuiContextMenuItem
-                        key={unit.value}
-                        icon={selectedUnit.value === unit.value ? 'check' : ''}
-                        onClick={() => {
-                          setShowUnitMenu(false);
-                          setSelectedUnit(unit);
-                        }}
-                      >
-                        {unit.name}
-                      </EuiContextMenuItem>
-                    </EuiFlexItem>
-                  ))}
-                />
-              </EuiFlexGroup>
+              <EuiContextMenuPanel
+                size="s"
+                items={timeUnits.map((unit) => (
+                  <EuiFlexItem grow>
+                    <EuiContextMenuItem
+                      key={unit.value}
+                      icon={selectedUnit.value === unit.value ? 'check' : 'empty'}
+                      onClick={() => {
+                        setShowUnitMenu(false);
+                        setSelectedUnit(unit);
+                      }}
+                    >
+                      {unit.name}
+                    </EuiContextMenuItem>
+                  </EuiFlexItem>
+                ))}
+              />
             </EuiPopover>
           }
         />
         <EuiSpacer />
         <EuiSwitch
-          label="Keep data indefinitely"
+          label={i18n.translate('xpack.streams.streamDetailLifecycle.keepDataIndefinitely', {
+            defaultMessage: 'Keep data indefinitely',
+          })}
           checked={noRetention}
           onChange={() => setNoRetention(!noRetention)}
         />
         <EuiSpacer />
-        <RetentionChanges />
       </EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty color="primary" onClick={() => closeModal()}>
-          Cancel
-        </EuiButtonEmpty>
-        <EuiButton
-          onClick={() => {
-            updateLifecycle({
-              dsl: {
-                data_retention: noRetention ? undefined : `${retentionValue}${selectedUnit.value}`,
-              },
-            });
-            closeModal();
-          }}
-          fill
-        >
-          Save
-        </EuiButton>
-      </EuiModalFooter>
+      <ModalFooter
+        confirmationLabel="Save"
+        closeModal={closeModal}
+        onConfirm={() => {
+          updateLifecycle({
+            dsl: {
+              data_retention: noRetention ? undefined : `${retentionValue}${selectedUnit.value}`,
+            },
+          });
+        }}
+        updateInProgress={updateInProgress}
+      />
     </EuiModal>
   );
 }
@@ -545,6 +624,7 @@ interface IlmOptionData {
 function IlmModal({
   closeModal,
   updateLifecycle,
+  updateInProgress,
   getIlmPolicies,
   definition: {
     stream: {
@@ -622,99 +702,145 @@ function IlmModal({
       <EuiModalBody>
         Select a pre-defined policy or visit Index Lifecycle Policies to create a new one.
         <EuiSpacer />
-        <EuiSelectable
-          searchable
-          singleSelection
-          isLoading={isLoading}
-          options={policies}
-          onChange={(options) => {
-            setSelectedPolicy(options.find((option) => option.checked === 'on')?.label);
-            setPolicies(options);
-          }}
-          listProps={{
-            rowHeight: 50,
-          }}
-          renderOption={(option: EuiSelectableOption<IlmOptionData>, searchValue: string) => (
-            <>
-              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-              <EuiText size="xs" color="subdued" className="eui-displayBlock">
-                <small>
-                  <EuiHighlight search={searchValue}>{option.phases || ''}</EuiHighlight>
-                </small>
-              </EuiText>
-            </>
-          )}
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-        <RetentionChanges />
+        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+          <EuiSelectable
+            searchable
+            singleSelection
+            isLoading={isLoading}
+            options={policies}
+            onChange={(options) => {
+              setSelectedPolicy(options.find((option) => option.checked === 'on')?.label);
+              setPolicies(options);
+            }}
+            listProps={{
+              rowHeight: 50,
+            }}
+            renderOption={(option: EuiSelectableOption<IlmOptionData>, searchValue: string) => (
+              <>
+                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                <EuiText size="xs" color="subdued" className="eui-displayBlock">
+                  <small>
+                    <EuiHighlight search={searchValue}>{option.phases || ''}</EuiHighlight>
+                  </small>
+                </EuiText>
+              </>
+            )}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiPanel>
+        <EuiSpacer />
       </EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty color="primary" onClick={() => closeModal()}>
-          Cancel
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          disabled={!selectedPolicy}
-          onClick={() => {
-            if (selectedPolicy) {
-              updateLifecycle({ ilm: { policy: selectedPolicy } });
-              closeModal();
-            }
-          }}
-        >
-          Attach policy
-        </EuiButton>
-      </EuiModalFooter>
+      <ModalFooter
+        confirmationLabel="Attach policy"
+        closeModal={closeModal}
+        onConfirm={() => {
+          if (selectedPolicy) {
+            updateLifecycle({ ilm: { policy: selectedPolicy } });
+          }
+        }}
+        confirmationIsDisabled={!selectedPolicy}
+        updateInProgress={updateInProgress}
+      />
     </EuiModal>
   );
 }
 
-function InheritModal({ closeModal, updateLifecycle }: ModalOptions) {
+function InheritModal({ closeModal, updateInProgress, updateLifecycle }: ModalOptions) {
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Set data retention to default</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleTitle', {
+            defaultMessage: 'Set data retention to default',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        All custom retention settings for this stream will be removed, resetting it to inherit data
-        retention from its nearest parent.
+        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleDesc', {
+          defaultMessage:
+            'All custom retention settings for this stream will be removed, resetting it to inherit data retention from its nearest parent.',
+        })}
         <EuiSpacer />
-        <RetentionChanges />
       </EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty color="primary" onClick={() => closeModal()}>
-          Cancel
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          onClick={() => {
-            updateLifecycle({ inherit: {} });
-            closeModal();
-          }}
-        >
-          Set to default
-        </EuiButton>
-      </EuiModalFooter>
+      <ModalFooter
+        confirmationLabel="Set to default"
+        closeModal={closeModal}
+        onConfirm={() => updateLifecycle({ inherit: {} })}
+        updateInProgress={updateInProgress}
+      />
     </EuiModal>
   );
 }
 
-function RetentionChanges() {
+function ModalFooter({
+  updateInProgress,
+  confirmationLabel,
+  confirmationIsDisabled,
+  onConfirm,
+  closeModal,
+}: {
+  updateInProgress: boolean;
+  confirmationLabel: string;
+  confirmationIsDisabled?: boolean;
+  onConfirm: () => void;
+  closeModal: () => void;
+}) {
   return (
-    <EuiCallOut title="Retention changes for dependent streams" iconType="logstashFilter">
-      <p>
-        Data retention changes will apply to dependant streams unless they already have custom
-        retention settings in place.
-      </p>
-    </EuiCallOut>
+    <EuiModalFooter>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.streams.streamDetailLifecycle.lifecycleDependentImpactTitle',
+              {
+                defaultMessage: 'Retention changes for dependent streams',
+              }
+            )}
+            iconType="logstashFilter"
+          >
+            <p>
+              {i18n.translate('xpack.streams.streamDetailLifecycle.lifecycleDependentImpactDesc', {
+                defaultMessage:
+                  'Data retention changes will apply to dependant streams unless they already have custom retention settings in place.',
+              })}
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                disabled={updateInProgress}
+                color="primary"
+                onClick={() => closeModal()}
+              >
+                Cancel
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                disabled={confirmationIsDisabled}
+                isLoading={updateInProgress}
+                onClick={() => onConfirm()}
+              >
+                {confirmationLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalFooter>
   );
 }
