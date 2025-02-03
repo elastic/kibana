@@ -13,8 +13,7 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/analytics",
-    "@kbn/core-http-server",
-    "@kbn/spaces-plugin"
+    "@kbn/core-http-server"
   ],
   "exclude": [
     "target/**/*",

@@ -24,6 +24,7 @@ import {
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
 
 const createRootMock = () => {
@@ -55,6 +56,7 @@ export const createSettingsApplicationServicesMock = (
   subscribeToUpdates: () => new Subscription(),
   addUrlToHistory: jest.fn(),
   getToastsService: jest.fn(),
+  spaces: spacesPluginMock.createStartContract(),
 });
 
 export const TestWrapper = ({

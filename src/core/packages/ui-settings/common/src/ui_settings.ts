@@ -10,7 +10,6 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Type } from '@kbn/config-schema';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import { SolutionView } from '@kbn/spaces-plugin/common';
 
 /**
  * UI element type to represent the settings.
@@ -50,6 +49,8 @@ export interface DeprecationSettings {
 export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
+
+export type UiSettingsSolution = 'es' | 'oblt' | 'security';
 
 /**
  * UiSettings parameters defined by the plugins.
@@ -120,7 +121,7 @@ export interface UiSettingsParams<T = unknown> {
   /** The solution where this setting is applicable.
    * This field is used to determine whether the setting should be displayed in the Advanced settings app.
    * If undefined, the setting must be displayed in all solutions. */
-  solution?: SolutionView;
+  solution?: UiSettingsSolution;
 }
 
 /**

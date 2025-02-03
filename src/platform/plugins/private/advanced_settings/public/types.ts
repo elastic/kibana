@@ -15,6 +15,7 @@ import type {
   SectionRegistrySetup,
   SectionRegistryStart,
 } from '@kbn/management-settings-section-registry';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export type AdvancedSettingsSetup = SectionRegistrySetup;
 export type AdvancedSettingsStart = SectionRegistryStart;
@@ -26,5 +27,5 @@ export interface AdvancedSettingsPluginSetup {
 }
 
 export interface AdvancedSettingsPluginStart {
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }
