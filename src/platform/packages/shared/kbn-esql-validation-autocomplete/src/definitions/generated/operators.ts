@@ -2823,7 +2823,7 @@ const likeDefinition: FunctionDefinition = {
     },
   ],
   supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  supportedOptions: undefined,
   validate: undefined,
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
 };
@@ -2834,7 +2834,7 @@ const matchOperatorDefinition: FunctionDefinition = {
   name: ':',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match_operator', {
     defaultMessage:
-      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on fields from the text family like  text and  semantic_text,\nas well as other field types like keyword, boolean, dates, and numeric types.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
+      'Use the match operator (`:`) to perform a match query on the specified field.\nUsing `:` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nThe match operator is equivalent to the match function.\n\nFor using the function syntax, or adding match query parameters, you can use the\nmatch function.\n\n`:` returns true if the provided query matches the row.',
   }),
   preview: true,
   alias: undefined,
@@ -4680,7 +4680,7 @@ const rlikeDefinition: FunctionDefinition = {
     },
   ],
   supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  supportedOptions: undefined,
   validate: undefined,
   examples: [
     'FROM employees\n| WHERE first_name RLIKE """.leja.*"""\n| KEEP first_name, last_name',
