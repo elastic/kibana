@@ -16,7 +16,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getPrompt } from '@kbn/security-ai-prompts';
 import {
   API_VERSIONS,
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
@@ -27,7 +27,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import {
-  createOpenAIFunctionsAgent,
+  createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
@@ -294,8 +294,9 @@ export const postEvaluateRoute = (
                 assistantContext.getRegisteredFeatures(
                   DEFAULT_PLUGIN_NAME
                 ).contentReferencesEnabled;
-              const contentReferencesStore =
-                contentReferencesEnabled && contentReferencesStoreFactory();
+              const contentReferencesStore = contentReferencesEnabled
+                ? newContentReferencesStore()
+                : undefined;
 
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
@@ -358,26 +359,27 @@ export const postEvaluateRoute = (
                 savedObjectsClient,
               });
 
-              const agentRunnable = isOpenAI
-                ? await createOpenAIFunctionsAgent({
-                    llm,
-                    tools,
-                    prompt: formatPrompt(defaultSystemPrompt),
-                    streamRunnable: false,
-                  })
-                : llmType && ['bedrock', 'gemini'].includes(llmType)
-                ? createToolCallingAgent({
-                    llm,
-                    tools,
-                    prompt: formatPrompt(defaultSystemPrompt),
-                    streamRunnable: false,
-                  })
-                : await createStructuredChatAgent({
-                    llm,
-                    tools,
-                    prompt: formatPromptStructured(defaultSystemPrompt),
-                    streamRunnable: false,
-                  });
+              const agentRunnable =
+                isOpenAI || llmType === 'inference'
+                  ? await createOpenAIToolsAgent({
+                      llm,
+                      tools,
+                      prompt: formatPrompt(defaultSystemPrompt),
+                      streamRunnable: false,
+                    })
+                  : llmType && ['bedrock', 'gemini'].includes(llmType)
+                  ? createToolCallingAgent({
+                      llm,
+                      tools,
+                      prompt: formatPrompt(defaultSystemPrompt),
+                      streamRunnable: false,
+                    })
+                  : await createStructuredChatAgent({
+                      llm,
+                      tools,
+                      prompt: formatPromptStructured(defaultSystemPrompt),
+                      streamRunnable: false,
+                    });
 
               return {
                 connectorId: connector.id,

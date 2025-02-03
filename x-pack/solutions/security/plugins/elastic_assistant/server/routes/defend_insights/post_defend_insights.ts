@@ -152,7 +152,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig,
             esClient,
             latestReplacements,
-            contentReferencesStore: false,
+            contentReferencesStore: undefined,
             connectorTimeout: CONNECTOR_TIMEOUT,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
             langSmithProject,

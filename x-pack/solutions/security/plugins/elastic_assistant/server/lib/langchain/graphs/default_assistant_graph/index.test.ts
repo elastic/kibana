@@ -12,14 +12,14 @@ import { invokeGraph, streamGraph } from './helpers';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { getPrompt } from '@kbn/security-ai-prompts';
+import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import {
   createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AssistantTool, AssistantToolParams } from '../../../..';
 import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
@@ -32,6 +32,7 @@ jest.mock('@kbn/langchain/server/tracers/apm');
 jest.mock('@kbn/langchain/server/tracers/telemetry');
 jest.mock('@kbn/security-ai-prompts');
 const getDefaultAssistantGraphMock = getDefaultAssistantGraph as jest.Mock;
+const resolveProviderAndModelMock = resolveProviderAndModel as jest.Mock;
 const getPromptMock = getPrompt as jest.Mock;
 describe('callAssistantGraph', () => {
   const mockDataClients = {
@@ -83,13 +84,16 @@ describe('callAssistantGraph', () => {
     telemetryParams: {},
     traceOptions: {},
     responseLanguage: 'English',
-    contentReferencesStore: contentReferencesStoreFactoryMock(),
+    contentReferencesStore: newContentReferencesStoreMock(),
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (mockDataClients?.kbDataClient?.isInferenceEndpointExists as jest.Mock).mockResolvedValue(true);
     getDefaultAssistantGraphMock.mockReturnValue({});
+    resolveProviderAndModelMock.mockResolvedValue({
+      provider: 'bedrock',
+    });
     (invokeGraph as jest.Mock).mockResolvedValue({
       output: 'test-output',
       traceData: {},
@@ -283,6 +287,24 @@ describe('callAssistantGraph', () => {
       expect(createStructuredChatAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
       expect(createToolCallingAgent).not.toHaveBeenCalled();
+    });
+    it('does not calls resolveProviderAndModel when llmType === openai', async () => {
+      const params = { ...defaultParams, llmType: 'openai' };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).not.toHaveBeenCalled();
+    });
+    it('calls resolveProviderAndModel when llmType === inference', async () => {
+      const params = { ...defaultParams, llmType: 'inference' };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).toHaveBeenCalled();
+    });
+    it('calls resolveProviderAndModel when llmType === undefined', async () => {
+      const params = { ...defaultParams, llmType: undefined };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).toHaveBeenCalled();
     });
   });
 });

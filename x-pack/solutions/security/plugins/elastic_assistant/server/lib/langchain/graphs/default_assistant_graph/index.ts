@@ -15,7 +15,7 @@ import {
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
-import { getPrompt } from '@kbn/security-ai-prompts';
+import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getModelOrOss } from '../../../prompt/helpers';
@@ -209,6 +209,13 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         logger
       )
     : undefined;
+  const { provider } =
+    !llmType || llmType === 'inference'
+      ? await resolveProviderAndModel({
+          connectorId,
+          actionsClient,
+        })
+      : { provider: llmType };
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
     dataClients,
@@ -231,6 +238,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     isStream,
     isOssModel,
     input: latestMessage[0]?.content as string,
+    provider: provider ?? '',
   };
 
   if (isStream) {
