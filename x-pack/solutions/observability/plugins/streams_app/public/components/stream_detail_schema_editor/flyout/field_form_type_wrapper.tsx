@@ -7,71 +7,61 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { EcsRecommendation } from './ecs_recommendation';
-import { FieldFormType } from './field_form_type';
-import { FieldEntry, SchemaEditorEditingState } from '../hooks/use_editing_state';
+import { FieldFormType, FieldFormTypeProps } from './field_form_type';
 import { FieldType } from '../field_type';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EMPTY_CONTENT, FIELD_TYPE_MAP } from '../constants';
+import { MappedSchemaField, SchemaField, isMappedSchemaField } from '../types';
 
 export const FieldFormTypeWrapper = ({
+  field,
   isEditing,
-  nextFieldType,
-  setNextFieldType,
-  selectedFieldType,
-  selectedFieldName,
+  onTypeChange,
 }: {
+  field: SchemaField;
   isEditing: boolean;
-  nextFieldType: SchemaEditorEditingState['nextFieldType'];
-  setNextFieldType: SchemaEditorEditingState['setNextFieldType'];
-  selectedFieldType: FieldEntry['type'];
-  selectedFieldName: FieldEntry['name'];
+  onTypeChange: FieldFormTypeProps['onChange'];
 }) => {
-  const {
-    dependencies: {
-      start: {
-        fieldsMetadata: { useFieldsMetadata },
-      },
-    },
-  } = useKibana();
+  const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
   const { fieldsMetadata, loading } = useFieldsMetadata(
     {
       attributes: ['type'],
-      fieldNames: [selectedFieldName],
+      fieldNames: [field.name],
     },
-    [selectedFieldName]
+    [field]
   );
 
+  const isMapped = isMappedSchemaField(field);
+
   // Propagate recommendation to state if a type is not already set
+  const recommendation = fieldsMetadata?.[field.name]?.type;
+
   useEffect(() => {
-    const recommendation = fieldsMetadata?.[selectedFieldName]?.type;
     if (
       !loading &&
       recommendation !== undefined &&
       // Supported type
       recommendation in FIELD_TYPE_MAP &&
-      !nextFieldType
+      !isMapped
     ) {
-      setNextFieldType(recommendation as FieldEntry['type']);
+      onTypeChange(recommendation as MappedSchemaField['type']);
     }
-  }, [fieldsMetadata, loading, nextFieldType, selectedFieldName, setNextFieldType]);
+  }, [isMapped, loading, recommendation, onTypeChange]);
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        {isEditing ? (
-          <FieldFormType value={nextFieldType} onChange={setNextFieldType} />
-        ) : selectedFieldType ? (
-          <FieldType type={selectedFieldType} />
+        {isEditing && isMapped ? (
+          <FieldFormType value={field.type} onChange={onTypeChange} />
+        ) : isMapped ? (
+          <FieldType type={field.type} />
         ) : (
           EMPTY_CONTENT
         )}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EcsRecommendation
-          isLoading={loading}
-          recommendation={fieldsMetadata?.[selectedFieldName]?.type}
-        />
+        <EcsRecommendation isLoading={loading} recommendation={recommendation} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

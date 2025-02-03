@@ -16,14 +16,17 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
+import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { fieldContainsData } from '@kbn/lens-plugin/public/shared_components';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
 import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
-import { SchemaEditorFlyoutProps } from '.';
 import { FieldFormTypeWrapper } from './field_form_type_wrapper';
-
-const EMPTY_CONTENT = '-----';
+import { ChildrenAffectedCallout } from './children_affected_callout';
+import { EMPTY_CONTENT } from '../constants';
+import { SchemaField, isMappedSchemaField } from '../types';
 
 const title = i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryTitle', {
   defaultMessage: 'Field summary',
@@ -52,160 +55,174 @@ const FIELD_SUMMARIES = {
   },
 };
 
-export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
-  const {
-    field,
-    isEditing,
-    nextFieldType,
-    setNextFieldType,
-    nextFieldFormat,
-    setNextFieldFormat,
-    toggleIsEditing,
-  } = props;
+interface FieldSummaryProps {
+  field: SchemaField;
+  isEditingByDefault: boolean;
+  stream: WiredStreamDefinition;
+  onChange: (field: Partial<SchemaField>) => void;
+}
+
+export const FieldSummary = (props: FieldSummaryProps) => {
+  // const {
+  //   isEditing,
+  //   field,
+  //   onChange,
+  //   nextFieldFormat,
+  //   setNextFieldFormat,
+  //   toggleIsEditing,
+  // } = props;
+  const { field, isEditingByDefault, onChange, stream } = props;
 
   const router = useStreamsAppRouter();
 
+  const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={1}>
-          <EuiTitle size="xxs">
-            <span>{title} </span>
-          </EuiTitle>
-        </EuiFlexItem>
-        {field.status !== 'inherited' && !isEditing ? (
-          <EuiFlexItem grow={2}>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="streamsAppFieldSummaryEditButton"
-                  size="s"
-                  color="primary"
-                  onClick={() => toggleIsEditing()}
-                  iconType="pencil"
-                >
-                  {i18n.translate('xpack.streams.fieldSummary.editButtonLabel', {
-                    defaultMessage: 'Edit',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+    <>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xxs">
+              <span>{title} </span>
+            </EuiTitle>
           </EuiFlexItem>
-        ) : field.status === 'inherited' ? (
-          <EuiFlexItem grow={2}>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="streamsAppFieldSummaryOpenInParentButton"
-                  size="s"
-                  color="primary"
-                  iconType="popout"
-                  href={router.link('/{key}/{tab}/{subtab}', {
-                    path: {
-                      key: field.parent,
-                      tab: 'management',
-                      subtab: 'schemaEditor',
-                    },
-                  })}
-                >
-                  {i18n.translate('xpack.streams.fieldSummary.editInParentButtonLabel', {
-                    defaultMessage: 'Edit in parent stream',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <EuiTitle size="xxs">
-            <span>
-              {FIELD_SUMMARIES.fieldStatus.label}{' '}
-              <EuiIconTip
-                type="iInCircle"
-                color="subdued"
-                content={i18n.translate('xpack.streams.fieldSummary.statusTooltip', {
-                  defaultMessage:
-                    'Indicates whether the field is actively mapped for use in the configuration or remains unmapped and inactive.',
-                })}
-              />
-            </span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <FieldStatusBadge status={selectedField.status} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiHorizontalRule margin="xs" />
-
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <EuiTitle size="xxs">
-            <span>{FIELD_SUMMARIES.fieldType.label}</span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <FieldFormTypeWrapper
-            isEditing={isEditing}
-            nextFieldType={nextFieldType}
-            setNextFieldType={setNextFieldType}
-            selectedFieldType={selectedField.type}
-            selectedFieldName={selectedField.name}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiHorizontalRule margin="xs" />
-
-      {typeSupportsFormat(nextFieldType) && (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={1}>
-              <EuiTitle size="xxs">
-                <span>{FIELD_SUMMARIES.fieldFormat.label}</span>
-              </EuiTitle>
-            </EuiFlexItem>
+          {field.status !== 'inherited' && !isEditing ? (
             <EuiFlexItem grow={2}>
-              {isEditing ? (
-                <FieldFormFormat
-                  nextFieldFormat={nextFieldFormat}
-                  setNextFieldFormat={setNextFieldFormat}
-                  nextFieldType={nextFieldType}
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="streamsAppFieldSummaryEditButton"
+                    size="s"
+                    color="primary"
+                    onClick={toggleEditMode}
+                    iconType="pencil"
+                  >
+                    {i18n.translate('xpack.streams.fieldSummary.editButtonLabel', {
+                      defaultMessage: 'Edit',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : field.status === 'inherited' ? (
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="streamsAppFieldSummaryOpenInParentButton"
+                    size="s"
+                    color="primary"
+                    iconType="popout"
+                    href={router.link('/{key}/{tab}/{subtab}', {
+                      path: {
+                        key: field.parent,
+                        tab: 'management',
+                        subtab: 'schemaEditor',
+                      },
+                    })}
+                  >
+                    {i18n.translate('xpack.streams.fieldSummary.editInParentButtonLabel', {
+                      defaultMessage: 'Edit in parent stream',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xxs">
+              <span>
+                {FIELD_SUMMARIES.fieldStatus.label}{' '}
+                <EuiIconTip
+                  type="iInCircle"
+                  color="subdued"
+                  content={i18n.translate('xpack.streams.fieldSummary.statusTooltip', {
+                    defaultMessage:
+                      'Indicates whether the field is actively mapped for use in the configuration or remains unmapped and inactive.',
+                  })}
                 />
-              ) : (
-                `${selectedField.format ?? EMPTY_CONTENT}`
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="xs" />
-        </>
-      )}
+              </span>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <FieldStatusBadge status={field.status} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <EuiTitle size="xxs">
-            <span>{FIELD_SUMMARIES.fieldParent.label}</span>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <FieldParent parent={selectedField.parent} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiHorizontalRule margin="xs" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xxs">
+              <span>{FIELD_SUMMARIES.fieldType.label}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            <FieldFormTypeWrapper
+              field={field}
+              isEditing={isEditing}
+              onTypeChange={(type) => onChange({ type })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="xs" />
+
+        {isMappedSchemaField(field) && typeSupportsFormat(field.type) && (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={1}>
+                <EuiTitle size="xxs">
+                  <span>{FIELD_SUMMARIES.fieldFormat.label}</span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={2}>
+                {isEditing ? (
+                  <FieldFormFormat
+                    nextFieldFormat={field.format}
+                    setNextFieldFormat={setNextFieldFormat}
+                    type={field.type}
+                  />
+                ) : (
+                  `${field.format ?? EMPTY_CONTENT}`
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xxs">
+              <span>{FIELD_SUMMARIES.fieldParent.label}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <FieldParent parent={field.parent} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="xs" />
       </EuiFlexGroup>
-
-      <EuiHorizontalRule margin="xs" />
-    </EuiFlexGroup>
+      {isEditing && stream.ingest.routing.length > 0 ? (
+        <EuiFlexItem grow={false}>
+          <ChildrenAffectedCallout childStreams={stream.ingest.routing} />
+        </EuiFlexItem>
+      ) : null}
+    </>
   );
 };

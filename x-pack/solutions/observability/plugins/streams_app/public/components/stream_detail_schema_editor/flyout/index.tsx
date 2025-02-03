@@ -5,45 +5,39 @@
  * 2.0.
  */
 
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
+import { WiredStreamDefinition } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { SchemaEditorEditingState } from '../hooks/use_editing_state';
-import { ChildrenAffectedCallout } from './children_affected_callout';
 import { SamplePreviewTable } from './sample_preview_table';
 import { FieldSummary } from './field_summary';
-import { SchemaField } from '../types';
+import { MappedSchemaField, SchemaField } from '../types';
 
 export interface SchemaEditorFlyoutProps {
   field: SchemaField;
-  stream: WiredStreamDefinition;
-  onSave: () => void;
+  isEditingByDefault?: boolean;
   onCancel: () => void;
+  onSave: (field: SchemaField) => void;
+  stream: WiredStreamDefinition;
   withFieldSimulation?: boolean;
 }
-// export type SchemaEditorFlyoutProps = {
-//   streamsRepositoryClient: StreamsRepositoryClient;
-//   definition: WiredStreamGetResponse;
-// } & SchemaEditorEditingState;
 
 export const SchemaEditorFlyout = ({
   field,
   stream,
   onCancel,
   onSave,
+  isEditingByDefault = false,
   withFieldSimulation = false,
 }: SchemaEditorFlyoutProps) => {
   // const {
@@ -55,9 +49,17 @@ export const SchemaEditorFlyout = ({
   //   isEditing,
   // } = props;
 
+  const [nextField, setNextField] = useReducer(
+    (prev: SchemaField, updated: Partial<SchemaField>): SchemaField => ({
+      ...prev,
+      ...updated,
+    }),
+    field
+  );
+
   const [{ loading: isSaving }, saveChanges] = useAsyncFn(async () => {
-    if (onSave) return onSave();
-  }, [onSave]);
+    if (onSave) return onSave(nextField);
+  }, [nextField, onSave]);
 
   return (
     <>
@@ -69,15 +71,14 @@ export const SchemaEditorFlyout = ({
 
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
-          <FieldSummary {...props} />
-          {isEditing && stream.ingest.routing.length > 0 ? (
-            <EuiFlexItem grow={false}>
-              <ChildrenAffectedCallout childStreams={stream.ingest.routing} />
-            </EuiFlexItem>
-          ) : null}
+          <FieldSummary
+            isEditingByDefault={isEditingByDefault}
+            field={nextField}
+            onChange={setNextField}
+          />
           {withFieldSimulation && (
             <EuiFlexItem grow={false}>
-              <SamplePreviewTable stream={stream} nextFieldDefinition={nextFieldDefinition} />
+              <SamplePreviewTable stream={stream} nextField={nextField} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

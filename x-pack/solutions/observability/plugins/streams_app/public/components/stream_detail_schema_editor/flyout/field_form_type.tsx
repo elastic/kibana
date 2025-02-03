@@ -9,7 +9,7 @@ import { EuiSelect } from '@elastic/eui';
 import React from 'react';
 import { FIELD_TYPE_MAP, FieldTypeOption } from '../constants';
 
-interface FieldFormTypeProps {
+export interface FieldFormTypeProps {
   onChange: (value: FieldTypeOption) => void;
   value?: FieldTypeOption;
 }

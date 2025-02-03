@@ -17,16 +17,17 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
 import { isFullFieldDefinition } from '../hooks/use_editing_state';
 import { LoadingPanel } from '../../loading_panel';
+import { SchemaField } from '../types';
 
 interface SamplePreviewTableProps {
   stream: WiredStreamDefinition;
-  nextFieldDefinition?: Partial<NamedFieldDefinitionConfig>;
+  nextField?: SchemaField;
 }
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
-  const { nextFieldDefinition, ...rest } = props;
-  if (isFullFieldDefinition(nextFieldDefinition)) {
-    return <SamplePreviewTableContent nextFieldDefinition={nextFieldDefinition} {...rest} />;
+  const { nextField, ...rest } = props;
+  if (isFullFieldDefinition(nextField)) {
+    return <SamplePreviewTableContent nextField={nextField} {...rest} />;
   } else {
     return null;
   }
@@ -36,8 +37,8 @@ const SAMPLE_DOCUMENTS_TO_SHOW = 20;
 
 const SamplePreviewTableContent = ({
   stream,
-  nextFieldDefinition,
-}: SamplePreviewTableProps & { nextFieldDefinition: NamedFieldDefinitionConfig }) => {
+  nextField,
+}: SamplePreviewTableProps & { nextField: NamedFieldDefinitionConfig }) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
   const { value, loading, error } = useStreamsAppFetch(
@@ -49,18 +50,18 @@ const SamplePreviewTableContent = ({
             id: stream.name,
           },
           body: {
-            field_definitions: [nextFieldDefinition],
+            field_definitions: [nextField],
           },
         },
       });
     },
-    [stream.name, nextFieldDefinition, streamsRepositoryClient],
+    [stream.name, nextField, streamsRepositoryClient],
     { disableToastOnError: true }
   );
 
   const columns = useMemo(() => {
-    return [nextFieldDefinition.name];
-  }, [nextFieldDefinition.name]);
+    return [nextField.name];
+  }, [nextField.name]);
 
   if (loading) {
     return <LoadingPanel />;

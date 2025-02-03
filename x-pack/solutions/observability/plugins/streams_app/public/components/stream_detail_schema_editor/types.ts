@@ -10,17 +10,32 @@ import { FieldDefinitionConfig, WiredStreamDefinition } from '@kbn/streams-schem
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
 export type SchemaFieldType = FieldDefinitionConfig['type'];
 
-export interface SchemaField extends Omit<FieldDefinitionConfig, 'type'> {
+export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
   name: string;
   parent: string;
-  status: SchemaFieldStatus;
-  type?: SchemaFieldType;
 }
+
+export interface MappedSchemaField extends BaseSchemaField {
+  status: 'inherited' | 'mapped';
+  type: SchemaFieldType;
+}
+
+export interface UnmappedSchemaField extends BaseSchemaField {
+  status: 'unmapped';
+}
+
+export type SchemaField = MappedSchemaField | UnmappedSchemaField;
 
 export interface SchemaEditorProps {
   fields: SchemaField[];
   isLoading?: boolean;
+  onFieldUnmap: (fieldName: SchemaField['name']) => void;
+  onFieldUpdate: (field: SchemaField) => void;
   stream: WiredStreamDefinition;
   withControls?: boolean;
   withTableActions?: boolean;
 }
+
+export const isMappedSchemaField = (field: SchemaField): field is MappedSchemaField => {
+  return field.status !== 'unmapped';
+};

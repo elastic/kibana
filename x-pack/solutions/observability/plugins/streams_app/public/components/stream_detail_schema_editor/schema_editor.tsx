@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useContext, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -32,27 +32,42 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FieldStatusFilterGroup } from './filters/status_filter_group';
 import { FieldTypeFilterGroup } from './filters/type_filter_group';
 import { TControls, useControls } from './hooks/use_controls';
-import { SchemaEditorProps, SchemaField } from './types';
+import { SchemaEditorProps, SchemaField, isMappedSchemaField } from './types';
 import { FieldParent } from './field_parent';
-import { FieldEntry } from './hooks/use_editing_state';
 import { useKibana } from '../../hooks/use_kibana';
 import { EMPTY_CONTENT } from './constants';
 import { FieldStatusBadge } from './field_status';
 import { FieldType } from './field_type';
+import { SchemaEditorFlyout } from './flyout';
+import { StreamsAppContextProvider } from '../streams_app_context_provider';
 
-const SchemaEditorContext = React.createContext<SchemaEditorProps | undefined>(undefined);
+type SchemaEditorContextType = Pick<
+  SchemaEditorProps,
+  'fields' | 'onFieldUnmap' | 'onFieldUpdate' | 'stream'
+>;
+
+const SchemaEditorContext = React.createContext<SchemaEditorContextType | undefined>(undefined);
+
+const useSchemaEditorContext = () => useContext(SchemaEditorContext) as SchemaEditorContextType;
 
 export function SchemaEditor({
   fields,
   isLoading,
+  onFieldUnmap,
+  onFieldUpdate,
   stream,
   withControls = false,
   withTableActions = false,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
 
+  const context = useMemo(
+    () => ({ fields, onFieldUnmap, onFieldUpdate, stream }),
+    [fields, onFieldUnmap, onFieldUpdate, stream]
+  );
+
   return (
-    <SchemaEditorContext.Provider value={{ fields }}>
+    <SchemaEditorContext.Provider value={context}>
       <EuiFlexGroup direction="column" gutterSize="m">
         {isLoading ? (
           <EuiPortal>
@@ -91,10 +106,10 @@ function Controls({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FieldTypeFilterGroup onChangeFilterGroup={onChange} />
+          <FieldTypeFilterGroup onChange={onChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FieldStatusFilterGroup onChangeFilterGroup={onChange} />
+          <FieldStatusFilterGroup onChange={onChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
@@ -146,17 +161,18 @@ function FieldsTable({
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
 
   const filteredFields = useMemo(() => {
-    const { query, type, status } = controls;
-    if (!query && isEmpty(type) && isEmpty(status)) return fields;
+    if (!controls.query && isEmpty(controls.type) && isEmpty(controls.status)) {
+      return fields;
+    }
 
-    const matchingQueryFields = EuiSearchBar.Query.execute(query, fields, {
+    const matchingQueryFields = EuiSearchBar.Query.execute(controls.query, fields, {
       defaultFields: ['name', 'type'],
     });
 
     const filteredByGroupsFields = matchingQueryFields.filter((field) => {
       return (
-        (isEmpty(type) || type.includes(field.type)) && // Filter by applyed type
-        (isEmpty(status) || status.includes(field.status)) // Filter by applyed status
+        (isEmpty(controls.type) || controls.type.includes('type' in field && field.type)) && // Filter by applied type
+        (isEmpty(controls.status) || controls.status.includes(field.status)) // Filter by applied status
       );
     });
 
@@ -231,11 +247,11 @@ const createCellRenderer =
   ({ rowIndex, columnId }) => {
     const field = fields[rowIndex];
     if (!field) return null;
-    const { type, parent, status } = field;
+    const { parent, status } = field;
 
     if (columnId === 'type') {
-      if (!type) return EMPTY_CONTENT;
-      return <FieldType type={type} />;
+      if (!isMappedSchemaField(field)) return EMPTY_CONTENT;
+      return <FieldType type={field.type} />;
     }
 
     if (columnId === 'parent') {
@@ -250,24 +266,43 @@ const createCellRenderer =
   };
 
 export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
-  const { core } = useKibana();
+  const context = useKibana();
+  const { core } = context;
+
+  const { onFieldUnmap, onFieldUpdate, stream } = useSchemaEditorContext();
+
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'fieldsTableContextMenuPopover',
   });
 
   const [popoverIsOpen, { off: closePopover, toggle }] = useBoolean(false);
 
-  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
-    let actions: ActionsCellActionsDescriptor[] = [];
+  const panels = useMemo(() => {
+    let actions = [];
 
-    const viewFieldAction: ActionsCellActionsDescriptor = {
+    const openFlyout = (props: { isEditingByDefault: boolean } = { isEditingByDefault: false }) => {
+      const overlay = core.overlays.openFlyout(
+        toMountPoint(
+          <StreamsAppContextProvider context={context}>
+            <SchemaEditorFlyout
+              field={field}
+              stream={stream}
+              onCancel={() => overlay.close()}
+              onSave={onFieldUpdate}
+              {...props}
+            />
+          </StreamsAppContextProvider>,
+          core
+        ),
+        { maxWidth: 500 }
+      );
+    };
+
+    const viewFieldAction = {
       name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
         defaultMessage: 'View field',
       }),
-      // disabled: editingState.isSaving,
-      onClick: (fieldEntry: FieldEntry) => {
-        // editingState.selectField(fieldEntry, false);
-      },
+      onClick: () => openFlyout(),
     };
 
     switch (field.status) {
@@ -278,19 +313,13 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             name: i18n.translate('xpack.streams.actions.editFieldLabel', {
               defaultMessage: 'Edit field',
             }),
-            // disabled: editingState.isSaving,
-            // onClick: (fieldEntry: FieldEntry) => {
-            //   editingState.selectField(fieldEntry, true);
-            // },
+            onClick: () => openFlyout({ isEditingByDefault: true }),
           },
           {
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
             }),
-            // disabled: unpromotingState.isUnpromotingField,
-            // onClick: (fieldEntry: FieldEntry) => {
-            //   unpromotingState.setSelectedField(fieldEntry.name);
-            // },
+            onClick: () => onFieldUnmap(field.name),
           },
         ];
         break;
@@ -301,16 +330,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
               defaultMessage: 'Map field',
             }),
-            onClick: (fieldEntry: FieldEntry) => {
-              core.overlays.openFlyout(toMountPoint(<h1>{fieldEntry.name}</h1>, core), {
-                maxWidth: 500,
-                onClose: (flyout) => flyout.close(),
-              });
-            },
-            // disabled: editingState.isSaving,
-            // onClick: (fieldEntry: FieldEntry) => {
-            //   editingState.selectField(fieldEntry, true);
-            // },
+            onClick: () => openFlyout({ isEditingByDefault: true }),
           },
         ];
         break;
@@ -327,15 +347,14 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         }),
         items: actions.map((action) => ({
           name: action.name,
-          icon: action.icon,
           onClick: () => {
-            action.onClick(field);
+            action.onClick();
             closePopover();
           },
         })),
       },
     ];
-  }, [closePopover, core, field]);
+  }, [closePopover, core, field, onFieldUnmap, onFieldUpdate, stream]);
 
   return (
     <EuiPopover
@@ -358,8 +377,4 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
-};
-
-export type ActionsCellActionsDescriptor = Omit<EuiContextMenuPanelItemDescriptor, 'onClick'> & {
-  onClick: (field: FieldEntry) => void;
 };

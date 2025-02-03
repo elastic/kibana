@@ -7,12 +7,12 @@
 
 import { useReducer } from 'react';
 import { EuiSearchBar } from '@elastic/eui';
-import { SchemaFieldStatus, SchemaField } from '../types';
+import { SchemaFieldStatus, MappedSchemaField } from '../types';
 
 const defaultControls = {
   query: EuiSearchBar.Query.MATCH_ALL,
   status: [] as SchemaFieldStatus[],
-  type: [] as Array<SchemaField['type']>,
+  type: [] as Array<MappedSchemaField['type']>,
 } as const;
 
 export type TControls = typeof defaultControls;
