@@ -49,7 +49,7 @@ export interface AgentExecutorParams<T extends boolean> {
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;
-  contentReferencesStore: ContentReferencesStore | false;
+  contentReferencesStore: ContentReferencesStore | undefined;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];

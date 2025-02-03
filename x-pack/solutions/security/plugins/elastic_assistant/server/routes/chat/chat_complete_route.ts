@@ -16,7 +16,7 @@ import {
   transformRawData,
   getAnonymizedValue,
   ConversationResponse,
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -186,8 +186,9 @@ export const chatCompleteRoute = (
             }));
           }
 
-          const contentReferencesStore =
-            contentReferencesEnabled && contentReferencesStoreFactory();
+          const contentReferencesStore = contentReferencesEnabled
+            ? newContentReferencesStore()
+            : undefined;
 
           const onLlmResponse = async (
             content: string,
