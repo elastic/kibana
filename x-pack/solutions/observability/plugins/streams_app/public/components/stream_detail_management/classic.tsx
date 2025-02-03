@@ -13,6 +13,7 @@ import { RedirectTo } from '../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { useKibana } from '../../hooks/use_kibana';
 import { Wrapper } from './wrapper';
+import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 
 type ManagementSubTabs = 'enrich' | 'overview';
 
@@ -44,6 +45,14 @@ export function ClassicStreamDetailManagement({
       ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
         defaultMessage: 'Extract field',
+      }),
+    },
+    lifecycle: {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+        defaultMessage: 'Data retention',
       }),
     },
   };
