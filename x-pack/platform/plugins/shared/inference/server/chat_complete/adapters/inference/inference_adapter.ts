@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { createInferenceInternalError } from '@kbn/inference-common';
 import { from, identity, switchMap, throwError } from 'rxjs';
-import { Readable, isReadable } from 'stream';
+import { isReadable, Readable } from 'stream';
+import { createInferenceInternalError } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { parseInlineFunctionCalls } from '../../simulated_function_calling';
+import { convertUpstreamError, isNativeFunctionCallingSupported } from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
-import { isNativeFunctionCallingSupported } from '../../utils';
-import { emitTokenCountEstimateIfMissing, processOpenAIStream } from '../openai';
+import { parseInlineFunctionCalls } from '../../simulated_function_calling';
+import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
 import { createRequest } from './create_openai_request';
 
 export const inferenceAdapter: InferenceConnectorAdapter = {
@@ -58,8 +58,8 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { createInferenceInternalError } from '@kbn/inference-common';
 import { from, identity, switchMap, throwError } from 'rxjs';
-import { Readable, isReadable } from 'stream';
+import { isReadable, Readable } from 'stream';
+import { createInferenceInternalError } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
+import type { InferenceConnectorAdapter } from '../../types';
 import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
-import type { InferenceConnectorAdapter } from '../../types';
-import { isNativeFunctionCallingSupported } from '../../utils/function_calling_support';
-import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
-import { processOpenAIStream } from './process_openai_stream';
-import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from './to_openai';
+import { convertUpstreamError, isNativeFunctionCallingSupported } from '../../utils';
 import type { OpenAIRequest } from './types';
+import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
+import { processOpenAIStream } from './process_openai_stream';
+import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -78,8 +78,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }

@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
+import { isReadable, Readable } from 'stream';
 import {
   Message,
   MessageRole,
-  ToolChoiceType,
   createInferenceInternalError,
+  ToolChoiceType,
 } from '@kbn/inference-common';
-import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
-import { Readable, isReadable } from 'stream';
+import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
-import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
-import { processCompletionChunks } from './process_completion_chunks';
-import { addNoToolUsageDirective } from './prompts';
+import { convertUpstreamError } from '../../utils';
+import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
 import {
   BedrockChunkMember,
   serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
-import { parseSerdeChunkMessage } from './serde_utils';
-import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
+import { processCompletionChunks } from './process_completion_chunks';
+import { addNoToolUsageDirective } from './prompts';
+import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -59,8 +60,8 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }

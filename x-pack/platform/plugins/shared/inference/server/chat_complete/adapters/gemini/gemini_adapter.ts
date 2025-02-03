@@ -6,21 +6,22 @@
  */
 
 import * as Gemini from '@google/generative-ai';
+import { from, map, switchMap, throwError } from 'rxjs';
+import { isReadable, Readable } from 'stream';
 import {
+  createInferenceInternalError,
   Message,
   MessageRole,
   ToolChoiceType,
   ToolOptions,
   ToolSchema,
   ToolSchemaType,
-  createInferenceInternalError,
 } from '@kbn/inference-common';
-import { from, map, switchMap, throwError } from 'rxjs';
-import { Readable, isReadable } from 'stream';
-import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';
+import { convertUpstreamError } from '../../utils';
+import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
-import type { GeminiMessage, GeminiToolConfig, GenerateContentResponseChunk } from './types';
+import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -53,8 +54,8 @@ export const geminiAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }
