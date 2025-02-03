@@ -708,7 +708,6 @@
     "@kbn/observability-onboarding-plugin": "link:x-pack/solutions/observability/plugins/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/solutions/observability/plugins/observability",
     "@kbn/observability-shared-plugin": "link:x-pack/solutions/observability/plugins/observability_shared",
-    "@kbn/observability-synthetics-test-data": "link:x-pack/solutions/observability/packages/synthetics_test_data",
     "@kbn/observability-utils-browser": "link:x-pack/solutions/observability/packages/utils_browser",
     "@kbn/observability-utils-common": "link:x-pack/solutions/observability/packages/utils_common",
     "@kbn/observability-utils-server": "link:x-pack/solutions/observability/packages/utils_server",
