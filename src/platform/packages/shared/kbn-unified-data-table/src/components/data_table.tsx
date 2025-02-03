@@ -732,6 +732,7 @@ export const UnifiedDataTable = ({
         externalCustomRenderers,
         isPlainRecord,
         isCompressed: dataGridDensity === DataGridDensity.COMPACT,
+        columnsMeta,
       }),
     [
       dataView,
@@ -742,6 +743,7 @@ export const UnifiedDataTable = ({
       externalCustomRenderers,
       isPlainRecord,
       dataGridDensity,
+      columnsMeta,
     ]
   );
 
