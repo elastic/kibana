@@ -21,6 +21,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('API /api/metrics/process_list', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
+
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
