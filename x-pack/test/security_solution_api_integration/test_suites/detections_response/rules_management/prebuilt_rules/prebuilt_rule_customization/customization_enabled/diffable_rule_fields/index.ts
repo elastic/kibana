@@ -32,7 +32,7 @@ import { investigationFieldsField } from './investigation_fields';
 import { dataSourceField } from './data_source';
 import { alertSuppressionField } from './alert_suppression';
 import { inlineQueryKqlQueryField } from './kql_query.inline_query';
-import { savedQueryKqlQueryField } from './kql_query.saved_query';
+// import { savedQueryKqlQueryField } from './kql_query.saved_query';
 import { eqlQueryField } from './eql_query';
 import { esqlQueryField } from './esql_query';
 import { threatIndexField } from './threat_index';
@@ -85,7 +85,7 @@ export default (context: FtrProviderContext): void => {
     inlineQueryKqlQueryField(context);
 
     // Saved Query rule types
-    savedQueryKqlQueryField(context);
+    // savedQueryKqlQueryField(context);
 
     // EQL rule type
     eqlQueryField(context);
