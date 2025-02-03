@@ -12,17 +12,13 @@ import {
   UNIVERSAL_ENTITY_FLYOUT_OPENED,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 
 export interface UniversalEntityPanelProps {
-  // TODO: Asset Inventory - use EntityEcs type definition for entity
-  entity: {
-    id: string;
-    timestamp: string;
-    type: string;
-  };
+  entity: UniversalEntityEcs;
   contextID?: string;
   scopeId?: string;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
@@ -30,6 +26,7 @@ export interface UniversalEntityPanelProps {
 }
 
 export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
+  // eslint-disable-next-line react/no-unused-prop-types
   key: 'universal-entity-panel';
   params: UniversalEntityPanelProps;
 }
@@ -41,73 +38,9 @@ export const UniversalEntityPanel = (props: UniversalEntityPanelExpandableFlyout
     uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
   }, [entity]);
 
-  // const serviceNameFilterQuery = useMemo(
-  //   () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
-  //   [serviceName]
-  // );
-  //
-  // const riskScoreState = useRiskScore({
-  //   riskEntity: EntityType.service,
-  //   filterQuery: serviceNameFilterQuery,
-  //   onlyLatest: false,
-  //   pagination: FIRST_RECORD_PAGINATION,
-  // });
-  //
-  // const { inspect, refetch, loading } = riskScoreState;
-  // const { setQuery, deleteQuery } = useGlobalTime();
-  // const observedService = useObservedService(serviceName, scopeId);
-  // const { data: serviceRisk } = riskScoreState;
-  // const serviceRiskData = serviceRisk && serviceRisk.length > 0 ? serviceRisk[0] : undefined;
-  // const isRiskScoreExist = !!serviceRiskData?.service.risk;
-  //
-  // const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID) ?? noop;
-  // const refetchRiskScore = useCallback(() => {
-  //   refetch();
-  //   (refetchRiskInputsTab as Refetch)();
-  // }, [refetch, refetchRiskInputsTab]);
-  //
-  // const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-  //   EntityType.service,
-  //   serviceName,
-  //   { onSuccess: refetchRiskScore }
-  // );
-  //
-  // useQueryInspector({
-  //   deleteQuery,
-  //   inspect,
-  //   loading,
-  //   queryId: SERVICE_PANEL_RISK_SCORE_QUERY_ID,
-  //   refetch,
-  //   setQuery,
-  // });
-  //
-  // const { openDetailsPanel, isLinkEnabled } = useNavigateToServiceDetails({
-  //   serviceName,
-  //   scopeId,
-  //   contextID,
-  //   isDraggable,
-  //   isRiskScoreExist,
-  // });
-  //
-  // const openPanelFirstTab = useCallback(
-  //   () =>
-  //     openDetailsPanel({
-  //       tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
-  //     }),
-  //   [openDetailsPanel]
-  // );
-  //
-  // if (observedService.isLoading) {
-  //   return <FlyoutLoading />;
-  // }
-
   return (
     <>
-      <FlyoutNavigation
-        flyoutIsExpandable={true}
-        // expandDetails={openPanelFirstTab}
-        // isPreview={scopeId === TableId.rulePreview}
-      />
+      <FlyoutNavigation flyoutIsExpandable={false} />
       <UniversalEntityFlyoutHeader entity={entity} />
       <UniversalEntityFlyoutContent entity={entity} />
     </>

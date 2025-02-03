@@ -149,6 +149,8 @@ const getEntity = (row: DataTableRecord): UniversalEntityEcs => {
   };
 };
 
+const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
+
 const AllAssets = ({
   rows,
   isLoading,
@@ -178,7 +180,11 @@ const AllAssets = ({
     if (hit) {
       const entity = getEntity(hit);
       setExpandedDoc(hit); // Table is expecting the same doc ref to highlight the selected row
-      openDynamicFlyout({ entity, scopeId: 'scopeId', contextId: 'contextId' });
+      openDynamicFlyout({
+        entity,
+        scopeId: ASSET_INVENTORY_TABLE_ID,
+        contextId: ASSET_INVENTORY_TABLE_ID,
+      });
     } else {
       closeDynamicFlyout();
       setExpandedDoc(undefined);
