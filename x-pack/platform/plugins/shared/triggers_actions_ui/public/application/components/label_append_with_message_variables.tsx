@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
@@ -18,6 +19,13 @@ interface Props {
   paramsProperty: string;
 }
 
+const OPTIONAL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.labelAppendWithMessageVariables.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
 export const LabelAppendWithMessageVariables: React.FunctionComponent<Props> = ({
   buttonTitle,
   messageVariables,
@@ -30,7 +38,7 @@ export const LabelAppendWithMessageVariables: React.FunctionComponent<Props> = (
   if (isOptionalField && messageVariablesLength === 0) {
     return (
       <EuiText size="xs" color="subdued">
-        Optional
+        {OPTIONAL_LABEL}
       </EuiText>
     );
   }
@@ -39,7 +47,7 @@ export const LabelAppendWithMessageVariables: React.FunctionComponent<Props> = (
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            Optional
+            {OPTIONAL_LABEL}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
