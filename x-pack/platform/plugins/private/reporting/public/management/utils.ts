@@ -8,6 +8,7 @@
 import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { Job } from '@kbn/reporting-public';
+import { SavedSearchTypeDisplayName } from '@kbn/saved-search-plugin/common';
 
 /**
  * This is not the most forward-compatible way of mapping to an {@link IconType} for an application.
@@ -29,6 +30,15 @@ export const guessAppIconTypeFromObjectType = (type: string): IconType => {
       return 'lensApp';
     default:
       return 'apps';
+  }
+};
+
+export const getDisplayNameFromObjectType = (type: string): string => {
+  switch (type) {
+    case 'search':
+      return SavedSearchTypeDisplayName;
+    default:
+      return type;
   }
 };
 

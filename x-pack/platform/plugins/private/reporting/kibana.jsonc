@@ -18,6 +18,7 @@
     "requiredPlugins": [
       "data",
       "discover",
+      "savedSearch",
       "fieldFormats",
       "home",
       "management",
