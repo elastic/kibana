@@ -49,8 +49,10 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
       return;
     }
 
-    const containsContentReferences = conversation.messages.some((message) => !isEmpty(message.metadata?.contentReferences));
-    const containsReplacements = !isEmpty(conversation.replacements)
+    const containsContentReferences = conversation.messages.some(
+      (message) => !isEmpty(message.metadata?.contentReferences)
+    );
+    const containsReplacements = !isEmpty(conversation.replacements);
 
     if (containsContentReferences || containsReplacements) {
       const timer = setTimeout(() => {
@@ -66,22 +68,24 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
   const finishTour = useCallback(() => {
     setTourCompleted(true);
     setShowTour(false);
-  }, []);
+  }, [setTourCompleted, setShowTour]);
 
-  return (<EuiTourStep
-    data-test-subj="anonymizedValuesAndCitationsTourStep"
-    panelProps={{
-      'data-test-subj': `anonymizedValuesAndCitationsTourStepPanel`,
-    }}
-    anchor={anonymizedValuesAndCitationsTourStep1.anchor}
-    content={anonymizedValuesAndCitationsTourStep1.content}
-    isStepOpen={showTour}
-    maxWidth={300}
-    onFinish={finishTour}
-    step={1}
-    stepsTotal={1}
-    title={anonymizedValuesAndCitationsTourStep1.title}
-    subtitle={anonymizedValuesAndCitationsTourStep1.subTitle}
-    anchorPosition="rightUp"
-  />)
+  return (
+    <EuiTourStep
+      data-test-subj="anonymizedValuesAndCitationsTourStep"
+      panelProps={{
+        'data-test-subj': `anonymizedValuesAndCitationsTourStepPanel`,
+      }}
+      anchor={anonymizedValuesAndCitationsTourStep1.anchor}
+      content={anonymizedValuesAndCitationsTourStep1.content}
+      isStepOpen={showTour}
+      maxWidth={300}
+      onFinish={finishTour}
+      step={1}
+      stepsTotal={1}
+      title={anonymizedValuesAndCitationsTourStep1.title}
+      subtitle={anonymizedValuesAndCitationsTourStep1.subTitle}
+      anchorPosition="rightUp"
+    />
+  );
 };
