@@ -100,6 +100,13 @@ describe('PingListExpandedRow', () => {
           <EuiCallOut
             color="primary"
           >
+            <EuiTitle
+              size="xs"
+            >
+              <h5>
+                Response Body
+              </h5>
+            </EuiTitle>
             <BodyDescription
               body={
                 Object {

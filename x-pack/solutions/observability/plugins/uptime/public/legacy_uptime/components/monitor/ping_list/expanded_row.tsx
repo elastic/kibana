@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatNumber } from '@elastic/eui';
+import { EuiTitle, formatNumber } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCodeBlock,
@@ -69,6 +69,13 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => (
         {ping.http?.response?.body && (
           // Show the body, if present
           <>
+            <EuiTitle size="xs">
+              <h5>
+                {i18n.translate('xpack.uptime.pingList.expandedRow.response_body', {
+                  defaultMessage: 'Response Body',
+                })}
+              </h5>
+            </EuiTitle>
             <BodyDescription body={ping.http.response.body} />
             <EuiSpacer size={'s'} />
             {ping.http.response.body.content ? (

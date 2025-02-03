@@ -44,6 +44,13 @@ exports[`PingListExpandedRow renders error information when an error field is pr
     <EuiCallOut
       color="danger"
     >
+      <EuiTitle
+        size="xs"
+      >
+        <h5>
+          Response Body
+        </h5>
+      </EuiTitle>
       <BodyDescription
         body={
           Object {
@@ -82,6 +89,13 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
     <EuiCallOut
       color="primary"
     >
+      <EuiTitle
+        size="xs"
+      >
+        <h5>
+          Response Body
+        </h5>
+      </EuiTitle>
       <BodyDescription
         body={
           Object {
@@ -115,6 +129,11 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
       <div
         class="euiText emotion-euiText-s-euiTextColor-default"
       >
+        <h5
+          class="euiTitle emotion-euiTitle-xs"
+        >
+          Response Body
+        </h5>
         <div
           class="euiText emotion-euiText-m"
         >
@@ -162,6 +181,13 @@ exports[`PingListExpandedRow shallow renders link to docs if body is not recorde
     <EuiCallOut
       color="primary"
     >
+      <EuiTitle
+        size="xs"
+      >
+        <h5>
+          Response Body
+        </h5>
+      </EuiTitle>
       <BodyDescription
         body={
           Object {
