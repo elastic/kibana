@@ -13,15 +13,18 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
+
 import { css } from '@emotion/css';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useAssetCriticalityEntityTypes } from '../../../hooks/use_enabled_entity_types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
+
 import {
   CRITICALITY_CSV_MAX_SIZE_BYTES,
   ValidCriticalityLevels,
@@ -37,26 +40,25 @@ interface AssetCriticalityFilePickerStepProps {
 
 const sampleCSVContent = `user,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
 
-const listStyle = css`
-  list-style-type: disc;
-  margin-bottom: ${euiThemeVars.euiSizeL};
-  margin-left: ${euiThemeVars.euiSizeL};
-  line-height: ${euiThemeVars.euiLineHeight};
-`;
-
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
-    const i18n = useI18n();
+    const { formatListToParts } = useI18n();
 
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
+
+    const listStyle = css`
+      list-style-type: disc;
+      margin-bottom: ${euiTheme.size.l};
+      margin-left: ${euiTheme.size.l};
+      line-height: ${useEuiFontSize('s').lineHeight};
+    `;
+
     const entityTypes = useAssetCriticalityEntityTypes();
     const i18nOrList = (items: string[]) =>
-      i18n
-        .formatListToParts(items, {
-          type: 'disjunction',
-        })
-        .map(({ type, value }) => (type === 'element' ? <b>{value}</b> : value)); // bolded list items
+      formatListToParts(items, {
+        type: 'disjunction',
+      }).map(({ type, value }) => (type === 'element' ? <b>{value}</b> : value)); // bolded list items
 
     return (
       <>
@@ -167,6 +169,12 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           onChange={onFileChange}
           isInvalid={!!errorMessage}
           isLoading={isLoading}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.filePickerAriaLabel',
+            {
+              defaultMessage: 'Asset criticality file picker',
+            }
+          )}
         />
         <br />
         {errorMessage && (

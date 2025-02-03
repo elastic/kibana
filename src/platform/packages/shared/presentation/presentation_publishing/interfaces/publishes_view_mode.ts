@@ -16,7 +16,7 @@ export type ViewMode = 'view' | 'edit' | 'print' | 'preview';
  * visibility of components.
  */
 export interface PublishesViewMode {
-  viewMode: PublishingSubject<ViewMode>;
+  viewMode$: PublishingSubject<ViewMode>;
 }
 
 /**
@@ -33,7 +33,7 @@ export type PublishesWritableViewMode = PublishesViewMode & {
 export const apiPublishesViewMode = (
   unknownApi: null | unknown
 ): unknownApi is PublishesViewMode => {
-  return Boolean(unknownApi && (unknownApi as PublishesViewMode)?.viewMode !== undefined);
+  return Boolean(unknownApi && (unknownApi as PublishesViewMode)?.viewMode$ !== undefined);
 };
 
 export const apiPublishesWritableViewMode = (

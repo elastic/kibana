@@ -44,7 +44,7 @@
     "@kbn/management-cards-navigation",
     "@kbn/discover-plugin",
     "@kbn/logging",
-    "@kbn/integration-assistant-plugin",
+    "@kbn/automatic-import-plugin",
     "@kbn/cloud-security-posture-common",
     "@kbn/dev-utils"
   ]

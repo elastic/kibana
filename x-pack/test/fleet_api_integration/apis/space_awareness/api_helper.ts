@@ -517,7 +517,8 @@ export class SpaceTestApiClient {
       .post(`${this.getBaseUrl(spaceId)}/internal/fleet/enable_space_awareness`)
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
-      .set('elastic-api-version', '1');
+      .set('elastic-api-version', '1')
+      .expect(200);
 
     return res;
   }

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import expect from '@kbn/expect';
 import equals from 'fast-deep-equal';
+import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
+import { testSubjectIds } from '../constants/test_subject_ids';
+
+const { CIS_AWS_OPTION_TEST_ID, AWS_SINGLE_ACCOUNT_TEST_ID } = testSubjectIds;
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
@@ -23,10 +27,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
     'cisAddIntegration',
   ]);
-
-  const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
-
-  const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
   describe('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_CREDENTIALS_PACKAGE_VERSION
+        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -56,9 +56,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.selectSetupTechnology('agentless');
-      await cisIntegration.selectAwsCredentials('direct');
-
       await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.selectAwsCredentials('direct');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.fillInTextField('awsDirectAccessKeyId', 'access_key_id');
+      await cisIntegration.fillInTextField('passwordInput-secret-access-key', 'secret_access_key');
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -84,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should show setup technology selector in edit mode`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_CREDENTIALS_PACKAGE_VERSION
+        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -93,9 +97,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.selectSetupTechnology('agentless');
-      await cisIntegration.selectAwsCredentials('direct');
-
       await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.selectAwsCredentials('direct');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await cisIntegration.fillInTextField('awsDirectAccessKeyId', 'access_key_id');
+      await cisIntegration.fillInTextField('passwordInput-secret-access-key', 'secret_access_key');
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -114,13 +122,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should hide setup technology selector in edit mode`, async () => {
       const integrationPolicyName = `cloud_security_posture1-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_CREDENTIALS_PACKAGE_VERSION
+        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
       await cisIntegration.selectSetupTechnology('agent-based');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -141,13 +151,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_CREDENTIALS_PACKAGE_VERSION
+        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
+      await cisIntegration.selectSetupTechnology('agent-based');
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();

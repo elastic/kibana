@@ -30,11 +30,14 @@ import {
   EuiPageTemplate,
   EuiTitle,
   EuiButtonIcon,
+  EuiBetaBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { css } from '@emotion/react';
 
 import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
@@ -43,7 +46,6 @@ import { type CriticalityLevelWithUnassigned } from '../../../common/entity_anal
 import { useKibana } from '../../common/lib/kibana';
 
 import { AssetCriticalityBadge } from '../../entity_analytics/components/asset_criticality/asset_criticality_badge';
-import { EmptyState } from '../components/empty_state';
 import { AdditionalControls } from '../components/additional_controls';
 import { AssetInventorySearchBar } from '../components/search_bar';
 import { RiskBadge } from '../components/risk_badge';
@@ -161,6 +163,7 @@ const AllAssets = ({
   createFn,
   ...rest
 }: AllAssetsProps) => {
+  const { euiTheme } = useEuiTheme();
   const assetInventoryDataTable = useAssetInventoryDataTable({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
@@ -199,7 +202,6 @@ const AllAssets = ({
     onChangeItemsPerPage,
     setUrlQuery,
     onSort,
-    onResetFilters,
     filters,
     sort,
   } = assetInventoryDataTable;
@@ -390,24 +392,38 @@ const AllAssets = ({
       ? DataLoadingState.loading
       : DataLoadingState.loaded;
 
-  // TODO Improve this loading - prevent race condition fetching rows and dataView
-  if (loadingState === DataLoadingState.loaded && !rows.length && !!dataView) {
-    return <EmptyState onResetFilters={onResetFilters} />;
-  }
-
   return (
     <I18nProvider>
-      <AssetInventorySearchBar
-        query={getDefaultQuery({ query: { query: '', language: '' }, filters: [] })}
-        setQuery={setUrlQuery}
-        loading={loadingState === DataLoadingState.loading}
-      />
+      {!dataView ? null : (
+        <AssetInventorySearchBar
+          query={getDefaultQuery({ query: { query: '', language: '' }, filters: [] })}
+          setQuery={setUrlQuery}
+          loading={loadingState === DataLoadingState.loading}
+        />
+      )}
       <EuiPageTemplate.Section>
-        <EuiTitle size="l">
+        <EuiTitle size="l" data-test-subj="all-assets-title">
           <h1>
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.allAssets"
               defaultMessage="All Assets"
+            />
+            <EuiBetaBadge
+              css={css`
+                margin-left: ${euiTheme.size.s};
+              `}
+              label={i18n.translate('xpack.securitySolution.assetInventory.technicalPreviewLabel', {
+                defaultMessage: 'Technical Preview',
+              })}
+              size="s"
+              color="subdued"
+              tooltipContent={i18n.translate(
+                'xpack.securitySolution.assetInventory.technicalPreviewTooltip',
+                {
+                  defaultMessage:
+                    'This functionality is experimental and not supported. It may change or be removed at any time.',
+                }
+              )}
             />
           </h1>
         </EuiTitle>

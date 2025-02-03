@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IClusterClient, KibanaRequest } from '@kbn/core/server';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { KueryNode } from '@kbn/es-query';
@@ -40,6 +40,8 @@ const sortSchema = schema.object({
     schema.literal('event.duration'),
     schema.literal('event.action'),
     schema.literal('message'),
+    schema.literal('kibana.alert.rule.gap.status'),
+    schema.literal('kibana.alert.rule.gap.total_gap_duration_ms'),
   ]),
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
 });
@@ -135,6 +137,14 @@ export class EventLogClient implements IEventLogClient {
       findOptions,
       authFilter,
     });
+  }
+
+  public async findEventsByDocumentIds(
+    docs: Array<{ _id: string; _index: string }>
+  ): Promise<Pick<QueryEventsBySavedObjectResult, 'data'>> {
+    const response = await this.esContext.esAdapter.queryEventsByDocumentIds(docs);
+
+    return response;
   }
 
   public async aggregateEventsBySavedObjectIds(

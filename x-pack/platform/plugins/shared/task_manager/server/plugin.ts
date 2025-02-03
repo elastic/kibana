@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,

@@ -26,7 +26,11 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
-export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
+export const DashboardViewport = ({
+  dashboardContainerRef,
+}: {
+  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
+}) => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const [hasControls, setHasControls] = useState(false);
@@ -41,11 +45,11 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
-    dashboardApi.panelTitle,
-    dashboardApi.panelDescription,
-    dashboardApi.expandedPanelId,
+    dashboardApi.title$,
+    dashboardApi.description$,
+    dashboardApi.expandedPanelId$,
     dashboardApi.panels$,
-    dashboardApi.viewMode,
+    dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
   );
@@ -136,7 +140,7 @@ export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?:
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        <DashboardGrid dashboardContainer={dashboardContainer} />
+        <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
       </div>
     </div>
   );

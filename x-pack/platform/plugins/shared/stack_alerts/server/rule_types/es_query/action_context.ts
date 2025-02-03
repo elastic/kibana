@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { EsQueryRuleParams } from './rule_type_params';
 import { Comparator } from '../../../common/comparator_types';

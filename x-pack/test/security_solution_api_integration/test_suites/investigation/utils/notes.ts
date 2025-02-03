@@ -7,11 +7,15 @@
 
 import type SuperTest from 'supertest';
 import {
+  DeleteNoteRequestBody,
   GetNotesResult,
   Note,
   PersistNoteRouteRequestBody,
+  PersistNoteRouteResponse,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import { NOTE_URL } from '@kbn/security-solution-plugin/common/constants';
+
+import { type SuperTestResponse } from './types';
 
 /**
  * Deletes the first 100 notes (the getNotes endpoints is paginated and defaults to 10 is nothing is provided)
@@ -24,12 +28,11 @@ export const deleteNotes = async (supertest: SuperTest.Agent): Promise<void> => 
     .set('elastic-api-version', '2023-10-31');
   const { notes } = response.body as GetNotesResult;
 
-  await supertest
-    .delete(NOTE_URL)
-    .set('kbn-xsrf', 'true')
-    .send({
-      noteIds: notes.map((note: Note) => note.noteId),
-    });
+  const deleteNoteRequestBody: DeleteNoteRequestBody = {
+    noteIds: notes.map((note: Note) => note.noteId),
+  };
+
+  await supertest.delete(NOTE_URL).set('kbn-xsrf', 'true').send(deleteNoteRequestBody);
 };
 
 /**
@@ -47,26 +50,38 @@ export const createNote = async (
     savedObjectId?: string;
     text: string;
   }
-) =>
-  await supertest
-    .patch(NOTE_URL)
-    .set('kbn-xsrf', 'true')
-    .send({
-      note: {
-        eventId: note.documentId || '',
-        timelineId: note.savedObjectId || '',
-        note: note.text,
-      },
-    } as PersistNoteRouteRequestBody);
+): Promise<SuperTestResponse<PersistNoteRouteResponse>> => {
+  const createNoteRequestBody: PersistNoteRouteRequestBody = {
+    note: {
+      eventId: note.documentId || '',
+      timelineId: note.savedObjectId || '',
+      note: note.text,
+    },
+  };
+  return await supertest.patch(NOTE_URL).set('kbn-xsrf', 'true').send(createNoteRequestBody);
+};
 
-export const getNote = (supertest: SuperTest.Agent, noteId: string) =>
-  supertest
+export const getNote = async (
+  supertest: SuperTest.Agent,
+  noteId: string
+): Promise<SuperTestResponse<GetNotesResult>> => {
+  return await supertest
     .get(`${NOTE_URL}?noteId=${noteId}`)
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31');
+};
 
-export const deleteNote = (supertest: SuperTest.Agent, noteId: string) =>
-  supertest.delete(NOTE_URL).set('kbn-xsrf', 'true').set('elastic-api-version', '2023-10-31').send({
+export const deleteNote = async (
+  supertest: SuperTest.Agent,
+  noteId: string
+): Promise<SuperTestResponse<void>> => {
+  const deleteNoteRequestBody: DeleteNoteRequestBody = {
     noteId,
-    noteIds: null,
-  });
+  };
+
+  return await supertest
+    .delete(NOTE_URL)
+    .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
+    .send(deleteNoteRequestBody);
+};

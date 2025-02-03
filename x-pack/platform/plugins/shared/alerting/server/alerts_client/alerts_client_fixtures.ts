@@ -129,66 +129,67 @@ export const getExpectedQueryByExecutionUuid = ({
   excludedAlertInstanceIds?: string[];
   alertsFilter?: AlertsFilter;
 }) => ({
-  query: {
-    bool: {
-      filter: [
-        { term: { 'kibana.alert.rule.execution.uuid': uuid } },
-        { term: { 'kibana.alert.rule.uuid': ruleId } },
-        {
-          bool: { must_not: { exists: { field: 'kibana.alert.maintenance_window_ids' } } },
-        },
-        ...(isLifecycleAlert ? [{ term: { 'event.action': alertTypes[alertType] } }] : []),
-        ...(!!excludedAlertInstanceIds?.length
-          ? [
-              {
-                bool: {
-                  must_not: {
-                    terms: {
-                      'kibana.alert.instance.id': excludedAlertInstanceIds,
-                    },
-                  },
-                },
-              },
-            ]
-          : []),
-        ...(alertsFilter
-          ? [
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [
-                    {
-                      match: {
-                        [alertsFilter.query!.kql.split(':')[0]]:
-                          alertsFilter.query!.kql.split(':')[1],
+  body: {
+    query: {
+      bool: {
+        filter: [
+          { term: { 'kibana.alert.rule.execution.uuid': uuid } },
+          { term: { 'kibana.alert.rule.uuid': ruleId } },
+          {
+            bool: { must_not: { exists: { field: 'kibana.alert.maintenance_window_ids' } } },
+          },
+          ...(isLifecycleAlert ? [{ term: { 'event.action': alertTypes[alertType] } }] : []),
+          ...(!!excludedAlertInstanceIds?.length
+            ? [
+                {
+                  bool: {
+                    must_not: {
+                      terms: {
+                        'kibana.alert.instance.id': excludedAlertInstanceIds,
                       },
                     },
-                  ],
-                },
-              },
-              {
-                script: {
-                  script: {
-                    params: {
-                      datetimeField: '@timestamp',
-                      days: alertsFilter.timeframe?.days,
-                      timezone: alertsFilter.timeframe!.timezone,
-                    },
-                    source:
-                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                   },
                 },
-              },
-              {
-                script: {
+              ]
+            : []),
+          ...(alertsFilter
+            ? [
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match: {
+                          [alertsFilter.query!.kql.split(':')[0]]:
+                            alertsFilter.query!.kql.split(':')[1],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
                   script: {
-                    params: {
-                      datetimeField: '@timestamp',
-                      end: alertsFilter.timeframe!.hours.end,
-                      start: alertsFilter.timeframe!.hours.start,
-                      timezone: alertsFilter.timeframe!.timezone,
+                    script: {
+                      params: {
+                        datetimeField: '@timestamp',
+                        days: alertsFilter.timeframe?.days,
+                        timezone: alertsFilter.timeframe!.timezone,
+                      },
+                      source:
+                        'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                     },
-                    source: `
+                  },
+                },
+                {
+                  script: {
+                    script: {
+                      params: {
+                        datetimeField: '@timestamp',
+                        end: alertsFilter.timeframe!.hours.end,
+                        start: alertsFilter.timeframe!.hours.start,
+                        timezone: alertsFilter.timeframe!.timezone,
+                      },
+                      source: `
               def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
@@ -210,16 +211,17 @@ export const getExpectedQueryByExecutionUuid = ({
                 }
               }
            `,
+                    },
                   },
                 },
-              },
-            ]
-          : []),
-      ],
+              ]
+            : []),
+        ],
+      },
     },
+    size: 100,
+    track_total_hits: true,
   },
-  size: 100,
-  track_total_hits: true,
   ignore_unavailable: true,
   index: indexName,
 });
@@ -374,13 +376,15 @@ export const getExpectedQueryByTimeRange = ({
   }
 
   return {
-    query: {
-      bool: {
-        filter,
+    body: {
+      query: {
+        bool: {
+          filter,
+        },
       },
+      size: 100,
+      track_total_hits: true,
     },
-    size: 100,
-    track_total_hits: true,
     ignore_unavailable: true,
     index: indexName,
   };
