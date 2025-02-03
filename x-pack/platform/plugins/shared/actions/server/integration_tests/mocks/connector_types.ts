@@ -8,7 +8,6 @@
 export const connectorTypes: string[] = [
   '.email',
   '.index',
-  '.inference',
   '.pagerduty',
   '.swimlane',
   '.server-log',
@@ -33,6 +32,7 @@ export const connectorTypes: string[] = [
   '.thehive',
   '.sentinelone',
   '.crowdstrike',
+  '.inference',
   '.microsoft_defender_endpoint',
   '.cases',
   '.observability-ai-assistant',
