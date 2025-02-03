@@ -327,7 +327,7 @@ export class StreamsClient {
     }
 
     if (isGroupStreamDefinition(definition)) {
-      await this.validateGroupStream({ definition });
+      await this.assertValidGroupMembers({ definition });
     }
 
     if (isRootStreamDefinition(definition)) {
@@ -457,7 +457,7 @@ export class StreamsClient {
    * Validates the members of the group streams to ensure they are NOT
    * GroupStreamDefinitions
    */
-  async validateGroupStream({ definition }: { definition: GroupStreamDefinition }) {
+  async assertValidGroupMembers({ definition }: { definition: GroupStreamDefinition }) {
     const { members } = definition.group;
 
     if (members.includes(definition.name)) {
