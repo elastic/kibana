@@ -25,13 +25,17 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  MISCONFIGURATION_INSIGHT_HOST_DETAILS,
+  VULNERABILITIES_INSIGHT_HOST_DETAILS,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -219,7 +223,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         ? [
             {
               field: 'risk',
-              name: ENTITY_RISK_LEVEL(RiskScoreEntity.user),
+              name: ENTITY_RISK_LEVEL(EntityType.user),
               truncateText: false,
               mobileOptions: { show: true },
               sortable: false,
@@ -346,13 +350,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
             name={hostName}
             direction="column"
             data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
-            telemetrySuffix={'host-details'}
+            telemetryKey={MISCONFIGURATION_INSIGHT_HOST_DETAILS}
           />
           <VulnerabilitiesInsight
             hostName={hostName}
             direction="column"
             data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
-            telemetrySuffix={'host-details'}
+            telemetryKey={VULNERABILITIES_INSIGHT_HOST_DETAILS}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />

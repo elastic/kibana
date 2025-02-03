@@ -2,78 +2,41 @@
 
 exports[`ColorFormatEditor should render boolean type normally 1`] = `
 <Fragment>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "boolean",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Boolean"
-            id="indexPatternFieldEditor.color.booleanLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "field": "text",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Text color"
-            id="indexPatternFieldEditor.color.textColorLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "field": "background",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Background color"
-            id="indexPatternFieldEditor.color.backgroundLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Example"
-            id="indexPatternFieldEditor.color.exampleLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "available": [Function],
-              "color": "danger",
-              "data-test-subj": "colorEditorRemoveColor",
-              "description": "Delete color format",
-              "icon": "trash",
-              "name": "Delete",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
-          "field": "actions",
-          "name": "Actions",
-        },
-      ]
-    }
-    items={
-      Array [
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="s"
+  >
+    <EuiTitle
+      size="xxs"
+    >
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Color formatting"
+          id="indexPatternFieldEditor.color.colorFormatterTitle"
+        />
+      </h4>
+    </EuiTitle>
+    <ColorRow
+      color={
         Object {
           "background": "#ffffff",
           "boolean": "true",
-          "index": 0,
-          "range": "-Infinity:Infinity",
+          "range": "min:max",
           "regex": "<insert regex>",
           "text": "#000000",
-        },
-      ]
-    }
-    noItemsMessage={
-      <EuiI18n
-        default="No items found"
-        token="euiBasicTable.noItemsMessage"
-      />
-    }
-    tableLayout="fixed"
-  />
+        }
+      }
+      fieldType="boolean"
+      index={0}
+      key="0"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={false}
+    />
+  </EuiFlexGroup>
   <EuiSpacer
     size="m"
   />
@@ -96,86 +59,58 @@ exports[`ColorFormatEditor should render boolean type normally 1`] = `
 
 exports[`ColorFormatEditor should render multiple colors 1`] = `
 <Fragment>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "regex",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Pattern (regular expression)"
-            id="indexPatternFieldEditor.color.patternLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "field": "text",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Text color"
-            id="indexPatternFieldEditor.color.textColorLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "field": "background",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Background color"
-            id="indexPatternFieldEditor.color.backgroundLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Example"
-            id="indexPatternFieldEditor.color.exampleLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "available": [Function],
-              "color": "danger",
-              "data-test-subj": "colorEditorRemoveColor",
-              "description": "Delete color format",
-              "icon": "trash",
-              "name": "Delete",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
-          "field": "actions",
-          "name": "Actions",
-        },
-      ]
-    }
-    items={
-      Array [
-        Object {
-          "background": "#ffffff",
-          "boolean": "true",
-          "index": 0,
-          "range": "-Infinity:Infinity",
-          "regex": "<insert regex>",
-          "text": "#000000",
-        },
-        Object {
-          "background": "#ffffff",
-          "boolean": "true",
-          "index": 1,
-          "range": "-Infinity:Infinity",
-          "regex": "<insert regex>",
-          "text": "#000000",
-        },
-      ]
-    }
-    noItemsMessage={
-      <EuiI18n
-        default="No items found"
-        token="euiBasicTable.noItemsMessage"
-      />
-    }
-    tableLayout="fixed"
+  <EuiSpacer
+    size="m"
   />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="s"
+  >
+    <EuiTitle
+      size="xxs"
+    >
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Color formatting"
+          id="indexPatternFieldEditor.color.colorFormatterTitle"
+        />
+      </h4>
+    </EuiTitle>
+    <ColorRow
+      color={
+        Object {
+          "background": "#ffffff",
+          "boolean": "true",
+          "range": "min:max",
+          "regex": "<insert regex>",
+          "text": "#000000",
+        }
+      }
+      fieldType="string"
+      index={0}
+      key="0"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={true}
+    />
+    <ColorRow
+      color={
+        Object {
+          "background": "#ffffff",
+          "boolean": "true",
+          "range": "min:max",
+          "regex": "<insert regex>",
+          "text": "#000000",
+        }
+      }
+      fieldType="string"
+      index={1}
+      key="1"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={true}
+    />
+  </EuiFlexGroup>
   <EuiSpacer
     size="m"
   />
@@ -198,78 +133,41 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
 
 exports[`ColorFormatEditor should render other type normally (range field) 1`] = `
 <Fragment>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "range",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Range (min:max)"
-            id="indexPatternFieldEditor.color.rangeLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "field": "text",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Text color"
-            id="indexPatternFieldEditor.color.textColorLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "field": "background",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Background color"
-            id="indexPatternFieldEditor.color.backgroundLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Example"
-            id="indexPatternFieldEditor.color.exampleLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "available": [Function],
-              "color": "danger",
-              "data-test-subj": "colorEditorRemoveColor",
-              "description": "Delete color format",
-              "icon": "trash",
-              "name": "Delete",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
-          "field": "actions",
-          "name": "Actions",
-        },
-      ]
-    }
-    items={
-      Array [
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="s"
+  >
+    <EuiTitle
+      size="xxs"
+    >
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Color formatting"
+          id="indexPatternFieldEditor.color.colorFormatterTitle"
+        />
+      </h4>
+    </EuiTitle>
+    <ColorRow
+      color={
         Object {
           "background": "#ffffff",
           "boolean": "true",
-          "index": 0,
-          "range": "-Infinity:Infinity",
+          "range": "min:max",
           "regex": "<insert regex>",
           "text": "#000000",
-        },
-      ]
-    }
-    noItemsMessage={
-      <EuiI18n
-        default="No items found"
-        token="euiBasicTable.noItemsMessage"
-      />
-    }
-    tableLayout="fixed"
-  />
+        }
+      }
+      fieldType="number"
+      index={0}
+      key="0"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={false}
+    />
+  </EuiFlexGroup>
   <EuiSpacer
     size="m"
   />
@@ -292,78 +190,41 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
 
 exports[`ColorFormatEditor should render string type normally (regex field) 1`] = `
 <Fragment>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "regex",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Pattern (regular expression)"
-            id="indexPatternFieldEditor.color.patternLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "field": "text",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Text color"
-            id="indexPatternFieldEditor.color.textColorLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "field": "background",
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Background color"
-            id="indexPatternFieldEditor.color.backgroundLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "name": <Memo(MemoizedFormattedMessage)
-            defaultMessage="Example"
-            id="indexPatternFieldEditor.color.exampleLabel"
-          />,
-          "render": [Function],
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "available": [Function],
-              "color": "danger",
-              "data-test-subj": "colorEditorRemoveColor",
-              "description": "Delete color format",
-              "icon": "trash",
-              "name": "Delete",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
-          "field": "actions",
-          "name": "Actions",
-        },
-      ]
-    }
-    items={
-      Array [
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="s"
+  >
+    <EuiTitle
+      size="xxs"
+    >
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Color formatting"
+          id="indexPatternFieldEditor.color.colorFormatterTitle"
+        />
+      </h4>
+    </EuiTitle>
+    <ColorRow
+      color={
         Object {
           "background": "#ffffff",
           "boolean": "true",
-          "index": 0,
-          "range": "-Infinity:Infinity",
+          "range": "min:max",
           "regex": "<insert regex>",
           "text": "#000000",
-        },
-      ]
-    }
-    noItemsMessage={
-      <EuiI18n
-        default="No items found"
-        token="euiBasicTable.noItemsMessage"
-      />
-    }
-    tableLayout="fixed"
-  />
+        }
+      }
+      fieldType="string"
+      index={0}
+      key="0"
+      onColorChange={[Function]}
+      onRemoveColor={[Function]}
+      showDeleteButton={false}
+    />
+  </EuiFlexGroup>
   <EuiSpacer
     size="m"
   />

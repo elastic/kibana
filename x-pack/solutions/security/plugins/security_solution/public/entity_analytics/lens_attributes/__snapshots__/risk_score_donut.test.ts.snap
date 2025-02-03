@@ -11,11 +11,11 @@ Object {
         "fieldAttrs": Object {},
         "fieldFormats": Object {},
         "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
-        "name": "ml_host_risk_score_latest_mockSpaceId_no_timestamp",
+        "name": "ea_host_risk_score_latest_mockSpaceId_no_timestamp",
         "runtimeFieldMap": Object {},
         "sourceFilters": Array [],
         "timeFieldName": "",
-        "title": "ml_host_risk_score_latest_mockSpaceId",
+        "title": "ea_host_risk_score_latest_mockSpaceId",
       },
     },
     "datasourceStates": Object {

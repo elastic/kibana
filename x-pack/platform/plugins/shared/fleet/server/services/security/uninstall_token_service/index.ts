@@ -305,7 +305,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async getPolicyIdNameDictionary(policyIds: string[]): Promise<Record<string, string>> {
-    const agentPolicies = await agentPolicyService.getByIDs(this.soClient, policyIds, {
+    const agentPolicies = await agentPolicyService.getByIds(this.soClient, policyIds, {
       ignoreMissing: true,
     });
 
@@ -520,9 +520,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     policyIds: string[],
     force: boolean = false
   ): Promise<void> {
-    const { agentTamperProtectionEnabled } = appContextService.getExperimentalFeatures();
-
-    if (!agentTamperProtectionEnabled || !policyIds.length) {
+    if (!policyIds.length) {
       return;
     }
 
@@ -615,7 +613,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
 
     await asyncForEach(chunk(policyIds, batchSize), async (policyIdsBatch) => {
-      const policies = await agentPolicyService.getByIDs(
+      const policies = await agentPolicyService.getByIds(
         appContextService.getInternalUserSOClientWithoutSpaceExtension(),
         policyIds.map((id) => ({ id, spaceId: '*' }))
       );

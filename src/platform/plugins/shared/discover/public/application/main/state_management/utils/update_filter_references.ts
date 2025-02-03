@@ -15,7 +15,7 @@ import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 
-export const updateFiltersReferences = ({
+export const updateFiltersReferences = async ({
   prevDataView,
   nextDataView,
   services: { uiActions },
@@ -25,7 +25,7 @@ export const updateFiltersReferences = ({
   services: DiscoverServices;
 }) => {
   const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-  const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+  const action = await uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
   action?.execute({
     trigger,
     fromDataView: prevDataView.id,

@@ -10,11 +10,11 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
 import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type {
@@ -83,6 +83,9 @@ export const useBulkActions = ({
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
+  const {
+    timelinePrivileges: { crud: canCreateTimelines },
+  } = useUserPrivileges();
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
@@ -431,7 +434,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
               name: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
               'data-test-subj': 'applyTimelineTemplateBulk',
-              disabled: isEditDisabled,
+              disabled: !canCreateTimelines || isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditTypeEnum.set_timeline),
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -470,12 +473,10 @@ export const useBulkActions = ({
             },
             {
               key: i18n.BULK_ACTION_DELETE,
-              name: (
-                <EuiTextColor
-                  color={isDeleteDisabled ? euiThemeVars.euiButtonColorDisabledText : 'danger'}
-                >
-                  {i18n.BULK_ACTION_DELETE}
-                </EuiTextColor>
+              name: isDeleteDisabled ? (
+                i18n.BULK_ACTION_DELETE
+              ) : (
+                <EuiTextColor color="danger">{i18n.BULK_ACTION_DELETE}</EuiTextColor>
               ),
               'data-test-subj': 'deleteRuleBulk',
               disabled: isDeleteDisabled,
@@ -595,6 +596,7 @@ export const useBulkActions = ({
       filterOptions,
       completeBulkEditForm,
       startServices,
+      canCreateTimelines,
     ]
   );
 

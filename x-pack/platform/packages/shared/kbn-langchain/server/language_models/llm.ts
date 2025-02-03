@@ -89,24 +89,35 @@ export class ActionsClientLlm extends LLM {
           assistantMessage
         )} `
     );
+
     // create a new connector request body with the assistant message:
     const requestBody = {
       actionId: this.#connectorId,
-      params: {
-        // hard code to non-streaming subaction as this class only supports non-streaming
-        subAction: 'invokeAI',
-        subActionParams: {
-          model: this.model,
-          messages: [assistantMessage], // the assistant message
-          ...getDefaultArguments(this.llmType, this.temperature),
-          // This timeout is large because LangChain prompts can be complicated and take a long time
-          timeout: this.#timeout ?? DEFAULT_TIMEOUT,
-        },
-      },
+      params:
+        this.llmType === 'inference'
+          ? {
+              subAction: 'unified_completion',
+              subActionParams: {
+                body: {
+                  model: this.model,
+                  messages: [assistantMessage], // the assistant message
+                },
+              },
+            }
+          : {
+              // hard code to non-streaming subaction as this class only supports non-streaming
+              subAction: 'invokeAI',
+              subActionParams: {
+                model: this.model,
+                messages: [assistantMessage], // the assistant message
+                ...getDefaultArguments(this.llmType, this.temperature),
+                // This timeout is large because LangChain prompts can be complicated and take a long time
+                timeout: this.#timeout ?? DEFAULT_TIMEOUT,
+              },
+            },
     };
 
     const actionResult = await this.#actionsClient.execute(requestBody);
-
     if (actionResult.status === 'error') {
       const error = new Error(
         `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
@@ -115,6 +126,18 @@ export class ActionsClientLlm extends LLM {
         error.name = actionResult?.serviceMessage;
       }
       throw error;
+    }
+
+    if (this.llmType === 'inference') {
+      const content = get('data.choices[0].message.content', actionResult);
+
+      if (typeof content !== 'string') {
+        throw new Error(
+          `${LLM_TYPE}: inference content should be a string, but it had an unexpected type: ${typeof content}`
+        );
+      }
+
+      return content; // per the contact of _call, return a string
     }
 
     const content = get('data.message', actionResult);

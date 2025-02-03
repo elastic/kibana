@@ -1,9 +1,15 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "server/**/*.json"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "server/**/*.json",
+    "../../../../../typings/emotion.d.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -43,12 +49,9 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/flot-charts",
-    "@kbn/ui-theme",
     "@kbn/core-elasticsearch-server",
     "@kbn/share-plugin",
-    "@kbn/analytics",
+    "@kbn/analytics"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

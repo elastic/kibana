@@ -6,10 +6,11 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import pRetry from 'p-retry';
 import type SuperTest from 'supertest';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 
-const RETRIES_COUNT = 10;
+const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
+const retryCount = 10;
 
 export async function waitForActiveRule({
   ruleId,
@@ -20,25 +21,18 @@ export async function waitForActiveRule({
   supertest: SuperTest.Agent;
   logger?: ToolingLog;
 }): Promise<Record<string, any>> {
-  return pRetry(
-    async () => {
+  return await retryForSuccess(logger || new debugLog({ context: 'waitForActiveRule' }), {
+    timeout: 20_000,
+    methodName: 'waitForActiveRule',
+    block: async () => {
       const response = await supertest.get(`/api/alerting/rule/${ruleId}`);
       const status = response.body?.execution_status?.status;
       const expectedStatus = 'active';
 
-      if (status !== expectedStatus) {
-        throw new Error(`Expected: ${expectedStatus}: got ${status}`);
-      }
+      if (status !== expectedStatus) throw new Error(`Expected: ${expectedStatus}: got ${status}`);
 
       return status;
     },
-    {
-      retries: RETRIES_COUNT,
-      onFailedAttempt: (error) => {
-        if (logger) {
-          logger.info(`Attempt ${error.attemptNumber}/${RETRIES_COUNT}: Waiting for active rule`);
-        }
-      },
-    }
-  );
+    retryCount,
+  });
 }

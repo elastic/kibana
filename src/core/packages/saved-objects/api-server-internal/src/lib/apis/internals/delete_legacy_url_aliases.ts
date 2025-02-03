@@ -69,29 +69,27 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
       {
         index: getIndexForType(LEGACY_URL_ALIAS_TYPE),
         refresh: false, // This could be called many times in succession, intentionally do not wait for a refresh
-        body: {
-          ...getSearchDsl(mappings, registry, {
-            type: LEGACY_URL_ALIAS_TYPE,
-            kueryNode: createKueryNode(type, id),
-          }),
-          script: {
-            // Intentionally use one script source with variable params to take advantage of ES script caching
-            source: `
+        ...(getSearchDsl(mappings, registry, {
+          type: LEGACY_URL_ALIAS_TYPE,
+          kueryNode: createKueryNode(type, id),
+        }) as Omit<ReturnType<typeof getSearchDsl>, 'sort'>), // Omitting sort in the types in this operation because types expect only string[] and we're not really sorting
+        script: {
+          // Intentionally use one script source with variable params to take advantage of ES script caching
+          source: `
               if (params['namespaces'].indexOf(ctx._source['${LEGACY_URL_ALIAS_TYPE}']['targetNamespace']) > -1) {
                 ctx.op = params['matchTargetNamespaceOp'];
               } else {
                 ctx.op = params['notMatchTargetNamespaceOp'];
               }
             `,
-            params: {
-              namespaces,
-              matchTargetNamespaceOp: deleteBehavior === 'inclusive' ? 'delete' : 'noop',
-              notMatchTargetNamespaceOp: deleteBehavior === 'inclusive' ? 'noop' : 'delete',
-            },
-            lang: 'painless',
+          params: {
+            namespaces,
+            matchTargetNamespaceOp: deleteBehavior === 'inclusive' ? 'delete' : 'noop',
+            notMatchTargetNamespaceOp: deleteBehavior === 'inclusive' ? 'noop' : 'delete',
           },
-          conflicts: 'proceed',
+          lang: 'painless',
         },
+        conflicts: 'proceed',
       },
       { ignore: [404] }
     );

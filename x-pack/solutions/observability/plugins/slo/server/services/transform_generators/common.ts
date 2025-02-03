@@ -40,9 +40,8 @@ export function parseStringFilters(filters: string, logger: Logger) {
     return JSON.parse(filters);
   } catch (e) {
     logger.info(`Failed to parse filters: ${e}`);
+    return {};
   }
-
-  return {};
 }
 
 export function parseIndex(index: string): string | string[] {
@@ -62,20 +61,32 @@ export function getTimesliceTargetComparator(timesliceTarget: number) {
  * preventInitialBackfill == true: we use the current time minus some buffer to account for the ingestion delay
  * preventInitialBackfill === false: we use the time window duration to get the data for the last N days
  */
-export function getFilterRange(slo: SLODefinition, timestampField: string) {
-  return slo.settings.preventInitialBackfill === true
-    ? {
-        range: {
-          [timestampField]: {
-            gte: `now-${getDelayInSecondsFromSLO(slo)}s/m`,
-          },
+export function getFilterRange(slo: SLODefinition, timestampField: string, isServerless: boolean) {
+  if (slo.settings.preventInitialBackfill) {
+    return {
+      range: {
+        [timestampField]: {
+          gte: `now-${getDelayInSecondsFromSLO(slo)}s/m`,
         },
-      }
-    : {
-        range: {
-          [timestampField]: {
-            gte: `now-${slo.timeWindow.duration.format()}/d`,
-          },
+      },
+    };
+  }
+
+  if (isServerless) {
+    return {
+      range: {
+        [timestampField]: {
+          gte: `now-7d`,
         },
-      };
+      },
+    };
+  }
+
+  return {
+    range: {
+      [timestampField]: {
+        gte: `now-${slo.timeWindow.duration.format()}/d`,
+      },
+    },
+  };
 }

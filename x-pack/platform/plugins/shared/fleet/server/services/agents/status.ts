@@ -111,6 +111,8 @@ export async function getAgentStatusForAgentPolicy(
     error: 0,
     inactive: 0,
     offline: 0,
+    uninstalled: 0,
+    orphaned: 0,
     updating: 0,
     unenrolled: 0,
     degraded: 0,

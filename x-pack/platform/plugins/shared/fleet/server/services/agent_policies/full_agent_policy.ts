@@ -120,13 +120,23 @@ export async function getFullAgentPolicy(
     })
   );
 
-  const inputs = await storedPackagePoliciesToAgentInputs(
-    agentPolicy.package_policies as PackagePolicy[],
-    packageInfoCache,
-    getOutputIdForAgentPolicy(dataOutput),
-    agentPolicy.namespace,
-    agentPolicy.global_data_tags
-  );
+  const inputs = (
+    await storedPackagePoliciesToAgentInputs(
+      agentPolicy.package_policies as PackagePolicy[],
+      packageInfoCache,
+      getOutputIdForAgentPolicy(dataOutput),
+      agentPolicy.namespace,
+      agentPolicy.global_data_tags
+    )
+  ).map((input) => {
+    // fix output id for default output
+    const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
+    if (output) {
+      input.use_output = getOutputIdForAgentPolicy(output);
+    }
+
+    return input;
+  });
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
@@ -508,6 +518,9 @@ export function transformOutputToFullPolicyOutput(
 
   if (output.type === outputType.RemoteElasticsearch) {
     newOutput.service_token = output.service_token;
+    newOutput.kibana_api_key = output.kibana_api_key;
+    newOutput.kibana_url = output.kibana_url;
+    newOutput.sync_integrations = output.sync_integrations;
   }
 
   if (outputTypeSupportPresets(output.type)) {

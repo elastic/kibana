@@ -12,8 +12,7 @@ import { GetRuleMigrationPrebuiltRulesRequestParams } from '../../../../../commo
 import { SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from './util/with_license';
-import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './util/prebuilt_rules';
-import { MAX_PREBUILT_RULES_TO_FETCH } from './constants';
+import { getPrebuiltRulesForMigration } from './util/prebuilt_rules';
 
 export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -47,19 +46,11 @@ export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
 
-            const result = await ruleMigrationsClient.data.rules.get(migrationId, {
-              filters: {
-                prebuilt: true,
-              },
-              from: 0,
-              size: MAX_PREBUILT_RULES_TO_FETCH,
-            });
-
-            const prebuiltRulesIds = getUniquePrebuiltRuleIds(result.data);
-            const prebuiltRules = await getPrebuiltRules(
+            const prebuiltRules = await getPrebuiltRulesForMigration(
+              migrationId,
+              ruleMigrationsClient,
               rulesClient,
-              savedObjectsClient,
-              prebuiltRulesIds
+              savedObjectsClient
             );
 
             return res.ok({ body: prebuiltRules });

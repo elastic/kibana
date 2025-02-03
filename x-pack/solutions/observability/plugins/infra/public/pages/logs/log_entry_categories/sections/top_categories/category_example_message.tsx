@@ -115,8 +115,8 @@ export const CategoryExampleMessage: React.FunctionComponent<{
             onClose={closeMenu}
             items={[
               {
-                label: i18n.translate('xpack.infra.logs.categoryExample.viewInStreamText', {
-                  defaultMessage: 'View in stream',
+                label: i18n.translate('xpack.infra.logs.categoryExample.viewInDiscoverText', {
+                  defaultMessage: 'View in Discover',
                 }),
                 onClick: viewInStreamLinkProps.onClick!,
                 href: viewInStreamLinkProps.href,

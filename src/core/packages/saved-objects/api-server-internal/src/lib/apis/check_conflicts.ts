@@ -85,11 +85,7 @@ export const performCheckConflicts = async <T>(
   }));
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
-        {
-          body: {
-            docs: bulkGetDocs,
-          },
-        },
+        { docs: bulkGetDocs },
         { ignore: [404], meta: true }
       )
     : undefined;

@@ -54,5 +54,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
     };
   }
 
-  public start() {}
+  public start() {
+    return {};
+  }
 }

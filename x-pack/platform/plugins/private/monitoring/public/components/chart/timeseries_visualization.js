@@ -5,14 +5,50 @@
  * 2.0.
  */
 
-import { debounce, keys, has, includes, isFunction, difference, assign } from 'lodash';
 import React from 'react';
+import { css } from '@emotion/react';
+import { debounce, keys, has, includes, isFunction, difference, assign } from 'lodash';
+
 import { getLastValue } from './get_last_value';
 import { TimeseriesContainer } from './timeseries_container';
 import { HorizontalLegend } from './horizontal_legend';
 import { getValuesForSeriesIndex, getValuesByX } from './get_values_for_legend';
 import { DEBOUNCE_SLOW_MS } from '../../../common/constants';
-import './timeseries_visualization.scss';
+
+const rhythmChartStyle = css`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+`;
+
+const rhythmChartContentStyle = css`
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+`;
+
+const rhythmChartVisualizationStyle = css`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+
+  & > div {
+    min-width: 1px;
+    width: 100%;
+    height: 100%;
+  }
+
+  div {
+    user-select: none;
+  }
+`;
 
 export class TimeseriesVisualization extends React.Component {
   constructor(props) {
@@ -116,11 +152,6 @@ export class TimeseriesVisualization extends React.Component {
   }
 
   render() {
-    const className = 'monRhythmChart';
-    const style = {
-      flexDirection: 'column', // for legend position = bottom
-    };
-
     const legend = this.props.hasLegend ? (
       <HorizontalLegend
         seriesFilter={this.state.seriesToShow}
@@ -131,9 +162,9 @@ export class TimeseriesVisualization extends React.Component {
     ) : null;
 
     return (
-      <div className={className}>
-        <div style={style} className="monRhythmChart__content">
-          <div className="monRhythmChart__visualization">
+      <div css={rhythmChartStyle}>
+        <div css={rhythmChartContentStyle}>
+          <div css={rhythmChartVisualizationStyle}>
             <TimeseriesContainer
               seriesToShow={this.state.seriesToShow}
               updateLegend={this.debouncedUpdateLegend}

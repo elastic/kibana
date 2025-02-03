@@ -2,7 +2,8 @@
 
 exports[`getESUpgradeStatus returns the correct shape of data 1`] = `
 Object {
-  "deprecations": Array [
+  "enrichedHealthIndicators": Array [],
+  "migrationsDeprecations": Array [
     Object {
       "correctiveAction": undefined,
       "details": "templates using \`template\` field: security_audit_log,watches,.monitoring-alerts,triggered_watches,.ml-anomalies-,.ml-notifications,.ml-meta,.monitoring-kibana,.monitoring-es,.monitoring-logstash,.watch-history-6,.ml-state,security-index-template",
@@ -181,7 +182,28 @@ Object {
       "type": "data_streams",
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
     },
+    Object {
+      "correctiveAction": undefined,
+      "details": "This action is already a noop so it can be safely removed, because frozen indices no longer offer any advantages. Consider cold or frozen tiers in place of frozen indices.",
+      "index": "myfreezepolicy",
+      "isCritical": false,
+      "message": "ILM policy [myfreezepolicy] contains the action 'freeze' that is deprecated and will be removed in a future version.",
+      "resolveDuringUpgrade": false,
+      "type": "ilm_policies",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html",
+    },
+    Object {
+      "correctiveAction": undefined,
+      "details": undefined,
+      "index": "mytemplate",
+      "isCritical": true,
+      "message": "Configuring source mode in mappings is deprecated and will be removed in future versions. Use [index.mapping.source.mode] index setting instead.",
+      "resolveDuringUpgrade": false,
+      "type": "templates",
+      "url": "https://github.com/elastic/elasticsearch/pull/117172",
+    },
   ],
-  "totalCriticalDeprecations": 6,
+  "totalCriticalDeprecations": 7,
+  "totalCriticalHealthIssues": 0,
 }
 `;

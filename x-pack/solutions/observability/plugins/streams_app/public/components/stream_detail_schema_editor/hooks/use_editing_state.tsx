@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  ReadStreamDefinition,
-  FieldDefinitionConfigWithName,
-  isWiredReadStream,
-} from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useCallback, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -17,14 +13,14 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { FieldStatus } from '../field_status';
+import { FieldStatus } from '../configuration_maps';
 
 export type SchemaEditorEditingState = ReturnType<typeof useEditingState>;
 
 export interface FieldEntry {
-  name: FieldDefinitionConfigWithName['name'];
-  type?: FieldDefinitionConfigWithName['type'];
-  format?: FieldDefinitionConfigWithName['format'];
+  name: NamedFieldDefinitionConfig['name'];
+  type?: NamedFieldDefinitionConfig['type'];
+  format?: NamedFieldDefinitionConfig['format'];
   parent: string;
   status: FieldStatus;
 }
@@ -39,7 +35,7 @@ export const useEditingState = ({
   toastsService,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
   refreshUnmappedFields: () => void;
   toastsService: ToastsStart;
@@ -95,16 +91,15 @@ export const useEditingState = ({
   const saveChanges = useMemo(() => {
     return selectedField &&
       isFullFieldDefinition(nextFieldDefinition) &&
-      hasChanges(selectedField, nextFieldDefinition) &&
-      isWiredReadStream(definition)
+      hasChanges(selectedField, nextFieldDefinition)
       ? async () => {
           toggleIsSaving(true);
           try {
-            await streamsRepositoryClient.fetch(`PUT /api/streams/{id}`, {
+            await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
               signal: abortController.signal,
               params: {
                 path: {
-                  id: definition.name,
+                  id: definition.stream.name,
                 },
                 body: {
                   ingest: {
@@ -175,14 +170,14 @@ export const useEditingState = ({
 };
 
 export const isFullFieldDefinition = (
-  value?: Partial<FieldDefinitionConfigWithName>
-): value is FieldDefinitionConfigWithName => {
+  value?: Partial<NamedFieldDefinitionConfig>
+): value is NamedFieldDefinitionConfig => {
   return !!value && !!value.name && !!value.type;
 };
 
 const hasChanges = (
-  selectedField: Partial<FieldDefinitionConfigWithName>,
-  nextFieldEntry: Partial<FieldDefinitionConfigWithName>
+  selectedField: Partial<NamedFieldDefinitionConfig>,
+  nextFieldEntry: Partial<NamedFieldDefinitionConfig>
 ) => {
   return (
     selectedField.type !== nextFieldEntry.type || selectedField.format !== nextFieldEntry.format

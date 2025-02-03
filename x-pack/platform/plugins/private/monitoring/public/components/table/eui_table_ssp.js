@@ -100,7 +100,7 @@ export function EuiMonitoringSSPTable({
   };
 
   return (
-    <div data-test-subj={`${props.className}Container`}>
+    <div data-test-subj={`${props['data-test-subj']}Container`}>
       <EuiSearchBar {...search} onChange={onQueryChange} />
       <EuiSpacer size="l" />
       <EuiBasicTable

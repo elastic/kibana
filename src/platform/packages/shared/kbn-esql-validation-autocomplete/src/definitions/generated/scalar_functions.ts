@@ -1378,6 +1378,66 @@ const dateDiffDefinition: FunctionDefinition = {
       params: [
         {
           name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
           type: 'text',
           optional: false,
         },
@@ -1389,6 +1449,66 @@ const dateDiffDefinition: FunctionDefinition = {
         {
           name: 'endTimestamp',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -1465,12 +1585,42 @@ const dateExtractDefinition: FunctionDefinition = {
       params: [
         {
           name: 'datePart',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'date',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'datePart',
           type: 'text',
           optional: false,
         },
         {
           name: 'date',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'datePart',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'date',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -1500,7 +1650,57 @@ const dateFormatDefinition: FunctionDefinition = {
       params: [
         {
           name: 'dateFormat',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
+          type: 'date_nanos',
+          optional: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
           type: 'keyword',
+          optional: true,
+        },
+        {
+          name: 'date',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
+          type: 'keyword',
+          optional: true,
+        },
+        {
+          name: 'date',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
+          type: 'text',
           optional: true,
         },
         {
@@ -1520,7 +1720,7 @@ const dateFormatDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -2252,7 +2452,9 @@ const hashDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  examples: [],
+  examples: [
+    'FROM sample_data \n| WHERE message != "Connection error"\n| EVAL md5 = hash("md5", message), sha256 = hash("sha256", message) \n| KEEP message, md5, sha256;',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -2560,8 +2762,6 @@ const kqlDefinition: FunctionDefinition = {
     defaultMessage:
       'Performs a KQL query. Returns true if the provided KQL query string matches the row.',
   }),
-  ignoreAsSuggestion: true,
-
   preview: true,
   alias: undefined,
   signatures: [
@@ -2571,6 +2771,7 @@ const kqlDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          fieldsOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -2581,13 +2782,14 @@ const kqlDefinition: FunctionDefinition = {
           name: 'query',
           type: 'text',
           optional: false,
+          fieldsOnly: true,
         },
       ],
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  supportedCommands: ['where'],
+  supportedOptions: [],
   validate: undefined,
   examples: [
     'FROM books \n| WHERE KQL("author: Faulkner")\n| KEEP book_no, author \n| SORT book_no \n| LIMIT 5;',
@@ -3524,7 +3726,7 @@ const matchDefinition: FunctionDefinition = {
   name: 'match',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match', {
     defaultMessage:
-      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on text fields, as well as other field types like boolean, dates, and numeric types.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
+      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on fields from the text family like  text and  semantic_text,\nas well as other field types like keyword, boolean, dates, and numeric types.\n\nMatch can use function named parameters to specify additional options for the match query.\nAll match query parameters are supported.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
   }),
   preview: true,
   alias: undefined,
@@ -3541,6 +3743,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'boolean',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3557,6 +3768,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3573,6 +3793,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'date',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3589,6 +3818,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3605,6 +3843,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'date_nanos',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3621,6 +3868,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3637,6 +3893,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'double',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3653,6 +3918,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'integer',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3669,6 +3943,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3685,6 +3968,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'long',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3701,6 +3993,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'double',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3717,6 +4018,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'integer',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3733,6 +4043,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3749,6 +4068,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'long',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3765,6 +4093,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'ip',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3781,6 +4118,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3797,6 +4143,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3813,6 +4168,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'double',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3829,6 +4193,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'integer',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3845,6 +4218,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3861,6 +4243,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'long',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3877,6 +4268,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3893,6 +4293,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'double',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3909,6 +4318,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'integer',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3925,6 +4343,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3941,6 +4368,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'long',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3957,6 +4393,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'unsigned_long',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3973,6 +4418,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3989,6 +4443,15 @@ const matchDefinition: FunctionDefinition = {
           name: 'query',
           type: 'version',
           optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'options',
+          type: 'function named parameters',
+          mapParams:
+            "{name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token.'}, {name='minimum_should_match', values=[2], description='Minimum number of clauses that must match for a document to be returned.'}, {name='zero_terms_query', values=[none, all], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba).'}, {name='fuzzy_rewrite', values=[constant_score_blended, constant_score, constant_score_boolean, top_terms_blended_freqs_N, top_terms_boost_N, top_terms_N], description='Method used to rewrite the query. See the rewrite parameter for valid values and more information.'}, {name='prefix_length', values=[1], description='Number of beginning characters left unchanged for fuzzy matching.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned.'}, {name='operator', values=[AND, OR], description='Boolean logic used to interpret text in the query value.'}, {name='max_expansions', values=[50], description='Maximum number of terms to which the query will expand.'}",
+          optional: true,
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -3999,6 +4462,46 @@ const matchDefinition: FunctionDefinition = {
   validate: undefined,
   examples: [
     'FROM books \n| WHERE MATCH(author, "Faulkner")\n| KEEP book_no, author \n| SORT book_no \n| LIMIT 5;',
+    'FROM books \n| WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})\n| KEEP title;',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const md5Definition: FunctionDefinition = {
+  type: 'eval',
+  name: 'md5',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.md5', {
+    defaultMessage: 'Computes the MD5 hash of the input.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'input',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'input',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: [
+    'FROM sample_data \n| WHERE message != "Connection error"\n| EVAL md5 = md5(message)\n| KEEP message, md5;',
   ],
 };
 
@@ -4071,6 +4574,21 @@ const mvAppendDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -4166,6 +4684,21 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
           type: 'long',
           optional: false,
         },
@@ -4186,11 +4719,41 @@ const mvAppendDefinition: FunctionDefinition = {
         },
         {
           name: 'field2',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'field2',
           type: 'text',
           optional: false,
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
     },
     {
       params: [
@@ -4660,6 +5223,16 @@ const mvDedupeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
     },
     {
       params: [
@@ -5868,6 +6441,26 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'start',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'end',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'version',
           optional: false,
         },
@@ -7069,6 +7662,21 @@ const roundDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'integer',
           optional: false,
         },
@@ -7094,6 +7702,21 @@ const roundDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'long',
           optional: false,
         },
@@ -7110,6 +7733,21 @@ const roundDefinition: FunctionDefinition = {
         {
           name: 'decimals',
           type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
           optional: true,
         },
       ],
@@ -7121,6 +7759,36 @@ const roundDefinition: FunctionDefinition = {
           name: 'number',
           type: 'unsigned_long',
           optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
         },
       ],
       returnType: 'unsigned_long',
@@ -7170,6 +7838,84 @@ const rtrimDefinition: FunctionDefinition = {
   validate: undefined,
   examples: [
     'ROW message = "   some text  ",  color = " red "\n| EVAL message = RTRIM(message)\n| EVAL color = RTRIM(color)\n| EVAL message = CONCAT("\'", message, "\'")\n| EVAL color = CONCAT("\'", color, "\'")',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const sha1Definition: FunctionDefinition = {
+  type: 'eval',
+  name: 'sha1',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sha1', {
+    defaultMessage: 'Computes the SHA1 hash of the input.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'input',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'input',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: [
+    'FROM sample_data \n| WHERE message != "Connection error"\n| EVAL sha1 = sha1(message)\n| KEEP message, sha1;',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const sha256Definition: FunctionDefinition = {
+  type: 'eval',
+  name: 'sha256',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sha256', {
+    defaultMessage: 'Computes the SHA256 hash of the input.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'input',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'input',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: [
+    'FROM sample_data \n| WHERE message != "Connection error"\n| EVAL sha256 = sha256(message)\n| KEEP message, sha256;',
   ],
 };
 
@@ -9099,7 +9845,7 @@ const toDateNanosDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_date_nanos', {
     defaultMessage: 'Converts an input to a nanosecond-resolution date value (aka date_nanos).',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10519,6 +11265,7 @@ export const scalarFunctionDefinitions = [
   log10Definition,
   ltrimDefinition,
   matchDefinition,
+  md5Definition,
   mvAppendDefinition,
   mvAvgDefinition,
   mvConcatDefinition,
@@ -10546,6 +11293,8 @@ export const scalarFunctionDefinitions = [
   rightDefinition,
   roundDefinition,
   rtrimDefinition,
+  sha1Definition,
+  sha256Definition,
   signumDefinition,
   sinDefinition,
   sinhDefinition,

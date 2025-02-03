@@ -42,6 +42,8 @@ export const Overview = () => {
   const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
     entityType: asset.type,
     entityId: asset.id,
+    from: dateRange.from,
+    to: dateRange.to,
   });
   const addMetricsCalloutId: AddMetricsCalloutKey =
     asset.type === 'host' ? 'hostOverview' : 'containerOverview';

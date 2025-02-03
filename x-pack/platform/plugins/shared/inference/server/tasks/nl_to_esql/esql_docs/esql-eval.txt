@@ -65,6 +65,15 @@ FROM employees
 | STATS avg_height_feet = AVG(`height * 3.281`)
 ```
 
+Any number of evaluations can be performed in a single EVAL command
+
+```esql
+FROM triangle
+| EVAL cos = COS(angle), tan = TAN(angle), sin = SIN(angle), acos=ACOS(angle), asin=ASIN(angle)
+| SORT angle DESC
+| LIMIT 10
+```
+
 ### Limitations
 - If a column with the same name already exists, the existing column is dropped.
 - If a column name is used more than once, only the rightmost duplicate creates a column.

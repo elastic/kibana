@@ -78,6 +78,16 @@ describe('Common authentication routes', () => {
         query: expect.any(Type),
         params: undefined,
       });
+      expect(routeConfig.security).toEqual({
+        authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party IdPs',
+        },
+        authc: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party IdPs',
+        },
+      });
 
       const queryValidator = (routeConfig.validate as any).query as Type<any>;
       expect(queryValidator.validate({ someRandomField: 'some-random' })).toEqual({
@@ -210,6 +220,17 @@ describe('Common authentication routes', () => {
         body: expect.any(Type),
         query: undefined,
         params: undefined,
+      });
+      expect(routeConfig.security).toEqual({
+        authz: {
+          enabled: false,
+          reason: `This route provides basic and token login capability, which is delegated to the internal authentication service`,
+        },
+        authc: {
+          enabled: false,
+          reason:
+            'This route is used for authentication - it does not require existing authentication',
+        },
       });
 
       const bodyValidator = (routeConfig.validate as any).body as Type<any>;

@@ -21,7 +21,6 @@ export const mockOptions: RelatedUsersRequestOptions = {
   factoryQueryType: RelatedEntitiesQueries.relatedUsers,
   hostName: 'host1',
   from: '2020-09-02T15:17:13.678Z',
-  isNewRiskScoreModuleInstalled: false,
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {

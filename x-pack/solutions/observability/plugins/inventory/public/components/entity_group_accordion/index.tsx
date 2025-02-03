@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { EntityCountBadge } from './entity_count_badge';
 import { GroupedEntitiesGrid } from './grouped_entities_grid';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 
 const ENTITIES_COUNT_BADGE = i18n.translate(
   'xpack.inventory.inventoryGroupPanel.entitiesBadgeLabel',
@@ -17,19 +18,21 @@ const ENTITIES_COUNT_BADGE = i18n.translate(
 );
 
 export interface Props {
-  groupBy: string;
   groupValue: string;
+  groupLabel: string;
   groupCount: number;
   isLoading?: boolean;
 }
 
-export function EntityGroupAccordion({ groupBy, groupValue, groupCount, isLoading }: Props) {
+export function EntityGroupAccordion({ groupValue, groupLabel, groupCount, isLoading }: Props) {
   const { euiTheme } = useEuiTheme();
   const [open, setOpen] = useState(false);
+  const { setSingleEntityType } = useUnifiedSearchContext();
 
   const onToggle = useCallback(() => {
+    if (!open) setSingleEntityType(groupValue);
     setOpen((opened) => !opened);
-  }, []);
+  }, [groupValue, open, setSingleEntityType]);
 
   return (
     <>
@@ -41,17 +44,17 @@ export function EntityGroupAccordion({ groupBy, groupValue, groupCount, isLoadin
         `}
       >
         <EuiAccordion
-          data-test-subj={`inventoryGroup_${groupBy}_${groupValue}`}
-          id={`inventory-group-${groupBy}-${groupValue}`}
+          data-test-subj={`inventoryGroup_entityType_${groupValue}`}
+          id={`inventoryGroup-entityType-${groupValue}`}
           buttonContent={
             <EuiTitle size="xs">
-              <h4 data-test-subj={`inventoryGroupTitle_${groupBy}_${groupValue}`}>{groupValue}</h4>
+              <h4 data-test-subj={`inventoryGroupTitle_entityType_${groupValue}`}>{groupLabel}</h4>
             </EuiTitle>
           }
           buttonElement="div"
           extraAction={
             <EntityCountBadge
-              data-test-subj={`entityCountBadge_${groupBy}_${groupValue}`}
+              data-test-subj={`entityCountBadge_entityType_${groupValue}`}
               name={ENTITIES_COUNT_BADGE}
               value={groupCount}
             />

@@ -17,7 +17,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
-import type { EmbeddableStateTransfer } from './lib';
+import type { EmbeddableStateTransfer } from './state_transfer';
 import type { EmbeddableStateWithType } from '../common';
 import { EnhancementRegistryDefinition } from './enhancements/types';
 

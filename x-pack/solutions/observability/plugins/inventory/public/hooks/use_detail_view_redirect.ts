@@ -14,24 +14,25 @@ import {
 import { useCallback } from 'react';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { castArray } from 'lodash';
-import { isBuiltinEntityOfType } from '../../common/utils/entity_type_guards';
+import { isBuiltinEntityOfType } from '../../common/utils/check_entity_type';
 import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.ecs]: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.semconv]: 'kubernetes_otel-cluster-overview',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CRONJOB.ecs]: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs]:
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CLUSTER.ecs]:
+    'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CLUSTER.semconv]: 'kubernetes_otel-cluster-overview',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.CRON_JOB.ecs]:
+    'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.DAEMON_SET.ecs]:
     'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs]:
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.DEPLOYMENT.ecs]:
     'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.JOB.ecs]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.NODE.ecs]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.POD.ecs]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.SERVICE.ecs]: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
-  [BUILT_IN_ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs]:
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.JOB.ecs]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.NODE.ecs]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.POD.ecs]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.SERVICE]: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES_V2.STATEFUL_SET.ecs]:
     'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
 };
 
@@ -48,21 +49,23 @@ export const useDetailViewRedirect = () => {
   const getDetailViewRedirectUrl = useCallback(
     (entity: InventoryEntity) => {
       const identityFieldsValue = entityManager.entityClient.getIdentityFieldsValue({
-        entity: {
-          identity_fields: entity.entityIdentityFields,
-        },
-        ...entity,
+        entity,
       });
-      const identityFields = castArray(entity.entityIdentityFields);
+      const identityFields = Object.keys(identityFieldsValue || {});
 
-      if (isBuiltinEntityOfType('host', entity) || isBuiltinEntityOfType('container', entity)) {
+      if (
+        isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.HOST_V2, entity) ||
+        isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.CONTAINER_V2, entity)
+      ) {
         return assetDetailsLocator?.getRedirectUrl({
           assetId: identityFieldsValue[identityFields[0]],
-          assetType: entity.entityType,
+          assetType: isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.HOST_V2, entity)
+            ? 'host'
+            : 'container',
         });
       }
 
-      if (isBuiltinEntityOfType('service', entity)) {
+      if (isBuiltinEntityOfType(BUILT_IN_ENTITY_TYPES.SERVICE_V2, entity)) {
         return serviceOverviewLocator?.getRedirectUrl({
           serviceName: identityFieldsValue[identityFields[0]],
         });
@@ -75,7 +78,7 @@ export const useDetailViewRedirect = () => {
 
   const getDashboardRedirectUrl = useCallback(
     (entity: InventoryEntity) => {
-      const type = entity.entityType;
+      const { entityType: type } = entity;
       const dashboardId = KUBERNETES_DASHBOARDS_IDS[type];
 
       return dashboardId
@@ -84,10 +87,7 @@ export const useDetailViewRedirect = () => {
             query: {
               language: 'kuery',
               query: entityManager.entityClient.asKqlFilter({
-                entity: {
-                  identity_fields: entity.entityIdentityFields,
-                },
-                ...entity,
+                entity,
               }),
             },
           })

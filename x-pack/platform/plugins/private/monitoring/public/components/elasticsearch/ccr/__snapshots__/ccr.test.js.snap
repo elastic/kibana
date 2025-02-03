@@ -13,7 +13,6 @@ exports[`Ccr that it renders normally 1`] = `
     </EuiScreenReaderOnly>
     <EuiPanel>
       <EuiInMemoryTable
-        className="monitoringElasticsearchCcrListingTable"
         columns={
           Array [
             Object {
@@ -56,6 +55,19 @@ exports[`Ccr that it renders normally 1`] = `
               "sortable": true,
             },
           ]
+        }
+        css={
+          Object {
+            "map": undefined,
+            "name": "f6xtqm",
+            "next": undefined,
+            "styles": "
+  .euiTableRow-isExpandedRow > .euiTableRowCell > .euiTableCellContent {
+    padding: 0;
+  }
+",
+            "toString": [Function],
+          }
         }
         executeQueryOptions={
           Object {

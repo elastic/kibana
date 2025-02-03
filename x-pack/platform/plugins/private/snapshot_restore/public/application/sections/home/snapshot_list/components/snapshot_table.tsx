@@ -99,6 +99,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
       name: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateColumnTitle', {
         defaultMessage: 'State',
       }),
+      'data-test-subj': 'snapshotState',
       truncateText: false,
       sortable: false,
       render: (state: string) => <SnapshotState state={state} displayTooltipIcon={false} />,

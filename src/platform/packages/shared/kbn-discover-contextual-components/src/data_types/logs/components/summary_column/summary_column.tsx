@@ -19,7 +19,6 @@ import {
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { Resource } from './resource';
 import { Content } from './content';
 import { createResourceFields, formatJsonDocumentForContent } from './utils';
@@ -55,6 +54,9 @@ export const SummaryColumn = (props: AllSummaryColumnProps) => {
 // eslint-disable-next-line import/no-default-export
 export default SummaryColumn;
 
+const DEFAULT_ROW_COUNT = 1;
+const SINGLE_ROW_COUNT = 1;
+
 const SummaryCell = ({
   density: maybeNullishDensity,
   rowHeight: maybeNullishRowHeight,
@@ -65,8 +67,8 @@ const SummaryCell = ({
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
 
-  const rowHeight = maybeNullishRowHeight ?? ROWS_HEIGHT_OPTIONS.single;
-  const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
+  const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
+  const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
   const resourceFields = createResourceFields(row, core, share);
   const shouldRenderResource = resourceFields.length > 0;
@@ -98,14 +100,19 @@ const SummaryCell = ({
   );
 };
 
-const SummaryCellPopover = (props: AllSummaryColumnProps) => {
+export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { row, dataView, fieldFormats, onFilter, closePopover, share, core } = props;
 
   const resourceFields = createResourceFields(row, core, share);
   const shouldRenderResource = resourceFields.length > 0;
 
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
-  const { field, value } = getMessageFieldWithFallbacks(documentOverview);
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(documentOverview, {
+    includeFormattedValue: true,
+  });
+  const messageCodeBlockProps = formattedValue
+    ? { language: 'json', children: formattedValue }
+    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
   const shouldRenderContent = Boolean(field && value);
 
   const shouldRenderSource = !shouldRenderContent;
@@ -142,11 +149,9 @@ const SummaryCellPopover = (props: AllSummaryColumnProps) => {
               overflowHeight={100}
               paddingSize="s"
               isCopyable
-              language="txt"
               fontSize="s"
-            >
-              {value}
-            </EuiCodeBlock>
+              {...messageCodeBlockProps}
+            />
           </EuiFlexGroup>
         )}
         {shouldRenderSource && (

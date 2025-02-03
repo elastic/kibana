@@ -7,15 +7,8 @@
 
 import React, { useCallback, useState } from 'react';
 import type { EuiSelectOption } from '@elastic/eui';
-import {
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiFlexGroup,
-  useIsWithinMaxBreakpoint,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFormRow, EuiSelect, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../containers/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { TEMPLATE_HELP_TEXT, TEMPLATE_LABEL } from './translations';
@@ -39,7 +32,6 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
   const [selectedTemplate, onSelectTemplate] = useState<string | undefined>(
     initialTemplate?.key ?? undefined
   );
-  const isSmallScreen = useIsWithinMaxBreakpoint('s');
 
   const options: EuiSelectOption[] = templates.map((template) => ({
     text: template.name,
@@ -72,14 +64,6 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
           `}
           responsive={false}
         >
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              line-height: 0;
-            `}
-          >
-            <ExperimentalBadge compact={isSmallScreen} />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>{OptionalFieldLabel}</EuiFlexItem>
         </EuiFlexGroup>
       }

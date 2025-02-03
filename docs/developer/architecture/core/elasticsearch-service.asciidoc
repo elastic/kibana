@@ -2,7 +2,7 @@
 == Elasticsearch service
 `Elasticsearch service` provides `elasticsearch.client` program API to communicate with Elasticsearch server HTTP API.
 
-NOTE: The Elasticsearch service is only available server side. You can use the {kib-repo}blob/{branch}/src/plugins/data/README.mdx[Data plugin].
+NOTE: The Elasticsearch service is only available server side. You can use the {kib-repo}blob/{branch}/src/platform/plugins/shared/data/README.mdx[Data plugin].
 
 `elasticsearch.client` interacts with Elasticsearch service on behalf of:
 

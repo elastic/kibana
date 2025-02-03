@@ -16,7 +16,8 @@ import { CaseSeverity } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/api');
 
-describe('useSeverityAction', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/207712
+describe.skip('useSeverityAction', () => {
   let appMockRender: AppMockRenderer;
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();

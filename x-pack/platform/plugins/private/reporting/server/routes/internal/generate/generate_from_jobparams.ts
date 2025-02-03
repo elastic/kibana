@@ -18,15 +18,23 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  const kibanaAccessControlTags = ['access:generateReport'];
+  const kibanaAccessControlTags = ['generateReport'];
 
   const registerInternalPostGenerationEndpoint = () => {
     const path = `${GENERATE_PREFIX}/{exportType}`;
     router.post(
       {
         path,
+        security: {
+          authz: {
+            requiredPrivileges: kibanaAccessControlTags,
+          },
+        },
         validate: RequestHandler.getValidation(),
-        options: { tags: kibanaAccessControlTags, access: 'internal' },
+        options: {
+          tags: kibanaAccessControlTags.map((accessControlTag) => `access:${accessControlTag}`),
+          access: 'internal',
+        },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {

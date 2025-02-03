@@ -23,12 +23,12 @@ Object {
         "layers": Object {
           "mockLayerId": Object {
             "columnOrder": Array [
-              "e92c8920-0449-4564-81f4-8945517817a4",
-              "eba07b4d-766d-49d7-8435-d40367d3d055",
-              "9c89324b-0c59-4403-9698-d989a09dc5a8",
+              "mockColumnTopValuesId",
+              "mockColumnTimestampId",
+              "mockColumnCountOfRecordsId",
             ],
             "columns": Object {
-              "9c89324b-0c59-4403-9698-d989a09dc5a8": Object {
+              "mockColumnCountOfRecordsId": Object {
                 "dataType": "number",
                 "isBucketed": false,
                 "label": "Count of records",
@@ -39,32 +39,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
-              "e92c8920-0449-4564-81f4-8945517817a4": Object {
-                "dataType": "string",
-                "isBucketed": true,
-                "label": "Top 10 values of event.category",
-                "operationType": "terms",
-                "params": Object {
-                  "exclude": Array [],
-                  "excludeIsRegex": false,
-                  "include": Array [],
-                  "includeIsRegex": false,
-                  "missingBucket": false,
-                  "orderBy": Object {
-                    "columnId": "9c89324b-0c59-4403-9698-d989a09dc5a8",
-                    "type": "column",
-                  },
-                  "orderDirection": "desc",
-                  "otherBucket": true,
-                  "parentFormat": Object {
-                    "id": "terms",
-                  },
-                  "size": 10,
-                },
-                "scale": "ordinal",
-                "sourceField": "event.category",
-              },
-              "eba07b4d-766d-49d7-8435-d40367d3d055": Object {
+              "mockColumnTimestampId": Object {
                 "dataType": "date",
                 "isBucketed": true,
                 "label": "@timestamp",
@@ -76,6 +51,31 @@ Object {
                 },
                 "scale": "interval",
                 "sourceField": "@timestamp",
+              },
+              "mockColumnTopValuesId": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top 10 values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "mockColumnCountOfRecordsId",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 10,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
               },
             },
             "incompleteColumns": Object {},
@@ -145,15 +145,15 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "9c89324b-0c59-4403-9698-d989a09dc5a8",
+            "mockColumnCountOfRecordsId",
           ],
           "layerId": "mockLayerId",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "e92c8920-0449-4564-81f4-8945517817a4",
-          "xAccessor": "eba07b4d-766d-49d7-8435-d40367d3d055",
+          "splitAccessor": "mockColumnTopValuesId",
+          "xAccessor": "mockColumnTimestampId",
         },
       ],
       "legend": Object {

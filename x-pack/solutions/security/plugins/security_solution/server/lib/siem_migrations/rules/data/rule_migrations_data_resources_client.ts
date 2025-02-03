@@ -16,10 +16,8 @@ import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client
 
 export type CreateRuleMigrationResourceInput = Pick<
   RuleMigrationResource,
-  'migration_id' | 'type' | 'name' | 'metadata'
-> & {
-  content?: string;
-};
+  'migration_id' | 'type' | 'name' | 'content' | 'metadata'
+>;
 export interface RuleMigrationResourceFilters {
   type?: RuleMigrationResourceType;
   names?: string[];
@@ -42,6 +40,7 @@ const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseClient {
   public async upsert(resources: CreateRuleMigrationResourceInput[]): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
 
     let resourcesSlice: CreateRuleMigrationResourceInput[];
 
@@ -56,7 +55,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
               doc: {
                 ...resource,
                 '@timestamp': createdAt,
-                updated_by: this.username,
+                updated_by: profileId,
                 updated_at: createdAt,
               },
               doc_as_upsert: true,
@@ -73,6 +72,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
   /** Creates the resources in the index only if they do not exist */
   public async create(resources: CreateRuleMigrationResourceInput[]): Promise<void> {
     const index = await this.getIndexName();
+    const profileId = await this.getProfileUid();
 
     let resourcesSlice: CreateRuleMigrationResourceInput[];
     const createdAt = new Date().toISOString();
@@ -85,7 +85,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
             {
               ...resource,
               '@timestamp': createdAt,
-              updated_by: this.username,
+              updated_by: profileId,
               updated_at: createdAt,
             },
           ]),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { usePatchObservable } from './use_patch_observables';
 import { patchObservable } from './api';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -41,7 +41,7 @@ describe('usePatchObservable', () => {
   it('should call patchObservable and show success toast on success', async () => {
     (patchObservable as jest.Mock).mockResolvedValue({});
 
-    const { result, waitFor } = renderHook(() => usePatchObservable(caseId, observableId), {
+    const { result } = renderHook(() => usePatchObservable(caseId, observableId), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -60,7 +60,7 @@ describe('usePatchObservable', () => {
     const error = new Error('Failed to patch observable');
     (patchObservable as jest.Mock).mockRejectedValue(error);
 
-    const { result, waitFor } = renderHook(() => usePatchObservable(caseId, observableId), {
+    const { result } = renderHook(() => usePatchObservable(caseId, observableId), {
       wrapper: appMockRender.AppWrapper,
     });
 

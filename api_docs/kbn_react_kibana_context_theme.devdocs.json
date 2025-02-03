@@ -39,7 +39,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -60,7 +60,7 @@
                 "text": "KibanaThemeProviderProps"
               }
             ],
-            "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -89,7 +89,7 @@
           "UserProfileService",
           " | undefined) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/theme/with_theme.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/theme/with_theme.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,7 +105,7 @@
             "signature": [
               "React.ReactNode"
             ],
-            "path": "packages/react/kibana_context/theme/with_theme.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/theme/with_theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -128,7 +128,7 @@
                 "text": "ThemeServiceStart"
               }
             ],
-            "path": "packages/react/kibana_context/theme/with_theme.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/theme/with_theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -144,7 +144,7 @@
               "UserProfileService",
               " | undefined"
             ],
-            "path": "packages/react/kibana_context/theme/with_theme.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/theme/with_theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -164,7 +164,7 @@
         "description": [
           "\nThe representation of the Kibana theme, (not to be confused with the EUI theme)."
         ],
-        "path": "packages/react/kibana_context/common/types.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -177,7 +177,7 @@
             "description": [
               "is dark mode enabled or not"
             ],
-            "path": "packages/react/kibana_context/common/types.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,7 +190,7 @@
             "description": [
               "\nName of the active theme"
             ],
-            "path": "packages/react/kibana_context/common/types.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -216,7 +216,7 @@
           },
           " extends EuiProps<{}>"
         ],
-        "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -238,7 +238,7 @@
                 "text": "ThemeServiceStart"
               }
             ],
-            "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -256,7 +256,7 @@
               "UserProfileService",
               ", \"getUserProfile$\"> | undefined"
             ],
-            "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/theme/theme_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -276,7 +276,7 @@
         "description": [
           "\nThe default `KibanaTheme` for use in Storybook, Jest, or initialization.  At\nruntime, the theme should always be provided by the `ThemeService`."
         ],
-        "path": "packages/react/kibana_context/common/index.ts",
+        "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -290,7 +290,7 @@
             "signature": [
               "false"
             ],
-            "path": "packages/react/kibana_context/common/index.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -301,7 +301,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/react/kibana_context/common/index.ts",
+            "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

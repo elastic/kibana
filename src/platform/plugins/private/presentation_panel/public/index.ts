@@ -13,7 +13,8 @@ export function plugin() {
   return new PresentationPanelPlugin();
 }
 
-export { getEditPanelAction, ACTION_CUSTOMIZE_PANEL } from './panel_actions';
+export { ACTION_CUSTOMIZE_PANEL } from './panel_actions/customize_panel_action/constants';
+export { ACTION_EDIT_PANEL } from './panel_actions/edit_panel_action/constants';
 export { PresentationPanel } from './panel_component';
 export type { PresentationPanelProps } from './panel_component/types';
 export { PresentationPanelError } from './panel_component/presentation_panel_error';

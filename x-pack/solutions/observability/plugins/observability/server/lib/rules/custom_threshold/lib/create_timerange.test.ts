@@ -38,17 +38,25 @@ describe('createTimerange(interval, aggType, timeframe)', () => {
     });
   });
   describe('With lastPeriodEnd', () => {
-    it('should return a minute and 1 second range for last 1 second when the lastPeriodEnd is less than the timeframe start', () => {
-      const subject = createTimerange(
-        1000,
-        timeframe,
-        end.clone().subtract(1, 'minutes').valueOf()
-      );
-      expect(subject.end - subject.start).toEqual(61000);
-    });
     it('should return a second range for last 1 second when the lastPeriodEnd is not less than the timeframe start', () => {
       const subject = createTimerange(1000, timeframe, end.clone().add(2, 'seconds').valueOf());
       expect(subject.end - subject.start).toEqual(1000);
+    });
+    it('should return a 3 minutes range for last 1 minute when the lastPeriodEnd is not more than 3x the execution window (maxAllowedLookBack)', () => {
+      const subject = createTimerange(
+        60000,
+        timeframe,
+        end.clone().subtract(2, 'minute').valueOf()
+      );
+      expect(subject.end - subject.start).toEqual(60000 * 3);
+    });
+    it('should return a minute range for last 1 minute when the lastPeriodEnd is more than 3x the execution window (maxAllowedLookBack)', () => {
+      const subject = createTimerange(
+        60000,
+        timeframe,
+        end.clone().subtract(4, 'minute').valueOf()
+      );
+      expect(subject.end - subject.start).toEqual(60000);
     });
   });
 });

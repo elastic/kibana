@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import React from 'react';
-import { uniquePrivateIpsStatItems, NetworkKpiUniquePrivateIps } from '.';
+import { NetworkKpiUniquePrivateIps } from '.';
 import { KpiBaseComponent } from '../../../../components/kpi';
 
 jest.mock('../../../../components/kpi');
@@ -26,7 +26,6 @@ describe('Network unique private ips KPI', () => {
     render(<NetworkKpiUniquePrivateIps from={from} to={to} />, {
       wrapper: TestProviders,
     });
-    expect(MockKpiBaseComponent.mock.calls[0][0].statItems).toEqual(uniquePrivateIpsStatItems);
     expect(MockKpiBaseComponent.mock.calls[0][0].from).toEqual(from);
     expect(MockKpiBaseComponent.mock.calls[0][0].to).toEqual(to);
   });

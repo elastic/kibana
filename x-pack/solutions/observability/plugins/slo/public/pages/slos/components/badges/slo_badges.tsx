@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiSkeletonRectangle } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
-import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
+import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
+import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { BurnRateRuleParams } from '../../../../typings';
 import { SloTagsList } from '../common/slo_tags_list';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
@@ -42,6 +42,7 @@ export function SloBadges({
       ) : (
         <>
           <SloStatusBadge slo={slo} />
+          <SloStateBadge slo={slo} />
           <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />

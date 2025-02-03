@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAvatar,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +15,6 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
@@ -43,11 +41,32 @@ export const renderGroupPanel: GroupPanelRenderer<AlertsGroupingAggregation> = (
         />
       ) : undefined;
     case 'host.name':
-      return <HostNameGroupContent hostName={bucket.key} nullGroupMessage={nullGroupMessage} />;
+      return (
+        <GroupContent
+          title={bucket.key}
+          icon="storage"
+          nullGroupMessage={nullGroupMessage}
+          dataTestSubj="host-name"
+        />
+      );
     case 'user.name':
-      return <UserNameGroupContent userName={bucket.key} nullGroupMessage={nullGroupMessage} />;
+      return (
+        <GroupContent
+          title={bucket.key}
+          icon="user"
+          nullGroupMessage={nullGroupMessage}
+          dataTestSubj="user-name"
+        />
+      );
     case 'source.ip':
-      return <SourceIpGroupContent sourceIp={bucket.key} nullGroupMessage={nullGroupMessage} />;
+      return (
+        <GroupContent
+          title={bucket.key}
+          icon="globe"
+          nullGroupMessage={nullGroupMessage}
+          dataTestSubj="source-ip"
+        />
+      );
   }
 };
 
@@ -63,7 +82,7 @@ const RuleNameGroupContent = React.memo<{
   );
   return (
     <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
-      <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
+      <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false} style={{ display: 'contents' }}>
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">{ruleName.trim()}</h5>
@@ -93,82 +112,30 @@ const RuleNameGroupContent = React.memo<{
 });
 RuleNameGroupContent.displayName = 'RuleNameGroup';
 
-const HostNameGroupContent = React.memo<{ hostName: string | string[]; nullGroupMessage?: string }>(
-  ({ hostName, nullGroupMessage }) => (
-    <EuiFlexGroup data-test-subj="host-name-group-renderer" gutterSize="s" alignItems="center">
-      <EuiFlexItem
-        grow={false}
-        style={{
-          backgroundColor: euiThemeVars.euiColorVis1_behindText,
-          borderRadius: '50%',
-        }}
-      >
-        <EuiIcon type="database" size="l" style={{ padding: 4 }} />
-      </EuiFlexItem>
-
+const GroupContent = React.memo<{
+  title: string | string[];
+  icon: string;
+  nullGroupMessage?: string;
+  dataTestSubj?: string;
+}>(({ title, icon, nullGroupMessage, dataTestSubj }) => (
+  <EuiFlexGroup
+    data-test-subj={`${dataTestSubj}-group-renderer`}
+    gutterSize="s"
+    alignItems="center"
+  >
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={icon} size="m" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xs">
+        <h5>{title}</h5>
+      </EuiTitle>
+    </EuiFlexItem>
+    {nullGroupMessage && (
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h5>{hostName}</h5>
-        </EuiTitle>
+        <EuiIconTip content={nullGroupMessage} position="right" />
       </EuiFlexItem>
-      {nullGroupMessage && (
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={nullGroupMessage} position="right" />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  )
-);
-HostNameGroupContent.displayName = 'HostNameGroupContent';
-
-const UserNameGroupContent = React.memo<{ userName: string | string[]; nullGroupMessage?: string }>(
-  ({ userName, nullGroupMessage }) => {
-    const userNameValue = firstNonNullValue(userName) ?? '-';
-    return (
-      <EuiFlexGroup data-test-subj="user-name-group-renderer" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiAvatar name={userNameValue} color={euiThemeVars.euiColorVis0} />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5>{userName}</h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        {nullGroupMessage && (
-          <EuiFlexItem grow={false}>
-            <EuiIconTip content={nullGroupMessage} position="right" />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  }
-);
-UserNameGroupContent.displayName = 'UserNameGroupContent';
-
-const SourceIpGroupContent = React.memo<{ sourceIp: string | string[]; nullGroupMessage?: string }>(
-  ({ sourceIp, nullGroupMessage }) => (
-    <EuiFlexGroup data-test-subj="source-ip-group-renderer" gutterSize="s" alignItems="center">
-      <EuiFlexItem
-        grow={false}
-        style={{
-          backgroundColor: euiThemeVars.euiColorVis3_behindText,
-          borderRadius: '50%',
-        }}
-      >
-        <EuiIcon style={{ padding: 4 }} type="ip" size="l" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h5>{sourceIp}</h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      {nullGroupMessage && (
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={nullGroupMessage} position="right" />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  )
-);
-SourceIpGroupContent.displayName = 'SourceIpGroupContent';
+    )}
+  </EuiFlexGroup>
+));
+GroupContent.displayName = 'GroupContent';

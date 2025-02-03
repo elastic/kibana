@@ -129,7 +129,9 @@
         "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.apiHasRuntimeChildState",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "apiHasRuntimeChildState",
         "description": [],
         "signature": [
@@ -144,8 +146,18 @@
           "<RuntimeState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
@@ -198,47 +210,6 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/has_save_notification.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.apiHasSerializableState",
-        "type": "Function",
-        "tags": [],
-        "label": "apiHasSerializableState",
-        "description": [],
-        "signature": [
-          "(api: unknown) => api is ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSerializableState",
-            "text": "HasSerializableState"
-          },
-          "<object>"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.apiHasSerializableState.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -622,9 +593,9 @@
           },
           "<RuntimeState> & ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.HasSnapshottableState",
             "text": "HasSnapshottableState"
           },
@@ -824,7 +795,7 @@
                 "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
-              "<SerializedState>, displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
+              "<SerializedState, object>, displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
             "deprecated": false,
@@ -845,7 +816,7 @@
                     "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
-                  "<SerializedState>"
+                  "<SerializedState, object>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/can_add_new_panel.ts",
                 "deprecated": false,
@@ -964,10 +935,10 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.CanExpandPanels.expandedPanelId",
+            "id": "def-public.CanExpandPanels.expandedPanelId$",
             "type": "Object",
             "tags": [],
-            "label": "expandedPanelId",
+            "label": "expandedPanelId$",
             "description": [],
             "signature": [
               "{ source: ",
@@ -1133,7 +1104,9 @@
         "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.HasRuntimeChildState",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "HasRuntimeChildState",
         "description": [],
         "signature": [
@@ -1147,8 +1120,18 @@
           "<RuntimeState>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/child_state.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/types.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
@@ -1216,56 +1199,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.HasSerializableState",
-        "type": "Interface",
-        "tags": [],
-        "label": "HasSerializableState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSerializableState",
-            "text": "HasSerializableState"
-          },
-          "<State>"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.HasSerializableState.serializeState",
-            "type": "Function",
-            "tags": [],
-            "label": "serializeState",
-            "description": [
-              "\nSerializes all state into a format that can be saved into\nsome external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}"
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/presentation-containers",
-                "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-public.SerializedPanelState",
-                "text": "SerializedPanelState"
-              },
-              "<State>"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.HasSerializedChildState",
         "type": "Interface",
         "tags": [],
@@ -1295,9 +1228,9 @@
             "signature": [
               "(childId: string) => ",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
+                "docId": "kibKbnPresentationPublishingPluginApi",
                 "section": "def-public.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
@@ -1330,48 +1263,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.HasSnapshottableState",
-        "type": "Interface",
-        "tags": [],
-        "label": "HasSnapshottableState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSnapshottableState",
-            "text": "HasSnapshottableState"
-          },
-          "<RuntimeState>"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.HasSnapshottableState.snapshotRuntimeState",
-            "type": "Function",
-            "tags": [],
-            "label": "snapshotRuntimeState",
-            "description": [
-              "\nSerializes all runtime state exactly as it appears. This can be used\nto rehydrate a component's state without needing to serialize then deserialize it."
-            ],
-            "signature": [
-              "() => RuntimeState"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.PanelPackage",
         "type": "Interface",
         "tags": [],
@@ -1385,7 +1276,7 @@
             "section": "def-public.PanelPackage",
             "text": "PanelPackage"
           },
-          "<SerializedState>"
+          "<SerializedStateType, RuntimeStateType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
@@ -1404,13 +1295,38 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PanelPackage.serializedState",
+            "type": "Object",
+            "tags": [],
+            "label": "serializedState",
+            "description": [
+              "\nThe serialized state of this panel."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.SerializedPanelState",
+                "text": "SerializedPanelState"
+              },
+              "<SerializedStateType> | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
             "id": "def-public.PanelPackage.initialState",
             "type": "Uncategorized",
             "tags": [],
             "label": "initialState",
-            "description": [],
+            "description": [
+              "\nThe runtime state of this panel. @deprecated Use `serializedState` instead."
+            ],
             "signature": [
-              "SerializedState | undefined"
+              "RuntimeStateType | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
@@ -1517,7 +1433,7 @@
                 "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
-              "<SerializedState>) => Promise<string>"
+              "<SerializedState, object>) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
@@ -1553,7 +1469,7 @@
                     "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
-                  "<SerializedState>"
+                  "<SerializedState, object>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
                 "deprecated": false,
@@ -1780,67 +1696,6 @@
               "<boolean | undefined>; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/publishes_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.SerializedPanelState",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedPanelState",
-        "description": [
-          "\nA package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any\nstrategy, this is the format that should be used."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.SerializedPanelState",
-            "text": "SerializedPanelState"
-          },
-          "<RawStateType>"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.SerializedPanelState.references",
-            "type": "Array",
-            "tags": [],
-            "label": "references",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "server",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-server.Reference",
-                "text": "Reference"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.SerializedPanelState.rawState",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "rawState",
-            "description": [],
-            "signature": [
-              "RawStateType"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/serialized_state.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -113,7 +113,11 @@ export const TemplatesForm = React.memo(({ value }: Props) => {
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
+      <Form
+        form={form}
+        isInvalid={form.isSubmitted && !form.isValid && !form.isSubmitting}
+        error={form.getErrors()}
+      >
         <UseField
           path="dynamicTemplates"
           component={JsonEditorField}

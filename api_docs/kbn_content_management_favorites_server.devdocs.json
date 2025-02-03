@@ -21,7 +21,7 @@
         "signature": [
           "({\n  logger,\n  core,\n  usageCollection,\n}: { core: ",
           "CoreSetup",
-          "<object, unknown>; logger: ",
+          "<{}, unknown>; logger: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -40,7 +40,7 @@
           " | undefined; }) => ",
           "FavoritesRegistrySetup"
         ],
-        "path": "packages/content-management/favorites/favorites_server/src/index.ts",
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,7 +51,7 @@
             "tags": [],
             "label": "{\n  logger,\n  core,\n  usageCollection,\n}",
             "description": [],
-            "path": "packages/content-management/favorites/favorites_server/src/index.ts",
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -64,9 +64,9 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
-                "path": "packages/content-management/favorites/favorites_server/src/index.ts",
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -86,7 +86,7 @@
                     "text": "Logger"
                   }
                 ],
-                "path": "packages/content-management/favorites/favorites_server/src/index.ts",
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -107,7 +107,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/content-management/favorites/favorites_server/src/index.ts",
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -126,7 +126,7 @@
         "tags": [],
         "label": "AddFavoriteResponse",
         "description": [],
-        "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -140,7 +140,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -154,7 +154,7 @@
         "tags": [],
         "label": "GetFavoritesResponse",
         "description": [],
-        "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,7 +168,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -182,7 +182,7 @@
             "signature": [
               "Record<string, object> | undefined"
             ],
-            "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -196,7 +196,7 @@
         "tags": [],
         "label": "RemoveFavoriteResponse",
         "description": [],
-        "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,7 +210,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -230,7 +230,7 @@
         "signature": [
           "{ registerFavoriteType: (type: string, config?: FavoriteTypeConfig) => void; }"
         ],
-        "path": "packages/content-management/favorites/favorites_server/src/index.ts",
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

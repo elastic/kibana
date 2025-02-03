@@ -7,10 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { GraphNode } from '../../types';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetTranslateRuleNodeParams {
   inferenceClient: InferenceClient;
@@ -42,30 +42,17 @@ export const getTranslateRuleNode = ({
     });
     const response = await esqlKnowledgeBaseCaller(prompt);
 
-    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
+    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
-
-    const translationResult = getTranslationResult(esqlQuery);
 
     return {
       response,
-      comments: [translationSummary],
-      translation_result: translationResult,
+      comments: [generateAssistantComment(cleanMarkdown(translationSummary))],
       elastic_rule: {
-        title: state.original_rule.title,
-        integration_id: integrationId,
-        description: state.original_rule.description,
-        severity: 'low',
+        integration_ids: [integrationId],
         query: esqlQuery,
         query_language: 'esql',
       },
     };
   };
-};
-
-const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro):[\s\S]*\]/)) {
-    return RuleTranslationResult.PARTIAL;
-  }
-  return RuleTranslationResult.FULL;
 };

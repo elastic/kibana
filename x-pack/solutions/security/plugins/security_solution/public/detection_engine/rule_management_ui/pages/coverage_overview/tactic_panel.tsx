@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiProgress, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiPanel, EuiProgress, EuiSpacer, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { memo, useMemo } from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
 import { coverageOverviewPanelWidth } from './constants';
 import * as i18n from './translations';
@@ -20,6 +19,8 @@ export interface CoverageOverviewTacticPanelProps {
 }
 
 const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTacticPanelProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const coveredTechniques = useMemo(() => getNumOfCoveredTechniques(tactic), [tactic]);
 
   const ProgressLabel = useMemo(
@@ -37,15 +38,15 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
       hasShadow={false}
       hasBorder
       paddingSize="s"
-      className={css`
-        background: ${euiThemeVars.euiColorLightestShade};
-        border-color: ${euiThemeVars.euiColorMediumShade};
+      css={css`
+        background: ${euiTheme.colors.lightestShade};
+        border-color: ${euiTheme.colors.mediumShade};
         width: ${coverageOverviewPanelWidth}px;
       `}
     >
       <EuiToolTip content={tactic.name}>
         <EuiText
-          className={css`
+          css={css`
             h4 {
               white-space: nowrap;
               overflow: hidden;

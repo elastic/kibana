@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
@@ -47,7 +47,7 @@ const StyledEuiSelectable = styled.div`
 `;
 
 const StyledEuiFlexItemButtonGroup = styled(EuiFlexItem)`
-  @media only screen and (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+  @media only screen and (max-width: ${({ theme }) => theme.euiTheme.breakpoint.m}) {
     align-items: center;
   }
 `;
@@ -56,14 +56,14 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
   .euiButtonGroupButton {
-    padding-right: ${(props) => props.theme.eui.euiSizeL};
+    padding-right: ${({ theme }) => theme.euiTheme.size.l};
   }
 `;
 
 const EffectivePolicyFormContainer = styled.div`
   .policy-name .euiSelectableListItem__text {
     text-decoration: none !important;
-    color: ${(props) => props.theme.eui.euiTextColor} !important;
+    color: ${({ theme }) => theme.euiTheme.colors.textParagraph} !important;
   }
 `;
 

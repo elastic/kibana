@@ -8,7 +8,8 @@
  */
 
 import sinon from 'sinon';
-import { RRule, Frequency, Weekday } from './rrule';
+import { RRule } from './rrule';
+import { Frequency, Weekday } from './types';
 
 const DATE_2019 = '2019-01-01T00:00:00.000Z';
 const DATE_2019_DECEMBER_19 = '2019-12-19T00:00:00.000Z';
@@ -730,6 +731,228 @@ describe('RRule', () => {
         ]
       `);
     });
+    it('ignores invalid byweekday values', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.WEEKLY,
+        interval: 1,
+        tzid: 'UTC',
+        byweekday: [Weekday.TH, 0, -2],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2019-12-19T00:00:00.000Z,
+          2019-12-26T00:00:00.000Z,
+          2020-01-02T00:00:00.000Z,
+          2020-01-09T00:00:00.000Z,
+          2020-01-16T00:00:00.000Z,
+          2020-01-23T00:00:00.000Z,
+          2020-01-30T00:00:00.000Z,
+          2020-02-06T00:00:00.000Z,
+          2020-02-13T00:00:00.000Z,
+          2020-02-20T00:00:00.000Z,
+          2020-02-27T00:00:00.000Z,
+          2020-03-05T00:00:00.000Z,
+          2020-03-12T00:00:00.000Z,
+          2020-03-19T00:00:00.000Z,
+        ]
+      `);
+
+      const rule2 = new RRule({
+        dtstart: new Date(DATE_2019),
+        freq: Frequency.WEEKLY,
+        interval: 1,
+        tzid: 'UTC',
+        byweekday: [Weekday.SA, Weekday.SU, Weekday.MO, 0],
+      });
+
+      expect(rule2.all(9)).toMatchInlineSnapshot(`
+        Array [
+          2019-01-05T00:00:00.000Z,
+          2019-01-06T00:00:00.000Z,
+          2019-01-07T00:00:00.000Z,
+          2019-01-12T00:00:00.000Z,
+          2019-01-13T00:00:00.000Z,
+          2019-01-14T00:00:00.000Z,
+          2019-01-19T00:00:00.000Z,
+          2019-01-20T00:00:00.000Z,
+          2019-01-21T00:00:00.000Z,
+        ]
+      `);
+    });
+  });
+
+  describe('bymonth', () => {
+    it('works with yearly frequency', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.YEARLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonth: [2, 5],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2020-02-19T00:00:00.000Z,
+          2020-05-19T00:00:00.000Z,
+          2021-02-19T00:00:00.000Z,
+          2021-05-19T00:00:00.000Z,
+          2022-02-19T00:00:00.000Z,
+          2022-05-19T00:00:00.000Z,
+          2023-02-19T00:00:00.000Z,
+          2023-05-19T00:00:00.000Z,
+          2024-02-19T00:00:00.000Z,
+          2024-05-19T00:00:00.000Z,
+          2025-02-19T00:00:00.000Z,
+          2025-05-19T00:00:00.000Z,
+          2026-02-19T00:00:00.000Z,
+          2026-05-19T00:00:00.000Z,
+        ]
+      `);
+    });
+    it('ignores invalid bymonth values', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.YEARLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonth: [0],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2019-12-19T00:00:00.000Z,
+          2020-12-19T00:00:00.000Z,
+          2021-12-19T00:00:00.000Z,
+          2022-12-19T00:00:00.000Z,
+          2023-12-19T00:00:00.000Z,
+          2024-12-19T00:00:00.000Z,
+          2025-12-19T00:00:00.000Z,
+          2026-12-19T00:00:00.000Z,
+          2027-12-19T00:00:00.000Z,
+          2028-12-19T00:00:00.000Z,
+          2029-12-19T00:00:00.000Z,
+          2030-12-19T00:00:00.000Z,
+          2031-12-19T00:00:00.000Z,
+          2032-12-19T00:00:00.000Z,
+        ]
+      `);
+    });
+  });
+
+  describe('bymonthday', () => {
+    it('works with monthly frequency', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.MONTHLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonthday: [1, 15],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2020-01-01T00:00:00.000Z,
+          2020-01-15T00:00:00.000Z,
+          2020-02-01T00:00:00.000Z,
+          2020-02-15T00:00:00.000Z,
+          2020-03-01T00:00:00.000Z,
+          2020-03-15T00:00:00.000Z,
+          2020-04-01T00:00:00.000Z,
+          2020-04-15T00:00:00.000Z,
+          2020-05-01T00:00:00.000Z,
+          2020-05-15T00:00:00.000Z,
+          2020-06-01T00:00:00.000Z,
+          2020-06-15T00:00:00.000Z,
+          2020-07-01T00:00:00.000Z,
+          2020-07-15T00:00:00.000Z,
+        ]
+      `);
+    });
+    it('ignores invalid bymonthday values', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.MONTHLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonthday: [0, -1, 32],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2019-12-19T00:00:00.000Z,
+          2020-01-19T00:00:00.000Z,
+          2020-02-19T00:00:00.000Z,
+          2020-03-19T00:00:00.000Z,
+          2020-04-19T00:00:00.000Z,
+          2020-05-19T00:00:00.000Z,
+          2020-06-19T00:00:00.000Z,
+          2020-07-19T00:00:00.000Z,
+          2020-08-19T00:00:00.000Z,
+          2020-09-19T00:00:00.000Z,
+          2020-10-19T00:00:00.000Z,
+          2020-11-19T00:00:00.000Z,
+          2020-12-19T00:00:00.000Z,
+          2021-01-19T00:00:00.000Z,
+        ]
+      `);
+    });
+  });
+
+  describe('bymonth, bymonthday', () => {
+    it('works with yearly frequency', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.YEARLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonth: [2, 5],
+        bymonthday: [8],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2020-02-08T00:00:00.000Z,
+          2020-05-08T00:00:00.000Z,
+          2021-02-08T00:00:00.000Z,
+          2021-05-08T00:00:00.000Z,
+          2022-02-08T00:00:00.000Z,
+          2022-05-08T00:00:00.000Z,
+          2023-02-08T00:00:00.000Z,
+          2023-05-08T00:00:00.000Z,
+          2024-02-08T00:00:00.000Z,
+          2024-05-08T00:00:00.000Z,
+          2025-02-08T00:00:00.000Z,
+          2025-05-08T00:00:00.000Z,
+          2026-02-08T00:00:00.000Z,
+          2026-05-08T00:00:00.000Z,
+        ]
+      `);
+    });
+    it('ignores valid dates that do not exist e.g. February 30th', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.YEARLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonth: [2, 5],
+        bymonthday: [30],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2020-05-30T00:00:00.000Z,
+          2021-05-30T00:00:00.000Z,
+          2022-05-30T00:00:00.000Z,
+          2023-05-30T00:00:00.000Z,
+          2024-05-30T00:00:00.000Z,
+          2025-05-30T00:00:00.000Z,
+          2026-05-30T00:00:00.000Z,
+          2027-05-30T00:00:00.000Z,
+          2028-05-30T00:00:00.000Z,
+          2029-05-30T00:00:00.000Z,
+          2030-05-30T00:00:00.000Z,
+          2031-05-30T00:00:00.000Z,
+          2032-05-30T00:00:00.000Z,
+          2033-05-30T00:00:00.000Z,
+        ]
+      `);
+    });
   });
 
   describe('byhour, byminute, bysecond', () => {
@@ -844,6 +1067,30 @@ describe('RRule', () => {
         ]
       `);
     });
+    it('ignores invalid byyearday values', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2020),
+        freq: Frequency.YEARLY,
+        byyearday: [0, -1],
+        interval: 1,
+        tzid: 'UTC',
+      });
+
+      expect(rule.all(10)).toMatchInlineSnapshot(`
+        Array [
+          2020-01-01T00:00:00.000Z,
+          2021-01-01T00:00:00.000Z,
+          2022-01-01T00:00:00.000Z,
+          2023-01-01T00:00:00.000Z,
+          2024-01-01T00:00:00.000Z,
+          2025-01-01T00:00:00.000Z,
+          2026-01-01T00:00:00.000Z,
+          2027-01-01T00:00:00.000Z,
+          2028-01-01T00:00:00.000Z,
+          2029-01-01T00:00:00.000Z,
+        ]
+      `);
+    });
   });
 
   describe('error handling', () => {
@@ -871,6 +1118,34 @@ describe('RRule', () => {
       expect(testFn).toThrowErrorMatchingInlineSnapshot(
         `"Cannot create RRule: until is an invalid date"`
       );
+    });
+
+    it('throws an error on an interval of 0', () => {
+      const testFn = () =>
+        new RRule({
+          dtstart: new Date(DATE_2020),
+          freq: Frequency.HOURLY,
+          interval: 0,
+          tzid: 'UTC',
+        });
+      expect(testFn).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot create RRule: interval must be greater than 0"`
+      );
+    });
+
+    it('throws an error when exceeding the iteration limit', () => {
+      const testFn = () => {
+        const rule = new RRule({
+          dtstart: new Date(DATE_2020),
+          freq: Frequency.YEARLY,
+          byyearday: [1],
+          interval: 1,
+          tzid: 'UTC',
+        });
+        rule.all(100001);
+      };
+
+      expect(testFn).toThrowErrorMatchingInlineSnapshot(`"RRule iteration limit exceeded"`);
     });
   });
 });

@@ -49,7 +49,7 @@ import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
   protected getResponseErrorMessage(error: AxiosError): string {
-    throw new Error('Method not implemented.');
+    throw new Error(error.message || 'Method not implemented.');
   }
 
   private inferenceId;
@@ -128,11 +128,13 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     const obs$ = from(eventSourceStreamIntoObservable(res as unknown as Readable)).pipe(
       filter((line) => !!line && line !== '[DONE]'),
       map((line) => {
-        return JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } };
+        return JSON.parse(line) as
+          | OpenAI.ChatCompletionChunk
+          | { error: { message?: string; reason?: string } };
       }),
       tap((line) => {
         if ('error' in line) {
-          throw new Error(line.error.message);
+          throw new Error(line.error.message || line.error.reason || 'Unknown error');
         }
         if (
           'choices' in line &&
@@ -185,7 +187,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
-        path: `_inference/completion/${this.inferenceId}/_unified`,
+        path: `_inference/chat_completion/${this.inferenceId}/_unified`,
         body: { ...params.body, n: undefined }, // exclude n param for now, constant is used on the inference API side
       },
       {
@@ -194,7 +196,6 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         signal: params.signal,
       }
     );
-
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
       const error = await streamToString(response.body as unknown as Readable);

@@ -93,6 +93,10 @@ export interface EndpointAuthz {
   canReadEndpointExceptions: boolean;
   /** if the user has read permissions for endpoint exceptions */
   canWriteEndpointExceptions: boolean;
+  /** if the user has write permissions for workflow insights */
+  canWriteWorkflowInsights: boolean;
+  /** if the user has read permissions for workflow insights */
+  canReadWorkflowInsights: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

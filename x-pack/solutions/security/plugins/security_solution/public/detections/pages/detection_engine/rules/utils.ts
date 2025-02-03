@@ -6,6 +6,7 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { DEFAULT_THREAT_MAPPING_VALUE } from '../../../../detection_engine/rule_creation/components/threat_match_mapping_edit';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
@@ -53,7 +54,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
   },
   requiredFields: [],
   relatedIntegrations: [],
-  threatMapping: [],
+  threatMapping: DEFAULT_THREAT_MAPPING_VALUE,
   threshold: {
     field: [],
     value: '200',
@@ -84,7 +85,11 @@ export const stepAboutDefaultValue: AboutStepRule = {
   description: '',
   isAssociatedToEndpointList: false,
   isBuildingBlock: false,
-  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+  severity: {
+    value: 'low',
+    mapping: fillEmptySeverityMappings([]),
+    isMappingChecked: false,
+  },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
   investigationFields: [],
   references: [''],

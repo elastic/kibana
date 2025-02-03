@@ -18,6 +18,12 @@ import { LlmTasksPlugin } from './plugin';
 export { config } from './config';
 
 export type { LlmTasksPluginSetup, LlmTasksPluginStart };
+export type {
+  RetrieveDocumentationAPI,
+  RetrieveDocumentationParams,
+  RetrieveDocumentationResult,
+  RetrieveDocumentationResultDoc,
+} from './tasks';
 
 export const plugin: PluginInitializer<
   LlmTasksPluginSetup,

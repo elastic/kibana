@@ -4,17 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiSearchBar,
-  EuiPortal,
-  Query,
-} from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiPortal, EuiButton } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import { i18n } from '@kbn/i18n';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useEditingState } from './hooks/use_editing_state';
 import { SchemaEditorFlyout } from './flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -23,9 +17,12 @@ import { SimpleSearchBar } from './simple_search_bar';
 import { UnpromoteFieldModal } from './unpromote_field_modal';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { FieldsTableContainer } from './fields_table';
+import { FieldTypeFilterGroup } from './filters/type_filter_group';
+import { useQueryAndFilters } from './hooks/use_query_and_filters';
+import { FieldStatusFilterGroup } from './filters/status_filter_group';
 
 interface SchemaEditorProps {
-  definition?: WiredReadStreamDefinition;
+  definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
   isLoadingDefinition: boolean;
 }
@@ -51,7 +48,7 @@ const Content = ({
     },
   } = useKibana();
 
-  const [query, setQuery] = useState<Query | undefined>(EuiSearchBar.Query.MATCH_ALL);
+  const queryAndFiltersState = useQueryAndFilters();
 
   const {
     value: unmappedFieldsValue,
@@ -63,12 +60,12 @@ const Content = ({
         signal,
         params: {
           path: {
-            id: definition.name,
+            id: definition.stream.name,
           },
         },
       });
     },
-    [definition.name, streamsRepositoryClient]
+    [definition.stream.name, streamsRepositoryClient]
   );
 
   const editingState = useEditingState({
@@ -92,7 +89,12 @@ const Content = ({
   // If the definition changes (e.g. navigating to parent stream), reset the entire editing state.
   useEffect(() => {
     reset();
-  }, [definition.name, reset]);
+  }, [definition.stream.name, reset]);
+
+  const refreshData = useCallback(() => {
+    refreshDefinition();
+    refreshUnmappedFields();
+  }, [refreshDefinition, refreshUnmappedFields]);
 
   return (
     <EuiFlexItem>
@@ -103,10 +105,35 @@ const Content = ({
           </EuiPortal>
         ) : null}
         <EuiFlexItem grow={false}>
-          <SimpleSearchBar
-            query={query}
-            onChange={(nextQuery) => setQuery(nextQuery.query ?? undefined)}
-          />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <SimpleSearchBar
+                query={queryAndFiltersState.query}
+                onChange={(nextQuery) =>
+                  queryAndFiltersState.setQuery(nextQuery.query ?? undefined)
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FieldTypeFilterGroup onChangeFilterGroup={queryAndFiltersState.changeFilterGroups} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FieldStatusFilterGroup
+                onChangeFilterGroup={queryAndFiltersState.changeFilterGroups}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="streamsAppContentRefreshButton"
+                iconType="refresh"
+                onClick={refreshData}
+              >
+                {i18n.translate('xpack.streams.schemaEditor.refreshDataButtonLabel', {
+                  defaultMessage: 'Refresh',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem
           className={css`
@@ -116,11 +143,12 @@ const Content = ({
         >
           <FieldsTableContainer
             definition={definition}
-            query={query}
+            query={queryAndFiltersState.query}
             unmappedFieldsResult={unmappedFieldsValue?.unmappedFields}
             isLoadingUnmappedFields={isLoadingUnmappedFields}
             editingState={editingState}
             unpromotingState={unpromotingState}
+            queryAndFiltersState={queryAndFiltersState}
           />
         </EuiFlexItem>
 

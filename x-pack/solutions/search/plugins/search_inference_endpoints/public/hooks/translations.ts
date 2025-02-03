@@ -28,10 +28,3 @@ export const ENDPOINT_CREATION_FAILED = i18n.translate(
     defaultMessage: 'Endpoint creation failed',
   }
 );
-
-export const GET_PROVIDERS_FAILED = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEndpoint.unableToFindProvidersQueryMessage',
-  {
-    defaultMessage: 'Unable to find providers',
-  }
-);

@@ -3842,7 +3842,7 @@
             "signature": [
               "(_core: ",
               "CoreSetup",
-              "<object, unknown>, { embeddable }: UiActionsEnhancedServerSetupDependencies) => { registerActionFactory: (definition: ",
+              "<{}, unknown>, { embeddable }: UiActionsEnhancedServerSetupDependencies) => { registerActionFactory: (definition: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "server",
@@ -3873,7 +3873,7 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<object, unknown>"
+                  "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,

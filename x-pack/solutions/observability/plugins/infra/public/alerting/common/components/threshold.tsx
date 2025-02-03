@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { Chart, Metric, Settings } from '@elastic/charts';
-import { EuiIcon, EuiPanel, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { COMPARATORS } from '@kbn/alerting-comparators';
 
 export interface ChartProps {
-  theme?: UseEuiTheme<{}>;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 
@@ -57,7 +57,7 @@ export const Threshold = ({
       data-test-subj={`threshold-${thresholds.join('-')}-${value}`}
     >
       <Chart>
-        <Settings theme={theme as PartialTheme} baseTheme={baseTheme} locale={i18n.getLocale()} />
+        <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
         <Metric
           id={id}
           data={[

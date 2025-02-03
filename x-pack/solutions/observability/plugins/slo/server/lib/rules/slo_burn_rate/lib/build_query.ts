@@ -7,9 +7,10 @@
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
-import { BurnRateRuleParams, WindowSchema } from '../types';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';
+import { getSlicesFromDateRange } from '../../../../services/utils/get_slices_from_date_range';
+import { BurnRateRuleParams, WindowSchema } from '../types';
 
 type BurnRateWindowWithDuration = WindowSchema & {
   longDuration: Duration;
@@ -47,6 +48,7 @@ const TIMESLICE_AGGS = {
   good: { sum: { field: 'slo.isGoodSlice' } },
   total: { value_count: { field: 'slo.isGoodSlice' } },
 };
+
 const OCCURRENCE_AGGS = {
   good: { sum: { field: 'slo.numerator' } },
   total: { sum: { field: 'slo.denominator' } },
@@ -59,12 +61,45 @@ function buildWindowAgg(
   slo: SLODefinition,
   dateRange: { from: Date; to: Date }
 ) {
-  const aggs = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ? TIMESLICE_AGGS
-    : OCCURRENCE_AGGS;
+  const isTimesliceBudgetingMethod = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod);
+
+  const aggs = isTimesliceBudgetingMethod ? TIMESLICE_AGGS : OCCURRENCE_AGGS;
+
+  // For timeslice budgeting method, we always compute the burn rate based on the observed bad slices, e.g. total observed  - good observed = bad slices observed,
+  // And we compare this to the expected slices in the whole window duration
+  const burnRateAgg = isTimesliceBudgetingMethod
+    ? {
+        bucket_script: {
+          buckets_path: {
+            good: `${generateStatsKey(id, type)}>good`,
+            total: `${generateStatsKey(id, type)}>total`,
+          },
+          script: {
+            source:
+              'params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0',
+            params: {
+              target: slo.objective.target,
+              totalSlices: getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!),
+            },
+          },
+        },
+      }
+    : {
+        bucket_script: {
+          buckets_path: {
+            good: `${generateStatsKey(id, type)}>good`,
+            total: `${generateStatsKey(id, type)}>total`,
+          },
+          script: {
+            source:
+              'params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0',
+            params: { target: slo.objective.target },
+          },
+        },
+      };
 
   return {
-    [`${id}_${type}`]: {
+    [generateStatsKey(id, type)]: {
       filter: {
         range: {
           '@timestamp': {
@@ -75,19 +110,7 @@ function buildWindowAgg(
       },
       aggs,
     },
-    [generateBurnRateKey(id, type)]: {
-      bucket_script: {
-        buckets_path: {
-          good: `${id}_${type}>good`,
-          total: `${id}_${type}>total`,
-        },
-        script: {
-          source:
-            'params.total != null && params.total > 0 ? (1 - (params.good / params.total)) / (1 - params.target) : 0',
-          params: { target: slo.objective.target },
-        },
-      },
-    },
+    [generateBurnRateKey(id, type)]: burnRateAgg,
     [generateAboveThresholdKey(id, type)]: {
       bucket_script: {
         buckets_path: { burnRate: generateBurnRateKey(id, type) },
@@ -134,14 +157,15 @@ function buildEvaluation(burnRateWindows: BurnRateWindowWithDuration[]) {
     };
   }, {});
 
-  const source = burnRateWindows.reduce((acc, _windDef, index) => {
-    const windowId = `${WINDOW}_${index}`;
-    const OP = acc ? ' || ' : '';
-    return `${acc}${OP}(params.${generateAboveThresholdKey(
-      windowId,
-      SHORT_WINDOW
-    )} == 1 && params.${generateAboveThresholdKey(windowId, LONG_WINDOW)} == 1)`;
-  }, '');
+  const source = burnRateWindows
+    .map((_windDef, index) => {
+      const windowId = `${WINDOW}_${index}`;
+      return `(params.${generateAboveThresholdKey(
+        windowId,
+        SHORT_WINDOW
+      )} == 1 && params.${generateAboveThresholdKey(windowId, LONG_WINDOW)} == 1)`;
+    })
+    .join(' || ');
 
   return {
     evaluation: {

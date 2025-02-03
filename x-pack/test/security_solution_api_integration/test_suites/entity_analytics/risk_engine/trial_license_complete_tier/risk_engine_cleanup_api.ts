@@ -45,7 +45,6 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return response with success status', async () => {
       const status1 = await riskEngineRoutes.getStatus();
       expect(status1.body.risk_engine_status).to.be('NOT_INSTALLED');
-      expect(status1.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
       const firstDocumentId = uuidv4();
       await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, firstDocumentId)]);
@@ -56,7 +55,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       const status2 = await riskEngineRoutes.getStatus();
       expect(status2.body.risk_engine_status).to.be('ENABLED');
-      expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
       const response = await riskEngineRoutes.cleanUp();
       expect(response.body).to.eql({
@@ -69,7 +67,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       const status3 = await riskEngineRoutes.getStatus();
       expect(status3.body.risk_engine_status).to.be('NOT_INSTALLED');
-      expect(status3.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
     });
   });
 };

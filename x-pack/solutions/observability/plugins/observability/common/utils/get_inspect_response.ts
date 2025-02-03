@@ -15,7 +15,7 @@ import { WrappedElasticsearchClientError } from './unwrap_es_response';
  * Get statistics to show on inspector tab.
  *
  * If you're using searchSource (which we're not), this gets populated from
- * https://github.com/elastic/kibana/blob/c7d742cb8b8935f3812707a747a139806e4be203/src/plugins/data/common/search/search_source/inspect/inspector_stats.ts
+ * src/plugins/data/common/search/search_source/inspect/inspector_stats.ts
  *
  * We do most of the same here, but not using searchSource.
  */

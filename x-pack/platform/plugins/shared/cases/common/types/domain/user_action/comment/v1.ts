@@ -6,10 +6,12 @@
  */
 
 import * as rt from 'io-ts';
-import { AttachmentRequestRt, AttachmentRequestWithoutRefsRt } from '../../../api/attachment/v1';
+import { AttachmentRequestWithoutRefsRt } from '../../../api/attachment/v1';
 import { UserActionTypes } from '../action/v1';
+import { AttachmentPayloadRt } from '../../attachment/v1';
 
-export const CommentUserActionPayloadRt = rt.strict({ comment: AttachmentRequestRt });
+export const CommentUserActionPayloadRt = rt.strict({ comment: AttachmentPayloadRt });
+
 export const CommentUserActionPayloadWithoutIdsRt = rt.strict({
   comment: AttachmentRequestWithoutRefsRt,
 });

@@ -20,6 +20,7 @@ import {
   useEuiTheme,
   EuiToolTip,
   EuiSkeletonText,
+  useEuiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiPanelProps, IconType } from '@elastic/eui';
@@ -126,6 +127,7 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
   );
 
   const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const headerLeftSection = useMemo(
     () => (
@@ -159,8 +161,8 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
               <EuiToolTip content={link?.tooltip}>
                 <EuiLink
                   css={css`
-                    font-size: 12px;
-                    font-weight: 700;
+                    font-size: ${xsFontSize};
+                    font-weight: ${euiTheme.font.weight.bold};
                   `}
                   data-test-subj={`${dataTestSubj}TitleLink`}
                   onClick={link?.callback}
@@ -178,15 +180,17 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
       </EuiFlexItem>
     ),
     [
+      euiTheme.size.xl,
+      euiTheme.size.s,
+      euiTheme.font.weight.bold,
       dataTestSubj,
       expandable,
       children,
       toggleIcon,
-      link?.callback,
       iconType,
-      euiTheme.size.s,
-      euiTheme.size.xl,
+      link?.callback,
       link?.tooltip,
+      xsFontSize,
       title,
     ]
   );

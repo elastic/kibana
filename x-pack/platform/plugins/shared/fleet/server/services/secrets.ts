@@ -333,6 +333,12 @@ function getOutputSecretPaths(
         value: remoteESOutput.secrets.service_token,
       });
     }
+    if (remoteESOutput.secrets?.kibana_api_key) {
+      outputSecretPaths.push({
+        path: 'secrets.kibana_api_key',
+        value: remoteESOutput.secrets.kibana_api_key,
+      });
+    }
   }
 
   return outputSecretPaths;
@@ -378,13 +384,17 @@ export function getOutputSecretReferences(output: Output): PolicySecretReference
     });
   }
 
-  if (
-    output.type === 'remote_elasticsearch' &&
-    typeof output?.secrets?.service_token === 'object'
-  ) {
-    outputSecretPaths.push({
-      id: output.secrets.service_token.id,
-    });
+  if (output.type === 'remote_elasticsearch') {
+    if (typeof output?.secrets?.service_token === 'object') {
+      outputSecretPaths.push({
+        id: output.secrets.service_token.id,
+      });
+    }
+    if (typeof output?.secrets?.kibana_api_key === 'object') {
+      outputSecretPaths.push({
+        id: output.secrets.kibana_api_key.id,
+      });
+    }
   }
 
   return outputSecretPaths;
@@ -604,13 +614,6 @@ export async function isSecretStorageEnabled(
 ): Promise<boolean> {
   const logger = appContextService.getLogger();
 
-  // first check if the feature flag is enabled, if not secrets are disabled
-  const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-  if (!secretsStorageEnabled) {
-    logger.debug('Secrets storage is disabled by feature flag');
-    return false;
-  }
-
   // if serverless then secrets will always be supported
   const isFleetServerStandalone =
     appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
@@ -659,14 +662,6 @@ export async function isOutputSecretStorageEnabled(
   soClient: SavedObjectsClientContract
 ): Promise<boolean> {
   const logger = appContextService.getLogger();
-
-  // first check if the feature flag is enabled, if not output secrets are disabled
-  const { outputSecretsStorage: outputSecretsStorageEnabled } =
-    appContextService.getExperimentalFeatures();
-  if (!outputSecretsStorageEnabled) {
-    logger.debug('Output secrets storage is disabled by feature flag');
-    return false;
-  }
 
   // if serverless then output secrets will always be supported
   const isFleetServerStandalone =

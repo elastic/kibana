@@ -711,13 +711,7 @@
               "; typeRegistry: ",
               "ISavedObjectTypeRegistry",
               "; }; uiSettings: { client: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               "; }; capabilities: ",
               "Observable",
               "<",

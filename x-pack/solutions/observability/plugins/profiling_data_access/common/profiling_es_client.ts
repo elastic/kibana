@@ -57,7 +57,7 @@ export interface ProfilingESClient {
     sampleSize?: number;
     indices?: string[];
     stacktraceIdsField?: string;
-    aggregationField?: AggregationField;
+    aggregationFields?: AggregationField[];
     co2PerKWH?: number;
     datacenterPUE?: number;
     pervCPUWattX86?: number;
