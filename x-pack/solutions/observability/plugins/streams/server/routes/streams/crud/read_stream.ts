@@ -13,7 +13,6 @@ import {
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { omit } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
 import { StreamsClient } from '../../../lib/streams/client';
 import {
@@ -44,7 +43,7 @@ export async function readStream({
 
   if (isGroupStreamDefinition(streamDefinition)) {
     return {
-      stream: omit(streamDefinition, 'name'),
+      stream: streamDefinition,
       dashboards,
     };
   }
