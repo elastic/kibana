@@ -94,10 +94,10 @@ const FIELDS_STATE_ORDER_MAP = {
   [FieldUpgradeStateEnum.NonSolvableConflict]: 0,
   [FieldUpgradeStateEnum.SolvableConflict]: 1,
   [FieldUpgradeStateEnum.SameUpdate]: 2,
-  [FieldUpgradeStateEnum.NoConflict]: 2,
-  [FieldUpgradeStateEnum.Accepted]: 3,
-  [FieldUpgradeStateEnum.NoUpdate]: 3,
-};
+  [FieldUpgradeStateEnum.NoConflict]: 3,
+  [FieldUpgradeStateEnum.Accepted]: 4,
+  [FieldUpgradeStateEnum.NoUpdate]: 5,
+} as const;
 
 function extractSortedFieldNames(
   fieldsUpgradeState: FieldsUpgradeState
