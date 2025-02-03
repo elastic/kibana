@@ -269,6 +269,16 @@ describe('TrainedModelsService', () => {
         },
       }
     );
+
+    expect(mockDisplaySuccessToast).toHaveBeenCalledWith({
+      title: i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
+        defaultMessage: 'Deployment updated',
+      }),
+      text: i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccessText', {
+        defaultMessage: '"{deploymentId}" has been updated successfully.',
+        values: { deploymentId: 'my-deployment-id' },
+      }),
+    });
   });
 
   it('handles updateModelDeployment error', async () => {
