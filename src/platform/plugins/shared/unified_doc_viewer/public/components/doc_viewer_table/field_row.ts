@@ -17,7 +17,7 @@ import {
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
-import { getOrBackfillDataViewField } from '@kbn/data-view-utils';
+import { getDataViewFieldOrBackfillWithColumnMeta } from '@kbn/data-view-utils';
 
 export class FieldRow {
   readonly name: string;
@@ -63,10 +63,10 @@ export class FieldRow {
 
     this.name = name;
     this.flattenedValue = flattenedValue;
-    this.dataViewField = getOrBackfillDataViewField({
+    this.dataViewField = getDataViewFieldOrBackfillWithColumnMeta({
       dataView,
       fieldName: name,
-      fieldMeta: columnsMeta?.[name],
+      columnMeta: columnsMeta?.[name],
     });
     this.isPinned = isPinned;
     this.columnsMeta = columnsMeta;

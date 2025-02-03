@@ -9,6 +9,6 @@
 
 export * from './src/constants';
 export { convertDatatableColumnToDataViewFieldSpec } from './src/utils/convert_to_data_view_field_spec';
-export { getOrBackfillDataViewField } from './src/utils/get_or_backfill_data_view_field';
+export { getDataViewFieldOrBackfillWithColumnMeta } from './src/utils/get_data_view_field_or_backfill';
 export { createRegExpPatternFrom } from './src/utils/create_regexp_pattern_from';
 export { testPatternAgainstAllowedList } from './src/utils/test_pattern_against_allowed_list';

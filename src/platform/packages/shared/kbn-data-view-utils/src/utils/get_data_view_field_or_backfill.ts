@@ -11,14 +11,14 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_view_field_spec';
 
-export const getOrBackfillDataViewField = ({
+export const getDataViewFieldOrBackfillWithColumnMeta = ({
   dataView,
   fieldName,
-  fieldMeta,
+  columnMeta,
 }: {
   dataView: DataView;
   fieldName: string;
-  fieldMeta?: DatatableColumnMeta;
+  columnMeta?: DatatableColumnMeta; // based on ES|QL query
 }) => {
   const dataViewField = dataView.fields.getByName(fieldName);
 
@@ -26,14 +26,14 @@ export const getOrBackfillDataViewField = ({
     return dataViewField;
   }
 
-  // based on ES|QL query
-  if (fieldMeta) {
+  if (columnMeta) {
     // console.log('backfilling', fieldName, fieldMeta);
+    // this will modify the data view instance and will allow to access the same backfilled field in other parts of Discover
     dataView.fields.add(
       convertDatatableColumnToDataViewFieldSpec({
         name: fieldName,
         id: fieldName,
-        meta: fieldMeta,
+        meta: columnMeta,
       })
     );
   }

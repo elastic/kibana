@@ -16,7 +16,7 @@ import {
   EuiListGroupItemProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getOrBackfillDataViewField } from '@kbn/data-view-utils';
+import { getDataViewFieldOrBackfillWithColumnMeta } from '@kbn/data-view-utils';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -142,10 +142,10 @@ function buildEuiGridColumn({
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
 }) {
-  const dataViewField = getOrBackfillDataViewField({
+  const dataViewField = getDataViewFieldOrBackfillWithColumnMeta({
     dataView,
     fieldName: columnName,
-    fieldMeta: columnsMeta?.[columnName],
+    columnMeta: columnsMeta?.[columnName],
   });
   const editFieldButton =
     editField &&
