@@ -19,6 +19,11 @@ export interface UseCreateAdhocDataViewReturnValue {
   createAdhocDataView: (missingPatterns: string[]) => Promise<DataView | null>;
 }
 
+const ADHOC_ID_PREFIX = 'adhoc_sourcerer_' as const;
+
+export const isAdhocDataView = (dataViewId: string | null) =>
+  dataViewId?.startsWith(ADHOC_ID_PREFIX) ?? false;
+
 export const useCreateAdhocDataView = (
   onResolveErrorManually: () => void
 ): UseCreateAdhocDataViewReturnValue => {
@@ -33,7 +38,7 @@ export const useCreateAdhocDataView = (
         const validatedPatterns = ensurePatternFormat(combinedPatterns);
         const patternsString = validatedPatterns.join(',');
         const adHocDataView = await dataViews.create({
-          id: `adhoc_sourcerer_${patternsString}`,
+          id: `${ADHOC_ID_PREFIX}${patternsString}`,
           title: patternsString,
         });
 

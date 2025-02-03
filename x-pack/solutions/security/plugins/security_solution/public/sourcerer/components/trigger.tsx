@@ -50,6 +50,13 @@ export const TriggerComponent: FC<Props> = ({
             {i18n.ALERTS_BADGE_TITLE}
           </StyledBadge>
         );
+      case 'adhoc': {
+        return (
+          <StyledBadge data-test-subj="sourcerer-alerts-badge">
+            {i18n.COMPAT_BADGE_TITLE}
+          </StyledBadge>
+        );
+      }
       case 'deprecated':
       case 'missingPatterns':
       case '':

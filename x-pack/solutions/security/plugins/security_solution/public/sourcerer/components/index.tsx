@@ -33,6 +33,7 @@ import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 import { useDataViewFallback } from './use_data_view_fallback';
+import { isAdhocDataView } from './use_create_adhoc_data_view';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -294,10 +295,26 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     resetDataSources();
   }, [resetDataSources]);
 
+  const handleApplyFallbackDataView = useCallback(
+    (newSelectedDataViewId: string, patterns: string[], shouldValidate?: boolean) => {
+      dispatchChangeDataView(newSelectedDataViewId, patterns, false);
+      setDataViewId(newSelectedDataViewId);
+    },
+    [dispatchChangeDataView]
+  );
+
+  const modificationStatus = useMemo(() => {
+    if (isAdhocDataView(dataViewId)) {
+      return 'adhoc';
+    }
+
+    return isModified;
+  }, [dataViewId, isModified]);
+
   // NOTE: this hook will enable the fallback data view (adhoc),
   // depending on the state of this component (see "enableFallback" below)
   useDataViewFallback({
-    onApplyFallbackDataView: dispatchChangeDataView,
+    onApplyFallbackDataView: handleApplyFallbackDataView,
     enableFallback:
       // NOTE: there are cases where sourcerer does not know the dataViewId to display and only knows required patterns.
       // In that case, we enable the fallback dataview creation that will try to create adhoc data view based on the patterns & will select it.
@@ -325,7 +342,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       showSourcerer={showSourcerer}
       activePatterns={activePatterns}
       isTriggerDisabled={false}
-      isModified={isModified}
+      isModified={modificationStatus}
       isOnlyDetectionAlerts={isOnlyDetectionAlerts}
       isPopoverOpen={isPopoverOpen}
       isTimelineSourcerer={isTimelineSourcerer}

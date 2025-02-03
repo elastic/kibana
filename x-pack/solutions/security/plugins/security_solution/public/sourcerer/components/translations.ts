@@ -96,10 +96,10 @@ export const ALERTS_BADGE_TITLE = i18n.translate(
   }
 );
 
-export const DEPRECATED_BADGE_TITLE = i18n.translate(
-  'xpack.securitySolution.indexPatterns.updateAvailableBadgeTitle',
+export const COMPAT_BADGE_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.compatBadgeTitle',
   {
-    defaultMessage: 'Action required',
+    defaultMessage: 'Compat mode',
   }
 );
 
