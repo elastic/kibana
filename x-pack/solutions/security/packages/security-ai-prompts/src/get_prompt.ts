@@ -129,15 +129,15 @@ export const getPrompt = async ({
   return prompt;
 };
 
-const resolveProviderAndModel = async ({
+export const resolveProviderAndModel = async ({
   providedProvider,
   providedModel,
   connectorId,
   actionsClient,
   providedConnector,
 }: {
-  providedProvider: string | undefined;
-  providedModel: string | undefined;
+  providedProvider?: string;
+  providedModel?: string;
   connectorId: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
   providedConnector?: Connector;
