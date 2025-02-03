@@ -265,7 +265,6 @@ describe('helpers', () => {
       expect(result).toBe(expectedHash);
     });
   });
-
   describe('generateTrustedAppsFilter', () => {
     it('should generate a filter for process.executable.caseless entries', () => {
       const insight = getDefaultInsight({
@@ -286,7 +285,6 @@ describe('helpers', () => {
       } as Partial<SecurityWorkflowInsight>);
 
       const filter = generateTrustedAppsFilter(insight);
-
       expect(filter).toBe('exception-list-agnostic.attributes.entries.value:"example-value"');
     });
 
@@ -309,7 +307,6 @@ describe('helpers', () => {
       } as Partial<SecurityWorkflowInsight>);
 
       const filter = generateTrustedAppsFilter(insight);
-
       expect(filter).toContain(
         'exception-list-agnostic.attributes.entries.entries.value:(*Example,*Inc.*)'
       );
@@ -340,13 +337,12 @@ describe('helpers', () => {
       } as Partial<SecurityWorkflowInsight>);
 
       const filter = generateTrustedAppsFilter(insight);
-
       expect(filter).toContain(
         'exception-list-agnostic.attributes.entries.entries.value:(*Example,*\\(Inc.\\)*http\\://example.com*[example]*) AND exception-list-agnostic.attributes.entries.value:"example-value"'
       );
     });
 
-    it('should return empty string if no valid entries are present', () => {
+    it('should return undefined if no valid entries are present', () => {
       const insight = getDefaultInsight({
         remediation: {
           exception_list_items: [
@@ -365,26 +361,10 @@ describe('helpers', () => {
       } as Partial<SecurityWorkflowInsight>);
 
       const filter = generateTrustedAppsFilter(insight);
-
-      expect(filter).toBe('');
-    });
-  });
-  describe('checkIfRemediationExists', () => {
-    it('should return false for non-incompatible_antivirus types', async () => {
-      const insight = getDefaultInsight({
-        type: 'other-type' as DefendInsightType,
-      });
-
-      const result = await checkIfRemediationExists({
-        insight,
-        exceptionListsClient: jest.fn() as unknown as ExceptionListClient,
-      });
-
-      expect(result).toBe(false);
+      expect(filter).toBe(undefined);
     });
 
-    it('should call exceptionListsClient with the correct filter', async () => {
-      const findExceptionListItemMock = jest.fn().mockResolvedValue({ total: 1 });
+    it('should prepend policy filter when packagePolicyId is provided with valid entries', () => {
       const insight = getDefaultInsight({
         remediation: {
           exception_list_items: [
@@ -402,23 +382,155 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
+      const packagePolicyId = 'abc123';
+      const filter = generateTrustedAppsFilter(insight, packagePolicyId);
+
+      expect(filter).toBe(
+        '(exception-list-agnostic.attributes.tags:"policy:abc123" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.value:"example-value"'
+      );
+    });
+
+    it('should return undefined string if packagePolicyId is provided but no valid entries exist', () => {
+      const insight = getDefaultInsight({
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'unknown-field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'example-value',
+                },
+              ],
+            },
+          ],
+        },
+      } as Partial<SecurityWorkflowInsight>);
+
+      const packagePolicyId = 'def456';
+      const filter = generateTrustedAppsFilter(insight, packagePolicyId);
+
+      // Since there are no valid entries, the policy filter should not be applied on its own.
+      expect(filter).toBe(undefined);
+    });
+  });
+
+  describe('checkIfRemediationExists', () => {
+    it('should return false for non-incompatible_antivirus types', async () => {
+      const insight = getDefaultInsight({
+        type: 'other-type' as DefendInsightType,
+      });
+
+      // For non-incompatible_antivirus types, getHostMetadata should not be called.
+      const endpointMetadataClientMock = {
+        getHostMetadata: jest.fn(),
+      };
+      const exceptionListsClientMock = {
+        findExceptionListItem: jest.fn(),
+      };
+
+      const result = await checkIfRemediationExists({
+        insight,
+        exceptionListsClient: exceptionListsClientMock as unknown as ExceptionListClient,
+        endpointMetadataClient: endpointMetadataClientMock as unknown as EndpointMetadataService,
+      });
+
+      expect(result).toBe(false);
+      expect(endpointMetadataClientMock.getHostMetadata).not.toHaveBeenCalled();
+    });
+
+    it('should call exceptionListsClient with the correct filter when valid entries exist', async () => {
+      const findExceptionListItemMock = jest.fn().mockResolvedValue({ total: 1 });
+      const endpointMetadataClientMock = {
+        getHostMetadata: jest
+          .fn()
+          .mockResolvedValue({ Endpoint: { policy: { applied: { id: 'abc123' } } } }),
+      };
+
+      const insight = getDefaultInsight({
+        type: DefendInsightType.Enum.incompatible_antivirus,
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'process.executable.caseless',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'example-value',
+                },
+              ],
+            },
+          ],
+        },
+        target: { ids: ['host-id'] },
+      } as Partial<SecurityWorkflowInsight>);
+
       const result = await checkIfRemediationExists({
         insight,
         exceptionListsClient: {
           findExceptionListItem: findExceptionListItemMock,
         } as unknown as ExceptionListClient,
+        endpointMetadataClient: endpointMetadataClientMock as unknown as EndpointMetadataService,
       });
 
+      // Ensure the metadata was fetched using the host id
+      expect(endpointMetadataClientMock.getHostMetadata).toHaveBeenCalledWith('host-id');
+
+      // Expected filter now includes the policy clause since valid entries exist.
       expect(findExceptionListItemMock).toHaveBeenCalledWith({
         listId: 'endpoint_trusted_apps',
         page: 1,
         perPage: 1,
         namespaceType: 'agnostic',
-        filter: expect.any(String),
+        filter:
+          '(exception-list-agnostic.attributes.tags:"policy:abc123" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.value:"example-value"',
         sortField: 'created_at',
         sortOrder: 'desc',
       });
       expect(result).toBe(true);
+    });
+
+    it('should return false if no valid entries exist even when a policy id is provided', async () => {
+      const endpointMetadataClientMock = {
+        getHostMetadata: jest
+          .fn()
+          .mockResolvedValue({ Endpoint: { policy: { applied: { id: 'abc123' } } } }),
+      };
+      const exceptionListsClientMock = {
+        findExceptionListItem: jest.fn(),
+      };
+
+      // Here the entry field is not valid, so generateTrustedAppsFilter returns an empty string.
+      const insight = getDefaultInsight({
+        type: DefendInsightType.Enum.incompatible_antivirus,
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'unknown-field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'example-value',
+                },
+              ],
+            },
+          ],
+        },
+        target: { ids: ['host-id'] },
+      } as Partial<SecurityWorkflowInsight>);
+
+      const result = await checkIfRemediationExists({
+        insight,
+        exceptionListsClient: exceptionListsClientMock as unknown as ExceptionListClient,
+        endpointMetadataClient: endpointMetadataClientMock as unknown as EndpointMetadataService,
+      });
+
+      // No valid remediation filter was created, so the exception list client should not be called.
+      expect(result).toBe(false);
+      expect(exceptionListsClientMock.findExceptionListItem).not.toHaveBeenCalled();
     });
   });
 });

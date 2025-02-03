@@ -163,45 +163,65 @@ export function getUniqueInsights(insights: SecurityWorkflowInsight[]): Security
   return Object.values(uniqueInsights);
 }
 
-export const generateTrustedAppsFilter = (insight: SecurityWorkflowInsight): string | undefined => {
-  return insight.remediation.exception_list_items
-    ?.flatMap((item) =>
-      item.entries.map((entry) => {
-        if (!('value' in entry)) return '';
+export const generateTrustedAppsFilter = (
+  insight: SecurityWorkflowInsight,
+  packagePolicyId?: string
+): string | undefined => {
+  const filterParts =
+    insight.remediation.exception_list_items
+      ?.flatMap((item) =>
+        item.entries.map((entry) => {
+          if (!('value' in entry)) return '';
 
-        if (entry.field === 'process.executable.caseless') {
-          return `exception-list-agnostic.attributes.entries.value:"${entry.value}"`;
-        }
+          if (entry.field === 'process.executable.caseless') {
+            return `exception-list-agnostic.attributes.entries.value:"${entry.value}"`;
+          }
 
-        if (
-          entry.field === 'process.code_signature' ||
-          (entry.field === 'process.Ext.code_signature' && typeof entry.value === 'string')
-        ) {
-          const sanitizedValue = (entry.value as string)
-            .replace(/[)(<>}{":\\]/gm, '\\$&')
-            .replace(/\s/gm, '*');
-          return `exception-list-agnostic.attributes.entries.entries.value:(*${sanitizedValue}*)`;
-        }
+          if (
+            entry.field === 'process.code_signature' ||
+            (entry.field === 'process.Ext.code_signature' && typeof entry.value === 'string')
+          ) {
+            const sanitizedValue = (entry.value as string)
+              .replace(/[)(<>}{":\\]/gm, '\\$&')
+              .replace(/\s/gm, '*');
+            return `exception-list-agnostic.attributes.entries.entries.value:(*${sanitizedValue}*)`;
+          }
 
-        return '';
-      })
-    )
-    .filter(Boolean)
-    .join(' AND ');
+          return '';
+        })
+      )
+      .filter(Boolean) || [];
+
+  // Only create a filter if there are valid entries
+  if (filterParts.length) {
+    let combinedFilter = filterParts.join(' AND ');
+    if (packagePolicyId) {
+      const policyFilter = `(exception-list-agnostic.attributes.tags:"policy:${packagePolicyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`;
+      combinedFilter = `${policyFilter} AND ${combinedFilter}`;
+    }
+    return combinedFilter;
+  }
+
+  return undefined;
 };
 
 export const checkIfRemediationExists = async ({
   insight,
   exceptionListsClient,
+  endpointMetadataClient,
 }: {
   insight: SecurityWorkflowInsight;
   exceptionListsClient: ExceptionListClient;
+  endpointMetadataClient: EndpointMetadataService;
 }): Promise<boolean> => {
   if (insight.type !== DefendInsightType.Enum.incompatible_antivirus) {
     return false;
   }
 
-  const filter = generateTrustedAppsFilter(insight);
+  // One endpoint only for incompatible antivirus insights
+  const hostMetadata = await endpointMetadataClient.getHostMetadata(insight.target.ids[0]);
+
+  const filter = generateTrustedAppsFilter(insight, hostMetadata.Endpoint.policy.applied.id);
 
   if (!filter) return false;
 
