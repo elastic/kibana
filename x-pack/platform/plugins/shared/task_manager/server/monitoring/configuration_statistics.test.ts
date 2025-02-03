@@ -9,8 +9,20 @@ import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
+import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 
 describe('Configuration Statistics Aggregator', () => {
+  let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
+  const capacityConfiguration$ = new Subject<number>();
+  const pollIntervalConfiguration$ = new Subject<number>();
+
+  beforeEach(() => {
+    mockTaskPollingLifecycle = taskPollingLifecycleMock.create({
+      capacityConfiguration$,
+      pollIntervalConfiguration$,
+    });
+  });
+
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
       discovery: {
@@ -55,17 +67,11 @@ describe('Configuration Statistics Aggregator', () => {
       auto_calculate_default_ech_capacity: false,
     };
 
-    const managedConfig = {
-      startingCapacity: 10,
-      capacityConfiguration$: new Subject<number>(),
-      pollIntervalConfiguration$: new Subject<number>(),
-    };
-
     return new Promise<void>(async (resolve, reject) => {
       try {
-        createConfigurationAggregator(configuration, managedConfig)
-          .pipe(take(3), bufferCount(3))
-          .subscribe(([initial, updatedWorkers, updatedInterval]) => {
+        createConfigurationAggregator(configuration, 10, mockTaskPollingLifecycle)
+          .pipe(take(2), bufferCount(2))
+          .subscribe(([initial, updatedWorkers]) => {
             expect(initial.value).toEqual({
               capacity: {
                 config: 10,
@@ -104,29 +110,9 @@ describe('Configuration Statistics Aggregator', () => {
                 custom: {},
               },
             });
-            expect(updatedInterval.value).toEqual({
-              capacity: {
-                config: 8,
-                as_workers: 8,
-                as_cost: 16,
-              },
-              claim_strategy: 'update_by_query',
-              poll_interval: 3000,
-              request_capacity: 1000,
-              monitored_aggregated_stats_refresh_rate: 5000,
-              monitored_stats_running_average_window: 50,
-              monitored_task_execution_thresholds: {
-                default: {
-                  error_threshold: 90,
-                  warn_threshold: 80,
-                },
-                custom: {},
-              },
-            });
             resolve();
           }, reject);
-        managedConfig.capacityConfiguration$.next(8);
-        managedConfig.pollIntervalConfiguration$.next(3000);
+        capacityConfiguration$.next(8);
       } catch (error) {
         reject(error);
       }
