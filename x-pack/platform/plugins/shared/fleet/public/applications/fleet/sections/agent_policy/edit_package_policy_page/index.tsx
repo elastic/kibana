@@ -25,8 +25,8 @@ import {
   useStartServices,
   useConfig,
   useUIExtension,
-  sendGetAgentStatus,
   useAuthz,
+  sendBulkGetAgentPoliciesForRq,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -159,24 +159,74 @@ export const EditPackagePolicyForm = memo<{
 
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
+  const agentPoliciesToAdd = useMemo(
+    () => [
+      ...agentPolicies
+        .filter(
+          (policy) =>
+            !existingAgentPolicies.find((existingPolicy) => existingPolicy.id === policy.id)
+        )
+        .map((policy) => policy.name),
+      ...(newAgentPolicyName ? [newAgentPolicyName] : []),
+    ],
+    [agentPolicies, existingAgentPolicies, newAgentPolicyName]
+  );
+  const agentPoliciesToRemove = useMemo(
+    () =>
+      existingAgentPolicies.filter(
+        (existingPolicy) => !agentPolicies.find((policy) => policy.id === existingPolicy.id)
+      ),
+    [agentPolicies, existingAgentPolicies]
+  );
+
+  const agentPoliciesToRemoveIds = useMemo(
+    () => agentPoliciesToRemove.map((policy) => policy.id),
+    [agentPoliciesToRemove]
+  );
+
+  const agentPoliciesToRemoveName = useMemo(
+    () => agentPoliciesToRemove.map((policy) => policy.name),
+    [agentPoliciesToRemove]
+  );
+
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
+  const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
   useEffect(() => {
     const getAgentCount = async () => {
-      let count = 0;
-      for (const id of packagePolicy.policy_ids) {
-        const { data } = await sendGetAgentStatus({ policyId: id });
-        if (data?.results.active) {
-          count += data.results.active;
+      const policiesToFetchIds = [...packagePolicy.policy_ids, ...agentPoliciesToRemoveIds];
+      try {
+        const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPoliciesForRq(
+          policiesToFetchIds,
+          {
+            ignoreMissing: true,
+          }
+        );
+
+        let count = 0;
+        let impactedCount = 0;
+        for (const item of bulkGetAgentPoliciesResponse.items) {
+          if (packagePolicy.policy_ids.includes(item.id)) {
+            count += item.agents ?? 0;
+          }
+
+          impactedCount += item.agents ?? 0;
         }
+        setAgentCount(count);
+        setImpactedAgentCount(impactedCount);
+      } catch (err) {
+        setAgentCount(0);
+        setImpactedAgentCount(0);
       }
-      setAgentCount(count);
     };
 
-    if (isFleetEnabled && packagePolicy.policy_ids.length > 0) {
+    if (
+      isFleetEnabled &&
+      (packagePolicy.policy_ids.length > 0 || agentPoliciesToRemoveIds.length > 0)
+    ) {
       getAgentCount();
     }
-  }, [packagePolicy.policy_ids, isFleetEnabled]);
+  }, [packagePolicy.policy_ids, agentPoliciesToRemoveIds, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -224,28 +274,6 @@ export const EditPackagePolicyForm = memo<{
       setAgentPolicies(existingAgentPolicies);
     }
   }, [existingAgentPolicies, isFirstLoad]);
-
-  const agentPoliciesToAdd = useMemo(
-    () => [
-      ...agentPolicies
-        .filter(
-          (policy) =>
-            !existingAgentPolicies.find((existingPolicy) => existingPolicy.id === policy.id)
-        )
-        .map((policy) => policy.name),
-      ...(newAgentPolicyName ? [newAgentPolicyName] : []),
-    ],
-    [agentPolicies, existingAgentPolicies, newAgentPolicyName]
-  );
-  const agentPoliciesToRemove = useMemo(
-    () =>
-      existingAgentPolicies
-        .filter(
-          (existingPolicy) => !agentPolicies.find((policy) => policy.id === existingPolicy.id)
-        )
-        .map((policy) => policy.name),
-    [agentPolicies, existingAgentPolicies]
-  );
 
   const onSubmit = async () => {
     if (formState === 'VALID' && hasErrors) {
@@ -518,12 +546,12 @@ export const EditPackagePolicyForm = memo<{
             />
             {formState === 'CONFIRM' && (
               <ConfirmDeployAgentPolicyModal
-                agentCount={agentCount}
+                agentCount={impactedAgentCount}
                 agentPolicies={agentPolicies}
                 onConfirm={onSubmit}
                 onCancel={() => setFormState('VALID')}
                 agentPoliciesToAdd={agentPoliciesToAdd}
-                agentPoliciesToRemove={agentPoliciesToRemove}
+                agentPoliciesToRemove={agentPoliciesToRemoveName}
               />
             )}
             {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
