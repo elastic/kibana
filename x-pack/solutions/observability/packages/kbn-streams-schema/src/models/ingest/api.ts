@@ -19,8 +19,10 @@ import {
   WiredIngest,
   WiredStreamDefinition,
   unwiredIngestSchema,
+  unwiredStreamDefinitionSchema,
   unwiredStreamDefinitionSchemaBase,
   wiredIngestSchema,
+  wiredStreamDefinitionSchema,
   wiredStreamDefinitionSchemaBase,
 } from './base';
 import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
@@ -73,14 +75,15 @@ const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
  * Stream get response
  */
 interface WiredStreamGetResponse extends StreamGetResponseBase {
-  stream: Omit<WiredStreamDefinition, 'name'>;
+  stream: WiredStreamDefinition;
   inherited_fields: InheritedFieldDefinition;
   effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
 }
 
 interface UnwiredStreamGetResponse extends StreamGetResponseBase {
-  stream: Omit<UnwiredStreamDefinition, 'name'>;
+  stream: UnwiredStreamDefinition;
   elasticsearch_assets: ElasticsearchAsset[];
+  data_stream_exists: boolean;
   effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
 
@@ -122,7 +125,7 @@ const ingestStreamUpsertRequestSchema: z.Schema<IngestStreamUpsertRequest> = z.u
 const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.intersection(
   streamGetResponseSchemaBase,
   z.object({
-    stream: wiredStreamDefinitionSchemaBase,
+    stream: wiredStreamDefinitionSchema,
     inherited_fields: inheritedFieldDefinitionSchema,
     effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
   })
@@ -131,8 +134,9 @@ const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.interse
 const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.intersection(
   streamGetResponseSchemaBase,
   z.object({
-    stream: unwiredStreamDefinitionSchemaBase,
+    stream: unwiredStreamDefinitionSchema,
     elasticsearch_assets: z.array(elasticsearchAssetSchema),
+    data_stream_exists: z.boolean(),
     effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })
 );
@@ -149,7 +153,7 @@ const isWiredStreamGetResponse = createIsNarrowSchema(
 
 const isUnWiredStreamGetResponse = createIsNarrowSchema(
   ingestStreamGetResponseSchema,
-  wiredStreamGetResponseSchema
+  unwiredStreamGetResponseSchema
 );
 
 const asWiredStreamGetResponse = createAsSchemaOrThrow(

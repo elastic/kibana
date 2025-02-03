@@ -13,9 +13,10 @@ import { evaluate } from 'langsmith/evaluation';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { getPrompt } from '@kbn/security-ai-prompts';
 import {
   API_VERSIONS,
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
@@ -26,11 +27,12 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import {
-  createOpenAIFunctionsAgent,
+  createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
@@ -38,7 +40,7 @@ import {
   formatPrompt,
   formatPromptStructured,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
-import { getPrompt, promptDictionary } from '../../lib/prompt';
+import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -292,8 +294,9 @@ export const postEvaluateRoute = (
                 assistantContext.getRegisteredFeatures(
                   DEFAULT_PLUGIN_NAME
                 ).contentReferencesEnabled;
-              const contentReferencesStore =
-                contentReferencesEnabled && contentReferencesStoreFactory();
+              const contentReferencesStore = contentReferencesEnabled
+                ? newContentReferencesStore()
+                : undefined;
 
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
@@ -316,11 +319,36 @@ export const postEvaluateRoute = (
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
               };
 
-              const tools: StructuredTool[] = assistantTools.flatMap(
-                (tool) => tool.getTool(assistantToolParams) ?? []
-              );
+              const tools: StructuredTool[] = (
+                await Promise.all(
+                  assistantTools.map(async (tool) => {
+                    let description: string | undefined;
+                    try {
+                      description = await getPrompt({
+                        actionsClient,
+                        connector,
+                        connectorId: connector.id,
+                        model: getModelOrOss(llmType, isOssModel),
+                        localPrompts: localToolPrompts,
+                        promptId: tool.name,
+                        promptGroupId: toolsGroupId,
+                        provider: llmType,
+                        savedObjectsClient,
+                      });
+                    } catch (e) {
+                      logger.error(`Failed to get prompt for tool: ${tool.name}`);
+                    }
+                    return tool.getTool({
+                      ...assistantToolParams,
+                      llm: createLlmInstance(),
+                      isOssModel,
+                      description,
+                    });
+                  })
+                )
+              ).filter((e) => e != null) as StructuredTool[];
 
-              const defaultSystemPrompt = await getPrompt({
+              const defaultSystemPrompt = await localGetPrompt({
                 actionsClient,
                 connector,
                 connectorId: connector.id,
@@ -331,26 +359,27 @@ export const postEvaluateRoute = (
                 savedObjectsClient,
               });
 
-              const agentRunnable = isOpenAI
-                ? await createOpenAIFunctionsAgent({
-                    llm,
-                    tools,
-                    prompt: formatPrompt(defaultSystemPrompt),
-                    streamRunnable: false,
-                  })
-                : llmType && ['bedrock', 'gemini'].includes(llmType)
-                ? createToolCallingAgent({
-                    llm,
-                    tools,
-                    prompt: formatPrompt(defaultSystemPrompt),
-                    streamRunnable: false,
-                  })
-                : await createStructuredChatAgent({
-                    llm,
-                    tools,
-                    prompt: formatPromptStructured(defaultSystemPrompt),
-                    streamRunnable: false,
-                  });
+              const agentRunnable =
+                isOpenAI || llmType === 'inference'
+                  ? await createOpenAIToolsAgent({
+                      llm,
+                      tools,
+                      prompt: formatPrompt(defaultSystemPrompt),
+                      streamRunnable: false,
+                    })
+                  : llmType && ['bedrock', 'gemini'].includes(llmType)
+                  ? createToolCallingAgent({
+                      llm,
+                      tools,
+                      prompt: formatPrompt(defaultSystemPrompt),
+                      streamRunnable: false,
+                    })
+                  : await createStructuredChatAgent({
+                      llm,
+                      tools,
+                      prompt: formatPromptStructured(defaultSystemPrompt),
+                      streamRunnable: false,
+                    });
 
               return {
                 connectorId: connector.id,
