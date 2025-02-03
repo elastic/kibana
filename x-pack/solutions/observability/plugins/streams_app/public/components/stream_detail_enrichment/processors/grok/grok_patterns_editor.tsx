@@ -61,7 +61,7 @@ export const GrokPatternsEditor = () => {
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditorLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorLabel',
         { defaultMessage: 'Grok patterns editor' }
       )}
     >
@@ -75,7 +75,7 @@ export const GrokPatternsEditor = () => {
               onRemove={getRemovePatternHandler(idx)}
               inputProps={register(`patterns.${idx}.value`, {
                 required: i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditorRequiredError',
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorRequiredError',
                   { defaultMessage: 'A pattern is required.' }
                 ),
               })}
@@ -88,7 +88,7 @@ export const GrokPatternsEditor = () => {
           iconType="plusInCircle"
         >
           {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.addPattern',
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
             { defaultMessage: 'Add pattern' }
           )}
         </EuiButtonEmpty>
@@ -135,7 +135,7 @@ const DraggablePatternInput = ({
               paddingSize="xs"
               {...provided.dragHandleProps}
               aria-label={i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.dragHandleLabel',
+                'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.dragHandleLabel',
                 { defaultMessage: 'Drag Handle' }
               )}
             >
@@ -155,7 +155,7 @@ const DraggablePatternInput = ({
                 color="danger"
                 onClick={() => onRemove(idx)}
                 aria-label={i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.removePattern',
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.removePattern',
                   { defaultMessage: 'Remove grok pattern' }
                 )}
               />

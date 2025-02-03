@@ -106,21 +106,21 @@ const docsFilterOptions = {
   outcome_filter_all: {
     id: 'outcome_filter_all',
     label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomeControls.all',
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.all',
       { defaultMessage: 'All samples' }
     ),
   },
   outcome_filter_matched: {
     id: 'outcome_filter_matched',
     label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomeControls.matched',
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.matched',
       { defaultMessage: 'Matched' }
     ),
   },
   outcome_filter_unmatched: {
     id: 'outcome_filter_unmatched',
     label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomeControls.unmatched',
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.unmatched',
       { defaultMessage: 'Unmatched' }
     ),
   },
@@ -173,7 +173,7 @@ const OutcomeControls = ({
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <EuiFilterGroup
         aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomeControlsAriaLabel',
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
           { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
         )}
       >
@@ -231,10 +231,10 @@ const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) =
         body={
           <p>
             {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.noDataBody',
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
               {
                 defaultMessage:
-                  'There are no samples document to test the processors. Try updating the time range or ingesting more data.',
+                  'There are no sample documents to test the processors. Try updating the time range or ingesting more data.',
               }
             )}
           </p>
