@@ -66,7 +66,7 @@ describe('getAnonymizedAlerts', () => {
       size,
     });
 
-    expect(result).toEqual([]);
+    expect(result.anonymizedAlerts).toEqual([]);
   });
 
   it('should return an empty array when size is not provided', async () => {
@@ -75,7 +75,7 @@ describe('getAnonymizedAlerts', () => {
       esClient: mockEsClient,
     });
 
-    expect(result).toEqual([]);
+    expect(result.anonymizedAlerts).toEqual([]);
   });
 
   it('should return an empty array when size is out of range', async () => {
@@ -87,7 +87,7 @@ describe('getAnonymizedAlerts', () => {
       size: outOfRange,
     });
 
-    expect(result).toEqual([]);
+    expect(result.anonymizedAlerts).toEqual([]);
   });
 
   it('calls getOpenAndAcknowledgedAlertsQuery with the provided anonymizationFields', async () => {
@@ -174,7 +174,7 @@ describe('getAnonymizedAlerts', () => {
       size,
     });
 
-    expect(result).toEqual([
+    expect(result.anonymizedAlerts).toEqual([
       '_id,b6e883c29b32571aaa667fa13e65bbb4f95172a2b84bdfb85d6f16c72b2d2560\nhost.name,replacement1',
       '_id,0215a6c5cc9499dd0290cd69a4947efb87d3ddd8b6385a766d122c2475be7367\nhost.name,replacement1',
       '_id,600eb9eca925f4c5b544b4e9d3cf95d83b7829f8f74c5bd746369cb4c2968b9a\nhost.name,replacement1',
