@@ -14,7 +14,7 @@ const CONTENT_REFERENCE_ID_ALPHABET =
 /**
  * Creates a new ContentReferencesStore used for storing references (also known as citations)
  */
-export const contentReferencesStoreFactory: () => ContentReferencesStore = () => {
+export const newContentReferencesStore: () => ContentReferencesStore = () => {
   const store = new Map<string, ContentReference>();
 
   const add: ContentReferencesStore['add'] = (creator) => {
