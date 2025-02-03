@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+
+import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
+import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../hooks/use_kibana';
+import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 import { DeleteSynonymsSetModal } from './delete_synonyms_set_modal';
 
 export const SynonymSets = () => {
+  const {
+    services: { application, http },
+  } = useKibana();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const { data: synonyms } = useFetchSynonymsSets({ from, size: pageSize });
-  const [synonymsSetToDelete, setSynonymsSetToDelete] = React.useState<string | null>(null);
+  const [synonymsSetToDelete, setSynonymsSetToDelete] = useState<string | null>(null);
 
   if (!synonyms) {
     return null;
   }
 
   const pagination = {
-    initialPageSize: 10,
+    initialPageSize: 25,
     pageSizeOptions: [10, 25, 50],
     ...synonyms._meta,
     pageSize,
@@ -37,7 +43,18 @@ export const SynonymSets = () => {
       name: i18n.translate('xpack.searchSynonyms.synonymsSetTable.nameColumn', {
         defaultMessage: 'Synonyms Set',
       }),
-      render: (name: string) => <div data-test-subj="synonyms-set-item-name">{name}</div>,
+      render: (name: string) => (
+        <div data-test-subj="synonyms-set-item-name">
+          <EuiLink
+            data-test-subj="searchSynonymsColumnsLink"
+            onClick={() =>
+              application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/sets/${name}`))
+            }
+          >
+            {name}
+          </EuiLink>
+        </div>
+      ),
     },
     {
       field: 'count',
@@ -78,7 +95,10 @@ export const SynonymSets = () => {
           icon: 'pencil',
           color: 'text',
           type: 'icon',
-          onClick: () => {},
+          onClick: (synonymsSet: SynonymsGetSynonymsSetsSynonymsSetItem) =>
+            application.navigateToUrl(
+              http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/sets/${synonymsSet.synonyms_set}`)
+            ),
         },
       ],
     },
