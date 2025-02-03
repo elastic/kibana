@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { createClient } from './create_client';
-export { createChatModel } from './create_chat_model';
-export type { InferenceClient, BoundInferenceClient } from './types';
+import { v4 } from 'uuid';
+
+export function generateFakeToolCallId() {
+  return v4().substr(0, 6);
+}
