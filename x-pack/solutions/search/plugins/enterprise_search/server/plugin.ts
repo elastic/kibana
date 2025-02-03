@@ -5,31 +5,17 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   Plugin,
   PluginInitializerContext,
   CoreSetup,
   Logger,
   SavedObjectsServiceStart,
-  IRouter,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
-import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
@@ -65,18 +51,11 @@ import {
 import { WS_TELEMETRY_NAME } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
-import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
-import {
-  EnterpriseSearchRequestHandler,
-  IEnterpriseSearchRequestHandler,
-} from './lib/enterprise_search_request_handler';
-
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
-import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
@@ -85,6 +64,7 @@ import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
 import { GlobalConfigService } from './services/global_config_service';
+import type { PluginsSetup, PluginsStart, RouteDependencies } from './types';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { getConnectorsSearchResultProvider } from './utils/connectors_search_result_provider';
@@ -92,35 +72,6 @@ import { getIndicesSearchResultProvider } from './utils/indices_search_result_pr
 import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
-
-interface PluginsSetup {
-  cloud: CloudSetup;
-  customIntegrations?: CustomIntegrationsPluginSetup;
-  features: FeaturesPluginSetup;
-  globalSearch: GlobalSearchPluginSetup;
-  guidedOnboarding?: GuidedOnboardingPluginSetup;
-  logsShared: LogsSharedPluginSetup;
-  ml?: MlPluginSetup;
-  licensing: LicensingPluginStart;
-  searchConnectors?: SearchConnectorsPluginSetup;
-  security: SecurityPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export interface PluginsStart {
-  data: DataPluginStart;
-  spaces?: SpacesPluginStart;
-}
-
-export interface RouteDependencies {
-  config: ConfigType;
-  enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
-  getSavedObjectsService?(): SavedObjectsServiceStart;
-  globalConfigService: GlobalConfigService;
-  log: Logger;
-  ml?: MlPluginSetup;
-  router: IRouter;
-}
 
 export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
   private readonly config: ConfigType;
@@ -175,11 +126,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
         http.staticAssets.getPluginAssetHref('images/crawler.svg')
       );
     }
-
-    /*
-     * Initialize config.ssl.certificateAuthorities file(s) - required for all API calls (+ access checks)
-     */
-    entSearchHttpAgent.initializeHttpAgent(config);
 
     /**
      * Register space/feature control
@@ -283,22 +229,20 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
      * Register routes
      */
     const router = http.createRouter();
-    const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
-    const dependencies = {
-      router,
+    const dependencies: RouteDependencies = {
       config,
+      getStartServices,
       globalConfigService: this.globalConfigService,
-      log,
-      enterpriseSearchRequestHandler,
-      ml,
       licensing,
+      log,
+      ml,
+      router,
     };
 
     registerConfigDataRoute(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
-    if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)
@@ -358,6 +302,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
      * Register a config for the search guide
      */
     if (config.hasWebCrawler) {
+      // TODO: Do we remove this guide with the removal of native crawler?
       guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
     if (config.hasConnectors) {

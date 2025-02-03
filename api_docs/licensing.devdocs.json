@@ -2209,6 +2209,10 @@
               "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
             },
             {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/data_streams/data_stream_reindex_service.ts"
+            },
+            {
               "plugin": "aiops",
               "path": "x-pack/platform/plugins/shared/aiops/server/plugin.ts"
             },

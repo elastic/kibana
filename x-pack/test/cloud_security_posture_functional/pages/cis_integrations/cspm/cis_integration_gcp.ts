@@ -7,17 +7,20 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { testSubjectIds } from '../../../constants/test_subject_ids';
 
-const CIS_GCP_OPTION_TEST_ID = 'cisGcpTestId';
-const GCP_ORGANIZATION_TEST_ID = 'gcpOrganizationAccountTestId';
-const GCP_SINGLE_ACCOUNT_TEST_ID = 'gcpSingleAccountTestId';
-const GCP_CLOUD_SHELL_TEST_ID = 'gcpGoogleCloudShellOptionTestId';
-const GCP_MANUAL_TEST_ID = 'gcpManualOptionTestId';
-const PRJ_ID_TEST_ID = 'project_id_test_id';
-const ORG_ID_TEST_ID = 'organization_id_test_id';
-const CREDENTIALS_TYPE_TEST_ID = 'credentials_type_test_id';
-const CREDENTIALS_FILE_TEST_ID = 'credentials_file_test_id';
-const CREDENTIALS_JSON_TEST_ID = 'textAreaInput-credentials-json';
+const {
+  CIS_GCP_OPTION_TEST_ID,
+  GCP_ORGANIZATION_TEST_ID,
+  GCP_SINGLE_ACCOUNT_TEST_ID,
+  GCP_CLOUD_SHELL_TEST_ID,
+  GCP_MANUAL_TEST_ID,
+  PRJ_ID_TEST_ID,
+  ORG_ID_TEST_ID,
+  CREDENTIALS_TYPE_TEST_ID,
+  CREDENTIALS_FILE_TEST_ID,
+  CREDENTIALS_JSON_TEST_ID,
+} = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {

@@ -56,15 +56,24 @@ export const exportRulesRoute = (
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
-        const rulesClient = await (await context.alerting).getRulesClient();
-        const exceptionsClient = (await context.lists)?.getExceptionListClient();
-        const actionsClient = (await context.actions)?.getActionsClient();
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'actions',
+          'lists',
+        ]);
 
-        const { getExporter, getClient } = (await context.core).savedObjects;
+        const rulesClient = await ctx.alerting.getRulesClient();
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
+        const actionsClient = ctx.actions.getActionsClient();
+        const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
+
+        const { getExporter, getClient } = ctx.core.savedObjects;
 
         const client = getClient({ includedHiddenTypes: ['action'] });
         const actionsExporter = getExporter(client);
-        const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
+        const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
 
         try {
           const exportSizeLimit = config.maxRuleImportExportSize;
@@ -76,7 +85,7 @@ export const exportRulesRoute = (
           } else {
             let rulesCount = 0;
 
-            if (prebuiltRulesCustomizationEnabled) {
+            if (isRulesCustomizationEnabled) {
               rulesCount = await getRulesCount({
                 rulesClient,
                 filter: '',
@@ -103,7 +112,7 @@ export const exportRulesRoute = (
                   actionsExporter,
                   request,
                   actionsClient,
-                  prebuiltRulesCustomizationEnabled
+                  isRulesCustomizationEnabled
                 )
               : await getExportAll(
                   rulesClient,
@@ -111,7 +120,7 @@ export const exportRulesRoute = (
                   actionsExporter,
                   request,
                   actionsClient,
-                  prebuiltRulesCustomizationEnabled
+                  isRulesCustomizationEnabled
                 );
 
           const responseBody = request.query.exclude_export_details
