@@ -34,14 +34,14 @@ describe('getSearchParams', () => {
     const searchParams = getSearchParamsFromRequest(
       {
         index: 'abc',
-        query: 123,
+        query: [{ query: '123', language: 'kql' }],
         track_total_hits: true,
       },
       { getConfig }
     );
     expect(searchParams.index).toBe('abc');
     expect(searchParams.track_total_hits).toBe(true);
-    expect(searchParams.query).toStrictEqual(123);
+    expect(searchParams.query).toStrictEqual([{ query: '123', language: 'kql' }]);
   });
 
   test('sets expand_wildcards=all if data view has allowHidden=true', () => {
@@ -57,7 +57,7 @@ describe('getSearchParams', () => {
     const searchParams = getSearchParamsFromRequest(
       {
         index,
-        query: 123,
+        query: [{ query: '123', language: 'kql' }],
         track_total_hits: true,
       },
       { getConfig }
@@ -78,7 +78,7 @@ describe('getSearchParams', () => {
     const searchParams = getSearchParamsFromRequest(
       {
         index,
-        query: 123,
+        query: [{ query: '123', language: 'kql' }],
         track_total_hits: true,
       },
       { getConfig }
