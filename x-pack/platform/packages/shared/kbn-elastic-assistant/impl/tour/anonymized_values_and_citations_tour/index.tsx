@@ -49,12 +49,8 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
       return;
     }
 
-    const containsContentReferences =
-      conversation.messages &&
-      conversation.messages.some((message) => message.metadata?.contentReferences != null);
-    const containsReplacements = !(
-      conversation.replacements == null || isEmpty(conversation.replacements)
-    );
+    const containsContentReferences = conversation.messages.some((message) => !isEmpty(message.metadata?.contentReferences));
+    const containsReplacements = !isEmpty(conversation.replacements)
 
     if (containsContentReferences || containsReplacements) {
       const timer = setTimeout(() => {
@@ -65,12 +61,12 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
         clearTimeout(timer);
       };
     }
-  }, [conversation, tourCompleted, setShowTour, showTour]);
+  }, [conversation, tourCompleted, showTour]);
 
   const finishTour = useCallback(() => {
     setTourCompleted(true);
     setShowTour(false);
-  }, [setTourCompleted, setShowTour]);
+  }, []);
 
   return (<EuiTourStep
     data-test-subj="anonymizedValuesAndCitationsTourStep"
