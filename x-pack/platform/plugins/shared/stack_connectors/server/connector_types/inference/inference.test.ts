@@ -237,6 +237,7 @@ describe('InferenceConnector', () => {
       });
       streamMock.complete();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockEsClient.inference.inference.mockResolvedValue(streamMock.transform as any);
     };
 

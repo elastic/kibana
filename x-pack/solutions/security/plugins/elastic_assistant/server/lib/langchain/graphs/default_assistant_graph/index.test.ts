@@ -18,12 +18,17 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
+import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { resolveProviderAndModel } from '@kbn/security-ai-prompts';
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
 jest.mock('@kbn/langchain/server/tracers/apm');
 jest.mock('@kbn/langchain/server/tracers/telemetry');
+jest.mock('@kbn/security-ai-prompts');
 const getDefaultAssistantGraphMock = getDefaultAssistantGraph as jest.Mock;
+const resolveProviderAndModelMock = resolveProviderAndModel as jest.Mock;
 describe('callAssistantGraph', () => {
   const mockDataClients = {
     anonymizationFieldsDataClient: {
@@ -41,6 +46,13 @@ describe('callAssistantGraph', () => {
     },
   };
 
+  const savedObjectsClient = savedObjectsClientMock.create();
+  savedObjectsClient.find = jest.fn().mockResolvedValue({
+    page: 1,
+    per_page: 20,
+    total: 0,
+    saved_objects: [],
+  });
   const defaultParams = {
     actionsClient: actionsClientMock.create(),
     alertsIndexPattern: 'test-pattern',
@@ -60,18 +72,23 @@ describe('callAssistantGraph', () => {
     onNewReplacements: jest.fn(),
     replacements: [],
     request: mockRequest,
+    savedObjectsClient,
     size: 1,
     systemPrompt: 'test-prompt',
     telemetry: {},
     telemetryParams: {},
     traceOptions: {},
     responseLanguage: 'English',
+    contentReferencesStore: contentReferencesStoreFactoryMock(),
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (mockDataClients?.kbDataClient?.isInferenceEndpointExists as jest.Mock).mockResolvedValue(true);
     getDefaultAssistantGraphMock.mockReturnValue({});
+    resolveProviderAndModelMock.mockResolvedValue({
+      provider: 'bedrock',
+    });
     (invokeGraph as jest.Mock).mockResolvedValue({
       output: 'test-output',
       traceData: {},
@@ -167,6 +184,12 @@ describe('callAssistantGraph', () => {
     });
 
     it('creates OpenAIToolsAgent for inference llmType', async () => {
+      defaultParams.actionsClient.get = jest.fn().mockResolvedValue({
+        config: {
+          provider: 'elastic',
+          providerConfig: { model_id: 'rainbow-sprinkles' },
+        },
+      });
       const params = { ...defaultParams, llmType: 'inference' };
       await callAssistantGraph(params);
 
@@ -206,6 +229,24 @@ describe('callAssistantGraph', () => {
       expect(createStructuredChatAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
       expect(createToolCallingAgent).not.toHaveBeenCalled();
+    });
+    it('does not calls resolveProviderAndModel when llmType === openai', async () => {
+      const params = { ...defaultParams, llmType: 'openai' };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).not.toHaveBeenCalled();
+    });
+    it('calls resolveProviderAndModel when llmType === inference', async () => {
+      const params = { ...defaultParams, llmType: 'inference' };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).toHaveBeenCalled();
+    });
+    it('calls resolveProviderAndModel when llmType === undefined', async () => {
+      const params = { ...defaultParams, llmType: undefined };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).toHaveBeenCalled();
     });
   });
 });

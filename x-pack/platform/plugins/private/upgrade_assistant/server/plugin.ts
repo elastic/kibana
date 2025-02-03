@@ -119,6 +119,8 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     });
 
     const router = http.createRouter();
+    // Initialize version service with current kibana version
+    versionService.setup(this.kibanaVersion);
 
     const dependencies: RouteDependencies = {
       router,
@@ -139,10 +141,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         featureSet: this.initialFeatureSet,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
+      current: versionService.getCurrentVersion(),
+      defaultTarget: versionService.getNextMajorVersion(),
     };
-
-    // Initialize version service with current kibana version
-    versionService.setup(this.kibanaVersion);
 
     registerRoutes(dependencies, this.getWorker.bind(this));
 
