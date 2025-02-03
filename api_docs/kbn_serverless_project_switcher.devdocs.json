@@ -37,7 +37,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/serverless/project_switcher/src/switcher.tsx",
+        "path": "src/platform/packages/private/serverless/project_switcher/src/switcher.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
                 "text": "ProjectSwitcherProps"
               }
             ],
-            "path": "packages/serverless/project_switcher/src/switcher.tsx",
+            "path": "src/platform/packages/private/serverless/project_switcher/src/switcher.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -86,7 +86,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/serverless/project_switcher/src/services.tsx",
+        "path": "src/platform/packages/private/serverless/project_switcher/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -108,7 +108,7 @@
               },
               ">"
             ],
-            "path": "packages/serverless/project_switcher/src/services.tsx",
+            "path": "src/platform/packages/private/serverless/project_switcher/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -131,7 +131,7 @@
           "Services",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/serverless/project_switcher/src/services.tsx",
+        "path": "src/platform/packages/private/serverless/project_switcher/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -147,7 +147,7 @@
               "Services",
               ">"
             ],
-            "path": "packages/serverless/project_switcher/src/services.tsx",
+            "path": "src/platform/packages/private/serverless/project_switcher/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -167,7 +167,7 @@
         "description": [
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component."
         ],
-        "path": "packages/serverless/project_switcher/src/types.ts",
+        "path": "src/platform/packages/private/serverless/project_switcher/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,7 +181,7 @@
             "signature": [
               "{ http: { post: (path: string, options: { body: string; }) => Promise<unknown>; }; }"
             ],
-            "path": "packages/serverless/project_switcher/src/types.ts",
+            "path": "src/platform/packages/private/serverless/project_switcher/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -192,7 +192,7 @@
             "tags": [],
             "label": "projectChangeAPIUrl",
             "description": [],
-            "path": "packages/serverless/project_switcher/src/types.ts",
+            "path": "src/platform/packages/private/serverless/project_switcher/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -214,7 +214,7 @@
           "ProjectType",
           "; }"
         ],
-        "path": "packages/serverless/project_switcher/src/types.ts",
+        "path": "src/platform/packages/private/serverless/project_switcher/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

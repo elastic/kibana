@@ -168,6 +168,36 @@ describe('saml_auth', () => {
         'Failed to create the new cloud session, check retry arguments: {"attemptsCount":0,"attemptDelay":100}'
       );
     });
+
+    test(`should fail without retry when response has 'mfa_required: true'`, async () => {
+      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
+        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
+          return Promise.resolve({
+            data: { user_id: 12345, authenticated: false, mfa_required: true },
+            status: 200,
+          });
+        }
+        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      });
+
+      await expect(
+        createCloudSession(
+          {
+            hostname: 'cloud',
+            email: 'viewer@elastic.co',
+            password: 'changeme',
+            log,
+          },
+          {
+            attemptsCount: 3,
+            attemptDelay: 100,
+          }
+        )
+      ).rejects.toThrow(
+        'Failed to create the new cloud session: MFA must be disabled for the test account'
+      );
+      expect(axiosRequestMock).toBeCalledTimes(1);
+    });
   });
 
   describe('createSAMLRequest', () => {
@@ -200,7 +230,7 @@ describe('saml_auth', () => {
       });
 
       expect(createSAMLRequest('https://kbn.test.co', '8.12.0', log)).rejects.toThrow(
-        `Failed to parse 'set-cookie' header`
+        /Failed to parse cookie from SAML response headers: no 'set-cookie' header, response.data:/
       );
     });
 
@@ -302,7 +332,9 @@ https://kbn.test.co in the same window.`);
           sid: 'Fe26.2**1234567890',
           log,
         })
-      ).rejects.toThrow(`Failed to parse 'set-cookie' header`);
+      ).rejects.toThrow(
+        /Failed to get cookie from SAML callback response: no 'set-cookie' header, response.data:/
+      );
     });
   });
 });

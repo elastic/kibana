@@ -8,12 +8,14 @@
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
 export default function ({ loadTestFile }: FtrProviderContextWithSpaces) {
-  describe('@ess @serverless SecuritySolution Timeline', () => {
+  describe('@ess @serverless @serverlessQA SecuritySolution Timeline', () => {
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./timeline'));
     loadTestFile(require.resolve('./timeline_migrations'));
     loadTestFile(require.resolve('./import_timelines'));
     loadTestFile(require.resolve('./install_prepackaged_timelines'));
+    loadTestFile(require.resolve('./timeline_privileges'));
+    loadTestFile(require.resolve('./notes_privileges'));
   });
 }

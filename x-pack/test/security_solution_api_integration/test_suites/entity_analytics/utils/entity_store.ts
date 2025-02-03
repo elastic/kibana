@@ -17,6 +17,7 @@ export const EntityStoreUtils = (
   const api = getService('securitySolutionApi');
   const es = getService('es');
   const log = getService('log');
+  const retry = getService('retry');
   const {
     expectTransformExists,
     expectTransformNotFound,
@@ -26,6 +27,8 @@ export const EntityStoreUtils = (
     expectComponentTemplateNotFound,
     expectIngestPipelineExists,
     expectIngestPipelineNotFound,
+    expectEntitiesIndexExists,
+    expectEntitiesIndexNotFound,
   } = elasticAssetCheckerFactory(getService);
 
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
@@ -68,6 +71,49 @@ export const EntityStoreUtils = (
     expect(res.status).to.eql(200);
   };
 
+  const initEntityEngineForEntityTypesAndWait = async (entityTypes: EntityType[]) => {
+    await Promise.all(entityTypes.map((entityType) => initEntityEngineForEntityType(entityType)));
+
+    await retry.waitForWithTimeout(
+      `Engines to start for entity types: ${entityTypes.join(', ')}`,
+      60_000,
+      async () => {
+        const { body } = await api.listEntityEngines(namespace).expect(200);
+        if (body.engines.every((engine: any) => engine.status === 'started')) {
+          return true;
+        }
+        if (body.engines.some((engine: any) => engine.status === 'error')) {
+          throw new Error(`Engines not started: ${JSON.stringify(body)}`);
+        }
+        return false;
+      }
+    );
+  };
+
+  const waitForEngineStatus = async (entityType: EntityType, status: string) => {
+    await retry.waitForWithTimeout(
+      `Engine for entity type ${entityType} to be in status ${status}`,
+      60_000,
+      async () => {
+        const { body } = await api
+          .getEntityEngine({ params: { entityType } }, namespace)
+          .expect(200);
+        log.debug(`Engine status for ${entityType}: ${body.status}`);
+        return body.status === status;
+      }
+    );
+  };
+
+  const enableEntityStore = async () => {
+    const res = await api.initEntityStore({ body: {} }, namespace);
+    if (res.status !== 200) {
+      log.error(`Failed to enable entity store`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect(res.status).to.eql(200);
+    return res;
+  };
+
   const expectTransformStatus = async (
     transformId: string,
     exists: boolean,
@@ -98,23 +144,32 @@ export const EntityStoreUtils = (
 
   const expectEngineAssetsExist = async (entityType: EntityType) => {
     await expectTransformExists(`entities-v1-latest-security_${entityType}_${namespace}`);
-    await expectEnrichPolicyExists(`entity_store_field_retention_${entityType}_${namespace}_v1`);
+    await expectEnrichPolicyExists(
+      `entity_store_field_retention_${entityType}_${namespace}_v1.0.0`
+    );
     await expectComponentTemplateExists(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineExists(`security_${entityType}_${namespace}-latest@platform`);
+    await expectEntitiesIndexExists(entityType, namespace);
   };
 
   const expectEngineAssetsDoNotExist = async (entityType: EntityType) => {
     await expectTransformNotFound(`entities-v1-latest-security_${entityType}_${namespace}`);
-    await expectEnrichPolicyNotFound(`entity_store_field_retention_${entityType}_${namespace}_v1`);
+    await expectEnrichPolicyNotFound(
+      `entity_store_field_retention_${entityType}_${namespace}_v1.0.0`
+    );
     await expectComponentTemplateNotFound(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineNotFound(`security_${entityType}_${namespace}-latest@platform`);
+    await expectEntitiesIndexNotFound(entityType, namespace);
   };
 
   return {
     cleanEngines,
-    initEntityEngineForEntityType,
+    initEntityEngineForEntityTypesAndWait,
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
+    enableEntityStore,
+    waitForEngineStatus,
+    initEntityEngineForEntityType,
   };
 };

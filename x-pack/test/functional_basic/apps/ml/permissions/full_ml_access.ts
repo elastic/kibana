@@ -32,8 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedUploadFileTitle = 'artificial_server_log';
 
         before(async () => {
-          await ml.api.cleanMlIndices();
-
           await esArchiver.loadIfNeeded(
             'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
           );

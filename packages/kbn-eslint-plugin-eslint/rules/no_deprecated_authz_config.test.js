@@ -11,8 +11,17 @@ const { RuleTester } = require('eslint');
 const rule = require('./no_deprecated_authz_config');
 const dedent = require('dedent');
 
-// Indentation is a big problem in the test cases, dedent library does not work as expected.
+beforeAll(() => {
+  process.env.MIGRATE_ENABLED_AUTHZ = 'true';
+  process.env.MIGRATE_DISABLED_AUTHZ = 'true';
+});
 
+afterAll(() => {
+  delete process.env.MIGRATE_ENABLED_AUTHZ;
+  delete process.env.MIGRATE_DISABLED_AUTHZ;
+});
+
+// Indentation is a big problem in the test cases, dedent library does not work as expected.
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
   parserOptions: {
@@ -196,6 +205,28 @@ ruleTester.run('no_deprecated_authz_config', rule, {
           security: {
                 authz: {
                   requiredPrivileges: [\`\${APP_ID}-entity-analytics\`],
+                },
+              },
+        });
+      `,
+      name: 'invalid: access tags are template literals, move to security.authz.requiredPrivileges',
+    },
+    {
+      code: `
+        router.get({
+          path: '/some/path',
+          options: {
+            tags: [\`access:\${APP.TEST_ID}\`],
+          },
+        });
+      `,
+      errors: [{ message: "Move 'access' tags to security.authz.requiredPrivileges." }],
+      output: `
+        router.get({
+          path: '/some/path',
+          security: {
+                authz: {
+                  requiredPrivileges: [\`\${APP.TEST_ID}\`],
                 },
               },
         });

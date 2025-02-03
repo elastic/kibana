@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'test-index-unmapped-fields',
-        'discover:searchFieldsFromSource': false,
         'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
       });
 
@@ -44,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/unmapped_fields');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.uiSettings.unset('defaultIndex');
-      await kibanaServer.uiSettings.unset('discover:searchFieldsFromSource');
       await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
     });
 

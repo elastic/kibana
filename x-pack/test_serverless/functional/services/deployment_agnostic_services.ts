@@ -36,7 +36,6 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'dashboardVisualizations',
   'dataGrid',
   'dataStreams',
-  'docTable',
   'dataViews',
   'elasticChart',
   'embedding',

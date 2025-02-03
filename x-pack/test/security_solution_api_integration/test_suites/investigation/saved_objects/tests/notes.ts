@@ -35,8 +35,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
-        const { note, noteId, timelineId, version } =
-          response.body.data && response.body.data.persistNote.note;
+        const { note, noteId, timelineId, version } = response.body && response.body.note;
 
         expect(note).to.be(myNote);
         expect(noteId).to.not.be.empty();
@@ -56,8 +55,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
-        const { noteId, timelineId, version } =
-          response.body.data && response.body.data.persistNote.note;
+        const { noteId, timelineId, version } = response.body && response.body.note;
 
         const myNewNote = 'new world test';
         const responseToTest = await supertest
@@ -70,9 +68,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             note: { note: myNewNote, timelineId },
           });
 
-        expect(responseToTest.body.data!.persistNote.note.note).to.be(myNewNote);
-        expect(responseToTest.body.data!.persistNote.note.noteId).to.be(noteId);
-        expect(responseToTest.body.data!.persistNote.note.version).to.not.be.eql(version);
+        expect(responseToTest.body.note.note).to.be(myNewNote);
+        expect(responseToTest.body.note.noteId).to.be(noteId);
+        expect(responseToTest.body.note.version).to.not.be.eql(version);
       });
     });
 
@@ -384,14 +382,15 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       // skipped https://github.com/elastic/kibana/issues/196896
       describe('@skipInServerless', () => {
-        it('should retrieve all notes that have been created by a specific user', async () => {
+        // TODO we need to figure out how to retrieve the uid of the current user in the test environment
+        it.skip('should retrieve all notes that have been created by a specific user', async () => {
           await Promise.all([
             createNote(supertest, { text: 'first note' }),
             createNote(supertest, { text: 'second note' }),
           ]);
 
           const response = await supertest
-            .get(`${NOTE_URL}?userFilter=elastic`)
+            .get(`${NOTE_URL}?createdByFilter=elastic`)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '2023-10-31');
           const { totalCount } = response.body as GetNotesResult;
@@ -400,19 +399,37 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         });
       });
 
-      it('should return nothing if no notes have been created by that user', async () => {
+      // TODO we need to figure out how to create another user in the test environment
+      it.skip('should return nothing if no notes have been created by that user', async () => {
         await Promise.all([
           createNote(supertest, { text: 'first note' }),
           createNote(supertest, { text: 'second note' }),
         ]);
 
         const response = await supertest
-          .get(`${NOTE_URL}?userFilter=user1`)
+          .get(`${NOTE_URL}?createdByFilter=user1`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
         const { totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(0);
+      });
+
+      it('should return error if user does not exist', async () => {
+        await Promise.all([
+          createNote(supertest, { text: 'first note' }),
+          createNote(supertest, { text: 'second note' }),
+        ]);
+
+        const response = await supertest
+          .get(`${NOTE_URL}?createdByFilter=wrong_user`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        expect(response.body).to.not.have.property('totalCount');
+        expect(response.body).to.not.have.property('notes');
+        expect(response.body.message).to.be('User with uid wrong_user not found');
+        expect(response.body.status_code).to.be(500);
       });
 
       it('should retrieve all notes that have an association with a document only', async () => {

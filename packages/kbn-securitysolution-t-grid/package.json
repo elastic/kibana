@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/securitysolution-t-grid",
-  "version": "1.0.0",
-  "description": "security solution t-grid packages will allow sharing components between timelines and security_solution plugin until we transfer all functionality to timelines plugin",
-  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
-  "private": true
-}

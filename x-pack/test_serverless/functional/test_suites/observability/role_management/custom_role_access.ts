@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should have limited navigation menu', async () => {
       await pageObjects.svlCommonPage.assertUserAvatarExists();
       // discover navigation link is present
-      await testSubjects.existOrFail('~nav-item-id-last-used-logs-viewer');
+      await testSubjects.existOrFail('~nav-item-id-discover');
 
       // all other links in navigation menu are hidden
       await testSubjects.missingOrFail('~nav-item-id-dashboards');

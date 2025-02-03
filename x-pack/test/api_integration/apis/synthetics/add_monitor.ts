@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import epct from 'expect';
 import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
-import { omit } from 'lodash';
+import { omit, omitBy } from 'lodash';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -23,7 +23,10 @@ import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { transformPublicKeys } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
+import {
+  removeMonitorEmptyValues,
+  transformPublicKeys,
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
@@ -61,7 +64,7 @@ export const keyToOmitList = [
 ];
 
 export const omitMonitorKeys = (monitor: any) => {
-  return omit(transformPublicKeys(monitor), keyToOmitList);
+  return omitBy(omit(transformPublicKeys(monitor), keyToOmitList), removeMonitorEmptyValues);
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -301,7 +304,9 @@ export default function ({ getService }: FtrProviderContext) {
             .send(httpMonitorJson);
 
           expect(apiResponse.status).eql(403);
-          expect(apiResponse.body.message).eql('Forbidden');
+          expect(apiResponse.body.message).eql(
+            'API [POST /api/synthetics/monitors] is unauthorized for user, this action is granted by the Kibana privileges [uptime-write]'
+          );
         });
     });
 

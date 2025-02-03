@@ -7,31 +7,28 @@
 
 import { Role } from './types';
 
+const defaultElasticsearchPrivileges = {
+  elasticsearch: {
+    indices: [
+      {
+        names: ['*'],
+        privileges: ['all'],
+      },
+    ],
+  },
+};
+
 export const noKibanaPrivileges: Role = {
   name: 'no_kibana_privileges',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
   },
 };
 
 export const noCasesPrivilegesSpace1: Role = {
   name: 'no_cases_kibana_privileges',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -47,14 +44,7 @@ export const noCasesPrivilegesSpace1: Role = {
 export const noCasesConnectors: Role = {
   name: 'no_cases_connectors',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -71,14 +61,7 @@ export const noCasesConnectors: Role = {
 export const globalRead: Role = {
   name: 'global_read',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -96,14 +79,7 @@ export const globalRead: Role = {
 export const testDisabledPluginAll: Role = {
   name: 'test_disabled_plugin_all',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -121,14 +97,7 @@ export const testDisabledPluginAll: Role = {
 export const securitySolutionOnlyAll: Role = {
   name: 'sec_only_all',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -145,14 +114,7 @@ export const securitySolutionOnlyAll: Role = {
 export const securitySolutionOnlyDelete: Role = {
   name: 'sec_only_delete',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -169,18 +131,11 @@ export const securitySolutionOnlyDelete: Role = {
 export const securitySolutionOnlyReadDelete: Role = {
   name: 'sec_only_read_delete',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
-          securitySolutionFixture: ['read', 'cases_delete'],
+          securitySolutionFixture: ['minimal_read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -193,14 +148,58 @@ export const securitySolutionOnlyReadDelete: Role = {
 export const securitySolutionOnlyNoDelete: Role = {
   name: 'sec_only_no_delete',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
+    ...defaultElasticsearchPrivileges,
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
         },
-      ],
-    },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyCreateComment: Role = {
+  name: 'sec_only_create_comment',
+  privileges: {
+    ...defaultElasticsearchPrivileges,
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['create_comment'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadCreateComment: Role = {
+  name: 'sec_only_read_create_comment',
+  privileges: {
+    ...defaultElasticsearchPrivileges,
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_read', 'create_comment'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyNoCreateComment: Role = {
+  name: 'sec_only_no_create_comment',
+  privileges: {
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -217,14 +216,7 @@ export const securitySolutionOnlyNoDelete: Role = {
 export const securitySolutionOnlyRead: Role = {
   name: 'sec_only_read',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -241,14 +233,7 @@ export const securitySolutionOnlyRead: Role = {
 export const securitySolutionOnlyReadAlerts: Role = {
   name: 'sec_only_read_alerts',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -282,14 +267,7 @@ export const securitySolutionOnlyReadNoIndexAlerts: Role = {
 export const observabilityOnlyAll: Role = {
   name: 'obs_only_all',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -306,14 +284,7 @@ export const observabilityOnlyAll: Role = {
 export const observabilityOnlyRead: Role = {
   name: 'obs_only_read',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -353,14 +324,7 @@ export const observabilityOnlyReadAlerts: Role = {
 export const securitySolutionOnlyAllSpacesRole: Role = {
   name: 'sec_only_all_spaces',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -377,14 +341,7 @@ export const securitySolutionOnlyAllSpacesRole: Role = {
 export const onlyActions: Role = {
   name: 'only_actions',
   privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
+    ...defaultElasticsearchPrivileges,
     kibana: [
       {
         feature: {
@@ -408,6 +365,9 @@ export const roles = [
   securitySolutionOnlyDelete,
   securitySolutionOnlyReadDelete,
   securitySolutionOnlyNoDelete,
+  securitySolutionOnlyCreateComment,
+  securitySolutionOnlyReadCreateComment,
+  securitySolutionOnlyNoCreateComment,
   observabilityOnlyAll,
   observabilityOnlyRead,
   observabilityOnlyReadAlerts,

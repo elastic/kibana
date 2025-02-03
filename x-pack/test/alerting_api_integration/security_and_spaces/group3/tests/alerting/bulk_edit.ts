@@ -388,11 +388,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'bulkEdit',
-                  'test.restricted-noop',
-                  'alertsRestrictedFixture'
-                ),
+                message: getUnauthorizedErrorMessage('bulkEdit', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);

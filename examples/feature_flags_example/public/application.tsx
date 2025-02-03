@@ -10,22 +10,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FeatureFlagsExampleApp } from './components/app';
 
 export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters) => {
   const { notifications, http, featureFlags } = coreStart;
   ReactDOM.render(
-    <KibanaRootContextProvider {...coreStart}>
-      <KibanaPageTemplate>
-        <FeatureFlagsExampleApp
-          featureFlags={featureFlags}
-          notifications={notifications}
-          http={http}
-        />
-      </KibanaPageTemplate>
-    </KibanaRootContextProvider>,
+    <KibanaRenderContextProvider {...coreStart}>
+      <FeatureFlagsExampleApp
+        featureFlags={featureFlags}
+        notifications={notifications}
+        http={http}
+      />
+    </KibanaRenderContextProvider>,
     element
   );
 

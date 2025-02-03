@@ -16,7 +16,7 @@ export function getRoutingTransform<T extends Fields>(dataStreamType: string) {
     transform(document: ESDocumentWithOperation<T>, encoding, callback) {
       if ('data_stream.dataset' in document && 'data_stream.namespace' in document) {
         document._index = `${dataStreamType}-${document['data_stream.dataset']}-${document['data_stream.namespace']}`;
-      } else {
+      } else if (!('_index' in document)) {
         throw new Error('Cannot determine index for event');
       }
 

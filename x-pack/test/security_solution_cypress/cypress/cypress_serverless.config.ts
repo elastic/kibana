@@ -8,6 +8,7 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { samlAuthentication } from './support/saml_auth';
+import { esClient } from './support/es_client';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -33,6 +34,7 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      esClient(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
           launchOptions.args.push('--window-size=1920,1200');
@@ -46,6 +48,7 @@ export default defineCypressConfig({
         return launchOptions;
       });
       samlAuthentication(on, config);
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
       return config;

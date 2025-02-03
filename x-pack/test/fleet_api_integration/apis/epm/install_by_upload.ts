@@ -195,7 +195,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Archive seems empty. Assumed content type was application/gzip, check if this matches the archive type."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Manifest file manifest.yml not found in paths."}'
       );
     });
 

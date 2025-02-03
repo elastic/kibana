@@ -23,6 +23,7 @@ export const FinderApp = (props: {
     <ContentClientProvider contentClient={props.contentClient}>
       <I18nProvider>
         <SavedObjectFinder
+          id="cmFinderApp"
           showFilter={true}
           services={{
             savedObjectsTagging: props.savedObjectsTagging.getTaggingApi(),
@@ -36,7 +37,7 @@ export const FinderApp = (props: {
             {
               type: `search`,
               getIconForSavedObject: () => 'discoverApp',
-              name: 'Saved search',
+              name: 'Discover session',
             },
             {
               type: 'index-pattern',

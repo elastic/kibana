@@ -22,7 +22,7 @@
         "tags": [],
         "label": "customBrandingServiceMock",
         "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
+        "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,16 +35,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-custom-branding-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreCustomBrandingServerInternalPluginApi",
-                "section": "def-server.CustomBrandingService",
-                "text": "CustomBrandingService"
-              },
+              "CustomBrandingService",
               ">"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
+            "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -60,7 +54,7 @@
             "signature": [
               "() => { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
+            "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -76,7 +70,7 @@
             "signature": [
               "() => {}"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
+            "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

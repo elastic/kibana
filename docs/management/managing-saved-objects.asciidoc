@@ -4,7 +4,8 @@
 Edit, import, export, and copy your saved objects. These objects include
 dashboards, visualizations, maps, {data-sources}, *Canvas* workpads, and other saved objects.
 
-To get started, open the main menu, and then click *Stack Management > Saved Objects*.
+You can find the *Saved Objects* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [role="screenshot"]
 image::images/management-saved-objects.png[Saved Objects]
@@ -14,7 +15,8 @@ image::images/management-saved-objects.png[Saved Objects]
 
 To access *Saved Objects*, you must have the required `Saved Objects Management` {kib} privilege.
 
-To add the privilege, open the main menu, and then click *Stack Management > Roles*.
+To add the privilege, go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 NOTE: Granting access to `Saved Objects Management` authorizes users to
 manage all saved objects in {kib}, including objects that are managed by

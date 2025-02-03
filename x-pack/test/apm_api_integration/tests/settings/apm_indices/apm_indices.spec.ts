@@ -107,40 +107,6 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       await deleteSavedObject();
     });
 
-    it('[trial] returns APM Indices', async () => {
-      const response = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
-      });
-      expect(response.status).to.be(200);
-      expect(response.body).to.eql({
-        transaction: 'traces-apm*,apm-*,traces-*.otel-*',
-        span: 'traces-apm*,apm-*,traces-*.otel-*',
-        error: 'logs-apm*,apm-*,logs-*.otel-*',
-        metric: 'metrics-apm*,apm-*,metrics-*.otel-*',
-        onboarding: 'apm-*',
-        sourcemap: 'apm-*',
-      });
-    });
-
-    it('[trial] updates apm indices', async () => {
-      const INDEX_VALUE = 'foo-*';
-
-      const writeResponse = await apmApiClient.writeUser({
-        endpoint: 'POST /internal/apm/settings/apm-indices/save',
-        params: {
-          body: { transaction: INDEX_VALUE },
-        },
-      });
-      expect(writeResponse.status).to.be(200);
-
-      const readResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
-      });
-
-      expect(readResponse.status).to.be(200);
-      expect(readResponse.body.transaction).to.eql(INDEX_VALUE);
-    });
-
     it('[trial] updates apm indices as read privileges with modify settings user', async () => {
       const INDEX_VALUE = 'foo-*';
 

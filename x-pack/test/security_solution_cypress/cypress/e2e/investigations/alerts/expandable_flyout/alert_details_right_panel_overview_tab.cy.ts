@@ -27,7 +27,6 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS,
@@ -43,6 +42,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HOST_OVERVIEW_LINK,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_NO_DATA,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_VALUE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_VALUE,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   navigateToCorrelationsDetails,
@@ -348,14 +349,12 @@ describe(
           'Threat intelligence'
         );
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
-          .eq(0)
-          .should('have.text', '0 threat matches detected'); // TODO work on getting proper IoC data to get proper data here
-
-        // field with threat enrichement
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
-          .eq(1)
-          .should('have.text', '0 fields enriched with threat intelligence'); // TODO work on getting proper IoC data to get proper data here
+        cy.get(
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_VALUE
+        ).should('have.text', '0'); // TODO work on getting proper IoC data to get proper data here
+        cy.get(
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_VALUE
+        ).should('have.text', '0'); // TODO work on getting proper IoC data to get proper data here
 
         cy.log('should navigate to left panel Threat Intelligence tab');
 
@@ -385,19 +384,19 @@ describe(
         );
         // cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_SUPPRESSED_ALERTS)
         //   .should('be.visible')
-        //   .and('have.text', '1 suppressed alert'); // TODO populate rule with alert suppression
+        //   .and('have.text', '1'); // TODO populate rule with alert suppression
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_ANCESTRY
-        ).should('have.text', '1 alert related by ancestry');
+        ).should('have.text', '1');
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT
-        ).should('have.text', '1 alert related by source event');
+        ).should('have.text', '1');
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SESSION
-        ).should('have.text', '1 alert related by session');
+        ).should('have.text', '1');
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_CASES
-        ).should('have.text', '1 related case');
+        ).should('have.text', '1');
 
         cy.log('should navigate to left panel Correlations tab');
 

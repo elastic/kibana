@@ -43,9 +43,9 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 export const TEST_CASE_OBJECTS: Record<string, { type: string; id: string }> = deepFreeze({
-  SHAREABLE_TYPE: { type: 'sharedtype', id: CASES.EACH_SPACE.id }, // contains references to four other objects
-  SHAREABLE_TYPE_DOES_NOT_EXIST: { type: 'sharedtype', id: 'does-not-exist' },
-  NON_SHAREABLE_TYPE: { type: 'isolatedtype', id: 'my_isolated_object' }, // one of these exists in each space
+  SHAREABLE_TYPE: { type: 'index-pattern', id: CASES.EACH_SPACE.id }, // contains references to four other objects
+  SHAREABLE_TYPE_DOES_NOT_EXIST: { type: 'index-pattern', id: 'does-not-exist' },
+  NON_SHAREABLE_TYPE: { type: 'url', id: 'my_isolated_object' }, // one of these exists in each space
 });
 // Expected results for each space are defined here since they are used in multiple test suites
 export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]> = {
@@ -54,7 +54,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
       // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
-      inboundReferences: [{ type: 'sharedtype', id: CASES.DEFAULT_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in the default space
+      inboundReferences: [{ type: 'index-pattern', id: CASES.DEFAULT_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in the default space
     },
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE_DOES_NOT_EXIST,
@@ -64,28 +64,28 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     },
     { ...TEST_CASE_OBJECTS.NON_SHAREABLE_TYPE, spaces: [], inboundReferences: [] }, // not missing, but has an empty spaces array because it is not a shareable type
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.DEFAULT_ONLY.id,
       spaces: [DEFAULT_SPACE_ID],
       // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.SPACE_1_ONLY.id,
       spaces: [],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
       isMissing: true, // doesn't exist in the default space
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.SPACE_2_ONLY.id,
       spaces: [],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
       isMissing: true, // doesn't exist in the default space
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
       // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
@@ -97,7 +97,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
       // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
-      inboundReferences: [{ type: 'sharedtype', id: CASES.SPACE_1_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in space 1
+      inboundReferences: [{ type: 'index-pattern', id: CASES.SPACE_1_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in space 1
     },
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE_DOES_NOT_EXIST,
@@ -107,14 +107,14 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     },
     { ...TEST_CASE_OBJECTS.NON_SHAREABLE_TYPE, spaces: [], inboundReferences: [] }, // not missing, but has an empty spaces array because it is not a shareable type
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.DEFAULT_ONLY.id,
       spaces: [],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
       isMissing: true, // doesn't exist in space 1
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.SPACE_1_ONLY.id,
       spaces: [SPACE_1_ID],
       spacesWithMatchingAliases: [DEFAULT_SPACE_ID, SPACE_2_ID], // aliases with a matching targetType and sourceId exist in two other spaces
@@ -122,14 +122,14 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.SPACE_2_ONLY.id,
       spaces: [],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
       isMissing: true, // doesn't exist in space 1
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
       // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
@@ -141,7 +141,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
       // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)
-      inboundReferences: [{ type: 'sharedtype', id: CASES.SPACE_2_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in space 2
+      inboundReferences: [{ type: 'index-pattern', id: CASES.SPACE_2_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in space 2
     },
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE_DOES_NOT_EXIST,
@@ -151,28 +151,28 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     },
     { ...TEST_CASE_OBJECTS.NON_SHAREABLE_TYPE, spaces: [], inboundReferences: [] }, // not missing, but has an empty spaces array because it is not a shareable type
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.DEFAULT_ONLY.id,
       spaces: [],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
       isMissing: true, // doesn't exist in space 2
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.SPACE_1_ONLY.id,
       spaces: [],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
       isMissing: true, // doesn't exist in space 2
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.SPACE_2_ONLY.id,
       spaces: [SPACE_2_ID],
       spacesWithMatchingOrigins: ['*'], // The third test assertion for spacesWithMatchingOrigins is an object that has a matching origin in all spaces (this takes precedence, causing SPACE_2_ID to be omitted)
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
     {
-      type: 'sharedtype',
+      type: 'index-pattern',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
       // No matching origins because there are no copies of the object in another space (we no longer consider a raw ID match to be an origin match)

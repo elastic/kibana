@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-containers';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 import {
   OPTIONS_LIST_CONTROL,

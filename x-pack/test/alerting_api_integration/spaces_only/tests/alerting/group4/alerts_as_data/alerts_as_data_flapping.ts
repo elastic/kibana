@@ -35,9 +35,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/195573
-  // Failing: See https://github.com/elastic/kibana/issues/195573
-  describe.skip('alerts as data flapping', function () {
+  describe('alerts as data flapping', function () {
     this.tags('skipFIPS');
     beforeEach(async () => {
       await es.deleteByQuery({
@@ -554,6 +552,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 2,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, true, false, true, false, true, false],
@@ -669,6 +669,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           status_change_threshold: 2,
         })
         .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
       const pattern = {
         alertA: [true, false, true, false, true, false, true, false],
@@ -712,6 +714,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         })
         .expect(200);
 
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
       // Wait for the rule to run once
       let run = 1;
       let runWhichItFlapped = 0;
@@ -754,6 +759,11 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
     const searchResult = await es.search({
       index: alertsAsDataIndex,
       body: {
+        sort: [
+          {
+            '@timestamp': 'desc',
+          },
+        ],
         query: {
           bool: {
             must: {

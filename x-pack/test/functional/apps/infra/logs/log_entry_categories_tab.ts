@@ -58,6 +58,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     describe('with a trial license', () => {
+      before(() => logsUi.cleanIndices());
+
       it('Shows no data page when indices do not exist', async () => {
         await logsUi.logEntryCategoriesPage.navigateTo();
 

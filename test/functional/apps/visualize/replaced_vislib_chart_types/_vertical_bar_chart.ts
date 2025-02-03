@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Field = @timestamp');
       await visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await visEditor.clickGo(true);
+      await visEditor.clickGo();
     };
 
     describe('bar charts x axis tick labels', () => {
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await visEditor.clickMetricsAndAxes();
         await visEditor.selectXAxisPosition('left');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
 
         // the getYAxisLabels helper always returns the labels on the left axis
         const leftLabels = await visChart.getYAxisLabels(xyChartSelector);
@@ -79,13 +79,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Date Range');
         await visEditor.selectField('@timestamp');
 
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const bottomLabels = await visChart.getXAxisLabels(xyChartSelector);
         expect(bottomLabels.length).to.be(1);
 
         await visEditor.clickMetricsAndAxes();
         await visEditor.selectXAxisPosition('left');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
 
         // the getYAxisLabels helper always returns the labels on the left axis
         const leftLabels = await visChart.getYAxisLabels(xyChartSelector);
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectField('@timestamp');
         await visEditor.clickAddDateRange();
         await visEditor.setDateRangeByIndex('1', 'now-2w/w', 'now-1w/w');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const bottomLabels = await visChart.getXAxisLabels(xyChartSelector);
         expect(bottomLabels.length).to.be(2);
       });
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visEditor.toggleOpenEditor(2);
       await visEditor.clickDropPartialBuckets();
-      await visEditor.clickGo(true);
+      await visEditor.clickGo();
 
       expectedChartValues = [
         218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4, 11, 14, 17, 38,
@@ -222,7 +222,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickYAxisOptions(axisId);
         await visEditor.selectYAxisScaleType(axisId, 'log');
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabelsAsNumbers(xyChartSelector);
 
         const minLabel = 1;
@@ -235,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting log scale', async () => {
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabelsAsNumbers(xyChartSelector);
 
         const minLabel = 1;
@@ -249,7 +249,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show ticks on selecting square root scale', async () => {
         await visEditor.selectYAxisScaleType(axisId, 'square root');
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -257,7 +257,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting square root scale', async () => {
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -266,7 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show ticks on selecting linear scale', async () => {
         await visEditor.selectYAxisScaleType(axisId, 'linear');
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         log.debug(labels);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
@@ -275,7 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting linear scale', async () => {
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -290,7 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectYAxisMode('percentage');
         await visEditor.changeYAxisShowCheckbox(axisId, true);
         await visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
         const labels = await visChart.getYAxisLabels(xyChartSelector);
         expect(labels[0]).to.eql('0%');
         expect(labels[labels.length - 1]).to.eql('100%');
@@ -306,7 +306,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('response.raw');
         await visChart.waitForVisualizationRenderingStabilized();
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
 
         const expectedEntries = ['200', '404', '503']; // sorting order aligned with the reading direction
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
@@ -316,7 +316,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow custom sorting of series', async () => {
         await visEditor.toggleOpenEditor(1, 'false');
         await visEditor.selectCustomSortMetric(3, 'Min', 'bytes');
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
 
         const expectedEntries = ['404', '200', '503'];
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
@@ -324,7 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should correctly filter by legend', async () => {
-        await visChart.filterLegend('200', true);
+        await visChart.filterLegend('200');
         await visChart.waitForVisualization();
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
         const expectedEntries = ['200'];
@@ -349,7 +349,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('machine.os');
         await visChart.waitForVisualizationRenderingStabilized();
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
 
         const expectedEntries = [
           '200 - win 8',
@@ -376,7 +376,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // this will avoid issues with the play tooltip covering the disable agg button
         await testSubjects.scrollIntoView('metricsAggGroup');
         await visEditor.toggleDisabledAgg(3);
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
 
         const expectedEntries = ['win 8', 'win xp', 'ios', 'osx', 'win 7'];
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
@@ -392,7 +392,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleOpenEditor(1);
         await visEditor.selectAggregation('Derivative', 'metrics');
         await visChart.waitForVisualizationRenderingStabilized();
-        await visEditor.clickGo(true);
+        await visEditor.clickGo();
 
         const expectedEntries = ['Derivative of Count'];
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);

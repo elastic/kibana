@@ -21,7 +21,8 @@ import {
 } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/196851
+describe.skip(
   'Unified Timeline table Row Actions',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

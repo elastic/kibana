@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-view-editor-plugin",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "This plugin provides the ability to create data views via a modal flyout inside Kibana apps",
+  "plugin": {
+    "id": "dataViewEditor",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "data",
+      "dataViews"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "esUiShared"
+    ]
+  }
+}

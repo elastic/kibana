@@ -16,14 +16,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens drag and drop tests', () => {
     describe('basic drag and drop', () => {
-      it('should construct the basic split xy chart', async () => {
+      it('should construct a bar chart when dropping a field to create top values chart', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-        await lens.goToTimeRange();
+        await header.waitUntilLoadingHasFinished();
+        await lens.dragFieldToWorkspace('machine.os.raw', xyChartContainer);
+        expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top 5 values of machine.os.raw'
+        );
+        expect(await lens.getChartTypeFromChartSwitcher()).to.eql('Bar');
+      });
+      it('should construct a bar chart when dropping a time field to create a date histogram chart', async () => {
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
         await header.waitUntilLoadingHasFinished();
         await lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
-
         expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql('@timestamp');
+        expect(await lens.getChartTypeFromChartSwitcher()).to.eql('Bar');
       });
 
       it('should allow dropping fields to existing and empty dimension triggers', async () => {
@@ -224,7 +233,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should drop a field to workspace', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-        await lens.goToTimeRange();
         await header.waitUntilLoadingHasFinished();
         await lens.dragFieldWithKeyboard('@timestamp');
         expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql('@timestamp');
@@ -300,7 +308,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should always nest time dimension in categorical dimension', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-        await lens.goToTimeRange();
         await header.waitUntilLoadingHasFinished();
         await lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
         await lens.waitForVisualization(xyChartContainer);
@@ -330,7 +337,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsXYvis');
         await lens.clickVisualizeListItemTitle('lnsXYvis');
-        await lens.goToTimeRange();
 
         await lens.createLayer('data');
 
@@ -410,7 +416,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsXYvis');
         await lens.clickVisualizeListItemTitle('lnsXYvis');
-        await lens.goToTimeRange();
 
         await lens.createLayer('data');
         await lens.dragFieldToDimensionTrigger(

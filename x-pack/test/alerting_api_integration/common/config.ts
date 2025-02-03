@@ -13,6 +13,7 @@ import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plu
 import { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -55,6 +56,7 @@ const enabledActionTypes = [
   '.d3security',
   SENTINELONE_CONNECTOR_ID,
   CROWDSTRIKE_CONNECTOR_ID,
+  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   '.slack',
   '.slack_api',
   '.thehive',
@@ -88,7 +90,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostSsl = false,
-    rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
     testFiles = undefined,
     reportName = undefined,
@@ -128,7 +129,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
           `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
-          '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
         ]
       : [
           `--xpack.actions.proxyUrl=http://elastic.co`,
@@ -212,7 +212,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.alerting.enableFrameworkAlerts=true`,
           `--xpack.alerting.rulesSettings.cacheInterval=10000`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
           `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
@@ -220,7 +219,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...emailSettings,
           ...maxScheduledPerMinuteSettings,
           '--xpack.eventLog.logEntries=true',
-          '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,

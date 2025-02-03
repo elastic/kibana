@@ -21,10 +21,7 @@ export const getArtifactMappings = (inferenceEndpoint: string): MappingTypeMappi
       slug: { type: 'keyword' },
       url: { type: 'keyword' },
       version: { type: 'version' },
-      ai_subtitle: {
-        type: 'semantic_text',
-        inference_id: inferenceEndpoint,
-      },
+      ai_subtitle: { type: 'text' },
       ai_summary: {
         type: 'semantic_text',
         inference_id: inferenceEndpoint,

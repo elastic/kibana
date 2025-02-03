@@ -1,5 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/core-custom-branding-server-mocks",
-  "owner": "@elastic/appex-sharedux",
-}

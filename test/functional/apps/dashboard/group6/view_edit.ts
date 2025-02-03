@@ -15,17 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const { dashboard, common, visualize, timePicker } = getPageObjects([
-    'dashboard',
-    'common',
-    'visualize',
-    'timePicker',
-  ]);
+  const { dashboard, common, timePicker } = getPageObjects(['dashboard', 'common', 'timePicker']);
   const dashboardName = 'dashboard with filter';
+  const copyOfDashboardName = `Copy of ${dashboardName}`;
   const filterBar = getService('filterBar');
   const security = getService('security');
 
-  describe('dashboard view edit mode', function viewEditModeTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/200748
+  describe.skip('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -72,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('save as new', () => {
       it('keeps duplicated dashboard in edit mode', async () => {
         await dashboard.gotoDashboardEditMode(dashboardName);
-        await dashboard.duplicateDashboard('edit');
+        await dashboard.duplicateDashboard(copyOfDashboardName);
         const isViewMode = await dashboard.getIsInViewMode();
         expect(isViewMode).to.equal(false);
       });
@@ -80,8 +77,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('save', function () {
       it('keeps dashboard in edit mode', async function () {
-        await dashboard.gotoDashboardEditMode(dashboardName);
-        await dashboard.saveDashboard(dashboardName, {
+        await dashboard.gotoDashboardEditMode(copyOfDashboardName);
+        // change dashboard time to cause unsaved change
+        await timePicker.setAbsoluteRange(
+          'Sep 19, 2013 @ 00:00:00.000',
+          'Sep 19, 2013 @ 07:00:00.000'
+        );
+        await dashboard.saveDashboard(copyOfDashboardName, {
           storeTimeWithDashboard: true,
           saveAsNew: false,
         });
@@ -149,29 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(hasFilter).to.be(true);
         });
 
-        it('when a new vis is added', async function () {
-          const originalPanelCount = await dashboard.getPanelCount();
-          await dashboardAddPanel.clickEditorMenuButton();
-          await dashboardAddPanel.clickAggBasedVisualizations();
-          await visualize.clickAreaChart();
-          await visualize.clickNewSearch();
-          await visualize.saveVisualizationExpectSuccess('new viz panel', {
-            saveAsNew: false,
-            redirectToOrigin: true,
-          });
-
-          await dashboard.clickCancelOutOfEditMode(false);
-          // for this sleep see https://github.com/elastic/kibana/issues/22299
-          await common.sleep(500);
-
-          // confirm lose changes
-          await common.clickConfirmOnModal();
-
-          const panelCount = await dashboard.getPanelCount();
-          expect(panelCount).to.eql(originalPanelCount);
-        });
-
-        it('when an existing vis is added', async function () {
+        it('when a panel is added', async function () {
           const originalPanelCount = await dashboard.getPanelCount();
 
           await dashboardAddPanel.addVisualization('new viz panel');

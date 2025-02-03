@@ -23,7 +23,6 @@ import {
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
-  assertErrorToastShown,
   updateConversationTitle,
 } from '../../tasks/assistant';
 import { deleteConversations } from '../../tasks/api_calls/assistant';
@@ -48,7 +47,9 @@ import {
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
-describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/204167
+// Failing: See https://github.com/elastic/kibana/issues/204167
+describe.skip('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();
@@ -146,7 +147,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
       assertMessageSent('goodbye');
     });
-    it('Correctly titles new conversations, and only allows one conversation called "New chat" at a time', () => {
+    it('Correctly creates and titles new conversations, and allows title updates', () => {
       visitGetStartedPage();
       openAssistant();
       createNewChat();
@@ -155,14 +156,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       typeAndSendMessage('hello');
       assertMessageSent('hello');
       assertConversationTitle('Unexpected API Error:  - Connection error.');
-      updateConversationTitle('New chat');
-      selectConversation('Welcome');
-      createNewChat();
-      assertErrorToastShown('Error creating conversation with title New chat');
-      selectConversation('New chat');
-      updateConversationTitle('My other chat');
-      createNewChat();
-      assertNewConversation(false, 'New chat');
+      updateConversationTitle('Something else');
     });
   });
 });

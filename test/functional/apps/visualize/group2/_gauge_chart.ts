@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('gaugePercentageMode');
       await testSubjects.setValue('gaugePercentageModeFormatPattern', '0.0%');
       await visChart.waitForVisualizationRenderingStabilized();
-      await visEditor.clickGo(false);
+      await visEditor.clickGo(true);
 
       await retry.try(async function tryingForTime() {
         const expectedTexts = ['57.3%', 'Average bytes'];
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectField('machine.os.raw');
         log.debug('Size = 4');
         await visEditor.setSize(4);
-        await visEditor.clickGo(false);
+        await visEditor.clickGo(true);
       });
 
       it('should show Split Gauges', async () => {
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickBucket('Metric', 'metrics');
         await visEditor.selectAggregation('Min', 'metrics');
         await visEditor.selectField('bytes', 'metrics');
-        await visEditor.clickGo(false);
+        await visEditor.clickGo(true);
 
         await retry.try(async function tryingForTime() {
           const metricValue = await visChart.getGaugeValue();

@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const { common, dashboard, header, discover } = getPageObjects([
     'common',
     'dashboard',
@@ -142,6 +143,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show the the grid toolbar', async () => {
       await addSearchEmbeddableToDashboard();
       await testSubjects.existOrFail('unifiedDataTableToolbar');
+    });
+
+    it('should display search highlights', async () => {
+      await addSearchEmbeddableToDashboard();
+      await queryBar.setQuery('Mozilla');
+      await queryBar.submitQuery();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+      const marks = await find.allByCssSelector('.unifiedDataTable__cellValue mark');
+      const highlights = await Promise.all(
+        marks.map(async (highlight) => await highlight.getVisibleText())
+      );
+      expect(highlights.length).to.be.greaterThan(0);
+      expect(highlights.every((text) => text === 'Mozilla')).to.be(true);
     });
   });
 }
