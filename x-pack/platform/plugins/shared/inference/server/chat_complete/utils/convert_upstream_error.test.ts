@@ -8,10 +8,6 @@
 import { InferenceTaskErrorCode } from '@kbn/inference-common';
 import { convertUpstreamError } from './convert_upstream_error';
 
-// https://github.com/elastic/kibana/blob/49df29609e10429809f3710d6b8b1d5efbc833a7/x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts#L200-L202
-// Status code: 400. Message: API Error: model_error - The response was filtered due to the prompt triggering Azure OpenAI's content management policy. Please modify your prompt and retry.
-// status_exception - Received an authentication error status code for request from inference entity id [openai-chat_completion-uuid] status [401]. Error message: [Incorrect API key provided]
-
 const connectorError =
   "Status code: 400. Message: API Error: model_error - The response was filtered due to the prompt triggering Azure OpenAI's content management policy. Please modify your prompt and retry.";
 
