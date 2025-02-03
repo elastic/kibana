@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -69,8 +70,10 @@ import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/c
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
+import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -87,14 +90,17 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     useListsConfig();
   const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+
+  const { isRulesCustomizationEnabled, customizationDisabledReason } =
+    usePrebuiltRulesCustomizationStatus();
+  const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
+
+  const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage();
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
   const [activeStep, setActiveStep] = useState<RuleStep>(
-    !isPrebuiltRulesCustomizationEnabled && rule.immutable
-      ? RuleStep.ruleActions
-      : RuleStep.defineRule
+    canEditRule ? RuleStep.defineRule : RuleStep.ruleActions
   );
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
@@ -207,13 +213,19 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     dataViewId: defineStepData.dataViewId,
   });
 
+  const customizationDisabledTooltip =
+    !canEditRule && customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License
+      ? prebuiltCustomizationUpsellingMessage
+      : undefined;
+
   const tabs = useMemo(
     () => [
       {
         'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
-        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
+        disabled: !canEditRule,
+        tooltip: customizationDisabledTooltip,
         content: (
           <div
             style={{
@@ -252,7 +264,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
-        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
+        disabled: !canEditRule,
+        tooltip: customizationDisabledTooltip,
         content: (
           <div
             style={{
@@ -285,7 +298,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
-        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
+        disabled: !canEditRule,
+        tooltip: customizationDisabledTooltip,
         content: (
           <div
             style={{
@@ -337,10 +351,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       },
     ],
     [
-      isPrebuiltRulesCustomizationEnabled,
-      rule?.immutable,
-      rule.rule_source,
-      rule?.id,
+      canEditRule,
+      customizationDisabledTooltip,
       activeStep,
       loading,
       isSavedQueryLoading,
@@ -351,11 +363,13 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       indexPattern,
       isIndexPatternLoading,
       isQueryBarValid,
-      defineStepData,
       memoizedIndex,
+      defineStepData,
       aboutStepData,
       aboutStepForm,
       esqlQueryForAboutStep,
+      rule.rule_source,
+      rule?.id,
       scheduleStepData,
       scheduleStepForm,
       actionsStepData,
@@ -407,10 +421,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const onSubmit = useCallback(async () => {
     const actionsStepFormValid = await actionsStepForm.validate();
-    if (!isPrebuiltRulesCustomizationEnabled && rule.immutable) {
+    if (!canEditRule) {
       // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
       // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
-      // We will need to remove this condition once rule customization work is done.
       if (actionsStepFormValid) {
         await saveChanges();
       }
@@ -452,8 +465,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     await saveChanges();
   }, [
     actionsStepForm,
-    isPrebuiltRulesCustomizationEnabled,
-    rule.immutable,
+    canEditRule,
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
@@ -468,15 +480,16 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const renderTabs = () => {
     return tabs.map((tab, index) => (
-      <EuiTab
-        key={index}
-        onClick={() => onTabClick(tab)}
-        isSelected={tab.id === activeStep}
-        disabled={tab.disabled}
-        data-test-subj={tab['data-test-subj']}
-      >
-        {tab.name}
-      </EuiTab>
+      <EuiToolTip key={index} position="top" content={tab.tooltip}>
+        <EuiTab
+          onClick={() => onTabClick(tab)}
+          isSelected={tab.id === activeStep}
+          disabled={tab.disabled}
+          data-test-subj={tab['data-test-subj']}
+        >
+          {tab.name}
+        </EuiTab>
+      </EuiToolTip>
     ));
   };
 

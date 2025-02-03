@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import {
   RuleTranslationResult,
@@ -17,6 +18,7 @@ import { SecurityPageName } from '../../../../../common';
 import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { type TableColumn } from './constants';
+import { TableHeader } from './header';
 
 interface ActionNameProps {
   disableActions?: boolean;
@@ -91,7 +93,34 @@ export const createActionsColumn = ({
 }: CreateActionsColumnProps): TableColumn => {
   return {
     field: 'elastic_rule',
-    name: i18n.COLUMN_ACTIONS,
+    name: (
+      <TableHeader
+        title={i18n.COLUMN_ACTIONS}
+        tooltipContent={
+          <FormattedMessage
+            id="xpack.securitySolution.siemMigrations.rules.tableColumn.actionsTooltip"
+            defaultMessage="{title}
+            {view} - go to rule installed in the Detection rule (SIEM) page. {lineBreak}
+            {install} - add rule to your Detection rule (SEIM) without enabling. {lineBreak}
+            {edit} - Open detail view when a rule has not been fully translated."
+            values={{
+              lineBreak: <br />,
+              title: (
+                <EuiText size="s">
+                  <p>
+                    <b>{i18n.COLUMN_ACTIONS}</b>
+                    <EuiHorizontalRule margin="s" />
+                  </p>
+                </EuiText>
+              ),
+              view: <b>{i18n.ACTIONS_VIEW_LABEL}</b>,
+              install: <b>{i18n.ACTIONS_INSTALL_LABEL}</b>,
+              edit: <b>{i18n.ACTIONS_EDIT_LABEL}</b>,
+            }}
+          />
+        }
+      />
+    ),
     render: (_, rule: RuleMigration) => {
       return (
         <ActionName

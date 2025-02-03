@@ -45,12 +45,15 @@ import {
   userAuthenticationsSchema,
   usersSchema,
 } from './users/users';
+import { observedServiceDetailsSchema } from './services';
 
 export * from './first_seen_last_seen/first_seen_last_seen';
 
 export * from './hosts/hosts';
 
 export * from './users/users';
+
+export * from './services';
 
 export * from './network/network';
 
@@ -76,6 +79,7 @@ export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryTyp
   observedUserDetailsSchema,
   managedUserDetailsSchema,
   userAuthenticationsSchema,
+  observedServiceDetailsSchema,
   riskScoreRequestOptionsSchema,
   riskScoreKpiRequestOptionsSchema,
   relatedHostsRequestOptionsSchema,

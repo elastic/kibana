@@ -84,7 +84,12 @@ export const GrokPatternsEditor = () => {
           ))}
         </SortableList>
         <EuiSpacer size="m" />
-        <EuiButtonEmpty onClick={handleAddPattern} iconType="plusInCircle" flush="left">
+        <EuiButtonEmpty
+          data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
+          onClick={handleAddPattern}
+          iconType="plusInCircle"
+          flush="left"
+        >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.addPattern',
             { defaultMessage: 'Add pattern' }
@@ -132,11 +137,15 @@ const DraggablePatternInput = ({
               color="transparent"
               paddingSize="xs"
               {...provided.dragHandleProps}
-              aria-label="Drag Handle"
+              aria-label={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.dragHandleLabel',
+                { defaultMessage: 'Drag Handle' }
+              )}
             >
               <EuiIcon type="grab" />
             </EuiPanel>
             <EuiFieldText
+              data-test-subj="streamsAppDraggablePatternInputFieldText"
               {...inputPropsWithoutRef}
               inputRef={ref}
               compressed
@@ -144,6 +153,7 @@ const DraggablePatternInput = ({
             />
             {onRemove && (
               <EuiButtonIcon
+                data-test-subj="streamsAppDraggablePatternInputButton"
                 iconType="minusInCircle"
                 color="danger"
                 onClick={() => onRemove(idx)}

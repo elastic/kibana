@@ -26,6 +26,7 @@ import { getDashboardBackupService } from '../../services/dashboard_backup_servi
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices } from '../../services/kibana_services';
+import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
   dashboardListingErrorStrings,
@@ -341,7 +342,7 @@ export const useDashboardListingTable = ({
   );
 
   const contentInsightsClient = useMemo(
-    () => new ContentInsightsClient({ http: coreServices.http }, { domainId: 'dashboard' }),
+    () => new ContentInsightsClient({ http: coreServices.http, logger }, { domainId: 'dashboard' }),
     []
   );
 

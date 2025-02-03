@@ -19,6 +19,7 @@ import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { NoteCardsProps } from '../../notes/note_cards';
 import { NoteCards } from '../../notes/note_cards';
 import * as i18n from './translations';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export type NotesFlyoutProps = {
   show: boolean;
@@ -46,6 +47,9 @@ const NotesFlyoutContainer = styled(EuiFlyoutResizable)`
 export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutProps) {
   const { eventId, toggleShowAddNote, show, onClose, associateNote, notes, timelineId, onCancel } =
     props;
+  const {
+    notesPrivileges: { crud: showAddNote },
+  } = useUserPrivileges();
 
   const notesFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'notesFlyoutTitle',
@@ -78,7 +82,7 @@ export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutPro
             className="notes-in-flyout"
             data-test-subj="note-cards"
             notes={notes}
-            showAddNote={true}
+            showAddNote={showAddNote}
             toggleShowAddNote={toggleShowAddNote}
             eventId={eventId}
             timelineId={timelineId}

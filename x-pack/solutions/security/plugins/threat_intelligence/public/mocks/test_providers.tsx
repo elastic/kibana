@@ -138,13 +138,26 @@ export const mockedServices = {
   },
 };
 
-export const TestProvidersComponent: FC<PropsWithChildren<any>> = ({ children }) => (
+interface TestProvidersProps {
+  securityContextOverrides?: Partial<SecuritySolutionPluginContext>;
+}
+
+export const TestProvidersComponent: FC<PropsWithChildren<TestProvidersProps>> = ({
+  children,
+  securityContextOverrides,
+}) => (
   <MemoryRouter>
     <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
       <QueryClientProvider client={new QueryClient()}>
         <FieldTypesContext.Provider value={generateFieldTypeMap()}>
           <EuiThemeProvider>
-            <SecuritySolutionContext.Provider value={mockSecurityContext}>
+            <SecuritySolutionContext.Provider
+              value={
+                securityContextOverrides
+                  ? { ...mockSecurityContext, ...securityContextOverrides }
+                  : mockSecurityContext
+              }
+            >
               <KibanaContext.Provider value={{ services: mockedServices } as any}>
                 <I18nProvider>
                   <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>

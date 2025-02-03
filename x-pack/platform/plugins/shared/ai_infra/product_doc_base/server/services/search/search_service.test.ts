@@ -37,12 +37,14 @@ describe('SearchService', () => {
         query: 'What is Kibana?',
         products: ['kibana'],
         max: 42,
+        highlights: 3,
       });
 
       expect(performSearchMock).toHaveBeenCalledTimes(1);
       expect(performSearchMock).toHaveBeenCalledWith({
         searchQuery: 'What is Kibana?',
         size: 42,
+        highlights: 3,
         index: getIndicesForProductNames(['kibana']),
         client: esClient,
       });

@@ -9,6 +9,8 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { Callbacks } from '@langchain/core/callbacks/manager';
+import type { LangSmithOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   StartRuleMigrationRequestBody,
@@ -52,10 +54,6 @@ export const registerSiemRuleMigrationsStartRoute = (
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
 
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            const inferenceClient = ctx.securitySolution.getInferenceClient();
-            const actionsClient = ctx.actions.getActionsClient();
-            const soClient = ctx.core.savedObjects.client;
-            const rulesClient = await ctx.alerting.getRulesClient();
 
             if (retry) {
               const { updated } = await ruleMigrationsClient.task.updateToRetry(
@@ -67,21 +65,12 @@ export const registerSiemRuleMigrationsStartRoute = (
               }
             }
 
-            const invocationConfig = {
-              callbacks: [
-                new APMTracer({ projectName: langsmithOptions?.project_name ?? 'default' }, logger),
-                ...getLangSmithTracer({ ...langsmithOptions, logger }),
-              ],
-            };
+            const callbacks = createInvocationCallbacks(langsmithOptions, logger);
 
             const { exists, started } = await ruleMigrationsClient.task.start({
               migrationId,
               connectorId,
-              invocationConfig,
-              inferenceClient,
-              actionsClient,
-              soClient,
-              rulesClient,
+              invocationConfig: { callbacks },
             });
 
             if (!exists) {
@@ -96,3 +85,15 @@ export const registerSiemRuleMigrationsStartRoute = (
       )
     );
 };
+
+function createInvocationCallbacks(
+  langsmithOptions: LangSmithOptions | undefined,
+  logger: Logger
+): Callbacks {
+  const { api_key: apiKey, project_name: projectName = 'default' } = langsmithOptions ?? {};
+  const callbacks: Callbacks = [new APMTracer({ projectName }, logger)];
+  if (langsmithOptions) {
+    callbacks.push(...getLangSmithTracer({ apiKey, projectName, logger }));
+  }
+  return callbacks;
+}

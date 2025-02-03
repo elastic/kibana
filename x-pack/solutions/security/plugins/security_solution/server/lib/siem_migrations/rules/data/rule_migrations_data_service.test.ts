@@ -12,6 +12,7 @@ import type { InstallParams } from '@kbn/index-adapter';
 import { IndexPatternAdapter, IndexAdapter } from '@kbn/index-adapter';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Subject } from 'rxjs';
+import type { SiemRuleMigrationsClientDependencies } from '../types';
 import type { IndexNameProviders } from './rule_migrations_data_client';
 import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
 
@@ -30,6 +31,7 @@ const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedC
 >;
 const MockedIndexAdapter = IndexAdapter as unknown as jest.MockedClass<typeof IndexAdapter>;
 
+const dependencies = {} as SiemRuleMigrationsClientDependencies;
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 
 describe('SiemRuleMigrationsDataService', () => {
@@ -106,6 +108,7 @@ describe('SiemRuleMigrationsDataService', () => {
       spaceId: 'space1',
       currentUser,
       esScopedClient: elasticsearchServiceMock.createStart().client.asScoped(),
+      dependencies,
     };
 
     it('should install space index pattern', async () => {

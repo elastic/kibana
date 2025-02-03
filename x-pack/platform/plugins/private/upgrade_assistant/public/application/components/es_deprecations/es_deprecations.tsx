@@ -127,8 +127,8 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
     warningDeprecations: number;
     criticalDeprecations: number;
   } = useMemo(
-    () => getDeprecationCountByLevel(esDeprecations?.deprecations || []),
-    [esDeprecations?.deprecations]
+    () => getDeprecationCountByLevel(esDeprecations?.migrationsDeprecations || []),
+    [esDeprecations?.migrationsDeprecations]
   );
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
     return <SectionLoading>{i18nTexts.isLoading}</SectionLoading>;
   }
 
-  if (esDeprecations?.deprecations?.length === 0) {
+  if (esDeprecations?.migrationsDeprecations?.length === 0) {
     return (
       <NoDeprecationsPrompt
         deprecationType="Elasticsearch"
@@ -198,7 +198,10 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
 
       <EuiSpacer size="l" />
 
-      <EsDeprecationsTable deprecations={esDeprecations?.deprecations} reload={resendRequest} />
+      <EsDeprecationsTable
+        deprecations={esDeprecations?.migrationsDeprecations}
+        reload={resendRequest}
+      />
     </div>
   );
 });

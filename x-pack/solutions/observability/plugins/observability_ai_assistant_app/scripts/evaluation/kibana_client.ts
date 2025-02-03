@@ -25,7 +25,7 @@ import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assis
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, isAxiosError, AxiosRequestConfig } from 'axios';
 import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
 import {
@@ -81,6 +81,7 @@ export interface ChatClient {
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
   onResult: (cb: (result: EvaluationResult) => void) => () => void;
+  getConnectorId: () => string;
 }
 
 export class KibanaClient {
@@ -93,6 +94,7 @@ export class KibanaClient {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'kibana',
       },
     });
   }
@@ -118,17 +120,15 @@ export class KibanaClient {
   callKibana<T>(
     method: string,
     props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
-    data?: any
+    data?: any,
+    axiosParams: Partial<AxiosRequestConfig> = {}
   ) {
     const url = this.getUrl(props);
     return this.axios<T>({
       method,
       url,
       ...(method.toLowerCase() === 'delete' && !data ? {} : { data: data || {} }),
-      headers: {
-        'kbn-xsrf': 'true',
-        'x-elastic-internal-origin': 'Kibana',
-      },
+      ...axiosParams,
     }).catch((error) => {
       if (isAxiosError(error)) {
         const interestingPartsOfError = {
@@ -635,6 +635,7 @@ export class KibanaClient {
         onResultCallbacks.push({ callback, unregister });
         return unregister;
       },
+      getConnectorId: () => connectorId,
     };
   }
 

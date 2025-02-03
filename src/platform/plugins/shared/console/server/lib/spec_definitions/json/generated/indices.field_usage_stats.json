@@ -15,16 +15,6 @@
       ],
       "ignore_unavailable": "__flag__",
       "fields": [],
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
-      "timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "wait_for_active_shards": [
         "1",
         "all",
@@ -37,7 +27,7 @@
     "patterns": [
       "{index}/_field_usage_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/field-usage-stats.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/field-usage-stats.html",
     "availability": {
       "stack": true,
       "serverless": false

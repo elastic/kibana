@@ -21,6 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
 
   // FLAKY: https://github.com/elastic/kibana/issues/205269
+  // Failing: See https://github.com/elastic/kibana/issues/205269
   describe.skip('Maintenance windows table', function () {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');

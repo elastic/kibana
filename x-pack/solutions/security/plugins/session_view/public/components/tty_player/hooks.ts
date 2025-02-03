@@ -318,21 +318,26 @@ export const useXtermPlayer = ({
 
   useEffect(() => {
     if (isPlaying) {
-      const timer = setTimeout(() => {
-        if (!hasNextPage && currentLine === lines.length - 1) {
-          setIsPlaying(false);
-        } else {
-          const nextLine = Math.min(lines.length - 1, currentLine + 1);
-          render(nextLine, false);
-          setCurrentLine(nextLine);
-        }
-      }, playSpeed);
+      const timer = setInterval(
+        () =>
+          setCurrentLine((_currentLine) => {
+            if (!hasNextPage && _currentLine === lines.length - 1) {
+              setIsPlaying(false);
+              return _currentLine;
+            } else {
+              const nextLine = Math.min(lines.length - 1, _currentLine + 1);
+              render(nextLine, false);
+              return nextLine;
+            }
+          }),
+        playSpeed
+      );
 
       return () => {
-        clearTimeout(timer);
+        clearInterval(timer);
       };
     }
-  }, [lines, currentLine, isPlaying, playSpeed, render, hasNextPage, fetchNextPage, setIsPlaying]);
+  }, [lines, isPlaying, playSpeed, render, hasNextPage, fetchNextPage, setIsPlaying]);
 
   const seekToLine = useCallback(
     (index: any) => {

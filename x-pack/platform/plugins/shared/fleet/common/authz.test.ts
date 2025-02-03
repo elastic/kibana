@@ -69,7 +69,7 @@ describe('fleet authz', () => {
         navLinks: {},
         management: {},
         catalogue: {},
-        siem: endpointCapabilities,
+        siemV2: endpointCapabilities,
         transform: transformCapabilities,
       });
 
@@ -95,7 +95,7 @@ describe('fleet authz', () => {
         navLinks: {},
         management: {},
         catalogue: {},
-        siem: endpointExceptionsCapabilities,
+        siemV2: endpointExceptionsCapabilities,
       });
 
       expect(actual).toEqual(expected);
@@ -120,7 +120,7 @@ describe('fleet authz', () => {
         navLinks: {},
         management: {},
         catalogue: {},
-        siem: endpointCapabilities,
+        siemV2: endpointCapabilities,
       });
 
       expect(actual).toEqual(expected);

@@ -434,6 +434,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.NonEmptyString",
+        "type": "Object",
+        "tags": [],
+        "label": "NonEmptyString",
+        "description": [],
+        "signature": [
+          "Zod.ZodEffects<Zod.ZodString, string, string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ]
   }

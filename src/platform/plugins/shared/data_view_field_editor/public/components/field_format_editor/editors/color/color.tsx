@@ -7,37 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
-import {
-  EuiBasicTable,
-  EuiButton,
-  EuiColorPicker,
-  EuiIcon,
-  EuiFieldText,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
+import { Color, ColorRow } from './color_row';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 
 import { FormatEditorProps } from '../types';
-
-interface Color {
-  range?: string;
-  regex?: string;
-  boolean?: string;
-  text: string;
-  background: string;
-}
-
-interface IndexedColor extends Color {
-  index: number;
-}
 
 export interface ColorFormatEditorFormatParams {
   colors: Color[];
@@ -78,263 +58,44 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
     });
   };
 
-  getFirstColumn = (fieldType: string) => {
-    if (fieldType === 'boolean')
-      return {
-        field: 'boolean',
-        name: (
-          <FormattedMessage
-            id="indexPatternFieldEditor.color.booleanLabel"
-            defaultMessage="Boolean"
-          />
-        ),
-        render: (value: string, item: IndexedColor) => {
-          return (
-            <EuiSelect
-              options={[
-                { value: 'true', text: 'true' },
-                { value: 'false', text: 'false' },
-              ]}
-              value={value}
-              data-test-subj={`colorEditorKeyBoolean ${item.index}`}
-              onChange={(e) => {
-                this.onColorChange(
-                  {
-                    boolean: e.target.value,
-                  },
-                  item.index
-                );
-              }}
-            />
-          );
-        },
-      };
-    if (fieldType === 'string')
-      return {
-        field: 'regex',
-        name: (
-          <FormattedMessage
-            id="indexPatternFieldEditor.color.patternLabel"
-            defaultMessage="Pattern (regular expression)"
-          />
-        ),
-        render: (value: string, item: IndexedColor) => {
-          return (
-            <EuiFieldText
-              value={value}
-              data-test-subj={`colorEditorKeyPattern ${item.index}`}
-              onChange={(e) => {
-                this.onColorChange(
-                  {
-                    regex: e.target.value,
-                  },
-                  item.index
-                );
-              }}
-            />
-          );
-        },
-      };
-    return {
-      field: 'range',
-      name: (
-        <FormattedMessage
-          id="indexPatternFieldEditor.color.rangeLabel"
-          defaultMessage="Range (min:max)"
-        />
-      ),
-      render: (value: string, item: IndexedColor) => {
-        return (
-          <EuiFieldText
-            value={value}
-            data-test-subj={`colorEditorKeyRange ${item.index}`}
-            onChange={(e) => {
-              this.onColorChange(
-                {
-                  range: e.target.value,
-                },
-                item.index
-              );
-            }}
-          />
-        );
-      },
-    };
-  };
-
   render() {
     const { formatParams, fieldType } = this.props;
 
-    const items =
-      (formatParams.colors &&
-        formatParams.colors.length &&
-        formatParams.colors.map((color, index) => {
-          return {
-            ...color,
-            index,
-          };
-        })) ||
-      [];
-
-    const columns = [
-      this.getFirstColumn(fieldType),
-      {
-        field: 'text',
-        name: (
-          <FormattedMessage
-            id="indexPatternFieldEditor.color.textColorLabel"
-            defaultMessage="Text color"
-          />
-        ),
-        render: (color: string, item: IndexedColor) => {
-          return (
-            <EuiColorPicker
-              color={color}
-              data-test-subj={`colorEditorColorPicker ${item.index}`}
-              onChange={(newColor) => {
-                this.onColorChange(
-                  {
-                    text: newColor,
-                  },
-                  item.index
-                );
-              }}
-              button={
-                <EuiButton
-                  minWidth="false"
-                  iconType="lettering"
-                  color="text"
-                  onClick={() => {}}
-                  aria-label={i18n.translate(
-                    'indexPatternFieldEditor.color.letteringButtonAriaLabel',
-                    {
-                      defaultMessage: 'Select a text color for item {index}',
-                      values: {
-                        index: item.index,
-                      },
-                    }
-                  )}
-                >
-                  <EuiIcon
-                    aria-label={color}
-                    color={color}
-                    size="l"
-                    type="stopFilled"
-                    data-test-subj={'buttonColorSwatchIcon'}
-                  />
-                </EuiButton>
-              }
-              secondaryInputDisplay="bottom"
-            />
-          );
-        },
-      },
-      {
-        field: 'background',
-        name: (
-          <FormattedMessage
-            id="indexPatternFieldEditor.color.backgroundLabel"
-            defaultMessage="Background color"
-          />
-        ),
-        render: (color: string, item: IndexedColor) => {
-          return (
-            <EuiColorPicker
-              color={color}
-              data-test-subj={`colorEditorBackgroundPicker ${item.index}`}
-              onChange={(newColor) => {
-                this.onColorChange(
-                  {
-                    background: newColor,
-                  },
-                  item.index
-                );
-              }}
-              button={
-                <EuiButton
-                  minWidth="false"
-                  iconType="color"
-                  color="text"
-                  onClick={() => {}}
-                  aria-label={i18n.translate(
-                    'indexPatternFieldEditor.color.letteringButtonAriaLabel',
-                    {
-                      defaultMessage: 'Select a background color for item {index}',
-                      values: {
-                        index: item.index,
-                      },
-                    }
-                  )}
-                >
-                  <EuiIcon
-                    aria-label={color}
-                    color={color}
-                    size="l"
-                    type="stopFilled"
-                    data-test-subj={'buttonColorSwatchIcon'}
-                  />
-                </EuiButton>
-              }
-              secondaryInputDisplay="bottom"
-            />
-          );
-        },
-      },
-      {
-        name: (
-          <FormattedMessage
-            id="indexPatternFieldEditor.color.exampleLabel"
-            defaultMessage="Example"
-          />
-        ),
-        render: (item: IndexedColor) => {
-          return (
-            <div
-              style={{
-                background: item.background,
-                color: item.text,
-              }}
-            >
-              123456
-            </div>
-          );
-        },
-      },
-      {
-        field: 'actions',
-        name: i18n.translate('indexPatternFieldEditor.color.actions', {
-          defaultMessage: 'Actions',
-        }),
-        actions: [
-          {
-            name: i18n.translate('indexPatternFieldEditor.color.deleteAria', {
-              defaultMessage: 'Delete',
-            }),
-            description: i18n.translate('indexPatternFieldEditor.color.deleteTitle', {
-              defaultMessage: 'Delete color format',
-            }),
-            onClick: (item: IndexedColor) => {
-              this.removeColor(item.index);
-            },
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
-            available: () => items.length > 1,
-            'data-test-subj': 'colorEditorRemoveColor',
-          },
-        ],
-      },
-    ];
+    const colors = formatParams?.colors;
 
     return (
-      <Fragment>
-        <EuiBasicTable items={items} columns={columns} />
+      <>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiTitle size="xxs">
+            <h4>
+              <FormattedMessage
+                id="indexPatternFieldEditor.color.colorFormatterTitle"
+                defaultMessage="Color formatting"
+              />
+            </h4>
+          </EuiTitle>
+          {colors?.length > 0 &&
+            colors.map((color, index) => {
+              return (
+                <ColorRow
+                  key={index}
+                  fieldType={fieldType}
+                  color={color}
+                  index={index}
+                  onColorChange={this.onColorChange}
+                  onRemoveColor={this.removeColor}
+                  showDeleteButton={colors?.length > 1}
+                />
+              );
+            })}
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiButton
           iconType="plusInCircle"
           size="s"
           onClick={this.addColor}
-          data-test-subj={'colorEditorAddColor'}
+          data-test-subj="colorEditorAddColor"
         >
           <FormattedMessage
             id="indexPatternFieldEditor.color.addColorButton"
@@ -342,7 +103,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
           />
         </EuiButton>
         <EuiSpacer size="l" />
-      </Fragment>
+      </>
     );
   }
 }

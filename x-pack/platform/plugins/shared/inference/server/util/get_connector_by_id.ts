@@ -43,5 +43,6 @@ export const getConnectorById = async ({
     connectorId: connector.id,
     name: connector.name,
     type: connector.actionTypeId,
+    config: connector.config ?? {},
   };
 };

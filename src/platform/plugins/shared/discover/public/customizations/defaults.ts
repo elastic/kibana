@@ -11,8 +11,4 @@ import { DiscoverCustomizationContext } from './types';
 
 export const defaultCustomizationContext: DiscoverCustomizationContext = {
   displayMode: 'standalone',
-  inlineTopNav: {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  },
 };

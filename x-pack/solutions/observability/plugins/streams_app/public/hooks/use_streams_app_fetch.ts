@@ -55,6 +55,10 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
           },
         }),
       });
+
+      // log to console to get the actual stack trace
+      // eslint-disable-next-line no-console
+      console.log(error);
     }
   };
 
@@ -68,6 +72,7 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
       return callback({ signal });
     },
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     deps,
     optionsForHook
   );

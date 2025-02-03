@@ -102,6 +102,11 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  'event.ingested': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
   'host.name': {
     type: 'keyword',
     array: false,

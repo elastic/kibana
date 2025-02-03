@@ -35,6 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { PICK_ASSET_CRITICALITY } from './translations';
 import { AssetCriticalityBadge } from './asset_criticality_badge';
 import type { Entity, State } from './use_asset_criticality';
@@ -59,7 +60,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
   const onSave = (value: CriticalityLevelWithUnassigned) => {
     criticality.mutation.mutate({
       criticalityLevel: value,
-      idField: `${entity.type}.name`,
+      idField: EntityTypeToIdentifierField[entity.type],
       idValue: entity.name,
     });
     toggleModal(false);
