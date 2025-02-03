@@ -319,7 +319,9 @@ https://kbn.test.co in the same window.`);
           },
         }); // Second attempt succeeds
 
-      await finishSAMLHandshake(params, retryCount);
+      const response = await finishSAMLHandshake(params, retryCount);
+      expect(response.key).toEqual('sid');
+      expect(response.value).toEqual(cookieStr);
       expect(axiosRequestMock).toHaveBeenCalledTimes(2);
     });
 
