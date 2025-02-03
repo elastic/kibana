@@ -111,7 +111,7 @@ export const StatusRuleViz = ({
             iconType="inspect"
             size="s"
           >
-            {i18n.translate('xpack.synthetics.inspectButtonText', {
+            {i18n.translate('xpack.synthetics.rules.details', {
               defaultMessage: 'Details',
             })}
           </EuiButtonEmpty>
