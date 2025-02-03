@@ -37,13 +37,12 @@ import {
   IngestStreamLifecycle,
   IngestUpsertRequest,
   ReadStreamDefinition,
-  UnwiredReadStreamDefinition,
-  WiredReadStreamDefinition,
   isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
+  isUnwiredReadStream,
   isWiredReadStream,
 } from '@kbn/streams-schema';
 import {
@@ -81,14 +80,19 @@ function useLifecycleState({
   useEffect(() => {
     if (!definition) return;
 
-    const actions = [
-      {
+    const actions = [];
+
+    if (
+      isWiredReadStream(definition) ||
+      (isUnwiredReadStream(definition) && !isIlmLifecycle(definition.effective_lifecycle))
+    ) {
+      actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
           defaultMessage: 'Set specific retention days',
         }),
         action: LifecycleEditAction.Dsl,
-      },
-    ];
+      });
+    }
 
     if (isWiredReadStream(definition) && !isServerless) {
       actions.push({
@@ -109,7 +113,7 @@ function useLifecycleState({
     }
 
     setLifecycleActions(actions);
-  }, [definition]);
+  }, [definition, isServerless]);
 
   return {
     lifecycleActions,
@@ -124,7 +128,7 @@ export function StreamDetailLifecycle({
   definition,
   refreshDefinition,
 }: {
-  definition?: WiredReadStreamDefinition | UnwiredReadStreamDefinition;
+  definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
   const {
@@ -244,21 +248,19 @@ export function StreamDetailLifecycle({
                 `}
               >
                 <EuiFlexItem grow={1}>
-                  <RetentionSummary definition={definition} isServerless={isServerless} />
+                  <RetentionSummary definition={definition} />
                 </EuiFlexItem>
 
-                {isWiredReadStream(definition) ? (
-                  <EuiFlexItem grow={4}>
-                    <RetentionMetadata
-                      definition={definition}
-                      lifecycleActions={lifecycleActions}
-                      ilmLocator={ilmLocator}
-                      openEditModal={(action) => {
-                        setOpenEditModal(action);
-                      }}
-                    />
-                  </EuiFlexItem>
-                ) : null}
+                <EuiFlexItem grow={4}>
+                  <RetentionMetadata
+                    definition={definition}
+                    lifecycleActions={lifecycleActions}
+                    ilmLocator={ilmLocator}
+                    openEditModal={(action) => {
+                      setOpenEditModal(action);
+                    }}
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
@@ -268,65 +270,47 @@ export function StreamDetailLifecycle({
   );
 }
 
-function RetentionSummary({
-  definition,
-  isServerless,
-}: {
-  definition: ReadStreamDefinition;
-  isServerless: boolean;
-}) {
-  const isWired = isWiredReadStream(definition);
+function RetentionSummary({ definition }: { definition: ReadStreamDefinition }) {
+  const isUnwired = isUnwiredReadStream(definition);
 
   const summaryText = (() => {
     const lifecycle = definition.stream.ingest.lifecycle;
     if (isInheritLifecycle(lifecycle)) {
       return (
         <p>
-          {i18n.translate('xpack.streams.streamDetailLifecycle.useInheritPolicyNote', {
-            defaultMessage: 'This data stream is using an inherit policy.',
-          })}
-          <br />
-          {i18n.translate('xpack.streams.streamDetailLifecycle.overridePolicyNote', {
-            defaultMessage:
-              'You can override it with a custom data retention or with an ILM policy.',
+          {i18n.translate('xpack.streams.streamDetailLifecycle.inheritLifecycleNote', {
+            defaultMessage: 'This data stream is inheriting its lifecycle configuration.',
           })}
         </p>
       );
     } else if (isDslLifecycle(lifecycle)) {
-      const usingDsl = i18n.translate('xpack.streams.streamDetailLifecycle.useDslNote', {
-        defaultMessage: 'This data stream is using a custom data retention.',
-      });
-      return (
-        <p>
-          {usingDsl}
-          <br />
-          {!isWired || isRoot(definition.name)
-            ? 'You can modify it or use an ILM policy.'
-            : 'You can modify it, use an ILM policy or inherit the retention of the nearest parent.'}
-        </p>
-      );
+      const usingDsl =
+        isRoot(definition.name) || isUnwired
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleRootNote', {
+              defaultMessage: 'This data stream is using a custom data retention.',
+            })
+          : i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleNonRootNote', {
+              defaultMessage:
+                'This data stream is using a custom data retention as an override at this level.',
+            });
+      return <p>{usingDsl}</p>;
     } else if (isIlmLifecycle(lifecycle)) {
-      return (
-        <p>
-          This data stream is using an ILM policy
-          {isWired && !isRoot(definition.name) ? ' as an override at this level' : ''}.
-          <br />
-          {!isWired || isRoot(definition.name)
-            ? 'You can modify it or use a custom data retention.'
-            : 'You can modify it, use a custom data retention or inherit the retention of the nearest parent.'}
-        </p>
-      );
+      const usingIlm =
+        isRoot(definition.name) || isUnwired
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyRootNote', {
+              defaultMessage: 'This data stream is using an ILM policy.',
+            })
+          : i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyNonRootNote', {
+              defaultMessage:
+                'This data stream is using an ILM policy as an override at this level.',
+            });
+      return <p>{usingIlm}</p>;
     }
 
     return (
       <p>
         {i18n.translate('xpack.streams.streamDetailLifecycle.disabledPolicyNote', {
           defaultMessage: 'The retention for this data stream is disabled.',
-        })}
-
-        <br />
-        {i18n.translate('xpack.streams.streamDetailLifecycle.overrideDisabledPolicyNote', {
-          defaultMessage: 'You can set a custom data retention or use an ILM policy.',
         })}
       </p>
     );
@@ -363,7 +347,7 @@ function RetentionMetadata({
   lifecycleActions,
   openEditModal,
 }: {
-  definition: WiredReadStreamDefinition;
+  definition: ReadStreamDefinition;
   ilmLocator?: LocatorPublic<IlmLocatorParams>;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
@@ -396,40 +380,43 @@ function RetentionMetadata({
 
   const lifecycle = definition.effective_lifecycle;
 
-  const contextualMenu = (
-    <EuiPopover
-      button={
-        <EuiButton
-          data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
-          size="s"
-          fullWidth
-          onClick={() => setMenuOpen(!isMenuOpen)}
-        >
-          Edit data retention
-        </EuiButton>
-      }
-      isOpen={isMenuOpen}
-      closePopover={() => setMenuOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={[
-          {
-            id: 0,
-            items: lifecycleActions.map(({ name, action }) => ({
-              name,
-              onClick: () => {
-                setMenuOpen(false);
-                openEditModal(action);
-              },
-            })),
-          },
-        ]}
-      />
-    </EuiPopover>
-  );
+  const contextualMenu =
+    lifecycleActions.length === 0 ? null : (
+      <EuiPopover
+        button={
+          <EuiButton
+            data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
+            size="s"
+            fullWidth
+            onClick={() => setMenuOpen(!isMenuOpen)}
+          >
+            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
+              defaultMessage: 'Edit data retention',
+            })}
+          </EuiButton>
+        }
+        isOpen={isMenuOpen}
+        closePopover={() => setMenuOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={[
+            {
+              id: 0,
+              items: lifecycleActions.map(({ name, action }) => ({
+                name,
+                onClick: () => {
+                  setMenuOpen(false);
+                  openEditModal(action);
+                },
+              })),
+            },
+          ]}
+        />
+      </EuiPopover>
+    );
 
   const ilmLink = isIlmLifecycle(lifecycle) ? (
     <EuiBadge color="hollow">
@@ -450,20 +437,26 @@ function RetentionMetadata({
   ) : null;
 
   const lifecycleOrigin = isInheritLifecycle(definition.stream.ingest.lifecycle) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem grow={false}>Inherited from</EuiFlexItem>
-      <EuiFlexItem grow={false}>
+    <>
+      Inherited from{' '}
+      {isWiredReadStream(definition) ? (
         <EuiLink
           data-test-subj="streamsAppRetentionMetadataLink"
           target="_blank"
           href={router.link('/{key}/{tab}/{subtab}', {
-            path: { key: lifecycle.from, tab: 'management', subtab: 'lifecycle' },
+            path: {
+              key: definition.effective_lifecycle.from,
+              tab: 'management',
+              subtab: 'lifecycle',
+            },
           })}
         >
-          [{lifecycle.from}]
+          [{definition.effective_lifecycle.from}]
         </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      ) : (
+        'the underlying data stream'
+      )}
+    </>
   ) : (
     `Local override`
   );
@@ -533,7 +526,7 @@ function EditLifecycleModal({
   return <InheritModal {...options} />;
 }
 
-function DslModal({ closeModal, updateInProgress, updateLifecycle }: ModalOptions) {
+function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }: ModalOptions) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
     { name: 'Hours', value: 'h' },
@@ -549,11 +542,17 @@ function DslModal({ closeModal, updateInProgress, updateLifecycle }: ModalOption
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Edit data retention for stream</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.streams.streamDetailLifecycle.editRetention', {
+            defaultMessage: 'Edit data retention for stream',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        Specify a custom data retention period for this stream.
+        {i18n.translate('xpack.streams.streamDetailLifecycle.setCustomDsl', {
+          defaultMessage: 'Specify a custom data retention period for this stream.',
+        })}
         <EuiSpacer />
         <EuiFieldNumber
           data-test-subj="streamsAppDslModalFieldNumber"
@@ -612,6 +611,7 @@ function DslModal({ closeModal, updateInProgress, updateLifecycle }: ModalOption
       </EuiModalBody>
 
       <ModalFooter
+        definition={definition}
         confirmationLabel="Save"
         closeModal={closeModal}
         onConfirm={() => {
@@ -637,16 +637,13 @@ function IlmModal({
   updateInProgress,
   getIlmPolicies,
   ilmLocator,
-  definition: {
-    stream: {
-      ingest: { lifecycle: existingLifecycle },
-    },
-  },
+  definition,
 }: ModalOptions) {
-  const [policies, setPolicies] = useState<Array<EuiSelectableOption<IlmOptionData>>>([]);
+  const existingLifecycle = definition.stream.ingest.lifecycle;
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
   );
+  const [policies, setPolicies] = useState<Array<EuiSelectableOption<IlmOptionData>>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -688,8 +685,8 @@ function IlmModal({
 
     setIsLoading(true);
     getIlmPolicies()
-      .then((policies) => {
-        const policyOptions = policies.map(
+      .then((ilmPolicies) => {
+        const policyOptions = ilmPolicies.map(
           ({ name, policy }): EuiSelectableOption<IlmOptionData> => ({
             label: `${name}`,
             searchableLabel: name,
@@ -706,12 +703,16 @@ function IlmModal({
         setErrorMessage('body' in error ? error.body.message : error.message);
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [getIlmPolicies, setIsLoading]);
 
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Attach a lifecycle policy to this stream</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.streams.streamDetailLifecycle.attachIlm', {
+            defaultMessage: 'Attach a lifecycle policy to this stream',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -762,6 +763,7 @@ function IlmModal({
       </EuiModalBody>
 
       <ModalFooter
+        definition={definition}
         confirmationLabel="Attach policy"
         closeModal={closeModal}
         onConfirm={() => {
@@ -776,7 +778,7 @@ function IlmModal({
   );
 }
 
-function InheritModal({ closeModal, updateInProgress, updateLifecycle }: ModalOptions) {
+function InheritModal({ definition, closeModal, updateInProgress, updateLifecycle }: ModalOptions) {
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
@@ -788,7 +790,7 @@ function InheritModal({ closeModal, updateInProgress, updateLifecycle }: ModalOp
       </EuiModalHeader>
 
       <EuiModalBody>
-        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleDesc', {
+        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleWiredDesc', {
           defaultMessage:
             'All custom retention settings for this stream will be removed, resetting it to inherit data retention from its nearest parent.',
         })}
@@ -796,6 +798,7 @@ function InheritModal({ closeModal, updateInProgress, updateLifecycle }: ModalOp
       </EuiModalBody>
 
       <ModalFooter
+        definition={definition}
         confirmationLabel="Set to default"
         closeModal={closeModal}
         onConfirm={() => updateLifecycle({ inherit: {} })}
@@ -806,12 +809,14 @@ function InheritModal({ closeModal, updateInProgress, updateLifecycle }: ModalOp
 }
 
 function ModalFooter({
+  definition,
   updateInProgress,
   confirmationLabel,
   confirmationIsDisabled,
   onConfirm,
   closeModal,
 }: {
+  definition: ReadStreamDefinition;
   updateInProgress: boolean;
   confirmationLabel: string;
   confirmationIsDisabled?: boolean;
@@ -821,24 +826,29 @@ function ModalFooter({
   return (
     <EuiModalFooter>
       <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.streams.streamDetailLifecycle.lifecycleDependentImpactTitle',
-              {
-                defaultMessage: 'Retention changes for dependent streams',
-              }
-            )}
-            iconType="logstashFilter"
-          >
-            <p>
-              {i18n.translate('xpack.streams.streamDetailLifecycle.lifecycleDependentImpactDesc', {
-                defaultMessage:
-                  'Data retention changes will apply to dependant streams unless they already have custom retention settings in place.',
-              })}
-            </p>
-          </EuiCallOut>
-        </EuiFlexItem>
+        {isWiredReadStream(definition) ? (
+          <EuiFlexItem>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.streams.streamDetailLifecycle.lifecycleDependentImpactTitle',
+                {
+                  defaultMessage: 'Retention changes for dependent streams',
+                }
+              )}
+              iconType="logstashFilter"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.streams.streamDetailLifecycle.lifecycleDependentImpactDesc',
+                  {
+                    defaultMessage:
+                      'Data retention changes will apply to dependant streams unless they already have custom retention settings in place.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
 
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
@@ -849,7 +859,9 @@ function ModalFooter({
                 color="primary"
                 onClick={() => closeModal()}
               >
-                Cancel
+                {i18n.translate('xpack.streams.streamDetailLifecycle.cancelLifecycleUpdate', {
+                  defaultMessage: 'Cancel',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
 

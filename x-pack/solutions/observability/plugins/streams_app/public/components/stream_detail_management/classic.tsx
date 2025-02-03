@@ -18,7 +18,7 @@ import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 type ManagementSubTabs = 'enrich' | 'overview';
 
 function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['enrich', 'overview'].includes(value);
+  return ['enrich', 'overview', 'lifecycle'].includes(value);
 }
 
 export function ClassicStreamDetailManagement({
@@ -70,10 +70,13 @@ export function ClassicStreamDetailManagement({
         defaultMessage: 'Extract field',
       }),
     };
-    
-    tabs.lifecycle: {
+
+    tabs.lifecycle = {
       content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+        <StreamDetailLifecycle
+          definition={legacyDefinition}
+          refreshDefinition={refreshDefinition}
+        />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
         defaultMessage: 'Data retention',
