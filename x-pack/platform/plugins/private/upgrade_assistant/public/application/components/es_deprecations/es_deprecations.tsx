@@ -77,7 +77,6 @@ const getBatchReindexLink = (docLinks: DocLinksStart) => {
   return (
     <FormattedMessage
       id="xpack.upgradeAssistant.esDeprecations.batchReindexingDocsDescription"
-      // defaultMessage="To start multiple reindexing tasks in a single request, use the Kibana {docsLink}."
       defaultMessage="To start upgrading multiple reindexing tasks in a single request, use the Kibana {docsLink} for indices. The {docsLink} does not support data streams."
       values={{
         docsLink: (
