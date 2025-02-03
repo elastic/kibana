@@ -19,7 +19,7 @@
       "inference"
     ],
     "optionalPlugins": ["cloud", "serverless"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "esUiShared"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "runtimePluginDependencies": ["ml"],
     "extraPublicDirs": []
   }

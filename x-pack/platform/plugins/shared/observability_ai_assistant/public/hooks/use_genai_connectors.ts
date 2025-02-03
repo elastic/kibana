@@ -8,10 +8,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 import { useKibana } from './use_kibana';
+import { isInferenceEndpointExists } from './inference_endpoint_exists';
 
 export interface UseGenAIConnectorsResult {
   connectors?: FindActionResult[];

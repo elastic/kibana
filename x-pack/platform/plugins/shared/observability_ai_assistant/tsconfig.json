@@ -52,7 +52,6 @@
     "@kbn/inference-plugin",
     "@kbn/ai-assistant-icon",
     "@kbn/security-authorization-core-common",
-    "@kbn/inference-endpoint-ui-common"
   ],
   "exclude": ["target/**/*"]
 }
