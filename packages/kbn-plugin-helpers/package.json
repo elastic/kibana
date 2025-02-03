@@ -6,16 +6,5 @@
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
-  },
-  "dependencies": {
-    "@kbn/dev-cli-errors": "link:../kbn-dev-cli-errors",
-    "@kbn/dev-cli-runner": "link:../kbn-dev-cli-runner",
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/jest-serializers": "link:../kbn-jest-serializers",
-    "@kbn/optimizer": "link:../kbn-optimizer",
-    "@kbn/repo-info": "link:../../src/platform/packages/shared/kbn-repo-info",
-    "@kbn/repo-packages": "link:../../src/platform/packages/private/kbn-repo-packages",
-    "@kbn/stdio-dev-helpers": "link:../kbn-stdio-dev-helpers",
-    "@kbn/tooling-log": "link:../kbn-tooling-log"
   }
 }
