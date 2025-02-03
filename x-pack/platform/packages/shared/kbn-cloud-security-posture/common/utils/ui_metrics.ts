@@ -48,7 +48,8 @@ export const CHANGE_RULE_STATE = 'change-rule-state' as const;
 export const GRAPH_PREVIEW = 'graph-preview' as const;
 export const GRAPH_INVESTIGATION = 'graph-investigation' as const;
 
-export const ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS = 'asset-inventory-expand-flyout-success' as const;
+export const ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS =
+  'asset-inventory-expand-flyout-success' as const;
 export const ASSET_INVENTORY_EXPAND_FLYOUT_ERROR = 'asset-inventory-expand-flyout-error' as const;
 export const UNIVERSAL_ENTITY_FLYOUT_OPENED = 'universal-entity-flyout-opened' as const;
 
@@ -72,7 +73,10 @@ export type CloudSecurityUiCounters =
   | typeof VULNERABILITIES_INSIGHT_HOST_DETAILS
   | typeof VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW
   | typeof GRAPH_PREVIEW
-  | typeof GRAPH_INVESTIGATION;
+  | typeof GRAPH_INVESTIGATION
+  | typeof ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS
+  | typeof ASSET_INVENTORY_EXPAND_FLYOUT_ERROR
+  | typeof UNIVERSAL_ENTITY_FLYOUT_OPENED;
 
 export class UiMetricService {
   private usageCollection: UsageCollectionSetup | undefined;
