@@ -50,6 +50,7 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
+import { AnonymizedValuesAndCitationsTour } from '../tour/anonymized_values_and_citations_tour';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -446,6 +447,10 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   return (
+    <>
+    {contentReferencesEnabled && (
+      <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
+    )}
     <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
       {chatHistoryVisible && (
         <EuiFlexItem
@@ -636,6 +641,7 @@ const AssistantComponent: React.FC<Props> = ({
         </CommentContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
+    </>
   );
 };
 
