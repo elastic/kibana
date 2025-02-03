@@ -99,9 +99,13 @@ export function TransactionDetailsTabs() {
           rangeFrom,
           rangeTo,
         },
+        customMetrics: {
+          key1: 'traceDocsTotal',
+          value1: traceSamplesFetchResult.data?.traceSamples?.length ?? 0,
+        },
       });
     }
-  }, [traceSamplesFetchResult.status, onPageReady, rangeFrom, rangeTo]);
+  }, [traceSamplesFetchResult, onPageReady, rangeFrom, rangeTo]);
 
   useEffect(() => {
     const selectedSample = traceSamplesFetchResult.data?.traceSamples.find(
