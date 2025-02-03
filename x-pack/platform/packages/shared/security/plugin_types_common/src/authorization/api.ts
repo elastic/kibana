@@ -4,5 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { isMinimalPrivilegeId, getMinimalPrivilegeId, ApiPrivileges } from './src/privileges';
+export enum ApiOperation {
+  Read = 'read',
+  Create = 'create',
+  Update = 'update',
+  Delete = 'delete',
+  Manage = 'manage',
+}
