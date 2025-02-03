@@ -45,13 +45,9 @@ export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
   return (
     <EuiFlyout onClose={() => reset()} maxWidth="500px">
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2>{selectedField?.name}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="m">
+          <h2>{selectedField?.name}</h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -74,29 +70,25 @@ export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="streamsAppSchemaEditorFlyoutCloseButton"
-              iconType="cross"
-              onClick={() => reset()}
-              flush="left"
-            >
-              {i18n.translate('xpack.streams.schemaEditorFlyout.closeButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="streamsAppSchemaEditorFieldSaveButton"
-              isDisabled={isSaving || !saveChanges}
-              onClick={() => saveChanges && saveChanges()}
-            >
-              {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {
-                defaultMessage: 'Save changes',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiButtonEmpty
+            data-test-subj="streamsAppSchemaEditorFlyoutCloseButton"
+            iconType="cross"
+            onClick={reset}
+            flush="left"
+          >
+            {i18n.translate('xpack.streams.schemaEditorFlyout.closeButtonLabel', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
+          <EuiButton
+            data-test-subj="streamsAppSchemaEditorFieldSaveButton"
+            isDisabled={isSaving || !saveChanges}
+            onClick={saveChanges}
+          >
+            {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {
+              defaultMessage: 'Save changes',
+            })}
+          </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

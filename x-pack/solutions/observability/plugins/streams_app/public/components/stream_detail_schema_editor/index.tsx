@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiPortal } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
@@ -19,6 +19,8 @@ import { FieldsTableContainer } from './fields_table';
 import { FieldTypeFilterGroup } from './filters/type_filter_group';
 import { useQueryAndFilters } from './hooks/use_query_and_filters';
 import { FieldStatusFilterGroup } from './filters/status_filter_group';
+import { SchemaEditor } from './schema_editor';
+import { SchemaField, SchemaFieldStatus } from './types';
 
 interface SchemaEditorProps {
   definition?: WiredStreamGetResponse;
@@ -47,7 +49,7 @@ const Content = ({
     },
   } = useKibana();
 
-  const queryAndFiltersState = useQueryAndFilters();
+  // const queryAndFiltersState = useQueryAndFilters();
 
   const {
     value: unmappedFieldsValue,
@@ -90,35 +92,51 @@ const Content = ({
     reset();
   }, [definition.stream.name, reset]);
 
+  const fields = useMemo(() => {
+    const inheritedFields: SchemaField[] = Object.entries(definition.inherited_fields).map(
+      ([name, field]) => ({
+        name,
+        type: field.type,
+        format: field.format,
+        parent: field.from,
+        status: 'inherited',
+      })
+    );
+
+    const mappedFields: SchemaField[] = Object.entries(definition.stream.ingest.wired.fields).map(
+      ([name, field]) => ({
+        name,
+        type: field.type,
+        format: field.format,
+        parent: definition.stream.name,
+        status: 'mapped',
+      })
+    );
+
+    const unmappedFields: SchemaField[] =
+      unmappedFieldsValue?.unmappedFields.map((field) => ({
+        name: field,
+        parent: definition.stream.name,
+        status: 'unmapped',
+      })) ?? [];
+
+    return [...inheritedFields, ...mappedFields, ...unmappedFields];
+  }, [definition, unmappedFieldsValue]);
+
+  return (
+    <SchemaEditor
+      fields={fields}
+      isLoading={isLoadingDefinition || isLoadingUnmappedFields}
+      stream={definition.stream}
+      withControls
+      withTableActions
+    />
+  );
+
   return (
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {isLoadingDefinition || isLoadingUnmappedFields ? (
-          <EuiPortal>
-            <EuiProgress size="xs" color="accent" position="fixed" />
-          </EuiPortal>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <SimpleSearchBar
-                query={queryAndFiltersState.query}
-                onChange={(nextQuery) =>
-                  queryAndFiltersState.setQuery(nextQuery.query ?? undefined)
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FieldTypeFilterGroup onChangeFilterGroup={queryAndFiltersState.changeFilterGroups} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FieldStatusFilterGroup
-                onChangeFilterGroup={queryAndFiltersState.changeFilterGroups}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem
+        {/* <EuiFlexItem
           className={css`
             overflow: auto;
           `}
@@ -131,7 +149,7 @@ const Content = ({
             unpromotingState={unpromotingState}
             queryAndFiltersState={queryAndFiltersState}
           />
-        </EuiFlexItem>
+        </EuiFlexItem> */}
 
         {editingState.selectedField && (
           <SchemaEditorFlyout

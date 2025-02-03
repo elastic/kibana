@@ -23,12 +23,13 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { isRootStreamDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
-import { FieldType } from './field_type';
+import { FieldNameWithIcon } from '@kbn/react-field';
 import { FieldStatusBadge } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
 import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 import { FieldParent } from './field_parent';
 import { SchemaEditorQueryAndFiltersState } from './hooks/use_query_and_filters';
+import { FIELD_TYPE_MAP } from './configuration_maps';
 
 interface FieldsTableContainerProps {
   definition: WiredStreamGetResponse;
@@ -296,7 +297,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
         if (columnId === 'type') {
           const fieldType = field.type;
           if (!fieldType) return EMPTY_CONTENT;
-          return <FieldType type={fieldType} />;
+          return <FieldNameWithIcon name={FIELD_TYPE_MAP[fieldType].label} type={fieldType} />;
         } else if (columnId === 'parent') {
           return (
             <FieldParent
@@ -335,9 +336,7 @@ export const ActionsCell = ({ panels }: { panels: EuiContextMenuPanelDescriptor[
         <EuiButtonIcon
           aria-label={i18n.translate(
             'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
-            {
-              defaultMessage: 'Open actions menu',
-            }
+            { defaultMessage: 'Open actions menu' }
           )}
           data-test-subj="streamsAppActionsButton"
           iconType="boxesVertical"
