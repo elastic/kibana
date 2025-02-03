@@ -20,7 +20,7 @@ interface UseRulePreviewFlyoutBaseParams {
   ruleActionsFactory: (
     rule: RuleResponse,
     closeRulePreview: () => void,
-    isRuleEdited: boolean
+    isEditingRule: boolean
   ) => ReactNode;
   extraTabsFactory?: (rule: RuleResponse) => EuiTabbedContentTab[];
   subHeaderFactory?: (rule: RuleResponse) => ReactNode;
@@ -64,7 +64,7 @@ export function useRulePreviewFlyout({
     [rules, setRuleForPreview]
   );
   const rulePreviewFlyout = (
-    <RulePreviewContextProvider key={rule?.rule_id}>
+    <RulePreviewContextProvider ruleId={rule?.rule_id}>
       <RulePreviewFlyoutInternal
         rule={rule}
         closeRulePreview={closeRulePreview}
