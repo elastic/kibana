@@ -20,19 +20,19 @@ interface GroupStreamGetResponse extends StreamGetResponseBase {
   stream: GroupStreamDefinitionBase;
 }
 
-/**
- * Group upsert request
- */
-interface GroupStreamUpsertRequest extends StreamUpsertRequestBase {
-  stream: GroupStreamDefinitionBase;
-}
-
 const groupStreamGetResponseSchema: z.Schema<GroupStreamGetResponse> = z.intersection(
   streamGetResponseSchemaBase,
   z.object({
     stream: groupStreamDefinitionBaseSchema,
   })
 );
+
+/**
+ * Group upsert request
+ */
+interface GroupStreamUpsertRequest extends StreamUpsertRequestBase {
+  stream: GroupStreamDefinitionBase;
+}
 
 const groupStreamUpsertRequestSchema: z.Schema<GroupStreamUpsertRequest> = z.intersection(
   streamUpsertRequestSchemaBase,
