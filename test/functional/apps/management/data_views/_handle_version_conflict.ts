@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const toasts = getService('toasts');
 
-  describe('FOO index version conflict', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/193102
+  describe.skip('FOO index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

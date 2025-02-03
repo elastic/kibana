@@ -7,6 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import {
+  DiscoverLogsLocatorDefinition,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
   TraceLogsLocatorDefinition,
@@ -28,9 +29,18 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     this.logViews = new LogViewsService();
   }
 
-  public setup(_: LogsSharedClientCoreSetup, pluginsSetup: LogsSharedClientSetupDeps) {
+  public setup(coreSetup: LogsSharedClientCoreSetup, pluginsSetup: LogsSharedClientSetupDeps) {
     const logViews = this.logViews.setup();
 
+    const discoverLogsLocator = pluginsSetup.share.url.locators.create(
+      new DiscoverLogsLocatorDefinition({
+        locators: pluginsSetup.share.url.locators,
+        getLogSourcesService: async () => {
+          const [_, pluginsStart] = await coreSetup.getStartServices();
+          return pluginsStart.logsDataAccess.services.logSourcesService;
+        },
+      })
+    );
     const logsLocator = pluginsSetup.share.url.locators.create(
       new LogsLocatorDefinition(pluginsSetup.share.url.locators)
     );
@@ -43,6 +53,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     );
 
     const locators = {
+      discoverLogsLocator,
       logsLocator,
       nodeLogsLocator,
       traceLogsLocator,

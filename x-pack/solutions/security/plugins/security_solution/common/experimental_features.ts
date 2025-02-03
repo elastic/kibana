@@ -218,12 +218,8 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the storing of gaps in the event log
    */
-  manualRuleRunEnabled: false,
-
-  /**
-   * Enables the storing of gaps in the event log
-   */
   storeGapsInEventLogEnabled: false,
+
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
@@ -286,7 +282,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables banner for informing users about changes in data collection.
    */
-  eventCollectionDataReductionBannerEnabled: false,
+  eventCollectionDataReductionBannerEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

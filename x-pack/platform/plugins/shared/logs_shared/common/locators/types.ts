@@ -9,6 +9,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LogViewReference } from '../log_views/types';
 import { TimeRange } from './time_range';
+import type { DiscoverLogsLocatorParams } from './discover_logs_locator';
 
 export interface LogsLocatorParams extends SerializableRecord {
   /** Defines log position */
@@ -31,6 +32,7 @@ export interface NodeLogsLocatorParams extends LogsLocatorParams {
 }
 
 export interface LogsSharedLocators {
+  discoverLogsLocator: LocatorPublic<DiscoverLogsLocatorParams>;
   logsLocator: LocatorPublic<LogsLocatorParams>;
   nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
   traceLogsLocator: LocatorPublic<TraceLogsLocatorParams>;
