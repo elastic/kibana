@@ -6,13 +6,22 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subscription, of, from, merge, delay, combineLatest, forkJoin, mergeMap } from 'rxjs';
+import {
+  Subscription,
+  of,
+  from,
+  merge,
+  delay,
+  combineLatest,
+  forkJoin,
+  mergeMap,
+  takeWhile,
+} from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
   timer,
   switchMap,
-  takeUntil,
   distinctUntilChanged,
   map,
   shareReplay,
@@ -65,14 +74,12 @@ export class TrainedModelsService {
   private readonly _reloadSubject$ = new Subject();
 
   private readonly _modelItems$ = new BehaviorSubject<TrainedModelUIItem[]>([]);
-  private readonly stopPolling$ = new Subject<void>();
   private readonly downloadStatus$ = new BehaviorSubject<ModelDownloadStatus>({});
   private readonly downloadInProgress = new Set<string>();
   private readonly deploymentInProgress = new Set<string>();
   private pollingSubscription?: Subscription;
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
-  public isInitialized = false;
   private setScheduledDeployments?: (deployingModels: ModelDeploymentParams[]) => void;
   private displayErrorToast?: (error: ErrorType, title?: string) => void;
   private displaySuccessToast?: (toast: { title: string; text: string }) => void;
@@ -82,6 +89,7 @@ export class TrainedModelsService {
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
   private savedObjectsApiService!: SavedObjectsApiService;
   private canManageSpacesAndSavedObjects!: boolean;
+  private isInitialized = false;
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -483,7 +491,7 @@ export class TrainedModelsService {
 
     this.pollingSubscription = timer(0, DOWNLOAD_POLL_INTERVAL)
       .pipe(
-        takeUntil(this.stopPolling$),
+        takeWhile(() => this.downloadStatusFetchInProgress),
         switchMap(() => this.trainedModelsApiService.getModelsDownloadStatus()),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         withLatestFrom(this._modelItems$)
@@ -546,7 +554,6 @@ export class TrainedModelsService {
   }
 
   private stopPolling() {
-    this.stopPolling$.next();
     if (this.pollingSubscription) {
       this.pollingSubscription.unsubscribe();
     }
