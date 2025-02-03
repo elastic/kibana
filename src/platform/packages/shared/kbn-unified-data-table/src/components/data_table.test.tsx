@@ -584,16 +584,16 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
-        Object {
-          "columns": Array [
-            Object {
-              "direction": "desc",
-              "id": "message",
-            },
-          ],
-          "onSort": [Function],
-        }
-      `);
+                  Object {
+                    "columns": Array [
+                      Object {
+                        "direction": "desc",
+                        "id": "message",
+                      },
+                    ],
+                    "onSort": [Function],
+                  }
+              `);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -612,20 +612,20 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
-        Object {
-          "columns": Array [
-            Object {
-              "direction": "desc",
-              "id": "bytes",
-            },
-            Object {
-              "direction": "desc",
-              "id": "message",
-            },
-          ],
-          "onSort": [Function],
-        }
-      `);
+                  Object {
+                    "columns": Array [
+                      Object {
+                        "direction": "desc",
+                        "id": "bytes",
+                      },
+                      Object {
+                        "direction": "desc",
+                        "id": "message",
+                      },
+                    ],
+                    "onSort": [Function],
+                  }
+              `);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -644,31 +644,31 @@ describe('UnifiedDataTable', () => {
 
         expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
           .toMatchInlineSnapshot(`
-        Object {
-          "additionalControls": null,
-          "showColumnSelector": false,
-          "showDisplaySelector": Object {
-            "additionalDisplaySettings": <React.Fragment>
-              <UnifiedDataTableAdditionalDisplaySettings
-                headerRowHeight="custom"
-                headerRowHeightLines={1}
-                onChangeRowHeight={[Function]}
-                onChangeRowHeightLines={[Function]}
-                onChangeSampleSize={[MockFunction]}
-                rowHeight="custom"
-                rowHeightLines={3}
-                sampleSize={150}
-              />
-            </React.Fragment>,
-            "allowDensity": false,
-            "allowResetButton": false,
-            "allowRowHeight": false,
-          },
-          "showFullScreenSelector": true,
-          "showKeyboardShortcuts": true,
-          "showSortSelector": true,
-        }
-      `);
+          Object {
+            "additionalControls": null,
+            "showColumnSelector": false,
+            "showDisplaySelector": Object {
+              "additionalDisplaySettings": <React.Fragment>
+                <UnifiedDataTableAdditionalDisplaySettings
+                  headerLineCountInput={1}
+                  headerRowHeight="custom"
+                  lineCountInput={3}
+                  onChangeRowHeight={[Function]}
+                  onChangeRowHeightLines={[Function]}
+                  onChangeSampleSize={[MockFunction]}
+                  rowHeight="custom"
+                  sampleSize={150}
+                />
+              </React.Fragment>,
+              "allowDensity": false,
+              "allowResetButton": false,
+              "allowRowHeight": false,
+            },
+            "showFullScreenSelector": true,
+            "showKeyboardShortcuts": true,
+            "showSortSelector": true,
+          }
+        `);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -684,30 +684,30 @@ describe('UnifiedDataTable', () => {
 
         expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
           .toMatchInlineSnapshot(`
-        Object {
-          "additionalControls": null,
-          "showColumnSelector": false,
-          "showDisplaySelector": Object {
-            "additionalDisplaySettings": <React.Fragment>
-              <UnifiedDataTableAdditionalDisplaySettings
-                headerRowHeight="custom"
-                headerRowHeightLines={1}
-                onChangeRowHeight={[Function]}
-                onChangeRowHeightLines={[Function]}
-                rowHeight="custom"
-                rowHeightLines={3}
-                sampleSize={200}
-              />
-            </React.Fragment>,
-            "allowDensity": false,
-            "allowResetButton": false,
-            "allowRowHeight": false,
-          },
-          "showFullScreenSelector": true,
-          "showKeyboardShortcuts": true,
-          "showSortSelector": true,
-        }
-      `);
+          Object {
+            "additionalControls": null,
+            "showColumnSelector": false,
+            "showDisplaySelector": Object {
+              "additionalDisplaySettings": <React.Fragment>
+                <UnifiedDataTableAdditionalDisplaySettings
+                  headerLineCountInput={1}
+                  headerRowHeight="custom"
+                  lineCountInput={3}
+                  onChangeRowHeight={[Function]}
+                  onChangeRowHeightLines={[Function]}
+                  rowHeight="custom"
+                  sampleSize={200}
+                />
+              </React.Fragment>,
+              "allowDensity": false,
+              "allowResetButton": false,
+              "allowRowHeight": false,
+            },
+            "showFullScreenSelector": true,
+            "showKeyboardShortcuts": true,
+            "showSortSelector": true,
+          }
+        `);
       },
       EXTENDED_JEST_TIMEOUT
     );
