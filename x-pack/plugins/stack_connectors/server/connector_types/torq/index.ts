@@ -128,7 +128,8 @@ function validateActionTypeConfig(
     );
   }
 
-  if (configureUrlObj.hostname !== 'hooks.torq.io' && configureUrlObj.hostname !== 'localhost') {
+  const isValidHostname = /^hooks(\.[a-z0-9]+)*\.torq\.io$/.test(configureUrlObj.hostname) || configureUrlObj.hostname === 'localhost';
+  if (!isValidHostname) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.torq.torqConfigurationErrorInvalidHostname', {
         defaultMessage:
