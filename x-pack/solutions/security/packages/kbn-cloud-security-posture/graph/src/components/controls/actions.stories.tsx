@@ -10,6 +10,7 @@ import type { Meta, Story } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 export default {
   title: 'Components/Graph Components/Additional Components',
@@ -19,6 +20,7 @@ export default {
       control: 'object',
     },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 } as Meta;
 
 const Template: Story<ActionsProps> = (props) => {

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { disableStreams, enableStreams, putStream } from './helpers/requests';
+import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
@@ -17,6 +17,7 @@ import {
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',
   ingest: {
+    lifecycle: { dsl: {} },
     processing: [],
     routing: [],
     wired: {
@@ -33,6 +34,9 @@ const rootStreamDefinition: WiredStreamDefinition = {
         'log.level': {
           type: 'keyword',
         },
+        'stream.name': {
+          type: 'keyword',
+        },
       },
     },
   },
@@ -41,6 +45,7 @@ const rootStreamDefinition: WiredStreamDefinition = {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
+  const esClient = getService('es');
 
   describe('Root stream', () => {
     before(async () => {
@@ -121,6 +126,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
       const response = await putStream(apiClient, 'logs', body);
       expect(response).to.have.property('acknowledged', true);
+    });
+
+    it('Should not allow sending data directly to a child stream', async () => {
+      const doc = {
+        '@timestamp': '2024-01-01T00:00:20.000Z',
+        message: 'test',
+      };
+      let threw = false;
+      try {
+        await indexDocument(esClient, 'logs.gcpcloud', doc);
+      } catch (e) {
+        threw = true;
+        expect(e.message).to.contain('stream.name is not set properly');
+      }
+      expect(threw).to.be(true);
     });
   });
 }

@@ -28,16 +28,16 @@ export const DragPreview = ({
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
         gridLayoutStateManager.activePanel$,
-        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.proposedGridLayout$,
       ])
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
-        .subscribe(([activePanel, gridLayout]) => {
+        .subscribe(([activePanel, proposedGridLayout]) => {
           if (!dragPreviewRef.current) return;
 
-          if (!activePanel || !gridLayout[rowIndex].panels[activePanel.id]) {
+          if (!activePanel || !proposedGridLayout?.[rowIndex].panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = gridLayout[rowIndex].panels[activePanel.id];
+            const panel = proposedGridLayout[rowIndex].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;

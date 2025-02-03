@@ -22,7 +22,7 @@ export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSET_INVENTORY_FEATURE_ID = 'securitySolutionAssetInventory' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
-export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
 export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
@@ -213,6 +213,10 @@ export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
+export const ENABLE_GRAPH_VISUALIZATION_SETTING =
+  'securitySolution:enableGraphVisualization' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -325,6 +329,7 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
  Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
+export const MINIMUM_RULE_CUSTOMIZATION_LICENSE = 'enterprise' as const;
 
 /**
  Machine Learning constants
@@ -425,6 +430,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
+  SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -432,19 +438,6 @@ export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showSourceEventTimeRange.v8.15';
-
-// TODO: https://github.com/elastic/kibana/pull/142950
-/**
- * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
- */
-export enum BulkActionsDryRunErrCode {
-  IMMUTABLE = 'IMMUTABLE',
-  MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
-  MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
-  ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
-  MANUAL_RULE_RUN_FEATURE = 'MANUAL_RULE_RUN_FEATURE',
-  MANUAL_RULE_RUN_DISABLED_RULE = 'MANUAL_RULE_RUN_DISABLED_RULE',
-}
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 

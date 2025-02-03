@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { IndicesDataStream, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesDataStream,
+  IndicesDataStreamLifecycleWithRollover,
+  IngestPipeline,
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { IngestStreamLifecycle } from '@kbn/streams-schema/src/models/ingest/common';
+import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { deleteComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
 import { deleteDataStream } from './data_streams/manage_data_streams';
@@ -27,22 +31,37 @@ interface DeleteStreamParams extends BaseParams {
   logger: Logger;
 }
 
-export function getDataStreamLifecycle(dataStream: IndicesDataStream): IngestStreamLifecycle {
+export function getDataStreamLifecycle(
+  dataStream: IndicesDataStream | null
+): UnwiredIngestStreamEffectiveLifecycle {
+  if (!dataStream) {
+    return {
+      error: {
+        message: 'Data stream not found',
+      },
+    };
+  }
   if (
     dataStream.ilm_policy &&
     (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
   ) {
+    return { ilm: { policy: dataStream.ilm_policy } };
+  }
+
+  const lifecycle = dataStream.lifecycle as
+    | (IndicesDataStreamLifecycleWithRollover & {
+        enabled: boolean;
+      })
+    | undefined;
+  if (lifecycle && lifecycle.enabled) {
     return {
-      type: 'ilm',
-      policy: dataStream.ilm_policy,
+      dsl: {
+        data_retention: lifecycle.data_retention ? String(lifecycle.data_retention) : undefined,
+      },
     };
   }
-  return {
-    type: 'dlm',
-    data_retention: dataStream.lifecycle?.data_retention
-      ? String(dataStream.lifecycle.data_retention)
-      : undefined,
-  };
+
+  return { disabled: {} };
 }
 
 export async function deleteUnmanagedStreamObjects({
