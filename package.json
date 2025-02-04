@@ -946,7 +946,7 @@
     "@kbn/third-party-lens-navigation-prompt-plugin": "link:x-pack/examples/third_party_lens_navigation_prompt",
     "@kbn/third-party-vis-lens-example-plugin": "link:x-pack/examples/third_party_vis_lens_example",
     "@kbn/threat-intelligence-plugin": "link:x-pack/solutions/security/plugins/threat_intelligence",
-    "@kbn/timelines-plugin": "link:x-pack/solutions/security/plugins/timelines",
+    "@kbn/timelines-plugin": "link:x-pack/platform/plugins/shared/timelines",
     "@kbn/timelion-grammar": "link:src/platform/packages/private/kbn-timelion-grammar",
     "@kbn/timerange": "link:src/platform/packages/shared/kbn-timerange",
     "@kbn/tinymath": "link:src/platform/packages/private/kbn-tinymath",
