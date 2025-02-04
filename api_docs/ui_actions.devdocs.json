@@ -349,10 +349,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register_discover_histogram_actions.ts"
-              },
-              {
-                "plugin": "links",
-                "path": "src/platform/plugins/private/links/public/actions/create_links_panel_action.ts"
               }
             ],
             "children": [
