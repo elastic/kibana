@@ -20,6 +20,7 @@ import {
 import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { GrokPatternDefinition } from './grok_pattern_definition';
 import { GrokPatternsEditor } from './grok_patterns_editor';
@@ -74,7 +75,12 @@ function GrokAiSuggestions({
   const { dependencies } = useKibana();
   const {
     streams: { streamsRepositoryClient },
+    data,
   } = dependencies.start;
+
+  const {
+    absoluteTimeRange: { start, end },
+  } = useDateRange({ data });
 
   const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
   const form = useFormContext<GrokFormState>();
@@ -91,13 +97,15 @@ function GrokAiSuggestions({
         params: {
           path: { id: definition.name },
           body: {
-            documents: samples.slice(0, 10),
             field: fieldValue,
+            condition: { always: {} },
+            start,
+            end,
           },
         },
       });
     },
-    [definition.name, fieldValue, samples, streamsRepositoryClient],
+    [definition.name, end, fieldValue, start, streamsRepositoryClient],
     { disableToastOnError: true }
   );
   if (isLoadingSuggestions) {

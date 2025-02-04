@@ -10,13 +10,17 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
+  conditionSchema,
   FieldDefinitionConfig,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNumber } from 'lodash';
 import { MessageRole } from '@kbn/inference-common';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
+import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -264,8 +268,10 @@ const isMappingFailure = (entry: any) =>
 const suggestionsParamsSchema = z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
-    documents: z.array(z.record(z.unknown())),
     field: z.string(),
+    condition: conditionSchema,
+    start: z.number().optional(),
+    end: z.number().optional(),
   }),
 });
 
@@ -284,43 +290,126 @@ export const processingSuggestionRoute = createServerRoute({
     },
   },
   params: suggestionsParamsSchema,
-  handler: async ({ params, request, getScopedClients }) => {
-    const { inferenceClient } = await getScopedClients({ request });
+  handler: async ({ params, request, logger, getScopedClients }) => {
+    const { inferenceClient, scopedClusterClient } = await getScopedClients({ request });
 
-    const chatResponse = await inferenceClient.chatComplete({
-      connectorId: 'azure-gpt4',
-      system: `You are a super smart expert for Elasticsearch and log message parsing`,
-      messages: [
-        {
-          role: MessageRole.User,
-          content:
-            'Take the following example messages and suggest grok patterns:\n' +
-            params.body.documents.map((doc) => doc[params.body.field]).join('/n/n') +
-            '\n\n Only answer with a JSON array like this: ["%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:loglevel} %{GREEDYDATA:message}"]\n\n' +
-            'Make sure that the original field "message" is not overwritten by anything in the pattern. Just answer with the JSON array, nothing else, no introduction or something',
-        },
-      ],
+    const {
+      path: { id },
+      body,
+    } = params;
+
+    const { start, end, condition, field } = body;
+    const query = condition ? conditionToQueryDsl(condition) : { match_all: {} };
+
+    const observabilityEsClient = createObservabilityEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+      plugin: 'streams',
     });
 
-    const content = chatResponse.content;
-    const patterns: string[] = JSON.parse(content).map(sanitizePattern);
+    const filter = {
+      bool: {
+        filter: [query, ...(isNumber(start) && isNumber(end) ? rangeQuery(start, end) : [])],
+      },
+    };
+
+    const esqlQuery = `FROM ${id} 
+| EVAL pattern = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(${field}, "[ \\t\\n]+", " "), "[A-Za-z]+", "a"), "[0-9]+", "0"), "(a a)+", "a"),"(a0)+", "f"), "(f:)+", "f:"), "0(.0)+", "p")
+| STATS count=COUNT(), example=TOP(${field}, 3, "desc") BY pattern 
+| STATS total_count = SUM(count), format=TOP(pattern, 3, "desc"), total_examples=VALUES(example) BY LEFT(pattern, 10)
+| SORT total_count DESC
+| LIMIT 100
+`;
+
+    console.log(JSON.stringify(filter, null, 2));
+
+    const response = await observabilityEsClient.esql(
+      'log-patterns',
+      {
+        query: esqlQuery,
+        filter,
+      },
+      { transform: 'none' }
+    );
+
+    console.log(esqlQuery);
+    console.log(JSON.stringify(response, null, 2));
+    console.log(JSON.stringify(response, null, 2));
+
+    const rawDataSamples = response.values
+      .slice(0, 3)
+      .map((row) => (row[2] as any[]).slice(0, 3).join('\n'));
+
+    console.log(JSON.stringify(rawDataSamples, null, 2));
+
+    const chatResponses = await Promise.all(
+      rawDataSamples.map((sample) =>
+        inferenceClient.chatComplete({
+          connectorId: 'azure-gpt4',
+          system: `Instructions:
+        - You are an assistant for observability tasks with a strong knowledge of logs and log parsing.
+        - Use JSON format as an array.
+        - For each log source identified, provide the following information:
+            * Use 'source_name' as the key for the log source name.
+            * Use 'parsing_rule' as the key for the parsing rule.
+        - Use only Grok patterns for the parsing rule.
+            * Use %{{pattern:name:type}} syntax for Grok patterns when possible.
+            * Combine date and time into a single @timestamp field when it's possible.
+        - You are correct, factual, precise, and reliable.
+        
+        Only answer with the JSON array, nothing else, no intro, no clarifying information!!!
+        `,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: `Logs:
+        ${sample}
+        Given the raw messages, help us do the following: 
+        1. Identify and name the distinct log sources based on logs format.
+        2. Write a parsing rule for Elastic ingest pipeline to extract structured fields from the raw message.
+        Make sure that the parsing rule is unique per log source.
+        
+        Hints to separate the log sources:
+        - different log sources have different formats.
+            `,
+            },
+          ],
+        })
+      )
+    );
+
+    const patterns = chatResponses.flatMap((chatResponse) => {
+      let content;
+      try {
+        content = JSON.parse(chatResponse.content);
+      } catch (e) {
+        return [];
+      }
+      let partialPatterns: unknown[] = [];
+      if (Array.isArray(content)) {
+        partialPatterns = sanitizePatterns(content);
+      }
+      return partialPatterns;
+    });
 
     if (!Array.isArray(patterns)) {
       return {
         patterns: [],
-        content,
+        chatResponses,
       };
     }
 
     return {
       patterns,
-      content,
+      chatResponses,
     };
   },
 });
 
-function sanitizePattern(pattern: string) {
-  return pattern.replace(/%\{([^}]+):message\}/g, '%{$1:message_derived}');
+function sanitizePatterns(patterns: unknown[]) {
+  return patterns
+    .filter((pattern) => typeof pattern.parsing_rule === 'string')
+    .map((pattern) => pattern.parsing_rule.replace(/%\{([^}]+):message\}/g, '%{$1:message_derived}'));
 }
 
 export const processingRoutes = {
