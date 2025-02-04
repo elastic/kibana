@@ -10,9 +10,12 @@
 import { buildPalettes } from './palettes';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
-describe('palettes', () => {
-  const palettes = buildPalettes({ name: 'amsterdam', darkMode: false });
+const itIf = (condition: boolean) => (condition ? it : it.skip);
 
+describe.each([
+  ['palettes', false, buildPalettes({ name: 'borealis', darkMode: false })],
+  ['legacyPalettes', true, buildPalettes({ name: 'amsterdam', darkMode: false })],
+])('%s', (_, legacy, palettes) => {
   describe('default palette', () => {
     describe('syncColors: false', () => {
       it('should return different colors based on behind text flag', () => {
@@ -37,7 +40,12 @@ describe('palettes', () => {
             behindText: true,
           }
         );
-        expect(color1).not.toEqual(color2);
+        if (legacy) {
+          expect(color1).not.toEqual(color2);
+        } else {
+          // no behind text coloring in new palettes
+          expect(color1).toEqual(color2);
+        }
       });
 
       it('should return different colors based on rank at current series', () => {
@@ -120,7 +128,13 @@ describe('palettes', () => {
             syncColors: true,
           }
         );
-        expect(color1).not.toEqual(color2);
+
+        if (legacy) {
+          expect(color1).not.toEqual(color2);
+        } else {
+          // no behind text coloring in new palettes
+          expect(color1).toEqual(color2);
+        }
       });
 
       it('should return different colors for different keys', () => {
@@ -223,7 +237,7 @@ describe('palettes', () => {
         expect(color1).toEqual(color2);
       });
 
-      it('should return the same index of the behind text palette for same key', () => {
+      itIf(legacy)('should return the same index of the behind text palette for same key', () => {
         const palette = palettes.default;
 
         const color1 = palette.getCategoricalColor(
@@ -263,6 +277,7 @@ describe('palettes', () => {
         );
         const color1Index = euiPaletteColorBlind({ rotations: 2 }).indexOf(color1!);
         const color2Index = euiPaletteColorBlindBehindText({ rotations: 2 }).indexOf(color2!);
+
         expect(color1Index).toEqual(color2Index);
       });
     });
