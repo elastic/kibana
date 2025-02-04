@@ -22,7 +22,6 @@ import {
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { UseEuiTheme } from '@elastic/eui';
 import { MultiFilterEvent } from '../../common/types';
 import { ExpressionHeatmapPluginStart } from '../plugin';
