@@ -18,8 +18,8 @@ initiated a request to the {es} server. To overcome this problem, we introduced
 
 `execution_context` propagates specified metadata from the {kib} browser app
 or {kib} server to the {es} server through the `x-opaque-id` header emitted to the
-{es} https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html[slow logs].
-For details, check the https://www.elastic.co/guide/en/kibana/master/kibana-troubleshooting-trace-query.html[troubleshooting guide].
+{es} {ref}/index-modules-slowlog.html[slow logs].
+For details, check the <<kibana-troubleshooting-trace-query,troubleshooting guide>>.
 
 The `execution_context` has the following interface:
 
