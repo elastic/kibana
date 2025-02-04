@@ -4,55 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { SchemaEditorProps, SchemaField } from './types';
 
 export const UnpromoteFieldModal = ({
-  unpromotingState,
+  field,
+  onClose,
+  onFieldUnmap,
 }: {
-  unpromotingState: SchemaEditorUnpromotingState;
+  field: SchemaField;
+  onClose: () => void;
+  onFieldUnmap: SchemaEditorProps['onFieldUnmap'];
 }) => {
-  const { setSelectedField, selectedField, unpromoteField, isUnpromotingField } = unpromotingState;
-
-  const modalTitleId = useGeneratedHtmlId();
-
-  if (!selectedField) return null;
+  const [{ loading }, unmapField] = useAsyncFn(async () => {
+    await onFieldUnmap(field.name);
+    if (onClose) onClose();
+  }, [field, onClose, onFieldUnmap]);
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={() => setSelectedField(undefined)}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>{selectedField}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>
-        {i18n.translate('xpack.streams.unpromoteFieldModal.unpromoteFieldWarning', {
-          defaultMessage: 'Are you sure you want to unmap this field from template mappings?',
-        })}
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiButton
-          data-test-subj="streamsAppUnpromoteFieldModalCloseButton"
-          onClick={() => unpromoteField()}
-          disabled={isUnpromotingField}
-          color="danger"
-          fill
-        >
-          {i18n.translate('xpack.streams.unpromoteFieldModal.unpromoteFieldButtonLabel', {
-            defaultMessage: 'Unmap field',
-          })}
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+    <EuiConfirmModal
+      isLoading={loading}
+      title={field.name}
+      onCancel={onClose}
+      onConfirm={unmapField}
+      cancelButtonText={i18n.translate(
+        'xpack.streams.unpromoteFieldModal.unpromoteFieldButtonCancelLabel',
+        { defaultMessage: 'Cancel' }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.streams.unpromoteFieldModal.unpromoteFieldButtonLabel',
+        { defaultMessage: 'Unmap field' }
+      )}
+      buttonColor="danger"
+    >
+      {i18n.translate('xpack.streams.unpromoteFieldModal.unpromoteFieldWarning', {
+        defaultMessage: 'Are you sure you want to unmap this field from template mappings?',
+      })}
+    </EuiConfirmModal>
   );
 };

@@ -22,7 +22,7 @@ import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
 import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
-import { FieldFormTypeWrapper } from './field_form_type_wrapper';
+import { FieldFormType } from './field_form_type';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { EMPTY_CONTENT } from '../constants';
 import { SchemaField } from '../types';
@@ -158,7 +158,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
-            <FieldFormTypeWrapper
+            <FieldFormType
               field={field}
               isEditing={isEditing}
               onTypeChange={(type) => onChange({ type })}

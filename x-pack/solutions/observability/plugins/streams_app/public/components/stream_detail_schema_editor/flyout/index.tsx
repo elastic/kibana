@@ -41,10 +41,11 @@ export const SchemaEditorFlyout = ({
   withFieldSimulation = false,
 }: SchemaEditorFlyoutProps) => {
   const [nextField, setNextField] = useReducer(
-    (prev: SchemaField, updated: Partial<SchemaField>): SchemaField => ({
-      ...prev,
-      ...updated,
-    }),
+    (prev: SchemaField, updated: Partial<SchemaField>) =>
+      ({
+        ...prev,
+        ...updated,
+      } as SchemaField),
     field
   );
 
@@ -64,8 +65,8 @@ export const SchemaEditorFlyout = ({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <FieldSummary
-            isEditingByDefault={isEditingByDefault}
             field={nextField}
+            isEditingByDefault={isEditingByDefault}
             onChange={setNextField}
             stream={stream}
           />

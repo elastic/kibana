@@ -5,11 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WiredStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
-import { SchemaEditorFlyout } from './flyout';
-import { useKibana } from '../../hooks/use_kibana';
-import { UnpromoteFieldModal } from './unpromote_field_modal';
 import { SchemaEditor } from './schema_editor';
 import { useFields } from './hooks/use_fields';
 

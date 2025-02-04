@@ -16,7 +16,7 @@ import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { MappedSchemaField, SchemaField } from '../types';
+import { MappedSchemaField, SchemaField, isSchemeFieldTyped } from '../types';
 
 export const useFields = ({
   definition,
@@ -90,7 +90,7 @@ export const useFields = ({
   const updateField = useCallback(
     async (field: SchemaField) => {
       try {
-        if (!field.type) {
+        if (!isSchemeFieldTyped(field)) {
           throw new Error('The field is not complete or fully mapped.');
         }
 

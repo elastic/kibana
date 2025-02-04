@@ -39,6 +39,7 @@ import { FieldType } from './field_type';
 import { SchemaEditorFlyout } from './flyout';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { SchemaEditorContextProvider, useSchemaEditorContext } from './schema_editor_context';
+import { UnpromoteFieldModal } from './unpromote_field_modal';
 
 export function SchemaEditor({
   fields,
@@ -262,9 +263,9 @@ const createCellRenderer =
 
 export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const context = useKibana();
-  const { core } = context;
+  const schemaEditorContext = useSchemaEditorContext();
 
-  const { onFieldUnmap, onFieldUpdate, stream, withFieldSimulation } = useSchemaEditorContext();
+  const { core } = context;
 
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'fieldsTableContextMenuPopover',
@@ -273,6 +274,8 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const [popoverIsOpen, { off: closePopover, toggle }] = useBoolean(false);
 
   const panels = useMemo(() => {
+    const { onFieldUnmap, onFieldUpdate, stream, withFieldSimulation } = schemaEditorContext;
+
     let actions = [];
 
     const openFlyout = (props: { isEditingByDefault: boolean } = { isEditingByDefault: false }) => {
@@ -288,6 +291,20 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
               {...props}
             />
           </StreamsAppContextProvider>,
+          core
+        ),
+        { maxWidth: 500 }
+      );
+    };
+
+    const openUnpromoteModal = () => {
+      const overlay = core.overlays.openModal(
+        toMountPoint(
+          <UnpromoteFieldModal
+            field={field}
+            onClose={() => overlay.close()}
+            onFieldUnmap={onFieldUnmap}
+          />,
           core
         ),
         { maxWidth: 500 }
@@ -315,7 +332,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
             }),
-            onClick: () => onFieldUnmap(field.name),
+            onClick: openUnpromoteModal,
           },
         ];
         break;
@@ -350,7 +367,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         })),
       },
     ];
-  }, [closePopover, context, core, field, onFieldUnmap, onFieldUpdate, stream]);
+  }, [closePopover, context, core, field, schemaEditorContext]);
 
   return (
     <EuiPopover
