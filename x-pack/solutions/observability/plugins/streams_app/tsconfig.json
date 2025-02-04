@@ -44,7 +44,6 @@
     "@kbn/code-editor",
     "@kbn/ui-theme",
     "@kbn/navigation-plugin",
-    "@kbn/core-notifications-browser",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/streams-schema",
     "@kbn/react-hooks",
