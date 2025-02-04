@@ -22,7 +22,7 @@ Are you planning with scalability in mind?
 
 Did you know {kib} makes a public statement about our commitment to
 creating an accessible product for people with disabilities?
-https://www.elastic.co/guide/en/kibana/master/accessibility.html[We do]!
+<<accessibility,We do>>!
 It’s very important all of our apps are accessible.
 
 * Learn how https://elastic.github.io/eui/#/guidelines/accessibility[EUI
