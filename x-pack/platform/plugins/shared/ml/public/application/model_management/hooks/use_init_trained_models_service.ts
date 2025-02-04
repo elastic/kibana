@@ -9,11 +9,11 @@ import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
 import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '../../../../common/types/storage';
-import type { ModelDeploymentParams } from '../trained_models_service';
 import type { TrainedModelsService } from '../trained_models_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useSavedObjectsApiService } from '../../services/ml_api_service/saved_objects';
+import type { StartAllocationParams } from '../../services/ml_api_service/trained_models';
 
 /**
  * Hook that initializes the shared TrainedModelsService instance with storage
@@ -37,11 +37,11 @@ export function useInitTrainedModelsService(
 
   const [scheduledDeployments, setScheduledDeployments] = useStorage<
     typeof ML_SCHEDULED_MODEL_DEPLOYMENTS,
-    ModelDeploymentParams[]
+    StartAllocationParams[]
   >(ML_SCHEDULED_MODEL_DEPLOYMENTS, initialScheduledDeployments);
 
   const scheduledDeployments$ = useMemo(
-    () => new BehaviorSubject<ModelDeploymentParams[]>(scheduledDeployments),
+    () => new BehaviorSubject<StartAllocationParams[]>(scheduledDeployments),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );

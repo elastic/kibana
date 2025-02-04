@@ -7,8 +7,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
-import type { TrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import type { ModelDeploymentParams } from './trained_models_service';
+import type {
+  StartAllocationParams,
+  TrainedModelsApiService,
+} from '../services/ml_api_service/trained_models';
 import { TrainedModelsService } from './trained_models_service';
 import type { TrainedModelUIItem } from '../../../common/types/trained_models';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
@@ -22,7 +24,7 @@ describe('TrainedModelsService', () => {
   let mockTrainedModelsApiService: jest.Mocked<TrainedModelsApiService>;
   let mockSavedObjectsApiService: jest.Mocked<SavedObjectsApiService>;
   let trainedModelsService: TrainedModelsService;
-  let scheduledDeploymentsSubject: BehaviorSubject<ModelDeploymentParams[]>;
+  let scheduledDeploymentsSubject: BehaviorSubject<StartAllocationParams[]>;
   let mockSetScheduledDeployments: jest.Mock<any, any>;
 
   const mockDisplayErrorToast = jest.fn();
@@ -31,8 +33,8 @@ describe('TrainedModelsService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    scheduledDeploymentsSubject = new BehaviorSubject<ModelDeploymentParams[]>([]);
-    mockSetScheduledDeployments = jest.fn((deployments: ModelDeploymentParams[]) => {
+    scheduledDeploymentsSubject = new BehaviorSubject<StartAllocationParams[]>([]);
+    mockSetScheduledDeployments = jest.fn((deployments: StartAllocationParams[]) => {
       scheduledDeploymentsSubject.next(deployments);
     });
 

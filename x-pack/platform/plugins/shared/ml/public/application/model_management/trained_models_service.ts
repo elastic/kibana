@@ -45,6 +45,7 @@ import {
 import type {
   CommonDeploymentParams,
   AdaptiveAllocationsParams,
+  StartAllocationParams,
 } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
@@ -55,15 +56,9 @@ interface ModelDownloadStatus {
 
 const DOWNLOAD_POLL_INTERVAL = 3000;
 
-export interface ModelDeploymentParams {
-  modelId: string;
-  deploymentParams: CommonDeploymentParams;
-  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
-}
-
 interface TrainedModelsServiceInit {
-  scheduledDeployments$: BehaviorSubject<ModelDeploymentParams[]>;
-  setScheduledDeployments: (deployments: ModelDeploymentParams[]) => void;
+  scheduledDeployments$: BehaviorSubject<StartAllocationParams[]>;
+  setScheduledDeployments: (deployments: StartAllocationParams[]) => void;
   displayErrorToast: (error: ErrorType, title?: string) => void;
   displaySuccessToast: (toast: { title: string; text: string }) => void;
   savedObjectsApiService: SavedObjectsApiService;
@@ -80,11 +75,11 @@ export class TrainedModelsService {
   private pollingSubscription?: Subscription;
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
-  private setScheduledDeployments?: (deployingModels: ModelDeploymentParams[]) => void;
+  private setScheduledDeployments?: (deployingModels: StartAllocationParams[]) => void;
   private displayErrorToast?: (error: ErrorType, title?: string) => void;
   private displaySuccessToast?: (toast: { title: string; text: string }) => void;
   private subscription!: Subscription;
-  private _scheduledDeployments$ = new BehaviorSubject<ModelDeploymentParams[]>([]);
+  private _scheduledDeployments$ = new BehaviorSubject<StartAllocationParams[]>([]);
   private destroySubscription?: Subscription;
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
   private savedObjectsApiService!: SavedObjectsApiService;
@@ -130,11 +125,11 @@ export class TrainedModelsService {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  public get scheduledDeployments$(): Observable<ModelDeploymentParams[]> {
+  public get scheduledDeployments$(): Observable<StartAllocationParams[]> {
     return this._scheduledDeployments$;
   }
 
-  public get scheduledDeployments(): ModelDeploymentParams[] {
+  public get scheduledDeployments(): StartAllocationParams[] {
     return this._scheduledDeployments$.getValue();
   }
 
@@ -402,7 +397,7 @@ export class TrainedModelsService {
     this.subscription.add(deploymentsSub);
   }
 
-  private executeScheduledDeployment(deployment: ModelDeploymentParams) {
+  private executeScheduledDeployment(deployment: StartAllocationParams) {
     this.deploymentInProgress.add(deployment.modelId);
 
     const singleDeploymentSub = this.getModel$(deployment.modelId)
@@ -411,13 +406,7 @@ export class TrainedModelsService {
         take(1),
         tap(() => this.updateUiStateForDeployment(deployment.modelId)),
         switchMap(() => {
-          return from(
-            this.trainedModelsApiService.startModelAllocation(
-              deployment.modelId,
-              deployment.deploymentParams,
-              deployment.adaptiveAllocationsParams
-            )
-          );
+          return from(this.trainedModelsApiService.startModelAllocation(deployment));
         }),
         tap({
           next: () => {
@@ -459,7 +448,7 @@ export class TrainedModelsService {
   }
 
   private isDeploymentAlreadyExists(
-    deployment: ModelDeploymentParams,
+    deployment: StartAllocationParams,
     modelItems: TrainedModelUIItem[]
   ) {
     const existingModel = modelItems.find((m) => m.model_id === deployment.modelId);
@@ -478,7 +467,7 @@ export class TrainedModelsService {
     return isSameDeployment || isAlreadyInProgress;
   }
 
-  private removeScheduledDeployment(deployment: ModelDeploymentParams) {
+  private removeScheduledDeployment(deployment: StartAllocationParams) {
     const currentScheduledDeployments = this._scheduledDeployments$.getValue();
     const updated = currentScheduledDeployments.filter(
       (d) => d.deploymentParams.deployment_id !== deployment.deploymentParams.deployment_id
