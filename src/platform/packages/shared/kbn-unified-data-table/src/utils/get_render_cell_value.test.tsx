@@ -839,7 +839,7 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders custom ES|QL fields correctly', () => {
-    jest.spyOn(dataViewMock.fields, 'add');
+    jest.spyOn(dataViewMock.fields, 'create');
 
     const rows: EsHitRecord[] = [
       {
@@ -847,7 +847,7 @@ describe('Unified data table cell rendering', function () {
         _index: 'test',
         _score: 1,
         _source: undefined,
-        fields: { bytes: 100, var0: 350 },
+        fields: { bytes: 100, var0: 350, extension: 'gif' },
       },
     ];
     const DataTableCellValue = getRenderCellValueFn({
@@ -858,13 +858,15 @@ describe('Unified data table cell rendering', function () {
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
       columnsMeta: {
-        bytes: {
-          type: 'number',
-          esType: 'long',
-        },
+        // custom ES|QL var
         var0: {
           type: 'number',
           esType: 'long',
+        },
+        // custom ES|QL override
+        bytes: {
+          type: 'string',
+          esType: 'keyword',
         },
       },
     });
@@ -872,7 +874,7 @@ describe('Unified data table cell rendering', function () {
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
-        columnId="bytes"
+        columnId="extension"
         isDetails={false}
         isExpanded={false}
         isExpandable={true}
@@ -884,7 +886,7 @@ describe('Unified data table cell rendering', function () {
         className="unifiedDataTable__cellValue"
         dangerouslySetInnerHTML={
           Object {
-            "__html": 100,
+            "__html": "gif",
           }
         }
       />
@@ -911,11 +913,43 @@ describe('Unified data table cell rendering', function () {
       />
     `);
 
-    expect(dataViewMock.fields.add).toHaveBeenCalledTimes(1);
-    expect(dataViewMock.fields.add).toHaveBeenCalledWith({
+    expect(dataViewMock.fields.create).toHaveBeenCalledTimes(1);
+    expect(dataViewMock.fields.create).toHaveBeenCalledWith({
       name: 'var0',
       type: 'number',
       esTypes: ['long'],
+      searchable: true,
+      aggregatable: false,
+      isNull: false,
+    });
+
+    const componentWithCustomESQLFieldOverride = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="bytes"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(componentWithCustomESQLFieldOverride).toMatchInlineSnapshot(`
+      <span
+        className="unifiedDataTable__cellValue"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": 100,
+          }
+        }
+      />
+    `);
+
+    expect(dataViewMock.fields.create).toHaveBeenCalledTimes(2);
+    expect(dataViewMock.fields.create).toHaveBeenLastCalledWith({
+      name: 'bytes',
+      type: 'string',
+      esTypes: ['keyword'],
       searchable: true,
       aggregatable: false,
       isNull: false,

@@ -101,10 +101,8 @@ export const buildDataViewMock = ({
     return dataViewFields;
   };
 
-  dataViewFields.add = (spec: FieldSpec) => {
-    const backFilledField = new DataViewField(spec);
-    dataViewFields.push(backFilledField);
-    return backFilledField;
+  dataViewFields.create = (spec: FieldSpec) => {
+    return new DataViewField(spec);
   };
 
   const dataView = {
