@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/serverless/project_switcher'],
-};
+export const ADD_LINKS_PANEL_ACTION_ID = 'create_links_panel';
