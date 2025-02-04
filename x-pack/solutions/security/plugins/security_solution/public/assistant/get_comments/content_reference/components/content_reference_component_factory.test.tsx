@@ -95,7 +95,6 @@ describe('contentReferenceComponentFactory', () => {
       const Component = contentReferenceComponentFactory({
         contentReferences,
         contentReferencesVisible: true,
-        loading: false,
       });
 
       render(<Component {...contentReferenceNode} />);
@@ -108,7 +107,6 @@ describe('contentReferenceComponentFactory', () => {
     const Component = contentReferenceComponentFactory({
       contentReferences: {},
       contentReferencesVisible: true,
-      loading: false,
     });
 
     const { container } = render(
@@ -121,11 +119,10 @@ describe('contentReferenceComponentFactory', () => {
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
 
-  it('renders placeholder if contentReferences are undefined and is loading', async () => {
+  it('renders placeholder if contentReferences are null', async () => {
     const Component = contentReferenceComponentFactory({
-      contentReferences: undefined,
+      contentReferences: null,
       contentReferencesVisible: true,
-      loading: true,
     });
 
     render(
@@ -138,11 +135,10 @@ describe('contentReferenceComponentFactory', () => {
     expect(screen.getByText('[1]')).toBeInTheDocument();
   });
 
-  it('renders nothing if contentReferences are undefined and is not loading', async () => {
+  it('renders nothing if contentReferences are undefined', async () => {
     const Component = contentReferenceComponentFactory({
       contentReferences: undefined,
       contentReferencesVisible: true,
-      loading: false,
     });
 
     const { container } = render(

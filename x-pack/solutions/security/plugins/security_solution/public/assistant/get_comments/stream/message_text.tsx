@@ -20,15 +20,14 @@ import { css } from '@emotion/react';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo } from 'react';
 import type { Node } from 'unist';
-import type { ContentReferences } from '@kbn/elastic-assistant-common';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
 import { ContentReferenceParser } from '../content_reference/content_reference_parser';
-import { contentReferenceComponentFactory } from '../content_reference/components/content_reference_component_factory';
+import { contentReferenceComponentFactory, StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   content: string;
-  contentReferences?: ContentReferences;
+  contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
   contentReferencesEnabled: boolean;
   index: number;
@@ -105,8 +104,7 @@ const loadingCursorPlugin = () => {
 };
 
 interface GetPluginDependencies {
-  contentReferences?: ContentReferences;
-  loading: boolean;
+  contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
   contentReferencesEnabled: boolean;
 }
@@ -114,7 +112,6 @@ interface GetPluginDependencies {
 const getPluginDependencies = ({
   contentReferences,
   contentReferencesVisible,
-  loading,
   contentReferencesEnabled,
 }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -130,7 +127,6 @@ const getPluginDependencies = ({
           contentReference: contentReferenceComponentFactory({
             contentReferences,
             contentReferencesVisible,
-            loading,
           }),
         }
       : {}),
@@ -194,9 +190,8 @@ export function MessageText({
         contentReferences,
         contentReferencesVisible,
         contentReferencesEnabled,
-        loading,
       }),
-    [contentReferences, contentReferencesVisible, contentReferencesEnabled, loading]
+    [contentReferences, contentReferencesVisible, contentReferencesEnabled]
   );
 
   return (

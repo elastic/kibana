@@ -15,16 +15,21 @@ import { ContentReferenceButton } from './content_reference_button';
 import { ProductDocumentationReference } from './product_documentation_reference';
 import { EsqlQueryReference } from './esql_query_reference';
 
+/** While message is being streamed, content references is null */
+export type StreamingContentReferences = null
+/** When a message has finished streaming, content references are defined or undefined */
+export type FinalContentReferences = ContentReferences | undefined
+/** If a message is being streamed, content references are null. When a message has finished streaming, content references are defined or undefined */
+export type StreamingOrFinalContentReferences = StreamingContentReferences | FinalContentReferences
+
 export interface ContentReferenceComponentFactory {
-  contentReferences?: ContentReferences;
+  contentReferences: StreamingOrFinalContentReferences
   contentReferencesVisible: boolean;
-  loading: boolean;
 }
 
 export const contentReferenceComponentFactory = ({
   contentReferences,
   contentReferencesVisible,
-  loading,
 }: ContentReferenceComponentFactory) => {
   const ContentReferenceComponent = (
     contentReferenceNode: ContentReferenceNode
@@ -38,9 +43,10 @@ export const contentReferenceComponentFactory = ({
       />
     );
 
-    if (!contentReferences && loading) return defaultNode;
+    if (contentReferences === null) return defaultNode;
+    if (contentReferences === undefined) return null;
 
-    const contentReference = contentReferences?.[contentReferenceNode.contentReferenceId];
+    const contentReference = contentReferences[contentReferenceNode.contentReferenceId];
 
     if (!contentReference) return null;
 
