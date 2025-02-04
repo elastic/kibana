@@ -63,11 +63,9 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
             data={{ field: ALERT_SEVERITY, value: severity }}
             sourcererScopeId={getSourcererScopeId(TableId.alertsOnAlertsPage)}
             disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
-            metadata={{
-              scopeId: TableId.alertsOnAlertsPage,
-              extraActionsIconType: 'boxesVertical',
-              extraActionsColor: 'text',
-            }}
+            metadata={{ scopeId: TableId.alertsOnAlertsPage }}
+            extraActionsIconType="boxesVertical"
+            extraActionsColor="text"
           />
         ),
       },

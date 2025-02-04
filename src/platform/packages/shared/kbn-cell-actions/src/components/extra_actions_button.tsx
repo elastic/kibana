@@ -10,32 +10,27 @@
 import { EuiButtonIcon, EuiToolTip, type EuiButtonIconProps } from '@elastic/eui';
 import React from 'react';
 import { SHOW_MORE_ACTIONS } from './translations';
-import type { CellActionExecutionContext } from '../types';
 
 interface ExtraActionsButtonProps {
   onClick: () => void;
   showTooltip: boolean;
-  actionContext: CellActionExecutionContext;
+  extraActionsIconType?: EuiButtonIconProps['iconType'];
+  extraActionsColor?: EuiButtonIconProps['color'];
 }
 
 export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({
   onClick,
   showTooltip,
-  actionContext,
+  extraActionsIconType,
+  extraActionsColor,
 }) => {
-  const iconType =
-    (actionContext?.metadata?.extraActionsIconType as EuiButtonIconProps['iconType']) ??
-    'boxesHorizontal';
-  const iconColor =
-    (actionContext?.metadata?.extraActionsColor as EuiButtonIconProps['color']) ?? 'primary';
-
   return showTooltip ? (
     <EuiToolTip content={SHOW_MORE_ACTIONS}>
       <EuiButtonIcon
         data-test-subj="showExtraActionsButton"
         aria-label={SHOW_MORE_ACTIONS}
-        iconType={iconType}
-        color={iconColor}
+        iconType={extraActionsIconType ?? 'boxesHorizontal'}
+        color={extraActionsColor}
         onClick={onClick}
       />
     </EuiToolTip>
@@ -43,8 +38,8 @@ export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({
     <EuiButtonIcon
       data-test-subj="showExtraActionsButton"
       aria-label={SHOW_MORE_ACTIONS}
-      iconType={iconType ?? 'boxesHorizontal'}
-      color={iconColor}
+      iconType={extraActionsIconType ?? 'boxesHorizontal'}
+      color={extraActionsColor}
       onClick={onClick}
     />
   );

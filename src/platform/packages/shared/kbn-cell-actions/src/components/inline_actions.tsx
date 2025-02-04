@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, type EuiButtonIconProps } from '@elastic/eui';
 import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
@@ -22,6 +22,8 @@ interface InlineActionsProps {
   showActionTooltips: boolean;
   visibleCellActions: number;
   disabledActionTypes: string[];
+  extraActionsIconType?: EuiButtonIconProps['iconType'];
+  extraActionsColor?: EuiButtonIconProps['color'];
 }
 
 export const InlineActions: React.FC<InlineActionsProps> = ({
@@ -30,6 +32,8 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   showActionTooltips,
   visibleCellActions,
   disabledActionTypes,
+  extraActionsIconType,
+  extraActionsColor,
 }) => {
   const { value: actions } = useLoadActions(actionContext, { disabledActionTypes });
   const { extraActions, visibleActions } = usePartitionActions(actions ?? [], visibleCellActions);
@@ -42,10 +46,11 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
       <ExtraActionsButton
         onClick={togglePopOver}
         showTooltip={showActionTooltips}
-        actionContext={actionContext}
+        extraActionsIconType={extraActionsIconType}
+        extraActionsColor={extraActionsColor}
       />
     ),
-    [togglePopOver, showActionTooltips, actionContext]
+    [togglePopOver, showActionTooltips, extraActionsIconType, extraActionsColor]
   );
 
   return (
@@ -74,6 +79,7 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
             button={button}
             closePopOver={closePopOver}
             isOpen={isPopoverOpen}
+            extraActionsColor={extraActionsColor}
           />
         </EuiFlexItem>
       ) : null}

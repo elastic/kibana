@@ -115,12 +115,10 @@ const DraggableLegendItemComponent: React.FC<{
               triggerId={SecurityCellActionsTrigger.DEFAULT}
               data={{ field, value }}
               sourcererScopeId={sourcererScopeId}
-              metadata={{
-                scopeId,
-                extraActionsIconType: 'boxesVertical',
-                extraActionsColor: 'text',
-              }}
+              metadata={{ scopeId }}
               disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+              extraActionsIconType="boxesVertical"
+              extraActionsColor="text"
             />
           </EuiFlexItem>
         )}

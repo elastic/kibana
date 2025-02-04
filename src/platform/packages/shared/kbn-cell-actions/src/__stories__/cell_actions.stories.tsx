@@ -104,10 +104,8 @@ export const CellActionInlineCustomStyle = () => (
         value: VALUE,
       },
     ]}
-    metadata={{
-      extraActionsIconType: 'boxesVertical',
-      extraActionsColor: 'text',
-    }}
+    extraActionsIconType="boxesVertical"
+    extraActionsColor="text"
   >
     {'Field value'}
   </CellActions>

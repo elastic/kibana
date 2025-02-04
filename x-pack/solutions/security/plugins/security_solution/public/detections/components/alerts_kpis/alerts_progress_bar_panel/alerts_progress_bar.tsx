@@ -198,12 +198,10 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                               triggerId={SecurityCellActionsTrigger.DEFAULT}
                               data={{ field: groupBySelection, value: item.key }}
                               sourcererScopeId={sourcererScopeId}
-                              metadata={{
-                                scopeId: TableId.alertsOnAlertsPage,
-                                extraActionsIconType: 'boxesVertical',
-                                extraActionsColor: 'text',
-                              }}
+                              metadata={{ scopeId: TableId.alertsOnAlertsPage }}
                               disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+                              extraActionsIconType="boxesVertical"
+                              extraActionsColor="text"
                             />
                           ) : (
                             <EmptyAction />

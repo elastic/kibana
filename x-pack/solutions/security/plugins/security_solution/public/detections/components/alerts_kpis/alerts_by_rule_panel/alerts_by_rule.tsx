@@ -74,11 +74,9 @@ const COLUMNS: Array<EuiBasicTableColumn<AlertsByRuleData>> = [
         data={{ field: ALERT_RULE_NAME, value: rule }}
         sourcererScopeId={getSourcererScopeId(TableId.alertsOnAlertsPage)}
         disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
-        metadata={{
-          scopeId: TableId.alertsOnAlertsPage,
-          extraActionsIconType: 'boxesVertical',
-          extraActionsColor: 'text',
-        }}
+        metadata={{ scopeId: TableId.alertsOnAlertsPage }}
+        extraActionsIconType="boxesVertical"
+        extraActionsColor="text"
       />
     ),
   },

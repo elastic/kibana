@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiScreenReaderOnly,
   EuiWrappingPopover,
+  type EuiButtonIconProps,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -20,8 +21,8 @@ import { css } from '@emotion/react';
 import { EXTRA_ACTIONS_ARIA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import type { CellAction, CellActionExecutionContext } from '../types';
 
-const getEuiContextMenuItemCSS = (actionContext: CellActionExecutionContext) => {
-  if (actionContext.metadata?.extraActionsColor === 'text') {
+const getEuiContextMenuItemCSS = (extraActionsColor?: EuiButtonIconProps['color']) => {
+  if (extraActionsColor && extraActionsColor === 'text') {
     return undefined;
   }
   return css`
@@ -36,6 +37,7 @@ interface ActionsPopOverProps {
   closePopOver: () => void;
   actions: CellAction[];
   button: JSX.Element;
+  extraActionsColor?: EuiButtonIconProps['color'];
 }
 
 export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
@@ -45,6 +47,7 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
   isOpen,
   closePopOver,
   button,
+  extraActionsColor,
 }) => (
   <EuiPopover
     button={button}
@@ -62,6 +65,7 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
       actions={actions}
       actionContext={actionContext}
       closePopOver={closePopOver}
+      extraActionsColor={extraActionsColor}
     />
   </EuiPopover>
 );
@@ -69,7 +73,7 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
 interface ExtraActionsPopOverWithAnchorProps
   extends Pick<
     ActionsPopOverProps,
-    'anchorPosition' | 'actionContext' | 'closePopOver' | 'isOpen' | 'actions'
+    'anchorPosition' | 'actionContext' | 'closePopOver' | 'isOpen' | 'actions' | 'extraActionsColor'
   > {
   anchorRef: React.RefObject<HTMLElement>;
 }
@@ -81,6 +85,7 @@ export const ExtraActionsPopOverWithAnchor = ({
   isOpen,
   closePopOver,
   actions,
+  extraActionsColor,
 }: ExtraActionsPopOverWithAnchorProps) => {
   return anchorRef.current ? (
     <EuiWrappingPopover
@@ -100,6 +105,7 @@ export const ExtraActionsPopOverWithAnchor = ({
         actions={actions}
         actionContext={actionContext}
         closePopOver={closePopOver}
+        extraActionsColor={extraActionsColor}
       />
     </EuiWrappingPopover>
   ) : null;
@@ -107,19 +113,20 @@ export const ExtraActionsPopOverWithAnchor = ({
 
 type ExtraActionsPopOverContentProps = Pick<
   ActionsPopOverProps,
-  'actionContext' | 'closePopOver' | 'actions'
+  'actionContext' | 'closePopOver' | 'actions' | 'extraActionsColor'
 >;
 
 const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
   actionContext,
   actions,
   closePopOver,
+  extraActionsColor,
 }) => {
   const items = useMemo(
     () =>
       actions.map((action) => (
         <EuiContextMenuItem
-          css={getEuiContextMenuItemCSS(actionContext)}
+          css={getEuiContextMenuItemCSS(extraActionsColor)}
           key={action.id}
           icon={action.getIconType(actionContext)}
           aria-label={action.getDisplayName(actionContext)}
@@ -132,7 +139,7 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
           {action.getDisplayName(actionContext)}
         </EuiContextMenuItem>
       )),
-    [actionContext, actions, closePopOver]
+    [actionContext, actions, closePopOver, extraActionsColor]
   );
 
   return (
