@@ -33,7 +33,7 @@ const entity = {
   id: '123',
   name: 'test-entity',
   type: 'universal',
-  timestamp: '1111-11-11',
+  timestamp: new Date(),
 };
 
 describe('useDynamicEntityFlyout', () => {
@@ -148,7 +148,7 @@ describe('useDynamicEntityFlyout', () => {
     );
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { ...entity, type: 'user' } });
+      result.current.openDynamicFlyout({ entity: { type: 'user' } });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -160,7 +160,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { ...entity, type: 'host' } });
+      result.current.openDynamicFlyout({ entity: { type: 'host' } });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -172,7 +172,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { ...entity, type: 'service' } });
+      result.current.openDynamicFlyout({ entity: { type: 'service' } });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(

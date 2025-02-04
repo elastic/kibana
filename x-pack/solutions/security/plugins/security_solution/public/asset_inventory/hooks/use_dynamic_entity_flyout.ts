@@ -47,11 +47,11 @@ type FlyoutParams =
       params: { serviceName: string } & SecurityFlyoutPanelsCommonParams;
     };
 
-const getFlyoutParamsByEntity = (
-  entity: UniversalEntityEcs,
-  scopeId?: string,
-  contextId?: string
-): FlyoutParams => {
+const getFlyoutParamsByEntity = ({
+  entity,
+  scopeId,
+  contextId,
+}: InventoryFlyoutProps): FlyoutParams => {
   const entitiesFlyoutParams: Record<UniversalEntityEcs['type'], FlyoutParams> = {
     universal: { id: UniversalEntityPanelKey, params: { entity } },
     user: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
@@ -68,7 +68,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
   const openDynamicFlyout = ({ entity, scopeId, contextId }: InventoryFlyoutProps) => {
-    const entityFlyoutParams = getFlyoutParamsByEntity(entity, scopeId, contextId);
+    const entityFlyoutParams = getFlyoutParamsByEntity({ entity, scopeId, contextId });
 
     // User, Host, and Service entity flyouts rely on entity name to fetch required data
     if (entity.type !== 'universal' && !entity.name) {
