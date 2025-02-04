@@ -2030,10 +2030,10 @@ module.exports = {
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
-        // FIXME @kbn/osquery-plugin has dependencies on:
-        // - @kbn/timelines-plugin         (security/private) https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/osquery/public/types.ts#L20
-        // - @kbn/security-solution-plugin (security/private) this one is “less critical” as it is cypress depending on cypress
+        // FIXME tomsonpl @kbn/osquery-plugin depends on @kbn/security-solution-plugin (security/private) (cypress code => cypress code)
         'x-pack/platform/plugins/shared/osquery/**',
+        // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
+        'x-pack/platform/plugins/shared/timelines/**',
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
