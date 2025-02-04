@@ -29,7 +29,7 @@ const detailedServiceMap = url.format({
   },
 });
 
-describe('service map', () => {
+describe.skip('service map', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -52,7 +52,7 @@ describe('service map', () => {
       cy.intercept('GET', '/internal/apm/service-map?*').as('serviceMap');
     });
 
-    it.skip('shows nodes in service map', () => {
+    it('shows nodes in service map', () => {
       cy.visitKibana(serviceMapHref);
       cy.wait('@serviceMap');
 
@@ -68,7 +68,7 @@ describe('service map', () => {
       );
     });
 
-    it.skip('shows nodes in detailed service map', () => {
+    it('shows nodes in detailed service map', () => {
       cy.visitKibana(detailedServiceMap);
       cy.wait('@serviceMap');
       cy.contains('h1', 'opbeans-java');
@@ -85,6 +85,7 @@ describe('service map', () => {
       );
     });
 
+    // Flaky: https://github.com/elastic/kibana/issues/207005
     describe('when there is no data', () => {
       it('shows empty state', () => {
         cy.visitKibana(serviceMapHref);
