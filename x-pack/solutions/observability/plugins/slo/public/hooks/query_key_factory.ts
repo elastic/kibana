@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindSLOHealthParams, Indicator } from '@kbn/slo-schema';
+import type { Indicator } from '@kbn/slo-schema';
 
 interface SloListFilter {
   kqlQuery: string;
