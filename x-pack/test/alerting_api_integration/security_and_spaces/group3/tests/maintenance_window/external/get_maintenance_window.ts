@@ -6,25 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { UserAtSpaceScenarios } from '../../../../scenarios';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function getMaintenanceWindowTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('getMaintenanceWindow', () => {
+  // POST needs to be implemented
+  describe.skip('getMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createParams = {
       title: 'test-maintenance-window',
       duration: 60 * 60 * 1000, // 1 hr
-      r_rule: {
-        dtstart: new Date().toISOString(),
-        tzid: 'UTC',
-        freq: 2, // weekly
-      },
     };
     afterEach(() => objectRemover.removeAll());
 
@@ -33,7 +29,7 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
       describe(scenario.id, () => {
         it('should get maintenance window correctly', async () => {
           const { body: createdMaintenanceWindow } = await supertest
-            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
+            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .send(createParams);
 
@@ -46,11 +42,7 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
           );
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window/${
-                createdMaintenanceWindow.id
-              }`
-            )
+            .get(`${getUrlPrefix(space.id)}/api/maintenance_window/${createdMaintenanceWindow.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -61,7 +53,7 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `API [GET /internal/alerting/rules/maintenance_window/${createdMaintenanceWindow.id}] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]`,
+                message: `API [GET /api/maintenance_window/${createdMaintenanceWindow.id}] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]`,
                 statusCode: 403,
               });
               break;

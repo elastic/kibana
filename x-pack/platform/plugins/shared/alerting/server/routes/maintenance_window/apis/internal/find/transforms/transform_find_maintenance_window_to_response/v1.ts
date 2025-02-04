@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformMaintenanceWindowToResponseV1 } from '../../../../../transforms';
+import { transformMaintenanceWindowToResponseV1 } from '../../../transforms';
 import type { FindMaintenanceWindowsResponseV1 } from '../../../../../../../../common/routes/maintenance_window/internal/apis/find';
 import type { MaintenanceWindow } from '../../../../../../../application/maintenance_window/types';
 import type { FindMaintenanceWindowsResult } from '../../../../../../../application/maintenance_window/methods/find/types';

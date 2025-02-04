@@ -247,8 +247,10 @@ export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
 
 // External
 
-export const ALERTING_API_MAINTENANCE_WINDOW_PATH =
-  `${BASE_ALERTING_API_PATH}/rules/maintenance_window` as const;
+export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';
+
+// export const ALERTING_API_MAINTENANCE_WINDOW_PATH =
+//   `${BASE_ALERTING_API_PATH}/rules/maintenance_window` as const;
 
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;

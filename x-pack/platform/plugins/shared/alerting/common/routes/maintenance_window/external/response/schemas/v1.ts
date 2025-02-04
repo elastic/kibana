@@ -7,36 +7,41 @@
 
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
-import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../shared';
-import { rRuleResponseSchemaV1 } from '../../../../r_rule';
-import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 
-export const maintenanceWindowEventSchema = schema.object({
-  gte: schema.string(),
-  lte: schema.string(),
-});
+const recurringScheduleSchema = schema.object({});
 
 // TO REVIEW
-export const maintenanceWindowResponseSchema = schema.object({
+const maintenanceWindowResponseFieldsSchema = schema.object({
   id: schema.string(),
   title: schema.string(),
   enabled: schema.boolean(),
   duration: schema.number(),
   expiration_date: schema.string(),
-  events: schema.arrayOf(maintenanceWindowEventSchema),
-  r_rule: rRuleResponseSchemaV1,
+
   created_by: schema.nullable(schema.string()),
   updated_by: schema.nullable(schema.string()),
   created_at: schema.string(),
   updated_at: schema.string(),
-  event_start_time: schema.nullable(schema.string()),
-  event_end_time: schema.nullable(schema.string()),
+
   status: schema.oneOf([
     schema.literal(maintenanceWindowStatusV1.RUNNING),
     schema.literal(maintenanceWindowStatusV1.UPCOMING),
     schema.literal(maintenanceWindowStatusV1.FINISHED),
     schema.literal(maintenanceWindowStatusV1.ARCHIVED),
   ]),
-  category_ids: maintenanceWindowCategoryIdsSchemaV1,
-  scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+
+  scope: schema.maybe(
+    schema.object({
+      query: schema.object({
+        kql: schema.string({
+          meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+        }),
+      }),
+    })
+  ),
 });
+
+export const maintenanceWindowResponseSchema = schema.intersection([
+  maintenanceWindowResponseFieldsSchema,
+  recurringScheduleSchema,
+]);

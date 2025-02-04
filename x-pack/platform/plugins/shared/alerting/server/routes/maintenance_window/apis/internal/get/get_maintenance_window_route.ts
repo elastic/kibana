@@ -19,7 +19,7 @@ import {
   GetMaintenanceWindowRequestParamsV1,
   GetMaintenanceWindowResponseV1,
 } from '../../../../../../common/routes/maintenance_window/internal/apis/get';
-import { transformMaintenanceWindowToResponseV1 } from '../../../transforms';
+import { transformMaintenanceWindowToResponseV1 } from '../transforms';
 
 export const getMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

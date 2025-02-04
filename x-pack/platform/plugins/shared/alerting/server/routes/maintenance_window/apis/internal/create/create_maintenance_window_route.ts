@@ -20,7 +20,7 @@ import {
   CreateMaintenanceWindowResponseV1,
 } from '../../../../../../common/routes/maintenance_window/internal/apis/create';
 import { transformCreateBodyV1 } from './transforms';
-import { transformMaintenanceWindowToResponseV1 } from '../../../transforms';
+import { transformMaintenanceWindowToResponseV1 } from '../transforms';
 
 export const createMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

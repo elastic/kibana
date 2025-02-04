@@ -16,7 +16,7 @@ import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 
 import { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import { GetActiveMaintenanceWindowsResponseV1 } from '../../../../../../common/routes/maintenance_window/internal/apis/get_active';
-import { transformMaintenanceWindowToResponseV1 } from '../../../transforms';
+import { transformMaintenanceWindowToResponseV1 } from '../transforms';
 
 export const getActiveMaintenanceWindowsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

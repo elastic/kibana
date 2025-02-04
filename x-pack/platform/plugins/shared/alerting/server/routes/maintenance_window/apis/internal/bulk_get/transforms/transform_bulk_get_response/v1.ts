@@ -7,7 +7,7 @@
 
 import { BulkGetMaintenanceWindowsResponseBodyV1 } from '../../../../../../../../common/routes/maintenance_window/internal/apis/bulk_get';
 import { BulkGetMaintenanceWindowsResult } from '../../../../../../../application/maintenance_window/methods/bulk_get/types';
-import { transformMaintenanceWindowToResponseV1 } from '../../../../../transforms';
+import { transformMaintenanceWindowToResponseV1 } from '../../../transforms';
 
 export const transformBulkGetResultToResponse = (
   result: BulkGetMaintenanceWindowsResult

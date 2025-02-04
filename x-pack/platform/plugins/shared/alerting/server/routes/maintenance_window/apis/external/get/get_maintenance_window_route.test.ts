@@ -13,7 +13,7 @@ import { maintenanceWindowClientMock } from '../../../../../maintenance_window_c
 import { getMaintenanceWindowRoute } from './get_maintenance_window_route';
 import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
-import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
+import { transformMaintenanceWindowToResponseV1 } from '../transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -34,7 +34,7 @@ describe('getMaintenanceWindowRoute', () => {
     jest.resetAllMocks();
   });
 
-  test('should get the maintenance window', async () => {
+  it('should get the maintenance window', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -47,10 +47,10 @@ describe('getMaintenanceWindowRoute', () => {
       { params: { id: 'test-id' } }
     );
 
-    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/{id}');
+    expect(config.path).toEqual('/api/maintenance_window/{id}');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
-        "access": "internal",
+        "access": "public",
       }
     `);
 
@@ -68,11 +68,11 @@ describe('getMaintenanceWindowRoute', () => {
 
     expect(maintenanceWindowClient.get).toHaveBeenLastCalledWith({ id: 'test-id' });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
+      body: transformMaintenanceWindowToResponseV1(mockMaintenanceWindow),
     });
   });
 
-  test('ensures the license allows for getting maintenance windows', async () => {
+  it('ensures the license allows for getting maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -88,7 +88,7 @@ describe('getMaintenanceWindowRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  test('ensures the license check prevents for getting maintenance windows', async () => {
+  it('ensures the license check prevents for getting maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -105,7 +105,7 @@ describe('getMaintenanceWindowRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
-  test('ensures only platinum license can access API', async () => {
+  it('ensures only platinum license can access API', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 

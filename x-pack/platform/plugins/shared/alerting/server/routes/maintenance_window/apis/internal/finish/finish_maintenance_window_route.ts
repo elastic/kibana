@@ -19,7 +19,7 @@ import {
   FinishMaintenanceWindowResponseV1,
 } from '../../../../../../common/routes/maintenance_window/internal/apis/finish';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
-import { transformMaintenanceWindowToResponseV1 } from '../../../transforms';
+import { transformMaintenanceWindowToResponseV1 } from '../transforms';
 
 export const finishMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

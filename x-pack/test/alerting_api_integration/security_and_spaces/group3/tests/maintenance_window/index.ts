@@ -10,7 +10,7 @@ import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export
 export default function maintenanceWindowTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Maintenance Window - Group 3', () => {
+  describe.only('Maintenance Window - Group 3', () => {
     describe('maintenance window', () => {
       before(async () => {
         await setupSpacesAndUsers(getService);
@@ -20,14 +20,14 @@ export default function maintenanceWindowTests({ loadTestFile, getService }: Ftr
         await tearDown(getService);
       });
 
-      loadTestFile(require.resolve('./get_maintenance_window'));
-      loadTestFile(require.resolve('./create_maintenance_window'));
-      loadTestFile(require.resolve('./update_maintenance_window'));
-      loadTestFile(require.resolve('./delete_maintenance_window'));
-      loadTestFile(require.resolve('./archive_maintenance_window'));
-      loadTestFile(require.resolve('./finish_maintenance_window'));
-      loadTestFile(require.resolve('./find_maintenance_windows'));
-      loadTestFile(require.resolve('./active_maintenance_windows'));
+      loadTestFile(require.resolve('./internal/get_maintenance_window'));
+      loadTestFile(require.resolve('./internal/create_maintenance_window'));
+      loadTestFile(require.resolve('./internal/update_maintenance_window'));
+      loadTestFile(require.resolve('./internal/delete_maintenance_window'));
+      loadTestFile(require.resolve('./internal/archive_maintenance_window'));
+      loadTestFile(require.resolve('./internal/finish_maintenance_window'));
+      loadTestFile(require.resolve('./internal/find_maintenance_windows'));
+      loadTestFile(require.resolve('./internal/active_maintenance_windows'));
     });
   });
 }

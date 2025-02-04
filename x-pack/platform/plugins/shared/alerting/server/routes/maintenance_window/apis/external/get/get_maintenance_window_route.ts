@@ -10,7 +10,7 @@ import { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import {
   AlertingRequestHandlerContext,
-  ALERTING_API_MAINTENANCE_WINDOW_PATH,
+  BASE_MAINTENANCE_WINDOW_API_PATH,
 } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 import { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
@@ -19,7 +19,7 @@ import {
   GetMaintenanceWindowRequestParamsV1,
   GetMaintenanceWindowResponseV1,
 } from '../../../../../../common/routes/maintenance_window/external/apis/get';
-import { transformMaintenanceWindowToResponseV1 } from '../../../transforms';
+import { transformMaintenanceWindowToResponseV1 } from '../transforms';
 
 export const getMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -27,7 +27,7 @@ export const getMaintenanceWindowRoute = (
 ) => {
   router.get(
     {
-      path: `${ALERTING_API_MAINTENANCE_WINDOW_PATH}/{id}`,
+      path: `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`,
       validate: {
         params: getParamsSchemaV1,
       },
@@ -52,7 +52,6 @@ export const getMaintenanceWindowRoute = (
           id: params.id,
         });
 
-        // NEED MY OWN TRANSFORM
         const response: GetMaintenanceWindowResponseV1 =
           transformMaintenanceWindowToResponseV1(maintenanceWindow);
 

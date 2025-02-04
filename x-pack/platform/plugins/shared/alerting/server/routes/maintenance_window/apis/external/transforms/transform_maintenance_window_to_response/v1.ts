@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MaintenanceWindowResponseV1 } from '../../../../../common/routes/maintenance_window/internal/response';
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import { MaintenanceWindowResponseV1 } from '../../../../../../../common/routes/maintenance_window/external/response';
+import { MaintenanceWindow } from '../../../../../../application/maintenance_window/types';
 
 export const transformMaintenanceWindowToResponse = (
   maintenanceWindow: MaintenanceWindow
@@ -17,20 +17,16 @@ export const transformMaintenanceWindowToResponse = (
     enabled: maintenanceWindow.enabled,
     duration: maintenanceWindow.duration,
     expiration_date: maintenanceWindow.expirationDate,
-    events: maintenanceWindow.events,
-    r_rule: maintenanceWindow.rRule,
+
+    // TODO: recurring_schedule
+
     created_by: maintenanceWindow.createdBy,
     updated_by: maintenanceWindow.updatedBy,
     created_at: maintenanceWindow.createdAt,
     updated_at: maintenanceWindow.updatedAt,
-    event_start_time: maintenanceWindow.eventStartTime,
-    event_end_time: maintenanceWindow.eventEndTime,
     status: maintenanceWindow.status,
-    ...(maintenanceWindow.categoryIds !== undefined
-      ? { category_ids: maintenanceWindow.categoryIds }
-      : {}),
-    ...(maintenanceWindow.scopedQuery !== undefined
-      ? { scoped_query: maintenanceWindow.scopedQuery }
+    ...(maintenanceWindow.scopedQuery?.kql !== undefined
+      ? { scoped: { query: { kql: maintenanceWindow.scopedQuery } } }
       : {}),
   };
 };

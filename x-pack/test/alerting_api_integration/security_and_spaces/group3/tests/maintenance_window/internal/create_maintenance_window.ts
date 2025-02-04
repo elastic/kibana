@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { UserAtSpaceScenarios } from '../../../../scenarios';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const scopedQuery = {
   kql: "_id: '1234'",
