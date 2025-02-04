@@ -19,7 +19,7 @@ import type {
   LogLevel,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  logLevelFromExecutionStatus,
+  consoleLogLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
   RuleExecutionStatusEnum,
@@ -157,12 +157,10 @@ export const createRuleExecutionLogClientForExecutors = (
   };
 
   const writeStatusChangeToConsole = (args: NormalizedStatusChangeArgs, logMeta: ExtMeta): void => {
-    const logLevel = logLevelFromExecutionStatus(args.newStatus);
-    if (logLevelToNumber(logLevel) >= logLevelToNumber(LogLevelEnum.error) && !args.userError) {
-      const messageParts: string[] = [`Changing rule status to "${args.newStatus}"`, args.message];
-      const logMessage = messageParts.filter(Boolean).join('. ');
-      writeMessageToConsole(logMessage, logLevel, logMeta);
-    }
+    const messageParts: string[] = [`Changing rule status to "${args.newStatus}"`, args.message];
+    const logMessage = messageParts.filter(Boolean).join('. ');
+    const logLevel = consoleLogLevelFromExecutionStatus(args.newStatus, args.userError);
+    writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
   const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
