@@ -15,14 +15,15 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloManagementContent } from './components/slo_management_content';
+import { usePermissions } from '../../hooks/use_permissions';
 
 export function SloManagementPage() {
   const {
     http: { basePath },
     serverless,
   } = useKibana().services;
-
   const { ObservabilityPageTemplate } = usePluginContext();
+  const { data: permissions } = usePermissions();
   const { hasAtLeast } = useLicense();
 
   useBreadcrumbs(
@@ -43,12 +44,20 @@ export function SloManagementPage() {
     { serverless }
   );
 
+  const hasRequiredPrivileges =
+    permissions?.hasAllReadRequested === true || permissions?.hasAllWriteRequested === true;
   const hasPlatinumLicense = hasAtLeast('platinum') === true;
 
-  const errors = !hasPlatinumLicense ? (
+  const errors = !hasRequiredPrivileges ? (
+    <EuiText>
+      {i18n.translate('xpack.slo.managementPage.sloPermissionsError', {
+        defaultMessage: 'You must have read or write permissions for SLOs to access this page',
+      })}
+    </EuiText>
+  ) : !hasPlatinumLicense ? (
     <EuiText>
       {i18n.translate('xpack.slo.managementPage.licenseError', {
-        defaultMessage: 'You must have at least a platinum license to access this page',
+        defaultMessage: 'You must have atleast a platinum license to access this page',
       })}
     </EuiText>
   ) : null;

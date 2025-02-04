@@ -65,7 +65,7 @@ export function SlosPage() {
     <ObservabilityPageTemplate
       data-test-subj="slosPage"
       pageHeader={{
-        pageTitle: i18n.translate('xpack.slo.slosPage.', { defaultMessage: 'SLOs' }),
+        pageTitle: i18n.translate('xpack.slo.slosPage', { defaultMessage: 'SLOs' }),
         rightSideItems: [<CreateSloBtn />, <FeedbackButton />],
       }}
       topSearchBar={<SloListSearchBar />}

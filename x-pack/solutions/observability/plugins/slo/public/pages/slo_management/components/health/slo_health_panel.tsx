@@ -7,7 +7,6 @@
 
 import {
   Criteria,
-  EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiIcon,
@@ -33,8 +32,9 @@ export function SloHealthPanel() {
   const {
     services: { http },
   } = useKibana();
-  const [query, setQuery] = useState<string | undefined>();
+  const [query, setQuery] = useState<string>();
   const [filters, setFilters] = useState<Filter[]>([]);
+  const [statusFilter, setStatusFilter] = useState<Filter>();
   const [sortBy, setSortBy] = useState<FindSLOHealthSortBy>('status');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [pageIndex, setPageIndex] = useState(0);
@@ -43,6 +43,7 @@ export function SloHealthPanel() {
   const { isLoading, isError, data } = useFetchSloHealth({
     query,
     filters,
+    statusFilter,
     page: pageIndex + 1,
     size: pageSize,
     sortBy,
@@ -67,7 +68,8 @@ export function SloHealthPanel() {
       },
     },
     {
-      width: '20%',
+      width: '15%',
+      truncateText: true,
       name: 'Name',
       render: (item: SLOHealthResponse) => {
         return (
@@ -79,17 +81,6 @@ export function SloHealthPanel() {
             {item.name}
           </EuiLink>
         );
-      },
-    },
-    {
-      field: 'tags',
-      name: 'Tags',
-      render: (tags: SLOHealthResponse['tags']) => {
-        return tags.map((tag) => (
-          <EuiBadge key={tag} color="hollow">
-            {tag}
-          </EuiBadge>
-        ));
       },
     },
     {
@@ -244,9 +235,11 @@ export function SloHealthPanel() {
       <SloHealthSearchBar
         query={query}
         filters={filters}
-        onSearchChange={(newQuery: string, newFilters: Filter[]) => {
+        statusFilter={statusFilter}
+        onSearchChange={({ newQuery, newFilters, newStatusFilter }) => {
           setQuery(newQuery);
           setFilters(newFilters);
+          setStatusFilter(newStatusFilter);
         }}
       />
       <EuiSpacer size="m" />

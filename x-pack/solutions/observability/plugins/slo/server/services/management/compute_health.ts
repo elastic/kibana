@@ -153,6 +153,7 @@ export class ComputeHealth {
     // remove old health documents (e.g. from SLO Definitions that were deleted)
     await this.esClient.deleteByQuery({
       index: HEALTH_INDEX_NAME,
+      wait_for_completion: false,
       body: {
         query: {
           range: {

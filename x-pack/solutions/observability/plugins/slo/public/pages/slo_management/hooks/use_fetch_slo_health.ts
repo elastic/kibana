@@ -24,29 +24,39 @@ type Props = Omit<FindSLOHealthParams, 'filters' | 'page' | 'size'> & {
   filters?: Filter[];
   page: number;
   size: number;
+  statusFilter?: Filter;
 };
 
 export function useFetchSloHealth(params: Props): UseFetchSloHealth {
-  const { query, filters = [], sortBy, sortDirection, searchAfter, page, size } = params;
+  const {
+    query,
+    filters = [],
+    statusFilter,
+    sortBy,
+    sortDirection,
+    searchAfter,
+    page,
+    size,
+  } = params;
   const { sloClient } = usePluginContext();
 
   const { dataView } = useCreateDataView({
     indexPatternString: HEALTH_INDEX_PATTERN,
   });
   const stringifiedFilters = useMemo(() => {
-    if (filters.length === 0) {
+    if (filters.length === 0 && statusFilter === undefined) {
       return undefined;
     }
     try {
       return JSON.stringify(
-        buildQueryFromFilters(filters, dataView, {
+        buildQueryFromFilters([...filters, ...(statusFilter ? [statusFilter] : [])], dataView, {
           ignoreFilterIfFieldNotInIndex: true,
         })
       );
     } catch (e) {
       return undefined;
     }
-  }, [filters, dataView]);
+  }, [filters, statusFilter, dataView]);
 
   const { isLoading, isError, data } = useQuery({
     queryKey: sloKeys.managementHealth(params),
