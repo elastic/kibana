@@ -33,8 +33,9 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
     (connector: AIConnector) => {
       setStoredConnectorId(connector.id);
       setComplete(true);
+      siemMigrations.rules.telemetry.reportConnectorSelected({ connector });
     },
-    [setComplete, setStoredConnectorId]
+    [setComplete, setStoredConnectorId, siemMigrations]
   );
 
   if (!checkCompleteMetadata) {

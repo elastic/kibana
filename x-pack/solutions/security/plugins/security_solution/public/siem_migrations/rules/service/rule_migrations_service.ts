@@ -12,8 +12,8 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
+import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
-import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigrationResourceBase,
   RuleMigrationTaskStats,
@@ -29,6 +29,7 @@ import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/cons
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
+import type { StartRuleMigrationParams } from '../api';
 import {
   createRuleMigration,
   getRuleMigrationStats,
@@ -43,6 +44,7 @@ import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
+import { SiemRulesMigrationsTelemetry } from './telemetry';
 
 // use the default assistant namespace since it's the only one we use
 const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
@@ -59,11 +61,14 @@ export class SiemRulesMigrationsService {
     customKey: NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY,
     storageType: 'session',
   });
+  public telemetry: SiemRulesMigrationsTelemetry;
 
   constructor(
     private readonly core: CoreStart,
-    private readonly plugins: StartPluginsDependencies
+    private readonly plugins: StartPluginsDependencies,
+    telemetryService: TelemetryServiceStart
   ) {
+    this.telemetry = new SiemRulesMigrationsTelemetry(telemetryService);
     this.latestStats$ = new BehaviorSubject<RuleMigrationStats[]>([]);
 
     this.plugins.spaces.getActiveSpace().then((space) => {
@@ -132,19 +137,26 @@ export class SiemRulesMigrationsService {
     if (!connectorId) {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
     }
+    const params: StartRuleMigrationParams = { migrationId, connectorId, retry };
 
-    const langSmithSettings = this.traceOptionsStorage.get();
-    let langSmithOptions: LangSmithOptions | undefined;
-    if (langSmithSettings) {
-      langSmithOptions = {
-        project_name: langSmithSettings.langSmithProject,
-        api_key: langSmithSettings.langSmithApiKey,
+    const traceOptions = this.traceOptionsStorage.get();
+    if (traceOptions) {
+      params.langSmithOptions = {
+        project_name: traceOptions.langSmithProject,
+        api_key: traceOptions.langSmithApiKey,
       };
     }
 
-    const result = await startRuleMigration({ migrationId, connectorId, retry, langSmithOptions });
-    this.startPolling();
-    return result;
+    try {
+      const result = await startRuleMigration(params);
+      this.startPolling();
+
+      this.telemetry.reportStartTranslation(params);
+      return result;
+    } catch (error) {
+      this.telemetry.reportStartTranslation({ ...params, error });
+      throw error;
+    }
   }
 
   public async getRuleMigrationStats(migrationId: string): Promise<GetRuleMigrationStatsResponse> {
