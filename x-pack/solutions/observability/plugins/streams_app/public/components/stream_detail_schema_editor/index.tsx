@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { WiredStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
-import { SchemaEditor } from './schema_editor';
-import { useFields } from './hooks/use_fields';
+import { SchemaEditor } from '../schema_editor';
+import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 
 interface SchemaEditorProps {
   definition?: WiredStreamGetResponse;
@@ -25,7 +25,7 @@ const Content = ({
   refreshDefinition,
   isLoadingDefinition,
 }: Required<SchemaEditorProps>) => {
-  const { fields, isLoadingUnmappedFields, unmapField, updateField } = useFields({
+  const { fields, isLoadingUnmappedFields, unmapField, updateField } = useSchemaFields({
     definition,
     refreshDefinition,
   });

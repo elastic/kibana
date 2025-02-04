@@ -71,3 +71,31 @@ export const FIELD_STATUS_MAP = {
 };
 
 export type FieldStatus = keyof typeof FIELD_STATUS_MAP;
+
+export const TABLE_COLUMNS = {
+  name: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablenameHeader', {
+      defaultMessage: 'Field',
+    }),
+  },
+  type: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTabletypeHeader', {
+      defaultMessage: 'Type',
+    }),
+  },
+  format: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableformatHeader', {
+      defaultMessage: 'Format',
+    }),
+  },
+  parent: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableFieldParentHeader', {
+      defaultMessage: 'Field Parent (Stream)',
+    }),
+  },
+  status: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablestatusHeader', {
+      defaultMessage: 'Status',
+    }),
+  },
+};

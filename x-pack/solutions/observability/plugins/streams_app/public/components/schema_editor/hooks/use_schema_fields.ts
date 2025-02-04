@@ -18,7 +18,7 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { MappedSchemaField, SchemaField, isSchemeFieldTyped } from '../types';
 
-export const useFields = ({
+export const useSchemaFields = ({
   definition,
   refreshDefinition,
 }: {

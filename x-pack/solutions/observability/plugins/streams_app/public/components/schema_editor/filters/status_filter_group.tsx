@@ -16,9 +16,7 @@ import { SchemaFieldStatus } from '../types';
 
 const BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.fieldStatusFilterGroupButtonLabel',
-  {
-    defaultMessage: 'Status',
-  }
+  { defaultMessage: 'Status' }
 );
 
 export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChangeHandler }) => {
