@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const { common, indexManagement, header, solutionNavigation, searchIndexDetailsPage } = getPageObjects([
-    'common',
-    'indexManagement',
-    'header',
-    'solutionNavigation',
-    'searchIndexDetailsPage'
-  ]);
+  const { common, indexManagement, header, solutionNavigation, searchIndexDetailsPage } =
+    getPageObjects([
+      'common',
+      'indexManagement',
+      'header',
+      'solutionNavigation',
+      'searchIndexDetailsPage',
+    ]);
   const testSubjects = getService('testSubjects');
 
   return {
