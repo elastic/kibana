@@ -65,7 +65,7 @@ describe('extractThreatArray', () => {
     ]);
   });
 
-  it('normalizes url ending backslashes with param strings', () => {
+  it('normalizes url ending backslashes with query strings', () => {
     const mockRule = {
       ...getRulesSchemaMock(),
       threat: [
