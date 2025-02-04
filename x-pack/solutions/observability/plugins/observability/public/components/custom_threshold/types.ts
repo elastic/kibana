@@ -59,6 +59,7 @@ export interface AlertParams {
   alertOnGroupDisappear?: boolean;
   searchConfiguration: CustomThresholdSearchSourceFields;
   shouldDropPartialBuckets?: boolean;
+  dashboards?: Array<{ id: string; title: string }>;
 }
 
 export interface InfraClientStartDeps {

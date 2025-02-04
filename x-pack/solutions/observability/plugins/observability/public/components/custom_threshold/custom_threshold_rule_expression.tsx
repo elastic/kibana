@@ -19,6 +19,8 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
+  EuiFlexItem,
+  EuiComboBox,
 } from '@elastic/eui';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -34,6 +36,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { SimpleSavedObject } from '@kbn/core/public';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -66,6 +69,7 @@ export const defaultExpression: MetricExpression = {
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+
   const {
     data,
     dataViews,
@@ -73,6 +77,7 @@ export default function Expressions(props: Props) {
     unifiedSearch: {
       ui: { SearchBar },
     },
+    savedObjects,
   } = useKibana().services;
 
   const hasGroupBy = useMemo<boolean>(
@@ -348,6 +353,60 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams]);
 
+  const [dashboardList, setDashboardList] = useState<
+    Array<{
+      value: string;
+      label: string;
+    }>
+  >();
+
+  const [selectedDashboards, setSelectedDashboards] = useState<
+    Array<{ label: string; value: string }> | undefined
+  >(
+    ruleParams.dashboards?.map((dashboard) => ({
+      label: dashboard.title,
+      value: dashboard.id,
+    }))
+  );
+
+  const onChange = (selectedOptions: any[]) => {
+    setSelectedDashboards(selectedOptions);
+    setRuleParams(
+      'dashboards',
+      selectedOptions.map((selectedOption) => ({
+        id: selectedOption.value,
+        title: selectedOption.label,
+      }))
+    );
+  };
+
+  const dashboardSavedObjectToMenuItem = (
+    savedObject: SimpleSavedObject<{
+      title: string;
+    }>
+  ) => ({
+    value: savedObject.id,
+    label: savedObject.attributes.title,
+  });
+
+  const loadDashboards = useCallback(
+    async (searchString?: string) => {
+      const { savedObjects: dashboardSO } = await savedObjects.client.find<{ title: string }>({
+        type: 'dashboard',
+        search: searchString ? `${searchString}*` : undefined,
+        searchFields: ['title^3', 'description'],
+        defaultSearchOperator: 'AND',
+        perPage: 100,
+      });
+      setDashboardList(dashboardSO.map(dashboardSavedObjectToMenuItem));
+    },
+    [savedObjects]
+  );
+
+  useEffect(() => {
+    loadDashboards();
+  }, [loadDashboards]);
+
   if (paramsError) {
     return (
       <>
@@ -610,6 +669,25 @@ export default function Expressions(props: Props) {
           }
         }}
       />
+      <EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiTitle size="xs">
+          <h6>
+            <FormattedMessage
+              id="xpack.observability.customThreshold.rule.alertFlyout.linkDashboards"
+              defaultMessage="Link dashboard(s)"
+            />
+          </h6>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiComboBox
+          fullWidth
+          options={dashboardList}
+          selectedOptions={selectedDashboards}
+          onChange={onChange}
+        />
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
       <EuiSpacer size="m" />
     </>
   );

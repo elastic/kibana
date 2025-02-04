@@ -21,7 +21,7 @@ import { ActionTypeRegistryContract, Rule, RuleUiAction } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export type InitialRule = Partial<Rule> &
-  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
+  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'dashboards'>;
 
 interface CommandType<
   T extends
