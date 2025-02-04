@@ -22,12 +22,12 @@ import {
   uiMetricService,
 } from '../../../../../lib/ui_metric';
 
-export interface ReindexFlyoutProps extends ReindexStateContext {
+export interface IndexFlyoutProps extends ReindexStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
 }
 
-export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
+export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
   reindexState,
   startReindex,
   cancelReindex,

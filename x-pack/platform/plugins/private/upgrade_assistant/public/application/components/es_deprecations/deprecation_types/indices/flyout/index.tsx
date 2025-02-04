@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { ReindexFlyoutProps } from './container';
-export { ReindexFlyout } from './container';
+export type { IndexFlyoutProps } from './container';
+export { IndexFlyout } from './container';

@@ -19,7 +19,7 @@ import {
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
-import { ReindexFlyout, ReindexFlyoutProps } from './flyout';
+import { IndexFlyout, IndexFlyoutProps } from './flyout';
 import { ReindexStatusProvider, useReindexContext } from './context';
 
 const { useGlobalFlyout } = GlobalFlyout;
@@ -40,16 +40,16 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
     useGlobalFlyout();
 
   const closeFlyout = useCallback(async () => {
-    removeContentFromGlobalFlyout('reindexFlyout');
+    removeContentFromGlobalFlyout('indexFlyout');
     setShowFlyout(false);
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_CLOSE_FLYOUT_CLICK);
   }, [removeContentFromGlobalFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
-      addContentToGlobalFlyout<ReindexFlyoutProps>({
-        id: 'reindexFlyout',
-        Component: ReindexFlyout,
+      addContentToGlobalFlyout<IndexFlyoutProps>({
+        id: 'IndexFlyout',
+        Component: IndexFlyout,
         props: {
           deprecation,
           closeFlyout,
