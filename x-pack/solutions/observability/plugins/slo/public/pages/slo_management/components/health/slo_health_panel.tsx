@@ -70,7 +70,9 @@ export function SloHealthPanel() {
     {
       width: '15%',
       truncateText: true,
-      name: 'Name',
+      name: i18n.translate('xpack.slo.sloHealthPanel.columns.nameLabel', {
+        defaultMessage: 'Name',
+      }),
       render: (item: SLOHealthResponse) => {
         return (
           <EuiLink
@@ -245,7 +247,7 @@ export function SloHealthPanel() {
       <EuiSpacer size="m" />
       {!isLoading && !isError && !!data?.results && (
         <EuiBasicTable
-          tableCaption="SLOs Health"
+          tableCaption={TABLE_CAPTION}
           items={data?.results ?? []}
           rowHeader="status"
           columns={columns}
@@ -256,3 +258,7 @@ export function SloHealthPanel() {
     </EuiPanel>
   );
 }
+
+const TABLE_CAPTION = i18n.translate('xpack.slo.sloHealthPanel.tableCaption', {
+  defaultMessage: 'SLOs Health',
+});

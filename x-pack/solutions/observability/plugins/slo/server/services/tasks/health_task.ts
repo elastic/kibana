@@ -54,7 +54,7 @@ export class HealthTask {
             },
 
             cancel: async () => {
-              this.abortController.abort('HealthTask timed out');
+              this.abortController.abort('[HealthTask] Timed out');
             },
           };
         },
@@ -77,8 +77,7 @@ export class HealthTask {
         taskType: TYPE,
         scope: ['observability', 'slo'],
         schedule: {
-          // interval: '20m',
-          interval: '1m',
+          interval: '20m',
         },
         state: {},
         params: { version: VERSION },
@@ -114,7 +113,7 @@ export class HealthTask {
     try {
       // Use SLOSettings saved object to store health task settings/flags
       if (!this.config.healthEnabled) {
-        this.logger.info('[HealthTask] Task is disabled');
+        this.logger.debug('[HealthTask] Task is disabled');
         return;
       }
 

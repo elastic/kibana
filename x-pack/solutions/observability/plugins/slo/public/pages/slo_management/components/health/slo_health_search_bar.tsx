@@ -12,6 +12,7 @@ import { observabilityAppId } from '@kbn/observability-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { skip } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { HEALTH_INDEX_PATTERN } from '../../../../../common/constants';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -70,7 +71,7 @@ export function SloHealthSearchBar({
     >
       <SearchBar
         appName={observabilityAppId}
-        placeholder="Search your SLOs"
+        placeholder={SEARCH_PLACEHOLDER}
         indexPatterns={dataView ? [dataView] : []}
         isDisabled={isDataViewLoading}
         query={{ query: String(query), language: 'kuery' }}
@@ -121,7 +122,7 @@ export function SloHealthSearchBar({
                       hideActionBar: true,
                       width: 'small',
                       grow: false,
-                      title: 'Status',
+                      title: STATUS_FILTER_LABEL,
                       selectedOptions: getSelectedOptions(statusFilter),
                       existsSelected: Boolean(
                         filters?.some((filter) => filter.meta.key === 'status')
@@ -165,3 +166,11 @@ const getSelectedOptions = (filter?: Filter) => {
   }
   return [];
 };
+
+const SEARCH_PLACEHOLDER = i18n.translate('xpack.slo.sloHealthSearchBar.searchPlaceholder', {
+  defaultMessage: 'Search your SLOs',
+});
+
+const STATUS_FILTER_LABEL = i18n.translate('xpack.slo.sloHealthSearchBar.statusFilterLabel', {
+  defaultMessage: 'Status',
+});

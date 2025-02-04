@@ -5,26 +5,41 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
+import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloManagementContent } from './components/slo_management_content';
-import { usePermissions } from '../../hooks/use_permissions';
 
 export function SloManagementPage() {
   const {
+    application: { navigateToUrl },
     http: { basePath },
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { data: permissions } = usePermissions();
   const { hasAtLeast } = useLicense();
+  const { isLoading, isError, data: { total } = { total: 0 } } = useFetchSloList({ perPage: 0 });
+
+  useEffect(() => {
+    if (hasAtLeast('platinum') === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+    if (permissions?.hasAllReadRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+
+    if ((!isLoading && total === 0) || isError) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total, permissions]);
 
   useBreadcrumbs(
     [
@@ -44,24 +59,6 @@ export function SloManagementPage() {
     { serverless }
   );
 
-  const hasRequiredPrivileges =
-    permissions?.hasAllReadRequested === true || permissions?.hasAllWriteRequested === true;
-  const hasPlatinumLicense = hasAtLeast('platinum') === true;
-
-  const errors = !hasRequiredPrivileges ? (
-    <EuiText>
-      {i18n.translate('xpack.slo.managementPage.sloPermissionsError', {
-        defaultMessage: 'You must have read or write permissions for SLOs to access this page',
-      })}
-    </EuiText>
-  ) : !hasPlatinumLicense ? (
-    <EuiText>
-      {i18n.translate('xpack.slo.managementPage.licenseError', {
-        defaultMessage: 'You must have atleast a platinum license to access this page',
-      })}
-    </EuiText>
-  ) : null;
-
   return (
     <ObservabilityPageTemplate
       data-test-subj="managementPage"
@@ -72,8 +69,7 @@ export function SloManagementPage() {
       }}
     >
       <HeaderMenu />
-
-      {!!errors ? errors : <SloManagementContent />}
+      <SloManagementContent />
     </ObservabilityPageTemplate>
   );
 }
