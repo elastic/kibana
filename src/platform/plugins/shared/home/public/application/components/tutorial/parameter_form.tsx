@@ -12,13 +12,13 @@ import { EuiPanel } from '@elastic/eui';
 import { NumberParameter } from './number_parameter';
 import { StringParameter } from './string_parameter';
 
-interface Param {
+export interface ParameterFormParam {
   id: string;
   label: string;
-  type: string;
+  type: 'string' | 'number';
 }
 interface ParameterFormProps {
-  params: Param[];
+  params: ParameterFormParam[];
   paramValues: { [key: string]: number | string };
   setParameter: (id: string, value: any) => void;
 }

@@ -20,12 +20,12 @@ import {
 } from '@kbn/core-saved-objects-api-browser';
 import { CustomStatusCheckCallback } from '../../../services/tutorials/tutorial_service';
 import { Footer } from './footer';
-import { Introduction } from './introduction'; // component
-import { InstructionSet, StatusCheckConfigShape } from './instruction_set'; // component
+import { Introduction } from './introduction';
+import { InstructionSet, StatusCheckConfigShape, InstructionVariantShape } from './instruction_set';
 import { SavedObjectsInstaller } from './saved_objects_installer';
 import * as StatusCheckStates from './status_check_states';
 import { getServices, HomeKibanaServices } from '../../kibana_services';
-import { InstructionVariantShape } from './instruction_set';
+import { ParameterFormParam } from './parameter_form';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -37,7 +37,7 @@ const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle'
   defaultMessage: 'Integrations',
 });
 
-interface TutorialProps {
+export interface TutorialProps {
   addBasePath: HomeKibanaServices['addBasePath'];
   isCloudEnabled: boolean;
   getTutorial: (id: string) => Promise<Tutorial>; // nope
@@ -50,14 +50,6 @@ interface TutorialProps {
   intl: InjectedIntl; // ?
 }
 
-interface Instruction {
-  textPre: string;
-  title: string;
-  customComponentName?: string;
-  textPost?: string;
-  commands?: string[];
-  params?: unknown;
-}
 interface StatusCheck {
   btnLabel: string;
   error: string;
@@ -78,32 +70,20 @@ interface StatusCheck {
   };
 }
 interface InstructionSet {
-  id: string;
+  // id: string;
   title: string;
-  callOut: {
+  instructionVariants: InstructionVariantShape[];
+  callOut?: {
     iconType: string;
     message: string;
     title: string;
   };
-  // params?: { id: string; defaultValue: string };
-  // instructions: Instruction[];
   statusCheck: StatusCheckConfigShape;
-  instructionVariants: InstructionVariantShape[];
+  params: ParameterFormParam[];
 }
-interface Param {
+interface InstructionParam {
   id: string;
   defaultValue: string;
-}
-
-interface InstructionSets {
-  // rename
-  // instructionVariants?: InstructionVariant[];
-  // title?: string; // not sure it should be optional
-  callOut?: unknown;
-  statusCheck?: unknown;
-  instructionSets?: InstructionSet[];
-  params?: Param[];
-  setParameter?: (paramId: string, newValue: string) => void;
 }
 interface SavedObject {
   id: string;
@@ -119,13 +99,22 @@ interface Dashboard {
 export interface Tutorial {
   id: string;
   name: string;
-  elasticCloud: InstructionSets;
-  onPrem: InstructionSets;
-  onPremElasticCloud: InstructionSets;
+  elasticCloud: {
+    params?: InstructionParam[];
+    instructionSets: InstructionSet[];
+  };
+  onPrem: {
+    params?: InstructionParam[];
+    instructionSets: InstructionSet[];
+  };
+  onPremElasticCloud: {
+    params?: InstructionParam[];
+    instructionSets: InstructionSet[];
+  };
   customStatusCheckName: string;
-  savedObjects: SavedObject[];
-  savedObjectsInstallMsg: string;
-  artifacts: {
+  savedObjects?: SavedObject[]; // optional?
+  savedObjectsInstallMsg?: string; // optional?
+  artifacts?: {
     dashboards: Dashboard[];
     exportedFields: {
       documentationUrl: string;
@@ -137,9 +126,9 @@ export interface Tutorial {
     };
   };
   euiIconType: string;
-  moduleName: string;
-  previewImagePath: string;
-  category: unknown;
+  moduleName?: string;
+  previewImagePath?: string;
+  category?: unknown;
   shortDescription?: string;
   longDescription: string;
   isBeta?: boolean;
@@ -148,14 +137,12 @@ type StatusCheckStatesType = 'HAS_DATA' | 'NO_DATA' | 'ERROR' | 'NOT_CHECKED' | 
 
 interface TutorialState {
   notFound: boolean;
-  paramValues: { [key: string]: unknown }; // remove any
+  paramValues: { [key: string]: string | number }; // remove any
   statusCheckStates: StatusCheckStatesType[];
   tutorial: Tutorial | null; // not sure (ITutorial is in load_tutorials)
   visibleInstructions: (typeof INSTRUCTIONS_TYPE)[keyof typeof INSTRUCTIONS_TYPE] | string; // useless - just string, but without "string" inside onChange on button component it errors
 }
-/*
-tutorial.name .elasticCloud .onPremElasticCloud .onPrem .customStatusCheckName
-*/
+
 class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   private _isMounted: boolean;
 
@@ -238,15 +225,15 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     }
   };
 
-  getInstructionSets = (): InstructionSets['instructionSets'] => {
-    return this.getInstructions().instructionSets; // unsure about !
+  getInstructionSets = (): InstructionSet[] => {
+    return this.getInstructions().instructionSets;
   };
 
   initInstructionsState = () => {
     const instructions = this.getInstructions();
-    const paramValues: { [key: string]: string } = {}; // check types
+    const paramValues: TutorialState['paramValues'] = {};
     if (instructions.params) {
-      instructions.params.forEach((param: Param) => {
+      instructions.params.forEach((param: InstructionParam) => {
         paramValues[param.id] = param.defaultValue;
       });
     }
@@ -290,7 +277,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     if (!instructionSet) {
       return;
     }
-    const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
+    const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`); // index-string, query - nested stuff
 
     // Checks if a custom status check callback  was registered in the CLIENT
     // that matches the same name registered in the SERVER (customStatusCheckName)
@@ -298,7 +285,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       // what gets returned if tutorial is null ?
       const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck(
         this.state.tutorial.customStatusCheckName
-      ); // not sure about ! after param
+      ); // "apm_fleet_server_status_check"
 
       const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
         ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
@@ -306,7 +293,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
           ? [this.fetchCustomStatusCheck(customStatusCheckCallback)]
           : []),
       ]);
-
       const nextStatusCheckState: StatusCheckStatesType =
         esHitsStatusCheck === StatusCheckStates.HAS_DATA ||
         customStatusCheck === StatusCheckStates.HAS_DATA
@@ -335,12 +321,18 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   ): Promise<StatusCheckStatesType> => {
     const { http } = getServices();
     try {
+      // Convert index array to a comma-separated string if necessary. without it 400
+      const index = Array.isArray(esHitsCheckConfig.index)
+        ? esHitsCheckConfig.index.join(',')
+        : esHitsCheckConfig.index;
+
       const response: { count: number } = await http.post('/api/home/hits_status', {
         body: JSON.stringify({
-          index: esHitsCheckConfig.index,
+          index,
           query: esHitsCheckConfig.query,
         }),
       });
+
       return response.count > 0 ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
     } catch (e) {
       return StatusCheckStates.ERROR;
@@ -393,19 +385,24 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   onStatusCheck = (instructionSetIndex: number) => {
     this.setState(
       (prevState) => ({
-        statusCheckStates: {
-          ...prevState.statusCheckStates,
-          [instructionSetIndex]: StatusCheckStates.FETCHING,
-        },
+        statusCheckStates: [
+          ...prevState.statusCheckStates.slice(0, instructionSetIndex),
+          StatusCheckStates.FETCHING,
+          ...prevState.statusCheckStates.slice(instructionSetIndex + 1),
+        ],
+        // don't understand why old option below doesn't work
+        // statusCheckStates: {
+        //   ...prevState.statusCheckStates,
+        //   [instructionSetIndex]: StatusCheckStates.FETCHING,
+        // },
       }),
       this.checkInstructionSetStatus.bind(null, instructionSetIndex)
     );
   };
 
-  renderInstructionSets = (instructions: InstructionSets) => {
+  renderInstructionSets = ({ instructionSets }: { instructionSets: InstructionSet[] }) => {
     let offset = 1;
-    return instructions.instructionSets?.map((instructionSet: InstructionSet, index: number) => {
-      // no sure i need to type params here
+    return instructionSets.map((instructionSet: InstructionSet, index: number) => {
       const currentOffset = offset;
       if (instructionSet.instructionVariants && instructionSet.instructionVariants.length > 0) {
         offset +=
@@ -428,14 +425,13 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
               this.onStatusCheck(index);
             }}
             offset={currentOffset}
-            params={instructions.params}
+            params={instructionSet.params}
             paramValues={this.state.paramValues}
             setParameter={this.setParameter}
             replaceTemplateStrings={this.props.replaceTemplateStrings}
             isCloudEnabled={this.props.isCloudEnabled}
           />
-          {/* not sure about ! below */}
-          {index < instructions.instructionSets!.length - 1 && <EuiSpacer />}
+          {index < instructionSets.length - 1 && <EuiSpacer />}
         </Fragment>
       );
     });
@@ -464,10 +460,10 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     let label;
     let url;
     if (_.has(this.state, 'tutorial.artifacts.application')) {
-      label = this.state.tutorial?.artifacts.application.label;
-      url = this.props.addBasePath(this.state.tutorial!.artifacts.application.path); // don't like ! above
+      label = this.state.tutorial?.artifacts?.application.label;
+      url = this.props.addBasePath(this.state.tutorial!.artifacts!.application.path); // don't like ! above
     } else if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
-      const overviewDashboard = this.state.tutorial!.artifacts.dashboards.find((dashboard) => {
+      const overviewDashboard = this.state.tutorial?.artifacts?.dashboards.find((dashboard) => {
         return dashboard.isOverview;
       });
       if (overviewDashboard) {
@@ -492,7 +488,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     const notices = getServices().tutorialService.getModuleNotices();
     if (notices.length && this.state.tutorial!.moduleName) {
       return notices.map((ModuleNotice, index) => (
-        <ModuleNotice key={index} moduleName={this.state.tutorial!.moduleName} />
+        <ModuleNotice key={index} moduleName={this.state.tutorial!.moduleName!} />
       ));
     } else {
       return null;
@@ -543,7 +539,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       let exportedFieldsUrl;
       if (_.has(this.state, 'tutorial.artifacts.exportedFields')) {
         exportedFieldsUrl = this.props.replaceTemplateStrings(
-          this.state.tutorial.artifacts.exportedFields.documentationUrl
+          this.state.tutorial.artifacts!.exportedFields.documentationUrl
         );
       }
 
