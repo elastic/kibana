@@ -606,10 +606,11 @@ export const UnifiedDataTable = ({
         dataView,
         columnId,
         fieldFormats,
+        columnsMeta,
         options,
       });
     },
-    [displayedRows, dataView, fieldFormats]
+    [displayedRows, dataView, fieldFormats, columnsMeta]
   );
 
   /**
