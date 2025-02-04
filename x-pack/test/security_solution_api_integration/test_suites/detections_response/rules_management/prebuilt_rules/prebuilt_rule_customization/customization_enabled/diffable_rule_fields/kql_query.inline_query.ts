@@ -20,7 +20,7 @@ import {
   setUpRuleUpgrade,
 } from '../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 
-const RULE_TYPES = ['query', 'threat_match', /* 'threshold',*/ 'new_terms'] as const;
+const RULE_TYPES = ['query', 'threat_match', 'threshold', 'new_terms'] as const;
 
 export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): void {
   const es = getService('es');
@@ -35,7 +35,7 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
   };
 
   for (const ruleType of RULE_TYPES) {
-    describe('"kql_query" with inline query', () => {
+    describe(`"kql_query" with inline query for ${ruleType} rule`, () => {
       describe('non-customized w/o an upgrade (AAA diff case)', () => {
         describe('without filters', () => {
           beforeEach(async () => {
@@ -140,6 +140,14 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
                   installed: {
                     type: ruleType,
                     filters: [FILTER],
+                    ...(ruleType === 'threshold'
+                      ? {
+                          threshold: {
+                            value: 10,
+                            field: 'fieldA',
+                          },
+                        }
+                      : {}),
                   },
                   patch: {
                     type: ruleType,
@@ -152,10 +160,26 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
                         },
                       },
                     ],
+                    ...(ruleType === 'threshold'
+                      ? {
+                          threshold: {
+                            value: 10,
+                            field: 'fieldA',
+                          },
+                        }
+                      : {}),
                   },
                   upgrade: {
                     type: ruleType,
                     filters: [FILTER],
+                    ...(ruleType === 'threshold'
+                      ? {
+                          threshold: {
+                            value: 10,
+                            field: 'fieldA',
+                          },
+                        }
+                      : {}),
                   },
                 },
                 deps,
@@ -328,15 +352,39 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
                 type: ruleType,
                 query: 'process.name:*.exe',
                 language: 'kuery',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
               patch: {
                 type: ruleType,
                 query: '*:*',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
               upgrade: {
                 type: ruleType,
                 query: 'process.name:*.exe',
                 language: 'kuery',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
             },
             deps,
@@ -470,15 +518,39 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
                 type: ruleType,
                 query: 'process.name:*.exe',
                 language: 'kuery',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
               patch: {
                 type: ruleType,
                 query: '*:*',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
               upgrade: {
                 type: ruleType,
                 query: '*:*',
                 language: 'kuery',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
             },
             deps,
@@ -612,15 +684,39 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
                 type: ruleType,
                 query: 'process.name:*.exe',
                 language: 'kuery',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
               patch: {
                 type: ruleType,
                 query: '*:*',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
               upgrade: {
                 type: ruleType,
                 query: 'process.name:*.sys',
                 language: 'kuery',
+                ...(ruleType === 'threshold'
+                  ? {
+                      threshold: {
+                        value: 10,
+                        field: 'fieldA',
+                      },
+                    }
+                  : {}),
               },
             },
             deps,
@@ -722,15 +818,39 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
                   type: ruleType,
                   query: 'process.name:*.exe',
                   language: 'kuery',
+                  ...(ruleType === 'threshold'
+                    ? {
+                        threshold: {
+                          value: 10,
+                          field: 'fieldA',
+                        },
+                      }
+                    : {}),
                 },
                 patch: {
                   type: ruleType,
                   query: 'process.name:*.sys',
+                  ...(ruleType === 'threshold'
+                    ? {
+                        threshold: {
+                          value: 10,
+                          field: 'fieldA',
+                        },
+                      }
+                    : {}),
                 },
                 upgrade: {
                   type: ruleType,
                   query: 'process.name:*.sys',
                   language: 'kuery',
+                  ...(ruleType === 'threshold'
+                    ? {
+                        threshold: {
+                          value: 10,
+                          field: 'fieldA',
+                        },
+                      }
+                    : {}),
                 },
               },
               removeInstalledAssets: true,
@@ -802,15 +922,39 @@ export function inlineQueryKqlQueryField({ getService }: FtrProviderContext): vo
                   type: ruleType,
                   query: 'process.name:*.exe',
                   language: 'kuery',
+                  ...(ruleType === 'threshold'
+                    ? {
+                        threshold: {
+                          value: 10,
+                          field: 'fieldA',
+                        },
+                      }
+                    : {}),
                 },
                 patch: {
                   type: ruleType,
                   query: '*:*',
+                  ...(ruleType === 'threshold'
+                    ? {
+                        threshold: {
+                          value: 10,
+                          field: 'fieldA',
+                        },
+                      }
+                    : {}),
                 },
                 upgrade: {
                   type: ruleType,
                   query: 'process.name:*.sys',
                   language: 'kuery',
+                  ...(ruleType === 'threshold'
+                    ? {
+                        threshold: {
+                          value: 10,
+                          field: 'fieldA',
+                        },
+                      }
+                    : {}),
                 },
               },
               removeInstalledAssets: true,
