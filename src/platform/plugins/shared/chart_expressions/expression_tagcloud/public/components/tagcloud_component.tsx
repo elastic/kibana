@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { throttle } from 'lodash';
-import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
+import { EuiIconTip, EuiResizeObserver, UseEuiTheme } from '@elastic/eui';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import {
   Chart,
@@ -30,13 +30,36 @@ import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/chart
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { css } from '@emotion/react';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 
-import './tag_cloud.scss';
-
 const MAX_TAG_COUNT = 200;
+
+const tgcChartWrapperCss = () =>
+  css({
+    flex: '1 1 0',
+    display: 'flex',
+    flexDirection: 'column',
+    // it is used for rendering at `Canvas`.
+    height: '100%',
+    '& text': {
+      cursor: 'pointer',
+    },
+  });
+
+const tgcChartLabelCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: '100%',
+    textAlign: 'center',
+    fontWeight: euiTheme.font.weight.bold,
+  });
+
+const tgcChartWarningCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: euiTheme.size.base,
+  });
 
 export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
@@ -237,7 +260,7 @@ export const TagCloudChart = ({
   return (
     <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
-        <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
+        <div css={tgcChartWrapperCss} ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
             <Settings
               // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
@@ -269,12 +292,12 @@ export const TagCloudChart = ({
             />
           </Chart>
           {label && showLabel && (
-            <div className="tgcChart__label" data-test-subj="tagCloudLabel">
+            <div className="tgcChart__label" css={tgcChartLabelCss} data-test-subj="tagCloudLabel">
               {label}
             </div>
           )}
           {!visParams.isPreview && warning && (
-            <div className="tgcChart__warning">
+            <div css={tgcChartWarningCss}>
               <EuiIconTip
                 type="warning"
                 color="warning"
