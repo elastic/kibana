@@ -55,8 +55,8 @@ export class LinksServerPlugin implements Plugin<object, object> {
           requestHandlerContext: context,
           request: req,
         });
-        const dashboards = await dashboardClient.search({});
-        res.ok({ body: dashboards });
+        const dashboards = await dashboardClient.search({ text: 'web traffic' });
+        return res.ok({ body: dashboards });
       }
     );
 
