@@ -13,7 +13,7 @@ import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/t
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
 import { addInferenceEndpoint } from '../lib/add_inference_endpoint';
-import { getInferenceEndpoint } from '../lib/get_inference_endpoint';
+import { inferenceEndpointExists } from '../lib/inference_endpoint_exists';
 
 const inferenceEndpointSchema = schema.object({
   config: schema.object({
@@ -129,7 +129,7 @@ export const getInferenceServicesRoute = (
         try {
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-          const result = await getInferenceEndpoint(esClient, request.params.inferenceId);
+          const result = await inferenceEndpointExists(esClient, request.params.inferenceId);
 
           return response.ok({
             body: { isEndpointExists: result },

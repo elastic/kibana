@@ -7,15 +7,15 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-export const getInferenceEndpoint = async (
+export const inferenceEndpointExists = async (
   esClient: ElasticsearchClient,
   inferenceEndpointId: string
 ) => {
   try {
     await esClient.inference.get({ inference_id: inferenceEndpointId });
     return true;
-  } catch (err: any) {
-    if (err?.body?.error?.type === 'resource_not_found_exception') {
+  } catch (err) {
+    if (err?.statusCode === 404) {
       return false;
     } else {
       throw err;
