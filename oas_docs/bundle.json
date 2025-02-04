@@ -25629,28 +25629,42 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "es_key": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "id": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
                                         "type": "string"
                                       }
-                                    },
-                                    "required": [
-                                      "id"
-                                    ],
-                                    "type": "object"
+                                    ]
                                   },
                                   "key": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "id": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
                                         "type": "string"
                                       }
-                                    },
-                                    "required": [
-                                      "id"
-                                    ],
-                                    "type": "object"
+                                    ]
                                   }
                                 },
                                 "type": "object"
@@ -25807,28 +25821,42 @@
                         "additionalProperties": false,
                         "properties": {
                           "es_key": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "id": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
                                 "type": "string"
                               }
-                            },
-                            "required": [
-                              "id"
-                            ],
-                            "type": "object"
+                            ]
                           },
                           "key": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "id": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
                                 "type": "string"
                               }
-                            },
-                            "required": [
-                              "id"
-                            ],
-                            "type": "object"
+                            ]
                           }
                         },
                         "type": "object"
@@ -25922,28 +25950,42 @@
                               "additionalProperties": false,
                               "properties": {
                                 "es_key": {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "id": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
                                       "type": "string"
                                     }
-                                  },
-                                  "required": [
-                                    "id"
-                                  ],
-                                  "type": "object"
+                                  ]
                                 },
                                 "key": {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "id": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
                                       "type": "string"
                                     }
-                                  },
-                                  "required": [
-                                    "id"
-                                  ],
-                                  "type": "object"
+                                  ]
                                 }
                               },
                               "type": "object"
@@ -26163,28 +26205,42 @@
                               "additionalProperties": false,
                               "properties": {
                                 "es_key": {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "id": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
                                       "type": "string"
                                     }
-                                  },
-                                  "required": [
-                                    "id"
-                                  ],
-                                  "type": "object"
+                                  ]
                                 },
                                 "key": {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "id": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
                                       "type": "string"
                                     }
-                                  },
-                                  "required": [
-                                    "id"
-                                  ],
-                                  "type": "object"
+                                  ]
                                 }
                               },
                               "type": "object"
@@ -26327,28 +26383,42 @@
                         "additionalProperties": false,
                         "properties": {
                           "es_key": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "id": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
                                 "type": "string"
                               }
-                            },
-                            "required": [
-                              "id"
-                            ],
-                            "type": "object"
+                            ]
                           },
                           "key": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "id": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
                                 "type": "string"
                               }
-                            },
-                            "required": [
-                              "id"
-                            ],
-                            "type": "object"
+                            ]
                           }
                         },
                         "type": "object"
@@ -26441,28 +26511,42 @@
                               "additionalProperties": false,
                               "properties": {
                                 "es_key": {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "id": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
                                       "type": "string"
                                     }
-                                  },
-                                  "required": [
-                                    "id"
-                                  ],
-                                  "type": "object"
+                                  ]
                                 },
                                 "key": {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "id": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
                                       "type": "string"
                                     }
-                                  },
-                                  "required": [
-                                    "id"
-                                  ],
-                                  "type": "object"
+                                  ]
                                 }
                               },
                               "type": "object"
