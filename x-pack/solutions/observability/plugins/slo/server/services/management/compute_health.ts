@@ -6,16 +6,9 @@
  */
 
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger, SavedObject, SavedObjectsClient } from '@kbn/core/server';
-import {
-  ALL_VALUE,
-  TransformHealthStatus,
-  TransformStats,
-  TransformStatsState,
-  sloDefinitionSchema,
-} from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/lib/Either';
-import { Dictionary, find, flatMap, groupBy, merge } from 'lodash';
+import { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
+import { TransformHealthStatus, TransformStats, TransformStatsState } from '@kbn/slo-schema';
+import { Dictionary, find, flatMap, groupBy } from 'lodash';
 import moment from 'moment';
 import {
   HEALTH_INDEX_NAME,
@@ -27,6 +20,7 @@ import {
 import { SLODefinition, SLOHealth, StoredSLODefinition } from '../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 import { SO_SLO_TYPE } from '../../saved_objects';
+import { toSLODefinition } from '../slo_repository';
 
 interface SummaryAggBucketKey {
   sloId: string;
@@ -72,7 +66,7 @@ export class ComputeHealth {
       }
 
       const sloDefinitions = response.saved_objects
-        .map(this.toSLODefinition)
+        .map((so) => toSLODefinition(so, this.logger))
         .filter(Boolean) as SLODefinition[];
 
       this.logger.debug(
@@ -294,7 +288,6 @@ export class ComputeHealth {
         },
         aggs: {
           bySlo: {
-            
             composite: {
               size: BATCH_SIZE,
               sources: [
@@ -318,35 +311,13 @@ export class ComputeHealth {
         },
       }),
     ]);
+
+    this.logger.debug(
+      `[HealthTask] Found ${transformStats.transforms.length} transform stats for ${sloDefinitions.length} SLO Definitions`
+    );
+    this.logger.debug(
+      `[HealthTask] Found ${summaryResults.aggregations?.bySlo.buckets.length} summary buckets for ${sloDefinitions.length} SLO Definitions`
+    );
     return { transformStats, summaryResults };
-  }
-
-  private toSLODefinition(
-    storedSLOObject: SavedObject<StoredSLODefinition>
-  ): SLODefinition | undefined {
-    const storedSLO = storedSLOObject.attributes;
-    const result = sloDefinitionSchema.decode({
-      ...storedSLO,
-      // groupBy was added in 8.10.0
-      groupBy: storedSLO.groupBy ?? ALL_VALUE,
-      // version was added in 8.12.0. This is a safeguard against SO migration issue.
-      // if not present, we considered the version to be 1, e.g. not migrated.
-      // We would need to call the _reset api on this SLO.
-      version: storedSLO.version ?? 1,
-      // settings.preventInitialBackfill was added in 8.15.0
-      settings: merge(
-        { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },
-        storedSLO.settings
-      ),
-      createdBy: storedSLO.createdBy ?? storedSLOObject.created_by,
-      updatedBy: storedSLO.updatedBy ?? storedSLOObject.updated_by,
-    });
-
-    if (isLeft(result)) {
-      this.logger.error(`Invalid stored SLO with id [${storedSLO.id}]`);
-      return undefined;
-    }
-
-    return result.right;
   }
 }

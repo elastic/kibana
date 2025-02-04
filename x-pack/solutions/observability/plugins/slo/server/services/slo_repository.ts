@@ -79,7 +79,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       throw new SLONotFound(`SLO [${id}] not found`);
     }
 
-    const slo = this.toSLO(response.saved_objects[0]);
+    const slo = toSLODefinition(response.saved_objects[0], this.logger);
     if (slo === undefined) {
       throw new Error('Invalid stored SLO');
     }
@@ -116,7 +116,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     });
 
     return response.saved_objects
-      .map((slo) => this.toSLO(slo))
+      .map((slo) => toSLODefinition(slo, this.logger))
       .filter((slo) => slo !== undefined) as SLODefinition[];
   }
 
@@ -141,37 +141,40 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       perPage: response.per_page,
       page: response.page,
       results: response.saved_objects
-        .map((savedObject) => this.toSLO(savedObject))
+        .map((savedObject) => toSLODefinition(savedObject, this.logger))
         .filter((slo) => slo !== undefined) as SLODefinition[],
     };
   }
+}
 
-  toSLO(storedSLOObject: SavedObject<StoredSLODefinition>): SLODefinition | undefined {
-    const storedSLO = storedSLOObject.attributes;
-    const result = sloDefinitionSchema.decode({
-      ...storedSLO,
-      // groupBy was added in 8.10.0
-      groupBy: storedSLO.groupBy ?? ALL_VALUE,
-      // version was added in 8.12.0. This is a safeguard against SO migration issue.
-      // if not present, we considered the version to be 1, e.g. not migrated.
-      // We would need to call the _reset api on this SLO.
-      version: storedSLO.version ?? 1,
-      // settings.preventInitialBackfill was added in 8.15.0
-      settings: merge(
-        { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },
-        storedSLO.settings
-      ),
-      createdBy: storedSLO.createdBy ?? storedSLOObject.created_by,
-      updatedBy: storedSLO.updatedBy ?? storedSLOObject.updated_by,
-    });
+export function toSLODefinition(
+  storedSLOObject: SavedObject<StoredSLODefinition>,
+  logger: Logger
+): SLODefinition | undefined {
+  const storedSLO = storedSLOObject.attributes;
+  const result = sloDefinitionSchema.decode({
+    ...storedSLO,
+    // groupBy was added in 8.10.0
+    groupBy: storedSLO.groupBy ?? ALL_VALUE,
+    // version was added in 8.12.0. This is a safeguard against SO migration issue.
+    // if not present, we considered the version to be 1, e.g. not migrated.
+    // We would need to call the _reset api on this SLO.
+    version: storedSLO.version ?? 1,
+    // settings.preventInitialBackfill was added in 8.15.0
+    settings: merge(
+      { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },
+      storedSLO.settings
+    ),
+    createdBy: storedSLO.createdBy ?? storedSLOObject.created_by,
+    updatedBy: storedSLO.updatedBy ?? storedSLOObject.updated_by,
+  });
 
-    if (isLeft(result)) {
-      this.logger.error(`Invalid stored SLO with id [${storedSLO.id}]`);
-      return undefined;
-    }
-
-    return result.right;
+  if (isLeft(result)) {
+    logger.error(`Invalid stored SLO with id [${storedSLO.id}]`);
+    return undefined;
   }
+
+  return result.right;
 }
 
 function toStoredSLO(slo: SLODefinition): StoredSLODefinition {
