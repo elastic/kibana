@@ -795,10 +795,9 @@ export class SearchSource {
     const metaFields = getConfig<string[]>(UI_SETTINGS.META_FIELDS) ?? [];
 
     const searchRequest = this.mergeProps();
-    // Keep backwards compatibility in case `body` is still provided somewhere
-    searchRequest.body = searchRequest.body || {};
-    const { index, ...rest } = searchRequest;
-    const body = { ...rest, ...searchRequest.body };
+    const { index, filters, highlightAll, ...restAsBody } = searchRequest;
+    const body = { ...restAsBody, ...searchRequest.body };
+    delete body.body;
     const dataView = this.getDataView(index);
 
     // get some special field types from the index pattern
@@ -857,7 +856,7 @@ export class SearchSource {
     // 2. Create a data view using the index pattern `kibana*` and don't use a timestamp field.
     // 3. Uncomment the lines below, navigate to Discover,
     //    and switch to the data view created in step 2.
-    // body.query.bool.must.push({
+    // query.bool.must.push({
     //   error_query: {
     //     indices: [
     //       {
@@ -914,8 +913,10 @@ export class SearchSource {
       }),
     };
 
+    const { query, filters: _filters, ...rest } = searchRequest;
+
     return omitByIsNil({
-      ...searchRequest,
+      ...rest,
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(index),
       highlightAll:

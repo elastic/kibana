@@ -82,7 +82,7 @@ export class SearchAPI {
                 ...request,
                 searchSessionId: this.searchSessionId,
               });
-              requestResponders[requestId].json(params.body);
+              requestResponders[requestId].json(params);
             }
           }),
           switchMap((params) =>

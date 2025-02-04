@@ -136,7 +136,7 @@ export const getEsdslFn = ({
               params: {
                 index: args.index,
                 size: args.size,
-                body: dsl,
+                ...dsl,
               },
             },
             { abortSignal }
