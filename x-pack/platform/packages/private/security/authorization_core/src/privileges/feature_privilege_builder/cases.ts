@@ -37,6 +37,7 @@ const deleteOperations = ['deleteCase', 'deleteComment'] as const;
 const settingsOperations = ['createConfiguration', 'updateConfiguration'] as const;
 const createCommentOperations = ['createComment'] as const;
 const reopenOperations = ['reopenCase'] as const;
+const assignOperations = ['assignCase'] as const;
 const allOperations = [
   ...pushOperations,
   ...createOperations,
@@ -46,6 +47,7 @@ const allOperations = [
   ...settingsOperations,
   ...createCommentOperations,
   ...reopenOperations,
+  ...assignOperations,
 ] as const;
 
 export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
@@ -71,6 +73,7 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(settingsOperations, privilegeDefinition.cases?.settings),
       ...getCasesPrivilege(createCommentOperations, privilegeDefinition.cases?.createComment),
       ...getCasesPrivilege(reopenOperations, privilegeDefinition.cases?.reopenCase),
+      ...getCasesPrivilege(assignOperations, privilegeDefinition.cases?.assign),
     ]);
   }
 }
