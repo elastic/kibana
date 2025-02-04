@@ -23,6 +23,7 @@ import {
 } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { UseEuiTheme } from '@elastic/eui';
 import { MultiFilterEvent } from '../../common/types';
 import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
@@ -42,13 +43,14 @@ interface ExpressioHeatmapRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
 }
 
-const heatmapContainerCss = css({
-  width: '100%',
-  height: '100%',
-  padding: euiThemeVars.euiSizeS,
-  overflow: 'auto hidden',
-  userSelect: 'text',
-});
+const heatmapContainerCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: '100%',
+    height: '100%',
+    padding: euiTheme.size.s,
+    overflow: 'auto hidden',
+    userSelect: 'text',
+  });
 
 export const heatmapRenderer: (
   deps: ExpressioHeatmapRendererDependencies
