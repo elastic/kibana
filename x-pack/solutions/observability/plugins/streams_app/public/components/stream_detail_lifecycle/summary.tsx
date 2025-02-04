@@ -9,15 +9,15 @@ import React, { useMemo } from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  StreamGetResponse,
+  IngestStreamGetResponse,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
-  isUnWiredStreamGetResponse,
+  isUnwiredStreamGetResponse,
 } from '@kbn/streams-schema';
 
-export function RetentionSummary({ definition }: { definition: StreamGetResponse }) {
+export function RetentionSummary({ definition }: { definition: IngestStreamGetResponse }) {
   const summary = useMemo(() => summaryText(definition), [definition]);
 
   return (
@@ -34,7 +34,7 @@ export function RetentionSummary({ definition }: { definition: StreamGetResponse
   );
 }
 
-function summaryText(definition: StreamGetResponse) {
+function summaryText(definition: IngestStreamGetResponse) {
   const lifecycle = definition.stream.ingest.lifecycle;
 
   if (isInheritLifecycle(lifecycle)) {
@@ -47,7 +47,7 @@ function summaryText(definition: StreamGetResponse) {
     );
   } else if (isDslLifecycle(lifecycle)) {
     const usingDsl =
-      isRoot(definition.stream.name) || isUnWiredStreamGetResponse(definition)
+      isRoot(definition.stream.name) || isUnwiredStreamGetResponse(definition)
         ? i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleRootNote', {
             defaultMessage: 'This data stream is using a custom data retention.',
           })
@@ -58,7 +58,7 @@ function summaryText(definition: StreamGetResponse) {
     return <p>{usingDsl}</p>;
   } else if (isIlmLifecycle(lifecycle)) {
     const usingIlm =
-      isRoot(definition.stream.name) || isUnWiredStreamGetResponse(definition)
+      isRoot(definition.stream.name) || isUnwiredStreamGetResponse(definition)
         ? i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyRootNote', {
             defaultMessage: 'This data stream is using an ILM policy.',
           })

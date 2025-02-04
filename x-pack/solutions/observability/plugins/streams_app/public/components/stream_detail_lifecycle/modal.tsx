@@ -13,6 +13,7 @@ import {
 } from '@kbn/index-lifecycle-management-common-shared';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
+  IngestStreamGetResponse,
   IngestStreamLifecycle,
   StreamGetResponse,
   isIlmLifecycle,
@@ -55,7 +56,7 @@ interface ModalOptions {
   closeModal: () => void;
   updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
   getIlmPolicies: () => Promise<PolicyFromES[]>;
-  definition: StreamGetResponse;
+  definition: IngestStreamGetResponse;
   updateInProgress: boolean;
   ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }

@@ -8,7 +8,7 @@
 import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
-  StreamGetResponse,
+  IngestStreamGetResponse,
   isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
@@ -39,7 +39,7 @@ export function RetentionMetadata({
   lifecycleActions,
   openEditModal,
 }: {
-  definition: StreamGetResponse;
+  definition: IngestStreamGetResponse;
   ilmLocator?: LocatorPublic<IlmLocatorParams>;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;

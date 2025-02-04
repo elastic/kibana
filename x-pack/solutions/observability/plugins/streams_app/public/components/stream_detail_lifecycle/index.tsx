@@ -8,12 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import {
+  IngestStreamGetResponse,
   IngestStreamLifecycle,
   IngestUpsertRequest,
-  StreamGetResponse,
   isIlmLifecycle,
   isRoot,
-  isUnWiredStreamGetResponse,
+  isUnwiredStreamGetResponse,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
 import {
@@ -32,7 +32,7 @@ function useLifecycleState({
   definition,
   isServerless,
 }: {
-  definition?: StreamGetResponse;
+  definition?: IngestStreamGetResponse;
   isServerless: boolean;
 }) {
   const [updateInProgress, setUpdateInProgress] = useState(false);
@@ -43,7 +43,7 @@ function useLifecycleState({
 
     const actions = [];
     const isWired = isWiredStreamGetResponse(definition);
-    const isUnwired = isUnWiredStreamGetResponse(definition);
+    const isUnwired = isUnwiredStreamGetResponse(definition);
     const isIlm = isIlmLifecycle(definition.effective_lifecycle);
 
     if (isWired || (isUnwired && !isIlm)) {
@@ -89,7 +89,7 @@ export function StreamDetailLifecycle({
   definition,
   refreshDefinition,
 }: {
-  definition?: StreamGetResponse;
+  definition?: IngestStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const {
