@@ -21,7 +21,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import {
   IngestStreamGetResponse,
-  isUnWiredStreamGetResponse,
+  isUnwiredStreamGetResponse,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
@@ -132,7 +132,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
     async ({ signal }) => {
       if (
         !definition ||
-        (isUnWiredStreamGetResponse(definition) && !definition.data_stream_exists)
+        (isUnwiredStreamGetResponse(definition) && !definition.data_stream_exists)
       ) {
         return undefined;
       }
