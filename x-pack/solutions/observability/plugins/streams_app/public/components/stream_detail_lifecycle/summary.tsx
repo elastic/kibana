@@ -16,24 +16,12 @@ import {
   isRoot,
   isUnWiredStreamGetResponse,
 } from '@kbn/streams-schema';
-import { css } from '@emotion/css';
 
 export function RetentionSummary({ definition }: { definition: StreamGetResponse }) {
   const summary = useMemo(() => summaryText(definition), [definition]);
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      color="subdued"
-      className={css`
-        display: flex;
-        max-width: 100%;
-        overflow: auto;
-        flex-grow: 1;
-      `}
-      paddingSize="s"
-    >
+    <EuiPanel hasShadow={false} hasBorder color="subdued" paddingSize="s">
       <EuiText>
         <h5>
           {i18n.translate('xpack.streams.streamDetailLifecycle.retentionSummaryLabel', {
