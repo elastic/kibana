@@ -6,6 +6,7 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
+import { isPersistedFormBasedLayer } from '../datasources/form_based/types';
 import type { VisualizeEditorContext, Suggestion } from '../types';
 import { TypedLensByValueInput } from '../react_embeddable/types';
 
@@ -41,17 +42,19 @@ export function mergeSuggestionWithVisContext({
   if (!datasourceId || datasourceId === 'formBased') {
     return suggestion;
   }
-  const datasourceState = Object.assign({}, visAttributes.state.datasourceStates[datasourceId]);
+  const datasourceState = Object.assign({}, visAttributes.state.datasourceStates.formBased);
 
   // should be based on same columns
   if (
     !datasourceState?.layers ||
     Object.values(datasourceState?.layers).some(
       (layer) =>
-        layer.columns?.some(
-          (c: { fieldName: string }) =>
-            !context?.textBasedColumns?.find((col) => col.name === c.fieldName)
-        ) || layer.columns?.length !== context?.textBasedColumns?.length
+        (!isPersistedFormBasedLayer(layer) &&
+          layer.columns?.some(
+            (c: { fieldName: string }) =>
+              !context?.textBasedColumns?.find((col) => col.name === c.fieldName)
+          )) ||
+        layer.columns?.length !== context?.textBasedColumns?.length
     )
   ) {
     return suggestion;

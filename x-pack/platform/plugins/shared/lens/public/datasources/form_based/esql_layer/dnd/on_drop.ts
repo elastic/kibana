@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FormBasedPrivateState, TextBasedLayer } from '../../types';
+import { TextBasedLayer, TextBasedPrivateState } from '../../types';
 import type { TextBasedLayerColumn } from '../types';
 import { reorderElements } from '../../../../utils';
 import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../../types';
 import { removeColumn } from '../remove_column';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 
-export const onDrop = (props: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>) => {
+export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPrivateState>) => {
   const { dropType, state, source, target } = props;
   if (
     ![

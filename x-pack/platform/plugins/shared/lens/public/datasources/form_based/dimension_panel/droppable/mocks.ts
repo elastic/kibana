@@ -194,14 +194,15 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
 };
 
 export const mockedLayers: Record<string, (...args: string[]) => FormBasedLayer> = {
-  singleColumnLayer: (id = 'col1') => ({
-    indexPatternId: 'first',
-    columnOrder: [id],
-    columns: {
-      [id]: mockedColumns.dateHistogram,
-    },
-    incompleteColumns: {},
-  }),
+  singleColumnLayer: (id = 'col1') =>
+    ({
+      indexPatternId: 'first',
+      columnOrder: [id],
+      columns: {
+        [id]: mockedColumns.dateHistogram,
+      },
+      incompleteColumns: {},
+    } as FormBasedLayer),
   doubleColumnLayer: (id1 = 'col1', id2 = 'col2') => ({
     indexPatternId: 'first',
     columnOrder: [id1, id2],

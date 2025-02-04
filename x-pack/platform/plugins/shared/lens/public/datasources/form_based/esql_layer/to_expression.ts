@@ -10,7 +10,7 @@ import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { TextBasedLayer, IndexPatternRef } from './types';
-import type { OriginalColumn } from '../../../common/types';
+import type { OriginalColumn } from '../../../../common/types';
 import { FormBasedPrivateState } from '../types';
 
 function getExpressionForLayer(
@@ -46,9 +46,9 @@ function getExpressionForLayer(
   const timeFieldName = layer.timeField ?? undefined;
 
   const formatterOverrides: ExpressionAstFunction[] = layer.columns
-    .filter((col) => col.params?.format)
+    .filter((col) => col.format)
     .map((col) => {
-      const format = col.params!.format!;
+      const format = col.format!;
 
       const base: ExpressionAstFunction = {
         type: 'function',

@@ -109,7 +109,7 @@ export function FormBasedDataPanel({
         Object.values(state.layers)
           .filter((layer) => layer.indexPatternId)
           .map(({ indexPatternId }) => indexPatternId as string)
-      ).concat(currentIndexPatternId)
+      ).concat(currentIndexPatternId!)
     )
       .filter((id) => !!indexPatterns[id])
       .sort()
@@ -145,7 +145,7 @@ export function FormBasedDataPanel({
         </EuiFlexGroup>
       ) : (
         <MemoizedDataPanel
-          currentIndexPatternId={currentIndexPatternId}
+          currentIndexPatternId={currentIndexPatternId!}
           query={query}
           dateRange={dateRange}
           filters={filters}

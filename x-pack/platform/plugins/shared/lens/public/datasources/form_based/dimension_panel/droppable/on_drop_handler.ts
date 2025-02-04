@@ -29,11 +29,11 @@ import {
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { getNewOperation, getField } from './get_drop_props';
-import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
+import { DataViewDragDropOperation, PureFormBasedPrivateState } from '../../types';
 import { removeColumn } from '../../form_based';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
-  state: FormBasedPrivateState;
+  state: PureFormBasedPrivateState;
   targetLayerDimensionGroups: VisualizationDimensionGroupConfig[];
   dropType?: DropType;
   source: T;
@@ -41,7 +41,7 @@ interface DropHandlerProps<T = DataViewDragDropOperation> {
   indexPatterns: IndexPatternMap;
 }
 
-export function onDrop(props: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>) {
+export function onDrop(props: DatasourceDimensionDropHandlerProps<PureFormBasedPrivateState>) {
   const { target, source, dropType, state, indexPatterns } = props;
 
   if (isDraggedDataViewField(source) && isFieldDropType(dropType)) {

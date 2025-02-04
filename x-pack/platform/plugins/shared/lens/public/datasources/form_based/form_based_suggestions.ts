@@ -41,7 +41,12 @@ import {
   ColumnAdvancedParams,
 } from './operations';
 import { hasField } from './pure_utils';
-import type { FormBasedPrivateState, FormBasedLayer } from './types';
+import {
+  FormBasedPrivateState,
+  FormBasedLayer,
+  PureFormBasedPrivateState,
+  isFormBasedLayer,
+} from './types';
 import { documentField } from './document_field';
 import { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
@@ -611,11 +616,13 @@ export function getDatasourceSuggestionsFromCurrentState(
   state: FormBasedPrivateState,
   indexPatterns?: IndexPatternMap,
   filterLayers: (layerId: string) => boolean = () => true
-): Array<DatasourceSuggestion<FormBasedPrivateState>> {
+): Array<DatasourceSuggestion<PureFormBasedPrivateState>> {
   if (!indexPatterns) {
     return [];
   }
-  const layers = Object.entries(state.layers || {}).filter(([layerId]) => filterLayers(layerId));
+  const layers = Object.entries(state.layers || {})
+    .filter(([layerId]) => filterLayers(layerId))
+    .filter((l) => isFormBasedLayer(l[1])) as unknown as Array<[string, FormBasedLayer]>;
 
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually
@@ -659,9 +666,6 @@ export function getDatasourceSuggestionsFromCurrentState(
 
   return flatten(
     layers
-      .filter(
-        ([_id, layer]) => layer.type !== 'esql' && layer.columnOrder.length && layer.indexPatternId
-      )
       .map((layer) => layer as [string, FormBasedLayer])
       .map(([layerId, layer]) => {
         const indexPattern = indexPatterns[layer.indexPatternId];
@@ -734,7 +738,7 @@ function createChangedNestingSuggestion(
   const layer = state.layers[layerId] as FormBasedLayer;
   const [firstBucket, secondBucket, ...rest] = layer.columnOrder;
   const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
-  const indexPattern = indexPatterns[state.currentIndexPatternId];
+  const indexPattern = indexPatterns[state.currentIndexPatternId!];
   const firstBucketColumn = layer.columns[firstBucket];
   const firstBucketLabel =
     (hasField(firstBucketColumn) &&

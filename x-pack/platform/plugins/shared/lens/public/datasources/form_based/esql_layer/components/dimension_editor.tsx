@@ -13,33 +13,26 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
+import { FormBasedPrivateState, TextBasedPrivateState } from '../../types';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import { FormatSelector, FormatSelectorProps } from '../../dimension_panel/format_selector';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
-import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
 import { TextBasedLayer } from '../types';
 
 export type TextBasedDimensionEditorProps =
-  DatasourceDimensionEditorProps<TextBasedPrivateState> & {
+  DatasourceDimensionEditorProps<FormBasedPrivateState> & {
     expressions: ExpressionsStart;
   };
 
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
-  const query = props.state.layers[props.layerId]?.query;
+  const layerState = props.state.layers[props.layerId] as TextBasedLayer;
+  const query = layerState.query;
   const { euiTheme } = useEuiTheme();
-  const {
-    isFullscreen,
-    columnId,
-    layerId,
-    state,
-    setState,
-    indexPatterns,
-    dateRange,
-    expressions,
-  } = props;
+  const { isFullscreen, columnId, layerId, setState, indexPatterns, dateRange, expressions } =
+    props;
 
   useEffect(() => {
     // in case the columns are not in the cache, I refetch them
@@ -88,13 +81,15 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   ]);
 
   const selectedField = useMemo(() => {
-    const layerColumns = props.state.layers[props.layerId].columns;
+    const layerColumns = layerState.columns;
     return layerColumns?.find((column) => column.columnId === props.columnId);
-  }, [props.columnId, props.layerId, props.state.layers]);
+  }, [props.columnId, layerState]);
 
   const updateLayer = useCallback(
     (newLayer: Partial<TextBasedLayer>) =>
-      setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+      setState(
+        (prevState) => mergeLayer({ state: prevState, layerId, newLayer }) as TextBasedPrivateState
+      ),
     [layerId, setState]
   );
 
@@ -102,14 +97,16 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     (newFormat) => {
       updateLayer(
         updateColumnFormat({
-          layer: state.layers[layerId],
+          layer: layerState,
           columnId,
           value: newFormat,
         })
       );
     },
-    [columnId, layerId, state.layers, updateLayer]
+    [columnId, layerState, updateLayer]
   );
+
+  const layer = props.state.layers[props.layerId] as TextBasedLayer;
 
   return (
     <>
@@ -140,8 +137,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                     layers: {
                       ...props.state.layers,
                       [props.layerId]: {
-                        ...props.state.layers[props.layerId],
-                        columns: [...props.state.layers[props.layerId].columns, newColumn],
+                        ...layer,
+                        columns: [...layer.columns, newColumn],
                       },
                     },
                   }
@@ -150,8 +147,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                     layers: {
                       ...props.state.layers,
                       [props.layerId]: {
-                        ...props.state.layers[props.layerId],
-                        columns: props.state.layers[props.layerId].columns.map((col) =>
+                        ...layer,
+                        columns: layer.columns.map((col) =>
                           col.columnId !== props.columnId
                             ? col
                             : {
@@ -199,7 +196,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             onChange={(value) => {
               updateLayer(
                 updateColumnLabel({
-                  layer: state.layers[layerId],
+                  layer: layerState,
                   columnId,
                   value,
                 })

@@ -67,7 +67,7 @@ export interface TextBasedLayer {
 }
 
 export interface FormBasedLayer {
-  type: 'form' | undefined;
+  type?: 'form';
   columnOrder: string[];
   columns: Record<string, GenericIndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
@@ -86,10 +86,52 @@ export interface FormBasedPersistedState {
 export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;
 
 export interface FormBasedPrivateState {
-  currentIndexPatternId: string;
-  indexPatternRefs: IndexPatternRef[];
+  currentIndexPatternId?: string;
+  indexPatternRefs?: IndexPatternRef[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   layers: Record<string, FormBasedLayer | TextBasedLayer>;
+}
+
+export function isTextBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is TextBasedLayer {
+  return layer.type === 'esql';
+}
+
+export function isFormBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is FormBasedLayer {
+  return layer.type === 'form' || !layer.type;
+}
+
+export function isPersistedFormBasedLayer(
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
+): layer is Omit<FormBasedLayer, 'indexPatternId'> {
+  return layer.type === 'form' || !layer.type;
+}
+
+export function hasTextBasedLayers(state: FormBasedPrivateState) {
+  return Object.values(state.layers).some(isTextBasedLayer);
+}
+
+export interface PureFormBasedPrivateState {
+  currentIndexPatternId?: string;
+  indexPatternRefs?: IndexPatternRef[];
+  layers: Record<string, FormBasedLayer>;
+}
+
+export interface TextBasedPrivateState {
+  indexPatternRefs?: IndexPatternRef[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  layers: Record<string, TextBasedLayer>;
+}
+
+export function hasOnlyTextBasedLayers(
+  state: FormBasedPrivateState
+): state is TextBasedPrivateState {
+  return Object.values(state.layers).every(isTextBasedLayer);
+}
+
+export function hasOnlyFormBasedLayers(
+  state: FormBasedPrivateState
+): state is PureFormBasedPrivateState {
+  return Object.values(state.layers).every(isFormBasedLayer);
 }
 
 export interface DataViewDragDropOperation extends DragDropOperation {

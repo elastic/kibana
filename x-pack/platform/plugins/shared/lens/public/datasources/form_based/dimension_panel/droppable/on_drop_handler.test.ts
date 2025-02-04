@@ -7,7 +7,7 @@
 
 import { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop_handler';
-import { FormBasedPrivateState } from '../../types';
+import { FormBasedLayer, PureFormBasedPrivateState } from '../../types';
 import { OperationMetadata, DatasourceDimensionDropHandlerProps } from '../../../../types';
 import { FormulaIndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
 import { generateId } from '../../../../id_generator';
@@ -48,7 +48,7 @@ const dimensionGroups = [
   },
 ];
 
-function getStateWithMultiFieldColumn(state: FormBasedPrivateState) {
+function getStateWithMultiFieldColumn(state: PureFormBasedPrivateState) {
   return {
     ...state,
     layers: {
@@ -64,8 +64,8 @@ function getStateWithMultiFieldColumn(state: FormBasedPrivateState) {
 }
 
 describe('FormBasedDimensionEditorPanel: onDrop', () => {
-  let state: FormBasedPrivateState;
-  let defaultProps: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>;
+  let state: PureFormBasedPrivateState;
+  let defaultProps: DatasourceDimensionDropHandlerProps<PureFormBasedPrivateState>;
 
   beforeEach(() => {
     state = {
@@ -147,7 +147,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         layers: {
           ...state.layers,
           first: {
-            ...state.layers.first,
+            ...(state.layers.first as FormBasedLayer),
             columns: {
               ...state.layers.first.columns,
               col1: {
@@ -337,7 +337,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
 
   describe('dropping a dimension', () => {
     it('sets correct order in group for metric and bucket columns when duplicating a column in group', () => {
-      const testState: FormBasedPrivateState = {
+      const testState: PureFormBasedPrivateState = {
         ...state,
         layers: {
           ...state.layers,
@@ -428,7 +428,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
 
     it('when duplicating fullReference column, the referenced columns get duplicated too', () => {
       (generateId as jest.Mock).mockReturnValue(`ref1Copy`);
-      const testState: FormBasedPrivateState = {
+      const testState: PureFormBasedPrivateState = {
         ...state,
         layers: {
           ...state.layers,
@@ -490,7 +490,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
     it('when duplicating fullReference column, the multiple referenced columns get duplicated too', () => {
       (generateId as jest.Mock).mockReturnValueOnce(`ref1Copy`);
       (generateId as jest.Mock).mockReturnValueOnce(`ref2Copy`);
-      const testState: FormBasedPrivateState = {
+      const testState: PureFormBasedPrivateState = {
         ...state,
         layers: {
           ...state.layers,
@@ -555,7 +555,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
     it('when duplicating fullReference column, the referenced columns get duplicated', () => {
       (generateId as jest.Mock).mockReturnValueOnce(`ref1Copy`);
       (generateId as jest.Mock).mockReturnValueOnce(`ref2Copy`);
-      const testState: FormBasedPrivateState = {
+      const testState: PureFormBasedPrivateState = {
         ...state,
         layers: {
           ...state.layers,
@@ -840,7 +840,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
     });
 
     describe('dimension group aware ordering and copying', () => {
-      let testState: FormBasedPrivateState;
+      let testState: PureFormBasedPrivateState;
       beforeEach(() => {
         testState = { ...state };
         testState.layers.first = { ...mockedLayers.multipleColumnsLayer() };
@@ -1512,7 +1512,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         },
       ];
       describe('simple operations', () => {
-        let props: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>;
+        let props: DatasourceDimensionDropHandlerProps<PureFormBasedPrivateState>;
         beforeEach(() => {
           props = {
             indexPatterns: mockDataViews(),
@@ -2034,7 +2034,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
         });
       });
       describe('references', () => {
-        let props: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>;
+        let props: DatasourceDimensionDropHandlerProps<PureFormBasedPrivateState>;
         beforeEach(() => {
           props = {
             targetLayerDimensionGroups: defaultDimensionGroups,

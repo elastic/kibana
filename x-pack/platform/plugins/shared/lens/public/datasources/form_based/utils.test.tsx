@@ -16,7 +16,11 @@ import {
   cloneLayer,
   getUnsupportedOperationsWarningMessage,
 } from './utils';
-import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
+import type {
+  FormBasedPrivateState,
+  GenericIndexPatternColumn,
+  PureFormBasedPrivateState,
+} from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
 import { TermsIndexPatternColumn } from './operations';
 import { FormBasedLayer } from './types';
@@ -26,7 +30,7 @@ import { getLongMessage } from '../../user_messages_utils';
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
     const datatableUtilitites = createDatatableUtilitiesMock();
-    let state: FormBasedPrivateState;
+    let state: PureFormBasedPrivateState;
     let framePublicAPI: FramePublicAPI;
     let docLinks: DocLinksStart;
 
@@ -35,6 +39,7 @@ describe('indexpattern_datasource utils', () => {
         layers: {
           id: {
             indexPatternId: 'one',
+            columnOrder: ['col1'],
             columns: {
               col1: {
                 operationType: 'terms',
@@ -47,7 +52,7 @@ describe('indexpattern_datasource utils', () => {
             },
           },
         },
-      } as unknown as FormBasedPrivateState;
+      };
       framePublicAPI = {
         activeData: {
           id: {

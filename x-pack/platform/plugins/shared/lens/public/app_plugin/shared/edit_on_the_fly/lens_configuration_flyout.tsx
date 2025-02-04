@@ -97,7 +97,7 @@ export function LensEditConfigurationFlyout({
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
-  const datasourceState = attributes.state.datasourceStates[datasourceId];
+  const datasourceState = attributes.state.datasourceStates.formBased;
   const activeDatasource = datasourceMap[datasourceId];
 
   const esqlVariables = useStateFromPublishingSubject(
@@ -160,9 +160,9 @@ export function LensEditConfigurationFlyout({
     const previousAttrs = previousAttributes.current;
 
     const datasourceStatesAreSame =
-      datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
+      datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates.formBased
         ? datasourceMap[datasourceId].isEqual(
-            previousAttrs.state.datasourceStates[datasourceId],
+            previousAttrs.state.datasourceStates.formBased,
             previousAttrs.references,
             datasourceStates[datasourceId].state,
             attributes.references
@@ -204,10 +204,10 @@ export function LensEditConfigurationFlyout({
       if (previousAttrs.visualizationType === visualization.activeId) {
         const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
           ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
-              previousAttrs.state.datasourceStates[datasourceId],
+              previousAttrs.state.datasourceStates.formBased,
               previousAttrs.references
             )
-          : previousAttrs.state.datasourceStates[datasourceId];
+          : previousAttrs.state.datasourceStates.formBased;
         updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
       } else {
         updateSuggestion?.(previousAttrs);

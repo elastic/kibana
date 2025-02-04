@@ -226,7 +226,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         | GenericIndexPatternColumn,
       options: { forceRender?: boolean } = {}
     ) => {
-      const layer = state.layers[layerId] as FormBasedLayer;
       let hypotethicalLayer: FormBasedLayer;
       if (isColumn(setter)) {
         hypotethicalLayer = {
@@ -244,7 +243,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       setState(
         (prevState) => {
           let outputLayer: FormBasedLayer;
-          const prevLayer = prevlayer;
+          const prevLayer = layer;
           if (isColumn(setter)) {
             outputLayer = {
               ...prevLayer,
@@ -272,7 +271,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }
       );
     },
-    [columnId, fireOrResetToastChecks, layerId, setState, state.layers]
+    [columnId, fireOrResetToastChecks, layer, layerId, setState]
   );
 
   const incompleteInfo = (layer.incompleteColumns ?? {})[columnId];
@@ -339,8 +338,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     if (typeof setter === 'function') {
       return setState(
         (prevState) => {
-          const layer = setter(addStaticValueColumn(prevlayer));
-          return mergeLayer({ state: prevState, layerId, newLayer: layer });
+          const newLayer = setter(addStaticValueColumn(prevlayer));
+          return mergeLayer({ state: prevState, layerId, newLayer });
         },
         {
           isDimensionComplete: true,
@@ -412,7 +411,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       disabledStatus:
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
-          props.indexPatterns[state.currentIndexPatternId],
+          props.indexPatterns[state.currentIndexPatternId!],
           layer,
           layerType
         ),
@@ -593,7 +592,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               return;
             }
             const newLayer = insertOrReplaceColumn({
-              layer: props.state.layers[props.layerId],
+              layer: props.state.layers[props.layerId] as FormBasedLayer,
               indexPattern: currentIndexPattern,
               columnId,
               op: operationType,
@@ -615,7 +614,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             let newLayer: FormBasedLayer;
             if (possibleFields.size === 1) {
               newLayer = insertOrReplaceColumn({
-                layer: props.state.layers[props.layerId],
+                layer: props.state.layers[props.layerId] as FormBasedLayer,
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
@@ -625,7 +624,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               });
             } else {
               newLayer = insertOrReplaceColumn({
-                layer: props.state.layers[props.layerId],
+                layer: props.state.layers[props.layerId] as FormBasedLayer,
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
@@ -658,7 +657,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           }
 
           const newLayer = replaceColumn({
-            layer: props.state.layers[props.layerId],
+            layer: props.state.layers[props.layerId] as FormBasedLayer,
             indexPattern: currentIndexPattern,
             columnId,
             op: operationType,
@@ -827,7 +826,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <>
           {selectedColumn.references.map((referenceId, index) => {
             const validation = selectedOperationDefinition.requiredReferences[index];
-            const layer = layer;
             return (
               <ReferenceEditor
                 operationDefinitionMap={operationDefinitionMap}

@@ -23,10 +23,10 @@ import { hasField } from '../../pure_utils';
 import { OperationMetadata, DraggedField } from '../../../../types';
 import { getOperationTypesForField } from '../../operations';
 import { GenericIndexPatternColumn } from '../../form_based';
-import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
+import { DataViewDragDropOperation, PureFormBasedPrivateState } from '../../types';
 
 interface GetDropPropsArgs {
-  state: FormBasedPrivateState;
+  state: PureFormBasedPrivateState;
   source?: DragContextState['dragging'];
   target: DragDropOperation;
   indexPatterns: IndexPatternMap;

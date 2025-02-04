@@ -31,7 +31,7 @@ import { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kb
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
-import { FormBasedPrivateState } from '../types';
+import { FormBasedLayer, PureFormBasedPrivateState } from '../types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
   FiltersIndexPatternColumn,
@@ -189,9 +189,11 @@ function mountWithServices(component: React.ReactElement): ReactWrapper {
  * - Dimension editor component: First half of the tests
  */
 describe('FormBasedDimensionEditor', () => {
-  let state: FormBasedPrivateState;
+  let state: PureFormBasedPrivateState;
   let setState: jest.Mock;
-  let defaultProps: FormBasedDimensionEditorProps;
+  let defaultProps: Omit<FormBasedDimensionEditorProps, 'state'> & {
+    state: PureFormBasedPrivateState;
+  };
 
   function getStateWithColumns(columns: Record<string, GenericIndexPatternColumn>) {
     return {
@@ -224,7 +226,7 @@ describe('FormBasedDimensionEditor', () => {
           },
           incompleteColumns: {},
         },
-      },
+      } as Record<string, FormBasedLayer>,
     };
 
     setState = jest.fn().mockImplementation((newState) => {
@@ -553,7 +555,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should keep the operation when switching to another field compatible with this operation', async () => {
-    const initialState: FormBasedPrivateState = getStateWithColumns({ col1: bytesColumn });
+    const initialState: PureFormBasedPrivateState = getStateWithColumns({ col1: bytesColumn });
 
     wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={initialState} />
@@ -957,7 +959,7 @@ describe('FormBasedDimensionEditor', () => {
         expect.any(Function),
         { isDimensionComplete: false },
       ]);
-      let returnedState: FormBasedPrivateState = {} as FormBasedPrivateState;
+      let returnedState: PureFormBasedPrivateState = {} as PureFormBasedPrivateState;
       act(() => {
         returnedState = setState.mock.calls[0][0](state);
       });
@@ -1859,7 +1861,7 @@ describe('FormBasedDimensionEditor', () => {
         .simulate('click');
     });
     expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: false }]);
-    let returnedState: FormBasedPrivateState = {} as FormBasedPrivateState;
+    let returnedState: PureFormBasedPrivateState = {} as PureFormBasedPrivateState;
     act(() => {
       returnedState = setState.mock.calls[0][0](defaultProps.state);
     });
@@ -1924,7 +1926,7 @@ describe('FormBasedDimensionEditor', () => {
         .simulate('click');
     });
     expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
-    let returnedState: FormBasedPrivateState = {} as FormBasedPrivateState;
+    let returnedState: PureFormBasedPrivateState = {} as PureFormBasedPrivateState;
     act(() => {
       returnedState = setState.mock.calls[0][0](state);
     });
@@ -1957,7 +1959,7 @@ describe('FormBasedDimensionEditor', () => {
         .simulate('click');
     });
     expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
-    let returnedState: FormBasedPrivateState = {} as FormBasedPrivateState;
+    let returnedState: PureFormBasedPrivateState = {} as PureFormBasedPrivateState;
     act(() => {
       returnedState = setState.mock.calls[0][0](state);
     });
@@ -2090,7 +2092,7 @@ describe('FormBasedDimensionEditor', () => {
       expect.any(Function),
       { isDimensionComplete: true, forceRender: false },
     ]);
-    let returnedState: FormBasedPrivateState | null = null;
+    let returnedState: PureFormBasedPrivateState | null = null;
     act(() => {
       returnedState = setState.mock.calls[0][0](defaultProps.state);
     });
@@ -2115,7 +2117,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should use helper function when changing the function', () => {
-    const initialState: FormBasedPrivateState = getStateWithColumns({
+    const initialState: PureFormBasedPrivateState = getStateWithColumns({
       col1: bytesColumn,
     });
     wrapper = mountWithServices(
@@ -2147,7 +2149,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('allows custom format', () => {
-    const stateWithNumberCol: FormBasedPrivateState = getStateWithColumns({
+    const stateWithNumberCol: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Average of memory',
         dataType: 'number',
@@ -2189,7 +2191,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('keeps decimal places while switching', () => {
-    const stateWithNumberCol: FormBasedPrivateState = getStateWithColumns({
+    const stateWithNumberCol: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Average of memory',
         dataType: 'number',
@@ -2229,7 +2231,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('allows custom format with number of decimal places', () => {
-    const stateWithNumberCol: FormBasedPrivateState = getStateWithColumns({
+    const stateWithNumberCol: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Average of memory',
         dataType: 'number',
@@ -2289,7 +2291,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should hide the reference editors when switching from reference to non-reference', () => {
-    const stateWithReferences: FormBasedPrivateState = getStateWithColumns({
+    const stateWithReferences: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Differences of (incomplete)',
         dataType: 'number',
@@ -2316,7 +2318,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should show a warning when the current dimension is no longer configurable', () => {
-    const stateWithInvalidCol: FormBasedPrivateState = getStateWithColumns({
+    const stateWithInvalidCol: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Invalid differences',
         dataType: 'number',
@@ -2339,7 +2341,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should remove options to select references when there are no time fields', () => {
-    const stateWithoutTime: FormBasedPrivateState = {
+    const stateWithoutTime: PureFormBasedPrivateState = {
       ...getStateWithColumns({
         col1: {
           label: 'Avg',
@@ -2392,7 +2394,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should not show tabs when formula and static_value operations are not available', () => {
-    const stateWithInvalidCol: FormBasedPrivateState = getStateWithColumns({
+    const stateWithInvalidCol: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Average of memory',
         dataType: 'number',
@@ -2422,7 +2424,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should show the formula tab when supported', () => {
-    const stateWithFormulaColumn: FormBasedPrivateState = getStateWithColumns({
+    const stateWithFormulaColumn: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Formula',
         dataType: 'number',
@@ -2443,7 +2445,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should not show the static_value tab when not supported', () => {
-    const stateWithFormulaColumn: FormBasedPrivateState = getStateWithColumns({
+    const stateWithFormulaColumn: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Formula',
         dataType: 'number',
@@ -2462,7 +2464,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should show the static value tab when supported', () => {
-    const staticWithFormulaColumn: FormBasedPrivateState = getStateWithColumns({
+    const staticWithFormulaColumn: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Formula',
         dataType: 'number',
@@ -2487,7 +2489,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should select the quick function tab by default', () => {
-    const stateWithNoColumn: FormBasedPrivateState = getStateWithColumns({});
+    const stateWithNoColumn: PureFormBasedPrivateState = getStateWithColumns({});
 
     wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithNoColumn} />
@@ -2502,7 +2504,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should select the static value tab when supported by default', () => {
-    const stateWithNoColumn: FormBasedPrivateState = getStateWithColumns({});
+    const stateWithNoColumn: PureFormBasedPrivateState = getStateWithColumns({});
 
     wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
@@ -2518,7 +2520,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should not show any tab when formula is in full screen mode', () => {
-    const stateWithFormulaColumn: FormBasedPrivateState = getStateWithColumns({
+    const stateWithFormulaColumn: PureFormBasedPrivateState = getStateWithColumns({
       col1: {
         label: 'Formula',
         dataType: 'number',

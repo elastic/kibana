@@ -126,7 +126,7 @@ export async function getStateFromAggregateQuery(
         columns: state.layers[newLayerId].columns ?? [],
         timeField: timeFieldName,
         errors,
-      },
+      } as TextBasedLayer,
     },
   };
 
@@ -227,7 +227,7 @@ export function updateColumnFormat({
       ...layer.columns.slice(0, currentColumnIndex),
       {
         ...currentColumn,
-        params: { format: value },
+        format: value,
       },
       ...layer.columns.slice(currentColumnIndex + 1),
     ],

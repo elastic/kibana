@@ -14,7 +14,7 @@ import type {
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { DatasourceSuggestion } from '../../types';
 import { generateId } from '../../id_generator';
-import type { FormBasedPrivateState } from './types';
+import type { PureFormBasedPrivateState } from './types';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
@@ -173,7 +173,7 @@ const expectedIndexPatterns = {
   },
 };
 
-function testInitialState(): FormBasedPrivateState {
+function testInitialState(): PureFormBasedPrivateState {
   return {
     currentIndexPatternId: '1',
     layers: {
@@ -209,7 +209,7 @@ function getSuggestionSubset(
 ): Array<Omit<IndexPatternSuggestion, 'state'>> {
   return suggestions.map((s) => {
     const newSuggestion = { ...s } as Omit<IndexPatternSuggestion, 'state'> & {
-      state?: FormBasedPrivateState;
+      state?: PureFormBasedPrivateState;
     };
     delete newSuggestion.state;
     return newSuggestion;
@@ -388,7 +388,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('should make a metric suggestion for a number field if there is no time field', async () => {
-        const state: FormBasedPrivateState = {
+        const state: PureFormBasedPrivateState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -462,7 +462,7 @@ describe('IndexPattern Data Source suggestions', () => {
     });
 
     describe('with a previous empty layer', () => {
-      function stateWithEmptyLayer(): FormBasedPrivateState {
+      function stateWithEmptyLayer(): PureFormBasedPrivateState {
         const state = testInitialState();
         return {
           ...state,
@@ -632,7 +632,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('should make a metric suggestion for a number field if there is no time field', async () => {
-        const state: FormBasedPrivateState = {
+        const state: PureFormBasedPrivateState = {
           currentIndexPatternId: '1',
           layers: {
             previousLayer: {
@@ -798,7 +798,7 @@ describe('IndexPattern Data Source suggestions', () => {
     });
 
     describe('suggesting extensions to non-empty tables', () => {
-      function stateWithNonEmptyTables(): FormBasedPrivateState {
+      function stateWithNonEmptyTables(): PureFormBasedPrivateState {
         const state = testInitialState();
 
         return {
@@ -1070,7 +1070,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('adds a metric column on a number field if no other metrics set', () => {
         (generateId as jest.Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
-        const modifiedState: FormBasedPrivateState = {
+        const modifiedState: PureFormBasedPrivateState = {
           ...initialState,
           layers: {
             ...initialState.layers,
@@ -1172,7 +1172,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('skips duplicates when the document-specific field is already in use', () => {
         const initialState = stateWithNonEmptyTables();
-        const modifiedState: FormBasedPrivateState = {
+        const modifiedState: PureFormBasedPrivateState = {
           ...initialState,
           layers: {
             ...initialState.layers,
@@ -1204,7 +1204,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('hides any referenced metrics when adding new metrics', () => {
         (generateId as jest.Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
-        const modifiedState: FormBasedPrivateState = {
+        const modifiedState: PureFormBasedPrivateState = {
           ...initialState,
           layers: {
             currentLayer: {
@@ -1273,7 +1273,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('makes a suggestion to extending from an invalid state with a new metric', () => {
         (generateId as jest.Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
-        const modifiedState: FormBasedPrivateState = {
+        const modifiedState: PureFormBasedPrivateState = {
           ...initialState,
           layers: {
             currentLayer: {
@@ -1342,7 +1342,7 @@ describe('IndexPattern Data Source suggestions', () => {
         (generateId as jest.Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
 
-        const modifiedState: FormBasedPrivateState = {
+        const modifiedState: PureFormBasedPrivateState = {
           ...initialState,
           layers: {
             referenceLineLayer: {
@@ -1432,7 +1432,7 @@ describe('IndexPattern Data Source suggestions', () => {
     });
 
     describe('finding the layer that is using the current index pattern', () => {
-      function stateWithCurrentIndexPattern(): FormBasedPrivateState {
+      function stateWithCurrentIndexPattern(): PureFormBasedPrivateState {
         const state = testInitialState();
 
         return {
@@ -2200,7 +2200,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('returns a single suggestion containing the current columns for each layer', async () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           ...initialState.layers,
@@ -2295,7 +2295,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('returns a metric over time for single metric tables', async () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           first: {
@@ -2360,7 +2360,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('adds date histogram over default time field for tables without time dimension', async () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           first: {
@@ -2452,7 +2452,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('adds date histogram over default time field for tables without time dimension and a referenceLine', async () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           first: {
@@ -2565,7 +2565,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('does not create an over time suggestion if tables with numeric buckets with time dimension', async () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           first: {
@@ -2613,7 +2613,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('adds date histogram over default time field for custom range intervals', async () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           first: {
@@ -2703,7 +2703,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('does not create an over time suggestion if there is no default time field', async () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           first: {
@@ -2740,7 +2740,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('should not propose an over time suggestion if there are multiple bucket dimensions', () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           first: {
@@ -2824,7 +2824,7 @@ describe('IndexPattern Data Source suggestions', () => {
           searchable: true,
         },
       ];
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2932,7 +2932,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('returns an only metric version of a given table, but does not include current state as reduced', () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -3041,7 +3041,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('returns an alternative metric for an only-metric table', () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -3108,7 +3108,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('contains a reordering suggestion when there are exactly 2 buckets', () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -3160,7 +3160,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('will generate suggestions even if there are errors from missing fields', () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -3226,7 +3226,7 @@ describe('IndexPattern Data Source suggestions', () => {
     describe('references', () => {
       it('will extend the table with a date when starting in an invalid state', () => {
         const initialState = testInitialState();
-        const state: FormBasedPrivateState = {
+        const state: PureFormBasedPrivateState = {
           ...initialState,
           layers: {
             ...initialState.layers,
@@ -3318,7 +3318,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('will make an unchanged suggestion including incomplete references', () => {
         const initialState = testInitialState();
-        const state: FormBasedPrivateState = {
+        const state: PureFormBasedPrivateState = {
           ...initialState,
           layers: {
             ...initialState.layers,
@@ -3411,7 +3411,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
       it('will create reduced suggestions with all referenced children when handling references', () => {
         const initialState = testInitialState();
-        const state: FormBasedPrivateState = {
+        const state: PureFormBasedPrivateState = {
           ...initialState,
           layers: {
             ...initialState.layers,
@@ -3557,7 +3557,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('will leave dangling references in place', () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           ...initialState.layers,
@@ -3605,7 +3605,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('will not suggest reduced tables if there is just a referenced top level metric', () => {
       const initialState = testInitialState();
-      const state: FormBasedPrivateState = {
+      const state: PureFormBasedPrivateState = {
         ...initialState,
         layers: {
           ...initialState.layers,
@@ -3650,7 +3650,7 @@ describe('IndexPattern Data Source suggestions', () => {
 });
 
 function isTableWithBucketColumns(
-  suggestion: DatasourceSuggestion<FormBasedPrivateState>,
+  suggestion: DatasourceSuggestion<PureFormBasedPrivateState>,
   columnIds: string[],
   numBuckets: number
 ) {
@@ -3661,7 +3661,7 @@ function isTableWithBucketColumns(
 }
 
 function isTableWithMetricColumns(
-  suggestion: DatasourceSuggestion<FormBasedPrivateState>,
+  suggestion: DatasourceSuggestion<PureFormBasedPrivateState>,
   columnIds: string[]
 ) {
   expect(suggestion.table.isMultiRow).toEqual(false);
