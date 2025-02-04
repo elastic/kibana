@@ -66,8 +66,16 @@ export async function updateRootRefsConfig(log: ToolingLog) {
 export async function updateRootTsconfigForMoon(log: ToolingLog) {
   // read the current root tsconfig with comments
   const tsconfigFile = await Fsp.readFile(ROOT_TSCONFIG_PATH, 'utf-8');
-  // eslint-disable-next-line no-eval
-  const rootRefsConfigJson = eval(`(0, (${tsconfigFile}))`);
+
+  let rootRefsConfigJson: any;
+  try {
+    // eslint-disable-next-line no-eval
+    rootRefsConfigJson = eval(`(0, (${tsconfigFile}))`);
+  } catch (err) {
+    log.error(`Failed to parse tsconfig.json @ ${ROOT_TSCONFIG_PATH}: ${err.message}`);
+    throw new err();
+  }
+
   const refs = TS_PROJECTS.flatMap((p) => {
     if (p.isTypeCheckDisabled()) {
       return [];

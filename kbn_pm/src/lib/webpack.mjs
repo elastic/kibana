@@ -29,6 +29,12 @@ export async function buildPackage(packageName, { quiet, reactVersion }) {
   });
 }
 
+/**
+ * Builds a single package using its npm build script
+ * @param {string[]} packageNames
+ * @param {{quiet: boolean, reactVersion: string}} options
+ * @returns {Promise<void>}
+ */
 export async function buildPackagesWithMoon(packageNames, { quiet, reactVersion }) {
   const moonTargets = packageNames.map((n) => `${n}:build`);
   await run('moon', moonTargets, {

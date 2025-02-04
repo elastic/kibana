@@ -18,10 +18,10 @@ import { SomeDevLog } from '@kbn/some-dev-log';
 import { type TsProject, TS_PROJECTS } from '@kbn/ts-projects';
 
 import {
-  // updateRootRefsConfig,
+  updateRootRefsConfig,
   cleanupRootRefsConfig,
   ROOT_REFS_CONFIG_PATH,
-  updateRootTsconfigForMoon,
+  // updateRootTsconfigForMoon,
 } from './root_refs_config';
 
 const rel = (from: string, to: string) => {
@@ -29,16 +29,17 @@ const rel = (from: string, to: string) => {
   return path.startsWith('.') ? path : `./${path}`;
 };
 
+const IS_MOON = !!process.env.MOON_PROJECT_ID;
+const maybeMoonify = (tsconfigPath: string) => {
+  if (IS_MOON) {
+    return tsconfigPath.replace('type_check', 'moon');
+  } else {
+    return tsconfigPath;
+  }
+};
+
 async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[], isMoon = false) {
   const writes: Array<[path: string, content: string]> = [];
-
-  const maybeMoonify = (tsconfigPath: string) => {
-    if (isMoon) {
-      return tsconfigPath.replace('type_check', 'moon');
-    } else {
-      return tsconfigPath;
-    }
-  };
 
   // write tsconfig.type_check.json files for each project that is not the root
   const queue = new Set(projects);
@@ -106,9 +107,14 @@ run(
       log.warning('Deleted all typescript caches');
     }
 
-    // if the tsconfig.refs.json file is not self-managed then make sure it has
-    // a reference to every composite project in the repo
-    await updateRootTsconfigForMoon(log);
+    if (IS_MOON) {
+      // await updateRootTsconfigForMoon(log);
+      // await updateRootRefsConfig(log);
+    } else {
+      // if the tsconfig.refs.json file is not self-managed then make sure it has
+      // a reference to every composite project in the repo
+      await updateRootRefsConfig(log);
+    }
 
     const projectFilter = flagsReader.path('project');
 
@@ -118,7 +124,8 @@ run(
 
     log.info(`Running typecheck for ${projects.length} projects, (filter: ${projectFilter})`);
 
-    const created = await createTypeCheckConfigs(log, projects, true);
+    const created = await createTypeCheckConfigs(log, projects, false);
+    // const created = await createTypeCheckConfigs(log, projects, true);
 
     if (flagsReader.boolean('config-only')) {
       log.success('Generated typecheck configs, exiting due to --config-only');
@@ -131,16 +138,18 @@ run(
         `Building TypeScript projects to check types (For visible, though excessive, progress info you can pass --verbose)`
       );
 
-      const relative = Path.relative(
-        REPO_ROOT,
-        projects.length === 1 ? projects[0].typeCheckConfigPath : ROOT_REFS_CONFIG_PATH
+      const relativePathToTsconfig = maybeMoonify(
+        Path.relative(
+          REPO_ROOT,
+          projects.length === 1 ? projects[0].typeCheckConfigPath : ROOT_REFS_CONFIG_PATH
+        )
       );
 
       await procRunner.run('tsc', {
         cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
         args: [
           '-b',
-          relative,
+          relativePathToTsconfig,
           '--pretty',
           ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
         ],

@@ -41,7 +41,7 @@ typescript:
   root: '.'
 
   # Name of `tsconfig.json` file in the TypeScript root.
-  rootConfigFileName: 'tsconfig.moonbase.json'
+  rootConfigFileName: 'tsconfig.json'
 
   # Name of the config file in the workspace root that defines shared compiler
   # options for all project reference based config files.
@@ -49,12 +49,12 @@ typescript:
 
   # Update a project's `tsconfig.json` to route the `outDir` compiler option
   # to moon's `.moon/cache` directory.
-  routeOutDirToCache: true
+  routeOutDirToCache: false
 
   # Sync a project's dependencies as project references within the
   # project's `tsconfig.json` and the workspace root `tsconfig.json`.
-  syncProjectReferences: true
+  syncProjectReferences: false
 
   # Sync a project's project references as import aliases to the `paths`
   # compiler option in each applicable project.
-  syncProjectReferencesToPaths: true
+  syncProjectReferencesToPaths: false

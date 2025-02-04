@@ -58,26 +58,44 @@ tasks:
   typecheck:
     command:
       - 'tsc'
-      # Use incremental builds with project references
       - '--build'
-      # Always use pretty output
+      - '$projectRoot/tsconfig.type_check.json'
       - '--pretty'
-      # Use verbose logging to see affected projects
       - '--verbose'
     inputs:
-      # Source and test files
-      - 'src/**/*'
-      - 'tests/**/*'
-      # Type declarations
-      - 'types/**/*'
-      # Project configs
+      - '@group(src)'
       - 'tsconfig.json'
       - 'tsconfig.*.json'
-      # Root configs (extended from only)
-      - '/tsconfig.options.json'
     outputs:
-      # Matches `compilerOptions.outDir`
-      - 'lib'
+      - 'target'
+    deps:
+      - '~:genTypecheckConfig'
+      - '^:typecheck'
+    options:
+      runFromWorkspaceRoot: true
+    env:
+      NODE_OPTIONS: '--max-old-space-size=12192'
+
+  typecheckQ:
+    command:
+      - 'tsc'
+      - '--build'
+      - '$projectRoot/tsconfig.moon.json'
+      - '--pretty'
+    inputs:
+      - '@group(src)'
+      - 'tsconfig.json'
+      - 'tsconfig.*.json'
+    outputs:
+      - 'target'
+    deps:
+      - '~:genTypecheckConfig'
+      - '^:typecheckQ'
+    options:
+      runFromWorkspaceRoot: true
+    env:
+      NODE_OPTIONS: '--max-old-space-size=12192'
+
   env:
     script: env
   ping:

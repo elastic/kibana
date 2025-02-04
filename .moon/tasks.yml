@@ -2,7 +2,11 @@ $schema: https://moonrepo.dev/schemas/tasks.json
 
 tasks:
   genTypecheckConfig:
-    script: "node $MOON_WORKSPACE_ROOT/scripts/type_check.js --project $MOON_PROJECT_ROOT/tsconfig.json --config-only"
+    script: "node $workspaceRoot/scripts/type_check.js --project $projectRoot/tsconfig.json --config-only"
+    inputs:
+      - "tsconfig.json"
+    outputs:
+      - "tsconfig.moon.json"
 
 fileGroups:
   "globalIgnoreConfigs":
