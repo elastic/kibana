@@ -55,7 +55,7 @@ export class AutoDeploy {
     );
     return inferenceEndpoints.some((endpoint) => {
       return (
-        endpoint.inference_id === this.inferenceId && endpoint.service_settings.num_allocations > 0
+        endpoint.inference_id === this.inferenceId && endpoint.service_settings.num_allocations >= 0
       );
     });
   }
