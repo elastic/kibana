@@ -7,25 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, TraceDocumentOverview, fieldConstants } from '../..';
 
-export function getTraceDocumentOverview(
-  doc: DataTableRecord,
-  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
-): TraceDocumentOverview {
+export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {
   const formatField = <T extends keyof TraceDocumentOverview>(field: T) => {
-    return (
-      doc.flattened[field] !== undefined && doc.flattened[field] !== null
-        ? formatApmFieldValue(doc.flattened[field], dataView.fields.getByName(field))
-        : undefined
-    ) as TraceDocumentOverview[T];
-  };
-
-  const formatApmFieldValue = (value: unknown, field?: DataViewField) => {
-    // TODO ADD CUSTOM FORMATING
-    return value;
+    return doc.flattened[field] as TraceDocumentOverview[T];
   };
 
   const timestamp = formatField(fieldConstants.TIMESTAMP_FIELD);

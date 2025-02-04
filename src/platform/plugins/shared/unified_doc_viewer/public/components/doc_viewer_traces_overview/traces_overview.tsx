@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getTraceDocumentOverview } from '@kbn/discover-utils';
 import { spanAttributeIds, transactionAttributeIds } from './resources/attribute_ids';
-import { getUnifiedDocViewerServices } from '../../plugin';
 import { getAttributeConfiguration } from './resources/get_attribute_configuration';
 export type TracesOverviewProps = DocViewRenderProps;
 
@@ -32,9 +31,7 @@ export function TracesOverview({
   onAddColumn,
   onRemoveColumn,
 }: TracesOverviewProps) {
-  const { fieldFormats } = getUnifiedDocViewerServices();
-  const parsedDoc = getTraceDocumentOverview(hit, { dataView, fieldFormats });
-
+  const parsedDoc = getTraceDocumentOverview(hit);
   const isTransaction = !parsedDoc['parent.id'];
   const detailTitle = `${isTransaction ? 'Transaction' : 'Span'} ${i18n.translate(
     'unifiedDocViewer.docViewerTracesOverview.title',
