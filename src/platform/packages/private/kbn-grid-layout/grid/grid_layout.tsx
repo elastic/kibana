@@ -32,7 +32,6 @@ export interface GridLayoutProps {
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
-  onRowAdded?: (rowId: string, rowRef: HTMLDivElement | null) => void;
 
   className?: string; // this makes it so that custom CSS can be passed via Emotion
 }
@@ -45,7 +44,6 @@ export const GridLayout = ({
 
   renderPanelContents,
   onLayoutChange,
-  onRowAdded,
 
   className,
 }: GridLayoutProps) => {
@@ -106,13 +104,6 @@ export const GridLayout = ({
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
-          if (onRowAdded && layoutBefore.length < layoutAfter.length) {
-            console.log(gridLayoutStateManager.rowRefs.current.length);
-            onRowAdded(
-              `kbnGridLayoutRow--${layoutAfter.length}`,
-              gridLayoutStateManager.rowRefs.current[layoutAfter.length]
-            );
-          }
         }
       });
 

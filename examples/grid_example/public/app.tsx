@@ -210,6 +210,10 @@ export const GridExample = ({
                           collapsed: false,
                         },
                       ]);
+                      // scroll to bottom after row is added
+                      new Promise((resolve) => setTimeout(resolve, 100)).then(() => {
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                      });
                     }}
                     disabled={viewMode !== 'edit'}
                   >
