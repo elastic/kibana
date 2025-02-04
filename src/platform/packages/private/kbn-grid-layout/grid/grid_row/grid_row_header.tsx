@@ -159,3 +159,5 @@ const styles = {
     marginLeft: 'auto',
   }),
 };
+
+GridRowHeader.displayName = 'GridRowHeader';

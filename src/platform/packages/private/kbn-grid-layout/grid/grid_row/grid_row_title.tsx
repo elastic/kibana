@@ -105,3 +105,5 @@ export const GridRowTitle = React.memo(
     );
   }
 );
+
+GridRowTitle.displayName = 'GridRowTitle';
