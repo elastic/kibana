@@ -29,6 +29,7 @@ const detailedServiceMap = url.format({
   },
 });
 
+// Flaky: https://github.com/elastic/kibana/issues/207005
 describe.skip('service map', () => {
   before(() => {
     synthtrace.index(
@@ -85,7 +86,6 @@ describe.skip('service map', () => {
       );
     });
 
-    // Flaky: https://github.com/elastic/kibana/issues/207005
     describe('when there is no data', () => {
       it('shows empty state', () => {
         cy.visitKibana(serviceMapHref);
