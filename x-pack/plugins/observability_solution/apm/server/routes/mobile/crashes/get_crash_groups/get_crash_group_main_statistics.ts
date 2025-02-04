@@ -142,7 +142,7 @@ export async function getMobileCrashGroupMainStatistics({
         error: {
           ...(event.error ?? {}),
           exception:
-            (errorSource?.error.exception?.length ?? 0) > 1
+            (errorSource?.error.exception?.length ?? 0) > 0
               ? errorSource?.error.exception
               : event?.error.exception && [event.error.exception],
         },
