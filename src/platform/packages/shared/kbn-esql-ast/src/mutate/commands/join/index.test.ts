@@ -162,5 +162,22 @@ describe('commands.where', () => {
         },
       ]);
     });
+
+    it('extracts index of an incomplete query', () => {
+      const src = 'FROM kibana_sample_data_ecommerce | LOOKUP JOIN lookup_index ON ';
+      const query = EsqlQuery.fromSrc(src);
+      const summary = commands.join.summarize(query.ast);
+
+      expect(summary).toMatchObject([
+        {
+          target: {
+            index: {
+              type: 'source',
+              name: 'lookup_index',
+            },
+          },
+        },
+      ]);
+    });
   });
 });
