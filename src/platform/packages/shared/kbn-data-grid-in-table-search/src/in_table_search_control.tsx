@@ -192,7 +192,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         >
           <EuiButtonIcon
             data-test-subj={BUTTON_TEST_SUBJ}
-            buttonRef={(node: HTMLButtonElement) => (buttonRef.current = node)}
+            buttonRef={buttonRef}
             iconType="search"
             size="xs"
             color="text"
