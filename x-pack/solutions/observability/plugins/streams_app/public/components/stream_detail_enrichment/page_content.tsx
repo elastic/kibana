@@ -5,31 +5,35 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   DragDropContextProps,
   EuiPanel,
-  EuiSpacer,
+  EuiResizableContainer,
+  EuiSplitPanel,
   EuiText,
   EuiTitle,
   euiDragDropReorder,
+  useEuiShadow,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition, isRootStreamDefinition } from '@kbn/streams-schema';
-import { useBoolean } from '@kbn/react-hooks';
+import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
-import { AddProcessorButton } from './add_processor_button';
-import { AddProcessorFlyout } from './flyout';
-import { DraggableProcessorListItem } from './processors_list';
-import { ManagementBottomBar } from '../management_bottom_bar';
-import { SortableList } from './sortable_list';
+import { css } from '@emotion/react';
+import { isEmpty } from 'lodash';
 import { useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
 import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
+import { DraggableProcessorListItem } from './processors_list';
+import { SortableList } from './sortable_list';
+import { ManagementBottomBar } from '../management_bottom_bar';
+import { AddProcessorPanel } from './processors';
+import { SimulationPlayground } from './simulation_playground';
+import { useProcessingSimulator } from './hooks/use_processing_simulator';
 
 interface StreamDetailEnrichmentContentProps {
-  definition: ReadStreamDefinition;
+  definition: IngestStreamGetResponse;
   refreshDefinition: () => void;
 }
 
@@ -39,9 +43,6 @@ export function StreamDetailEnrichmentContent({
 }: StreamDetailEnrichmentContentProps) {
   const { appParams, core } = useKibana();
 
-  const [isBottomBarOpen, { on: openBottomBar, off: closeBottomBar }] = useBoolean();
-  const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
-
   const {
     processors,
     addProcessor,
@@ -49,110 +50,162 @@ export function StreamDetailEnrichmentContent({
     deleteProcessor,
     resetChanges,
     saveChanges,
-    setProcessors,
+    reorderProcessors,
     hasChanges,
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
 
+  const {
+    hasLiveChanges,
+    isLoading,
+    refreshSamples,
+    samples,
+    simulation,
+    tableColumns,
+    watchProcessor,
+    refreshSimulation,
+  } = useProcessingSimulator({ definition, processors });
+
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const items = euiDragDropReorder(processors, source.index, destination.index);
-      setProcessors(items);
+      reorderProcessors(items);
     }
   };
 
-  useEffect(() => {
-    if (hasChanges) openBottomBar();
-    else closeBottomBar();
-  }, [closeBottomBar, hasChanges, openBottomBar]);
-
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasChanges,
+    hasUnsavedChanges: hasChanges || hasLiveChanges,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
 
-  const handleSaveChanges = async () => {
-    await saveChanges();
-    closeBottomBar();
-  };
-
-  const handleDiscardChanges = async () => {
-    await resetChanges();
-    closeBottomBar();
-  };
-
-  const bottomBar = isBottomBarOpen && (
-    <ManagementBottomBar
-      onCancel={handleDiscardChanges}
-      onConfirm={handleSaveChanges}
-      isLoading={isSavingChanges}
-    />
-  );
-
-  const addProcessorFlyout = isAddProcessorOpen && (
-    <AddProcessorFlyout
-      key="add-processor"
-      definition={definition}
-      onClose={closeAddProcessor}
-      onAddProcessor={addProcessor}
-    />
-  );
-
-  const hasProcessors = processors.length > 0;
-
   if (isRootStreamDefinition(definition.stream)) {
     return <RootStreamEmptyPrompt />;
   }
 
+  const hasProcessors = !isEmpty(processors);
+
   return (
-    <>
-      {hasProcessors ? (
-        <EuiPanel paddingSize="none">
-          <ProcessorsHeader />
-          <EuiSpacer size="l" />
-          <SortableList onDragItem={handlerItemDrag}>
-            {processors.map((processor, idx) => (
-              <DraggableProcessorListItem
-                key={processor.id}
-                idx={idx}
-                definition={definition}
-                processor={processor}
-                onUpdateProcessor={updateProcessor}
-                onDeleteProcessor={deleteProcessor}
-              />
-            ))}
-          </SortableList>
-          <EuiSpacer size="m" />
-          <AddProcessorButton onClick={openAddProcessor} />
-        </EuiPanel>
-      ) : (
-        <EnrichmentEmptyPrompt onAddProcessor={openAddProcessor} />
-      )}
-      {addProcessorFlyout}
-      {bottomBar}
-    </>
+    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+      <EuiSplitPanel.Inner
+        paddingSize="none"
+        css={css`
+          display: flex;
+          overflow: auto;
+        `}
+      >
+        <EuiResizableContainer>
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                initialSize={25}
+                minSize="400px"
+                tabIndex={0}
+                paddingSize="none"
+                css={verticalFlexCss}
+              >
+                <ProcessorsHeader />
+                <EuiPanel
+                  paddingSize="m"
+                  hasShadow={false}
+                  borderRadius="none"
+                  css={css`
+                    overflow: auto;
+                  `}
+                >
+                  {hasProcessors && (
+                    <SortableList onDragItem={handlerItemDrag}>
+                      {processors.map((processor, idx) => (
+                        <DraggableProcessorListItem
+                          key={processor.id}
+                          idx={idx}
+                          definition={definition}
+                          processor={processor}
+                          onUpdateProcessor={updateProcessor}
+                          onDeleteProcessor={deleteProcessor}
+                          onWatchProcessor={watchProcessor}
+                          refreshSimulation={refreshSimulation}
+                        />
+                      ))}
+                    </SortableList>
+                  )}
+                  <AddProcessorPanel
+                    key={processors.length} // Used to force reset the inner form state once a new processor is added
+                    definition={definition}
+                    onAddProcessor={addProcessor}
+                    onWatchProcessor={watchProcessor}
+                    refreshSimulation={refreshSimulation}
+                  />
+                </EuiPanel>
+              </EuiResizablePanel>
+
+              <EuiResizableButton indicator="border" accountForScrollbars="both" />
+
+              <EuiResizablePanel
+                initialSize={75}
+                minSize="300px"
+                tabIndex={0}
+                paddingSize="s"
+                css={verticalFlexCss}
+              >
+                <SimulationPlayground
+                  definition={definition}
+                  columns={tableColumns}
+                  simulation={simulation}
+                  samples={samples}
+                  onRefreshSamples={refreshSamples}
+                  isLoading={isLoading}
+                />
+              </EuiResizablePanel>
+            </>
+          )}
+        </EuiResizableContainer>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner grow={false} color="subdued">
+        <ManagementBottomBar
+          onCancel={resetChanges}
+          onConfirm={saveChanges}
+          isLoading={isSavingChanges}
+          disabled={!hasChanges}
+        />
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 }
 
 const ProcessorsHeader = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <>
-      <EuiTitle size="xs">
+    <EuiPanel
+      paddingSize="m"
+      hasShadow={false}
+      borderRadius="none"
+      grow={false}
+      css={css`
+        z-index: ${euiTheme.levels.maskBelowHeader};
+        ${useEuiShadow('xs')};
+      `}
+    >
+      <EuiTitle size="xxs">
         <h2>
           {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.headingTitle', {
             defaultMessage: 'Processors for field extraction',
           })}
         </h2>
       </EuiTitle>
-      <EuiText component="p" size="s">
+      <EuiText component="p" size="xs">
         {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle', {
-          defaultMessage:
-            'Use processors to transform data before indexing. Drag and drop existing processors to update their execution order.',
+          defaultMessage: 'Drag and drop existing processors to update their execution order.',
         })}
       </EuiText>
-    </>
+    </EuiPanel>
   );
 };
+
+const verticalFlexCss = css`
+  display: flex;
+  flex-direction: column;
+`;

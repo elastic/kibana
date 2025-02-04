@@ -17,10 +17,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
+import { StreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { GrokPatternDefinition } from './grok_pattern_definition';
 import { GrokPatternsEditor } from './grok_patterns_editor';
@@ -31,24 +31,21 @@ import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { UseProcessingSimulatorReturnType } from '../../hooks/use_processing_simulator';
-import { convertFormStateToProcessing } from '../../utils';
 
 export const GrokProcessorForm = ({
-  samples,
   definition,
-  onSimulate,
+  refreshSimulation,
 }: {
-  samples?: Array<Record<PropertyKey, unknown>>;
-  definition?: ReadStreamDefinition;
-  onSimulate?: UseProcessingSimulatorReturnType['simulate'];
+  definition?: StreamDefinition;
+  refreshSimulation?: UseProcessingSimulatorReturnType['refreshSimulation'];
 }) => {
   return (
     <>
       <ProcessorFieldSelector />
       <GrokPatternsEditor />
       <EuiSpacer size="m" />
-      {samples && onSimulate && definition && (
-        <GrokAiSuggestions samples={samples} definition={definition} onSimulate={onSimulate} />
+      {refreshSimulation && definition && (
+        <GrokAiSuggestions definition={definition} refreshSimulation={refreshSimulation} />
       )}
       <EuiSpacer size="m" />
       <OptionalFieldsAccordion>
@@ -64,13 +61,11 @@ export const GrokProcessorForm = ({
 };
 
 function GrokAiSuggestions({
-  samples,
   definition,
-  onSimulate,
+  refreshSimulation,
 }: {
-  samples: Array<Record<PropertyKey, unknown>>;
-  definition: ReadStreamDefinition;
-  onSimulate: UseProcessingSimulatorReturnType['simulate'];
+  definition: StreamDefinition;
+  refreshSimulation: UseProcessingSimulatorReturnType['refreshSimulation'];
 }) {
   const { dependencies } = useKibana();
   const {
@@ -173,8 +168,7 @@ function GrokAiSuggestions({
               } else {
                 form.setValue('patterns', [...currentState.patterns, { value: pattern }]);
               }
-              const newState = form.getValues();
-              onSimulate(convertFormStateToProcessing(newState), newState.detected_fields);
+              refreshSimulation();
             }}
             data-test-subj="streamsAppGrokAiSuggestionsButton"
             iconType="plusInCircle"

@@ -385,7 +385,7 @@ export const processingSuggestionRoute = createServerRoute({
       } catch (e) {
         return [];
       }
-      let partialPatterns: unknown[] = [];
+      let partialPatterns: string[] = [];
       if (Array.isArray(content)) {
         partialPatterns = sanitizePatterns(content);
       }
@@ -406,7 +406,7 @@ export const processingSuggestionRoute = createServerRoute({
   },
 });
 
-function sanitizePatterns(patterns: unknown[]) {
+function sanitizePatterns(patterns: unknown[]): string[] {
   return patterns
     .filter((pattern) => typeof pattern.parsing_rule === 'string')
     .map((pattern) => pattern.parsing_rule.replace(/%\{([^}]+):message\}/g, '%{$1:message_derived}'));
