@@ -758,9 +758,12 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const modelStatusIndicatorConfigOverrides = {
     names: {
-      downloading: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
-        defaultMessage: 'Downloading model',
-      }),
+      downloading: i18n.translate(
+        'xpack.ml.trainedModels.modelsList.modelState.downloadingModelName',
+        {
+          defaultMessage: 'Downloading model',
+        }
+      ),
     },
     color: euiTheme.colors.textSubdued,
   };
