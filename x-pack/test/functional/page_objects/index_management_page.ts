@@ -208,7 +208,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       ) {
         await testSubjects.click(tab);
       },
-      async expectBreadcrumbNavigationToHaveBreadcrumb(breadcrumbName: string) {
+      async expectBreadcrumbNavigationToHaveBreadcrumbName(breadcrumbName: string) {
         await testSubjects.existOrFail('euiBreadcrumb');
         expect(await testSubjects.getVisibleText('breadcrumb first')).to.contain(
           'Stack Management'

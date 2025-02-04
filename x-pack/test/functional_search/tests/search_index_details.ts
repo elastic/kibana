@@ -381,7 +381,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             // click the first index in the table and wait for the index details page
             await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
             await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
-            await pageObjects.indexManagement.indexDetailsPage.expectBreadcrumbNavigationToHaveBreadcrumb(
+            await pageObjects.indexManagement.indexDetailsPage.expectBreadcrumbNavigationToHaveBreadcrumbName(
               'Overview'
             );
           });
