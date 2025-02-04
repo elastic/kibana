@@ -42,11 +42,11 @@ function useLifecycleState({
     if (!definition) return [];
 
     const actions = [];
+    const isWired = isWiredStreamGetResponse(definition);
+    const isUnwired = isUnWiredStreamGetResponse(definition);
+    const isIlm = isIlmLifecycle(definition.effective_lifecycle);
 
-    if (
-      isWiredStreamGetResponse(definition) ||
-      (isUnWiredStreamGetResponse(definition) && !isIlmLifecycle(definition.effective_lifecycle))
-    ) {
+    if (isWired || (isUnwired && !isIlm)) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
           defaultMessage: 'Set specific retention days',
@@ -55,7 +55,7 @@ function useLifecycleState({
       });
     }
 
-    if (isWiredStreamGetResponse(definition) && !isServerless) {
+    if (isWired && !isServerless) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.setLifecyclePolicy', {
           defaultMessage: 'Use a lifecycle policy',
@@ -64,10 +64,7 @@ function useLifecycleState({
       });
     }
 
-    if (
-      !isRoot(definition.stream.name) ||
-      (isUnWiredStreamGetResponse(definition) && !isIlmLifecycle(definition.effective_lifecycle))
-    ) {
+    if (!isRoot(definition.stream.name) || (isUnwired && !isIlm)) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',
