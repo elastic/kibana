@@ -6,10 +6,9 @@
  */
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { type KibanaExecutionContext } from '@kbn/core/public';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import {
   BehaviorSubject,
   type Subscription,
@@ -20,7 +19,6 @@ import {
   merge,
   tap,
   map,
-  of,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
@@ -258,15 +256,13 @@ export function loadEmbeddableData(
     return pipe(distinctUntilChanged(fastIsEqual), skip(1));
   }
 
-  // Read ESQL variables from the parent if it provides them
-  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
-    ? parentApi.esqlVariables$
-    : of([] as ESQLControlVariable[]);
-
   const mergedSubscriptions = merge(
     // on search context change, reload
     fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
-    esqlVariables$.pipe(map(() => 'ESQLvariables' as ReloadReason)),
+    internalApi?.esqlVariables$.pipe(
+      waitUntilChanged(),
+      map(() => 'ESQLvariables' as ReloadReason)
+    ),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
