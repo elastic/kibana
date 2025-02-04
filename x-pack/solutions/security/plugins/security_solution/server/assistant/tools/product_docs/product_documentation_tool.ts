@@ -18,6 +18,9 @@ import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/serve
 import { APP_UI_ID } from '../../../../common';
 
 const toolDetails = {
+  // note: this description is overwritten when `getTool` is called
+  // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
+  // local definitions can be overwritten by security-ai-prompt integration definitions
   description:
     'Use this tool to retrieve documentation about Elastic products. You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch, or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search.',
   id: 'product-documentation-tool',
@@ -40,7 +43,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
-      description: toolDetails.description,
+      description: params.description || toolDetails.description,
       schema: z.object({
         query: z.string().describe(
           `The query to use to retrieve documentation
