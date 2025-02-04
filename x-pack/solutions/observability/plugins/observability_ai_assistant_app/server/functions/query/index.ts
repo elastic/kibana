@@ -137,7 +137,7 @@ export function registerQueryFunction({
             { description: fn.description, schema: fn.parameters } as ToolDefinition,
           ])
         ),
-        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
+        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'auto',
       });
 
       const chatMessageId = v4();

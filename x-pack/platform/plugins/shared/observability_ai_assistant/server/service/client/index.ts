@@ -166,7 +166,7 @@ export class ObservabilityAIAssistantClient {
   complete = ({
     functionClient,
     connectorId,
-    simulateFunctionCalling = false,
+    functionCallingMode = 'auto',
     instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
@@ -187,7 +187,7 @@ export class ObservabilityAIAssistantClient {
     isPublic?: boolean;
     kibanaPublicUrl?: string;
     instructions?: AdHocInstruction[];
-    simulateFunctionCalling?: boolean;
+    functionCallingMode?: string;
     disableFunctions?:
       | boolean
       | {
@@ -254,7 +254,7 @@ export class ObservabilityAIAssistantClient {
                     chat: (name, chatParams) =>
                       this.chat(name, {
                         ...chatParams,
-                        simulateFunctionCalling,
+                        functionCallingMode,
                         connectorId,
                         signal,
                         stream: false,
@@ -292,7 +292,7 @@ export class ObservabilityAIAssistantClient {
                   return this.chat(name, {
                     ...chatParams,
                     signal,
-                    simulateFunctionCalling,
+                    functionCallingMode,
                     connectorId,
                     stream: true,
                   });
@@ -307,7 +307,7 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
-                useSimulatedFunctionCalling: simulateFunctionCalling === true,
+                useSimulatedFunctionCalling: functionCallingMode === 'simulated',
               })
             );
           }),
@@ -471,7 +471,7 @@ export class ObservabilityAIAssistantClient {
       functions,
       functionCall,
       signal,
-      simulateFunctionCalling,
+      functionCallingMode,
       tracer,
       stream,
     }: {
@@ -480,7 +480,7 @@ export class ObservabilityAIAssistantClient {
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
-      simulateFunctionCalling?: boolean;
+      functionCallingMode?: string;
       tracer: LangTracer;
       stream: TStream;
     }
@@ -505,6 +505,7 @@ export class ObservabilityAIAssistantClient {
           }
         : ToolChoiceType.auto;
     }
+
     const options = {
       connectorId,
       messages: convertMessagesForInference(
@@ -512,8 +513,9 @@ export class ObservabilityAIAssistantClient {
       ),
       toolChoice,
       tools,
-      functionCalling: (simulateFunctionCalling ? 'simulated' : 'native') as FunctionCallingMode,
+      functionCalling: functionCallingMode as FunctionCallingMode,
     };
+
     if (stream) {
       return defer(() =>
         this.dependencies.inferenceClient.chatComplete({

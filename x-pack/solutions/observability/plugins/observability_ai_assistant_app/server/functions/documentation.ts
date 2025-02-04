@@ -69,7 +69,7 @@ export async function registerDocumentationFunction({
         max: 3,
         connectorId,
         request: resources.request,
-        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
+        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'auto',
       });
 
       return {

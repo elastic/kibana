@@ -484,8 +484,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:aiAssistantSimulatedFunctionCalling': {
-    type: 'boolean',
+  'observability:aiAssistantFunctionCallingMode': {
+    type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:aiAssistantSearchConnectorIndexPattern': {

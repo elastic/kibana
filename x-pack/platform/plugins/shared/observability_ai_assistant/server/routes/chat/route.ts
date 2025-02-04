@@ -11,7 +11,8 @@ import * as t from 'io-ts';
 import { from, map } from 'rxjs';
 import { Readable } from 'stream';
 import { AssistantScope } from '@kbn/ai-assistant-common';
-import { aiAssistantSimulatedFunctionCalling } from '../..';
+import { FunctionCallingMode } from '@kbn/inference-common';
+import { aiAssistantFunctionCallingMode } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
@@ -100,10 +101,10 @@ async function initializeChatRequest({
     return connector;
   });
 
-  const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
+  const [client, cloudStart, functionCallingMode] = await Promise.all([
     service.getClient({ request, scopes }),
     cloud?.start(),
-    (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
+    (await context.core).uiSettings.client.get<FunctionCallingMode>(aiAssistantFunctionCallingMode),
   ]);
 
   if (!client) {
@@ -119,7 +120,7 @@ async function initializeChatRequest({
   return {
     client,
     isCloudEnabled: Boolean(cloudStart?.isCloudEnabled),
-    simulateFunctionCalling,
+    functionCallingMode,
     signal: controller.signal,
   };
 }
@@ -152,7 +153,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       body: { name, messages, connectorId, functions, functionCall },
     } = params;
 
-    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
+    const { client, functionCallingMode, signal, isCloudEnabled } = await initializeChatRequest(
       resources
     );
 
@@ -167,7 +168,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
             functionCall,
           }
         : {}),
-      simulateFunctionCalling,
+      functionCallingMode,
       tracer: new LangTracer(otelContext.active()),
     });
 
@@ -191,7 +192,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
     }),
   }),
   handler: async (resources): Promise<Readable> => {
-    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
+    const { client, functionCallingMode, signal, isCloudEnabled } = await initializeChatRequest(
       resources
     );
 
@@ -206,7 +207,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
               ...params,
               stream: true,
               connectorId,
-              simulateFunctionCalling,
+              functionCallingMode,
               signal,
               tracer: new LangTracer(otelContext.active()),
             })
@@ -258,7 +259,7 @@ async function chatComplete(
     },
   } = params;
 
-  const { client, isCloudEnabled, signal, simulateFunctionCalling } = await initializeChatRequest(
+  const { client, isCloudEnabled, signal, functionCallingMode } = await initializeChatRequest(
     resources
   );
 
@@ -279,7 +280,7 @@ async function chatComplete(
     signal,
     functionClient,
     instructions,
-    simulateFunctionCalling,
+    functionCallingMode,
     disableFunctions,
   });
 

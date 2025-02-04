@@ -9,7 +9,7 @@ import React from 'react';
 import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import {
   aiAssistantLogsIndexPattern,
-  aiAssistantSimulatedFunctionCalling,
+  aiAssistantFunctionCallingMode,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
 } from '@kbn/observability-ai-assistant-plugin/public';
@@ -33,7 +33,7 @@ export function UISettings() {
   const { config } = useAppContext();
 
   const settingsKeys = [
-    aiAssistantSimulatedFunctionCalling,
+    aiAssistantFunctionCallingMode,
     ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
     ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
   ];

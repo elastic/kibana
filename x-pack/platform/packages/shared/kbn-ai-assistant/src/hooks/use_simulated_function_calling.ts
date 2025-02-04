@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { aiAssistantSimulatedFunctionCalling } from '@kbn/observability-ai-assistant-plugin/public';
+import { aiAssistantFunctionCallingMode } from '@kbn/observability-ai-assistant-plugin/public';
+import { FunctionCallingMode } from '@kbn/inference-common';
 import { useKibana } from './use_kibana';
 
 export function useSimulatedFunctionCalling() {
@@ -13,10 +14,12 @@ export function useSimulatedFunctionCalling() {
     services: { uiSettings },
   } = useKibana();
 
-  const simulatedFunctionCallingEnabled = uiSettings!.get<boolean>(
-    aiAssistantSimulatedFunctionCalling,
-    false
+  const functionCallingMode = uiSettings!.get<FunctionCallingMode>(
+    aiAssistantFunctionCallingMode,
+    'auto'
   );
+
+  const simulatedFunctionCallingEnabled = functionCallingMode === 'simulated';
 
   return { simulatedFunctionCallingEnabled };
 }
