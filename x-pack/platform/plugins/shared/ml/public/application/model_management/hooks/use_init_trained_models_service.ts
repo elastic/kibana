@@ -33,12 +33,12 @@ export function useInitTrainedModelsService(
 
   const savedObjectsApiService = useSavedObjectsApiService();
 
-  const initialScheduledDeployments = useMemo(() => [], []);
+  const defaultScheduledDeployments = useMemo(() => [], []);
 
   const [scheduledDeployments, setScheduledDeployments] = useStorage<
     typeof ML_SCHEDULED_MODEL_DEPLOYMENTS,
     StartAllocationParams[]
-  >(ML_SCHEDULED_MODEL_DEPLOYMENTS, initialScheduledDeployments);
+  >(ML_SCHEDULED_MODEL_DEPLOYMENTS, defaultScheduledDeployments);
 
   const scheduledDeployments$ = useMemo(
     () => new BehaviorSubject<StartAllocationParams[]>(scheduledDeployments),
