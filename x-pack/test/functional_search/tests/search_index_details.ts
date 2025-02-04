@@ -174,9 +174,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should have breadcrumb navigation', async () => {
-          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(
-            indexName
-          );
+          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(indexName);
         });
 
         it('should show code examples for adding documents', async () => {
