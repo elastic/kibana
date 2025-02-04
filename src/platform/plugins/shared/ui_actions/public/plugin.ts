@@ -25,6 +25,7 @@ export type UiActionsPublicSetup = Pick<
   | 'attachAction'
   | 'detachAction'
   | 'registerAction'
+  | 'registerActionAsync'
   | 'registerTrigger'
   | 'unregisterAction'
 >;
