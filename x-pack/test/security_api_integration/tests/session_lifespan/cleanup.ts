@@ -178,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'saml',
         name: 'saml_override',
       });
+
       await checkSessionCookie(samlDisableSessionCookie, 'a@b.c', {
         type: 'saml',
         name: 'saml_disable',
