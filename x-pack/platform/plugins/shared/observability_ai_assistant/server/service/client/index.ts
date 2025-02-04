@@ -42,7 +42,6 @@ import {
   ConversationUpdateEvent,
   createConversationNotFoundError,
   StreamingChatResponseEventType,
-  TokenCountEvent,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
@@ -58,7 +57,6 @@ import {
   KnowledgeBaseEntryRole,
   MessageRole,
 } from '../../../common/types';
-import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
@@ -71,9 +69,8 @@ import { LangTracer } from './instrumentation/lang_tracer';
 import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
-import { extractTokenCount } from './operators/extract_token_count';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
+import { apmInstrumentation } from './operators/apm_instrumentation';
 import {
   runSemanticTextKnowledgeBaseMigration,
   scheduleSemanticTextMigration,
@@ -321,115 +318,93 @@ export class ObservabilityAIAssistantClient {
           forkJoin([
             messagesWithUpdatedSystemMessage$,
             // get just the new messages
-            nextEvents$.pipe(withoutTokenCountEvents(), extractMessages()),
-            // count all the token count events emitted during completion
-            mergeOperator(
-              nextEvents$,
-              title$.pipe(filter((value): value is TokenCountEvent => typeof value !== 'string'))
-            ).pipe(extractTokenCount()),
+            nextEvents$.pipe(extractMessages()),
             // get just the title, and drop the token count events
             title$.pipe(filter((value): value is string => typeof value === 'string')),
           ]).pipe(
-            switchMap(
-              ([messagesWithUpdatedSystemMessage, addedMessages, tokenCountResult, title]) => {
-                const initialMessagesWithAddedMessages =
-                  messagesWithUpdatedSystemMessage.concat(addedMessages);
+            switchMap(([messagesWithUpdatedSystemMessage, addedMessages, title]) => {
+              const initialMessagesWithAddedMessages =
+                messagesWithUpdatedSystemMessage.concat(addedMessages);
 
-                const lastMessage = last(initialMessagesWithAddedMessages);
+              const lastMessage = last(initialMessagesWithAddedMessages);
 
-                // if a function request is at the very end, close the stream to consumer
-                // without persisting or updating the conversation. we need to wait
-                // on the function response to have a valid conversation
-                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+              // if a function request is at the very end, close the stream to consumer
+              // without persisting or updating the conversation. we need to wait
+              // on the function response to have a valid conversation
+              const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                if (!persist || isFunctionRequest) {
-                  return of();
-                }
-
-                if (isConversationUpdate) {
-                  return from(this.getConversationWithMetaFields(conversationId))
-                    .pipe(
-                      switchMap((conversation) => {
-                        if (!conversation) {
-                          return throwError(() => createConversationNotFoundError());
-                        }
-
-                        const persistedTokenCount = conversation._source?.conversation
-                          .token_count ?? {
-                          prompt: 0,
-                          completion: 0,
-                          total: 0,
-                        };
-
-                        return from(
-                          this.update(
-                            conversationId,
-
-                            merge(
-                              {},
-
-                              // base conversation without messages
-                              omit(conversation._source, 'messages'),
-
-                              // update messages
-                              { messages: initialMessagesWithAddedMessages },
-
-                              // update token count
-                              {
-                                conversation: {
-                                  title: title || conversation._source?.conversation.title,
-                                  token_count: {
-                                    prompt: persistedTokenCount.prompt + tokenCountResult.prompt,
-                                    completion:
-                                      persistedTokenCount.completion + tokenCountResult.completion,
-                                    total: persistedTokenCount.total + tokenCountResult.total,
-                                  },
-                                },
-                              }
-                            )
-                          )
-                        );
-                      })
-                    )
-                    .pipe(
-                      map((conversation): ConversationUpdateEvent => {
-                        return {
-                          conversation: conversation.conversation,
-                          type: StreamingChatResponseEventType.ConversationUpdate,
-                        };
-                      })
-                    );
-                }
-
-                return from(
-                  this.create({
-                    '@timestamp': new Date().toISOString(),
-                    conversation: {
-                      title,
-                      id: conversationId,
-                      token_count: tokenCountResult,
-                    },
-                    public: !!isPublic,
-                    labels: {},
-                    numeric_labels: {},
-                    messages: initialMessagesWithAddedMessages,
-                  })
-                ).pipe(
-                  map((conversation): ConversationCreateEvent => {
-                    return {
-                      conversation: conversation.conversation,
-                      type: StreamingChatResponseEventType.ConversationCreate,
-                    };
-                  })
-                );
+              if (!persist || isFunctionRequest) {
+                return of();
               }
-            )
+
+              if (isConversationUpdate) {
+                return from(this.getConversationWithMetaFields(conversationId))
+                  .pipe(
+                    switchMap((conversation) => {
+                      if (!conversation) {
+                        return throwError(() => createConversationNotFoundError());
+                      }
+
+                      return from(
+                        this.update(
+                          conversationId,
+
+                          merge(
+                            {},
+
+                            // base conversation without messages
+                            omit(conversation._source, 'messages'),
+
+                            // update messages
+                            { messages: initialMessagesWithAddedMessages },
+
+                            // update title
+                            {
+                              conversation: {
+                                title: title || conversation._source?.conversation.title,
+                              },
+                            }
+                          )
+                        )
+                      );
+                    })
+                  )
+                  .pipe(
+                    map((conversation): ConversationUpdateEvent => {
+                      return {
+                        conversation: conversation.conversation,
+                        type: StreamingChatResponseEventType.ConversationUpdate,
+                      };
+                    })
+                  );
+              }
+
+              return from(
+                this.create({
+                  '@timestamp': new Date().toISOString(),
+                  conversation: {
+                    title,
+                    id: conversationId,
+                  },
+                  public: !!isPublic,
+                  labels: {},
+                  numeric_labels: {},
+                  messages: initialMessagesWithAddedMessages,
+                })
+              ).pipe(
+                map((conversation): ConversationCreateEvent => {
+                  return {
+                    conversation: conversation.conversation,
+                    type: StreamingChatResponseEventType.ConversationCreate,
+                  };
+                })
+              );
+            })
           )
         );
 
         return output$.pipe(
-          instrumentAndCountTokens('complete'),
-          withoutTokenCountEvents(),
+          apmInstrumentation('complete'),
           catchError((error) => {
             this.dependencies.logger.error(error);
             return throwError(() => error);
@@ -485,7 +460,7 @@ export class ObservabilityAIAssistantClient {
       stream: TStream;
     }
   ): TStream extends true
-    ? Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent>
+    ? Observable<ChatCompletionChunkEvent | ChatCompletionMessageEvent>
     : Promise<ChatCompleteResponse> {
     let tools: Record<string, { description: string; schema: any }> | undefined;
     let toolChoice: ToolChoiceType | { function: string } | undefined;
@@ -505,11 +480,14 @@ export class ObservabilityAIAssistantClient {
           }
         : ToolChoiceType.auto;
     }
+
+    const convertedMessages = convertMessagesForInference(
+      messages.filter((message) => message.message.role !== MessageRole.System)
+    );
+
     const options = {
       connectorId,
-      messages: convertMessagesForInference(
-        messages.filter((message) => message.message.role !== MessageRole.System)
-      ),
+      messages: convertedMessages,
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'native') as FunctionCallingMode,
@@ -522,7 +500,7 @@ export class ObservabilityAIAssistantClient {
         })
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
-        instrumentAndCountTokens(name),
+        apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (
@@ -534,7 +512,7 @@ export class ObservabilityAIAssistantClient {
         }),
         shareReplay()
       ) as TStream extends true
-        ? Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent>
+        ? Observable<ChatCompletionChunkEvent | ChatCompletionMessageEvent>
         : never;
     } else {
       return this.dependencies.inferenceClient.chatComplete({

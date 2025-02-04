@@ -59,13 +59,6 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
             id: keyword,
             title: text,
             last_updated: date,
-            token_count: {
-              properties: {
-                prompt: integer,
-                completion: integer,
-                total: integer,
-              },
-            },
           },
         },
         namespace: keyword,
