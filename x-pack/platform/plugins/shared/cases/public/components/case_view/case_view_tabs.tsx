@@ -35,7 +35,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 
 const TabTitle = ({ title }: { title: string }) => (
   <EuiTitle size="xxs">
-    <h2 className="eui-displayInline">{title}</h2>
+    <p className="eui-displayInline">{title}</p>
   </EuiTitle>
 );
 

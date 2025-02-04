@@ -91,7 +91,7 @@ const ConnectorsComponent: React.FC<Props> = ({
     <>
       <EuiDescribedFormGroup
         fullWidth
-        title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
+        title={<h2>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h2>}
         description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
         data-test-subj="case-connectors-form-group"
       >
