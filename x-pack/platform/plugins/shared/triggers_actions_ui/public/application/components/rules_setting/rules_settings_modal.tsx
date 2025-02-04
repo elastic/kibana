@@ -220,7 +220,9 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     if (isFlappingLoading || isQueryDelayLoading) {
       return <CenterJustifiedSpinner />;
     }
-    const isAlertDeletionSettingsEnabled = getIsExperimentalFeatureEnabled('alertDeletionSettings');
+    const isAlertDeletionSettingsEnabled = getIsExperimentalFeatureEnabled(
+      'alertDeletionSettingsEnabled'
+    );
     return (
       <>
         {flappingSettings && (

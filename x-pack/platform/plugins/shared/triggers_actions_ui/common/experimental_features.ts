@@ -22,7 +22,7 @@ export const allowedExperimentalValues = Object.freeze({
   isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
   isUsingRuleCreateFlyout: false,
-  alertDeletionSettings: false,
+  alertDeletionSettingsEnabled: false,
 });
 
 const deprecatedExperimentalValues = new Set(['ruleFormV2']);
