@@ -193,9 +193,7 @@ export class SLOPlugin
       ?.start(plugins.taskManager, internalSoClient, internalEsClient)
       .catch(() => {});
 
-    this.healthTask?.start({ taskManager: plugins.taskManager }).catch((e) => {
-      this.logger.error(`Error starting HealthTask: ${e}`);
-    });
+    this.healthTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
 
     return {
       getSloClientWithRequest: (request: KibanaRequest) => {

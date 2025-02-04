@@ -68,8 +68,12 @@ export class HealthTask {
       return;
     }
 
-    this.wasStarted = true;
+    if (!this.config.healthEnabled) {
+      return await taskManager.removeIfExists(this.taskId);
+    }
+
     this.logger.info(`[HealthTask] Started with 20m interval`);
+    this.wasStarted = true;
 
     try {
       await taskManager.ensureScheduled({
@@ -104,19 +108,18 @@ export class HealthTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[HealthTask] runTask() started`);
+    if (!this.config.healthEnabled) {
+      this.logger.debug('[HealthTask] Task is disabled');
+      return;
+    }
+
+    this.logger.debug(`[HealthTask] runTask() started`);
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      // Use SLOSettings saved object to store health task settings/flags
-      if (!this.config.healthEnabled) {
-        this.logger.debug('[HealthTask] Task is disabled');
-        return;
-      }
-
       const computeHealth = new ComputeHealth(esClient, soClient, this.logger);
       await computeHealth.execute();
     } catch (err) {

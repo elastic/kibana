@@ -49,7 +49,7 @@ export class ComputeHealth {
   ) {}
 
   public async execute(): Promise<void> {
-    this.logger.info('[HealthTask] Computing health...');
+    this.logger.info('[HealthTask] Computing SLOs health...');
 
     const finder = await this.soClient.createPointInTimeFinder<StoredSLODefinition>({
       type: SO_SLO_TYPE,

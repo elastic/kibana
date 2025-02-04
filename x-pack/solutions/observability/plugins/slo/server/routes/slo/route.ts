@@ -53,7 +53,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
     ...getSLOsOverview,
-    // SLO OPS
+    // SLO Management
     ...findSLOHealthRoute,
   };
 };
