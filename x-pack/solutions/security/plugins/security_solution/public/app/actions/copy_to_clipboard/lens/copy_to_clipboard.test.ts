@@ -63,7 +63,7 @@ describe('createCopyToClipboardLensAction', () => {
   });
 
   it('should return display name', () => {
-    expect(copyToClipboardAction.getDisplayName(context)).toEqual('Copy to Clipboard');
+    expect(copyToClipboardAction.getDisplayName(context)).toEqual('Copy to clipboard');
   });
 
   it('should return icon type', () => {
