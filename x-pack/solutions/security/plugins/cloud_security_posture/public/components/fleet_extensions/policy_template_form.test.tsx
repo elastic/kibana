@@ -1169,7 +1169,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByText } = render(
@@ -1191,7 +1190,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByText } = render(
@@ -1208,7 +1206,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { getByTestId } = render(
@@ -1228,7 +1225,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.type': { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByLabelText, getByRole } = render(
@@ -1247,7 +1243,6 @@ describe('<CspPolicyTemplateForm />', () => {
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.project_id': { value: 'a' },
         'gcp.credentials.type': { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByTestId } = render(
@@ -1289,7 +1284,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { getByLabelText, getByTestId } = render(
@@ -1305,7 +1299,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'manual' },
       });
 
       const { getByLabelText, getByTestId } = render(
@@ -1321,7 +1314,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { queryByLabelText, queryByTestId } = render(
@@ -1337,7 +1329,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'manual' },
       });
 
       const { getByTestId } = render(
