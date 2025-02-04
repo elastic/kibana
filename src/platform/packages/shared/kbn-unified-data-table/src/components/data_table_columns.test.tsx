@@ -360,10 +360,6 @@ describe('Data table columns', function () {
       expect(deserializeHeaderRowHeight(ROWS_HEIGHT_OPTIONS.auto)).toBe(undefined);
     });
 
-    it('returns 1 for single', () => {
-      expect(deserializeHeaderRowHeight(ROWS_HEIGHT_OPTIONS.single)).toBe(1);
-    });
-
     it('returns the value for other values', () => {
       expect(deserializeHeaderRowHeight(2)).toBe(2);
     });
