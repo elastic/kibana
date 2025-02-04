@@ -31,47 +31,43 @@ export async function openSloConfiguration(
           default: SloConfiguration,
         };
       });
-      try {
-        const flyoutSession = overlays.openFlyout(
-          toMountPoint(
-            <KibanaContextProvider
-              services={{
-                ...coreStart,
-                ...pluginsStart,
+      const flyoutSession = overlays.openFlyout(
+        toMountPoint(
+          <KibanaContextProvider
+            services={{
+              ...coreStart,
+              ...pluginsStart,
+            }}
+          >
+            <PluginContext.Provider
+              value={{
+                observabilityRuleTypeRegistry:
+                  pluginsStart.observability.observabilityRuleTypeRegistry,
+                ObservabilityPageTemplate:
+                  pluginsStart.observabilityShared.navigation.PageTemplate,
+                sloClient,
               }}
             >
-              <PluginContext.Provider
-                value={{
-                  observabilityRuleTypeRegistry:
-                    pluginsStart.observability.observabilityRuleTypeRegistry,
-                  ObservabilityPageTemplate:
-                    pluginsStart.observabilityShared.navigation.PageTemplate,
-                  sloClient,
-                }}
-              >
-                <QueryClientProvider client={queryClient}>
-                  <Suspense fallback={<EuiSkeletonText />}>
-                    <LazySloConfiguration
-                      initialInput={initialState}
-                      onCreate={(update: EmbeddableSloProps) => {
-                        flyoutSession.close();
-                        resolve(update);
-                      }}
-                      onCancel={() => {
-                        flyoutSession.close();
-                        reject();
-                      }}
-                    />
-                  </Suspense>
-                </QueryClientProvider>
-              </PluginContext.Provider>
-            </KibanaContextProvider>,
-            coreStart
-          )
-        );
-      } catch (error) {
-        reject(error);
-      }
+              <QueryClientProvider client={queryClient}>
+                <Suspense fallback={<EuiSkeletonText />}>
+                  <LazySloConfiguration
+                    initialInput={initialState}
+                    onCreate={(update: EmbeddableSloProps) => {
+                      flyoutSession.close();
+                      resolve(update);
+                    }}
+                    onCancel={() => {
+                      flyoutSession.close();
+                      reject();
+                    }}
+                  />
+                </Suspense>
+              </QueryClientProvider>
+            </PluginContext.Provider>
+          </KibanaContextProvider>,
+          coreStart
+        )
+      );
     } catch (error) {
       reject(error);
     }

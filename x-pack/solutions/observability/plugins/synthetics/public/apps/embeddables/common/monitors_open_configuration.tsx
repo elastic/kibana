@@ -35,38 +35,34 @@ export async function openMonitorConfiguration({
           default: MonitorConfiguration,
         };
       });
-      try {
-        const flyoutSession = overlays.openFlyout(
-          toMountPoint(
-            <KibanaContextProvider
-              services={{
-                ...coreStart,
-                ...pluginStart,
-              }}
-            >
-              <QueryClientProvider client={queryClient}>
-                <Suspense fallback={<EuiSkeletonText />}>
-                  <LazyMonitorConfiguration
-                    title={title}
-                    initialInput={initialState}
-                    onCreate={(update: { filters: MonitorFilters }) => {
-                      flyoutSession.close();
-                      resolve(update);
-                    }}
-                    onCancel={() => {
-                      flyoutSession.close();
-                      reject();
-                    }}
-                  />
-                </Suspense>
-              </QueryClientProvider>
-            </KibanaContextProvider>,
-            coreStart
-          )
-        );
-      } catch (error) {
-        reject(error);
-      }
+      const flyoutSession = overlays.openFlyout(
+        toMountPoint(
+          <KibanaContextProvider
+            services={{
+              ...coreStart,
+              ...pluginStart,
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <Suspense fallback={<EuiSkeletonText />}>
+                <LazyMonitorConfiguration
+                  title={title}
+                  initialInput={initialState}
+                  onCreate={(update: { filters: MonitorFilters }) => {
+                    flyoutSession.close();
+                    resolve(update);
+                  }}
+                  onCancel={() => {
+                    flyoutSession.close();
+                    reject();
+                  }}
+                />
+              </Suspense>
+            </QueryClientProvider>
+          </KibanaContextProvider>,
+          coreStart
+        )
+      );
     } catch (error) {
       reject(error);
     }
