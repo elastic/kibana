@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import {
-  IngestStreamGetResponse,
   InheritedFieldDefinition,
+  StreamGetResponse,
   WiredStreamGetResponse,
+  isGroupStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
@@ -31,14 +31,25 @@ export async function readStream({
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
-}): Promise<IngestStreamGetResponse> {
-  const [streamDefinition, dashboards, ancestors, dataStream] = await Promise.all([
+}): Promise<StreamGetResponse> {
+  const [streamDefinition, dashboards] = await Promise.all([
     streamsClient.getStream(name),
     assetClient.getAssetIds({
       entityId: name,
       entityType: 'stream',
       assetType: 'dashboard',
     }),
+  ]);
+
+  if (isGroupStreamDefinition(streamDefinition)) {
+    return {
+      stream: streamDefinition,
+      dashboards,
+    };
+  }
+
+  // These queries are only relavant for IngestStreams
+  const [ancestors, dataStream] = await Promise.all([
     streamsClient.getAncestors(name),
     streamsClient.getDataStream(name).catch((e) => {
       if (e.statusCode === 404) {
@@ -50,7 +61,7 @@ export async function readStream({
 
   if (isUnwiredStreamDefinition(streamDefinition)) {
     return {
-      stream: omit(streamDefinition, 'name'),
+      stream: streamDefinition,
       elasticsearch_assets: dataStream
         ? await getUnmanagedElasticsearchAssets({
             dataStream,
@@ -65,7 +76,7 @@ export async function readStream({
   }
 
   const body: WiredStreamGetResponse = {
-    stream: omit(streamDefinition, 'name'),
+    stream: streamDefinition,
     dashboards,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: ancestors.reduce((acc, def) => {

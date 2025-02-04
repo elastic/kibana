@@ -3156,7 +3156,7 @@
         "label": "CASES_FEATURE_ID",
         "description": [],
         "signature": [
-          "\"securitySolutionCasesV2\""
+          "\"securitySolutionCasesV3\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,
