@@ -37,8 +37,6 @@ const apiKeyState: ApiKeyState = {
 
 const apiKeyEmitter: ApiKeyEventEmitter = new EventEmitter();
 
-let isInitializing = false;
-
 const updateApiKeyState = (newState: Partial<ApiKeyState>) => {
   Object.assign(apiKeyState, newState);
   apiKeyEmitter.emit('change', apiKeyState);
@@ -76,8 +74,11 @@ export const useSearchApiKey = (): UseSearchApiKeyParams => {
 
     apiKeyEmitter.on('change', handleChange);
 
-    if (apiKeyState.status === Status.uninitialized && !isInitializing) {
-      isInitializing = true;
+    if (
+      [Status.uninitialized, Status.showHiddenKey, Status.showPreviewKey].includes(
+        apiKeyState.status
+      )
+    ) {
       (async () => {
         try {
           updateApiKeyState({ status: Status.loading });
@@ -98,8 +99,6 @@ export const useSearchApiKey = (): UseSearchApiKeyParams => {
           }
         } catch (e) {
           updateApiKeyState({ apiKey: null, status: Status.showCreateButton });
-        } finally {
-          isInitializing = false;
         }
       })();
     }
