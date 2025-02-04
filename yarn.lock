@@ -7308,10 +7308,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-project-switcher@link:src/platform/packages/private/serverless/project_switcher":
-  version "0.0.0"
-  uid ""
-
 "@kbn/serverless-search-settings@link:src/platform/packages/shared/serverless/settings/search_project":
   version "0.0.0"
   uid ""
