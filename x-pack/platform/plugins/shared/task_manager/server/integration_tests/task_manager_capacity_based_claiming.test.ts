@@ -198,9 +198,6 @@ describe('capacity based claiming', () => {
 
     expect(taskRunAtDates.length).toBe(10);
 
-    // eslint-disable-next-line no-console
-    console.warn(`taskRunAtDates: ${JSON.stringify(taskRunAtDates)}`);
-
     // run at dates should be within a few seconds of each other
     const firstRunAt = taskRunAtDates[0].getTime();
     const lastRunAt = taskRunAtDates[taskRunAtDates.length - 1].getTime();
