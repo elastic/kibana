@@ -9,7 +9,7 @@
 
 import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
