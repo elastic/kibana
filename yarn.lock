@@ -6564,7 +6564,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/product-intercept-dialog-plugin@link:x-pack/platform/plugins/private/product_intercept_dialog":
+"@kbn/product-intercept-trigger-plugin@link:x-pack/platform/plugins/private/product_intercept_trigger":
   version "0.0.0"
   uid ""
 
