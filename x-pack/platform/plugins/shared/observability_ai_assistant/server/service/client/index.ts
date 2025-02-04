@@ -317,10 +317,8 @@ export class ObservabilityAIAssistantClient {
           // wait until all dependencies have completed
           forkJoin([
             messagesWithUpdatedSystemMessage$,
-            // get just the new messages
             nextEvents$.pipe(extractMessages()),
-            // get just the title, and drop the token count events
-            title$.pipe(filter((value): value is string => typeof value === 'string')),
+            title$,
           ]).pipe(
             switchMap(([messagesWithUpdatedSystemMessage, addedMessages, title]) => {
               const initialMessagesWithAddedMessages =
