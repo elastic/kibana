@@ -23,7 +23,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         defaultMessage: 'Function calling mode',
       }
     ),
-    value: false,
+    value: FunctionCallingModeEnum.Auto,
     description: i18n.translate(
       'xpack.observabilityAiAssistantManagement.settingsPage.functionCallingModeDescription',
       {
