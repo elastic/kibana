@@ -60,7 +60,7 @@ export const useDataGridInTableSearch = (
     () =>
       wrapRenderCellValueWithInTableSearchSupport(
         renderCellValue,
-        'currentColor',
+        euiTheme.colors.textAccent,
         euiTheme.colors.backgroundLightAccent
       ),
     [renderCellValue, euiTheme.colors]
