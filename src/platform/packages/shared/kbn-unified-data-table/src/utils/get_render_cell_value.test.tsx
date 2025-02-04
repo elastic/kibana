@@ -117,6 +117,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -142,6 +143,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -168,6 +170,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = mountWithIntl(
       <DataTableCellValue
@@ -197,6 +200,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -233,6 +237,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -300,6 +305,7 @@ describe('Unified data table cell rendering', function () {
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
       isPlainRecord: true,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -339,6 +345,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -378,6 +385,7 @@ describe('Unified data table cell rendering', function () {
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       // this is the number of rendered items
       maxEntries: 1,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -414,6 +422,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -490,6 +499,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -530,6 +540,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -567,6 +578,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -641,6 +653,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = mountWithIntl(
       <KibanaContextProvider services={mockServices}>
@@ -669,6 +682,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -703,6 +717,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -728,6 +743,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -766,6 +782,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
