@@ -160,10 +160,7 @@ describe('capacity based claiming', () => {
       });
     const taskRunAtDates: Date[] = [];
     mockTaskTypeNormalCostRunFn.mockImplementation(() => {
-      const now = new Date();
-      // eslint-disable-next-line no-console
-      console.warn(`runAt Date ${now.toISOString()}`);
-      taskRunAtDates.push(now);
+      taskRunAtDates.push(new Date());
       return { state: { foo: 'test' } };
     });
 
