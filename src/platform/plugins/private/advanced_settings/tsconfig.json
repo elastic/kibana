@@ -19,6 +19,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-application",
+    "@kbn/spaces-plugin",
   ],
   "exclude": [
     "target/**/*",
