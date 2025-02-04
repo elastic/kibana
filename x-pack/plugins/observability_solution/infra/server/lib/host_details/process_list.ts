@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TIMESTAMP_FIELD, SYSTEM_PROCESS_CMDLINE_FIELD } from '../../../common/constants';
-import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../common/http_api';
-import { ESSearchClient } from '../metrics/types';
+import { TIMESTAMP_FIELD, PROCESS_COMMANDLINE_FIELD } from '../../../common/constants';
+import type {
+  ProcessListAPIRequest,
+  ProcessListAPIQueryAggregation,
+} from '../../../common/http_api';
+import type { ESSearchClient } from '../metrics/types';
 import type { InfraSourceConfiguration } from '../sources';
 
 const TOP_N = 10;
@@ -69,7 +71,7 @@ export const getProcessList = async (
         aggs: {
           filteredProcs: {
             terms: {
-              field: SYSTEM_PROCESS_CMDLINE_FIELD,
+              field: PROCESS_COMMANDLINE_FIELD,
               size: TOP_N,
               order: {
                 [sortBy.name]: sortBy.isAscending ? 'asc' : 'desc',
@@ -101,7 +103,12 @@ export const getProcessList = async (
                       },
                     },
                   ],
-                  _source: ['system.process.state', 'user.name', 'process.pid'],
+                  _source: [
+                    'system.process.state',
+                    'user.name',
+                    'process.pid',
+                    'process.command_line',
+                  ],
                 },
               },
             },
