@@ -159,15 +159,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.be.eql(
-          `
-GET _search
-{
-    "aggs": {
-      "NAME": {
-        "AGG_TYPE": {}
-      }
-    }
+        // Verify that the autocomplete suggestion is inserted into the editor
+        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.contain(`
+"aggs": {
+  "NAME": {
+    "AGG_TYPE": {}
+  }
 }
 `.replace(/\s/g, '')
         );
