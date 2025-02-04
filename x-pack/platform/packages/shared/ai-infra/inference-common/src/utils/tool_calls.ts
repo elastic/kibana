@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './set_synthetic_source';
+import { v4 } from 'uuid';
+
+export function generateFakeToolCallId() {
+  return v4().substr(0, 6);
+}
