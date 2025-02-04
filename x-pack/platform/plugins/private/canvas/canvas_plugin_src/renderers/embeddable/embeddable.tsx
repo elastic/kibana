@@ -58,7 +58,6 @@ const renderReactEmbeddable = ({
 
     const filters$ = useMemo(() => {
       return new BehaviorSubject<Filter[] | undefined>(input.filters);
-      // filters, query, timeRange only used as initial values. Changes do not effect memoized value
     }, []);
 
     return (
