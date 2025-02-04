@@ -17,7 +17,7 @@ import {
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getDataViewFieldOrBackfillWithColumnMeta } from '@kbn/data-view-utils';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   DataTableColumnsMeta,
   DataTableRecord,
@@ -55,7 +55,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
   isCompressed?: boolean;
-  columnsMeta?: DataTableColumnsMeta;
+  columnsMeta: DataTableColumnsMeta | undefined;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -67,7 +67,7 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const field = getDataViewFieldOrBackfillWithColumnMeta({
+    const field = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
       fieldName: columnId,
       columnMeta: columnsMeta?.[columnId],

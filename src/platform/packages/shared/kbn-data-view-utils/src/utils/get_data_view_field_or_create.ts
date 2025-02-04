@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_view_field_spec';
 
-export const getDataViewFieldOrBackfillWithColumnMeta = ({
+export const getDataViewFieldOrCreateFromColumnMeta = ({
   dataView,
   fieldName,
   columnMeta,
@@ -22,21 +23,23 @@ export const getDataViewFieldOrBackfillWithColumnMeta = ({
 }) => {
   const dataViewField = dataView.fields.getByName(fieldName);
 
-  if (dataViewField) {
+  if (!columnMeta) {
     return dataViewField;
   }
 
-  if (columnMeta) {
-    // console.log('backfilling', fieldName, fieldMeta);
-    // this will modify the data view instance and will allow to access the same backfilled field in other parts of Discover
-    dataView.fields.add(
-      convertDatatableColumnToDataViewFieldSpec({
-        name: fieldName,
-        id: fieldName,
-        meta: columnMeta,
-      })
-    );
+  const fieldSpecFromColumnMeta = convertDatatableColumnToDataViewFieldSpec({
+    name: fieldName,
+    id: fieldName,
+    meta: columnMeta,
+  });
+
+  if (
+    !dataViewField ||
+    dataViewField.type !== fieldSpecFromColumnMeta.type ||
+    !isEqual(dataViewField.esTypes, fieldSpecFromColumnMeta.esTypes)
+  ) {
+    return dataView.fields.create(fieldSpecFromColumnMeta);
   }
 
-  return dataView.fields.getByName(fieldName);
+  return dataViewField;
 };

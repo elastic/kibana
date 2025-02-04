@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria } from '@kbn/sort-predicates';
-import { getDataViewFieldOrBackfillWithColumnMeta } from '@kbn/data-view-utils';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
@@ -50,7 +50,7 @@ export const useSorting = ({
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
-        const field = getDataViewFieldOrBackfillWithColumnMeta({
+        const field = getDataViewFieldOrCreateFromColumnMeta({
           dataView,
           fieldName: id,
           columnMeta: columnsMeta?.[id],
@@ -60,11 +60,7 @@ export const useSorting = ({
           return acc;
         }
 
-        const sortField = getSortingCriteria(
-          columnsMeta?.[id]?.type ?? field.type,
-          id,
-          dataView.getFormatterForField(field)
-        );
+        const sortField = getSortingCriteria(field.type, id, dataView.getFormatterForField(field));
 
         acc.push((a, b) => sortField(a.flattened, b.flattened, direction as 'asc' | 'desc'));
 
