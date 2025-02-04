@@ -160,7 +160,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.sleepForDebouncePeriod();
 
         // Verify that the autocomplete suggestion is inserted into the editor
-        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.contain(`
+        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.contain(
+          `
 "aggs": {
   "NAME": {
     "AGG_TYPE": {}
