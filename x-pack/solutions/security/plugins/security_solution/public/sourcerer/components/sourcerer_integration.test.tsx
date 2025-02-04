@@ -21,10 +21,7 @@ const mockDispatch = jest.fn();
 
 jest.mock('../containers');
 jest.mock('../containers/use_signal_helpers');
-const mockuseCreateAdhocDataView = jest.fn().mockReturnValue(() => true);
-jest.mock('./use_create_adhoc_data_view', () => ({
-  useCreateAdhocDataView: () => mockuseCreateAdhocDataView,
-}));
+jest.mock('./use_create_adhoc_data_view');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
