@@ -257,6 +257,8 @@ function IlmModal({
         setErrorMessage('body' in error ? error.body.message : error.message);
       })
       .finally(() => setIsLoading(false));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
