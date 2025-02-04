@@ -208,6 +208,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       ) {
         await testSubjects.click(tab);
       },
+      async expectBreadcrumbNavigationToHaveBreadcrumb(breadcrumbName: string) {
+        await testSubjects.existOrFail('euiBreadcrumb');
+        expect(await testSubjects.getVisibleText('breadcrumb first')).to.contain("Stack Management");
+        expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(breadcrumbName);
+      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');

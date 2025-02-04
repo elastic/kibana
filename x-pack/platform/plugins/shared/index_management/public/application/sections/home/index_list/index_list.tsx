@@ -18,7 +18,6 @@ import { IndexTable } from './index_table';
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
     core: { executionContext, chrome },
-    services: { extensionsService },
     plugins: { cloud },
   } = useAppContext();
 
