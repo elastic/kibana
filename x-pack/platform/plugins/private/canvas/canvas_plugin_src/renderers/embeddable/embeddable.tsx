@@ -56,8 +56,12 @@ const renderReactEmbeddable = ({
   const RendererWrapper: FC<{}> = () => {
     const getAppContext = useGetAppContext(core);
 
-    const filters$ = useMemo(() => {
-      return new BehaviorSubject<Filter[] | undefined>(input.filters);
+    const searchApi = useMemo(() => {
+      return {
+        filters$: new BehaviorSubject<Filter[] | undefined>(input.filters),
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+        timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+      };
     }, []);
 
     return (
@@ -70,9 +74,7 @@ const renderReactEmbeddable = ({
           getSerializedStateForChild: () => ({
             rawState: omit(input, ['disableTriggers', 'filters']),
           }),
-          filters$,
-          query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
-          timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+          ...searchApi,
         })}
         key={`${type}_${uuid}`}
         onAnyStateChange={(newState) => {
@@ -89,13 +91,13 @@ const renderReactEmbeddable = ({
             ...api,
             setFilters: (filters: Filter[] | undefined) => {
               if (
-                !onlyDisabledFiltersChanged(filters$.getValue(), filters, {
+                !onlyDisabledFiltersChanged(searchApi.filters$.getValue(), filters, {
                   ...COMPARE_ALL_OPTIONS,
                   // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
                   state: false,
                 })
               ) {
-                filters$.next(filters);
+                searchApi.filters$.next(filters);
               }
             },
           };
