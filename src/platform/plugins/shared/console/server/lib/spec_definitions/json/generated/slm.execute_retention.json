@@ -22,7 +22,7 @@
     "patterns": [
       "_slm/_execute_retention"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/slm-api-execute-retention.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-execute-retention",
     "availability": {
       "stack": true,
       "serverless": false

@@ -18,7 +18,7 @@
       "_ingest/ip_location/database",
       "_ingest/ip_location/database/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-ip-location-database-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-ip-location-database",
     "availability": {
       "stack": true,
       "serverless": false

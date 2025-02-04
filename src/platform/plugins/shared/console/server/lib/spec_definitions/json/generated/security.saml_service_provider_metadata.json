@@ -12,7 +12,7 @@
     "patterns": [
       "_security/saml/metadata/{realm_name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-sp-metadata.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-service-provider-metadata",
     "availability": {
       "stack": true,
       "serverless": false
