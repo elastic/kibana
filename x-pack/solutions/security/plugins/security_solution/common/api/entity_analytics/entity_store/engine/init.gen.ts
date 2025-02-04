@@ -37,6 +37,10 @@ export const InitEntityEngineRequestBody = z.object({
   filter: z.string().optional(),
   enrichPolicyExecutionInterval: Interval.optional(),
   /**
+   * The field to use as the timestamp for the entity type.
+   */
+  timestampField: z.string().optional().default('@timestamp'),
+  /**
    * The amount of time the transform looks back to calculate the aggregations.
    */
   lookbackPeriod: z

@@ -161,9 +161,10 @@ export const getEnrichedDeprecations = async (
     })
     .map((deprecation) => {
       const correctiveAction = getCorrectiveAction(
+        deprecation.type,
         deprecation.message,
         deprecation.metadata as EsMetadata,
-        deprecation.index!
+        deprecation.index
       );
 
       // If we have found deprecation information for index/indices
