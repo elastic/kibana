@@ -307,7 +307,7 @@ const getTimeRangeDuration = ({
       const dateRangeDuration = moment.duration(dateEnd.diff(dateStart)).asHours();
       return {
         dateRangeDuration,
-        isDefaultDateRange: start === 'now' && end === 'now-24h',
+        isDefaultDateRange: end === 'now' && start === 'now-24h',
       };
     }
   }
