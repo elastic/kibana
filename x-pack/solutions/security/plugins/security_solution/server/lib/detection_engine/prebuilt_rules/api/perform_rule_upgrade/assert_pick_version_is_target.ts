@@ -29,10 +29,7 @@ export const assertPickVersionIsTarget = ({ requestBody, ruleId }: AssertRuleTyp
     pickVersions.push(rulePayload?.pick_version ?? requestBody.pick_version ?? 'MERGED');
 
     if (rulePayload?.fields) {
-      const fieldPickValues = Object.values(rulePayload?.fields).map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (field) => (field as any).pick_version
-      );
+      const fieldPickValues = Object.values(rulePayload?.fields).map((field) => field.pick_version);
       pickVersions.push(...fieldPickValues);
     }
   } else {
