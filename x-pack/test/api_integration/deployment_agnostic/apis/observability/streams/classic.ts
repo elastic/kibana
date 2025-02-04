@@ -53,6 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(classicStream).to.eql({
         name: TEST_STREAM_NAME,
         ingest: {
+          lifecycle: { inherit: {} },
           processing: [],
           routing: [],
           unwired: {},
@@ -70,6 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 routing: [],
                 processing: [
                   {
@@ -101,12 +103,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const body = asUnwiredStreamGetResponse(getResponse.body);
 
-      const { dashboards, stream, lifecycle, elasticsearch_assets: elasticsearchAssets } = body;
+      const {
+        dashboards,
+        stream,
+        effective_lifecycle: effectiveLifecycle,
+        elasticsearch_assets: elasticsearchAssets,
+      } = body;
 
       expect(dashboards).to.eql([]);
 
       expect(stream).to.eql({
+        name: TEST_STREAM_NAME,
         ingest: {
+          lifecycle: { inherit: {} },
           processing: [
             {
               grok: {
@@ -123,14 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      expect(lifecycle).to.eql(
-        isServerless
-          ? { type: 'dlm' }
-          : {
-              policy: 'logs',
-              type: 'ilm',
-            }
-      );
+      expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
 
       expect(elasticsearchAssets).to.eql([
         {
@@ -189,6 +191,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 processing: [],
                 routing: [],
                 unwired: {},

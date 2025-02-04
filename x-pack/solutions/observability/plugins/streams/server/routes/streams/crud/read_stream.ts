@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import {
-  IngestStreamGetResponse,
   InheritedFieldDefinition,
+  StreamGetResponse,
   WiredStreamGetResponse,
+  isGroupStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
@@ -19,6 +19,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
+import { findInheritedLifecycle } from '../../../lib/streams/helpers/lifecycle';
 
 export async function readStream({
   name,
@@ -30,37 +31,54 @@ export async function readStream({
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
-}): Promise<IngestStreamGetResponse> {
-  const [streamDefinition, dashboards, ancestors, dataStream] = await Promise.all([
+}): Promise<StreamGetResponse> {
+  const [streamDefinition, dashboards] = await Promise.all([
     streamsClient.getStream(name),
     assetClient.getAssetIds({
       entityId: name,
       entityType: 'stream',
       assetType: 'dashboard',
     }),
-    streamsClient.getAncestors(name),
-    streamsClient.getDataStream(name),
   ]);
 
-  const lifecycle = getDataStreamLifecycle(dataStream);
+  if (isGroupStreamDefinition(streamDefinition)) {
+    return {
+      stream: streamDefinition,
+      dashboards,
+    };
+  }
+
+  // These queries are only relavant for IngestStreams
+  const [ancestors, dataStream] = await Promise.all([
+    streamsClient.getAncestors(name),
+    streamsClient.getDataStream(name).catch((e) => {
+      if (e.statusCode === 404) {
+        return null;
+      }
+      throw e;
+    }),
+  ]);
 
   if (isUnwiredStreamDefinition(streamDefinition)) {
     return {
-      stream: omit(streamDefinition, 'name'),
-      elasticsearch_assets: await getUnmanagedElasticsearchAssets({
-        dataStream,
-        scopedClusterClient,
-      }),
-      lifecycle,
+      stream: streamDefinition,
+      elasticsearch_assets: dataStream
+        ? await getUnmanagedElasticsearchAssets({
+            dataStream,
+            scopedClusterClient,
+          })
+        : [],
+      data_stream_exists: !!dataStream,
+      effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       inherited_fields: {},
     };
   }
 
   const body: WiredStreamGetResponse = {
-    stream: omit(streamDefinition, 'name'),
+    stream: streamDefinition,
     dashboards,
-    lifecycle,
+    effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: ancestors.reduce((acc, def) => {
       Object.entries(def.ingest.wired.fields).forEach(([key, fieldDef]) => {
         acc[key] = { ...fieldDef, from: def.name };

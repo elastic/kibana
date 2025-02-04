@@ -777,7 +777,7 @@
         "tags": [],
         "label": "isSupportedConnector",
         "description": [
-          "\nChecks if a given connector is compatible for inference.\n\nA connector is compatible if:\n1. its type is in the list of allowed types\n2. for inference connectors, if its taskType is \"completion\""
+          "\nChecks if a given connector is compatible for inference.\n\nA connector is compatible if:\n1. its type is in the list of allowed types\n2. for inference connectors, if its taskType is \"chat_completion\""
         ],
         "signature": [
           "(connector: ",
@@ -1351,7 +1351,7 @@
               "\nconfiguration (without secrets) of the connector.\nthe list of properties depends on the connector type (and subtype for inference)"
             ],
             "signature": [
-              "{ [x: string]: string; }"
+              "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
             "deprecated": false,
@@ -1626,7 +1626,7 @@
             "tags": [],
             "label": "functionCalling",
             "description": [
-              "\nFunction calling mode, defaults to \"native\"."
+              "\nFunction calling mode, defaults to \"auto\"."
             ],
             "signature": [
               {
@@ -2017,6 +2017,20 @@
           "\nThe list of connector types that can be used with the inference APIs"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.InferenceEndpointProvider",
+        "type": "Enum",
+        "tags": [],
+        "label": "InferenceEndpointProvider",
+        "description": [
+          "\nConstants for relevant inference providers"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2803,10 +2817,10 @@
         "tags": [],
         "label": "FunctionCallingMode",
         "description": [
-          "\nDefine the function calling mode when using inference APIs.\n- native will use the LLM's native function calling (requires the LLM to have native support)\n- simulated: will emulate function calling with function calling instructions"
+          "\nDefine the function calling mode when using inference APIs.\n- \"native\": will use the LLM's native function calling (requires the LLM to have native support)\n- \"simulated\": will emulate function calling with function calling instructions\n- \"auto\": will use \"native\" for providers we know are supporting native function call, \"simulated\" otherwise"
         ],
         "signature": [
-          "\"native\" | \"simulated\""
+          "\"auto\" | \"native\" | \"simulated\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
         "deprecated": false,
@@ -3579,33 +3593,76 @@
         "description": [
           "\nConstants for all default (preconfigured) inference endpoints."
         ],
+        "signature": [
+          "{ readonly ELSER: \".elser-2-elasticsearch\"; readonly MULTILINGUAL_E5_SMALL: \".multilingual-e5-small-elasticsearch\"; }"
+        ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.elasticModelDictionary",
+        "type": "Object",
+        "tags": [],
+        "label": "elasticModelDictionary",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/const.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.defaultInferenceEndpoints.ELSER",
-            "type": "string",
+            "id": "def-common.elasticModelDictionary.rainbowsprinkles",
+            "type": "Object",
             "tags": [],
-            "label": "ELSER",
+            "label": "'rainbow-sprinkles'",
             "description": [],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/const.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL",
-            "type": "string",
-            "tags": [],
-            "label": "MULTILINGUAL_E5_SMALL",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.elasticModelDictionary.rainbowsprinkles.provider",
+                "type": "string",
+                "tags": [],
+                "label": "provider",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/const.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.elasticModelDictionary.rainbowsprinkles.model",
+                "type": "string",
+                "tags": [],
+                "label": "model",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/const.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.elasticModelIds",
+        "type": "Object",
+        "tags": [],
+        "label": "elasticModelIds",
+        "description": [],
+        "signature": [
+          "{ readonly RainbowSprinkles: \"rainbow-sprinkles\"; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

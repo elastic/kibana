@@ -24,8 +24,9 @@ spec:
         GITHUB_COMMIT_STATUS_CONTEXT: buildkite/on-merge
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.x 8.17 8.16 7.17
+      branch_configuration: main 9.0 8.x 8.18 8.17 8.16 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/on_merge.yml

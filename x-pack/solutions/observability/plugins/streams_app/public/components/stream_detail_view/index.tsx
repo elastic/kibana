@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { isUnwiredStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -36,7 +36,7 @@ export function StreamDetailView() {
     refresh,
     loading,
   } = useStreamsAppFetch(
-    ({ signal }) => {
+    async ({ signal }) => {
       return streamsRepositoryClient
         .fetch('GET /api/streams/{id}', {
           signal,
@@ -52,26 +52,28 @@ export function StreamDetailView() {
               dashboards: response.dashboards,
               inherited_fields: response.inherited_fields,
               elasticsearch_assets: [],
-              lifecycle: response.lifecycle,
+              effective_lifecycle: response.effective_lifecycle,
               name: key,
               stream: {
-                name: key,
                 ...response.stream,
               },
             };
           }
 
-          return {
-            dashboards: response.dashboards,
-            elasticsearch_assets: response.elasticsearch_assets,
-            inherited_fields: {},
-            lifecycle: response.lifecycle,
-            name: key,
-            stream: {
+          if (isUnwiredStreamGetResponse(response)) {
+            return {
+              dashboards: response.dashboards,
+              elasticsearch_assets: response.elasticsearch_assets,
+              inherited_fields: {},
+              effective_lifecycle: response.effective_lifecycle,
               name: key,
-              ...response.stream,
-            },
-          };
+              data_stream_exists: response.data_stream_exists,
+              stream: {
+                ...response.stream,
+              },
+            };
+          }
+          throw new Error('Stream detail only supports IngestStreams.');
         });
     },
     [streamsRepositoryClient, key]

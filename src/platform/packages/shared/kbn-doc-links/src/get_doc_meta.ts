@@ -19,7 +19,7 @@ export const getDocLinksMeta = ({
   buildFlavor,
 }: GetDocLinksMetaOptions): DocLinksMeta => {
   return {
-    version: kibanaBranch === 'main' ? 'master' : kibanaBranch,
+    version: kibanaBranch === 'main' ? 'current' : kibanaBranch,
     ecs_version: 'current',
     elasticWebsiteUrl: 'https://www.elastic.co/',
     elasticGithubUrl: 'https://github.com/elastic/',
