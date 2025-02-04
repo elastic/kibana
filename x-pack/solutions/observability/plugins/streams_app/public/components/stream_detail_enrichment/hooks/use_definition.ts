@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useBoolean } from '@kbn/react-hooks';
@@ -82,42 +82,46 @@ export const useDefinition = (
     [processors]
   );
 
-  const addProcessor = (newProcessor: ProcessorDefinition, newFields?: DetectedField[]) => {
-    setProcessors((prevProcs) =>
-      prevProcs.concat(processorConverter.toUIDefinition(newProcessor, { status: 'draft' }))
-    );
+  const addProcessor = useCallback(
+    (newProcessor: ProcessorDefinition, newFields?: DetectedField[]) => {
+      setProcessors((prevProcs) =>
+        prevProcs.concat(processorConverter.toUIDefinition(newProcessor, { status: 'draft' }))
+      );
 
-    if (isWiredStreamGetResponse(definition) && newFields) {
-      setFields((currentFields) => mergeFields(definition, currentFields, newFields));
-    }
-  };
+      if (isWiredStreamGetResponse(definition) && newFields) {
+        setFields((currentFields) => mergeFields(definition, currentFields, newFields));
+      }
+    },
+    [definition]
+  );
 
-  const updateProcessor = (
-    id: string,
-    processorUpdate: ProcessorDefinition,
-    status: ProcessorDefinitionWithUIAttributes['status'] = 'updated'
-  ) => {
-    setProcessors((prevProcs) =>
-      prevProcs.map((proc) =>
-        proc.id === id
-          ? {
-              ...processorUpdate,
-              id,
-              type: getProcessorType(processorUpdate),
-              status,
-            }
-          : proc
-      )
-    );
-  };
+  const updateProcessor = useCallback(
+    (
+      id: string,
+      processorUpdate: ProcessorDefinition,
+      status: ProcessorDefinitionWithUIAttributes['status'] = 'updated'
+    ) => {
+      setProcessors((prevProcs) =>
+        prevProcs.map((proc) =>
+          proc.id === id
+            ? {
+                ...processorUpdate,
+                id,
+                type: getProcessorType(processorUpdate),
+                status,
+              }
+            : proc
+        )
+      );
+    },
+    []
+  );
 
-  const reorderProcessors = (udpatedProcessors: ProcessorDefinitionWithUIAttributes[]) => {
-    setProcessors(udpatedProcessors);
-  };
+  const reorderProcessors = setProcessors;
 
-  const deleteProcessor = (id: string) => {
+  const deleteProcessor = useCallback((id: string) => {
     setProcessors((prevProcs) => prevProcs.filter((proc) => proc.id !== id));
-  };
+  }, []);
 
   const resetChanges = () => {
     const resetProcessors = createProcessorsList(existingProcessorDefinitions);

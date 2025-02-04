@@ -22,7 +22,7 @@ import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-sc
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
-import { useDefinition } from './hooks/use_definition';
+import { UseDefinitionReturn, useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
 import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 import { DraggableProcessorListItem } from './processors_list';
@@ -30,7 +30,12 @@ import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { AddProcessorPanel } from './processors';
 import { SimulationPlayground } from './simulation_playground';
-import { useProcessingSimulator } from './hooks/use_processing_simulator';
+import {
+  UseProcessingSimulatorReturn,
+  useProcessingSimulator,
+} from './hooks/use_processing_simulator';
+
+const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
 interface StreamDetailEnrichmentContentProps {
   definition: IngestStreamGetResponse;
@@ -65,13 +70,6 @@ export function StreamDetailEnrichmentContent({
     watchProcessor,
   } = useProcessingSimulator({ definition, processors });
 
-  const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
-      const items = euiDragDropReorder(processors, source.index, destination.index);
-      reorderProcessors(items);
-    }
-  };
-
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges || hasLiveChanges,
     history: appParams.history,
@@ -83,8 +81,6 @@ export function StreamDetailEnrichmentContent({
   if (isRootStreamDefinition(definition.stream)) {
     return <RootStreamEmptyPrompt />;
   }
-
-  const hasProcessors = !isEmpty(processors);
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
@@ -105,37 +101,15 @@ export function StreamDetailEnrichmentContent({
                 paddingSize="none"
                 css={verticalFlexCss}
               >
-                <ProcessorsHeader />
-                <EuiPanel
-                  paddingSize="m"
-                  hasShadow={false}
-                  borderRadius="none"
-                  css={css`
-                    overflow: auto;
-                  `}
-                >
-                  {hasProcessors && (
-                    <SortableList onDragItem={handlerItemDrag}>
-                      {processors.map((processor, idx) => (
-                        <DraggableProcessorListItem
-                          key={processor.id}
-                          idx={idx}
-                          definition={definition}
-                          processor={processor}
-                          onUpdateProcessor={updateProcessor}
-                          onDeleteProcessor={deleteProcessor}
-                          onWatchProcessor={watchProcessor}
-                        />
-                      ))}
-                    </SortableList>
-                  )}
-                  <AddProcessorPanel
-                    key={processors.length} // Used to force reset the inner form state once a new processor is added
-                    definition={definition}
-                    onAddProcessor={addProcessor}
-                    onWatchProcessor={watchProcessor}
-                  />
-                </EuiPanel>
+                <ProcessorsEditor
+                  definition={definition}
+                  processors={processors}
+                  onUpdateProcessor={updateProcessor}
+                  onDeleteProcessor={deleteProcessor}
+                  onWatchProcessor={watchProcessor}
+                  onAddProcessor={addProcessor}
+                  onReorderProcessor={reorderProcessors}
+                />
               </EuiResizablePanel>
 
               <EuiResizableButton indicator="border" accountForScrollbars="both" />
@@ -147,7 +121,7 @@ export function StreamDetailEnrichmentContent({
                 paddingSize="s"
                 css={verticalFlexCss}
               >
-                <SimulationPlayground
+                <MemoSimulationPlayground
                   definition={definition}
                   columns={tableColumns}
                   simulation={simulation}
@@ -172,35 +146,103 @@ export function StreamDetailEnrichmentContent({
   );
 }
 
-const ProcessorsHeader = () => {
-  const { euiTheme } = useEuiTheme();
+interface ProcessorsEditorProps {
+  definition: IngestStreamGetResponse;
+  processors: UseDefinitionReturn['processors'];
+  onAddProcessor: UseDefinitionReturn['addProcessor'];
+  onDeleteProcessor: UseDefinitionReturn['deleteProcessor'];
+  onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
+  onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
+  onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
+}
 
-  return (
-    <EuiPanel
-      paddingSize="m"
-      hasShadow={false}
-      borderRadius="none"
-      grow={false}
-      css={css`
-        z-index: ${euiTheme.levels.maskBelowHeader};
-        ${useEuiShadow('xs')};
-      `}
-    >
-      <EuiTitle size="xxs">
-        <h2>
-          {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.headingTitle', {
-            defaultMessage: 'Processors for field extraction',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiText component="p" size="xs">
-        {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle', {
-          defaultMessage: 'Drag and drop existing processors to update their execution order.',
-        })}
-      </EuiText>
-    </EuiPanel>
-  );
-};
+const ProcessorsEditor = React.memo(
+  ({
+    definition,
+    processors,
+    onAddProcessor,
+    onDeleteProcessor,
+    onReorderProcessor,
+    onUpdateProcessor,
+    onWatchProcessor,
+  }: ProcessorsEditorProps) => {
+    const { euiTheme } = useEuiTheme();
+
+    const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
+      if (source && destination) {
+        const items = euiDragDropReorder(processors, source.index, destination.index);
+        onReorderProcessor(items);
+      }
+    };
+
+    const hasProcessors = !isEmpty(processors);
+
+    return (
+      <>
+        <EuiPanel
+          paddingSize="m"
+          hasShadow={false}
+          borderRadius="none"
+          grow={false}
+          css={css`
+            z-index: ${euiTheme.levels.maskBelowHeader};
+            ${useEuiShadow('xs')};
+          `}
+        >
+          <EuiTitle size="xxs">
+            <h2>
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
+                {
+                  defaultMessage: 'Processors for field extraction',
+                }
+              )}
+            </h2>
+          </EuiTitle>
+          <EuiText component="p" size="xs">
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
+              {
+                defaultMessage:
+                  'Drag and drop existing processors to update their execution order.',
+              }
+            )}
+          </EuiText>
+        </EuiPanel>
+        <EuiPanel
+          paddingSize="m"
+          hasShadow={false}
+          borderRadius="none"
+          css={css`
+            overflow: auto;
+          `}
+        >
+          {hasProcessors && (
+            <SortableList onDragItem={handlerItemDrag}>
+              {processors.map((processor, idx) => (
+                <DraggableProcessorListItem
+                  key={processor.id}
+                  idx={idx}
+                  definition={definition}
+                  processor={processor}
+                  onDeleteProcessor={onDeleteProcessor}
+                  onUpdateProcessor={onUpdateProcessor}
+                  onWatchProcessor={onWatchProcessor}
+                />
+              ))}
+            </SortableList>
+          )}
+          <AddProcessorPanel
+            key={processors.length} // Used to force reset the inner form state once a new processor is added
+            definition={definition}
+            onAddProcessor={onAddProcessor}
+            onWatchProcessor={onWatchProcessor}
+          />
+        </EuiPanel>
+      </>
+    );
+  }
+);
 
 const verticalFlexCss = css`
   display: flex;

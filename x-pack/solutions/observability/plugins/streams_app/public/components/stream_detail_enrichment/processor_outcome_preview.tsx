@@ -23,15 +23,15 @@ import { isEmpty } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
-import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
+import { TableColumn, UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
 import { AssetImage } from '../asset_image';
 
 interface ProcessorOutcomePreviewProps {
   columns: TableColumn[];
-  isLoading: UseProcessingSimulatorReturnType['isLoading'];
-  simulation: UseProcessingSimulatorReturnType['simulation'];
-  samples: UseProcessingSimulatorReturnType['samples'];
-  onRefreshSamples: UseProcessingSimulatorReturnType['refreshSamples'];
+  isLoading: UseProcessingSimulatorReturn['isLoading'];
+  simulation: UseProcessingSimulatorReturn['simulation'];
+  samples: UseProcessingSimulatorReturn['samples'];
+  onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
 }
 
 export const ProcessorOutcomePreview = ({

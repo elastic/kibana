@@ -35,7 +35,7 @@ export interface UseProcessingSimulatorProps {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
-export interface UseProcessingSimulatorReturnType {
+export interface UseProcessingSimulatorReturn {
   hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
@@ -51,7 +51,7 @@ export interface UseProcessingSimulatorReturnType {
 export const useProcessingSimulator = ({
   definition,
   processors,
-}: UseProcessingSimulatorProps): UseProcessingSimulatorReturnType => {
+}: UseProcessingSimulatorProps): UseProcessingSimulatorReturn => {
   const { dependencies } = useKibana();
   const {
     data,
