@@ -194,6 +194,8 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     );
   }
 
+  private isReadOnlyRoleMapping = (record: RoleMapping) => record.metadata?._read_only;
+
   private renderTable = () => {
     const { roleMappings, selectedItems, loadState } = this.state;
 
@@ -283,7 +285,15 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               columns={this.getColumnConfig(deleteRoleMappingPrompt)}
               search={search}
               sorting={sorting}
-              selection={this.props.readOnly ? undefined : selection}
+              selection={
+                this.props.readOnly
+                  ? undefined
+                  : {
+                      selectable: (roleMapping: RoleMapping) =>
+                        !this.isReadOnlyRoleMapping(roleMapping),
+                      ...selection,
+                    }
+              }
               pagination={pagination}
               loading={loadState === 'loadingTable'}
               message={message}
@@ -386,6 +396,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             name: i18n.translate('xpack.security.management.roleMappings.actionCloneTooltip', {
               defaultMessage: 'Clone',
             }),
+            available: (roleMapping: RoleMapping) => !this.isReadOnlyRoleMapping(roleMapping),
             description: (record: RoleMapping) =>
               i18n.translate('xpack.security.management.roleMappings.actionCloneAriaLabel', {
                 defaultMessage: `Clone ''{name}''`,
@@ -406,6 +417,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             name: i18n.translate('xpack.security.management.roleMappings.actionDeleteTooltip', {
               defaultMessage: 'Delete',
             }),
+            available: (roleMapping: RoleMapping) => !this.isReadOnlyRoleMapping(roleMapping),
             description: (record: RoleMapping) =>
               i18n.translate('xpack.security.management.roleMappings.actionDeleteAriaLabel', {
                 defaultMessage: `Delete ''{name}''`,
@@ -422,6 +434,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             name: i18n.translate('xpack.security.management.roleMappings.actionEditTooltip', {
               defaultMessage: 'Edit',
             }),
+            available: (roleMapping: RoleMapping) => !this.isReadOnlyRoleMapping(roleMapping),
             description: (record: RoleMapping) =>
               i18n.translate('xpack.security.management.roleMappings.actionEditAriaLabel', {
                 defaultMessage: `Edit ''{name}''`,
