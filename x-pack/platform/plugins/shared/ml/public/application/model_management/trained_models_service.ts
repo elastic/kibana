@@ -247,7 +247,7 @@ export class TrainedModelsService {
   public getModel$(modelId: string): Observable<TrainedModelUIItem | undefined> {
     return this._modelItems$.pipe(
       map((items) => items.find((item) => item.model_id === modelId)),
-      distinctUntilChanged()
+      distinctUntilChanged(isEqual)
     );
   }
 
