@@ -8,10 +8,18 @@
 import { CoreStart } from '@kbn/core/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { useSearchApi } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
+import {
+  AggregateQuery,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+  onlyDisabledFiltersChanged,
+} from '@kbn/es-query';
+import { BehaviorSubject } from 'rxjs';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
 import {
@@ -26,6 +34,8 @@ import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { useGetAppContext } from './use_get_app_context';
 
 const { embeddable: strings } = RendererStrings;
+
+const children: Record<string, { setFilters: (filters: Filter[] | undefined) => void }> = {};
 
 const renderReactEmbeddable = ({
   type,
@@ -45,7 +55,11 @@ const renderReactEmbeddable = ({
   // wrap in functional component to allow usage of hooks
   const RendererWrapper: FC<{}> = () => {
     const getAppContext = useGetAppContext(core);
-    const searchApi = useSearchApi({ filters: input.filters });
+
+    const filters$ = useMemo(() => {
+      return new BehaviorSubject<Filter[] | undefined>(input.filters);
+      // filters, query, timeRange only used as initial values. Changes do not effect memoized value
+    }, []);
 
     return (
       <ReactEmbeddableRenderer
@@ -57,7 +71,9 @@ const renderReactEmbeddable = ({
           getSerializedStateForChild: () => ({
             rawState: omit(input, ['disableTriggers', 'filters']),
           }),
-          ...searchApi,
+          filters$,
+          query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+          timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
         })}
         key={`${type}_${uuid}`}
         onAnyStateChange={(newState) => {
@@ -68,6 +84,22 @@ const renderReactEmbeddable = ({
             true
           );
           if (newExpression) handlers.onEmbeddableInputChange(newExpression);
+        }}
+        onApiAvailable={(api) => {
+          children[uuid] = {
+            ...api,
+            setFilters: (filters: Filter[] | undefined) => {
+              if (
+                !onlyDisabledFiltersChanged(filters$.getValue(), filters, {
+                  ...COMPARE_ALL_OPTIONS,
+                  // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
+                  state: false,
+                })
+              ) {
+                filters$.next(filters);
+              }
+            },
+          };
         }}
       />
     );
@@ -95,24 +127,30 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
-      const uniqueId = handlers.getElementId();
-      ReactDOM.render(
-        renderReactEmbeddable({
-          input,
-          handlers,
-          uuid: uniqueId,
-          type: embeddableType,
-          container: canvasApi,
-          core,
-        }),
-        domNode,
-        () => handlers.done()
-      );
+      const uuid = handlers.getElementId();
+      const api = children[uuid];
+      if (!api) {
+        ReactDOM.render(
+          renderReactEmbeddable({
+            input,
+            handlers,
+            uuid,
+            type: embeddableType,
+            container: canvasApi,
+            core,
+          }),
+          domNode,
+          () => handlers.done()
+        );
 
-      handlers.onDestroy(() => {
-        handlers.onEmbeddableDestroyed();
-        return ReactDOM.unmountComponentAtNode(domNode);
-      });
+        handlers.onDestroy(() => {
+          delete children[uuid];
+          handlers.onEmbeddableDestroyed();
+          return ReactDOM.unmountComponentAtNode(domNode);
+        });
+      } else {
+        api.setFilters(input.filters);
+      }
     },
   });
 };
