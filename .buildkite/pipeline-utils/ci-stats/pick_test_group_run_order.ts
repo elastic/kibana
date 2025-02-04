@@ -260,7 +260,7 @@ export async function pickTestGroupRunOrder() {
   //       .filter(Boolean)
   //   : ['unit', 'integration', 'functional'];
 
-  const LIMIT_CONFIG_TYPE = ['functional']
+  const LIMIT_CONFIG_TYPE = ['functional'];
 
   const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
     ? process.env.FTR_CONFIG_PATTERNS.split(',')
