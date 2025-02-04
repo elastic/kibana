@@ -43,8 +43,7 @@ export async function openSloConfiguration(
               value={{
                 observabilityRuleTypeRegistry:
                   pluginsStart.observability.observabilityRuleTypeRegistry,
-                ObservabilityPageTemplate:
-                  pluginsStart.observabilityShared.navigation.PageTemplate,
+                ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
                 sloClient,
               }}
             >
