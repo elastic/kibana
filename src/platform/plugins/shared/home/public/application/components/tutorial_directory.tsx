@@ -256,7 +256,7 @@ class TutorialDirectoryUi extends React.Component<
     const tabs = this.getTabs();
 
     return (
-      <div style={{ border: '10px solid blue' }}>
+      <div style={{ border: '3px solid blue' }}>
         <KibanaPageTemplate
           restrictWidth={1200}
           pageHeader={{

@@ -16,10 +16,10 @@ import { getServices } from '../../kibana_services';
 
 interface InstructionProps {
   commands?: string[];
-  paramValues: string;
+  paramValues: { [key: string]: string | number };
   textPost?: string;
   textPre?: string;
-  replaceTemplateStrings: (text: string, paramValues?: string) => string;
+  replaceTemplateStrings: (text: string, paramValues?: InstructionProps['paramValues']) => string;
   customComponentName?: string;
   variantId: keyof typeof INSTRUCTION_VARIANT; // it feels more typesafe, but can be too specific if someone adds another variant in the future;
   isCloudEnabled: boolean;
@@ -60,7 +60,7 @@ export function Instruction({
   // Memoize the custom component so it wont rerender everytime
   const LazyCustomComponent = useMemo(() => {
     if (customComponent) {
-      return React.lazy(() => customComponent()); // need to fix. can't figure out what is wrong when i am refactoring it following the manner in other places. to add {default: component}
+      return React.lazy(() => customComponent()); // need to fix. can't figure out how... the code is working with this error
     }
   }, [customComponent]);
 

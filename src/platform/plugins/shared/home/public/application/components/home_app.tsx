@@ -88,15 +88,17 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
             </Route>
           )}
           <Route exact path="/">
-            <Home
-              addBasePath={addBasePath}
-              directories={directories}
-              solutions={solutions}
-              localStorage={localStorage}
-              urlBasePath={getBasePath()}
-              hasUserDataView={() => dataViewsService.hasUserDataView()}
-              isCloudEnabled={isCloudEnabled}
-            />
+            <div style={{ border: '3px solid green' }}>
+              <Home
+                addBasePath={addBasePath}
+                directories={directories}
+                solutions={solutions}
+                localStorage={localStorage}
+                urlBasePath={getBasePath()}
+                hasUserDataView={() => dataViewsService.hasUserDataView()}
+                isCloudEnabled={isCloudEnabled}
+              />
+            </div>
           </Route>
           <Redirect to="/" />
         </Routes>

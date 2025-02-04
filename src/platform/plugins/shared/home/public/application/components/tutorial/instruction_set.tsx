@@ -23,67 +23,70 @@ import {
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
 import { Instruction } from './instruction';
-import { ParameterForm } from './parameter_form';
+import { ParameterForm, ParameterFormParam } from './parameter_form';
 import { Content } from './content';
 import { INSTRUCTION_VARIANT, getDisplayText } from '../../..';
 import * as StatusCheckStates from './status_check_states';
 
 interface InstructionShape {
   title: string;
-  textPre?: string;
-  commands: string[];
+  commands?: string[];
+  customComponentName?: string;
   textPost?: string;
-  customComponentName?: string; // ? should it be optional?
+  textPre?: string;
 }
-
+interface InstructionStep {
+  key: number | string;
+  title: string;
+  children: React.JSX.Element;
+  status?: 'incomplete' | 'complete' | 'warning' | 'danger';
+}
 export interface InstructionVariantShape {
   id: keyof typeof INSTRUCTION_VARIANT; // it feels more typesafe, but can be too specific if someone adds another variant in the future
   instructions: InstructionShape[];
-  initialSelected: boolean;
+  initialSelected?: boolean;
 }
 
 export interface StatusCheckConfigShape {
+  // using inside tutorial.tsx
   success: string;
   error: string;
   title: string;
   text: string;
   btnLabel: string;
-  customStatusCheck: string;
+  // customStatusCheck: string;
 }
 
-export interface InstructionSetProps {
-  // not sure if i should export props
+interface InstructionSetProps {
   title: string;
-  // callOut: {
-  //   iconType: string;
-  //   message: string;
-  //   title: string;
-  // }; // ?
+  callOut?: {
+    iconType: string;
+    message: string;
+    title: string;
+  }; // ?
   instructionVariants: InstructionVariantShape[];
-  // statusCheckConfig: StatusCheckConfigShape;
+  statusCheckConfig: StatusCheckConfigShape;
   statusCheckState: keyof typeof StatusCheckStates;
   onStatusCheck: () => void;
   offset: number;
-  // params: unknown; // type
-  paramValues: object; // ?
-  // setParameter: (paramId: string, newValue: string) => void;
+  params: ParameterFormParam[];
+  paramValues: { [key: string]: string | number }; // ?
+  setParameter: (paramId: string, newValue: string) => void;
   replaceTemplateStrings: (text: string) => string;
   isCloudEnabled: boolean;
-  intl?: InjectedIntl;
+  intl: InjectedIntl;
 }
-interface InstructionState {
+interface InstructionSetState {
   selectedTabId: string;
   isParamFormVisible: boolean;
-  tabs?: Tab[]; // ?
 }
-interface Tab {
+interface InstructionSetTab {
   id: string;
   name: string;
-  initialSelected: boolean;
+  initialSelected?: boolean;
 }
-class InstructionSetUi extends React.Component<InstructionSetProps | any> {
-  tabs: Tab[];
-  state: InstructionState;
+class InstructionSetUi extends React.Component<InstructionSetProps, InstructionSetState> {
+  tabs: InstructionSetTab[];
 
   constructor(props: InstructionSetProps) {
     super(props);
@@ -99,7 +102,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps | any> {
     }));
   }
 
-  initializeState(tabs: Tab[]) {
+  initializeState(tabs: InstructionSetTab[]) {
     const initialState = {
       isParamFormVisible: false,
       selectedTabId:
@@ -111,7 +114,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps | any> {
     return initialState;
   }
   handleToggleVisibility = () => {
-    this.setState((prevState: InstructionState) => ({
+    this.setState((prevState: InstructionSetState) => ({
       isParamFormVisible: !prevState.isParamFormVisible, // can remove !
     }));
   };
@@ -165,11 +168,14 @@ class InstructionSetUi extends React.Component<InstructionSetProps | any> {
       <>
         <EuiSpacer size="s" />
         <EuiCallOut title={message} color={color} />
+        {/* check above for colour? removing state testing inside tutorial.test */}
       </>
     );
   }
 
-  getStepStatus(statusCheckState: InstructionSetProps['statusCheckState']) {
+  getStepStatus(
+    statusCheckState: InstructionSetProps['statusCheckState']
+  ): InstructionStep['status'] {
     switch (statusCheckState) {
       case undefined:
       case StatusCheckStates.NOT_CHECKED:
@@ -240,8 +246,8 @@ class InstructionSetUi extends React.Component<InstructionSetProps | any> {
       return;
     }
 
-    const steps = instructionVariant.instructions.map(
-      (instruction: InstructionShape, index: string) => {
+    const steps: InstructionStep[] = instructionVariant.instructions.map(
+      (instruction: InstructionShape, index: number) => {
         const step = (
           <Instruction
             commands={instruction.commands}
