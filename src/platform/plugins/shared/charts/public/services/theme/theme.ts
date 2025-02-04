@@ -103,21 +103,8 @@ export class ThemeService {
    */
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
-    this.theme$.subscribe((newTheme) => {
-      this._chartsBaseTheme$.next(getChartTheme(newTheme));
+    this.theme$.subscribe(({ darkMode }) => {
+      this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
     });
   }
-}
-
-// TODO: define these overrides in elastic/charts when Borealis becomes default
-function getChartTheme(theme: CoreTheme): Theme {
-  const chartTheme = theme.darkMode ? DARK_THEME : LIGHT_THEME;
-
-  if (theme.name !== 'amsterdam') {
-    const backgroundColor = euiThemeVars.euiColorEmptyShade;
-    chartTheme.background.color = backgroundColor;
-    chartTheme.background.fallbackColor = backgroundColor;
-  }
-
-  return chartTheme;
 }
