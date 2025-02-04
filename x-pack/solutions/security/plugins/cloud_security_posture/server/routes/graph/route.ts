@@ -11,6 +11,7 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph/latest';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING } from '@kbn/management-settings-ids';
 import { GRAPH_ROUTE_PATH } from '../../../common/constants';
 import { CspRequestHandlerContext, CspRouter } from '../../types';
 import { getGraph as getGraphV1 } from './v1';
@@ -45,6 +46,15 @@ export const defineGraphRoute = (router: CspRouter) =>
         const { nodesLimit, showUnknownTarget = false } = request.body;
         const { originEventIds, start, end, esQuery } = request.body.query as GraphRequest['query'];
         const spaceId = (await cspContext.spaces?.spacesService?.getActiveSpace(request))?.id;
+        const isGraphEnabled = await (
+          await context.core
+        ).uiSettings.client.get(SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING);
+
+        cspContext.logger.debug(`isGraphEnabled: ${isGraphEnabled}`);
+
+        if (!isGraphEnabled) {
+          return response.notFound();
+        }
 
         try {
           const resp = await getGraphV1({

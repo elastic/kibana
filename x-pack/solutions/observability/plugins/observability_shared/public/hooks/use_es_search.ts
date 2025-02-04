@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -110,6 +110,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
           });
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...fnDeps]);
 
   const { rawResponse } = response as any;
