@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
@@ -20,6 +20,7 @@ import {
   BUTTON_TEST_SUBJ,
   INPUT_TEST_SUBJ,
 } from './constants';
+import { getHighlightColors } from './get_highlight_colors';
 
 const innerCss = css`
   .dataGridInTableSearch__matchesCounter {
@@ -67,6 +68,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   ...props
 }) => {
   const { euiTheme } = useEuiTheme();
+  const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
@@ -87,12 +89,12 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             pointer-events: none;
             position: absolute;
             inset: 0;
-            border: 2px solid ${euiTheme.colors.borderStrongAccent} !important;
+            border: 2px solid ${colors.activeHighlightBorderColor} !important;
             border-radius: 3px;
           }
           .${HIGHLIGHT_CLASS_NAME}[${CELL_MATCH_INDEX_ATTRIBUTE}='${matchIndexWithinCell}'] {
-            color: ${euiTheme.colors.textInverse} !important;
-            background-color: ${euiTheme.colors.backgroundFilledAccent} !important;
+            color: ${colors.activeHighlightColor} !important;
+            background-color: ${colors.activeHighlightBackgroundColor} !important;
           }
         }
       `);
@@ -106,14 +108,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         align: 'center',
       });
     },
-    [
-      getColumnIndexFromId,
-      scrollToCell,
-      onChangeCss,
-      onChangeToExpectedPage,
-      pageSize,
-      euiTheme.colors,
-    ]
+    [getColumnIndexFromId, scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize, colors]
   );
 
   const {

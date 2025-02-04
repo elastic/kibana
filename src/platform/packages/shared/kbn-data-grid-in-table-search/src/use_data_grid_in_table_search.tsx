@@ -13,6 +13,7 @@ import { EuiDataGridProps, EuiDataGridRefProps, useEuiTheme } from '@elastic/eui
 import { InTableSearchControl, InTableSearchControlProps } from './in_table_search_control';
 import { RenderCellValueWrapper } from './types';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
+import { getHighlightColors } from './get_highlight_colors';
 
 export interface UseDataGridInTableSearchProps
   extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
@@ -56,15 +57,15 @@ export const useDataGridInTableSearch = (
   const pageIndexRef = useRef<number>();
   pageIndexRef.current = pagination?.pageIndex ?? 0;
 
-  const renderCellValueWithInTableSearchSupport = useMemo(
-    () =>
-      wrapRenderCellValueWithInTableSearchSupport(
-        renderCellValue,
-        euiTheme.colors.textAccent,
-        euiTheme.colors.backgroundLightAccent
-      ),
-    [renderCellValue, euiTheme.colors]
-  );
+  const renderCellValueWithInTableSearchSupport = useMemo(() => {
+    const colors = getHighlightColors(euiTheme);
+
+    return wrapRenderCellValueWithInTableSearchSupport(
+      renderCellValue,
+      colors.highlightColor,
+      colors.highlightBackgroundColor
+    );
+  }, [renderCellValue, euiTheme]);
 
   const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] =
     useState<UseDataGridInTableSearchState>(() => ({ inTableSearchTerm: '' }));
