@@ -116,7 +116,7 @@ export function createAggregators({
       createEphemeralTaskAggregator(
         ephemeralTaskLifecycle,
         config.monitored_stats_running_average_window,
-        managedConfig.startingCapacity
+        startingCapacity
       )
     );
   }
