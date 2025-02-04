@@ -63,9 +63,10 @@ export const createSettingsApplicationServicesMock = (
   subscribeToUpdates: () => new Subscription(),
   addUrlToHistory: jest.fn(),
   getToastsService: jest.fn(),
-  getActiveSpace: () => Promise.resolve({
-    solution: spaceSolution,
-  }),
+  getActiveSpace: () =>
+    Promise.resolve({
+      solution: spaceSolution,
+    }),
 });
 
 export const TestWrapper = ({
