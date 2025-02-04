@@ -11,6 +11,8 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_TEST_PLUGIN_PATH,
+  IDP_METADATA_PATHS,
 } from '@kbn/mock-idp-utils';
 import {
   fleetPackageRegistryDockerImage,
@@ -61,15 +63,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
-    // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
-    const idpPath = require.resolve(
-      '@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml'
-    );
-    const samlIdPPlugin = path.resolve(
-      __dirname,
-      '../../../security_api_integration/plugins/saml_provider'
-    );
-
     const servers = {
       kibana: {
         ...kbnTestConfig.getUrlParts(systemIndicesSuperuser),
@@ -112,7 +105,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
           'xpack.security.authc.token.enabled=true',
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${idpPath}`,
+          // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${IDP_METADATA_PATHS.default}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,
@@ -135,7 +129,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
-          `--plugin-path=${samlIdPPlugin}`,
+          `--plugin-path=${MOCK_IDP_TEST_PLUGIN_PATH}`,
           '--xpack.cloud.id=ftr_fake_cloud_id',
           // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
           // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login

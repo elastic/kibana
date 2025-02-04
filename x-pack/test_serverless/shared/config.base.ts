@@ -18,7 +18,11 @@ import {
 } from '@kbn/test';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+import {
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_TEST_PLUGIN_PATH,
+  IDP_METADATA_PATHS,
+} from '@kbn/mock-idp-utils';
 import path from 'path';
 import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import { services } from './services';
@@ -48,16 +52,6 @@ export default async () => {
     },
   };
 
-  // "Fake" SAML provider
-  const idpPath = resolve(
-    __dirname,
-    '../../test/security_api_integration/plugins/saml_provider/metadata.xml'
-  );
-  const samlIdPPlugin = resolve(
-    __dirname,
-    '../../test/security_api_integration/plugins/saml_provider'
-  );
-
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
   return {
@@ -78,7 +72,7 @@ export default async () => {
     },
     esTestCluster: {
       from: 'serverless',
-      files: [idpPath, jwksPath],
+      files: [IDP_METADATA_PATHS.default, jwksPath],
       serverArgs: [
         'xpack.security.authc.realms.file.file1.order=-100',
         `xpack.security.authc.realms.native.native1.enabled=false`,
@@ -155,7 +149,7 @@ export default async () => {
         })}`,
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
-        `--plugin-path=${samlIdPPlugin}`,
+        `--plugin-path=${MOCK_IDP_TEST_PLUGIN_PATH}`,
         // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
         // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
         // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
