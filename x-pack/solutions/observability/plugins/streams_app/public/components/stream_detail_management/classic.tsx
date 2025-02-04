@@ -74,7 +74,7 @@ export function ClassicStreamDetailManagement({
     tabs.lifecycle = {
       content: (
         <StreamDetailLifecycle
-          definition={legacyDefinition}
+          definition={definition}
           refreshDefinition={refreshDefinition}
         />
       ),

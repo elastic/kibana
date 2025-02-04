@@ -85,7 +85,7 @@ export function WiredStreamDetailManagement({
     lifecycle: {
       content: (
         <StreamDetailLifecycle
-          definition={legacyDefinition}
+          definition={definition}
           refreshDefinition={refreshDefinition}
         />
       ),
