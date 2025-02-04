@@ -491,7 +491,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...httpMonitorJson,
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
-        locations: [privateLocation.id],
+        private_locations: [privateLocation.id],
       };
 
       try {
@@ -499,8 +499,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send(monitor)
-          .expect(200);
+          .send(monitor);
+
+        expect(apiResponse.status).eql(200, JSON.stringify(apiResponse.body));
+
         monitorId = apiResponse.body.id;
 
         const policyResponse = await supertestWithAuth.get(
