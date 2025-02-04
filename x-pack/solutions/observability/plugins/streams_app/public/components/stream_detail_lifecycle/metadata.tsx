@@ -127,7 +127,7 @@ export function RetentionMetadata({
   ) : null;
 
   const lifecycleOrigin = isInheritLifecycle(definition.stream.ingest.lifecycle) ? (
-    <>
+    <EuiText>
       {i18n.translate('xpack.streams.streamDetailLifecycle.inheritedFrom', {
         defaultMessage: 'Inherited from',
       })}{' '}
@@ -135,11 +135,10 @@ export function RetentionMetadata({
         <EuiLink
           data-test-subj="streamsAppRetentionMetadataLink"
           target="_blank"
-          href={router.link('/{key}/{tab}/{subtab}', {
+          href={router.link('/{key}/{tab}', {
             path: {
               key: definition.effective_lifecycle.from,
-              tab: 'management',
-              subtab: 'lifecycle',
+              tab: 'overview',
             },
           })}
         >
@@ -150,7 +149,7 @@ export function RetentionMetadata({
           defaultMessage: 'the underlying data stream',
         })
       )}
-    </>
+    </EuiText>
   ) : (
     i18n.translate('xpack.streams.streamDetailLifecycle.localOverride', {
       defaultMessage: 'Local override',

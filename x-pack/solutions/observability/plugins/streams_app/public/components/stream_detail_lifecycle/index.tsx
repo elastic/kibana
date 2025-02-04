@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   IngestStreamLifecycle,
   IngestUpsertRequest,
@@ -37,12 +37,9 @@ function useLifecycleState({
 }) {
   const [updateInProgress, setUpdateInProgress] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(LifecycleEditAction.None);
-  const [lifecycleActions, setLifecycleActions] = useState<
-    Array<{ name: string; action: LifecycleEditAction }>
-  >([]);
 
-  useEffect(() => {
-    if (!definition) return;
+  const lifecycleActions = useMemo(() => {
+    if (!definition) return [];
 
     const actions = [];
 
@@ -67,7 +64,10 @@ function useLifecycleState({
       });
     }
 
-    if (!isRoot(definition.stream.name)) {
+    if (
+      !isRoot(definition.stream.name) ||
+      (isUnWiredStreamGetResponse(definition) && !isIlmLifecycle(definition.effective_lifecycle))
+    ) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',
@@ -76,7 +76,7 @@ function useLifecycleState({
       });
     }
 
-    setLifecycleActions(actions);
+    return actions;
   }, [definition, isServerless]);
 
   return {

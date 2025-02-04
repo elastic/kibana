@@ -342,10 +342,15 @@ function InheritModal({ definition, closeModal, updateInProgress, updateLifecycl
       </EuiModalHeader>
 
       <EuiModalBody>
-        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleWiredDesc', {
-          defaultMessage:
-            'All custom retention settings for this stream will be removed, resetting it to inherit data retention from its nearest parent.',
-        })}
+        {isWiredStreamGetResponse(definition)
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleWiredDesc', {
+              defaultMessage:
+                'All custom retention settings for this stream will be removed, resetting it to inherit data retention from its nearest parent.',
+            })
+          : i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleUnwiredDesc', {
+              defaultMessage:
+                'All custom retention settings for this stream will be removed, resetting it to use the configuration of the data stream.',
+            })}
         <EuiSpacer />
       </EuiModalBody>
 
