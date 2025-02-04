@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import { Error } from '../../shared_imports';
 
-import { pageObjects } from './page_objects';
-import { services } from './services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export const getErrorText = (error: Error) => {
+  return error.message && error.message !== '{}' ? error.message : error.error;
+};
