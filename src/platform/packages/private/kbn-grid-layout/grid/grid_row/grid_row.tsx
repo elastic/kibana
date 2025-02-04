@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -155,6 +155,12 @@ export const GridRow = ({
     );
   }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex]);
 
+  const toggleIsCollapsed = useCallback(() => {
+    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+    newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+    gridLayoutStateManager.gridLayout$.next(newLayout);
+  }, [rowIndex, gridLayoutStateManager.gridLayout$]);
+
   return (
     <div
       id={`kbnGridLayoutRow--${rowIndex}`}
@@ -167,11 +173,7 @@ export const GridRow = ({
         <GridRowHeader
           rowIndex={rowIndex}
           gridLayoutStateManager={gridLayoutStateManager}
-          toggleIsCollapsed={() => {
-            const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-            newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
-            gridLayoutStateManager.gridLayout$.next(newLayout);
-          }}
+          toggleIsCollapsed={toggleIsCollapsed}
         />
       )}
       {!isCollapsed && (

@@ -14,92 +14,94 @@ import { EuiButtonIcon, EuiFlexItem, EuiInlineEditTitle, EuiLink, EuiTitle } fro
 
 import { GridLayoutStateManager } from '../types';
 
-export const GridRowTitle = ({
-  readOnly,
-  rowIndex,
-  editTitleOpen,
-  setEditTitleOpen,
-  toggleIsCollapsed,
-  gridLayoutStateManager,
-}: {
-  readOnly: boolean;
-  rowIndex: number;
-  editTitleOpen: boolean;
-  setEditTitleOpen: (value: boolean) => void;
-  toggleIsCollapsed: () => void;
-  gridLayoutStateManager: GridLayoutStateManager;
-}) => {
-  const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
-  const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
+export const GridRowTitle = React.memo(
+  ({
+    readOnly,
+    rowIndex,
+    editTitleOpen,
+    setEditTitleOpen,
+    toggleIsCollapsed,
+    gridLayoutStateManager,
+  }: {
+    readOnly: boolean;
+    rowIndex: number;
+    editTitleOpen: boolean;
+    setEditTitleOpen: (value: boolean) => void;
+    toggleIsCollapsed: () => void;
+    gridLayoutStateManager: GridLayoutStateManager;
+  }) => {
+    const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
+    const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
 
-  useEffect(() => {
-    const titleSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(
-        map((gridLayout) => gridLayout[rowIndex]?.title ?? ''),
-        distinctUntilChanged()
-      )
-      .subscribe((title) => {
-        setRowTitle(title);
-      });
+    useEffect(() => {
+      const titleSubscription = gridLayoutStateManager.gridLayout$
+        .pipe(
+          map((gridLayout) => gridLayout[rowIndex]?.title ?? ''),
+          distinctUntilChanged()
+        )
+        .subscribe((title) => {
+          setRowTitle(title);
+        });
 
-    return () => {
-      titleSubscription.unsubscribe();
-    };
-  }, [rowIndex, gridLayoutStateManager]);
+      return () => {
+        titleSubscription.unsubscribe();
+      };
+    }, [rowIndex, gridLayoutStateManager]);
 
-  const updateTitle = useCallback(
-    (title: string) => {
-      const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.getValue());
-      newLayout[rowIndex].title = title;
-      gridLayoutStateManager.gridLayout$.next(newLayout);
-      setEditTitleOpen(false);
-    },
-    [rowIndex, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
-  );
+    const updateTitle = useCallback(
+      (title: string) => {
+        const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.getValue());
+        newLayout[rowIndex].title = title;
+        gridLayoutStateManager.gridLayout$.next(newLayout);
+        setEditTitleOpen(false);
+      },
+      [rowIndex, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
+    );
 
-  useEffect(() => {
-    if (!editTitleOpen) return;
-  }, [editTitleOpen]);
+    useEffect(() => {
+      if (!editTitleOpen) return;
+    }, [editTitleOpen]);
 
-  return (
-    <>
-      {!readOnly && editTitleOpen ? (
-        <EuiFlexItem grow={true}>
-          {/* @ts-ignore -  */}
-          <EuiInlineEditTitle
-            size="xs"
-            heading="h2"
-            value={rowTitle}
-            onCancel={() => setEditTitleOpen(false)}
-            onSave={updateTitle}
-            editModeProps={{
-              cancelButtonProps: { onClick: () => setEditTitleOpen(false) },
-              formRowProps: { className: 'editModeFormRow ' },
-            }}
-            startWithEditOpen
-            inputAriaLabel="Edit title inline"
-          />
-        </EuiFlexItem>
-      ) : (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={toggleIsCollapsed}>
-              <EuiTitle size="xs">
-                <h2>{rowTitle}</h2>
-              </EuiTitle>
-            </EuiLink>
+    return (
+      <>
+        {!readOnly && editTitleOpen ? (
+          <EuiFlexItem grow={true}>
+            {/* @ts-ignore - EUI typing issue that will be resolved with https://github.com/elastic/eui/pull/8307 */}
+            <EuiInlineEditTitle
+              size="xs"
+              heading="h2"
+              defaultValue={rowTitle}
+              onCancel={() => setEditTitleOpen(false)}
+              onSave={updateTitle}
+              editModeProps={{
+                cancelButtonProps: { onClick: () => setEditTitleOpen(false) },
+                formRowProps: { className: 'editModeFormRow ' },
+              }}
+              startWithEditOpen
+              inputAriaLabel="Edit title inline"
+            />
           </EuiFlexItem>
-          {!readOnly && (
+        ) : (
+          <>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="pencil"
-                onClick={() => setEditTitleOpen(true)}
-                color="text"
-              />
+              <EuiLink onClick={toggleIsCollapsed}>
+                <EuiTitle size="xs">
+                  <h2>{rowTitle}</h2>
+                </EuiTitle>
+              </EuiLink>
             </EuiFlexItem>
-          )}
-        </>
-      )}
-    </>
-  );
-};
+            {!readOnly && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="pencil"
+                  onClick={() => setEditTitleOpen(true)}
+                  color="text"
+                />
+              </EuiFlexItem>
+            )}
+          </>
+        )}
+      </>
+    );
+  }
+);
