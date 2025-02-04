@@ -53,6 +53,7 @@ export class ApmSynthtraceKibanaClient {
         );
       }
 
+      // Add support for 7.x stack as latest version is available under different node
       if (responseJson.response && responseJson.response.latestVersion) {
         return responseJson.response.latestVersion as string;
       }
