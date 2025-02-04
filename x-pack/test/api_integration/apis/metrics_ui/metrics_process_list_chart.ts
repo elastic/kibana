@@ -18,7 +18,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('API /metrics/process_list/chart', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes'));
+    before(() =>
+      esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes')
+    );
     after(() =>
       esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes')
     );
