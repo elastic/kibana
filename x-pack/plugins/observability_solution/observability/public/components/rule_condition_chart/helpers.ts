@@ -15,16 +15,16 @@ export interface LensOperation {
 }
 
 export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOperation => {
-  const { aggType, field, filter } = metric;
+  const { aggType, field, filter = '' } = metric;
   let operation: string = aggType;
   const operationArgs: string[] = [];
-  const aggFilter = JSON.stringify(filter || '').replace(/"|\\/g, '');
+  const escapedFilter = filter.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   if (aggType === Aggregators.RATE) {
     return {
       operation: 'counter_rate',
-      operationWithField: `counter_rate(max(${field}), kql='${aggFilter}')`,
-      sourceField: field || '',
+      operationWithField: `counter_rate(max("${field}"), kql='${escapedFilter}')`,
+      sourceField: `"${field}"` || '',
     };
   }
 
@@ -34,7 +34,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   if (aggType === Aggregators.COUNT) operation = 'count';
 
   if (field) {
-    operationArgs.push(field);
+    operationArgs.push(`"${field}"`);
   }
 
   if (aggType === Aggregators.P95) {
@@ -45,12 +45,11 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
     operationArgs.push('percentile=99');
   }
 
-  if (aggFilter) operationArgs.push(`kql='${aggFilter}'`);
-
+  if (escapedFilter) operationArgs.push(`kql='${escapedFilter}'`);
   return {
     operation,
     operationWithField: `${operation}(${operationArgs.join(', ')})`,
-    sourceField: field || '',
+    sourceField: `"${field}"` || '',
   };
 };
 
