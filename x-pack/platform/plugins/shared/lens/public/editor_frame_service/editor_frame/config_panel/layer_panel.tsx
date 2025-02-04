@@ -433,7 +433,7 @@ export function LayerPanel(props: LayerPanelProps) {
       const activeData: Record<string, Datatable> = {};
       const adaptersTables = previousAdapters.current?.tables?.tables;
       const [table] = Object.values(adaptersTables || {});
-      if (table) {
+      if (table && layers) {
         // there are cases where a query can return a big amount of columns
         // at this case we don't suggest all columns in a table but the first
         // MAX_NUM_OF_COLUMNS
