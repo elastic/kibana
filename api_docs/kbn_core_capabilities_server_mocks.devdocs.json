@@ -28,7 +28,7 @@
           "CapabilitiesSetup",
           "; preboot: (prebootDeps: PrebootSetupDeps) => void; }"
         ],
-        "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
+        "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -42,7 +42,7 @@
         "tags": [],
         "label": "capabilitiesServiceMock",
         "description": [],
-        "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
+        "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,16 +55,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-capabilities-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreCapabilitiesServerMocksPluginApi",
-                "section": "def-server.CapabilitiesServiceContract",
-                "text": "CapabilitiesServiceContract"
-              },
+              "CapabilitiesServiceContract",
               ">"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
+            "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -82,7 +76,7 @@
               "CapabilitiesSetup",
               ">"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
+            "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -100,7 +94,7 @@
               "CapabilitiesStart",
               ">"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
+            "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -117,7 +111,7 @@
               "() => ",
               "Capabilities"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
+            "path": "src/core/packages/capabilities/server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

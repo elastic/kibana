@@ -186,6 +186,14 @@ export const postCaseResp = (
   observables: [],
 });
 
+export const getCaseWithoutCommentsResp = (
+  id?: string | null,
+  req: CasePostRequest = postCaseReq
+): Partial<Case> => {
+  const { comments, ...caseWithoutComments } = postCaseResp(id, req);
+  return caseWithoutComments;
+};
+
 interface CommentRequestWithID {
   id: string;
   comment: AttachmentRequest;

@@ -1092,6 +1092,9 @@
       "status": {
         "type": "keyword"
       },
+      "timestampField": {
+        "type": "keyword"
+      },
       "type": {
         "type": "keyword"
       }
@@ -2136,6 +2139,7 @@
     }
   },
   "ingest-outputs": {
+    "dynamic": false,
     "properties": {
       "allow_edit": {
         "enabled": false

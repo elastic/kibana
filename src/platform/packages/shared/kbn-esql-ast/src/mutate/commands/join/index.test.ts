@@ -25,7 +25,7 @@ describe('commands.where', () => {
           name: 'join',
           args: [
             {
-              type: 'identifier',
+              type: 'source',
               name: 'join_index1',
             },
             {},
@@ -36,7 +36,7 @@ describe('commands.where', () => {
           name: 'join',
           args: [
             {
-              type: 'identifier',
+              type: 'source',
               name: 'join_index2',
             },
             {},
@@ -60,7 +60,7 @@ describe('commands.where', () => {
         name: 'join',
         args: [
           {
-            type: 'identifier',
+            type: 'source',
             name: 'join_index2',
           },
           {},
@@ -71,7 +71,7 @@ describe('commands.where', () => {
         name: 'join',
         args: [
           {
-            type: 'identifier',
+            type: 'source',
             name: 'join_index1',
           },
           {},
@@ -91,7 +91,7 @@ describe('commands.where', () => {
         {
           target: {
             index: {
-              type: 'identifier',
+              type: 'source',
               name: 'join_index1',
             },
           },
@@ -99,7 +99,7 @@ describe('commands.where', () => {
         {
           target: {
             index: {
-              type: 'identifier',
+              type: 'source',
               name: 'join_index2',
             },
           },
@@ -159,6 +159,23 @@ describe('commands.where', () => {
               name: 'join_field3',
             },
           ],
+        },
+      ]);
+    });
+
+    it('extracts index of an incomplete query', () => {
+      const src = 'FROM kibana_sample_data_ecommerce | LOOKUP JOIN lookup_index ON ';
+      const query = EsqlQuery.fromSrc(src);
+      const summary = commands.join.summarize(query.ast);
+
+      expect(summary).toMatchObject([
+        {
+          target: {
+            index: {
+              type: 'source',
+              name: 'lookup_index',
+            },
+          },
         },
       ]);
     });
