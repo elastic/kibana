@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as delay } from 'timers/promises';
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
@@ -56,8 +57,6 @@ const cleanException = (url: string, ex: any) => {
     ex.response = { REDACTED: 'REDACTED' };
   }
 };
-
-const delay = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getCookieFromResponseHeaders = (response: AxiosResponse, errorMessage: string) => {
   const setCookieHeader = response?.headers['set-cookie'];
@@ -257,8 +256,13 @@ ${kbnHost} in the same window.`
   return value;
 };
 
-export const finishSAMLHandshake = async (params: SAMLCallbackParams, retriesCount: number = 3) => {
-  const { kbnHost, samlResponse, sid, log } = params;
+export const finishSAMLHandshake = async ({
+  kbnHost,
+  samlResponse,
+  sid,
+  log,
+  maxRetryCount = 3,
+}: SAMLCallbackParams) => {
   const encodedResponse = encodeURIComponent(samlResponse);
   const url = kbnHost + '/api/security/saml/callback';
   const request = {
@@ -274,7 +278,7 @@ export const finishSAMLHandshake = async (params: SAMLCallbackParams, retriesCou
   };
   let authResponse: AxiosResponse;
 
-  let attemptsLeft = retriesCount;
+  let attemptsLeft = maxRetryCount + 1;
   while (attemptsLeft > 0) {
     try {
       authResponse = await axios.request(request);
@@ -303,7 +307,7 @@ export const finishSAMLHandshake = async (params: SAMLCallbackParams, retriesCou
           log.error(`${ex.message}\nWaiting ${attemptDelay} ms before the next attempt`);
           await delay(attemptDelay);
         } else {
-          throw new Error(`Retry failed after ${retriesCount} attempts: ${ex.message}`);
+          throw new Error(`Retry failed after ${maxRetryCount + 1} attempts: ${ex.message}`);
         }
       } else {
         // exit for non 5xx errors

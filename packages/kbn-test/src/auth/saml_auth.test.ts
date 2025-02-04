@@ -21,10 +21,9 @@ import {
 const axiosRequestMock = jest.spyOn(axios, 'request');
 const axiosGetMock = jest.spyOn(axios, 'get');
 
-jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
-  fn();
-  return {} as unknown as NodeJS.Timeout;
-});
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn(() => Promise.resolve()),
+}));
 
 describe('saml_auth', () => {
   const log = new ToolingLog();
@@ -294,7 +293,7 @@ https://kbn.test.co in the same window.`);
         },
       });
 
-      const response = await finishSAMLHandshake(params, retryCount);
+      const response = await finishSAMLHandshake(params);
       expect(response.key).toEqual('sid');
       expect(response.value).toEqual(cookieStr);
       expect(axiosRequestMock).toHaveBeenCalledTimes(1);
@@ -303,7 +302,7 @@ https://kbn.test.co in the same window.`);
     it('should throw an error on 4xx response without retrying', async () => {
       axiosRequestMock.mockResolvedValue({ status: 401 });
 
-      await expect(finishSAMLHandshake(params, retryCount)).rejects.toThrow(
+      await expect(finishSAMLHandshake(params)).rejects.toThrow(
         'SAML callback failed: expected 302, got 401'
       );
       expect(axiosRequestMock).toHaveBeenCalledTimes(1);
@@ -319,19 +318,20 @@ https://kbn.test.co in the same window.`);
           },
         }); // Second attempt succeeds
 
-      const response = await finishSAMLHandshake(params, retryCount);
+      const response = await finishSAMLHandshake(params);
       expect(response.key).toEqual('sid');
       expect(response.value).toEqual(cookieStr);
       expect(axiosRequestMock).toHaveBeenCalledTimes(2);
     });
 
     it('should retry on 5xx response and fail after max attempts', async () => {
+      const attemptsCount = retryCount + 1;
       axiosRequestMock.mockResolvedValue({ status: 503 });
 
-      await expect(finishSAMLHandshake(params, retryCount)).rejects.toThrow(
-        `Retry failed after ${retryCount} attempts: SAML callback failed: expected 302, got 503`
+      await expect(finishSAMLHandshake(params)).rejects.toThrow(
+        `Retry failed after ${attemptsCount} attempts: SAML callback failed: expected 302, got 503`
       );
-      expect(axiosRequestMock).toHaveBeenCalledTimes(3);
+      expect(axiosRequestMock).toHaveBeenCalledTimes(attemptsCount);
     });
 
     it('should stop retrying if a later response is 4xx', async () => {
@@ -339,7 +339,7 @@ https://kbn.test.co in the same window.`);
         .mockResolvedValueOnce({ status: 503 }) // First attempt fails (5xx), retrying
         .mockResolvedValueOnce({ status: 400 }); // Second attempt gets a 4xx (stop retrying)
 
-      await expect(finishSAMLHandshake(params, retryCount)).rejects.toThrow(
+      await expect(finishSAMLHandshake(params)).rejects.toThrow(
         'SAML callback failed: expected 302, got 400'
       );
       expect(axiosRequestMock).toHaveBeenCalledTimes(2);

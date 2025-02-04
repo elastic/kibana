@@ -46,6 +46,7 @@ export interface SAMLCallbackParams {
   samlResponse: string;
   sid?: string;
   log: ToolingLog;
+  maxRetryCount?: number;
 }
 
 export interface User {
