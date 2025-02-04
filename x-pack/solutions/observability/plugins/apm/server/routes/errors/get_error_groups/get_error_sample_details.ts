@@ -157,7 +157,7 @@ export async function getErrorSampleDetails({
       error: {
         ...errorFromFields.error,
         exception:
-          (source?.error.exception?.length ?? 0) > 1
+          (source?.error.exception?.length ?? 0) > 0
             ? source?.error.exception
             : errorFromFields?.error.exception && [errorFromFields.error.exception],
         log: source?.error?.log,
