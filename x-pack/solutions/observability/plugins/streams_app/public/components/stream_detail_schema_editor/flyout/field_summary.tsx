@@ -18,7 +18,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { WiredStreamDefinition } from '@kbn/streams-schema';
-import { fieldContainsData } from '@kbn/lens-plugin/public/shared_components';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
@@ -26,7 +25,7 @@ import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { FieldFormTypeWrapper } from './field_form_type_wrapper';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { EMPTY_CONTENT } from '../constants';
-import { SchemaField, isMappedSchemaField } from '../types';
+import { SchemaField } from '../types';
 
 const title = i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryTitle', {
   defaultMessage: 'Field summary',
@@ -63,14 +62,6 @@ interface FieldSummaryProps {
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  // const {
-  //   isEditing,
-  //   field,
-  //   onChange,
-  //   nextFieldFormat,
-  //   setNextFieldFormat,
-  //   toggleIsEditing,
-  // } = props;
   const { field, isEditingByDefault, onChange, stream } = props;
 
   const router = useStreamsAppRouter();
@@ -177,7 +168,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
         <EuiHorizontalRule margin="xs" />
 
-        {isMappedSchemaField(field) && typeSupportsFormat(field.type) && (
+        {typeSupportsFormat(field.type) && (
           <>
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
@@ -187,11 +178,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
                 {isEditing ? (
-                  <FieldFormFormat
-                    nextFieldFormat={field.format}
-                    setNextFieldFormat={setNextFieldFormat}
-                    type={field.type}
-                  />
+                  <FieldFormFormat field={field} onChange={(format) => onChange({ format })} />
                 ) : (
                   `${field.format ?? EMPTY_CONTENT}`
                 )}

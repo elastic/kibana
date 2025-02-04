@@ -22,6 +22,7 @@ export interface MappedSchemaField extends BaseSchemaField {
 
 export interface UnmappedSchemaField extends BaseSchemaField {
   status: 'unmapped';
+  type?: SchemaFieldType | undefined;
 }
 
 export type SchemaField = MappedSchemaField | UnmappedSchemaField;
@@ -33,9 +34,10 @@ export interface SchemaEditorProps {
   onFieldUpdate: (field: SchemaField) => void;
   stream: WiredStreamDefinition;
   withControls?: boolean;
+  withFieldSimulation?: boolean;
   withTableActions?: boolean;
 }
 
-export const isMappedSchemaField = (field: SchemaField): field is MappedSchemaField => {
-  return field.status !== 'unmapped';
+export const isSchemeFieldTyped = (field: SchemaField): field is MappedSchemaField => {
+  return !!field && !!field.name && !!field.type;
 };

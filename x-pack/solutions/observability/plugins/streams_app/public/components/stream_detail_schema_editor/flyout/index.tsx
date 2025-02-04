@@ -21,12 +21,12 @@ import { WiredStreamDefinition } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { SamplePreviewTable } from './sample_preview_table';
 import { FieldSummary } from './field_summary';
-import { MappedSchemaField, SchemaField } from '../types';
+import { SchemaField } from '../types';
 
 export interface SchemaEditorFlyoutProps {
   field: SchemaField;
   isEditingByDefault?: boolean;
-  onCancel: () => void;
+  onClose?: () => void;
   onSave: (field: SchemaField) => void;
   stream: WiredStreamDefinition;
   withFieldSimulation?: boolean;
@@ -35,20 +35,11 @@ export interface SchemaEditorFlyoutProps {
 export const SchemaEditorFlyout = ({
   field,
   stream,
-  onCancel,
+  onClose,
   onSave,
   isEditingByDefault = false,
   withFieldSimulation = false,
 }: SchemaEditorFlyoutProps) => {
-  // const {
-  //   definition,
-  //   streamsRepositoryClient,
-  //   selectedField,
-  //   reset,
-  //   nextFieldDefinition,
-  //   isEditing,
-  // } = props;
-
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>): SchemaField => ({
       ...prev,
@@ -58,8 +49,9 @@ export const SchemaEditorFlyout = ({
   );
 
   const [{ loading: isSaving }, saveChanges] = useAsyncFn(async () => {
-    if (onSave) return onSave(nextField);
-  }, [nextField, onSave]);
+    await onSave(nextField);
+    if (onClose) onClose();
+  }, [nextField, onClose, onSave]);
 
   return (
     <>
@@ -75,6 +67,7 @@ export const SchemaEditorFlyout = ({
             isEditingByDefault={isEditingByDefault}
             field={nextField}
             onChange={setNextField}
+            stream={stream}
           />
           {withFieldSimulation && (
             <EuiFlexItem grow={false}>
@@ -89,7 +82,7 @@ export const SchemaEditorFlyout = ({
           <EuiButtonEmpty
             data-test-subj="streamsAppSchemaEditorFlyoutCloseButton"
             iconType="cross"
-            onClick={onCancel}
+            onClick={onClose}
             flush="left"
           >
             {i18n.translate('xpack.streams.schemaEditorFlyout.closeButtonLabel', {
@@ -98,7 +91,7 @@ export const SchemaEditorFlyout = ({
           </EuiButtonEmpty>
           <EuiButton
             data-test-subj="streamsAppSchemaEditorFieldSaveButton"
-            isDisabled={!onSave || isSaving}
+            isLoading={isSaving}
             onClick={saveChanges}
           >
             {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {

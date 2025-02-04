@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
@@ -15,18 +14,17 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
-import { isFullFieldDefinition } from '../hooks/use_editing_state';
 import { LoadingPanel } from '../../loading_panel';
-import { SchemaField } from '../types';
+import { SchemaField, isSchemeFieldTyped } from '../types';
 
 interface SamplePreviewTableProps {
   stream: WiredStreamDefinition;
-  nextField?: SchemaField;
+  nextField: SchemaField;
 }
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
   const { nextField, ...rest } = props;
-  if (isFullFieldDefinition(nextField)) {
+  if (isSchemeFieldTyped(nextField)) {
     return <SamplePreviewTableContent nextField={nextField} {...rest} />;
   } else {
     return null;

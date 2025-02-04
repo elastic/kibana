@@ -14,6 +14,7 @@ import { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FieldStatus } from '../constants';
+import { MappedSchemaField, SchemaField } from '../types';
 
 export type SchemaEditorEditingState = ReturnType<typeof useEditingState>;
 
@@ -169,10 +170,8 @@ export const useEditingState = ({
   };
 };
 
-export const isFullFieldDefinition = (
-  value?: Partial<NamedFieldDefinitionConfig>
-): value is NamedFieldDefinitionConfig => {
-  return !!value && !!value.name && !!value.type;
+export const isFullFieldDefinition = (field: SchemaField): field is MappedSchemaField => {
+  return !!field && !!field.name && !!field.type;
 };
 
 const hasChanges = (

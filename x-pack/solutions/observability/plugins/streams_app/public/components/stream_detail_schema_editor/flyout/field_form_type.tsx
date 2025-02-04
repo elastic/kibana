@@ -10,14 +10,16 @@ import React from 'react';
 import { FIELD_TYPE_MAP, FieldTypeOption } from '../constants';
 
 export interface FieldFormTypeProps {
+  isLoading?: boolean;
   onChange: (value: FieldTypeOption) => void;
   value?: FieldTypeOption;
 }
 
-export const FieldFormType = ({ value, onChange }: FieldFormTypeProps) => {
+export const FieldFormType = ({ value, onChange, isLoading = false }: FieldFormTypeProps) => {
   return (
     <EuiSelect
-      disabled={!value}
+      // disabled={!value}
+      isLoading={isLoading}
       data-test-subj="streamsAppFieldFormTypeSelect"
       hasNoInitialSelection={!value}
       onChange={(event) => {

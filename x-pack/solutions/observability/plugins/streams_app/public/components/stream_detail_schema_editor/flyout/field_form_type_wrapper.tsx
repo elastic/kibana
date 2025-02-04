@@ -11,7 +11,7 @@ import { FieldFormType, FieldFormTypeProps } from './field_form_type';
 import { FieldType } from '../field_type';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EMPTY_CONTENT, FIELD_TYPE_MAP } from '../constants';
-import { MappedSchemaField, SchemaField, isMappedSchemaField } from '../types';
+import { MappedSchemaField, SchemaField } from '../types';
 
 export const FieldFormTypeWrapper = ({
   field,
@@ -25,14 +25,9 @@ export const FieldFormTypeWrapper = ({
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
   const { fieldsMetadata, loading } = useFieldsMetadata(
-    {
-      attributes: ['type'],
-      fieldNames: [field.name],
-    },
+    { attributes: ['type'], fieldNames: [field.name] },
     [field]
   );
-
-  const isMapped = isMappedSchemaField(field);
 
   // Propagate recommendation to state if a type is not already set
   const recommendation = fieldsMetadata?.[field.name]?.type;
@@ -43,18 +38,18 @@ export const FieldFormTypeWrapper = ({
       recommendation !== undefined &&
       // Supported type
       recommendation in FIELD_TYPE_MAP &&
-      !isMapped
+      !field.type
     ) {
       onTypeChange(recommendation as MappedSchemaField['type']);
     }
-  }, [isMapped, loading, recommendation, onTypeChange]);
+  }, [field, loading, recommendation, onTypeChange]);
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        {isEditing && isMapped ? (
-          <FieldFormType value={field.type} onChange={onTypeChange} />
-        ) : isMapped ? (
+        {isEditing ? (
+          <FieldFormType value={field.type} onChange={onTypeChange} isLoading={loading} />
+        ) : field.type ? (
           <FieldType type={field.type} />
         ) : (
           EMPTY_CONTENT

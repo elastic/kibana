@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
   EuiDataGrid,
   EuiDataGridCellProps,
   EuiDataGridColumnSortingConfig,
@@ -32,7 +30,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FieldStatusFilterGroup } from './filters/status_filter_group';
 import { FieldTypeFilterGroup } from './filters/type_filter_group';
 import { TControls, useControls } from './hooks/use_controls';
-import { SchemaEditorProps, SchemaField, isMappedSchemaField } from './types';
+import { SchemaEditorProps, SchemaField } from './types';
 import { FieldParent } from './field_parent';
 import { useKibana } from '../../hooks/use_kibana';
 import { EMPTY_CONTENT } from './constants';
@@ -40,15 +38,7 @@ import { FieldStatusBadge } from './field_status';
 import { FieldType } from './field_type';
 import { SchemaEditorFlyout } from './flyout';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
-
-type SchemaEditorContextType = Pick<
-  SchemaEditorProps,
-  'fields' | 'onFieldUnmap' | 'onFieldUpdate' | 'stream'
->;
-
-const SchemaEditorContext = React.createContext<SchemaEditorContextType | undefined>(undefined);
-
-const useSchemaEditorContext = () => useContext(SchemaEditorContext) as SchemaEditorContextType;
+import { SchemaEditorContextProvider, useSchemaEditorContext } from './schema_editor_context';
 
 export function SchemaEditor({
   fields,
@@ -57,17 +47,22 @@ export function SchemaEditor({
   onFieldUpdate,
   stream,
   withControls = false,
+  withFieldSimulation = false,
   withTableActions = false,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
 
-  const context = useMemo(
-    () => ({ fields, onFieldUnmap, onFieldUpdate, stream }),
-    [fields, onFieldUnmap, onFieldUpdate, stream]
-  );
-
   return (
-    <SchemaEditorContext.Provider value={context}>
+    <SchemaEditorContextProvider
+      fields={fields}
+      isLoading={isLoading}
+      onFieldUnmap={onFieldUnmap}
+      onFieldUpdate={onFieldUpdate}
+      stream={stream}
+      withControls={withControls}
+      withFieldSimulation={withFieldSimulation}
+      withTableActions={withTableActions}
+    >
       <EuiFlexGroup direction="column" gutterSize="m">
         {isLoading ? (
           <EuiPortal>
@@ -82,7 +77,7 @@ export function SchemaEditor({
           withTableActions={withTableActions}
         />
       </EuiFlexGroup>
-    </SchemaEditorContext.Provider>
+    </SchemaEditorContextProvider>
   );
 }
 
@@ -171,7 +166,7 @@ function FieldsTable({
 
     const filteredByGroupsFields = matchingQueryFields.filter((field) => {
       return (
-        (isEmpty(controls.type) || controls.type.includes('type' in field && field.type)) && // Filter by applied type
+        (isEmpty(controls.type) || (field.type && controls.type.includes(field.type))) && // Filter by applied type
         (isEmpty(controls.status) || controls.status.includes(field.status)) // Filter by applied status
       );
     });
@@ -250,7 +245,7 @@ const createCellRenderer =
     const { parent, status } = field;
 
     if (columnId === 'type') {
-      if (!isMappedSchemaField(field)) return EMPTY_CONTENT;
+      if (!field.type) return EMPTY_CONTENT;
       return <FieldType type={field.type} />;
     }
 
@@ -269,7 +264,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const context = useKibana();
   const { core } = context;
 
-  const { onFieldUnmap, onFieldUpdate, stream } = useSchemaEditorContext();
+  const { onFieldUnmap, onFieldUpdate, stream, withFieldSimulation } = useSchemaEditorContext();
 
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'fieldsTableContextMenuPopover',
@@ -287,8 +282,9 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             <SchemaEditorFlyout
               field={field}
               stream={stream}
-              onCancel={() => overlay.close()}
+              onClose={() => overlay.close()}
               onSave={onFieldUpdate}
+              withFieldSimulation={withFieldSimulation}
               {...props}
             />
           </StreamsAppContextProvider>,
@@ -354,7 +350,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         })),
       },
     ];
-  }, [closePopover, core, field, onFieldUnmap, onFieldUpdate, stream]);
+  }, [closePopover, context, core, field, onFieldUnmap, onFieldUpdate, stream]);
 
   return (
     <EuiPopover

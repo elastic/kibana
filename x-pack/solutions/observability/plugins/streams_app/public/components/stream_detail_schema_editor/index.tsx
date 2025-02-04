@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { WiredStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
 import { SchemaEditorFlyout } from './flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { UnpromoteFieldModal } from './unpromote_field_modal';
@@ -42,7 +42,8 @@ const Content = ({
       onFieldUnmap={unmapField}
       onFieldUpdate={updateField}
       withControls
-      withTableActions
+      withFieldSimulation
+      withTableActions={!isRootStreamDefinition(definition.stream)}
     />
   );
 };
