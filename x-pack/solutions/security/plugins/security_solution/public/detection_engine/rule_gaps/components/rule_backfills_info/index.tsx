@@ -6,13 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiButton, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
