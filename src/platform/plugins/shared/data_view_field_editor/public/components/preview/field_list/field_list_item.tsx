@@ -52,7 +52,6 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
-    'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
     'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
   });
 
@@ -150,8 +149,8 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
         className={classes}
         // highlights the field using token, TODO: migrate whole SCSS file to emotions
         css={css`
-          background-color: ${isFromScript ? euiTheme.colors.backgroundBasePrimary : 'inherit'};
-          font-weight: ${isFromScript ? 'bold' : 'normal'};
+          background-color: ${isFromScript ? euiTheme.colors.backgroundBasePrimary : undefined};
+          font-weight: ${isFromScript ? 600 : 'normal'};
         `}
         gutterSize="none"
         data-test-subj="listItem"

@@ -532,7 +532,7 @@ export const DocViewerTable = ({
             css={css`
               .euiDataGridRow {
                 &:hover {
-                  background-color: ${euiTheme.colors.highlight};
+                  background-color: ${euiTheme.colors.backgroundLightText};
                 }
               }
             `}
