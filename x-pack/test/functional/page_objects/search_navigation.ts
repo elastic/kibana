@@ -43,9 +43,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'management:index_management',
       });
-      await searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
-        0
-      );
+      await searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(0);
       await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage(expectRedirect: boolean = false) {
