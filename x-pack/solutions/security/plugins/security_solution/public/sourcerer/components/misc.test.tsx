@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 
 import { initialSourcererState, type SelectedDataView, SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
@@ -57,11 +55,13 @@ const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
 
-const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
+const checkOptionsAndSelections = (patterns: string[]) => ({
   availableOptionCount:
-    wrapper.find('List').length > 0 ? wrapper.find('List').prop('itemCount') : 0,
-  optionsSelected: patterns.every((pattern) =>
-    wrapper.find(`[data-test-subj="sourcerer-combo-box"] span[title="${pattern}"]`).first().exists()
+    screen.queryAllByTestId('List').length > 0 ? screen.queryAllByTestId('List').length : 0,
+  optionsSelected: patterns.every(
+    (pattern) =>
+      screen.getByTestId(`sourcerer-combo-box`).querySelectorAll(`span[title="${pattern}"]`)
+        .length === 1
   ),
 });
 
@@ -102,31 +102,31 @@ describe('No data', () => {
   });
 
   test('Hide sourcerer - default ', () => {
-    const wrapper = mount(
+    render(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="sourcerer-trigger"]`).exists()).toEqual(false);
+    expect(screen.queryAllByTestId('sourcerer-trigger')).toHaveLength(0);
   });
   test('Hide sourcerer - detections ', () => {
-    const wrapper = mount(
+    render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="sourcerer-trigger"]`).exists()).toEqual(false);
+    expect(screen.queryAllByTestId('sourcerer-trigger')).toHaveLength(0);
   });
   test('Hide sourcerer - timeline ', () => {
-    const wrapper = mount(
+    render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).exists()).toEqual(true);
+    expect(screen.queryAllByTestId('timeline-sourcerer-trigger')).toHaveLength(1);
   });
 });
 
@@ -379,20 +379,21 @@ describe('Sourcerer integration tests', () => {
   });
 
   it('Selects a different index pattern', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-    wrapper.find(`button[data-test-subj="sourcerer-select"]`).first().simulate('click');
 
-    wrapper.find(`[data-test-subj="dataView-option-super"]`).first().simulate('click');
-    expect(checkOptionsAndSelections(wrapper, ['fakebeat-*'])).toEqual({
+    fireEvent.click(screen.getByTestId('sourcerer-trigger'));
+    fireEvent.click(screen.getByTestId('sourcerer-select'));
+
+    fireEvent.click(screen.queryAllByTestId('dataView-option-super')[0]);
+    expect(checkOptionsAndSelections(['fakebeat-*'])).toEqual({
       availableOptionCount: 0,
       optionsSelected: true,
     });
-    wrapper.find(`button[data-test-subj="sourcerer-save"]`).first().simulate('click');
+    fireEvent.click(screen.getByTestId('sourcerer-save'));
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
