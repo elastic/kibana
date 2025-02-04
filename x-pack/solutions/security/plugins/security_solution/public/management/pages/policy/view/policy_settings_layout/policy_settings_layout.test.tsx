@@ -34,8 +34,7 @@ jest.mock('../../../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-// Failing: See https://github.com/elastic/kibana/issues/179984
-describe.skip('When rendering PolicySettingsLayout', () => {
+describe('When rendering PolicySettingsLayout', () => {
   jest.setTimeout(15000);
 
   const testSubj = getPolicySettingsFormTestSubjects();
@@ -85,6 +84,14 @@ describe.skip('When rendering PolicySettingsLayout', () => {
     };
 
     /**
+     * Performs a minimal number of updates to make 'Save' button enabled.
+     */
+    const makeMinimalUpdates = async () => {
+      const { getByTestId } = renderResult;
+      await userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
+    };
+
+    /**
      * Makes updates to the policy form on the UI and return back a new (cloned) `PolicyData`
      * with the updates reflected in it
      */
@@ -114,9 +121,11 @@ describe.skip('When rendering PolicySettingsLayout', () => {
       await userEvent.type(getByTestId(testSubj.ransomware.notifyCustomMessage), 'foo message');
       set(policySettings, 'windows.popup.ransomware.message', 'foo message');
 
-      await userEvent.click(getByTestId(testSubj.advancedSection.showHideButton));
-      await userEvent.type(getByTestId('linux.advanced.agent.connection_delay'), '1000');
-      set(policySettings, 'linux.advanced.agent.connection_delay', '1000');
+      // skipping Advanced Options as changing them takes too long.
+      // todo: re-enable them with this issue: https://github.com/elastic/security-team/issues/11765
+      // await userEvent.click(getByTestId(testSubj.advancedSection.showHideButton));
+      // await userEvent.type(getByTestId('linux.advanced.agent.connection_delay'), '1000');
+      // set(policySettings, 'linux.advanced.agent.connection_delay', '1000');
 
       return expectedUpdates;
     };
@@ -131,7 +140,7 @@ describe.skip('When rendering PolicySettingsLayout', () => {
 
     it('should render layout with expected content when changes have been made', async () => {
       const { getByTestId } = render();
-      await makeUpdates();
+      await makeMinimalUpdates();
       expect(getByTestId('endpointPolicyForm'));
       expect(getByTestId('policyDetailsCancelButton')).not.toBeDisabled();
       expect(getByTestId('policyDetailsSaveButton')).not.toBeDisabled();
@@ -153,7 +162,7 @@ describe.skip('When rendering PolicySettingsLayout', () => {
       const deferred = getDeferred();
       apiMocks.responseProvider.updateEndpointPolicy.mockDelay.mockReturnValue(deferred.promise);
       const { getByTestId } = render();
-      await makeUpdates();
+      await makeMinimalUpdates();
       await clickSave(true, false);
 
       await waitFor(() => {
@@ -164,13 +173,11 @@ describe.skip('When rendering PolicySettingsLayout', () => {
       expect(
         getByTestId('policyDetailsSaveButton').querySelector('.euiLoadingSpinner')
       ).not.toBeNull();
-
-      deferred.resolve();
     });
 
     it('should show success toast on update success', async () => {
       render();
-      await makeUpdates();
+      await makeMinimalUpdates();
       await clickSave();
 
       await waitFor(() => {
@@ -189,7 +196,7 @@ describe.skip('When rendering PolicySettingsLayout', () => {
         throw new Error('oh oh!');
       });
       render();
-      await makeUpdates();
+      await makeMinimalUpdates();
       await clickSave();
 
       await waitFor(() => {
