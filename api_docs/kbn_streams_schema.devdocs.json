@@ -1593,10 +1593,10 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.isUnWiredStreamGetResponse",
+        "id": "def-common.isUnwiredStreamGetResponse",
         "type": "Function",
         "tags": [],
-        "label": "isUnWiredStreamGetResponse",
+        "label": "isUnwiredStreamGetResponse",
         "description": [],
         "signature": [
           "<TValue extends ",
@@ -1624,7 +1624,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.isUnWiredStreamGetResponse.$1",
+            "id": "def-common.isUnwiredStreamGetResponse.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",

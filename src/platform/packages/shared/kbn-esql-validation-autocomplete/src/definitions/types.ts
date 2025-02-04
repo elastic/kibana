@@ -42,6 +42,8 @@ export const fieldTypes = [
   'counter_double',
   'unsupported',
   'date_nanos',
+  // This type is inconsistent in comparison to the others. This is how it comes from ES though.
+  'function named parameters',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -162,6 +164,7 @@ export interface Signature {
      * values that we don't want to show as suggestions.
      */
     literalSuggestions?: string[];
+    mapParams?: string;
   }>;
   minParams?: number;
   returnType: FunctionReturnType;
