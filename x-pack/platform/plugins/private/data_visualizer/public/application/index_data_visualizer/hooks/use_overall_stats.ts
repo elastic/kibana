@@ -330,6 +330,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
               const docs = resp.rawResponse.hits.hits.map((d) =>
                 d.fields ? getProcessedFields(d.fields) : {}
               );
+
               sampledNonAggregatableFieldsExamples = docs;
             }
             if (isAggregatableFieldOverallStats(resp)) {
@@ -375,6 +376,20 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
                     nonAggregatableFieldsUniqueCount[fieldIdx].add(
                       JSON.stringify(fieldValue.embeddings)
                     );
+                    return;
+                  }
+
+                  if (
+                    Array.isArray(fieldValue) &&
+                    fieldValue.length > 0 &&
+                    isPopulatedObject(fieldValue[0], ['embeddings'])
+                  ) {
+                    nonAggregatableFieldsCount[fieldIdx] += 1;
+                    nonAggregatableFieldsUniqueCount[fieldIdx].add(
+                      // We don't need to show the whole embedding array, just the first 2
+                      JSON.stringify(fieldValue.slice(0, 2))
+                    );
+                    return;
                   }
                 }
               });
