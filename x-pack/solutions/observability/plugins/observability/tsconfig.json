@@ -119,7 +119,8 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/object-utils",
     "@kbn/task-manager-plugin",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }
