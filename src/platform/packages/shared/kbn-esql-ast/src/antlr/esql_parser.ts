@@ -3476,7 +3476,7 @@ export default class esql_parser extends parser_config {
 			this.enterOuterAlt(localctx, 1);
 			{
 			this.state = 622;
-			localctx._index = this.identifier();
+			localctx._index = this.indexPattern();
 			this.state = 625;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
@@ -3863,7 +3863,7 @@ export default class esql_parser extends parser_config {
 	0,0,0,609,610,5,17,0,0,610,613,3,54,27,0,611,612,5,33,0,0,612,614,3,30,
 	15,0,613,611,1,0,0,0,613,614,1,0,0,0,614,123,1,0,0,0,615,617,7,8,0,0,616,
 	615,1,0,0,0,616,617,1,0,0,0,617,618,1,0,0,0,618,619,5,20,0,0,619,620,3,
-	126,63,0,620,621,3,128,64,0,621,125,1,0,0,0,622,625,3,64,32,0,623,624,5,
+	126,63,0,620,621,3,128,64,0,621,125,1,0,0,0,622,625,3,36,18,0,623,624,5,
 	89,0,0,624,626,3,64,32,0,625,623,1,0,0,0,625,626,1,0,0,0,626,127,1,0,0,
 	0,627,628,5,93,0,0,628,633,3,130,65,0,629,630,5,39,0,0,630,632,3,130,65,
 	0,631,629,1,0,0,0,632,635,1,0,0,0,633,631,1,0,0,0,633,634,1,0,0,0,634,129,
@@ -6553,20 +6553,20 @@ export class JoinCommandContext extends ParserRuleContext {
 
 
 export class JoinTargetContext extends ParserRuleContext {
-	public _index!: IdentifierContext;
+	public _index!: IndexPatternContext;
 	public _alias!: IdentifierContext;
 	constructor(parser?: esql_parser, parent?: ParserRuleContext, invokingState?: number) {
 		super(parent, invokingState);
     	this.parser = parser;
 	}
-	public identifier_list(): IdentifierContext[] {
-		return this.getTypedRuleContexts(IdentifierContext) as IdentifierContext[];
-	}
-	public identifier(i: number): IdentifierContext {
-		return this.getTypedRuleContext(IdentifierContext, i) as IdentifierContext;
+	public indexPattern(): IndexPatternContext {
+		return this.getTypedRuleContext(IndexPatternContext, 0) as IndexPatternContext;
 	}
 	public AS(): TerminalNode {
 		return this.getToken(esql_parser.AS, 0);
+	}
+	public identifier(): IdentifierContext {
+		return this.getTypedRuleContext(IdentifierContext, 0) as IdentifierContext;
 	}
     public get ruleIndex(): number {
     	return esql_parser.RULE_joinTarget;
