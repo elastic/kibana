@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
-  type Conversation,
   type ConversationCreateRequest,
   type ConversationRequestBase,
   type ConversationUpdateRequest,
@@ -80,27 +79,20 @@ export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.interse
 export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.intersection([
   baseConversationRt,
   t.type({
-    conversation: t.type({
-      id: t.string,
-      title: t.string,
-    }),
-  }),
-]);
-
-export const conversationRt: t.Type<Conversation> = t.intersection([
-  baseConversationRt,
-  t.intersection([
-    t.type({
-      namespace: t.string,
-      conversation: t.type({
+    conversation: t.intersection([
+      t.type({
         id: t.string,
-        last_updated: t.string,
+        title: t.string,
       }),
-    }),
-    t.partial({
-      user: t.intersection([t.type({ name: t.string }), t.partial({ id: t.string })]),
-    }),
-  ]),
+      t.partial({
+        token_count: t.type({
+          prompt: t.number,
+          completion: t.number,
+          total: t.number,
+        }),
+      }),
+    ]),
+  }),
 ]);
 
 export const functionRt = t.intersection([

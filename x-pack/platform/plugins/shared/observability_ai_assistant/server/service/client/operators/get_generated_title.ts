@@ -9,7 +9,7 @@ import { catchError, mergeMap, Observable, of, tap, from } from 'rxjs';
 import { Logger } from '@kbn/logging';
 import { ChatCompleteResponse } from '@kbn/inference-common';
 import type { ObservabilityAIAssistantClient } from '..';
-import { Message, MessageRole, StreamingChatResponseEventType } from '../../../../common';
+import { Message, MessageRole } from '../../../../common';
 import { LangTracer } from '../instrumentation/lang_tracer';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
