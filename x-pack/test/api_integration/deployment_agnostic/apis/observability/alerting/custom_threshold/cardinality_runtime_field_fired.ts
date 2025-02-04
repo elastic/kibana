@@ -277,10 +277,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
 
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('DISCOVER_APP_LOCATOR');
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataViewId: DATA_VIEW_ID,
-          dataViewSpec: DATA_VIEW_ID,
+          dataset: DATA_VIEW_ID,
           timeRange: { to: 'now' },
           query: { query: '', language: 'kuery' },
           filters: [],
