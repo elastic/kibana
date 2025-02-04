@@ -312,8 +312,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
       });
-
-
     });
     describe('Classic Nav', function () {
       let cleanUpSpace: () => Promise<unknown>;
