@@ -9,6 +9,7 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
@@ -22,7 +23,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<{ dashboard: DashboardPluginStart }>,
     plugins: {
       contentManagement: ContentManagementServerSetup;
     }
@@ -40,10 +41,29 @@ export class LinksServerPlugin implements Plugin<object, object> {
 
     core.savedObjects.registerType<LinksAttributes>(linksSavedObjectType);
 
+    const router = core.http.createRouter();
+
+    router.get(
+      {
+        path: '/api/links',
+        validate: false,
+      },
+      async (context, req, res) => {
+        const [_, { dashboard }] = await core.getStartServices();
+        const { contentClient } = dashboard;
+        const dashboardClient = contentClient!.getForRequest({
+          requestHandlerContext: context,
+          request: req,
+        });
+        const dashboards = await dashboardClient.search({});
+        res.ok({ body: dashboards });
+      }
+    );
+
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { dashboard }: { dashboard: DashboardPluginStart }) {
     return {};
   }
 
