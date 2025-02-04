@@ -7,19 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  ErrorToastOptions,
-  ToastOptions,
-  Toast,
-  ToastInput,
-  IToasts,
-  ToastInputFields,
-  IProductInterceptPublicApi,
-  ProductIntercept,
-} from './src/types';
-export type {
-  ToastsSetup,
-  ToastsStart,
-  NotificationsSetup,
-  NotificationsStart,
-} from './src/contracts';
+export { EventReporter } from './event_reporter';
