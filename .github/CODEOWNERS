@@ -828,7 +828,7 @@ x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/alerting_rule_utils @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/observability/logs_overview @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/logs_overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
