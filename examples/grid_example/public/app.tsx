@@ -10,7 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { combineLatest, debounceTime } from 'rxjs';
+import { Subject, combineLatest, debounceTime, map, skip, take } from 'rxjs';
 
 import {
   EuiBadge,
@@ -75,29 +75,42 @@ export const GridExample = ({
     mockDashboardApi.viewMode$,
     mockDashboardApi.expandedPanelId$
   );
+  const layoutUpdated$ = useMemo(() => new Subject<void>(), []);
 
   useEffect(() => {
     combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
-      .pipe(debounceTime(0)) // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
-      .subscribe(([panels, rows]) => {
-        const panelIds = Object.keys(panels);
-        let panelsAreEqual = true;
-        for (const panelId of panelIds) {
-          if (!panelsAreEqual) break;
-          const currentPanel = panels[panelId];
-          const savedPanel = savedState.current.panels[panelId];
-          panelsAreEqual = deepEqual(
-            { row: 0, ...currentPanel.gridData },
-            { row: 0, ...savedPanel.gridData }
-          );
-        }
-
-        const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
+      .pipe(
+        debounceTime(0), // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
+        map(([panels, rows]) => {
+          const panelIds = Object.keys(panels);
+          let panelsAreEqual = true;
+          for (const panelId of panelIds) {
+            if (!panelsAreEqual) break;
+            const currentPanel = panels[panelId];
+            const savedPanel = savedState.current.panels[panelId];
+            panelsAreEqual = deepEqual(
+              { row: 0, ...currentPanel.gridData },
+              { row: 0, ...savedPanel.gridData }
+            );
+          }
+          const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
+          return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, rows }) };
+        })
+      )
+      .subscribe(({ hasChanges, updatedLayout }) => {
         setHasUnsavedChanges(hasChanges);
-        setCurrentLayout(dashboardInputToGridLayout({ panels, rows }));
+        setCurrentLayout(updatedLayout);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * On layout update, emit `layoutUpdated$` so that side effects such as scroll to bottom on section
+   * add can happen
+   */
+  useEffect(() => {
+    layoutUpdated$.next();
+  }, [currentLayout, layoutUpdated$]);
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
@@ -210,8 +223,9 @@ export const GridExample = ({
                           collapsed: false,
                         },
                       ]);
+
                       // scroll to bottom after row is added
-                      new Promise((resolve) => setTimeout(resolve, 100)).then(() => {
+                      layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
                         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                       });
                     }}
