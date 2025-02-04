@@ -10,11 +10,14 @@
 import { isEqual, cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { PieVisualizationState, Suggestion, XYState } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
 import { removeTablesFromLensAttributes } from './lens_vis_from_table';
+
+export const TIMESTAMP_COLUMN = 'timestamp';
 
 export interface QueryParams {
   dataView: DataView;
@@ -104,9 +107,21 @@ export const isSuggestionShapeAndVisContextCompatible = (
   );
 };
 
+const injectIntervalToDateTimeColumn = (
+  columns: TextBasedLayerColumn[],
+  dateFieldLabel: string
+) => {
+  const dateColumn = columns.find((column) => column.columnId === TIMESTAMP_COLUMN);
+  if (dateColumn && dateColumn.label !== dateFieldLabel && dateColumn.customLabel) {
+    dateColumn.label = dateFieldLabel;
+  }
+  return columns;
+};
+
 export const injectESQLQueryIntoLensLayers = (
   visAttributes: UnifiedHistogramVisContext['attributes'],
-  query: AggregateQuery
+  query: AggregateQuery,
+  dateFieldLabel?: string
 ) => {
   const datasourceId = getDatasourceId(visAttributes.state.datasourceStates);
 
@@ -125,6 +140,12 @@ export const injectESQLQueryIntoLensLayers = (
     Object.values(datasourceState.layers).forEach((layer) => {
       if (!isEqual(layer.query, query)) {
         layer.query = query;
+      }
+      if (dateFieldLabel && layer.columns) {
+        const columns = injectIntervalToDateTimeColumn(layer.columns, dateFieldLabel);
+        if (!isEqual(layer.columns, columns)) {
+          layer.columns = columns;
+        }
       }
     });
   }

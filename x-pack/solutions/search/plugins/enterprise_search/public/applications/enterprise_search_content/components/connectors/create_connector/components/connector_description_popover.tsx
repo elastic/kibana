@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import connectorLogo from '../../../../../../assets/images/connector.svg';
+import { EuiIconPlugs } from '@kbn/search-shared-ui';
+
 import { KibanaLogic } from '../../../../../shared/kibana';
 
 const nativePopoverPanels = [
@@ -40,7 +41,7 @@ const nativePopoverPanels = [
       'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
       { defaultMessage: 'Configure your connector using our Kibana UI' }
     ),
-    icons: [<EuiIcon size="l" type={connectorLogo} />, <EuiIcon size="l" type="logoElastic" />],
+    icons: [<EuiIcon size="l" type={EuiIconPlugs} />, <EuiIcon size="l" type="logoElastic" />],
     id: 'native-configure-connector',
   },
 ];
@@ -63,7 +64,7 @@ const connectorClientPopoverPanels = [
       }
     ),
     icons: [
-      <EuiIcon size="l" type={connectorLogo} />,
+      <EuiIcon size="l" type={EuiIconPlugs} />,
       <EuiIcon size="l" type="sortRight" />,
       <EuiIcon size="l" type="launch" />,
     ],
@@ -79,7 +80,7 @@ const connectorClientPopoverPanels = [
     icons: [
       <EuiIcon size="l" type="documents" />,
       <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type={connectorLogo} />,
+      <EuiIcon size="l" type={EuiIconPlugs} />,
       <EuiIcon size="l" type="sortRight" />,
       <EuiIcon size="l" type="logoElastic" />,
     ],
