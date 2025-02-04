@@ -36,7 +36,7 @@ export interface BrowserAuthFixture {
  * for the specified role and the "context" fixture to update the cookie with the role-scoped session.
  */
 export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: BrowserAuthFixture }>({
-  browserAuth: async ({ log, context, samlAuth, config }, use) => {
+  browserAuth: async ({ log, context, samlAuth, config, kbnUrl }, use) => {
     const setSessionCookie = async (cookieValue: string) => {
       await context.clearCookies();
       await context.addCookies([
@@ -44,7 +44,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
           name: 'sid',
           value: cookieValue,
           path: '/',
-          domain: 'localhost',
+          domain: kbnUrl.domain(),
         },
       ]);
     };
