@@ -26,6 +26,7 @@ export function useCustomCards(
       context: { isServerless, isCloud },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
   const getUrlForApp = application?.getUrlForApp;
 
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
@@ -54,7 +55,7 @@ export function useCustomCards(
         defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
       }
     ),
-    categories: [],
+    categories: ['observability'],
     icons: [
       {
         type: 'svg',
@@ -363,7 +364,7 @@ export function useCustomCards(
         }
       ),
       name: 'upload-file',
-      categories: [],
+      categories: ['observability'],
       icons: [
         {
           type: 'eui',
