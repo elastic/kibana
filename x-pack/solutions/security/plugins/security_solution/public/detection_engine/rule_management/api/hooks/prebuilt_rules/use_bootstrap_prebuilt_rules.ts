@@ -6,18 +6,18 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../common/api/detection_engine';
-import type { BootstrapPrebuiltRulesResponse } from '../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
-import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../common/detection_engine/constants';
-import { bootstrapPrebuiltRules } from '../api';
-import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query';
-import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
+import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine';
+import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
+import { bootstrapPrebuiltRules } from '../../api';
+import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
+import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
 
 export const BOOTSTRAP_PREBUILT_RULES_KEY = ['POST', BOOTSTRAP_PREBUILT_RULES_URL];
 
 export const useBootstrapPrebuiltRulesMutation = (
-  options?: UseMutationOptions<BootstrapPrebuiltRulesResponse, Error>
+  options?: UseMutationOptions<BootstrapPrebuiltRulesResponse>
 ) => {
   const invalidatePrePackagedRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidatePrebuiltRulesInstallReview = useInvalidateFetchPrebuiltRulesInstallReviewQuery();
@@ -26,7 +26,7 @@ export const useBootstrapPrebuiltRulesMutation = (
   return useMutation(() => bootstrapPrebuiltRules(), {
     ...options,
     mutationKey: BOOTSTRAP_PREBUILT_RULES_KEY,
-    onSettled: (...args) => {
+    onSuccess: (...args) => {
       const response = args[0];
       if (
         response?.packages.find((pkg) => pkg.name === PREBUILT_RULES_PACKAGE_NAME)?.status ===
@@ -40,8 +40,8 @@ export const useBootstrapPrebuiltRulesMutation = (
         invalidatePrebuiltRulesUpdateReview();
       }
 
-      if (options?.onSettled) {
-        options.onSettled(...args);
+      if (options?.onSuccess) {
+        options.onSuccess(...args);
       }
     },
   });
