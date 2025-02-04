@@ -48,7 +48,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   useEffect(() => {
     if (showFlyout) {
       addContentToGlobalFlyout<IndexFlyoutProps>({
-        id: 'IndexFlyout',
+        id: 'indexFlyout',
         Component: IndexFlyout,
         props: {
           deprecation,
