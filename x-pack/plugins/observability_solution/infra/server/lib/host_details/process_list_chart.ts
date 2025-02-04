@@ -6,8 +6,8 @@
  */
 
 import { first } from 'lodash';
-import { TIMESTAMP_FIELD, SYSTEM_PROCESS_CMDLINE_FIELD } from '../../../common/constants';
-import {
+import { TIMESTAMP_FIELD, PROCESS_COMMANDLINE_FIELD } from '../../../common/constants';
+import type {
   ProcessListAPIChartRequest,
   ProcessListAPIChartQueryAggregation,
   ProcessListAPIRow,
@@ -48,7 +48,7 @@ export const getProcessListChart = async (
             must: [
               {
                 match: {
-                  [SYSTEM_PROCESS_CMDLINE_FIELD]: command,
+                  [PROCESS_COMMANDLINE_FIELD]: command,
                 },
               },
             ],
@@ -57,7 +57,7 @@ export const getProcessListChart = async (
         aggs: {
           filteredProc: {
             terms: {
-              field: SYSTEM_PROCESS_CMDLINE_FIELD,
+              field: PROCESS_COMMANDLINE_FIELD,
               size: 1,
             },
             aggs: {
