@@ -26,6 +26,7 @@ interface Props {
   cluster?: ClusterPayload;
   nextButtonTestSubj: string;
   backButtonTestSubj?: string;
+  previousClusterMode?: 'proxy' | 'sniff';
 }
 
 export const ActionButtons: React.FC<Props> = ({
@@ -39,6 +40,7 @@ export const ActionButtons: React.FC<Props> = ({
   cluster,
   nextButtonTestSubj,
   backButtonTestSubj,
+  previousClusterMode,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState(false);
   const toggleRequest = useCallback(() => {
@@ -92,7 +94,11 @@ export const ActionButtons: React.FC<Props> = ({
         )}
       </EuiFlexItem>
       {isRequestVisible && cluster ? (
-        <RequestFlyout cluster={cluster} close={() => setIsRequestVisible(false)} />
+        <RequestFlyout
+          cluster={cluster}
+          close={() => setIsRequestVisible(false)}
+          previousClusterMode={previousClusterMode}
+        />
       ) : null}
     </EuiFlexGroup>
   );

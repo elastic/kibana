@@ -25,6 +25,7 @@ import { ClusterPayload, serializeCluster } from '../../../../../../common/lib';
 interface Props {
   close: () => void;
   cluster: ClusterPayload;
+  previousClusterMode?: 'proxy' | 'sniff';
 }
 
 export class RequestFlyout extends PureComponent<Props> {
@@ -32,7 +33,11 @@ export class RequestFlyout extends PureComponent<Props> {
     const { close, cluster } = this.props;
     const { name } = cluster;
     const endpoint = 'PUT _cluster/settings';
-    const payload = JSON.stringify(serializeCluster(cluster), null, 2);
+    const payload = JSON.stringify(
+      serializeCluster(cluster, this.props.previousClusterMode),
+      null,
+      2
+    );
     const request = `${endpoint}\n${payload}`;
 
     return (
