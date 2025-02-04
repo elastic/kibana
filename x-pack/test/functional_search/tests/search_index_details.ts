@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Create a space with the search solution and navigate to its home page
         ({ cleanUp: cleanUpSpace, space: spaceCreated } = await spaces.create({
-          name: 'search-index-details-ftr',
+          name: 'solution-nav-search-index-details-ftr',
           solution: 'es',
         }));
 
@@ -101,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           // Navigate to the spaces management page which will log us in Kibana
           await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.searchNavigation.navigateToIndexDetailPage();
         });
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const indexNameCodeExample = 'test-my-index2';
           before(async () => {
             await es.indices.create({ index: indexNameCodeExample });
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexNameCodeExample);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage();
           });
 
           after(async () => {
@@ -135,7 +135,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         describe('API key details', () => {
           it('should show api key', async () => {
             await pageObjects.searchApiKeys.deleteAPIKeys();
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage();
             // sometimes the API key exists in the cluster and its lost in sessionStorage
             // if fails we retry to delete the API key and refresh the browser
             await retry.try(
@@ -169,14 +169,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               },
             },
           });
-          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.searchNavigation.navigateToIndexDetailPage();
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
         });
 
         it('should have breadcrumb navigation', async () => {
-          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(
-            indexName
-          );
+          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(indexName);
         });
 
         it('should show code examples for adding documents', async () => {
@@ -206,7 +204,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 my_field: [1, 0, 1],
               },
             });
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage();
           });
           it('should have index documents', async () => {
             await pageObjects.searchIndexDetailsPage.expectHasIndexDocuments();
@@ -241,7 +239,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
             // re-open page to refresh queries for test (these will auto-refresh,
             // but waiting for that will make this test flakey)
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage();
             await pageObjects.searchIndexDetailsPage.expectAddDocumentCodeExamples();
             await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(0);
           });
@@ -254,11 +252,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 my_field: [1, 0, 1],
               },
             });
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage();
           });
 
           beforeEach(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage();
           });
 
           it('delete document button is enabled', async () => {
@@ -283,7 +281,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         describe('page loading error', () => {
           before(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage();
             await esDeleteAllIndices(indexName);
           });
           it('has page load error section', async () => {
@@ -298,7 +296,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         describe('Index more options menu', () => {
           before(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage();
           });
           it('shows action menu in actions popover', async () => {
             await pageObjects.searchIndexDetailsPage.expectMoreOptionsActionButtonExists();
@@ -325,7 +323,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Create a space with the classic nav solution and navigate to its home page
         ({ cleanUp: cleanUpSpace, space: spaceCreated } = await spaces.create({
-          name: 'search-index-details-classic-nav-ftr',
+          name: 'classic-nav-search-index-details-ftr',
           solution: 'classic',
         }));
         await pageObjects.searchApiKeys.deleteAPIKeys();

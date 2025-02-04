@@ -38,7 +38,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       });
     },
 
-    async navigateToIndexDetailPage(indexName: string) {
+    async navigateToIndexDetailPage() {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'management:index_management',
