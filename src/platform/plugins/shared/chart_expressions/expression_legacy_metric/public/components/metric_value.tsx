@@ -8,9 +8,51 @@
  */
 
 import React, { CSSProperties, useLayoutEffect } from 'react';
-import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
+import { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiTextTruncate } from '@elastic/eui';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
+
+const legacyMtrVisValueCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    fontWeight: euiTheme.font.weight.bold,
+  });
+
+const legacyMtrVisContainerCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    textAlign: 'center',
+    padding: euiTheme.size.base,
+    display: 'flex',
+    flexDirection: 'column',
+  });
+
+const legacyMtrVisContainerLightCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    color: euiTheme.colors.emptyShade,
+  });
+
+const legacyMtrVisContainerIsFilterableCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    cursor: 'pointer',
+    transition: `transform ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+    transform: 'translate(0, 0)',
+    '&:hover, &:focus': {
+      boxShadow: 'none',
+      transform: 'translate(0, -2px)',
+    },
+  });
+
+const legacyMtrVisContainerIsFullCss = () =>
+  css({
+    minHeight: '100%',
+    minWidth: 'max-content',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: '1 0 100%',
+  });
 
 interface MetricVisValueProps {
   metric: MetricOptions;
@@ -24,11 +66,6 @@ interface MetricVisValueProps {
 
 export const MetricVisValue = (props: MetricVisValueProps) => {
   const { style, metric, onFilter, labelConfig, colorFullBackground, autoScale } = props;
-  const containerClassName = classNames('legacyMtrVis__container', {
-    'legacyMtrVis__container--light': metric.lightText,
-    'legacyMtrVis__container-isfilterable': onFilter,
-    'legacyMtrVis__container-isfull': !autoScale && colorFullBackground,
-  });
 
   useLayoutEffect(() => {
     props.renderComplete?.();
@@ -37,12 +74,17 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   // for autoScale true we should add background to upper level so that correct colorize full container
   const metricComponent = (
     <div
-      className={containerClassName}
+      css={[
+        legacyMtrVisContainerCss,
+        metric.lightText && legacyMtrVisContainerLightCss,
+        onFilter && legacyMtrVisContainerIsFilterableCss,
+        !autoScale && colorFullBackground && legacyMtrVisContainerIsFullCss,
+      ]}
       style={autoScale && colorFullBackground ? {} : { backgroundColor: metric.bgColor }}
     >
       <div
         data-test-subj="metric_value"
-        className="legacyMtrVis__value"
+        css={[legacyMtrVisValueCss, euiTextTruncate()]}
         style={{
           ...(style.spec as CSSProperties),
           ...(metric.color ? { color: metric.color } : {}),
