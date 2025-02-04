@@ -20,7 +20,6 @@ import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import type {
   DFAModelItem,
-  NLPModelItem,
   TrainedModelItem,
   TrainedModelUIItem,
 } from '../../../common/types/trained_models';
@@ -239,7 +238,7 @@ export function useModelActions({
           }
 
           const modelDeploymentParams = await getUserInputModelDeploymentParams(
-            item as NLPModelItem,
+            item.model_id,
             undefined,
             modelAndDeploymentIds
           );
@@ -290,7 +289,10 @@ export function useModelActions({
             (v) => v.deployment_id === deploymentIdToUpdate
           )!;
 
-          const deploymentParams = await getUserInputModelDeploymentParams(item, targetDeployment);
+          const deploymentParams = await getUserInputModelDeploymentParams(
+            item.model_id,
+            targetDeployment
+          );
 
           if (!deploymentParams) return;
 

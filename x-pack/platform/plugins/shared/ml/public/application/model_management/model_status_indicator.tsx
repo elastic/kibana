@@ -7,22 +7,24 @@
 
 import React from 'react';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
-import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';
 import { isBaseNLPModelItem } from '../../../common/types/trained_models';
+import type { NameOverrides } from './get_model_state';
 import { getModelStateColor } from './get_model_state';
 import { useMlKibana } from '../contexts/kibana';
 
 export const ModelStatusIndicator = ({
   modelId,
-  isModalEmbedded,
+  configOverrides,
 }: {
   modelId: string;
-  isModalEmbedded?: boolean;
+  configOverrides?: {
+    color?: string;
+    names?: NameOverrides;
+  };
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const {
     services: {
       mlServices: { trainedModelsService },
@@ -39,13 +41,9 @@ export const ModelStatusIndicator = ({
   }
 
   const { state, downloadState } = currentModel;
-  const config = getModelStateColor(state, isModalEmbedded);
+  const config = getModelStateColor(state, configOverrides?.names);
 
   if (!config) {
-    return null;
-  }
-
-  if (isModalEmbedded && state !== MODEL_STATE.DOWNLOADING && state !== MODEL_STATE.DOWNLOADED) {
     return null;
   }
 
@@ -64,9 +62,9 @@ export const ModelStatusIndicator = ({
           <EuiProgress
             label={config.name}
             labelProps={{
-              ...(isModalEmbedded && {
+              ...(configOverrides?.color && {
                 css: {
-                  color: euiTheme.colors.textSubdued,
+                  color: configOverrides.color,
                 },
               }),
             }}
