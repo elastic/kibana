@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SynonymsPutSynonymResponse } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import { SYNONYMS_RULE_FETCH_QUERY_KEY, SYNONYMS_SETS_QUERY_KEY } from '../../common/constants';
 import { PLUGIN_ROUTE_ROOT } from '../../common/api_routes';
 import { useKibana } from './use_kibana';
 
@@ -30,8 +31,8 @@ export const usePutSynonymsSet = (onSuccess?: () => void, onError?: (error: stri
     },
     {
       onSuccess: (_, { synonymsSetId }) => {
-        queryClient.invalidateQueries(['synonyms-sets-fetch']);
-        queryClient.invalidateQueries(['synonyms-rule-fetch']);
+        queryClient.invalidateQueries([SYNONYMS_RULE_FETCH_QUERY_KEY]);
+        queryClient.invalidateQueries([SYNONYMS_SETS_QUERY_KEY]);
         notifications?.toasts?.addSuccess({
           title: i18n.translate('xpack.searchSynonyms.putSynonymsSetSuccess', {
             defaultMessage: 'Synonyms set added',
