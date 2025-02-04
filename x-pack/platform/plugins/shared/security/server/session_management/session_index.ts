@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
@@ -26,7 +27,6 @@ import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audi
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import { errors } from '@elastic/elasticsearch';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
