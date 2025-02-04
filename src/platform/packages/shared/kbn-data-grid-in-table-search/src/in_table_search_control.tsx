@@ -15,7 +15,6 @@ import { useFindMatches } from './matches/use_find_matches';
 import { InTableSearchInput } from './in_table_search_input';
 import { UseFindMatchesProps } from './types';
 import {
-  ACTIVE_HIGHLIGHT_COLOR,
   CELL_MATCH_INDEX_ATTRIBUTE,
   HIGHLIGHT_CLASS_NAME,
   BUTTON_TEST_SUBJ,
@@ -79,7 +78,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         onChangeToExpectedPage(expectedPageIndex);
       }
 
-      // The cell border is useful when the active match is not visible due to the limited cell height.
+      // The cell border is useful when the active match is not visible due to the limited cell boundaries
       onChangeCss(css`
         .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
           &:after {
@@ -88,11 +87,12 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             pointer-events: none;
             position: absolute;
             inset: 0;
-            border: 2px solid ${ACTIVE_HIGHLIGHT_COLOR} !important;
+            border: 2px solid ${euiTheme.colors.borderStrongAccent} !important;
             border-radius: 3px;
           }
           .${HIGHLIGHT_CLASS_NAME}[${CELL_MATCH_INDEX_ATTRIBUTE}='${matchIndexWithinCell}'] {
-            background-color: ${ACTIVE_HIGHLIGHT_COLOR} !important;
+            color: ${euiTheme.colors.textInverse} !important;
+            background-color: ${euiTheme.colors.backgroundFilledAccent} !important;
           }
         }
       `);
@@ -106,7 +106,14 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         align: 'center',
       });
     },
-    [getColumnIndexFromId, scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize]
+    [
+      getColumnIndexFromId,
+      scrollToCell,
+      onChangeCss,
+      onChangeToExpectedPage,
+      pageSize,
+      euiTheme.colors,
+    ]
   );
 
   const {
