@@ -26835,6 +26835,14 @@
                               "is_preconfigured": {
                                 "type": "boolean"
                               },
+                              "kibana_api_key": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "kibana_url": {
+                                "nullable": true,
+                                "type": "string"
+                              },
                               "name": {
                                 "type": "string"
                               },
@@ -26855,6 +26863,25 @@
                               "secrets": {
                                 "additionalProperties": true,
                                 "properties": {
+                                  "kibana_api_key": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": true,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
                                   "service_token": {
                                     "anyOf": [
                                       {
@@ -26967,6 +26994,9 @@
                                   }
                                 },
                                 "type": "object"
+                              },
+                              "sync_integrations": {
+                                "type": "boolean"
                               },
                               "type": {
                                 "enum": [
@@ -27925,6 +27955,14 @@
                       "is_preconfigured": {
                         "type": "boolean"
                       },
+                      "kibana_api_key": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "kibana_url": {
+                        "nullable": true,
+                        "type": "string"
+                      },
                       "name": {
                         "type": "string"
                       },
@@ -27945,6 +27983,25 @@
                       "secrets": {
                         "additionalProperties": false,
                         "properties": {
+                          "kibana_api_key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
                           "service_token": {
                             "anyOf": [
                               {
@@ -28057,6 +28114,9 @@
                           }
                         },
                         "type": "object"
+                      },
+                      "sync_integrations": {
+                        "type": "boolean"
                       },
                       "type": {
                         "enum": [
@@ -28953,6 +29013,14 @@
                             "is_preconfigured": {
                               "type": "boolean"
                             },
+                            "kibana_api_key": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "kibana_url": {
+                              "nullable": true,
+                              "type": "string"
+                            },
                             "name": {
                               "type": "string"
                             },
@@ -28973,6 +29041,25 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
+                                "kibana_api_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": true,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "service_token": {
                                   "anyOf": [
                                     {
@@ -29085,6 +29172,9 @@
                                 }
                               },
                               "type": "object"
+                            },
+                            "sync_integrations": {
+                              "type": "boolean"
                             },
                             "type": {
                               "enum": [
@@ -30131,6 +30221,14 @@
                             "is_preconfigured": {
                               "type": "boolean"
                             },
+                            "kibana_api_key": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "kibana_url": {
+                              "nullable": true,
+                              "type": "string"
+                            },
                             "name": {
                               "type": "string"
                             },
@@ -30151,6 +30249,25 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
+                                "kibana_api_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": true,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "service_token": {
                                   "anyOf": [
                                     {
@@ -30263,6 +30380,9 @@
                                 }
                               },
                               "type": "object"
+                            },
+                            "sync_integrations": {
+                              "type": "boolean"
                             },
                             "type": {
                               "enum": [
@@ -31206,6 +31326,14 @@
                       "is_preconfigured": {
                         "type": "boolean"
                       },
+                      "kibana_api_key": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "kibana_url": {
+                        "nullable": true,
+                        "type": "string"
+                      },
                       "name": {
                         "type": "string"
                       },
@@ -31226,6 +31354,25 @@
                       "secrets": {
                         "additionalProperties": false,
                         "properties": {
+                          "kibana_api_key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
                           "service_token": {
                             "anyOf": [
                               {
@@ -31338,6 +31485,9 @@
                           }
                         },
                         "type": "object"
+                      },
+                      "sync_integrations": {
+                        "type": "boolean"
                       },
                       "type": {
                         "enum": [
@@ -32219,6 +32369,14 @@
                             "is_preconfigured": {
                               "type": "boolean"
                             },
+                            "kibana_api_key": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "kibana_url": {
+                              "nullable": true,
+                              "type": "string"
+                            },
                             "name": {
                               "type": "string"
                             },
@@ -32239,6 +32397,25 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
+                                "kibana_api_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": true,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "service_token": {
                                   "anyOf": [
                                     {
@@ -32351,6 +32528,9 @@
                                 }
                               },
                               "type": "object"
+                            },
+                            "sync_integrations": {
+                              "type": "boolean"
                             },
                             "type": {
                               "enum": [
@@ -40767,6 +40947,80 @@
         "tags": [
           "roles"
         ]
+      }
+    },
+    "/api/security/role/_query": {
+      "post": {
+        "operationId": "post-security-role-query",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "filters": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "showReservedRoles": {
+                        "type": "boolean"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "from": {
+                    "type": "number"
+                  },
+                  "query": {
+                    "type": "string"
+                  },
+                  "size": {
+                    "type": "number"
+                  },
+                  "sort": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "direction": {
+                        "enum": [
+                          "asc",
+                          "desc"
+                        ],
+                        "type": "string"
+                      },
+                      "field": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "field",
+                      "direction"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Query roles",
+        "tags": []
       }
     },
     "/api/security/role/{name}": {

@@ -16,10 +16,10 @@
 
 import type { z } from '@kbn/zod';
 
-import { SuccessResponse, NoParametersRequestSchema } from '../../../model/schema/common.gen';
+import { SuccessResponse, BaseActionSchema } from '../../../model/schema/common.gen';
 
 export type UnisolateRouteRequestBody = z.infer<typeof UnisolateRouteRequestBody>;
-export const UnisolateRouteRequestBody = NoParametersRequestSchema;
+export const UnisolateRouteRequestBody = BaseActionSchema;
 
 export type EndpointUnisolateActionRequestBody = z.infer<typeof EndpointUnisolateActionRequestBody>;
 export const EndpointUnisolateActionRequestBody = UnisolateRouteRequestBody;

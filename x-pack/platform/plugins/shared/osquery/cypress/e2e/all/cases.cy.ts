@@ -61,7 +61,7 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('security', { tags: ['@ess', '@serverless'] }, () => {
+  describe('security', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
     let caseId: string;
     let caseTitle: string;
 
