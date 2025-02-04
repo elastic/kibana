@@ -249,7 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             alertOnNoData: true,
             alertOnGroupDisappear: true,
             searchConfiguration: {
-              index: 'data-view-id',
+              index: DATA_VIEW_ID,
               query: { query: '', language: 'kuery' },
             },
           });
@@ -279,8 +279,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataViewId: DATA_VIEW_ID,
-          dataViewSpec: DATA_VIEW_ID,
+          dataset: DATA_VIEW_ID,
           timeRange: { to: 'now' },
           query: { query: '', language: 'kuery' },
           filters: [],
