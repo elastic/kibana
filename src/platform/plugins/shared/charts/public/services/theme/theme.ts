@@ -11,8 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { LIGHT_THEME, PartialTheme, Theme, getChartsTheme } from '@elastic/charts';
 
 export class ThemeService {
   /** Returns default charts theme */
@@ -103,8 +102,8 @@ export class ThemeService {
    */
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
-    this.theme$.subscribe(({ darkMode }) => {
-      this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
+    this.theme$.subscribe((newTheme) => {
+      this._chartsBaseTheme$.next(getChartsTheme(newTheme));
     });
   }
 }
