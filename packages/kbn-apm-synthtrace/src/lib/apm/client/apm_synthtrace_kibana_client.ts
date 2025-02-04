@@ -53,6 +53,10 @@ export class ApmSynthtraceKibanaClient {
         );
       }
 
+      if (responseJson.response && responseJson.response.latestVersion) {
+        return responseJson.response.latestVersion as string;
+      }
+
       return responseJson.item.latestVersion as string;
     };
 
