@@ -2846,7 +2846,6 @@
         "cypress"
       ],
       "reviewers": [
-        "team:apm",
         "team:security-solution"
       ],
       "matchBaseBranches": [
