@@ -30,7 +30,7 @@ const testProps = {
   regenerateMessage: jest.fn(),
   setIsStreaming: jest.fn(),
   transformMessage: jest.fn(),
-  contentReferences: undefined
+  contentReferences: undefined,
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;

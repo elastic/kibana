@@ -16,10 +16,10 @@ import { ProductDocumentationReference } from './product_documentation_reference
 import { EsqlQueryReference } from './esql_query_reference';
 
 /** While a message is being streamed, content references are null. When a message has finished streaming, content references are either defined or undefined */
-export type StreamingOrFinalContentReferences = ContentReferences | undefined | null
+export type StreamingOrFinalContentReferences = ContentReferences | undefined | null;
 
 export interface ContentReferenceComponentFactory {
-  contentReferences: StreamingOrFinalContentReferences
+  contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
 }
 

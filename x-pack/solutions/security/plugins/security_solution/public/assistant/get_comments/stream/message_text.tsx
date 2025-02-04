@@ -23,7 +23,8 @@ import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
 import { ContentReferenceParser } from '../content_reference/content_reference_parser';
-import { contentReferenceComponentFactory, StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import { contentReferenceComponentFactory } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   content: string;

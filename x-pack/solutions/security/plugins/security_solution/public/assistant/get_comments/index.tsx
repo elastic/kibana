@@ -178,7 +178,7 @@ export const getComments: GetAssistantMessages = ({
           children: (
             <StreamComment
               abortStream={abortStream}
-              contentReferences={null} 
+              contentReferences={null}
               contentReferencesVisible={contentReferencesVisible}
               contentReferencesEnabled={contentReferencesEnabled}
               index={index}

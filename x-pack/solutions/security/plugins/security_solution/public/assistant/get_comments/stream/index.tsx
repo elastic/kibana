@@ -13,7 +13,7 @@ import { StopGeneratingButton } from './buttons/stop_generating_button';
 import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
-import { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   abortStream: () => void;
