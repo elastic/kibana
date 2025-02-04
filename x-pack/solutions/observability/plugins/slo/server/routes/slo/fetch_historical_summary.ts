@@ -6,7 +6,6 @@
  */
 
 import { fetchHistoricalSummaryParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -26,6 +25,6 @@ export const fetchHistoricalSummary = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
 
-    return await executeWithErrorHandler(() => historicalSummaryClient.fetch(params.body));
+    return await historicalSummaryClient.fetch(params.body);
   },
 });
