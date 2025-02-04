@@ -25,10 +25,11 @@ const Content = ({
   refreshDefinition,
   isLoadingDefinition,
 }: Required<SchemaEditorProps>) => {
-  const { fields, isLoadingUnmappedFields, unmapField, updateField } = useSchemaFields({
-    definition,
-    refreshDefinition,
-  });
+  const { fields, isLoadingUnmappedFields, refreshFields, unmapField, updateField } =
+    useSchemaFields({
+      definition,
+      refreshDefinition,
+    });
 
   return (
     <SchemaEditor
@@ -37,6 +38,7 @@ const Content = ({
       stream={definition.stream}
       onFieldUnmap={unmapField}
       onFieldUpdate={updateField}
+      onRefreshData={refreshFields}
       withControls
       withFieldSimulation
       withTableActions={!isRootStreamDefinition(definition.stream)}

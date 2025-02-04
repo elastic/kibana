@@ -87,6 +87,11 @@ export const useSchemaFields = ({
     return [...inheritedFields, ...mappedFields, ...unmappedFields];
   }, [definition, unmappedFieldsValue]);
 
+  const refreshFields = useCallback(() => {
+    refreshDefinition();
+    refreshUnmappedFields();
+  }, [refreshDefinition, refreshUnmappedFields]);
+
   const updateField = useCallback(
     async (field: SchemaField) => {
       try {
@@ -128,8 +133,7 @@ export const useSchemaFields = ({
           })
         );
 
-        refreshDefinition();
-        refreshUnmappedFields();
+        refreshFields();
       } catch (error) {
         toasts.addError(error, {
           title: i18n.translate('xpack.streams.streamDetailSchemaEditorEditErrorToast', {
@@ -141,14 +145,7 @@ export const useSchemaFields = ({
         });
       }
     },
-    [
-      abortController.signal,
-      definition,
-      refreshDefinition,
-      refreshUnmappedFields,
-      streamsRepositoryClient,
-      toasts,
-    ]
+    [abortController.signal, definition, refreshFields, streamsRepositoryClient, toasts]
   );
 
   const unmapField = useCallback(
@@ -184,8 +181,7 @@ export const useSchemaFields = ({
           })
         );
 
-        refreshDefinition();
-        refreshUnmappedFields();
+        refreshFields();
       } catch (error) {
         toasts.addError(error, {
           title: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmapErrorToast', {
@@ -197,19 +193,13 @@ export const useSchemaFields = ({
         });
       }
     },
-    [
-      abortController.signal,
-      definition,
-      refreshDefinition,
-      refreshUnmappedFields,
-      streamsRepositoryClient,
-      toasts,
-    ]
+    [abortController.signal, definition, refreshFields, streamsRepositoryClient, toasts]
   );
 
   return {
     fields,
     isLoadingUnmappedFields,
+    refreshFields,
     unmapField,
     updateField,
   };

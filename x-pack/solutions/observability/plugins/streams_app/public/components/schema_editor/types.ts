@@ -32,6 +32,7 @@ export interface SchemaEditorProps {
   isLoading?: boolean;
   onFieldUnmap: (fieldName: SchemaField['name']) => void;
   onFieldUpdate: (field: SchemaField) => void;
+  onRefreshData?: () => void;
   stream: WiredStreamDefinition;
   withControls?: boolean;
   withFieldSimulation?: boolean;

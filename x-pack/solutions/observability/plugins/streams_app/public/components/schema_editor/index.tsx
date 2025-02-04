@@ -18,6 +18,7 @@ export function SchemaEditor({
   isLoading,
   onFieldUnmap,
   onFieldUpdate,
+  onRefreshData,
   stream,
   withControls = false,
   withFieldSimulation = false,
@@ -42,7 +43,9 @@ export function SchemaEditor({
             <EuiProgress size="xs" color="accent" position="fixed" />
           </EuiPortal>
         ) : null}
-        {withControls && <Controls controls={controls} onChange={updateControls} />}
+        {withControls && (
+          <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
+        )}
         <FieldsTable
           fields={fields}
           controls={controls}
