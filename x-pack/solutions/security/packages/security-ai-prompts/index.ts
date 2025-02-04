@@ -6,7 +6,7 @@
  */
 
 export { promptType } from './src/saved_object_mappings';
-export { getPrompt, getPromptsByGroupId } from './src/get_prompt';
+export { getPrompt, getPromptsByGroupId, resolveProviderAndModel } from './src/get_prompt';
 export {
   type PromptArray,
   type Prompt,
