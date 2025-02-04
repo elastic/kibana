@@ -11,12 +11,12 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { CoreStart } from '@kbn/core/public';
 import { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ADD_SYNTHETICS_OVERVIEW_ACTION_ID } from './constants';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
-import { CoreStart } from '@kbn/core/public';
 
 export function createStatusOverviewPanelAction(
   coreStart: CoreStart,

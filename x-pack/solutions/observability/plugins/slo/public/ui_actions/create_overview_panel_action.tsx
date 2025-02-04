@@ -19,7 +19,7 @@ import {
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from '../embeddable/slo/overview/constants';
 import { SLORepositoryClient } from '../types';
-import { openSloConfiguration }from '../embeddable/slo/overview/slo_overview_open_configuration';
+import { openSloConfiguration } from '../embeddable/slo/overview/slo_overview_open_configuration';
 
 export function createOverviewPanelAction(
   coreStart: CoreStart,

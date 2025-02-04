@@ -32,11 +32,7 @@ export function registerSloUiActions(
     });
     uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SLO_ERROR_BUDGET_ACTION_ID, async () => {
       const { createAddErrorBudgetPanelAction } = await import('./add_panel_actions_module');
-      return createAddErrorBudgetPanelAction(
-        coreStart,
-        pluginsStart,
-        sloClient
-      );
+      return createAddErrorBudgetPanelAction(coreStart, pluginsStart, sloClient);
     });
     uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SLO_ALERTS_ACTION_ID, async () => {
       const { createAddAlertsPanelAction } = await import('./add_panel_actions_module');

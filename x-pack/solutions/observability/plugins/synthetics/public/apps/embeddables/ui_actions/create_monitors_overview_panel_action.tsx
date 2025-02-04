@@ -12,11 +12,11 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
+import { CoreStart } from '@kbn/core/public';
 import { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import { ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID } from './constants';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
-import { CoreStart } from '@kbn/core/public';
 
 export function createMonitorsOverviewPanelAction(
   coreStart: CoreStart,

@@ -7,4 +7,3 @@
 
 export { createStatusOverviewPanelAction } from './create_stats_overview_panel_action';
 export { createMonitorsOverviewPanelAction } from './create_monitors_overview_panel_action';
-
