@@ -49,6 +49,19 @@ export function SearchApiKeysProvider({ getService, getPageObjects }: FtrProvide
       expect(sessionStorageKey.encoded).to.eql(apiKey);
     },
 
+    async expectShownAPIKeyAvailable() {
+      await testSubjects.existOrFail('apiKeyFormAPIKey');
+      let apiKey;
+      await retry.try(async () => {
+        apiKey = await testSubjects.getVisibleText('apiKeyFormAPIKey');
+        expect(apiKey).to.be.a('string');
+        expect(apiKey.length).to.be(60);
+        expect(apiKey).to.not.be(APIKEY_MASK);
+      });
+      const sessionStorageKey = await getAPIKeyFromSessionStorage();
+      expect(sessionStorageKey.encoded).to.eql(apiKey);
+    },
+
     async expectAPIKeyNoPrivileges() {
       await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
     },
