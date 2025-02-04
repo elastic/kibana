@@ -83,6 +83,12 @@ export const LogsPageContent: React.FunctionComponent = () => {
             return null;
           }}
         />
+        <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
+        <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
+        <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
+        <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
+        <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
+        // Legacy renders and redirects
         <Route
           path="/settings"
           exact
@@ -95,12 +101,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
             return null;
           }}
         />
-        <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
-        <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
-        <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
-        <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
-        <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
-
         <Route render={() => <NotFoundPage title={pageTitle} />} />
       </Routes>
     </>
