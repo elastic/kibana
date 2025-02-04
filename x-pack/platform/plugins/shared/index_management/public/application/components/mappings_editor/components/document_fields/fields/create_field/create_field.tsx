@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
+  EuiPanel,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -291,6 +292,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   return (
     <>
+      <EuiSpacer size="s" />
       <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
         <Form
           form={form}
@@ -298,18 +300,15 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onSubmit={submitForm}
           data-test-subj="createFieldForm"
         >
-          <div
+          <EuiPanel
+            color="subdued"
+            paddingSize="m"
             className={classNames('mappingsEditor__createFieldWrapper', {
               'mappingsEditor__createFieldWrapper--toggle':
                 Boolean(maxNestedDepth) && maxNestedDepth! > 0,
               'mappingsEditor__createFieldWrapper--multiField': isMultiField,
             })}
-            css={css`
-              padding: ${euiTheme.size.l};
-              paddingleft: ${paddingLeftCreateFieldWrapper};
-              background-color: ${euiTheme.colors.backgroundBaseSubdued};
-            `}
-            ref={createFieldFormRef}
+            panelRef={createFieldFormRef}
             tabIndex={0}
           >
             <div className="mappingsEditor__createFieldContent">
@@ -320,7 +319,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               {isSemanticText && <SelectInferenceId />}
               {renderFormActions()}
             </div>
-          </div>
+          </EuiPanel>
         </Form>
       </EuiOutsideClickDetector>
     </>
