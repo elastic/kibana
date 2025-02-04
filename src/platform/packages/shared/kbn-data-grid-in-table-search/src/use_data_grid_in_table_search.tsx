@@ -9,7 +9,7 @@
 
 import React, { useMemo, useRef, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
-import type { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiDataGridProps, EuiDataGridRefProps, useEuiTheme } from '@elastic/eui';
 import { InTableSearchControl, InTableSearchControlProps } from './in_table_search_control';
 import { RenderCellValueWrapper } from './types';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
@@ -49,6 +49,7 @@ export const useDataGridInTableSearch = (
     pagination,
     cellContext,
   } = props;
+  const { euiTheme } = useEuiTheme();
   const isPaginationEnabled = Boolean(pagination);
   const pageSize = (isPaginationEnabled && pagination?.pageSize) || null;
   const onChangePage = pagination?.onChangePage;
@@ -56,8 +57,13 @@ export const useDataGridInTableSearch = (
   pageIndexRef.current = pagination?.pageIndex ?? 0;
 
   const renderCellValueWithInTableSearchSupport = useMemo(
-    () => wrapRenderCellValueWithInTableSearchSupport(renderCellValue),
-    [renderCellValue]
+    () =>
+      wrapRenderCellValueWithInTableSearchSupport(
+        renderCellValue,
+        'currentColor',
+        euiTheme.colors.backgroundLightAccent
+      ),
+    [renderCellValue, euiTheme.colors]
   );
 
   const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] =
