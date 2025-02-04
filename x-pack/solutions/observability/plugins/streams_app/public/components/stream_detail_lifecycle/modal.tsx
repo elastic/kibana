@@ -93,7 +93,7 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
   const [showUnitMenu, setShowUnitMenu] = useState(false);
 
   return (
-    <EuiModal maxWidth onClose={closeModal}>
+    <EuiModal onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.streams.streamDetailLifecycle.editRetention', {
@@ -259,7 +259,7 @@ function IlmModal({
   }, [getIlmPolicies, setIsLoading]);
 
   return (
-    <EuiModal maxWidth onClose={closeModal}>
+    <EuiModal onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.streams.streamDetailLifecycle.attachIlm', {
@@ -332,7 +332,7 @@ function IlmModal({
 
 function InheritModal({ definition, closeModal, updateInProgress, updateLifecycle }: ModalOptions) {
   return (
-    <EuiModal maxWidth onClose={closeModal}>
+    <EuiModal onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleTitle', {
