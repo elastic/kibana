@@ -14,10 +14,10 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { DataStreamMigrationStatus } from '../../../../../../../../../common/types';
 import type { MigrationState } from '../../../use_migration_state';
-import { StepProgress, StepProgressStep } from '../../../../reindex/flyout/step_progress';
 import { getDataStreamReindexProgress } from '../../../../../../../lib/utils';
 import { MigrateDocumentsStepTitle } from './progress_title';
 import { CancelLoadingState } from '../../../../../../types';
+import { StepProgress, type StepProgressStep } from '../../../../../common/step_progress';
 
 interface Props {
   migrationState: MigrationState;

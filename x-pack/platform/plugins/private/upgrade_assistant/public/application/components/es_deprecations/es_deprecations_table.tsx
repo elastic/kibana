@@ -31,7 +31,7 @@ import {
   MlSnapshotsTableRow,
   DefaultTableRow,
   IndexSettingsTableRow,
-  ReindexTableRow,
+  IndexTableRow,
   ClusterSettingsTableRow,
   HealthIndicatorTableRow,
   DataStreamTableRow,
@@ -126,7 +126,7 @@ const renderTableRowCells = (
       return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'reindex':
-      return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'healthIndicator':
       return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
