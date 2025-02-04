@@ -427,7 +427,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.malware.max_file_size_bytes',
-    first_supported_version: '8.16',
+    first_supported_version: '8.16.4',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.max_file_size_bytes',
       {
