@@ -18,6 +18,7 @@ import {
   ToolSchemaType,
 } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
+import { convertUpstreamError } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
@@ -51,8 +52,8 @@ export const geminiAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }

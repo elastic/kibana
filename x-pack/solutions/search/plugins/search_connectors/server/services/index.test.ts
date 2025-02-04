@@ -301,7 +301,7 @@ describe('AgentlessConnectorsInfraService', () => {
       expect(policies[1].agent_policy_ids).toBe(thirdPackagePolicy.policy_ids);
     });
 
-    test('Skips policies that have missing fields', async () => {
+    test('Returns policies that have missing connector_id and connector_name but not service_type', async () => {
       const firstPackagePolicy = createPackagePolicyMock();
       firstPackagePolicy.id = 'this-is-package-policy-id';
       firstPackagePolicy.policy_ids = ['this-is-agent-policy-id'];
@@ -325,13 +325,28 @@ describe('AgentlessConnectorsInfraService', () => {
         } as PackagePolicyInput,
       ];
 
+      const thirdPackagePolicy = createPackagePolicyMock();
+      thirdPackagePolicy.inputs = [
+        {
+          type: 'connectors-py',
+          compiled_input: {
+            connector_id: '000002',
+            service_type: 'github',
+          },
+        } as PackagePolicyInput,
+      ];
+
       packagePolicyService.fetchAllItems.mockResolvedValue(
-        getMockPolicyFetchAllItems([[firstPackagePolicy], [secondPackagePolicy]])
+        getMockPolicyFetchAllItems([
+          [firstPackagePolicy],
+          [secondPackagePolicy],
+          [thirdPackagePolicy],
+        ])
       );
 
       const policies = await service.getConnectorPackagePolicies();
 
-      expect(policies.length).toBe(0);
+      expect(policies.length).toBe(2);
     });
   });
   describe('deployConnector', () => {
@@ -579,6 +594,20 @@ describe('module', () => {
     is_deleted: false,
   };
 
+  const confluenceConnector: ConnectorMetadata = {
+    id: '000004',
+    name: 'Confluence Connector',
+    service_type: 'confluence',
+    is_deleted: false,
+  };
+
+  const confluenceConnectorEmptySettings: ConnectorMetadata = {
+    id: '',
+    name: '',
+    service_type: 'confluence',
+    is_deleted: false,
+  };
+
   const deleted = (connector: ConnectorMetadata): ConnectorMetadata => {
     return {
       id: connector.id,
@@ -604,6 +633,12 @@ describe('module', () => {
     package_policy_id: 'agent-003',
     agent_policy_ids: ['agent-package-003'],
     connector_settings: mysqlConnector,
+  };
+
+  const confluencePackagePolicy: PackagePolicyMetadata = {
+    package_policy_id: '000004',
+    agent_policy_ids: [],
+    connector_settings: confluenceConnectorEmptySettings,
   };
 
   describe('getPoliciesToDelete', () => {
@@ -687,6 +722,15 @@ describe('module', () => {
       expect(missingConnectors).toContain(githubConnector);
       expect(missingConnectors).toContain(sharepointConnector);
       expect(missingConnectors).toContain(mysqlConnector);
+    });
+
+    test('Returns none if Policy is created without a connector_id or connector_name', async () => {
+      const missingConnectors = getConnectorsToDeploy(
+        [githubPackagePolicy, sharepointPackagePolicy, mysqlPackagePolicy, confluencePackagePolicy],
+        [githubConnector, sharepointConnector, mysqlConnector, confluenceConnector]
+      );
+
+      expect(missingConnectors.length).toBe(0);
     });
   });
 });
