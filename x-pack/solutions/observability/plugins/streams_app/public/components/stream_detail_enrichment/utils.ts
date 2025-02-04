@@ -9,6 +9,7 @@
 
 import { ProcessorDefinition, ProcessorType, getProcessorType } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
@@ -94,7 +95,7 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
         if: formState.if,
         field,
         pattern,
-        append_separator,
+        append_separator: isEmpty(append_separator) ? undefined : append_separator,
         ignore_failure,
         ignore_missing,
       },

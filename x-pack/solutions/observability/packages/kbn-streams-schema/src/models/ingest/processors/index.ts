@@ -63,7 +63,7 @@ export const dissectProcessorDefinitionSchema: z.Schema<DissectProcessorDefiniti
       z.object({
         field: NonEmptyString,
         pattern: NonEmptyString,
-        append_separator: z.optional(z.string()),
+        append_separator: z.optional(NonEmptyString),
         ignore_missing: z.optional(z.boolean()),
       })
     ),
