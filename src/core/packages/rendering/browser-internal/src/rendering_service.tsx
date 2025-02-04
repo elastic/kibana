@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { createRoot } from 'react-dom/client';
 import { pairwise, startWith } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -60,7 +61,8 @@ export class RenderingService {
         body.classList.add(...newClasses);
       });
 
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <>
           {/* Global Styles that apply across the entire app */}
@@ -81,8 +83,7 @@ export class RenderingService {
             {appComponent}
           </AppWrapper>
         </>
-      </KibanaRootContextProvider>,
-      targetDomElement
+      </KibanaRootContextProvider>
     );
   }
 }
