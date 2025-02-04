@@ -31,7 +31,6 @@
     "@kbn/observability-utils-server",
     "@kbn/ui-theme",
     "@kbn/calculate-auto",
-    "@kbn/core-notifications-browser",
     "@kbn/kibana-react-plugin",
     "@kbn/es-query",
     "@kbn/server-route-repository-client",
