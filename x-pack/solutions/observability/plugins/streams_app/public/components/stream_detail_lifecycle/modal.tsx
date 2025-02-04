@@ -291,7 +291,7 @@ function IlmModal({
               setPolicies(options);
             }}
             listProps={{
-              rowHeight: 50,
+              rowHeight: 45,
             }}
             renderOption={(option: EuiSelectableOption<IlmOptionData>, searchValue: string) => (
               <>
