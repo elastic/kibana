@@ -564,7 +564,7 @@ export class TrainedModelsService {
   private hasActiveOperations(): boolean {
     return (
       this.downloadInProgress.size > 0 ||
-      this.scheduledDeployments.length > 0 ||
+      this.deploymentsInProgress.size > 0 ||
       this.downloadStatusFetchInProgress
     );
   }
