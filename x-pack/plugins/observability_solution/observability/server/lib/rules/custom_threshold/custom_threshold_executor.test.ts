@@ -154,6 +154,7 @@ const mockedIndex = {
 const mockedDataView = {
   getIndexPattern: () => 'mockedIndexPattern',
   getName: () => 'mockedDataViewName',
+  getRuntimeMappings: () => undefined,
   ...mockedIndex,
 };
 const mockedSearchSource = {
@@ -970,7 +971,7 @@ describe('The custom threshold alert type', () => {
           stateResult2
         );
         expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-        expect(mockedEvaluateRule.mock.calls[2][10]).toEqual([
+        expect(mockedEvaluateRule.mock.calls[2][11]).toEqual([
           { bucketKey: { groupBy0: 'b' }, key: 'b' },
         ]);
       });
@@ -2959,7 +2960,7 @@ describe('The custom threshold alert type', () => {
           stateResult2
         );
         expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-        expect(mockedEvaluateRule.mock.calls[2][10]).toEqual([
+        expect(mockedEvaluateRule.mock.calls[2][11]).toEqual([
           { bucketKey: { groupBy0: 'b' }, key: 'b' },
         ]);
       });
