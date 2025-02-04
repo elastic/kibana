@@ -34,7 +34,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { isObject } from 'lodash';
-import { defaultDoc } from '../mocks';
+import { createMockDatasource, defaultDoc } from '../mocks';
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
@@ -87,13 +87,21 @@ type ChangeFnType = ({
 async function expectRerenderOnDataLoder(
   changeFn: ChangeFnType,
   runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() },
-  parentApiOverrides?: Partial<
-    {
-      filters$: BehaviorSubject<Filter[] | undefined>;
-      query$: BehaviorSubject<Query | AggregateQuery | undefined>;
-      timeRange$: BehaviorSubject<TimeRange | undefined>;
-    } & LensOverrides
-  >
+  {
+    parentApiOverrides,
+    servicesOverrides,
+    internalApiOverrides,
+  }: {
+    parentApiOverrides?: Partial<
+      {
+        filters$: BehaviorSubject<Filter[] | undefined>;
+        query$: BehaviorSubject<Query | AggregateQuery | undefined>;
+        timeRange$: BehaviorSubject<TimeRange | undefined>;
+      } & LensOverrides
+    >;
+    internalApiOverrides?: Partial<LensInternalApi>;
+    servicesOverrides?: Partial<LensEmbeddableStartServices>;
+  } = {}
 ): Promise<void> {
   const parentApi = {
     ...createUnifiedSearchApi(),
@@ -116,12 +124,15 @@ async function expectRerenderOnDataLoder(
     parentApi,
   };
   const getState = jest.fn(() => runtimeState);
-  const internalApi = getLensInternalApiMock();
-  const services = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
-    visOverrides: { id: 'lnsXY' },
-    dataOverrides: { id: 'form_based' },
-  });
-  services.documentToExpression = jest.fn().mockResolvedValue({ ast: 'expression_string' });
+  const internalApi = getLensInternalApiMock(internalApiOverrides);
+  const services = {
+    ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+      visOverrides: { id: 'lnsXY' },
+      dataOverrides: { id: 'form_based' },
+    }),
+    documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+    ...servicesOverrides,
+  };
   const { cleanup } = loadEmbeddableData(
     faker.string.uuid(),
     getState,
@@ -209,7 +220,7 @@ describe('Data Loader', () => {
         },
       });
       // trigger a change by changing the title in the attributes
-      (api.viewMode as BehaviorSubject<ViewMode | undefined>).next('view');
+      (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
     });
   });
 
@@ -217,7 +228,7 @@ describe('Data Loader', () => {
     await expectRerenderOnDataLoder(async ({ api }) => {
       // the default get state does not have dynamic actions
       // trigger a change by changing the title in the attributes
-      (api.viewMode as BehaviorSubject<ViewMode | undefined>).next('view');
+      (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
       // should not re-render
       return false;
     });
@@ -242,7 +253,7 @@ describe('Data Loader', () => {
         return false;
       },
       undefined, // use default attributes
-      createUnifiedSearchApi(query, filters) // customize parentApi
+      { parentApiOverrides: createUnifiedSearchApi(query, filters) } // customize parentApi
     );
   });
 
@@ -305,7 +316,13 @@ describe('Data Loader', () => {
         return false;
       },
       { attributes },
-      createUnifiedSearchApi(parentApiQuery, parentApiFilters, parentApiTimeRange)
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          parentApiQuery,
+          parentApiFilters,
+          parentApiTimeRange
+        ),
+      }
     );
   });
 
@@ -322,7 +339,7 @@ describe('Data Loader', () => {
       // trigger a onData
       params?.onData$?.(1);
       expect(parentApi.onLoad).toHaveBeenCalledTimes(2);
-      expect(parentApi.onLoad).toHaveBeenNthCalledWith(2, false, undefined, api.dataLoading);
+      expect(parentApi.onLoad).toHaveBeenNthCalledWith(2, false, undefined, api.dataLoading$);
 
       // turn off the re-render check, that will be performed here
       return false;
@@ -333,10 +350,10 @@ describe('Data Loader', () => {
     await expectRerenderOnDataLoder(
       async ({ internalApi }) => {
         await waitForValue(
-          internalApi.dataViews,
+          internalApi.dataViews$,
           (v: NonNullable<unknown>) => Array.isArray(v) && v.length > 0
         );
-        const outputIndexPatterns = internalApi.dataViews.getValue() || [];
+        const outputIndexPatterns = internalApi.dataViews$.getValue() || [];
 
         expect(outputIndexPatterns.length).toEqual(2);
         expect(outputIndexPatterns[0].id).toEqual('123');
@@ -376,7 +393,7 @@ describe('Data Loader', () => {
         ...internalApi.attributes$.getValue(),
         title: faker.lorem.word(),
       });
-      (api.savedObjectId as BehaviorSubject<string | undefined>).next('newSavedObjectId');
+      (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newSavedObjectId');
     });
   });
 
@@ -407,6 +424,56 @@ describe('Data Loader', () => {
           settings: {
             onBrushEnd: 'ignore',
           },
+        },
+      }
+    );
+  });
+
+  it('should catch missing dataView errors correctly', async () => {
+    await expectRerenderOnDataLoder(
+      async ({ internalApi }) => {
+        // wait for the error to appear
+        await waitForValue(internalApi.blockingError$);
+
+        const error = internalApi.blockingError$.getValue()!;
+        expect(error.message).toEqual(
+          'Could not find the data view: 90943e30-9a47-11e8-b64d-95841ca0b247'
+        );
+        return false;
+      },
+      undefined,
+      // Unfortuantely some mocks are required here to make the test work
+      {
+        // Mock the testing datasource to return an error when asked for checkIntegrity
+        servicesOverrides: {
+          datasourceMap: {
+            form_based: {
+              ...createMockDatasource('form_based'),
+              checkIntegrity: jest.fn().mockReturnValue(['90943e30-9a47-11e8-b64d-95841ca0b247']),
+            },
+          },
+        },
+        // Mock the visualization context to fully load the datasource state
+        internalApiOverrides: {
+          getVisualizationContext: jest.fn().mockReturnValue({
+            activeAttributes: {
+              ...defaultDoc,
+              visualizationType: 'lnsXY',
+              state: { ...defaultDoc.state, datasourceStates: { form_based: {} } },
+            },
+            mergedSearchContext: {
+              now: Date.now(),
+              timeRange: { from: 'now-15m', to: 'now' },
+              query: [defaultDoc.state.query],
+              filters: [],
+              disableWarningToasts: true,
+            },
+            indexPatterns: [],
+            indexPatternRefs: {},
+            activeVisualizationState: { activeId: 'lnsXY' },
+            activeDatasourceState: {},
+            activeData: {},
+          }),
         },
       }
     );

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { Fragment } from 'react';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import React, { Fragment } from 'react';
 
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface Props {
@@ -38,7 +38,7 @@ export function SloDetailsAlerts({ slo }: Props) {
               bool: {
                 filter: [
                   { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.instanceId': slo.instanceId ?? ALL_VALUE } },
+                  { term: { 'slo.instanceId': slo.instanceId } },
                 ],
               },
             }}

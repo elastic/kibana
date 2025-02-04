@@ -8,7 +8,7 @@ import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
-import { IStorageClient, StorageDocumentOf } from '@kbn/observability-utils-server/es/storage';
+import { IStorageClient } from '@kbn/observability-utils-server/es/storage';
 import { keyBy } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
@@ -64,7 +64,7 @@ function getAssetDocument({
   entityId,
   entityType,
   assetType,
-}: AssetLink & { entityId: string; entityType: string }): StorageDocumentOf<AssetStorageSettings> {
+}: AssetLink & { entityId: string; entityType: string }) {
   const doc = {
     'asset.id': assetId,
     'asset.type': assetType,
@@ -87,10 +87,17 @@ interface AssetBulkDeleteOperation {
 
 export type AssetBulkOperation = AssetBulkIndexOperation | AssetBulkDeleteOperation;
 
+export interface StoredAssetLink {
+  'asset.id': string;
+  'asset.type': AssetType;
+  'entity.id': string;
+  'entity.type': string;
+}
+
 export class AssetClient {
   constructor(
     private readonly clients: {
-      storageClient: IStorageClient<AssetStorageSettings>;
+      storageClient: IStorageClient<AssetStorageSettings, StoredAssetLink>;
       soClient: SavedObjectsClientContract;
       rulesClient: RulesClient;
     }
@@ -175,6 +182,10 @@ export class AssetClient {
     const { _id: id } = getAssetDocument(properties);
 
     await this.clients.storageClient.delete({ id });
+  }
+
+  async clean() {
+    await this.clients.storageClient.clean();
   }
 
   async getAssetIds({

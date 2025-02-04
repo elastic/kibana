@@ -20,7 +20,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { StreamDefinition, isDescendantOf, isWiredStream } from '@kbn/streams-schema';
+import {
+  StreamDefinition,
+  getSegments,
+  isDescendantOf,
+  isUnwiredStreamDefinition,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
@@ -35,13 +41,13 @@ export interface StreamTree {
 
 function asTrees(definitions: StreamDefinition[]) {
   const trees: StreamTree[] = [];
-  const wiredDefinitions = definitions.filter((definition) => isWiredStream(definition));
-  wiredDefinitions.sort((a, b) => a.name.split('.').length - b.name.split('.').length);
+  const wiredDefinitions = definitions.filter((definition) => isWiredStreamDefinition(definition));
+  wiredDefinitions.sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
 
   wiredDefinitions.forEach((definition) => {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
-    const segments = definition.name.split('.');
+    const segments = getSegments(definition.name);
     // traverse the tree following the prefix of the current id.
     // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
     while (
@@ -80,12 +86,12 @@ export function StreamsList({
 
   const filteredItems = useMemo(() => {
     return items
-      .filter((item) => showClassic || isWiredStream(item))
+      .filter((item) => showClassic || isWiredStreamDefinition(item))
       .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 
   const classicStreams = useMemo(() => {
-    return filteredItems.filter((item) => !isWiredStream(item));
+    return filteredItems.filter((item) => isUnwiredStreamDefinition(item));
   }, [filteredItems]);
 
   const treeView = useMemo(() => {
@@ -114,6 +120,7 @@ export function StreamsList({
             <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
               {Object.keys(collapsed).length === 0 ? (
                 <EuiButtonEmpty
+                  data-test-subj="streamsAppStreamsListCollapseAllButton"
                   iconType="fold"
                   size="s"
                   onClick={() =>
@@ -125,7 +132,12 @@ export function StreamsList({
                   })}
                 </EuiButtonEmpty>
               ) : (
-                <EuiButtonEmpty iconType="unfold" onClick={() => setCollapsed({})} size="s">
+                <EuiButtonEmpty
+                  data-test-subj="streamsAppStreamsListExpandAllButton"
+                  iconType="unfold"
+                  onClick={() => setCollapsed({})}
+                  size="s"
+                >
                   {i18n.translate('xpack.streams.streamsTable.expandAll', {
                     defaultMessage: 'Expand all',
                   })}
@@ -231,7 +243,11 @@ function StreamNode({
             <EuiIcon type={collapsed?.[node.name] ? 'arrowRight' : 'arrowDown'} />
           </button>
         )}
-        <EuiLink color="text" href={router.link('/{key}', { path: { key: node.name } })}>
+        <EuiLink
+          data-test-subj="streamsAppStreamNodeLink"
+          color="text"
+          href={router.link('/{key}', { path: { key: node.name } })}
+        >
           {node.name}
         </EuiLink>
         {node.type === 'root' && (
@@ -257,6 +273,7 @@ function StreamNode({
             })}
           >
             <EuiButtonIcon
+              data-test-subj="streamsAppStreamNodeButton"
               aria-label={i18n.translate('xpack.streams.streamsTable.openInNewTab', {
                 defaultMessage: 'Open in new tab',
               })}
@@ -271,6 +288,7 @@ function StreamNode({
             })}
           >
             <EuiButtonIcon
+              data-test-subj="streamsAppStreamNodeButton"
               iconType="discoverApp"
               href={discoverUrl}
               aria-label={i18n.translate('xpack.streams.streamsTable.openInDiscover', {
@@ -284,6 +302,7 @@ function StreamNode({
             })}
           >
             <EuiButtonIcon
+              data-test-subj="streamsAppStreamNodeButton"
               iconType="gear"
               aria-label={i18n.translate('xpack.streams.streamsTable.management', {
                 defaultMessage: 'Management',

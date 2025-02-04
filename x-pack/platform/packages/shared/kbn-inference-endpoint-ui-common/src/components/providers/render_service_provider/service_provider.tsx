@@ -21,6 +21,7 @@ import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
 import anthropicIcon from '../assets/images/anthropic.svg';
 import alibabaCloudIcon from '../assets/images/alibaba_cloud.svg';
 import ibmWatsonxIcon from '../assets/images/ibm_watsonx.svg';
+import jinaAIIcon from '../assets/images/jinaai.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -66,6 +67,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'Elasticsearch',
     solutions: ['Search'],
   },
+  [ServiceProviderKeys.elastic]: {
+    icon: elasticIcon,
+    name: 'Elastic',
+    solutions: ['Observability', 'Security', 'Search'],
+  },
   [ServiceProviderKeys.googleaistudio]: {
     icon: googleAIStudioIcon,
     name: 'Google AI Studio',
@@ -99,6 +105,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.watsonxai]: {
     icon: ibmWatsonxIcon,
     name: 'IBM Watsonx',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.jinaai]: {
+    icon: jinaAIIcon,
+    name: 'Jina AI',
     solutions: ['Search'],
   },
 };

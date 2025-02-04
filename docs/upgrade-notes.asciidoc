@@ -23,8 +23,8 @@ ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
 1. Copy and edit the template in the right section of this file. Most recent entries should be at the top of the section, search for sections using the text "[float]".
 2. Edit the anchor ID [[REPO-PR]] of the template with proper values.
 3. Don't hardcode the link to the new entry. Instead, make it available through the doc link service files:
-  - https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-doc-links/src/get_doc_links.ts
-  - https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-doc-links/src/types.ts
+  - {kib-repo}blob/{branch}/src/platform/packages/shared/kbn-doc-links/src/get_doc_links.ts
+  - {kib-repo}blob/{branch}/src/platform/packages/shared/kbn-doc-links/src/types.ts
 
 The entry in the main links file should look like this:
 
@@ -48,6 +48,69 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 [float]
 === Breaking changes
 
+[discrete]
+[[breaking-207091]]
+.Removed legacy security rules bulk endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+--
+* `POST /api/detection_engine/rules/_bulk_create` has been replaced by `POST /api/detection_engine/rules/_import`
+* `PUT /api/detection_engine/rules/_bulk_update` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
+* `PATCH /api/detection_engine/rules/_bulk_update has been replaced by `POST /api/detection_engine/rules/_bulk_action`
+* `DELETE /api/detection_engine/rules/_bulk_delete` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
+* `POST api/detection_engine/rules/_bulk_delete` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
+--
+These changes were introduced in {kibana-pull}197422[#197422].
+
+*Impact* +
+Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
+*Action* +
+--
+Update your implementations to use the new endpoints:
+
+* **For bulk creation of rules:**
+   - Use `POST /api/detection_engine/rules/_import` (link:{api-kibana}/operation/operation-importrules[API documentation]) to create multiple rules along with their associated entities (for example, exceptions and action connectors).
+   - Alternatively, create rules individually using `POST /api/detection_engine/rules` (link:{api-kibana}/operation/operation-createrule[API documentation]).
+
+* **For bulk updates of rules:**
+   - Use `POST /api/detection_engine/rules/_bulk_action` (link:{api-kibana}/operation/operation-performrulesbulkaction[API documentation]) to update fields in multiple rules simultaneously.
+   - Alternatively, update rules individually using `PUT /api/detection_engine/rules` (link:{api-kibana}/operation/operation-updaterule[API documentation]).
+
+* **For bulk deletion of rules:**
+   - Use `POST /api/detection_engine/rules/_bulk_action` (link:{api-kibana}/operation/operation-performrulesbulkaction[API documentation]) to delete multiple rules by IDs or query.
+   - Alternatively, delete rules individually using `DELETE /api/detection_engine/rules` (link:{api-kibana}/operation/operation-deleterule[API documentation]).
+--
+====
+
+[discrete]
+[[breaking-199598]]
+.Remove deprecated endpoint management endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+--
+* `POST /api/endpoint/isolate` has been replaced by `POST /api/endpoint/action/isolate`
+* `POST /api/endpoint/unisolate` has been replaced by `POST /api/endpoint/action/unisolate`
+* `GET /api/endpoint/policy/summaries` has been deprecated without replacement. Will be removed in v9.0.0
+* `POST /api/endpoint/suggestions/{suggestion_type}` has been deprecated without replacement. Will be removed in v9.0.0
+* `GET /api/endpoint/action_log/{agent_id}` has been deprecated without replacement. Will be removed in v9.0.0
+* `GET /api/endpoint/metadata/transforms` has been deprecated without replacement. Will be removed in v9.0.0
+--
+
+*Impact* +
+Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
+*Action* +
+--
+* Remove references to `GET /api/endpoint/policy/summaries` endpoint.
+* Remove references to `POST /api/endpoint/suggestions/{suggestion_type}` endpoint.
+* Remove references to `GET /api/endpoint/action_log/{agent_id}` endpoint.
+* Remove references to `GET /api/endpoint/metadata/transforms` endpoint.
+* Replace references to deprecated endpoints with the replacements listed in the breaking change details.
+--
+====
 
 [discrete]
 [[breaking-201550]]
@@ -186,6 +249,45 @@ Upgrade to use the Risk Engine in all spaces which use the legacy risk scoring m
 - If the original user and host risk score modules are enabled, you'll see a button to "Start update". Click the button, and follow the instructions.
 ====
 
+[discrete]
+[[breaking-200834]]
+.Reporting uses Kibana feature privileges only to control access to reporting features
+[%collapsible]
+====
+*Details* +
+--
+In 8.x, the default access control model was based on a built-in role called `reporting_user`, which granted access to reporting features. Since 7.13, the preferred model for controlling access to reporting features has been Kibana feature privileges, enabled by setting `xpack.reporting.roles.enabled: false` in `kibana.yml`.
+
+In 9.0.0, the `xpack.reporting.roles.*` settings will be ignored.
+--
+
+*Impact* +
+The built-in `reporting_user` role is no longer deprecated and provides access to reporting features using Kibana feature privileges. This means that users that do not have privileges to use reporting will not see reporting features in the Kibana UI.
+
+*Action* +
+Use Kibana feature privileges to control access to reporting features. For more information, see {kibana-pull}200834[#200834].
+
+- The `reporting_user` role is still supported, but gives full access to all reporting features. We recommend creating custom roles with minimal privileges in **Stack Management > Roles**.
+- The `xpack.reporting.roles.allow` setting is no longer supported. If you have a `xpack.reporting.roles.allow` value in your `kibana.yml`, you should remove this setting and assign privileges to reporting features using Kibana feature privileges.
+====
+
+[discrete]
+[[breaking-202863]]
+.Saved query privileges have been reworked (9.0.0)
+[%collapsible]
+====
+*Details* +
+Saved query privileges have been reworked to rely solely on a single global `savedQueryManagement` privilege, and eliminate app-specific overrides (e.g. implicit access with `all` privilege for Discover, Dashboard, Maps, and Visualize apps). This change simplifies the security model and ensures consistency in the saved query management UI across Kibana, but results in different handling of saved query privileges for new user roles, and minor breaking changes to the existing management UX.
+For more information, refer to {kibana-pull}202863[#202863].
+*Impact* +
+The `savedQueryManagement` feature privilege now globally controls access to saved query management for all new user roles. Regardless of privileges for Discover, Dashboard, Maps, or Visualize, new user roles follow this behaviour:
+. If `savedQueryManagement` is `none`, the user cannot see or access the saved query management UI or APIs.
+. If `savedQueryManagement` is `read`, the user can load queries from the UI and access read APIs, but cannot save queries from the UI or make changes to queries through APIs.
+. If `savedQueryManagement` is `all`, the user can both load and save queries from the UI and through APIs.
+*Action* +
+Existing user roles that were previously implicitly granted access to saved queries through the dashboard, discover, visualize, or maps feature privileges will retain that access to prevent breaking changes. While no action is required for existing roles, it’s still advisable to audit relevant roles and re-save them to migrate to the latest privileges model. For new roles, ensure that the savedQueryManagement privilege is set as needed.
+====
+
 [float]
 === Deprecation notices
 
@@ -235,4 +337,26 @@ Systems that use HTTP/1 or don't have TLS configured will get a deprecation warn
 Verify that TLS is properly configured by enabling it and providing valid certificates in the settings. Test your system to ensure that connections are established securely over HTTP/2.
 
 If your Kibana server is hosted behind a load balancer or reverse proxy we recommend testing your deployment configuration before upgrading to 9.0. 
+====
+
+
+[discrete]
+[[known-issue-206998]]
+.Search sessions disabled by default (9.0.0)
+[%collapsible]
+====
+*Details* +
+Starting from version 9.0.0, search sessions are disabled by default. To view, manage, and restore search sessions, the feature needs to be explicitly re-enabled. 
+
+*Impact* +
+Search sessions will be disabled unless they are explicitly enabled in config.yml.
+
+*Action* +
+If you would like to continue using, managing, and restoring search sessions in 9.0, you'll need to re-enable the feature in your kibana.yml configuration file. If not, no action is necessary.
+
+To re-enable search sessions, add the following in your config.yml:
+
+```
+data.search.sessions.enabled: true
+``` 
 ====

@@ -53,5 +53,6 @@
     "@kbn/spaces-plugin",
     "@kbn/elastic-assistant-plugin",
     "@kbn/test-suites-src",
+    "@kbn/openapi-common",
   ]
 }

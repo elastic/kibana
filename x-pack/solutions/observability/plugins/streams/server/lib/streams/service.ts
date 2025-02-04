@@ -12,6 +12,7 @@ import {
   StorageSettings,
   types,
 } from '@kbn/observability-utils-server/es/storage';
+import { StreamDefinition } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { StreamsClient } from './client';
 import { AssetClient } from './assets/asset_client';
@@ -21,17 +22,14 @@ export const streamsStorageSettings = {
   schema: {
     properties: {
       name: types.keyword(),
-      stream: types.object({
-        properties: {
-          ingest: types.object({ enabled: false }),
-        },
-      }),
+      ingest: types.object({ enabled: false }),
+      group: types.object({ enabled: false }),
     },
   },
 } satisfies StorageSettings;
 
 export type StreamsStorageSettings = typeof streamsStorageSettings;
-export type StreamsStorageClient = IStorageClient<StreamsStorageSettings>;
+export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, StreamDefinition>;
 
 export class StreamsService {
   constructor(
@@ -52,7 +50,9 @@ export class StreamsService {
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
-    const storageAdapter = new StorageIndexAdapter(
+    const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
+
+    const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, StreamDefinition>(
       scopedClusterClient.asInternalUser,
       logger,
       streamsStorageSettings
@@ -63,6 +63,7 @@ export class StreamsService {
       logger,
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),
+      isServerless,
     });
   }
 }

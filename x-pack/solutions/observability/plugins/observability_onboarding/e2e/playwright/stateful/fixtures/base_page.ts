@@ -12,6 +12,8 @@ import { SpaceSelector } from '../pom/components/space_selector.component';
 import { KubernetesOverviewDashboardPage } from '../pom/pages/kubernetes_overview_dashboard.page';
 import { AutoDetectFlowPage } from '../pom/pages/auto_detect_flow.page';
 import { KubernetesEAFlowPage } from '../pom/pages/kubernetes_ea_flow.page';
+import { OtelKubernetesFlowPage } from '../pom/pages/otel_kubernetes_flow.page';
+import { OtelKubernetesOverviewDashboardPage } from '../pom/pages/otel_kubernetes_overview_dashboard.page';
 
 export const test = base.extend<{
   headerBar: HeaderBar;
@@ -19,7 +21,9 @@ export const test = base.extend<{
   onboardingHomePage: OnboardingHomePage;
   autoDetectFlowPage: AutoDetectFlowPage;
   kubernetesEAFlowPage: KubernetesEAFlowPage;
+  otelKubernetesFlowPage: OtelKubernetesFlowPage;
   kubernetesOverviewDashboardPage: KubernetesOverviewDashboardPage;
+  otelKubernetesOverviewDashboardPage: OtelKubernetesOverviewDashboardPage;
 }>({
   headerBar: async ({ page }, use) => {
     await use(new HeaderBar(page));
@@ -41,7 +45,15 @@ export const test = base.extend<{
     await use(new KubernetesEAFlowPage(page));
   },
 
+  otelKubernetesFlowPage: async ({ page }, use) => {
+    await use(new OtelKubernetesFlowPage(page));
+  },
+
   kubernetesOverviewDashboardPage: async ({ page }, use) => {
     await use(new KubernetesOverviewDashboardPage(page));
+  },
+
+  otelKubernetesOverviewDashboardPage: async ({ page }, use) => {
+    await use(new OtelKubernetesOverviewDashboardPage(page));
   },
 });

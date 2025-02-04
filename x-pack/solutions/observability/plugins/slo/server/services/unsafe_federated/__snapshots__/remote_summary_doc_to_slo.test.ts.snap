@@ -4,6 +4,7 @@ exports[`FromRemoteSummaryDocToSlo with kibana < v8.14 fallbacks to dummy indica
 Object {
   "budgetingMethod": "timeslices",
   "createdAt": 2024-01-01T00:00:00.000Z,
+  "createdBy": undefined,
   "description": "irrelevant",
   "enabled": true,
   "groupBy": "*",
@@ -49,6 +50,7 @@ Object {
     "type": "rolling",
   },
   "updatedAt": 2024-01-01T00:00:00.000Z,
+  "updatedBy": undefined,
   "version": 1,
 }
 `;
@@ -57,6 +59,7 @@ exports[`FromRemoteSummaryDocToSlo with kibana >= v8.14 uses the stringified ind
 Object {
   "budgetingMethod": "occurrences",
   "createdAt": 2024-02-01T00:00:00.000Z,
+  "createdBy": undefined,
   "description": "irrelevant",
   "enabled": true,
   "groupBy": "*",
@@ -99,6 +102,59 @@ Object {
     "type": "rolling",
   },
   "updatedAt": 2024-02-01T00:00:00.000Z,
+  "updatedBy": undefined,
+  "version": 1,
+}
+`;
+
+exports[`FromRemoteSummaryDocToSlo with kibana >= v8.18 uses the provided updatedBy and createdBy 1`] = `
+Object {
+  "budgetingMethod": "occurrences",
+  "createdAt": 2024-02-01T00:00:00.000Z,
+  "createdBy": "john",
+  "description": "irrelevant",
+  "enabled": true,
+  "groupBy": "*",
+  "id": "irrelevant",
+  "indicator": Object {
+    "params": Object {
+      "good": "irrelevant",
+      "index": "irrelvant",
+      "timestampField": "irrelevant",
+      "total": "irrelevant",
+    },
+    "type": "sli.kql.custom",
+  },
+  "name": "irrelevant",
+  "objective": Object {
+    "target": 0.9999,
+    "timesliceTarget": undefined,
+    "timesliceWindow": undefined,
+  },
+  "revision": 1,
+  "settings": Object {
+    "frequency": Duration {
+      "unit": "m",
+      "value": 1,
+    },
+    "preventInitialBackfill": false,
+    "syncDelay": Duration {
+      "unit": "m",
+      "value": 1,
+    },
+  },
+  "tags": Array [
+    "prod",
+  ],
+  "timeWindow": Object {
+    "duration": Duration {
+      "unit": "d",
+      "value": 7,
+    },
+    "type": "rolling",
+  },
+  "updatedAt": 2024-02-01T00:00:00.000Z,
+  "updatedBy": "jane",
   "version": 1,
 }
 `;

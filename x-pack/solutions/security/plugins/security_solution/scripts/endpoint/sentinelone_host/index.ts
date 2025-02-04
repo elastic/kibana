@@ -233,7 +233,13 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   // Trigger an alert on the SentinelOn host so that we get an alert back in Kibana
   log.info(`Triggering SentinelOne alert`);
-  await s1HostVm.exec('nslookup elastic.co');
+  await s1HostVm
+    .exec('curl -o /tmp/eicar.com.txt https://secure.eicar.org/eicar.com.txt')
+    .catch((err) => {
+      log.warning(
+        `Attempted to trigger an alert on host [${s1HostVm.name}], but failed with: ${err.message}`
+      );
+    });
 
   log.info(`Done!
 

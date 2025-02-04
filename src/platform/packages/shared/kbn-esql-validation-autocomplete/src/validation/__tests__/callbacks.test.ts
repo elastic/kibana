@@ -29,4 +29,36 @@ describe('FROM', () => {
 
     expect((callbacks.getColumnsFor as any).mock.calls.length).toBe(1);
   });
+
+  test('loads fields from JOIN index', async () => {
+    const { validate, callbacks } = await setup();
+
+    await validate('FROM index1 | LOOKUP JOIN index2 ON field1 | LIMIT 123');
+
+    expect((callbacks.getColumnsFor as any).mock.calls.length).toBe(1);
+
+    const query = (callbacks.getColumnsFor as any).mock.calls[0][0].query as string;
+
+    expect(query.includes('index1')).toBe(true);
+    expect(query.includes('index2')).toBe(true);
+  });
+
+  test('includes all "from" and "join" index for loading fields', async () => {
+    const { validate, callbacks } = await setup();
+
+    await validate(
+      'FROM index1, index2, index3 | LOOKUP JOIN index4 ON field1 | KEEP abc | LOOKUP JOIN index5 ON field2 | LIMIT 123'
+    );
+
+    expect((callbacks.getColumnsFor as any).mock.calls.length).toBe(1);
+
+    const query = (callbacks.getColumnsFor as any).mock.calls[0][0].query as string;
+
+    expect(query.includes('index1')).toBe(true);
+    expect(query.includes('index2')).toBe(true);
+    expect(query.includes('index3')).toBe(true);
+    expect(query.includes('index4')).toBe(true);
+    expect(query.includes('index5')).toBe(true);
+    expect(query.includes('index6')).toBe(false);
+  });
 });

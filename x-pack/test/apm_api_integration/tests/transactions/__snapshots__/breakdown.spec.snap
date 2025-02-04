@@ -4,7 +4,6 @@ exports[`APM API tests transactions/breakdown.spec.ts basic apm_8.0.0 Breakdown 
 Object {
   "timeseries": Array [
     Object {
-      "color": "#54b399",
       "data": Array [
         Object {
           "x": 1627973400000,
@@ -257,7 +256,6 @@ Object {
       "type": "areaStacked",
     },
     Object {
-      "color": "#6092c0",
       "data": Array [
         Object {
           "x": 1627973400000,
@@ -510,7 +508,6 @@ Object {
       "type": "areaStacked",
     },
     Object {
-      "color": "#d36086",
       "data": Array [
         Object {
           "x": 1627973400000,
@@ -763,7 +760,6 @@ Object {
       "type": "areaStacked",
     },
     Object {
-      "color": "#9170b8",
       "data": Array [
         Object {
           "x": 1627973400000,
@@ -1019,7 +1015,7 @@ Object {
 }
 `;
 
-exports[`APM API tests transactions/breakdown.spec.ts basic apm_8.0.0 Breakdown when data is loaded returns the transaction breakdown for a transaction group 9`] = `
+exports[`APM API tests transactions/breakdown.spec.ts basic apm_8.0.0 Breakdown when data is loaded returns the transaction breakdown for a transaction group 8`] = `
 Array [
   Object {
     "x": 1627973400000,

@@ -14,6 +14,7 @@ import { getDefaultControlColumn } from '../../body/control_columns';
 import { TimelineControlColumnCellRender } from '../../unified_components/data_table/control_column_cell_render';
 import type { UnifiedTimelineDataGridCellContext } from '../../types';
 import { useTimelineUnifiedDataTableContext } from '../../unified_components/data_table/use_timeline_unified_data_table_context';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface UseTimelineControlColumnArgs {
   timelineId: string;
@@ -37,6 +38,10 @@ export const useTimelineControlColumn = ({
 }: UseTimelineControlColumnArgs) => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = useMemo(() => (isEnterprisePlus ? 5 : 4), [isEnterprisePlus]);
+  const {
+    notesPrivileges: { read: canReadNotes },
+    timelinePrivileges: { crud: canWriteTimelines },
+  } = useUserPrivileges();
 
   const RowCellRender = useMemo(
     () =>
@@ -84,10 +89,21 @@ export const useTimelineControlColumn = ({
             pinnedEventIds={pinnedEventIds}
             eventIdToNoteIds={eventIdToNoteIds}
             toggleShowNotes={onToggleShowNotes}
+            showNotes={canReadNotes}
+            disablePinAction={!canWriteTimelines}
           />
         );
       },
-    [events, timelineId, refetch, pinnedEventIds, eventIdToNoteIds, onToggleShowNotes]
+    [
+      events,
+      timelineId,
+      refetch,
+      pinnedEventIds,
+      eventIdToNoteIds,
+      onToggleShowNotes,
+      canReadNotes,
+      canWriteTimelines,
+    ]
   );
 
   return useMemo(() => {

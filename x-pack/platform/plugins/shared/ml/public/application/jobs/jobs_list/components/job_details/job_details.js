@@ -177,19 +177,23 @@ export class JobDetailsUI extends Component {
             </>
           ),
         },
-        {
-          id: 'counts',
-          'data-test-subj': 'mlJobListTab-counts',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.countsLabel', {
-            defaultMessage: 'Counts',
-          }),
-          content: (
-            <JobDetailsPane
-              data-test-subj="mlJobDetails-counts"
-              sections={[counts, modelSizeStats, jobTimingStats]}
-            />
-          ),
-        },
+        ...(this.props.mode !== 'flyout'
+          ? [
+              {
+                id: 'counts',
+                'data-test-subj': 'mlJobListTab-counts',
+                name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.countsLabel', {
+                  defaultMessage: 'Counts',
+                }),
+                content: (
+                  <JobDetailsPane
+                    data-test-subj="mlJobDetails-counts"
+                    sections={[counts, modelSizeStats, jobTimingStats]}
+                  />
+                ),
+              },
+            ]
+          : []),
         {
           id: 'json',
           'data-test-subj': 'mlJobListTab-json',
@@ -214,58 +218,59 @@ export class JobDetailsUI extends Component {
         },
       ];
 
-      if (datafeed.items.length) {
-        tabs.push(
-          {
-            id: 'datafeed-preview',
-            disabled: job.blocked !== undefined,
-            'data-test-subj': 'mlJobListTab-datafeed-preview',
-            name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel', {
-              defaultMessage: 'Datafeed preview',
-            }),
-            content: <DatafeedPreviewPane job={job} />,
-          },
-          {
-            id: 'forecasts',
-            disabled: job.blocked !== undefined,
-            'data-test-subj': 'mlJobListTab-forecasts',
-            name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.forecastsLabel', {
-              defaultMessage: 'Forecasts',
-            }),
-            content: <ForecastsTable job={job} />,
-          }
-        );
+      if (this.props.mode !== 'flyout') {
+        if (datafeed.items.length) {
+          tabs.push(
+            {
+              id: 'datafeed-preview',
+              disabled: job.blocked !== undefined,
+              'data-test-subj': 'mlJobListTab-datafeed-preview',
+              name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel', {
+                defaultMessage: 'Datafeed preview',
+              }),
+              content: <DatafeedPreviewPane job={job} />,
+            },
+            {
+              id: 'forecasts',
+              disabled: job.blocked !== undefined,
+              'data-test-subj': 'mlJobListTab-forecasts',
+              name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.forecastsLabel', {
+                defaultMessage: 'Forecasts',
+              }),
+              content: <ForecastsTable job={job} />,
+            }
+          );
+        }
+
+        tabs.push({
+          id: 'annotations',
+          disabled: job.blocked !== undefined,
+          'data-test-subj': 'mlJobListTab-annotations',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
+            defaultMessage: 'Annotations',
+          }),
+          content: (
+            <Fragment>
+              <AnnotationsTable jobs={[job]} refreshJobList={refreshJobList} />
+              <AnnotationFlyout />
+            </Fragment>
+          ),
+        });
+
+        tabs.push({
+          id: 'modelSnapshots',
+          disabled: job.blocked !== undefined,
+          'data-test-subj': 'mlJobListTab-modelSnapshots',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
+            defaultMessage: 'Model snapshots',
+          }),
+          content: (
+            <Fragment>
+              <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
+            </Fragment>
+          ),
+        });
       }
-
-      tabs.push({
-        id: 'annotations',
-        disabled: job.blocked !== undefined,
-        'data-test-subj': 'mlJobListTab-annotations',
-        name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
-          defaultMessage: 'Annotations',
-        }),
-        content: (
-          <Fragment>
-            <AnnotationsTable jobs={[job]} refreshJobList={refreshJobList} />
-            <AnnotationFlyout />
-          </Fragment>
-        ),
-      });
-
-      tabs.push({
-        id: 'modelSnapshots',
-        disabled: job.blocked !== undefined,
-        'data-test-subj': 'mlJobListTab-modelSnapshots',
-        name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
-          defaultMessage: 'Model snapshots',
-        }),
-        content: (
-          <Fragment>
-            <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
-          </Fragment>
-        ),
-      });
-
       return (
         <div className="tab-contents" data-test-subj={`mlJobListRowDetails details-${job.job_id}`}>
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />

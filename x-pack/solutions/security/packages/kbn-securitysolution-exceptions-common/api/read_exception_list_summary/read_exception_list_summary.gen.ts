@@ -27,11 +27,11 @@ export type ReadExceptionListSummaryRequestQuery = z.infer<
 >;
 export const ReadExceptionListSummaryRequestQuery = z.object({
   /**
-   * Exception list's identifier generated upon creation
+   * Exception list's identifier generated upon creation.
    */
   id: ExceptionListId.optional(),
   /**
-   * Exception list's human readable identifier
+   * Exception list's human readable identifier.
    */
   list_id: ExceptionListHumanId.optional(),
   namespace_type: ExceptionNamespaceType.optional().default('single'),

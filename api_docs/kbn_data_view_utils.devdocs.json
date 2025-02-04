@@ -83,7 +83,7 @@
         "label": "createRegExpPatternFrom",
         "description": [],
         "signature": [
-          "(basePatterns: string | string[]) => RegExp"
+          "(basePatterns: string | string[], selector: Selector) => RegExp"
         ],
         "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
         "deprecated": false,
@@ -98,6 +98,21 @@
             "description": [],
             "signature": [
               "string | string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.createRegExpPatternFrom.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "selector",
+            "description": [],
+            "signature": [
+              "Selector"
             ],
             "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/create_regexp_pattern_from.ts",
             "deprecated": false,
