@@ -41,7 +41,6 @@ import { PipelineDeleteModal } from './delete_modal';
 import { getErrorText } from '../utils';
 import { PipelineFlyout } from './pipeline_flyout';
 
-
 const getPipelineNameFromLocation = (location: Location) => {
   const { pipeline } = parse(location.search.substring(1));
   return pipeline;
