@@ -719,7 +719,7 @@ export function dataSourceField({ getService }: FtrProviderContext): void {
           num_fields_with_conflicts: 0,
           num_fields_with_non_solvable_conflicts: 0,
         });
-        expect(response.rules[0].diff.fields).toMatchObject({
+        expect(response.rules[0].diff.fields).not.toMatchObject({
           data_source: expect.anything(),
         });
       });
@@ -752,7 +752,7 @@ export function dataSourceField({ getService }: FtrProviderContext): void {
         expect(response.results.updated[0]).toMatchObject({
           data_view_id: 'dataViewResolved',
         });
-        expect(upgradedRule.body).not.toMatchObject({
+        expect(upgradedRule.body).toMatchObject({
           data_view_id: 'dataViewResolved',
         });
       });
