@@ -183,8 +183,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
-    (e: React.SyntheticEvent) => {
-      e.preventDefault();
+    (ip: string) => {
       if (onClick) {
         onClick();
       }
@@ -194,7 +193,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           right: {
             id: NetworkPanelKey,
             params: {
-              ip: address,
+              ip,
               scopeId: eventContext.timelineID,
               flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
                 ? FlowTargetSourceDest.destination
@@ -204,7 +203,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         });
       }
     },
-    [onClick, eventContext, isInTimelineContext, address, fieldName, openFlyout]
+    [onClick, eventContext, isInTimelineContext, fieldName, openFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
