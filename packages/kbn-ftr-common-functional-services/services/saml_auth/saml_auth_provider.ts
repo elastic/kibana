@@ -148,7 +148,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
           throw new Error(`Custom roles are not supported for the current deployment`);
         }
-        const roleDescriptor = supportedRoleDescriptors.get(role);
+        const roleDescriptor = { ...supportedRoleDescriptors.get(role), metadata: {} };
         if (!roleDescriptor) {
           throw new Error(
             role === CUSTOM_ROLE
