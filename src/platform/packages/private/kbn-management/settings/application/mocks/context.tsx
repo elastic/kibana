@@ -24,7 +24,7 @@ import {
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
-import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { UiSettingsSolution } from '@kbn/core-ui-settings-common';
 import { SolutionView } from '@kbn/spaces-plugin/common';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
 
@@ -45,11 +45,16 @@ const createRootMock = () => {
 
 export const createSettingsApplicationServicesMock = (
   hasGlobalSettings?: boolean,
-  solution?: SolutionView
+  settingsSolution?: UiSettingsSolution,
+  spaceSolution: SolutionView = 'classic'
 ): SettingsApplicationServices => ({
   ...createFormServicesMock(),
   getAllowlistedSettings: (scope: UiSettingsScope) =>
-    scope === 'namespace' ? getSettingsMock(undefined, undefined, solution) : hasGlobalSettings ? getGlobalSettingsMock(undefined, undefined, solution) : {},
+    scope === 'namespace'
+      ? getSettingsMock(undefined, undefined, settingsSolution)
+      : hasGlobalSettings
+      ? getGlobalSettingsMock(undefined, undefined, settingsSolution)
+      : {},
   getSections: () => [],
   getCapabilities: getSettingsCapabilitiesMock,
   setBadge: jest.fn(),
@@ -58,7 +63,9 @@ export const createSettingsApplicationServicesMock = (
   subscribeToUpdates: () => new Subscription(),
   addUrlToHistory: jest.fn(),
   getToastsService: jest.fn(),
-  spaces: spacesPluginMock.createStartContract(),
+  getActiveSpace: () => Promise.resolve({
+    solution: spaceSolution,
+  }),
 });
 
 export const TestWrapper = ({

@@ -8,7 +8,7 @@
  */
 
 import { KnownTypeToMetadata, SettingType } from '@kbn/management-settings-types';
-import { SolutionView } from '@kbn/spaces-plugin/common';
+import { UiSettingsSolution } from '@kbn/core-ui-settings-common';
 
 type Settings = {
   [key in Exclude<SettingType, 'json' | 'markdown'>]: KnownTypeToMetadata<key>;
@@ -22,7 +22,7 @@ type Settings = {
 export const getSettingsMock = (
   requiresPageReload: boolean = false,
   readonly: boolean = false,
-  solution?: SolutionView
+  solution?: UiSettingsSolution
 ): Settings => {
   const defaults = {
     requiresPageReload,
@@ -128,15 +128,6 @@ export const getSettingsMock = (
       category: ['notifications', 'search'],
       ...defaults,
     },
-    solution: {
-      description: 'Description for Undefined test setting',
-      name: 'undefined:test:setting',
-      type: 'undefined',
-      userValue: null,
-      value: undefined,
-      category: ['notifications', 'search'],
-      ...defaults,
-    },
   };
 };
 
@@ -148,7 +139,7 @@ export const getSettingsMock = (
 export const getGlobalSettingsMock = (
   requiresPageReload: boolean = false,
   readonly: boolean = false,
-  solution: SolutionView
+  solution?: UiSettingsSolution
 ) => {
   const defaults = {
     requiresPageReload,

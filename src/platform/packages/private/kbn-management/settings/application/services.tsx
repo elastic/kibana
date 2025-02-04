@@ -25,6 +25,7 @@ import { RegistryEntry, SectionRegistryStart } from '@kbn/management-settings-se
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { ChromeBadge, ChromeStart } from '@kbn/core-chrome-browser';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { Space } from '@kbn/spaces-plugin/common';
 
 export interface Services {
   getAllowlistedSettings: (scope: UiSettingsScope) => Record<string, UiSettingMetadata>;
@@ -36,7 +37,7 @@ export interface Services {
   isCustomSetting: (key: string, scope: UiSettingsScope) => boolean;
   isOverriddenSetting: (key: string, scope: UiSettingsScope) => boolean;
   addUrlToHistory: (url: string) => void;
-  spaces: SpacesPluginStart;
+  getActiveSpace: () => Promise<Space>;
 }
 
 export type SettingsApplicationServices = Services & FormServices;
@@ -59,7 +60,7 @@ export interface KibanaDependencies {
   };
   application: Pick<ApplicationStart, 'capabilities'>;
   chrome: Pick<ChromeStart, 'setBadge'>;
-  spaces: SpacesPluginStart;
+  spaces: Pick<SpacesPluginStart, 'getActiveSpace'>;
 }
 
 export type SettingsApplicationKibanaDependencies = KibanaDependencies & FormKibanaDependencies;
@@ -90,7 +91,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
     isCustomSetting,
     isOverriddenSetting,
     addUrlToHistory,
-    spaces,
+    getActiveSpace,
   } = services;
 
   return (
@@ -105,7 +106,7 @@ export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicati
         isCustomSetting,
         isOverriddenSetting,
         addUrlToHistory,
-        spaces,
+        getActiveSpace,
       }}
     >
       <FormProvider
@@ -197,7 +198,7 @@ export const SettingsApplicationKibanaProvider: FC<
     isOverriddenSetting,
     subscribeToUpdates,
     addUrlToHistory: (url: string) => history.push({ pathname: '', search: url }),
-    spaces,
+    getActiveSpace: spaces.getActiveSpace,
   };
 
   return (

@@ -57,10 +57,16 @@ function getQueryParam(url: string) {
  * Component for displaying the {@link SettingsApplication} component.
  */
 export const SettingsApplication = () => {
-  const { addUrlToHistory, getSections, getToastsService, getCapabilities, setBadge, spaces } =
-    useServices();
+  const {
+    addUrlToHistory,
+    getSections,
+    getToastsService,
+    getCapabilities,
+    setBadge,
+    getActiveSpace,
+  } = useServices();
 
-  const currentSolution = useSolutionView(spaces);
+  const currentSolution = useSolutionView(getActiveSpace);
 
   const queryParam = getQueryParam(window.location.href);
   const [query, setQuery] = useState<Query>(Query.parse(queryParam));

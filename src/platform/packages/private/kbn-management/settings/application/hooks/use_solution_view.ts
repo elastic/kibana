@@ -9,21 +9,21 @@
 
 import { useState, useEffect } from 'react';
 import { SolutionView } from '@kbn/spaces-plugin/common';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { Space } from '@kbn/spaces-plugin/common';
 
 /**
  * React hook which returns the solution view of the current active space.
  */
-export function useSolutionView(spaces: SpacesPluginStart) {
+export function useSolutionView(getActiveSpace: () => Promise<Space>) {
   const [solutionView, setSolutionView] = useState<SolutionView>();
 
   useEffect(() => {
-    if (spaces) {
-      spaces.getActiveSpace().then((space) => {
+    if (getActiveSpace) {
+      getActiveSpace().then((space) => {
         setSolutionView(space.solution);
       });
     }
-  }, [spaces]);
+  }, [getActiveSpace]);
 
   return solutionView;
 }

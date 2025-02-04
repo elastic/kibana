@@ -10,9 +10,8 @@
 import { ReactElement } from 'react';
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { DeprecationSettings } from '@kbn/core-ui-settings-common';
+import { DeprecationSettings, UiSettingsSolution } from '@kbn/core-ui-settings-common';
 
-import { SolutionView } from '@kbn/spaces-plugin/common';
 import { KnownTypeToValue, SettingType } from './setting_type';
 
 /**
@@ -90,8 +89,10 @@ export interface FieldDefinition<
   /** An identifier of the field when it has an unsaved change. */
   unsavedFieldId: string;
   /** The solution where this setting is applicable.
-   * If undefined, the setting must be displayed in all solutions. */
-  solution?: SolutionView;
+   * If undefined, the setting must be displayed in all solutions.
+   * @see {@link UiSettingsSolution}
+   */
+  solution?: UiSettingsSolution;
 }
 
 /**
