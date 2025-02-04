@@ -132,8 +132,9 @@ describe('<KibanaErrorBoundary>', () => {
     (await findByTestId('clickForErrorBtn')).click();
 
     expect(apm.captureError).toHaveBeenCalledTimes(1);
-    expect(apm.captureError).toHaveBeenCalledWith(
-      new Error('This is an error to show the test user!')
-    );
+    expect(apm.captureError).toHaveBeenCalledWith({
+      ...new Error('This is an error to show the test user!'),
+      context: 'fatal-error-react',
+    });
   });
 });
