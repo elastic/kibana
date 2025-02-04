@@ -95,14 +95,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await searchStart.expectToBeOnIndexListPage();
       });
       it('should redirect to indices list if single index exist on page load', async () => {
-        await searchNavigation.navigateToElasticsearchStartPage();
+        await searchNavigation.navigateToElasticsearchStartPage(false, `/s/${spaceCreated.id}`);
         await es.indices.create({ index: 'test-my-index-001' });
         await searchNavigation.navigateToElasticsearchStartPage(true);
         await searchStart.expectToBeOnIndexListPage();
       });
 
       it('should support switching between UI and Code Views', async () => {
-        await searchNavigation.navigateToElasticsearchStartPage();
+        await searchNavigation.navigateToElasticsearchStartPage(false, `/s/${spaceCreated.id}`);
         await searchStart.expectCreateIndexUIView();
         await searchStart.clickCodeViewButton();
         await searchStart.expectCreateIndexCodeView();
@@ -162,7 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Navigate away to keep key in current session, invalidate key and return back
         await searchNavigation.navigateToIndexManagementPage();
         await searchApiKeys.invalidateAPIKey(initialApiKey.id);
-        await searchNavigation.navigateToElasticsearchStartPage();
+        await searchNavigation.navigateToElasticsearchStartPage(false, `/s/${spaceCreated.id}`);
         await searchStart.clickCodeViewButton();
 
         // Check that new key was generated
