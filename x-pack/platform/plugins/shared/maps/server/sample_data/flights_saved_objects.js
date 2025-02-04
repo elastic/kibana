@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_EMS_ROADMAP_DESATURATED_ID } from '@kbn/maps-ems-plugin/common';
 
 const layerList = [
   {
@@ -14,7 +15,7 @@ const layerList = [
     sourceDescriptor: {
       type: 'EMS_TMS',
       isAutoSelect: true,
-      lightModeDefault: 'road_map_desaturated',
+      lightModeDefault: DEFAULT_EMS_ROADMAP_DESATURATED_ID,
     },
     visible: true,
     style: {},

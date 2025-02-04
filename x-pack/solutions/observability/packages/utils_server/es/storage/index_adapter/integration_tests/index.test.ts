@@ -11,7 +11,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import {
-  IStorageClient,
+  SimpleIStorageClient,
   StorageClientBulkResponse,
   StorageClientIndexResponse,
   StorageIndexAdapter,
@@ -22,6 +22,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
 import { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SimpleStorageIndexAdapter } from '..';
 
 const TEST_INDEX_NAME = 'test_index';
 
@@ -56,8 +57,8 @@ describe('StorageIndexAdapter', () => {
     },
   } satisfies StorageSettings;
 
-  let adapter: StorageIndexAdapter<typeof storageSettings>;
-  let client: IStorageClient<typeof storageSettings>;
+  let adapter: SimpleStorageIndexAdapter<typeof storageSettings>;
+  let client: SimpleIStorageClient<typeof storageSettings>;
 
   describe('with a clean Elasticsearch instance', () => {
     beforeAll(async () => {
@@ -182,10 +183,9 @@ describe('StorageIndexAdapter', () => {
       await verifyClean();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/206482
-    // FLAKY: https://github.com/elastic/kibana/issues/206483
-    describe.skip('after rolling over the index manually and indexing the same document', () => {
+    describe('after rolling over the index manually and indexing the same document', () => {
       beforeAll(async () => {
+        await verifyClean();
         await client.index({ id: 'doc1', document: { foo: 'bar' } });
         await rolloverIndex();
         await client.index({ id: 'doc1', document: { foo: 'bar' } });
@@ -407,7 +407,7 @@ describe('StorageIndexAdapter', () => {
 
   function createStorageIndexAdapter<TStorageSettings extends StorageSettings>(
     settings: TStorageSettings
-  ): StorageIndexAdapter<TStorageSettings> {
+  ): SimpleStorageIndexAdapter<TStorageSettings> {
     return new StorageIndexAdapter(esClient, loggerMock, settings);
   }
 

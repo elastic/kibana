@@ -41,7 +41,6 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/palettes",
   ],
   "exclude": [
     "target/**/*",

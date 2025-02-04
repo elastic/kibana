@@ -31,6 +31,7 @@ import type {
   PostAgentPolicyUpdateCallback,
   PutPackagePolicyPostUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import type { EndpointInternalFleetServicesInterface } from '../endpoint/services/fleet';
 import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
 import { createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
@@ -123,7 +124,8 @@ export const getPackagePolicyCreateCallback = (
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,
-  productFeatures: ProductFeaturesService
+  productFeatures: ProductFeaturesService,
+  telemetryConfigProvider: TelemetryConfigProvider
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -196,7 +198,8 @@ export const getPackagePolicyCreateCallback = (
       endpointIntegrationConfig,
       cloud,
       esClientInfo,
-      productFeatures
+      productFeatures,
+      telemetryConfigProvider
     );
 
     return {

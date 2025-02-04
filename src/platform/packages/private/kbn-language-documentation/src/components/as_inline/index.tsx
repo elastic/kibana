@@ -60,6 +60,7 @@ function DocumentationInline({ searchInDescription, height }: DocumentationInlin
         max-height: ${height}px;
         overflow-y: auto;
         ${scrollBarStyles}
+        background-color: ${theme.euiTheme.colors.backgroundBaseSubdued};
       `}
     >
       <DocumentationNavigation

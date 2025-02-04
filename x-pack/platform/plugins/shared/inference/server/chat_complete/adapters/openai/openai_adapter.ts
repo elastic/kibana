@@ -14,6 +14,7 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import { convertUpstreamError, isNativeFunctionCallingSupported } from '../../utils';
 import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
 import { processOpenAIStream } from './process_openai_stream';
@@ -27,15 +28,18 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     toolChoice,
     tools,
     temperature = 0,
-    functionCalling,
+    functionCalling = 'auto',
     modelName,
     logger,
     abortSignal,
   }) => {
-    const simulatedFunctionCalling = functionCalling === 'simulated';
+    const useSimulatedFunctionCalling =
+      functionCalling === 'auto'
+        ? !isNativeFunctionCallingSupported(executor.getConnector())
+        : functionCalling === 'simulated';
 
     let request: OpenAIRequest;
-    if (simulatedFunctionCalling) {
+    if (useSimulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({
         system,
         messages,
@@ -72,8 +76,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }
@@ -86,7 +90,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       }),
       processOpenAIStream(),
       emitTokenCountEstimateIfMissing({ request }),
-      simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
 };

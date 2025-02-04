@@ -53,7 +53,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         const superTest = await utils.createSuperTestWithUser(users.secNotesAllUser);
         const {
-          body: { noteId },
+          body: {
+            note: { noteId },
+          },
         } = await createNote(superTest, { text: 'test', documentId: '123' });
         getNoteId = () => noteId;
       });
@@ -61,14 +63,16 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       canWriteOrReadUsers.forEach((user) => {
         it(`user "${user.username}" can read notes`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
-          await getNote(superTest, getNoteId()).expect(200);
+          const getNoteResponse = await getNote(superTest, getNoteId());
+          expect(getNoteResponse.status).to.be(200);
         });
       });
 
       cannotAccessUsers.forEach((user) => {
         it(`user "${user.username}" cannot read notes`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
-          await getNote(superTest, getNoteId()).expect(403);
+          const getNoteResponse = await getNote(superTest, getNoteId());
+          expect(getNoteResponse.status).to.be(403);
         });
       });
     });
@@ -96,7 +100,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         const superTest = await utils.createSuperTestWithUser(users.secNotesAllUser);
         const {
-          body: { noteId },
+          body: {
+            note: { noteId },
+          },
         } = await createNote(superTest, { text: 'test', documentId: '123' });
         getNoteId = () => noteId;
       });
@@ -104,14 +110,16 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       canWriteUsers.forEach((user) => {
         it(`user "${user.username}" can delete notes`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
-          await deleteNote(superTest, getNoteId()).expect(200);
+          const deleteNoteRequest = await deleteNote(superTest, getNoteId());
+          expect(deleteNoteRequest.status).to.be(200);
         });
       });
 
       cannotWriteUsers.forEach((user) => {
         it(`user "${user.username}" cannot delete notes`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
-          await deleteNote(superTest, getNoteId()).expect(403);
+          const deleteNoteRequest = await deleteNote(superTest, getNoteId());
+          expect(deleteNoteRequest.status).to.be(403);
         });
       });
     });

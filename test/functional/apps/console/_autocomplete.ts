@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/156926
-  describe.skip('console autocomplete feature', function describeIndexTests() {
+  describe('console autocomplete feature', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -53,7 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should provide basic auto-complete functionality', async () => {
       await PageObjects.console.enterText(`GET _search\n`);
-      await PageObjects.console.pressEnter();
       await PageObjects.console.enterText(`{\n\t"query": {`);
       await PageObjects.console.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
@@ -146,6 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('JSON autocompletion with placeholder fields', async () => {
         await PageObjects.console.enterText('GET _search\n');
         await PageObjects.console.enterText('{');
+        await PageObjects.console.sleepForDebouncePeriod();
         await PageObjects.console.pressEnter();
 
         for (const char of '"ag') {
@@ -374,8 +373,7 @@ GET _search
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/198109
-    describe.skip('index fields autocomplete', () => {
+    describe('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {
@@ -394,7 +392,11 @@ GET _search
 
       it('fields autocomplete only shows fields of the index', async () => {
         await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText('GET _search\n{\n"fields": ["');
+        await PageObjects.console.enterText('GET _search\n{\n"fields": [');
+        // Wait for the autocomplete request to finish loading
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // Trigger the autocomplete for the field we previously added
+        await PageObjects.console.enterText('te');
 
         expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
         expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);

@@ -1,0 +1,69 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "metrics-endpoint.metrics-01",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "endpoint"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "ignore_missing_component_templates": [],
+      "index_patterns": [
+        "metrics-endpoint.metrics-*"
+      ],
+      "name": "metrics-endpoint.metrics",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "endpoint"
+            }
+          },
+          "date_detection": false,
+          "dynamic_templates": [],
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "agent": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "Endpoint": {
+              "properties": {
+                "metrics": {
+                  "properties": {
+                    "threads": {
+                      "properties": {
+                        "cpu": {
+                          "properties": {
+                            "mean": {
+                              "type": "float"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
