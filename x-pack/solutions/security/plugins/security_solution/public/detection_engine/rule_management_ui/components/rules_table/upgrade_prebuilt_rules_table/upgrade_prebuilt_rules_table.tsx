@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -51,6 +52,10 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
 
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
+  const [pageIndex, setPageIndex] = useState(0);
+  const onTableChange = ({ page: { index } }: CriteriaWithPagination<RuleUpgradeState>) => {
+    setPageIndex(index);
+  };
 
   return (
     <>
@@ -102,6 +107,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 pagination={{
                   initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
                   pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+                  pageIndex,
                 }}
                 selection={{
                   selectable: () => true,
@@ -111,6 +117,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 itemId="rule_id"
                 data-test-subj="rules-upgrades-table"
                 columns={rulesColumns}
+                onTableChange={onTableChange}
               />
             </>
           )
