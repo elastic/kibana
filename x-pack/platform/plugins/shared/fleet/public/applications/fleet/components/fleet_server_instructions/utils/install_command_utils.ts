@@ -128,9 +128,6 @@ export function getInstallCommandForPlatform({
     const fleetServerCert = fleetServerHost?.ssl?.certificate
       ? `'${fleetServerHost?.ssl?.certificate}'`
       : '<PATH_TO_FLEET_SERVER_CERT>';
-    const certificateKey = fleetServerHost?.ssl?.key
-      ? `'${fleetServerHost?.ssl?.key}'`
-      : '<PATH_TO_FLEET_SERVER_CERT_KEY>';
 
     commandArguments.push(['certificate-authorities', certificateAuthorities]);
 
@@ -141,7 +138,7 @@ export function getInstallCommandForPlatform({
       commandArguments.push(['fleet-server-es-ca', esCert]);
     }
     commandArguments.push(['fleet-server-cert', fleetServerCert]);
-    commandArguments.push(['fleet-server-cert-key', certificateKey]);
+    commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
   }
 
   commandArguments.push(['fleet-server-port', '8220']);

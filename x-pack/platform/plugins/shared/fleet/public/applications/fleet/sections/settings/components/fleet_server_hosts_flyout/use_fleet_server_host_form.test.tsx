@@ -82,10 +82,12 @@ describe('useFleetServerHostsForm', () => {
           host_urls: [],
           is_default: false,
           is_preconfigured: false,
-          certificate_authorities: 'cert authorities',
-          certificate: 'path/to/cert',
-          es_certificate: 'path/to/EScert',
-          certificate_key: '0939388u45r78457sdfjkhiughw',
+          ssl: {
+            certificate_authorities: ['cert authorities'],
+            es_certificate_authorities: ['ES cert authorities'],
+            certificate: 'path/to/cert',
+            es_certificate: 'path/to/EScert',
+          },
         },
         onSuccess
       )

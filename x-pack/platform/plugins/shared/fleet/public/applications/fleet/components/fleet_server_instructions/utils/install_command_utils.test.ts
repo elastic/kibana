@@ -401,10 +401,11 @@ describe('getInstallCommandForPlatform', () => {
       it('should return the command with correct SSL options', () => {
         const fullFleetServerHost = {
           ...fleetServerHost,
-          certificate_authorities: 'cert authorities',
-          certificate: 'path/to/cert',
-          es_certificate: 'path/to/EScert',
-          certificate_key: '0939388u45r78457sdfjkhiughw',
+          ssl: {
+            certificate_authorities: ['cert authorities'],
+            certificate: 'path/to/cert',
+            es_certificate: 'path/to/EScert',
+          },
         };
         const res = getInstallCommandForPlatform({
           platform: 'linux',
@@ -426,16 +427,17 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities='cert authorities' \\\\
           --fleet-server-es-ca='path/to/EScert' \\\\
           --fleet-server-cert='path/to/cert' \\\\
-          --fleet-server-cert-key='0939388u45r78457sdfjkhiughw' \\\\
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
           --fleet-server-port=8220"
       `);
       });
       it('should return the command with SSL options and placeholders', () => {
         const fullFleetServerHost = {
           ...fleetServerHost,
-          certificate_authorities: 'cert authorities',
-          certificate: 'path/to/cert',
-          certificate_key: '0939388u45r78457sdfjkhiughw',
+          ssl: {
+            certificate_authorities: ['cert authorities'],
+            certificate: 'path/to/cert',
+          },
         };
         const res = getInstallCommandForPlatform({
           platform: 'linux',
@@ -457,7 +459,7 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities='cert authorities' \\\\
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert='path/to/cert' \\\\
-          --fleet-server-cert-key='0939388u45r78457sdfjkhiughw' \\\\
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
           --fleet-server-port=8220"
       `);
       });

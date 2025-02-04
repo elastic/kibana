@@ -11,6 +11,7 @@ export type FleetServerHostSecret =
       id: string;
       hash?: string;
     };
+
 export interface NewFleetServerHost {
   name: string;
   host_urls: string[];

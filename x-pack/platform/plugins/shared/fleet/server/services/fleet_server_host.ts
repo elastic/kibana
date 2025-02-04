@@ -31,7 +31,11 @@ import type {
   AgentPolicy,
   PolicySecretReference,
 } from '../types';
-import { FleetServerHostUnauthorizedError, FleetServerHostNotFoundError } from '../errors';
+import {
+  FleetServerHostUnauthorizedError,
+  FleetServerHostNotFoundError,
+  FleetEncryptedSavedObjectEncryptionKeyRequired,
+} from '../errors';
 
 import { appContextService } from './app_context';
 
@@ -66,6 +70,12 @@ export async function createFleetServerHost(
 ): Promise<FleetServerHost> {
   const logger = appContextService.getLogger();
   const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
+
+  if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+      `Fleet server host needs encrypted saved object api key to be set`
+    );
+  }
 
   if (fleetServerHost.is_default) {
     const defaultItem = await getDefaultFleetServerHost(soClient);
@@ -103,11 +113,13 @@ export async function createFleetServerHost(
       data.ssl = JSON.stringify({ ...fleetServerHost.ssl, ...fleetServerHost.secrets.ssl });
     }
   }
+
   const res = await soClient.create<FleetServerHostSOAttributes>(
     FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     data,
     { id: options?.id, overwrite: options?.overwrite }
   );
+
   logger.debug(`Created fleet server host ${options?.id}`);
   return savedObjectToFleetServerHost(res);
 }
@@ -233,6 +245,13 @@ export async function updateFleetServerHost(
 
   if (data.host_urls) {
     updateData.host_urls = data.host_urls.map(normalizeHostsForAgents);
+  }
+
+  if (data.ssl) {
+    updateData.ssl = JSON.stringify(data.ssl);
+  } else if (data.ssl === null) {
+    // Explicitly set to null to allow to delete the field
+    updateData.ssl = null;
   }
 
   // Store secret values if enabled; if not, store plain text values

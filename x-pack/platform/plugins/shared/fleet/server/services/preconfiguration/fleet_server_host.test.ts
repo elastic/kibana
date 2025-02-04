@@ -73,10 +73,12 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
           host_urls: [],
           is_default: false,
           is_preconfigured: false,
-          certificate_authorities: 'cert authorities',
-          certificate: 'path/to/cert',
-          es_certificate: 'path/to/EScert',
-          certificate_key: '0939388u45r78457sdfjkhiughw',
+          ssl: {
+            certificate_authorities: 'cert authorities',
+            es_certificate_authorities: 'es cert authorities',
+            certificate: 'path/to/cert',
+            es_certificate: 'path/to/EScert',
+          },
         },
       ],
     };
@@ -244,14 +246,17 @@ describe('createCloudFleetServerHostIfNeeded', () => {
   });
   it('should do nothing if there is no cloud fleet server hosts', async () => {
     const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    await createCloudFleetServerHostIfNeeded(soClient);
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
     expect(mockedCreateFleetServerHost).not.toBeCalled();
   });
 
   it('should do nothing if there is already an host configured', async () => {
     const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
         'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
@@ -268,13 +273,15 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       id: 'test',
     } as any);
 
-    await createCloudFleetServerHostIfNeeded(soClient);
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
     expect(mockedCreateFleetServerHost).not.toBeCalled();
   });
 
   it('should create a new fleet server hosts if there is no host configured', async () => {
     const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
         'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
@@ -294,10 +301,11 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       attributes: {},
     } as any);
 
-    await createCloudFleetServerHostIfNeeded(soClient);
+    await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
     expect(mockedCreateFleetServerHost).toBeCalledTimes(1);
     expect(mockedCreateFleetServerHost).toBeCalledWith(
+      expect.anything(),
       expect.anything(),
       expect.objectContaining({
         host_urls: ['https://deployment-id-1.fleet.us-east-1.aws.found.io'],
