@@ -56,7 +56,7 @@ export const StatusRuleViz = ({
   }, [ruleParams, dispatch, inspectorAdapters?.requests]);
 
   return (
-    <EuiCallOut iconType="search">
+    <EuiCallOut iconType="search" size="s">
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
           {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFlexItemLabel', {
@@ -70,7 +70,7 @@ export const StatusRuleViz = ({
             button={
               <EuiButtonEmpty
                 data-test-subj="syntheticsStatusRuleVizMonitorQueryIDsButton"
-                size="s"
+                size="xs"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               >
                 {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
@@ -109,7 +109,7 @@ export const StatusRuleViz = ({
             data-test-subj="syntheticsStatusRuleVizInspectButton"
             onClick={inspect}
             iconType="inspect"
-            size="s"
+            size="xs"
           >
             {i18n.translate('xpack.synthetics.rules.details', {
               defaultMessage: 'Details',

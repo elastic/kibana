@@ -33,9 +33,9 @@ export const StatusRuleComponent: React.FC<{
       <AlertSearchBar kqlQuery={ruleParams.kqlQuery ?? ''} onChange={onFiltersChange} />
       <EuiSpacer size="m" />
       <FieldFilters ruleParams={ruleParams} setRuleParams={setRuleParams} />
-      <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
-      <EuiSpacer size="m" />
       <StatusRuleViz ruleParams={ruleParams} />
+      <EuiSpacer size="m" />
+      <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
     </>
   );
 };
