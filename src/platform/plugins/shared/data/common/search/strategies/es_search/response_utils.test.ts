@@ -9,7 +9,6 @@
 
 import { getTotalLoaded, getHitsTotal } from './response_utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/types';
 
 describe('response utils', () => {
   describe('getTotalLoaded', () => {
@@ -33,21 +32,21 @@ describe('response utils', () => {
   describe('getHitsTotal', () => {
     describe('when hits.total is number', () => {
       it('should return it', () => {
-        const hits = { total: 5 } as SearchHitsMetadata;
+        const hits = { total: 5 } as estypes.SearchHitsMetadata;
         expect(getHitsTotal(hits.total)).toBe(5);
       });
     });
 
     describe('when hits.total is object', () => {
       it('should return hits.total.value', () => {
-        const hits = { total: { value: 10 } } as SearchHitsMetadata;
+        const hits = { total: { value: 10 } } as estypes.SearchHitsMetadata;
         expect(getHitsTotal(hits.total)).toBe(10);
       });
     });
 
     describe('when hits.total is 0', () => {
       it('should return it', () => {
-        const hits = { total: 0 } as SearchHitsMetadata;
+        const hits = { total: 0 } as estypes.SearchHitsMetadata;
         expect(getHitsTotal(hits.total)).toBe(0);
       });
     });

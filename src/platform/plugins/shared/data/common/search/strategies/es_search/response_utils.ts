@@ -8,7 +8,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
@@ -21,6 +20,6 @@ export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
   return { total, loaded };
 }
 
-export function getHitsTotal(total: SearchHitsMetadata['total']): number {
+export function getHitsTotal(total: estypes.SearchHitsMetadata['total']): number {
   return typeof total === 'number' ? total : total?.value ?? 0;
 }

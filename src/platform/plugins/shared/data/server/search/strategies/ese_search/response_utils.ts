@@ -13,7 +13,7 @@ import { IncomingHttpHeaders } from 'http';
 import type { AsyncSearchResponse } from './types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { AsyncSearchStatusResponse } from './types';
-import { getTotalLoaded, IAsyncSearchOptions } from '../../../../common';
+import { getTotalLoaded, type IAsyncSearchOptions } from '../../../../common';
 
 /**
  * Get the Kibana representation of an async search status response.

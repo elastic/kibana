@@ -76,8 +76,7 @@ export const esSearchStrategyProvider = (
           ...transport,
           meta: true,
         });
-        const response = body;
-        return toKibanaSearchResponse(response, meta?.request?.params);
+        return toKibanaSearchResponse(body, meta?.request?.params);
       } catch (e) {
         throw getKbnSearchError(e);
       }
