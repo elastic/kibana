@@ -25,6 +25,7 @@ import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
 import { waitFor, cleanup } from '@testing-library/react';
+import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy';
 import { getDeferred } from '../../../../mocks/utils';
@@ -208,6 +209,39 @@ describe('When rendering PolicySettingsLayout', () => {
         text: 'oh oh!',
         title: 'Failed!',
       });
+    });
+
+    it('should not show warning about endpoints if there are no active endpoints', async () => {
+      apiMocks.responseProvider.agentStatus.mockReturnValue({
+        results: { active: 0 },
+      } as GetAgentStatusResponse);
+
+      const { getByTestId, queryByTestId } = render();
+      await makeMinimalUpdates();
+
+      await userEvent.click(getByTestId('policyDetailsSaveButton'));
+      await waitFor(() => {
+        expect(getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+      });
+      expect(queryByTestId('policyDetailsWarningCallout')).not.toBeInTheDocument();
+    });
+
+    it('should show warning about endpoints with the number of active endpoints', async () => {
+      apiMocks.responseProvider.agentStatus.mockReturnValue({
+        results: { active: 6 },
+      } as GetAgentStatusResponse);
+
+      const { getByTestId } = render();
+      await makeMinimalUpdates();
+
+      await userEvent.click(getByTestId('policyDetailsSaveButton'));
+      await waitFor(() => {
+        expect(getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+      });
+
+      const callout = getByTestId('policyDetailsWarningCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout.textContent).toContain('This action will update 6 endpoints');
     });
   });
 
