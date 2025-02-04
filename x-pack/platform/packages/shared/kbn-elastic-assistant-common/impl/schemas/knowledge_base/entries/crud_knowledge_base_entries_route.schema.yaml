@@ -1,13 +1,11 @@
 openapi: 3.0.0
 info:
   title: Manage Knowledge Base Entries API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/knowledge_base/entries:
+  /api/security_ai_assistant/knowledge_base/entries:
     post:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: CreateKnowledgeBaseEntry
       description: Create a Knowledge Base Entry
@@ -34,11 +32,9 @@ paths:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
 
-  /internal/elastic_assistant/knowledge_base/entries/{id}:
+  /api/security_ai_assistant/knowledge_base/entries/{id}:
     get:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: ReadKnowledgeBaseEntry
       description: Read a Knowledge Base Entry
@@ -67,8 +63,6 @@ paths:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
     put:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: UpdateKnowledgeBaseEntry
       description: Update a Knowledge Base Entry
@@ -103,8 +97,6 @@ paths:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
     delete:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: DeleteKnowledgeBaseEntry
       description: Deletes a single Knowledge Base Entry using the `id` field
@@ -120,11 +112,11 @@ paths:
             $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
-          description: Successful request returning the deleted Knowledge Base Entry
+          description: Successful request returning the deleted Knowledge Base Entry's ID
           content:
             application/json:
               schema:
-                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+                $ref: './common_attributes.schema.yaml#/components/schemas/DeleteResponseFields'
         400:
           description: Generic Error
           content:

@@ -20,6 +20,7 @@ export const FieldParent = ({
   return linkEnabled ? (
     <EuiBadge color="hollow">
       <EuiLink
+        data-test-subj="streamsAppFieldParentLink"
         href={router.link('/{key}/{tab}/{subtab}', {
           path: {
             key: parent,

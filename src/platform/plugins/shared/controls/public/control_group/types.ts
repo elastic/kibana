@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { PublishesESQLVariables } from '@kbn/esql-variables-types';
 import { Filter } from '@kbn/es-query';
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
@@ -46,6 +47,7 @@ export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
   PublishesFilters &
   PublishesDataViews &
+  PublishesESQLVariables &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
   PublishesTimeslice &

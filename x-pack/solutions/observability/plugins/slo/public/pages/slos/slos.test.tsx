@@ -100,6 +100,9 @@ const mockKibana = () => {
       docLinks: {
         links: {
           query: {},
+          observability: {
+            slo: 'dummy_link',
+          },
         },
       },
       http: {

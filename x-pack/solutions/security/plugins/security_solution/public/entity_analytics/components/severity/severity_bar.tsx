@@ -31,6 +31,8 @@ type PalletteArray = PalletteObject[];
 export const SeverityBar: React.FC<{
   severityCount: SeverityCount;
 }> = ({ severityCount }) => {
+  // TODO: use riskSeverity hook when palette agreed.
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
   const palette = useMemo(
     () =>
       (Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).reduce(

@@ -22,7 +22,7 @@ import {
 import { assertNever } from '@kbn/std';
 import * as t from 'io-ts';
 import moment from 'moment';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import {
   DateRange,
   GroupBy,
@@ -74,8 +74,8 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
       ({ sloId, revision, budgetingMethod, instanceId, groupBy, timeWindow, remoteName }) => [
         {
           index: remoteName
-            ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
-            : SLO_DESTINATION_INDEX_PATTERN,
+            ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+            : SLI_DESTINATION_INDEX_PATTERN,
         },
         generateSearchQuery({
           groupBy,

@@ -3294,7 +3294,7 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
               "AppDeepLink",
               "<string>[]; updater$: ",
               "Subject",
@@ -14202,6 +14202,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.casesFeatureIdV3",
+        "type": "string",
+        "tags": [],
+        "label": "casesFeatureIdV3",
+        "description": [],
+        "signature": [
+          "\"observabilityCasesV3\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.defaultApmServiceEnvironment",
         "type": "string",
         "tags": [],
@@ -14775,7 +14790,7 @@
         "label": "observabilityPaths",
         "description": [],
         "signature": [
-          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; }"
+          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,

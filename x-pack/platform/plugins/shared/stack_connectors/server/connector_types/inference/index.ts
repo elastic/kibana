@@ -15,7 +15,7 @@ import {
   GenerativeAIForSecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
