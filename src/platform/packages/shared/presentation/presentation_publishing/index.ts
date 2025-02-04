@@ -10,6 +10,7 @@
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
+  diffComparators$,
   getUnchangingComparator,
   type ComparatorDefinition,
   type ComparatorFunction,
@@ -145,8 +146,8 @@ export {
 export {
   initializeTitleManager,
   stateHasTitles,
-  type TitlesApi,
   type SerializedTitles,
+  type TitlesApi,
 } from './interfaces/titles/title_manager';
 export {
   useBatchedOptionalPublishingSubjects,

@@ -8,7 +8,6 @@
  */
 
 import {
-  apiHasParentApi,
   apiHasSerializableState,
   apiHasSerializedStateComparator,
   HasSnapshottableState,
@@ -30,15 +29,15 @@ import { apiIsPresentationContainer } from '../presentation_container';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 
-export const initializeUnsavedChanges = <
+export const initializeHasUnsavedChanges = <
   SerializedState extends object = object,
-  RuntimeState extends object = SerializedState,
-  Api extends unknown = unknown
+  RuntimeState extends object = SerializedState
 >(
   uuid: string,
   type: string,
   comparators: StateComparators<RuntimeState>,
-  api: Api
+  api: unknown,
+  parentApi: unknown
 ) => {
   const snapshotRuntimeState = () => {
     const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;
@@ -51,8 +50,8 @@ export const initializeUnsavedChanges = <
   };
 
   if (
-    !apiHasParentApi(api) ||
-    !apiHasLastSavedChildState<SerializedState>(api.parentApi) ||
+    !parentApi ||
+    !apiHasLastSavedChildState<SerializedState>(parentApi) ||
     !apiHasSerializableState<SerializedState>(api)
   ) {
     return {
@@ -71,16 +70,14 @@ export const initializeUnsavedChanges = <
    * the parent saves.
    */
   const getLastSavedState = () => {
-    return (api.parentApi as HasLastSavedChildState<SerializedState>).getLastSavedStateForChild(
-      uuid
-    );
+    return (parentApi as HasLastSavedChildState<SerializedState>).getLastSavedStateForChild(uuid);
   };
   const lastSavedState$ = new BehaviorSubject<SerializedPanelState<SerializedState> | undefined>(
     getLastSavedState()
   );
   subscriptions.push(
     // any time the parent saves, refresh the last saved state...
-    api.parentApi.saveNotification$.subscribe(() => {
+    parentApi.saveNotification$.subscribe(() => {
       lastSavedState$.next(getLastSavedState());
     })
   );
@@ -105,8 +102,8 @@ export const initializeUnsavedChanges = <
     api: {
       hasUnsavedChanges$,
       resetUnsavedChanges: () => {
-        if (!apiIsPresentationContainer(api.parentApi)) return;
-        api.parentApi.replacePanel(uuid, {
+        if (!apiIsPresentationContainer(parentApi)) return;
+        parentApi.replacePanel(uuid, {
           panelType: type,
           serializedState: lastSavedState$.getValue(),
         });

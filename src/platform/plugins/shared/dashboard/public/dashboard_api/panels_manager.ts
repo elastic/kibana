@@ -23,11 +23,9 @@ import {
   StateComparators,
   apiHasLibraryTransforms,
   apiPublishesTitle,
-  apiPublishesUnsavedChanges,
   apiHasSerializableState,
   getTitle,
 } from '@kbn/presentation-publishing';
-import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
 import type { initializeTrackPanel } from './track_panel';
@@ -52,7 +50,7 @@ export function initializePanelsManager(
   pushReferences: (references: Reference[]) => void
 ) {
   const children$ = new BehaviorSubject<{
-    [key: string]: unknown;
+    [key: string]: DefaultEmbeddableApi;
   }>({});
   const panels$ = new BehaviorSubject(initialPanels);
   function setPanels(panels: DashboardPanelMap) {
@@ -365,17 +363,7 @@ export function initializePanelsManager(
         const currentChildren = children$.value;
         for (const panelId of Object.keys(currentChildren)) {
           if (panels$.value[panelId]) {
-            const child = currentChildren[panelId];
-            if (apiPublishesUnsavedChanges(child)) {
-              const success = child.resetUnsavedChanges();
-              if (!success) {
-                coreServices.notifications.toasts.addWarning(
-                  i18n.translate('dashboard.reset.panelError', {
-                    defaultMessage: 'Unable to reset panel changes',
-                  })
-                );
-              }
-            }
+            currentChildren[panelId].resetUnsavedChanges?.();
           } else {
             // if reset resulted in panel removal, we need to update the list of children
             delete currentChildren[panelId];

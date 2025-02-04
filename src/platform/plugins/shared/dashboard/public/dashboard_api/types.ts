@@ -19,8 +19,8 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
+  HasLastSavedChildState,
   HasRuntimeChildState,
-  HasSaveNotification,
   HasSerializedChildState,
   PresentationContainer,
   PublishesSettings,
@@ -28,7 +28,6 @@ import {
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
-  SerializedPanelState,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -37,12 +36,13 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
-  PublishesTitle,
   PublishesSavedObjectId,
+  PublishesTitle,
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
+  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -124,7 +124,7 @@ export type DashboardApi = CanExpandPanels &
   HasAppContext &
   HasExecutionContext &
   HasRuntimeChildState &
-  HasSaveNotification &
+  HasLastSavedChildState &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &

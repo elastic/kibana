@@ -11,7 +11,6 @@ import type { Reference } from '@kbn/content-management-utils';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import {
@@ -25,7 +24,6 @@ import { getDashboardContentManagementService } from '../services/dashboard_cont
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
-import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
 import { getSerializedState } from './get_serialized_state';
 import { openSaveModal } from './open_save_modal';
 import { initializePanelsManager } from './panels_manager';
@@ -52,8 +50,10 @@ export function getDashboardApi({
   initialPanelsRuntimeState,
   savedObjectResult,
   savedObjectId,
+  lastSavedDashboardState,
 }: {
   creationOptions?: DashboardCreationOptions;
+  lastSavedDashboardState?: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState | undefined;
   initialState: DashboardState;
   initialPanelsRuntimeState?: UnsavedPanelState;
@@ -109,9 +109,8 @@ export function getDashboardApi({
   const unsavedChangesManager = initializeUnsavedChangesManager({
     creationOptions,
     controlGroupApi$,
-    lastSavedState: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
-      ...DEFAULT_DASHBOARD_INPUT,
-    },
+    getPanelReferences,
+    lastSavedState: lastSavedDashboardState,
     panelsManager,
     savedObjectId$,
     settingsManager,

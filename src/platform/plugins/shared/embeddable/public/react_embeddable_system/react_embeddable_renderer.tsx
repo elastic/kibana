@@ -11,7 +11,7 @@ import {
   apiHasRuntimeChildState,
   apiIsPresentationContainer,
   HasSerializedChildState,
-  initializeUnsavedChanges,
+  initializeHasUnsavedChanges,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
@@ -154,10 +154,12 @@ export const ReactEmbeddableRenderer = <
               );
             }
 
-            const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
+            const unsavedChanges = initializeHasUnsavedChanges<SerializedState, RuntimeState>(
               uuid,
-              parentApi,
-              comparators
+              type,
+              comparators,
+              apiRegistration,
+              parentApi
             );
 
             const fullApi = setApi({
@@ -178,8 +180,7 @@ export const ReactEmbeddableRenderer = <
             buildApi,
             uuid,
             parentApi,
-            setApi,
-            lastSavedRuntimeState
+            setApi
           );
 
           phaseTracker.current.trackPhaseEvents(uuid, api);

@@ -58,13 +58,26 @@ export async function loadDashboardApi({
 
   const sessionStorageInput = ((): Partial<DashboardState> | undefined => {
     if (!creationOptions?.useSessionStorageIntegration) return;
-    return dashboardBackupState?.dashboardState;
+    return dashboardBackupState;
   })();
 
-  const combinedSessionState: DashboardState = {
+  const lastSavedDashboardState: DashboardState = {
     ...DEFAULT_DASHBOARD_INPUT,
     ...(savedObjectResult?.dashboardInput ?? {}),
+    references: savedObjectResult?.references,
+  };
+
+  const combinedSessionState: DashboardState = {
+    ...lastSavedDashboardState,
     ...sessionStorageInput,
+    panels: {
+      ...lastSavedDashboardState.panels,
+
+      /**
+       * Panels are spread from the session storage input because only panels which have changed are backed up there.
+       */
+      ...sessionStorageInput?.panels,
+    },
   };
   combinedSessionState.references = sessionStorageInput?.references?.length
     ? sessionStorageInput?.references
@@ -111,6 +124,7 @@ export async function loadDashboardApi({
       ...combinedSessionState,
       ...overrideState,
     },
+    lastSavedDashboardState,
     initialPanelsRuntimeState,
     savedObjectResult,
     savedObjectId,

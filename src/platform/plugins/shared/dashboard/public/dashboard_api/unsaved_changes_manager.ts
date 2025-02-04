@@ -7,19 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { childrenUnsavedChanges$, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import {
   PublishesSavedObjectId,
   PublishingSubject,
+  SerializedPanelState,
   StateComparators,
+  diffComparators$,
+  getUnchangingComparator,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { BehaviorSubject, Subject, combineLatest, debounceTime, skipWhile, switchMap } from 'rxjs';
 import {
-  PANELS_CONTROL_GROUP_KEY,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
+  BehaviorSubject,
+  Subject,
+  combineLatest,
+  debounceTime,
+  map,
+  skipWhile,
+  switchMap,
+} from 'rxjs';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { initializePanelsManager } from './panels_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions, DashboardState } from './types';
@@ -36,10 +45,12 @@ export function initializeUnsavedChangesManager({
   viewModeManager,
   unifiedSearchManager,
   referencesComparator,
+  getPanelReferences,
 }: {
+  getPanelReferences: (id: string) => Reference[];
   creationOptions?: DashboardCreationOptions;
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
-  lastSavedState: DashboardState;
+  lastSavedState: DashboardState | undefined;
   panelsManager: ReturnType<typeof initializePanelsManager>;
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   settingsManager: ReturnType<typeof initializeSettingsManager>;
@@ -48,32 +59,47 @@ export function initializeUnsavedChangesManager({
   referencesComparator: StateComparators<Pick<DashboardState, 'references'>>;
 }) {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-  const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  const lastSavedState$ = new BehaviorSubject<DashboardState | undefined>(lastSavedState);
   const saveNotification$ = new Subject<void>();
 
-  const dashboardUnsavedChanges = initializeUnsavedChanges<
-    Omit<DashboardState, 'controlGroupInput' | 'controlGroupState' | 'timeslice' | 'tags'>
-  >(
-    lastSavedState,
-    { saveNotification$ },
-    {
-      ...panelsManager.comparators,
-      ...settingsManager.comparators,
-      ...viewModeManager.comparators,
-      ...unifiedSearchManager.comparators,
-      ...referencesComparator,
-    }
+  const dashboardChangesSource$ = diffComparators$<DashboardState>(lastSavedState$, {
+    ...panelsManager.comparators,
+    ...settingsManager.comparators,
+    ...viewModeManager.comparators,
+    ...unifiedSearchManager.comparators,
+    ...referencesComparator,
+
+    tags: getUnchangingComparator(),
+    controlGroupInput: getUnchangingComparator(),
+    controlGroupState: getUnchangingComparator(),
+  });
+  const panelsChangesSource$ = childrenUnsavedChanges$(panelsManager.api.children$).pipe(
+    map((childrenWithChanges) => {
+      const changedPanelStates: { [key: string]: SerializedPanelState<object> } = {};
+      for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
+        if (!hasUnsavedChanges) continue;
+        const childApi = panelsManager.api.children$.value[uuid];
+        if (!childApi) continue;
+        changedPanelStates[uuid] = childApi.serializeState();
+      }
+      return changedPanelStates;
+    })
+  );
+  const controlGroupChangesSource$ = controlGroupApi$.pipe(
+    skipWhile((api) => !api),
+    switchMap((api) => api!.unsavedChanges$),
+    map((changes) => {
+      if (Object.keys(changes).length > 0) {
+        return controlGroupApi$.value?.serializeState();
+      }
+      return undefined;
+    })
   );
 
   const unsavedChangesSubscription = combineLatest([
-    dashboardUnsavedChanges.api.unsavedChanges$,
-    childrenUnsavedChanges$(panelsManager.api.children$),
-    controlGroupApi$.pipe(
-      skipWhile((controlGroupApi) => !controlGroupApi),
-      switchMap((controlGroupApi) => {
-        return controlGroupApi!.unsavedChanges$;
-      })
-    ),
+    dashboardChangesSource$,
+    panelsChangesSource$,
+    controlGroupChangesSource$,
   ])
     .pipe(debounceTime(0))
     .subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
@@ -90,40 +116,63 @@ export function initializeUnsavedChangesManager({
       if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
         hasUnsavedChanges$.next(hasUnsavedChanges);
       }
+      const allReferences: Reference[] = [];
 
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
         // Current behaviour expects time range not to be backed up. Revisit this?
-        const dashboardStateToBackup = omit(dashboardChanges ?? {}, [
+        const dashboardStateToBackup: Partial<DashboardState> = omit(dashboardChanges ?? {}, [
           'timeRange',
           'refreshInterval',
         ]);
-        const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
+        // apply control group changes.
         if (controlGroupChanges) {
-          reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
+          allReferences.concat(controlGroupChanges.references ?? []);
+          dashboardStateToBackup.controlGroupInput = controlGroupChanges.rawState;
         }
 
-        getDashboardBackupService().setState(
-          savedObjectId$.value,
-          dashboardStateToBackup,
-          reactEmbeddableChanges
-        );
+        // apply panels changes
+        if (unsavedPanelState) {
+          const currentPanels = panelsManager.internalApi.getState().panels;
+          dashboardStateToBackup.panels = {};
+          for (const [uuid, serializedPanelState] of Object.entries(unsavedPanelState)) {
+            allReferences.concat(serializedPanelState.references ?? []);
+            dashboardStateToBackup.panels[uuid] = {
+              ...currentPanels[uuid],
+              explicitInput: { ...serializedPanelState.rawState, id: uuid },
+            };
+          }
+        }
+        dashboardStateToBackup.references = allReferences;
+
+        getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
       }
     });
+
+  const lastSavedChildStateApi: HasLastSavedChildState = {
+    saveNotification$,
+    getLastSavedStateForChild: (uuid: string) => {
+      if (!lastSavedState$.value?.panels[uuid]) return;
+      return {
+        rawState: lastSavedState$.value?.panels[uuid]?.explicitInput,
+        references: getPanelReferences(uuid),
+      };
+    },
+  };
 
   return {
     api: {
       asyncResetToLastSavedState: async () => {
+        if (!lastSavedState$.value) return;
         panelsManager.internalApi.reset(lastSavedState$.value);
         settingsManager.internalApi.reset(lastSavedState$.value);
         unifiedSearchManager.internalApi.reset(lastSavedState$.value);
         await controlGroupApi$.value?.asyncResetUnsavedChanges();
       },
+      ...lastSavedChildStateApi,
       hasUnsavedChanges$,
-      saveNotification$,
     },
     cleanup: () => {
-      dashboardUnsavedChanges.cleanup();
       unsavedChangesSubscription.unsubscribe();
     },
     internalApi: {

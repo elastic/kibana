@@ -11,11 +11,7 @@ import type { Observable } from 'rxjs';
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import {
-  HasSaveNotification,
-  HasSerializedChildState,
-  PresentationContainer,
-} from '@kbn/presentation-containers';
+import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -23,7 +19,6 @@ import {
   PublishesFilters,
   PublishesTimeslice,
   PublishesUnifiedSearch,
-  PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -53,10 +48,10 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataViews &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
-  Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges$'> &
   PublishesTimeslice &
   PublishesDisabledActionIds &
-  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
+  Partial<HasParentApi<PublishesUnifiedSearch> & PublishesReload> & {
+    unsavedChanges$: PublishingSubject<Partial<ControlGroupRuntimeState>>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
     autoApplySelections$: PublishingSubject<boolean>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
