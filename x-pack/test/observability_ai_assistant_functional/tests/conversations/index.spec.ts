@@ -145,11 +145,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           ],
           conversation: {
             title: 'My old conversation',
-            token_count: {
-              completion: 1,
-              prompt: 1,
-              total: 2,
-            },
           },
           '@timestamp': '2024-04-18T14:29:22.948',
           public: false,
@@ -286,13 +281,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   ],
                 });
 
-                await titleSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
                 await titleSimulator.complete();
 
                 await conversationSimulator.next('My response');
-
-                await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
 
                 await conversationSimulator.complete();
 
@@ -359,8 +350,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   const conversationSimulator = await conversationInterceptor.waitForIntercept();
 
                   await conversationSimulator.next('My second response');
-
-                  await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
 
                   await conversationSimulator.complete();
 
@@ -454,8 +443,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   await conversationSimulator.next(
                     'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
                   );
-
-                  await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
 
                   await conversationSimulator.complete();
 

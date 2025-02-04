@@ -115,8 +115,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               await simulator.next(`Part: ${i}\n`);
             }
 
-            await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
-
             await simulator.complete();
 
             await new Promise<void>((innerResolve) => passThrough.on('end', () => innerResolve()));
@@ -131,15 +129,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 null,
                 2
               )}`
-            );
-
-            const tokenCountChunk = receivedChunks.find((chunk) => chunk.type === 'tokenCount');
-            expect(tokenCountChunk).to.eql(
-              {
-                type: 'tokenCount',
-                tokens: { completion: 20, prompt: 33, total: 53 },
-              },
-              `received token count chunk did not match expected`
             );
           }
 

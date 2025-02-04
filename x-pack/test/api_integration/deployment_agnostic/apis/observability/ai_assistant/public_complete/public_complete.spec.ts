@@ -95,7 +95,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await titleSimulator.status(200);
       await titleSimulator.next('My generated title');
-      await titleSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
       await titleSimulator.complete();
 
       await conversationSimulator.status(200);
@@ -180,7 +179,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 },
               ],
             });
-            await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
             await conversationSimulator.complete();
           }
         );
@@ -252,7 +250,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 },
               ],
             });
-            await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
             await conversationSimulator.complete();
           }
         );
@@ -269,7 +266,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         responseBody = await getOpenAIResponse(async (conversationSimulator) => {
           await conversationSimulator.next('Hello');
-          await conversationSimulator.tokenCount({ completion: 5, prompt: 10, total: 15 });
           await conversationSimulator.complete();
         });
       });
