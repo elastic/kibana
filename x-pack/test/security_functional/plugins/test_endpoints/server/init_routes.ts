@@ -293,15 +293,15 @@ export function initRoutes(
 
   router.post(
     {
-      path: '/simulate_point_in_time',
-      validate: { body: schema.object({ simulateOpenPointInTime: schema.boolean() }) },
+      path: '/simulate_point_in_time_failure',
+      validate: { body: schema.object({ simulateOpenPointInTimeFailure: schema.boolean() }) },
       options: { authRequired: false, xsrfRequired: false },
     },
     async (context, request, response) => {
       const esClient = (await context.core).elasticsearch.client.asInternalUser;
       const originalOpenPointInTime = esClient.openPointInTime;
 
-      if (request.body.simulateOpenPointInTime) {
+      if (request.body.simulateOpenPointInTimeFailure) {
         // @ts-expect-error
         esClient.openPointInTime = async function (params, options) {
           const { index } = params;
