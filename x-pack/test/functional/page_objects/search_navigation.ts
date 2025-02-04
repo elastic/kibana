@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
+
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -38,7 +38,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       });
     },
 
-    async navigateToIndexDetailPage(indexName: string, spaceId?:number) {
+    async navigateToIndexDetailPage(indexName: string) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'management:index_management',
@@ -46,7 +46,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       await searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
         0
       );
-      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 10000 });
+      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage(expectRedirect: boolean = false) {
       await common.navigateToApp('searchInferenceEndpoints', {

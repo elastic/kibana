@@ -101,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           // Navigate to the spaces management page which will log us in Kibana
           await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName, spaceCreated?.id);
+          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
         });
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
@@ -174,7 +174,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should have breadcrumb navigation', async () => {
-          await pageObjects.searchIndexDetailsPage.expectBreadcrumbNavigationWithIndexName(
+          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(
             indexName
           );
         });

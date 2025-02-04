@@ -284,7 +284,7 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       });
     },
 
-    async expectBreadcrumbNavigationWithIndexName(indexName: string) {
+    async expectIndexNametoBeInBreadcrumbs(indexName: string) {
       await testSubjects.existOrFail('euiBreadcrumb');
       expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(indexName);
     },
