@@ -233,7 +233,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             updatedAt: '2024-10-23T17:33:15.933Z',
             updatedBy: 'u_user_id_1',
             users: [{ name: 'Test User 1' }],
-            name: 'AAAAA',
+            name: 'A',
             namespace: 'default',
             type: 'document',
             kbResource: 'user',
@@ -247,7 +247,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             updatedAt: '2024-10-25T09:55:56.596Z',
             updatedBy: 'u_user_id_2',
             users: [],
-            name: 'BBBBB',
+            name: 'b',
             namespace: 'default',
             type: 'index',
             index: 'index-1',
@@ -258,11 +258,26 @@ describe('KnowledgeBaseSettingsManagement', () => {
           {
             id: '3',
             createdAt: '2024-10-25T09:55:56.596Z',
+            createdBy: 'u_user_id_2',
+            updatedAt: '2024-10-25T09:55:56.596Z',
+            updatedBy: 'u_user_id_2',
+            users: [],
+            name: 'B',
+            namespace: 'default',
+            type: 'index',
+            index: 'index-1',
+            field: 'semantic_field1',
+            description: 'Test description',
+            queryDescription: 'Test query instruction',
+          },
+          {
+            id: '4',
+            createdAt: '2024-10-25T09:55:56.596Z',
             createdBy: 'u_user_id_1',
             updatedAt: '2024-10-25T09:55:56.596Z',
             updatedBy: 'u_user_id_1',
             users: [{ name: 'Test User 1' }],
-            name: 'aaaaa',
+            name: 'a',
             namespace: 'default',
             type: 'index',
             index: 'index-2',
@@ -282,25 +297,35 @@ describe('KnowledgeBaseSettingsManagement', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('knowledge-base-entries-table')).toBeInTheDocument();
-      expect(screen.getByText('AAAAA')).toBeInTheDocument();
-      expect(screen.getByText('BBBBB')).toBeInTheDocument();
-      expect(screen.getByText('aaaaa')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('B')).toBeInTheDocument();
+      expect(screen.getByText('a')).toBeInTheDocument();
     });
 
     // Order ascending
     await userEvent.click(screen.getByText('Name'));
 
     await waitFor(() => {
-      expect(screen.getByText('AAAAA').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(4);
-      expect(screen.getByText('aaaaa').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(4);
+      // Upper case letters should come before lower case letters
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('a'))).toBe(4);
+      expect(screen.getByText('B').compareDocumentPosition(screen.getByText('b'))).toBe(4);
+
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('B'))).toBe(4);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('B'))).toBe(4);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('b'))).toBe(4);
     });
 
     // Order decending
     await userEvent.click(screen.getByText('Name'));
 
     await waitFor(() => {
-      expect(screen.getByText('AAAAA').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(2);
-      expect(screen.getByText('aaaaa').compareDocumentPosition(screen.getByText('BBBBB'))).toBe(2);
+      // Lower case letters should come before upper case letters
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('a'))).toBe(2);
+      expect(screen.getByText('B').compareDocumentPosition(screen.getByText('b'))).toBe(2);
+
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('B'))).toBe(2);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('B'))).toBe(2);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('b'))).toBe(2);
     });
   });
 
