@@ -24,7 +24,6 @@ import {
   switchMap,
   distinctUntilChanged,
   map,
-  shareReplay,
   tap,
   take,
   finalize,
@@ -121,8 +120,7 @@ export class TrainedModelsService {
   public readonly isLoading$ = this._isLoading$.pipe(distinctUntilChanged());
 
   public readonly modelItems$: Observable<TrainedModelUIItem[]> = this._modelItems$.pipe(
-    distinctUntilChanged(isEqual),
-    shareReplay({ bufferSize: 1, refCount: true })
+    distinctUntilChanged(isEqual)
   );
 
   public get scheduledDeployments$(): Observable<StartAllocationParams[]> {
