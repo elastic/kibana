@@ -256,7 +256,7 @@ function IlmModal({
         setErrorMessage('body' in error ? error.body.message : error.message);
       })
       .finally(() => setIsLoading(false));
-  }, [getIlmPolicies, setIsLoading]);
+  }, []);
 
   return (
     <EuiModal onClose={closeModal}>
