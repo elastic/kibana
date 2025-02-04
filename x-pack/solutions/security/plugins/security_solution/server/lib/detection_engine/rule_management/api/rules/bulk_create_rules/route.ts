@@ -42,6 +42,8 @@ export const bulkCreateRulesRoute = (
   logger: Logger,
   docLinks: DocLinksServiceSetup
 ) => {
+  const securityDocLinks = docLinks.links.securitySolution;
+
   router.versioned
     .post({
       access: 'public',
@@ -67,7 +69,7 @@ export const bulkCreateRulesRoute = (
         },
         options: {
           deprecated: {
-            documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+            documentationUrl: securityDocLinks.legacyRuleManagementBulkApiDeprecations,
             severity: 'critical',
             reason: {
               type: 'migrate',
