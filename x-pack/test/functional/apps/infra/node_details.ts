@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
