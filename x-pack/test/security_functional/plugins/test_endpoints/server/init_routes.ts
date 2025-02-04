@@ -305,14 +305,10 @@ export function initRoutes(
         // @ts-expect-error
         esClient.openPointInTime = async function (params, options) {
           const { index } = params;
-          console.log('params', params);
           if (index.includes('kibana_security_session')) {
-            console.log('We are overriding the openPointInTime function');
-            return Promise.reject(
-              new errors.ResponseError({
-                statusCode: 503,
-              } as unknown as DiagnosticResult)
-            );
+            return {
+              statusCode: 503,
+            } as unknown as DiagnosticResult;
           }
           return originalOpenPointInTime.call(this, params, options);
         };
@@ -332,8 +328,8 @@ export function initRoutes(
     },
     async (context, request, response) => {
       const [, { taskManager }] = await core.getStartServices();
-      console.log('taskManager', taskManager);
-      const { attempts, state, status } = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
+      const res = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
+      const { attempts, state, status } = res;
       return response.ok({ body: { attempts, state, status } });
     }
   );

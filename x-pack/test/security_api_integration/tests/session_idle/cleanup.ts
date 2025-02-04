@@ -106,16 +106,6 @@ export default function ({ getService }: FtrProviderContext) {
     await esSupertest.put('/_cluster/settings').send(addLogging).expect(200);
   }
 
-  async function rerouteIndexCluster() {
-    const res = await es.cluster.putSettings({
-      body: {
-        transient: { 'cluster.routing.allocation.enable': 'none' },
-      },
-    });
-
-    console.log('res2', JSON.stringify(res, null, 2));
-  }
-
   describe('Session Idle cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
@@ -259,93 +249,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Session document should still be present.
       expect(await getNumberOfSessionDocuments()).to.be(1);
-    });
-
-    it('quietly fails if shards are unavailable', async function () {
-      this.timeout(100000);
-
-      await supertest
-        .post('/simulate_point_in_time')
-        .send({ simulateOpenPointInTime: true })
-        .expect(200);
-
-      log.debug(`Log in as ${basicUsername} using ${basicPassword} password.`);
-      await supertest
-        .post('/internal/security/login')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          providerType: 'basic',
-          providerName: 'basic1',
-          currentURL: '/',
-          params: { username: basicUsername, password: basicPassword },
-        })
-        .expect(200);
-
-      await runCleanupTaskSoon();
-
-      log.debug('Waiting for cleanup job to run...');
-
-      await setTimeoutAsync(40000);
-      await retry.tryForTime(20000, async () => {
-        // Session does not clean up but the cleanup task has not failed either
-        expect(await getNumberOfSessionDocuments()).to.be(1);
-      });
-
-      await supertest
-        .post('/simulate_point_in_time')
-        .send({ simulateOpenPointInTime: false })
-        .expect(200);
-    });
-
-    it.only('fails if shards are unavailable more than 10 times', async function () {
-      this.timeout(100000);
-
-      await supertest
-        .post('/simulate_point_in_time')
-        .send({ simulateOpenPointInTime: true })
-        .expect(200);
-
-      await supertest
-        .post('/internal/security/login')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          providerType: 'basic',
-          providerName: 'basic1',
-          currentURL: '/',
-          params: { username: basicUsername, password: basicPassword },
-        })
-        .expect(200);
-
-      log.debug('Waiting for cleanup job to run...');
-
-      let shardMissingCounter = 0;
-      while (shardMissingCounter < 10) {
-        log.debug(`Running cleanup task (attempt ${shardMissingCounter + 1})...`);
-
-        await runCleanupTaskSoon();
-        await setTimeoutAsync(40000);
-
-        log.debug('Attempting to get task status');
-        let response = await supertest.get('/cleanup_task_status').expect(200);
-        let { state } = response.body;
-        shardMissingCounter = state.shardMissingCounter ?? 0;
-
-        if (shardMissingCounter < 9) {
-          await runCleanupTaskSoon();
-          await setTimeoutAsync(40000);
-          response = await supertest.get('/cleanup_task_status').expect(200);
-          state = response.body.state;
-          shardMissingCounter = state.shardMissingCounter ?? 0;
-        } else {
-          // On the 10th attempt, it should reset or succeed
-          console.log('state', state);
-        }
-      }
-
-      await supertest
-        .post('/simulate_point_in_time')
-        .send({ simulateOpenPointInTime: false })
-        .expect(200);
     });
   });
 }

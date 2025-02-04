@@ -26,6 +26,7 @@ import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audi
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { errors } from '@elastic/elasticsearch';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
@@ -496,10 +497,10 @@ export class SessionIndex {
         indexNeedsRefresh = (await this.bulkDeleteSessions(operations)) || indexNeedsRefresh;
       }
     } catch (err) {
-      if (err.statusCode === 503) {
+      if (err instanceof errors.ResponseError && err.statusCode === 503) {
         shardMissingCounter = shardMissingCounter + 1;
         if (shardMissingCounter < 10) {
-          logger.debug(
+          logger.warn(
             `No shards found for session index, skipping session cleanup. This operation has failed ${shardMissingCounter} time(s)`
           );
           return {
@@ -508,12 +509,13 @@ export class SessionIndex {
             },
           };
         }
-        error = new Error(
-          `Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed ${shardMissingCounter} times.`
-        );
-        logger.error(error.message);
+
+        const errorMesage = `Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed ${shardMissingCounter} times. ${getDetailedErrorMessage(
+          err
+        )}`;
+        logger.error(errorMesage);
         return {
-          error,
+          error: errorMesage,
           state: {
             shardMissingCounter: 0,
           },
@@ -854,20 +856,19 @@ export class SessionIndex {
       });
     }
 
-    let { body: openPitResponse, statusCode } =
-      await this.options.elasticsearchClient.openPointInTime(
-        {
-          index: this.aliasName,
-          keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
-          // @ts-expect-error client support this option, but it is not documented and typed yet.
-          // once support added we should remove this expected type error
-          // https://github.com/elastic/elasticsearch-specification/issues/3144
-          allow_partial_search_results: true,
-        },
-        { ignore: [404], meta: true }
-      );
+    const response = await this.options.elasticsearchClient.openPointInTime(
+      {
+        index: this.aliasName,
+        keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+        // @ts-expect-error client support this option, but it is not documented and typed yet.
+        // once support added we should remove this expected type error
+        // https://github.com/elastic/elasticsearch-specification/issues/3144
+        allow_partial_search_results: true,
+      },
+      { ignore: [404], meta: true }
+    );
 
-    if (statusCode === 404) {
+    if (response.statusCode === 404) {
       await this.ensureSessionIndexExists();
       ({ body: openPitResponse, statusCode } =
         await this.options.elasticsearchClient.openPointInTime(
@@ -883,6 +884,10 @@ export class SessionIndex {
         ));
     }
 
+    if (response.statusCode === 503) {
+      throw new errors.ResponseError(response);
+    }
+    let openPitResponse = response.body;
     try {
       let searchAfter: SortResults | undefined;
       for (let i = 0; i < SESSION_INDEX_CLEANUP_BATCH_LIMIT; i++) {
