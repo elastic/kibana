@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -20,7 +19,6 @@ import {
   EuiSelectableOption,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
