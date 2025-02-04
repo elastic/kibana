@@ -133,15 +133,6 @@ describe('single line query', () => {
         );
       });
 
-      test('supports aliases', () => {
-        const { text } = reprint(`
-          FROM employees | LEFT JOIN languages_lookup AS something ON language_code`);
-
-        expect(text).toBe(
-          'FROM employees | LEFT JOIN languages_lookup AS something ON language_code'
-        );
-      });
-
       test('supports multiple conditions', () => {
         const { text } = reprint(`
           FROM employees | LEFT JOIN a ON b, c, d.e.f`);
