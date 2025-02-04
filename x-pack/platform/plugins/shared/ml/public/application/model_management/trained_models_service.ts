@@ -73,7 +73,7 @@ export class TrainedModelsService {
   private savedObjectsApiService!: SavedObjectsApiService;
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
-  private runningDeployments = new WeakSet<StartAllocationParams>();
+  private deploymentsInProgress = new Set<StartAllocationParams>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -242,11 +242,27 @@ export class TrainedModelsService {
   }
 
   /** Removes scheduled deployments for a model */
-  public removeScheduledDeployments(modelId: string) {
-    this.abortDownload(modelId);
-    this.setScheduledDeployments?.(
-      this.scheduledDeployments.filter((deployment) => deployment.modelId !== modelId)
-    );
+  public removeScheduledDeployments({
+    modelId,
+    deploymentId,
+  }: {
+    modelId?: string;
+    deploymentId?: string;
+  }) {
+    let updated = this._scheduledDeployments$.getValue();
+
+    // If removing by modelId, abort download and filter all deployments for that model.
+    if (modelId) {
+      this.abortDownload(modelId);
+      updated = updated.filter((d) => d.modelId !== modelId);
+    }
+
+    // If removing by deploymentId, filter deployments matching that ID.
+    if (deploymentId) {
+      updated = updated.filter((d) => d.deploymentParams.deployment_id !== deploymentId);
+    }
+
+    this.setScheduledDeployments?.(updated);
   }
 
   private isModelReadyForDeployment(model: TrainedModelUIItem | undefined) {
@@ -370,7 +386,7 @@ export class TrainedModelsService {
   }
 
   private handleDeployment(deployment: StartAllocationParams): Observable<unknown> {
-    return of(null).pipe(
+    return of(deployment).pipe(
       // Make sure it still exists in the scheduled deployments
       filter(() => {
         const found = this.scheduledDeployments.find((d) => d === deployment);
@@ -380,7 +396,7 @@ export class TrainedModelsService {
       filter(() => !this.isDeploymentForModelAlreadyRunning(deployment)),
       tap(() => {
         // Mark as running so we don't do it multiple times
-        this.runningDeployments.add(deployment);
+        this.deploymentsInProgress.add(deployment);
       }),
       // If model is already deployed with that ID, skip
       filter(() => {
@@ -392,7 +408,9 @@ export class TrainedModelsService {
           model.deployment_ids.includes(deployment.deploymentParams.deployment_id!)
         ) {
           // It's already deployed, remove from schedule
-          this.removeScheduledDeployment(deployment);
+          this.removeScheduledDeployments({
+            deploymentId: deployment.deploymentParams.deployment_id!,
+          });
           return false;
         }
         return true;
@@ -406,8 +424,15 @@ export class TrainedModelsService {
 
         return from(this.trainedModelsApiService.startModelAllocation(deployment)).pipe(
           finalize(() => {
-            this.removeScheduledDeployment(deployment);
-
+            this.removeScheduledDeployments({
+              deploymentId: deployment.deploymentParams.deployment_id!,
+            });
+            // Manually update the BehaviorSubject to ensure proper cleanup
+            // if user navigates away, as localStorage hook won't be available to handle updates
+            const updatedDeployments = this._scheduledDeployments$
+              .getValue()
+              .filter((d) => d.modelId !== deployment.modelId);
+            this._scheduledDeployments$.next(updatedDeployments);
             this.fetchModels();
           }),
           tap({
@@ -449,16 +474,7 @@ export class TrainedModelsService {
   }
 
   private isDeploymentForModelAlreadyRunning(deployment: StartAllocationParams): boolean {
-    return this.runningDeployments.has(deployment);
-  }
-
-  private removeScheduledDeployment(deployment: StartAllocationParams) {
-    const currentScheduledDeployments = this._scheduledDeployments$.getValue();
-    const updated = currentScheduledDeployments.filter(
-      (d) => d.deploymentParams.deployment_id !== deployment.deploymentParams.deployment_id
-    );
-
-    this.setScheduledDeployments?.(updated);
+    return this.deploymentsInProgress.has(deployment);
   }
 
   /**
@@ -556,7 +572,7 @@ export class TrainedModelsService {
   private cleanupService() {
     // Clear operation state
     this.downloadInProgress.clear();
-    this.runningDeployments = new WeakSet();
+    this.deploymentsInProgress.clear();
     this.abortedDownloads.clear();
     this.downloadStatusFetchInProgress = false;
 
