@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/product-intercept-trigger-plugin",
+  "owner": ["@elastic/appex-sharedux"],
+  "group": "platform",
+  "visibility": "private",
+  "description": "This plugin provides system level triggers for soliciting user product feedback.",
+  "plugin": {
+    "id": "productInterceptTrigger",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["taskManager"],
+    "requiredBundles": []
+  }
+}

@@ -23,7 +23,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { ProductInterceptDialogCore } from './core';
+import { ProductInterceptTriggerCore } from './core';
 
 interface ProductInterceptDialogPluginSetup {
   taskManager: TaskManagerSetupContract;
@@ -41,25 +41,25 @@ export class ProductInterceptDialogPlugin
     Plugin<object, object, ProductInterceptDialogPluginSetup, ProductInterceptDialogPluginStart>
 {
   private readonly logger: Logger;
-  private productInterceptDialogCore?: ProductInterceptDialogCore;
+  private productInterceptDialogCore?: ProductInterceptTriggerCore;
 
   constructor(private initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
   }
 
   public setup(core: CoreSetup, { taskManager }) {
-    this.productInterceptDialogCore = new ProductInterceptDialogCore(this.initContext, {
+    this.productInterceptDialogCore = new ProductInterceptTriggerCore(this.initContext, {
       core,
       logger: this.logger,
       taskManager,
     });
 
-    return this.productInterceptDialogCore.getContract();
+    return {};
   }
 
   public start(core: CoreStart, { taskManager }) {
     void (async () => {
-      await this.productInterceptDialogCore?.startUp({
+      await this.productInterceptDialogCore?.init({
         taskManager,
       });
     })();
