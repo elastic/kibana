@@ -12,37 +12,31 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { byDataColorPaletteMap, SimplifiedArrayNode } from './get_color';
 import type { SeriesLayer } from '@kbn/coloring';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
-import { generateFormatters } from '../formatters';
 import { ChartTypes } from '../../../common/types';
 import { getDistinctSeries } from '..';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 
 describe('#byDataColorPaletteMap', () => {
   let paletteDefinition: PaletteDefinition;
   let palette: PaletteOutput;
+  let colorIndexMap: Map<string, number>;
   const visData = createMockVisData();
-  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
-  const formatters = generateFormatters(visData, defaultFormatter);
+  const categories = (chartType?: ChartTypes) =>
+    chartType === ChartTypes.MOSAIC && visData.columns.length === 2
+      ? getColorCategories(visData.rows, visData.columns[1]?.id)
+      : getColorCategories(visData.rows, visData.columns[0]?.id);
 
   beforeEach(() => {
     paletteDefinition = chartPluginMock.createPaletteRegistry().get('default');
     palette = { type: 'palette' } as PaletteOutput;
+    colorIndexMap = new Map(categories().map((d, i) => [d[0], i]));
   });
 
   it('should create byDataColorPaletteMap', () => {
-    expect(
-      byDataColorPaletteMap(
-        visData.rows,
-        visData.columns[0],
-        paletteDefinition,
-        palette,
-        formatters,
-        fieldFormatsMock
-      )
-    ).toMatchInlineSnapshot(`
+    expect(byDataColorPaletteMap(paletteDefinition, palette, colorIndexMap)).toMatchInlineSnapshot(`
       Object {
         "getColor": [Function],
       }
@@ -50,40 +44,19 @@ describe('#byDataColorPaletteMap', () => {
   });
 
   it('should get color', () => {
-    const colorPaletteMap = byDataColorPaletteMap(
-      visData.rows,
-      visData.columns[0],
-      paletteDefinition,
-      palette,
-      formatters,
-      fieldFormatsMock
-    );
+    const colorPaletteMap = byDataColorPaletteMap(paletteDefinition, palette, colorIndexMap);
 
     expect(colorPaletteMap.getColor('Logstash Airways')).toBe('black');
   });
 
   it('should return undefined in case if values not in datatable', () => {
-    const colorPaletteMap = byDataColorPaletteMap(
-      visData.rows,
-      visData.columns[0],
-      paletteDefinition,
-      palette,
-      formatters,
-      fieldFormatsMock
-    );
+    const colorPaletteMap = byDataColorPaletteMap(paletteDefinition, palette, colorIndexMap);
 
     expect(colorPaletteMap.getColor('wrong')).toBeUndefined();
   });
 
   it('should increase rankAtDepth for each new value', () => {
-    const colorPaletteMap = byDataColorPaletteMap(
-      visData.rows,
-      visData.columns[0],
-      paletteDefinition,
-      palette,
-      formatters,
-      fieldFormatsMock
-    );
+    const colorPaletteMap = byDataColorPaletteMap(paletteDefinition, palette, colorIndexMap);
     colorPaletteMap.getColor('Logstash Airways');
     colorPaletteMap.getColor('JetBeats');
 
@@ -108,13 +81,17 @@ describe('getColor', () => {
   const buckets = createMockBucketColumns();
   const visParams = createMockPieParams();
   const colors = ['color1', 'color2', 'color3', 'color4'];
+  const categories = (chartType?: ChartTypes) =>
+    chartType === ChartTypes.MOSAIC && visData.columns.length === 2
+      ? getColorCategories(visData.rows, visData.columns[1]?.id)
+      : getColorCategories(visData.rows, visData.columns[0]?.id);
+  const colorIndexMap = (chartType?: ChartTypes) =>
+    new Map(categories(chartType).map((d, i) => [d[0], i]));
   const dataMock = dataPluginMock.createStartContract();
   interface RangeProps {
     gte: number;
     lt: number;
   }
-  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
-  const formatters = generateFormatters(visData, defaultFormatter);
   const distinctSeries = getDistinctSeries(visData.rows, buckets);
   const dataLength = { columnsLength: buckets.length, rowsLength: visData.rows.length };
 
@@ -182,7 +159,7 @@ describe('getColor', () => {
       false,
       dataMock.fieldFormats,
       visData.columns[0],
-      formatters
+      colorIndexMap(ChartTypes.PIE)
     );
     expect(color).toEqual(colors[0]);
   });
@@ -217,7 +194,7 @@ describe('getColor', () => {
       false,
       dataMock.fieldFormats,
       visData.columns[0],
-      formatters
+      colorIndexMap(ChartTypes.PIE)
     );
     expect(color).toEqual('color3');
   });
@@ -251,7 +228,7 @@ describe('getColor', () => {
       false,
       dataMock.fieldFormats,
       visData.columns[0],
-      formatters
+      colorIndexMap(ChartTypes.PIE)
     );
     expect(color).toEqual('#000028');
   });
@@ -315,7 +292,7 @@ describe('getColor', () => {
       false,
       dataMock.fieldFormats,
       column,
-      formatters
+      colorIndexMap(ChartTypes.PIE)
     );
     expect(color).toEqual('#3F6833');
   });
@@ -356,7 +333,7 @@ describe('getColor', () => {
       false,
       dataMock.fieldFormats,
       visData.columns[0],
-      formatters
+      colorIndexMap(ChartTypes.MOSAIC)
     );
     expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
       [expect.objectContaining({ name: 'Second level 1' })],
@@ -401,7 +378,7 @@ describe('getColor', () => {
       false,
       dataMock.fieldFormats,
       visData.columns[0],
-      formatters
+      colorIndexMap(ChartTypes.TREEMAP)
     );
     expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
       [expect.objectContaining({ name: 'First level' })],
