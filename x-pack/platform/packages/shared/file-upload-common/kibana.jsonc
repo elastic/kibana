@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/file-upload-common",
+  "owner": "@elastic/ml-ui",
+  "group": "platform",
+  "visibility": "shared"
+}
