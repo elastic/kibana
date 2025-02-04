@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { Observable } from 'rxjs';
-import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { EuiGlobalToastListToast as EuiToast, EuiTourStepProps } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /**
@@ -122,3 +122,17 @@ export interface NotificationCoordinatorPublicApi {
  * that returns an instance that of the notification coordinator that will be bound to the registrar value provided.
  */
 export type NotificationCoordinator = (registrar: string) => NotificationCoordinatorPublicApi;
+interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title' | 'content' | 'subtitle'> {
+  onNextClick?: () => void;
+}
+
+export interface ProductIntercept {
+  title: string;
+  steps: ProductInterceptSteps[];
+  onFinish: () => void;
+}
+
+export interface IProductInterceptPublicApi {
+  get$: () => Observable<ProductIntercept[]>;
+  add(productIntercept: ProductIntercept): string;
+}

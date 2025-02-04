@@ -18,6 +18,10 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import { showErrorDialog, ToastsService } from './toasts';
 import { Coordinator, notificationCoordinator } from './notification_coordinator';
+import {
+  ProductInterceptService,
+  EventReporter as ProductInterceptEventReporter,
+} from './product_intercept_dialog';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -35,17 +39,20 @@ export interface StartDeps {
 export class NotificationsService {
   private readonly toasts: ToastsService;
   private uiSettingsErrorSubscription?: Rx.Subscription;
+  private readonly productIntercepts: ProductInterceptService;
   private targetDomElement?: HTMLElement;
   private readonly coordinator = notificationCoordinator.bind(new Coordinator());
 
   constructor() {
     this.toasts = new ToastsService();
+    this.productIntercepts = new ProductInterceptService();
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
     const notificationSetup = {
       toasts: this.toasts.setup({ uiSettings, analytics }),
       coordinator: this.coordinator,
+      productIntercepts: this.productIntercepts.setup(),
     };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
@@ -79,6 +86,17 @@ export class NotificationsService {
           openModal: overlays.openModal,
           ...startDeps,
         }),
+      productIntercepts: this.productIntercepts.start({
+        eventReporter: new ProductInterceptEventReporter({ analytics: startDeps.analytics }),
+        overlays,
+        targetDomElement: (() => {
+          // create container to hold product intercept dialog
+          const productInterceptContainer = document.createElement('div');
+          targetDomElement.appendChild(productInterceptContainer);
+          return productInterceptContainer;
+        })(),
+        ...startDeps,
+      }),
     };
   }
 

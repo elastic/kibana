@@ -7,22 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  ErrorToastOptions,
-  ToastOptions,
-  Toast,
-  ToastInput,
-  IToasts,
-  ToastInputFields,
-  NotificationCoordinator,
-  NotificationCoordinatorState,
-  NotificationCoordinatorPublicApi,
-  IProductInterceptPublicApi,
-  ProductIntercept,
-} from './src/types';
-export type {
-  ToastsSetup,
-  ToastsStart,
-  NotificationsSetup,
-  NotificationsStart,
-} from './src/contracts';
+export { ProductInterceptDialogService as ProductInterceptService } from './product_intercept_dialog_service';
+export type { ProductInterceptDialogApi } from './product_intercept_dialog_api';
+export { EventReporter } from './product_intercept_dialog_manager/telemetry';

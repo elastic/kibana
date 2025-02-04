@@ -7,22 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  ErrorToastOptions,
-  ToastOptions,
-  Toast,
-  ToastInput,
-  IToasts,
-  ToastInputFields,
-  NotificationCoordinator,
-  NotificationCoordinatorState,
-  NotificationCoordinatorPublicApi,
-  IProductInterceptPublicApi,
-  ProductIntercept,
-} from './src/types';
-export type {
-  ToastsSetup,
-  ToastsStart,
-  NotificationsSetup,
-  NotificationsStart,
-} from './src/contracts';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+
+export class EventReporter {
+  private readonly reportEvent: AnalyticsServiceStart['reportEvent'];
+
+  constructor({ analytics }: { analytics: AnalyticsServiceStart }) {
+    this.reportEvent = analytics.reportEvent;
+  }
+}
