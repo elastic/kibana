@@ -16,10 +16,9 @@ import {
 } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { HostOptions, SamlSessionManager } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
 import { ScoutTestConfig } from '../../types';
 import { Protocol } from '../../playwright/types';
-import { serviceLoadedMsg } from '../../playwright/utils';
+import { ScoutLogger } from './logger';
 
 const getResourceDirPath = (config: ScoutTestConfig) => {
   return config.serverless
@@ -43,7 +42,7 @@ const createKibanaHostOptions = (config: ScoutTestConfig): HostOptions => {
 
 export const createSamlSessionManager = (
   config: ScoutTestConfig,
-  log: ToolingLog
+  log: ScoutLogger
 ): SamlSessionManager => {
   const resourceDirPath = getResourceDirPath(config);
   const rolesDefinitionPath = path.resolve(resourceDirPath, 'roles.yml');
@@ -65,7 +64,7 @@ export const createSamlSessionManager = (
     cloudUsersFilePath: config.cloudUsersFilePath,
   });
 
-  log.debug(serviceLoadedMsg('samlAuth'));
+  log.serviceLoaded('samlAuth');
 
   return sessionManager;
 };

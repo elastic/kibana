@@ -29,6 +29,7 @@
     "@kbn/saved-search-plugin",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/palettes",
   ],
   "exclude": [
     "target/**/*",
