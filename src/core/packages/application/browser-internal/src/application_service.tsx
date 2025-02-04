@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { flushSync } from 'react-dom';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
@@ -147,7 +148,9 @@ export class ApplicationService {
 
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
-      return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+      return flushSync(() => {
+        return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+      });
     };
 
     this.openInNewTab = (url) => {
