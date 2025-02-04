@@ -6012,6 +6012,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-langchain@link:x-pack/platform/packages/shared/ai-infra/inference-langchain":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-plugin@link:x-pack/platform/plugins/shared/inference":
   version "0.0.0"
   uid ""
@@ -24657,10 +24661,10 @@ moment-duration-format@^2.3.2:
   resolved "https://registry.yarnpkg.com/moment-duration-format/-/moment-duration-format-2.3.2.tgz#5fa2b19b941b8d277122ff3f87a12895ec0d6212"
   integrity sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==
 
-moment-timezone@^0.5.46:
-  version "0.5.46"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.46.tgz#a21aa6392b3c6b3ed916cd5e95858a28d893704a"
-  integrity sha512-ZXm9b36esbe7OmdABqIWJuBBiLLwAjrN7CE+7sYdCCx82Nabt1wHDj8TVseS59QIlfFPbOoiBPm6ca9BioG4hw==
+moment-timezone@^0.5.47:
+  version "0.5.47"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.47.tgz#d4d1a21b78372d914d6d69ae285454732a429749"
+  integrity sha512-UbNt/JAWS0m/NJOebR0QMRHBk0hu03r5dx9GK8Cs0AS3I81yDcOc9k+DytPItgVvBP7J6Mf6U2n3BPAacAV9oA==
   dependencies:
     moment "^2.29.4"
 
@@ -25414,10 +25418,10 @@ oas-validator@^5.0.8:
     should "^13.2.1"
     yaml "^1.10.0"
 
-oas@^25.2.1:
-  version "25.2.1"
-  resolved "https://registry.yarnpkg.com/oas/-/oas-25.2.1.tgz#2cf0ac042e5ba7af0bfc2a9acea6d33699cd6b90"
-  integrity sha512-56NO/ThEzIQeniJHm12tFIIGaugcdZTxYWiWP0KV8W9DcdWRvk9tvBEKITFp9r62w7W25vobedpiApa9u/Aoxg==
+oas@^25.3.0:
+  version "25.3.0"
+  resolved "https://registry.yarnpkg.com/oas/-/oas-25.3.0.tgz#c55a3a557fc040c2e8ea5954dd017b746ae2ac3a"
+  integrity sha512-98HLqUASE1u4kS8o3O7ZqjT1LG5oNwNjG1oXTsMscYVl2RSW4gMzlrn80dpxjsxpMlVuqPPa/sUS5WFtkk+Xxg==
   dependencies:
     "@readme/json-schema-ref-parser" "^1.2.0"
     "@types/json-schema" "^7.0.11"
