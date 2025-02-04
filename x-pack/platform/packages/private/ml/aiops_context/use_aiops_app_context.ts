@@ -7,6 +7,7 @@
 
 import { createContext, type FC, useContext } from 'react';
 
+import type { EventBusPluginStart } from '@kbn/event-bus-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -36,6 +37,10 @@ import type { UseFieldStatsTrigger } from '@kbn/ml-field-stats-flyout/use_field_
  * AIOps app context value to be provided via React context.
  */
 export interface AiopsAppContextValue {
+  /**
+   * Kibana Event Bus.
+   */
+  eventBus: EventBusPluginStart;
   /**
    * Used for telemetry/performance metrics.
    */

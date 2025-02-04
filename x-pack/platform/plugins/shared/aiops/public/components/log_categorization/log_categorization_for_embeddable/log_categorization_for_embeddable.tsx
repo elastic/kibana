@@ -22,12 +22,12 @@ import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-c
 import datemath from '@elastic/datemath';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
 import type { PatternAnalysisProps } from '../../../shared_components/pattern_analysis';
 import { useSearch } from '../../../hooks/use_search';
 import { getDefaultLogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
 import { useData } from '../../../hooks/use_data';
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { useCategorizeRequest } from '../use_categorize_request';
 import type { EventRate } from '../use_categorize_request';
