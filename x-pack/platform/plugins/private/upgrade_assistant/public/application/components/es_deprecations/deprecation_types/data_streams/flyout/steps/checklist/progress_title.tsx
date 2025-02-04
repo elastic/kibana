@@ -14,7 +14,7 @@ import type { ReindexState } from '../../../use_reindex_state';
 
 export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
   reindexState: ReindexState;
-}> = ({ reindexState: { status, cancelLoadingState } }) => {
+}> = ({ reindexState: { status, cancelLoadingState, resolutionType } }) => {
   switch (cancelLoadingState) {
     case CancelLoadingState.Requested:
     case CancelLoadingState.Loading: {
@@ -37,7 +37,8 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
-          defaultMessage="Failed to cancel reindexing"
+          defaultMessage="Failed to cancel {resolutionType, select, reindexing {reindexing} readonly {readonly} other {}}"
+          values={{ resolutionType }}
         />
       );
     }
@@ -48,7 +49,8 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing data stream"
+          defaultMessage="{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {}}"
+          values={{ resolutionType }}
         />
       );
     }
@@ -56,7 +58,8 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing failed"
+          defaultMessage="Failed to {resolutionType, select, reindexing {reindex} readonly {mark as readonly} other {}}"
+          values={{ resolutionType }}
         />
       );
     case DataStreamReindexStatus.fetchFailed:
@@ -70,14 +73,16 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelled.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing cancelled"
+          defaultMessage="{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {}} cancelled"
+          values={{ resolutionType }}
         />
       );
     case DataStreamReindexStatus.completed:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.completed.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing completed"
+          defaultMessage="{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {}} completed"
+          values={{ resolutionType }}
         />
       );
     case DataStreamReindexStatus.notStarted:
@@ -85,7 +90,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
-          defaultMessage="Reindex data stream"
+          defaultMessage="{resolutionType, select, reindexing {Reindex data stream} readonly {Mark data stream as readonly} other {Unknown action}}"
         />
       );
     }

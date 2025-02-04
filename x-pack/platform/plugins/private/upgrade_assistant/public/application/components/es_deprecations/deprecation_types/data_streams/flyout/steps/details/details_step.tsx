@@ -39,9 +39,17 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
+  startReadonly: () => void;
   lastIndexCreationDateFormatted: string;
   meta: DataStreamMetadata;
-}> = ({ closeFlyout, reindexState, startReindex, lastIndexCreationDateFormatted, meta }) => {
+}> = ({
+  closeFlyout,
+  reindexState,
+  startReindex,
+  startReadonly,
+  lastIndexCreationDateFormatted,
+  meta,
+}) => {
   const {
     services: {
       api,
@@ -233,7 +241,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color={status === DataStreamReindexStatus.cancelled ? 'warning' : 'primary'}
+                    color={status === DataStreamReindexStatus.cancelled ? 'warning' : 'accent'}
                     iconType={status === DataStreamReindexStatus.cancelled ? 'play' : undefined}
                     onClick={startReindex}
                     isLoading={loading}
@@ -244,6 +252,20 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                   </EuiButton>
                 </EuiFlexItem>
               )}
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color={'primary'}
+                  onClick={startReadonly}
+                  disabled={!hasRequiredPrivileges}
+                  data-test-subj="startDataStreamReadonlyButton"
+                >
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.cancelReindexButtonLabel"
+                    defaultMessage="Mark all read only"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

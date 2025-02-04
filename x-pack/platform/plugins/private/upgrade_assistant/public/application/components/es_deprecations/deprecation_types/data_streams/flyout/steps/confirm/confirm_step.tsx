@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -18,33 +17,37 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { i18n } from '@kbn/i18n';
 import {
   DataStreamReindexWarning,
-  DataStreamReindexWarningTypes,
+  DataStreamWarningTypes,
   DataStreamMetadata,
 } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
 import {
   IncompatibleDataInDataStreamWarningCheckbox,
   WarningCheckboxProps,
-} from './warning_step_checkbox';
+  AffectExistingSetupsWarningCheckbox,
+} from './warnings';
 
+import { ReindexWarningCallout, ReadonlyWarningCallout } from './callouts';
 interface CheckedIds {
   [id: string]: boolean;
 }
 
 const warningToComponentMap: Record<
-  DataStreamReindexWarningTypes,
+  DataStreamWarningTypes,
   React.FunctionComponent<WarningCheckboxProps>
 > = {
   incompatibleDataStream: IncompatibleDataInDataStreamWarningCheckbox,
+  affectExistingSetups: AffectExistingSetupsWarningCheckbox,
 };
 
 export const idForWarning = (id: number) => `reindexWarning-${id}`;
 interface WarningsConfirmationFlyoutProps {
   hideWarningsStep: () => void;
-  continueReindex: () => void;
+  startAction: () => void;
+  resolutionType: 'reindex' | 'readonly';
   warnings: DataStreamReindexWarning[];
   meta: DataStreamMetadata;
 }
@@ -55,7 +58,7 @@ interface WarningsConfirmationFlyoutProps {
  */
 export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
   WarningsConfirmationFlyoutProps
-> = ({ warnings, hideWarningsStep, continueReindex, meta }) => {
+> = ({ warnings, hideWarningsStep, startAction, resolutionType, meta }) => {
   const {
     services: {
       core: { docLinks },
@@ -84,36 +87,49 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
     }));
   };
 
+  const startActionButtonLabel =
+    resolutionType === 'reindex'
+      ? i18n.translate(
+          'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.startActionButtonLabel',
+          {
+            defaultMessage: 'Start reindexing',
+          }
+        )
+      : i18n.translate(
+          'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.startActionButtonLabel',
+          {
+            defaultMessage: 'Mark all read only',
+          }
+        );
+
+  const actionClarification =
+    resolutionType === 'reindex'
+      ? i18n.translate(
+          'upgradeAssistant.dataStream.flyout.warningsStep.reindex.acceptChangesTitle',
+          {
+            defaultMessage:
+              '{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first.',
+            values: { count: meta.indicesRequiringUpgradeCount },
+          }
+        )
+      : i18n.translate(
+          'upgradeAssistant.dataStream.flyout.warningsStep.readonly.acceptChangesTitle',
+          {
+            defaultMessage:
+              '{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be marked as read only.',
+            values: { count: meta.indicesRequiringUpgradeCount },
+          }
+        );
+
   return (
     <>
       <EuiFlyoutBody>
         {warnings.length > 0 && (
           <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
-                  defaultMessage="This operation requires destructive changes that cannot be reversed"
-                />
-              }
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
-                  defaultMessage="Ensure data has been backed up before continuing. To proceed with reindexing this data, confirm below."
-                />
-              </p>
-            </EuiCallOut>
+            {resolutionType === 'reindex' && <ReindexWarningCallout />}
+            {resolutionType === 'readonly' && <ReadonlyWarningCallout />}
             <EuiSpacer />
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.dataStreamReindexing.flyout.warningsStep.acceptChangesTitle"
-                defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first."
-                values={{ count: meta.indicesRequiringUpgradeCount }}
-              />
-            </p>
+            <p>{actionClarification}</p>
             <EuiSpacer size="m" />
             {warnings.map((warning, index) => {
               const WarningCheckbox = warningToComponentMap[warning.warningType];
@@ -143,11 +159,8 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="primary" onClick={continueReindex} disabled={blockAdvance}>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.startReindexingButtonLabel"
-                defaultMessage="Start reindexing"
-              />
+            <EuiButton fill color="primary" onClick={startAction} disabled={blockAdvance}>
+              {startActionButtonLabel}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

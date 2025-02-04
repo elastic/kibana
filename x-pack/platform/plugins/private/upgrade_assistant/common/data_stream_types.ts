@@ -39,10 +39,10 @@ export interface DataStreamReindexStatusResponse {
   hasRequiredPrivileges?: boolean;
 }
 
-export type DataStreamReindexWarningTypes = 'incompatibleDataStream';
+export type DataStreamWarningTypes = 'incompatibleDataStream' | 'affectExistingSetups';
 
 export interface DataStreamReindexWarning {
-  warningType: DataStreamReindexWarningTypes;
+  warningType: DataStreamWarningTypes;
   meta?: {
     [key: string]: string | string[];
   };

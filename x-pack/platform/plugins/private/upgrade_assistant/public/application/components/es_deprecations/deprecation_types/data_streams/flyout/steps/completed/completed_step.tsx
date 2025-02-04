@@ -13,9 +13,13 @@ import type { DataStreamMetadata } from '../../../../../../../../../common/types
 
 interface Props {
   meta: DataStreamMetadata;
+  resolutionType?: 'reindex' | 'readonly';
 }
 
-export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ meta }: Props) => {
+export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({
+  meta,
+  resolutionType,
+}: Props) => {
   return (
     <>
       <EuiFlyoutBody>
@@ -23,7 +27,7 @@ export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ 
           <h3>
             <FormattedMessage
               id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.acceptChangesTitle"
-              defaultMessage="Data Stream Reindexing Complete"
+              defaultMessage="Data Stream Migration Complete"
             />
           </h3>
         </EuiTitle>
@@ -31,8 +35,8 @@ export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ 
         <p>
           <FormattedMessage
             id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.acceptChangesTitle"
-            defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully reindexed."
-            values={{ count: meta.indicesRequiringUpgradeCount }}
+            defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindexing {reindexed} readonly {marked as readonly} other {executed}}."
+            values={{ count: meta.indicesRequiringUpgradeCount, resolutionType }}
           />
         </p>
       </EuiFlyoutBody>

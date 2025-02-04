@@ -11,10 +11,15 @@ import { ApiService } from '../../../../lib/api';
 import { useReindexStatus, ReindexState } from './use_reindex_state';
 
 export interface ReindexStateContext {
-  reindexState: ReindexState;
-  startReindex: () => Promise<void>;
   loadDataStreamMetadata: () => Promise<void>;
+  reindexState: ReindexState;
+
+  // reindex resolution actions
+  startReindex: () => Promise<void>;
   cancelReindex: () => Promise<void>;
+
+  // readonly resolution actions
+  startReadonly: () => Promise<void>;
 }
 
 const DataStreamReindexContext = createContext<ReindexStateContext | undefined>(undefined);
@@ -40,10 +45,11 @@ export const DataStreamReindexStatusProvider: React.FunctionComponent<Props> = (
   dataStreamName,
   children,
 }) => {
-  const { reindexState, startReindex, loadDataStreamMetadata, cancelReindex } = useReindexStatus({
-    dataStreamName,
-    api,
-  });
+  const { reindexState, startReindex, loadDataStreamMetadata, cancelReindex, startReadonly } =
+    useReindexStatus({
+      dataStreamName,
+      api,
+    });
 
   return (
     <DataStreamReindexContext.Provider
@@ -51,6 +57,7 @@ export const DataStreamReindexStatusProvider: React.FunctionComponent<Props> = (
         reindexState,
         startReindex,
         cancelReindex,
+        startReadonly,
         loadDataStreamMetadata,
       }}
     >

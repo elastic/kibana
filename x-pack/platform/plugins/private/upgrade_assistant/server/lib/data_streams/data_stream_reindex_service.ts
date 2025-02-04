@@ -110,7 +110,8 @@ export const dataStreamReindexServiceFactory = ({
     async detectReindexWarnings(): Promise<DataStreamReindexWarning[]> {
       return [
         {
-          warningType: 'incompatibleDataStream',
+          warningType: 'affectExistingSetups',
+          // warningType: 'incompatibleDataStream',
         },
       ];
     },

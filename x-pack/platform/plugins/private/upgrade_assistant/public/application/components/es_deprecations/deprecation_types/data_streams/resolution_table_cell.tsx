@@ -21,56 +21,69 @@ import { getDataStreamReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useDataStreamReindexContext } from './context';
 
-const i18nTexts = {
-  reindexLoadingStatusText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexLoadingStatusText',
-    {
-      defaultMessage: 'Loading status…',
-    }
-  ),
-  reindexInProgressText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexInProgressText',
-    {
-      defaultMessage: 'Reindexing in progress…',
-    }
-  ),
-  reindexCompleteText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCompleteText',
-    {
-      defaultMessage: 'Reindex complete',
-    }
-  ),
-  reindexFailedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFailedText',
-    {
-      defaultMessage: 'Reindex failed',
-    }
-  ),
-  reindexFetchFailedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFetchFailedText',
-    {
-      defaultMessage: 'Reindex status not available',
-    }
-  ),
-  reindexCanceledText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCanceledText',
-    {
-      defaultMessage: 'Reindex cancelled',
-    }
-  ),
-  resolutionText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionLabel',
-    {
-      defaultMessage: 'Reindex',
-    }
-  ),
-  resolutionTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipLabel',
-    {
-      defaultMessage:
-        'Resolve this issue by reindexing this data stream. This issue can be resolved automatically.',
-    }
-  ),
+const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
+  return {
+    reindexLoadingStatusText: i18n.translate(
+      'xpack.upgradeAssistant.esDeprecations.dataStream.reindexLoadingStatusText',
+      {
+        defaultMessage: 'Loading status…',
+      }
+    ),
+    reindexInProgressText: i18n.translate(
+      'xpack.upgradeAssistant.esDeprecations.dataStream.reindexInProgressText',
+      {
+        defaultMessage:
+          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} in progress…',
+        values: { resolutionType },
+      }
+    ),
+    reindexCompleteText: i18n.translate(
+      'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCompleteText',
+      {
+        defaultMessage:
+          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} complete',
+        values: { resolutionType },
+      }
+    ),
+    reindexFailedText: i18n.translate(
+      'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFailedText',
+      {
+        defaultMessage:
+          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} failed',
+        values: { resolutionType },
+      }
+    ),
+    reindexFetchFailedText: i18n.translate(
+      'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFetchFailedText',
+      {
+        defaultMessage:
+          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} status not available',
+        values: { resolutionType },
+      }
+    ),
+    reindexCanceledText: i18n.translate(
+      'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCanceledText',
+      {
+        defaultMessage:
+          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} cancelled',
+        values: { resolutionType },
+      }
+    ),
+    resolutionText: i18n.translate(
+      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionLabel',
+      {
+        defaultMessage: 'Mark as readonly, or Reindex',
+      }
+    ),
+    resolutionTooltipLabel: i18n.translate(
+      'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipLabel',
+      {
+        defaultMessage:
+          'Resolve this issue by reindexing this data stream. This issue can be resolved automatically.',
+        values: { resolutionType },
+      }
+    ),
+  };
 };
 
 export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
@@ -83,7 +96,9 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.reindexLoadingStatusText}</EuiText>
+          <EuiText size="s">
+            {getI18nTexts(reindexState.resolutionType).reindexLoadingStatusText}
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -98,7 +113,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              {i18nTexts.reindexInProgressText}{' '}
+              {getI18nTexts(reindexState.resolutionType).reindexInProgressText}{' '}
               {getDataStreamReindexProgressLabel(
                 reindexState.status,
                 reindexState.reindexTaskPercComplete
@@ -114,7 +129,9 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
             <EuiIcon type="check" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexCompleteText}</EuiText>
+            <EuiText size="s">
+              {getI18nTexts(reindexState.resolutionType).reindexCompleteText}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -125,7 +142,9 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
             <EuiIcon type="warning" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
+            <EuiText size="s">
+              {getI18nTexts(reindexState.resolutionType).reindexFailedText}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -136,19 +155,24 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
             <EuiIcon type="warning" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexFetchFailedText}</EuiText>
+            <EuiText size="s">
+              {getI18nTexts(reindexState.resolutionType).reindexFetchFailedText}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
     default:
       return (
-        <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
+        <EuiToolTip
+          position="top"
+          content={getI18nTexts(reindexState.resolutionType).resolutionTooltipLabel}
+        >
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="indexSettings" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+              <EuiText size="s">{getI18nTexts(reindexState.resolutionType).resolutionText}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>

@@ -28,7 +28,8 @@ interface Props {
  * and any error messages that are encountered.
  */
 export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
-  const { status, reindexTaskPercComplete, cancelLoadingState, taskStatus } = props.reindexState;
+  const { status, reindexTaskPercComplete, cancelLoadingState, taskStatus, resolutionType } =
+    props.reindexState;
 
   // The reindexing step is special because it generally lasts longer and can be cancelled mid-flight
   const reindexingDocsStep = {
@@ -92,12 +93,14 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
             {status === DataStreamReindexStatus.inProgress ? (
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingInProgressTitle"
-                defaultMessage="Reindexing in progress…"
+                defaultMessage="{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Unknown action}} in progress…"
+                values={{ resolutionType }}
               />
             ) : (
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklistTitle"
-                defaultMessage="Reindex data stream"
+                defaultMessage="{resolutionType, select, reindexing {Reindex data stream} readonly {Mark data stream as readonly} other {Unknown action}}"
+                values={{ resolutionType }}
               />
             )}
           </h3>
@@ -154,8 +157,8 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                         'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.progressStep.failedTitle',
                         {
                           defaultMessage:
-                            '{count, plural, =1 {# Index} other {# Indices}} failed to reindex.',
-                          values: { count: taskStatus.errorsCount },
+                            '{count, plural, =1 {# Index} other {# Indices}} failed to get {resolutionType, select, reindexing {reindexed} readonly {marked as readonly} other {execute}}.',
+                          values: { count: taskStatus.errorsCount, resolutionType },
                         }
                       )}
                     </p>
@@ -169,8 +172,8 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                       'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.progressStep.completeTitle',
                       {
                         defaultMessage:
-                          '{count, plural, =1 {# Index} other {# Indices}} successfully reindexed.',
-                        values: { count: taskStatus.successCount },
+                          '{count, plural, =1 {# Index} other {# Indices}} successfully {resolutionType, select, reindexing {rein dexed} readonly {marked as readonly} other {executed}}.',
+                        values: { count: taskStatus.successCount, resolutionType },
                       }
                     )}
                   </p>
@@ -183,8 +186,8 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                       'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.progressStep.inProgressTitle',
                       {
                         defaultMessage:
-                          '{count, plural, =1 {# Index} other {# Indices}} currently reindexing.',
-                        values: { count: taskStatus.inProgressCount },
+                          '{count, plural, =1 {# Index} other {# Indices}} currently getting {resolutionType, select, reindexing {reindexed} readonly {marked as readonly} other {executed}}.',
+                        values: { count: taskStatus.inProgressCount, resolutionType },
                       }
                     )}
                   </p>

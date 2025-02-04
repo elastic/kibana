@@ -18,19 +18,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
-import {
-  DataStreamReindexWarning,
-  DataStreamReindexWarningTypes,
-} from '../../../../../../../../../common/types';
 
-export const hasReindexWarning = (
-  warnings: DataStreamReindexWarning[],
-  warningType: DataStreamReindexWarningTypes
-): boolean => {
-  return Boolean(warnings.find((warning) => warning.warningType === warningType));
-};
-
-const WarningCheckbox: React.FunctionComponent<{
+export const WarningCheckbox: React.FunctionComponent<{
   isChecked: boolean;
   warningId: string;
   label: React.ReactNode;

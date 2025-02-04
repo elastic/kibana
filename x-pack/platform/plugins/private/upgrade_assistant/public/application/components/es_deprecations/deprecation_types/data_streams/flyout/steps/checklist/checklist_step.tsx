@@ -33,9 +33,10 @@ import { getPrimaryButtonLabel } from '../../messages';
 export const ChecklistFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
-  startReindex: () => void;
-  cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+  resolutionType: 'reindex' | 'readonly';
+  executeAction: () => void;
+  cancelAction: () => void;
+}> = ({ closeFlyout, reindexState, resolutionType, executeAction, cancelAction }) => {
   const {
     services: { api },
   } = useAppContext();
@@ -167,7 +168,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   <EuiButton
                     color={'accent'}
                     iconType={'pause'}
-                    onClick={cancelReindex}
+                    onClick={cancelAction}
                     disabled={!hasRequiredPrivileges}
                     data-test-subj="cancelDataStreamReindexingButton"
                   >
@@ -185,7 +186,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                     fill
                     color={status === DataStreamReindexStatus.inProgress ? 'primary' : 'warning'}
                     iconType={status === DataStreamReindexStatus.inProgress ? undefined : 'refresh'}
-                    onClick={startReindex}
+                    onClick={executeAction}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}
                     data-test-subj="startDataStreamReindexingButton"

@@ -18,6 +18,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import moment from 'moment';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import {
   DataStreamReindexStatus,
   EnrichedDeprecationInfo,
@@ -29,6 +30,8 @@ import { DeprecationBadge } from '../../../../shared';
 import {
   UIM_DATA_STREAM_REINDEX_START_CLICK,
   UIM_DATA_STREAM_REINDEX_STOP_CLICK,
+  UIM_DATA_STREAM_START_READONLY_CLICK,
+  UIM_DATA_STREAM_STOP_READONLY_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
 
@@ -53,10 +56,12 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   loadDataStreamMetadata,
   reindexState,
   startReindex,
+  startReadonly,
   closeFlyout,
   deprecation,
 }) => {
   const { status, reindexWarnings, errorMessage, meta } = reindexState;
+  const resolutionType = 'readonly' as const;
   const { index } = deprecation;
 
   const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
@@ -97,10 +102,19 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     await startReindex();
   }, [startReindex]);
 
+  const onStartReadonly = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_START_READONLY_CLICK);
+    await startReadonly();
+  }, [startReadonly]);
+
   const onStopReindex = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_STOP_CLICK);
     await cancelReindex();
   }, [cancelReindex]);
+
+  const onStopReadonly = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_STOP_READONLY_CLICK);
+  }, []);
 
   const { docsSizeFormatted, indicesRequiringUpgradeDocsCount, lastIndexCreationDateFormatted } =
     useMemo(() => {
@@ -144,6 +158,9 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         return (
           <DataStreamDetailsFlyoutStep
             closeFlyout={closeFlyout}
+            startReadonly={() => {
+              setFlyoutStep('confirm');
+            }}
             lastIndexCreationDateFormatted={lastIndexCreationDateFormatted}
             meta={meta}
             startReindex={() => {
@@ -161,15 +178,21 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             />
           );
         }
+
         return (
           <ConfirmReindexingFlyoutStep
             warnings={reindexWarnings ?? []}
             meta={meta}
+            resolutionType={resolutionType}
             hideWarningsStep={() => {
               setFlyoutStep('notStarted');
             }}
-            continueReindex={() => {
-              onStartReindex();
+            startAction={() => {
+              if (resolutionType === 'readonly') {
+                onStartReadonly();
+              } else {
+                onStartReindex();
+              }
             }}
           />
         );
@@ -182,14 +205,22 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             />
           );
         }
+
         return (
           <ChecklistFlyoutStep
             closeFlyout={closeFlyout}
-            startReindex={() => {
+            executeAction={() => {
               setFlyoutStep('confirm');
             }}
+            resolutionType={resolutionType}
             reindexState={reindexState}
-            cancelReindex={onStopReindex}
+            cancelAction={() => {
+              if (resolutionType === 'readonly') {
+                onStopReadonly();
+              } else {
+                onStopReindex();
+              }
+            }}
           />
         );
       }
@@ -201,7 +232,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             />
           );
         }
-        return <ReindexingCompletedFlyoutStep meta={meta} />;
+        return <ReindexingCompletedFlyoutStep meta={meta} resolutionType={resolutionType} />;
       }
     }
   }, [
@@ -214,6 +245,9 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     reindexWarnings,
     meta,
     errorMessage,
+    onStartReadonly,
+    onStopReadonly,
+    resolutionType,
   ]);
 
   return (
@@ -237,7 +271,12 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                     textStyle="reverse"
                     listItems={[
                       {
-                        title: 'Reindexing required for indices created on or before',
+                        title: i18n.translate(
+                          'xpack.upgradeAssistant.dataStream.flyout.container.affectedIndicesCreatedOnOrBefore',
+                          {
+                            defaultMessage: 'Migration required for indices created on or before',
+                          }
+                        ),
                         description: lastIndexCreationDateFormatted,
                       },
                     ]}
@@ -249,7 +288,12 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                       textStyle="reverse"
                       listItems={[
                         {
-                          title: 'Size',
+                          title: i18n.translate(
+                            'xpack.upgradeAssistant.dataStream.flyout.container.indicesDocsSize',
+                            {
+                              defaultMessage: 'Size',
+                            }
+                          ),
                           description: docsSizeFormatted,
                         },
                       ]}
@@ -260,7 +304,12 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                       textStyle="reverse"
                       listItems={[
                         {
-                          title: 'Document Count',
+                          title: i18n.translate(
+                            'xpack.upgradeAssistant.dataStream.flyout.container.indicesDocsCount',
+                            {
+                              defaultMessage: 'Document Count',
+                            }
+                          ),
                           description: indicesRequiringUpgradeDocsCount,
                         },
                       ]}
