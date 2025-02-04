@@ -310,7 +310,9 @@ export class StreamsClient {
     result: 'created' | 'updated';
     parentDefinition?: WiredStreamDefinition;
   }> {
-    await this.assertNoHierarchicalConflicts(definition.name);
+    if (isWiredStreamDefinition(definition)) {
+      await this.assertNoHierarchicalConflicts(definition.name);
+    }
 
     const existingDefinition = await this.getStream(definition.name).catch((error) => {
       if (isDefinitionNotFoundError(error)) {
@@ -384,7 +386,7 @@ export class StreamsClient {
 
     if (conflicts.length !== 0) {
       throw new NameTakenError(
-        `Cannot create stream "${definitionName}" due to hierarchical conflicts caused by existing indices or data streams: [${conflicts.join(
+        `Cannot create stream "${definitionName}" due to hierarchical conflicts caused by existing unwired stream definition, index or data stream: [${conflicts.join(
           ', '
         )}]`
       );
