@@ -282,7 +282,7 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
     dateRangeDuration: {
       type: 'integer',
       _meta: {
-        description: 'Duration of time period of request in hours',
+        description: 'Duration of time range of request in hours',
         optional: false,
       },
     },
