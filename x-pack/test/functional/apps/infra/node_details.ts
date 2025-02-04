@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
@@ -262,6 +262,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'network', chartsCount: 1 },
         ].forEach(({ metric, chartsCount }) => {
           it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            await waitForChartsToLoad();
             const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
             expect(hosts.length).to.equal(chartsCount);
           });
@@ -736,6 +737,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ].forEach(({ metric, chartsCount }) => {
           it(`should render ${chartsCount} ${metric} chart`, async () => {
             await retry.tryForTime(5000, async () => {
+              await waitForChartsToLoad();
               const charts = await (metric === 'kubernetes'
                 ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
                 : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
