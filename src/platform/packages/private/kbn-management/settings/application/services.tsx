@@ -37,7 +37,7 @@ export interface Services {
   isCustomSetting: (key: string, scope: UiSettingsScope) => boolean;
   isOverriddenSetting: (key: string, scope: UiSettingsScope) => boolean;
   addUrlToHistory: (url: string) => void;
-  getActiveSpace: () => Promise<Space>;
+  getActiveSpace: () => Promise<Pick<Space, 'solution'>>;
 }
 
 export type SettingsApplicationServices = Services & FormServices;

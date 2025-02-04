@@ -14,7 +14,7 @@ import { Space } from '@kbn/spaces-plugin/common';
 /**
  * React hook which returns the solution view of the current active space.
  */
-export function useSolutionView(getActiveSpace: () => Promise<Space>) {
+export function useSolutionView(getActiveSpace: () => Promise<Pick<Space, 'solution'>>) {
   const [solutionView, setSolutionView] = useState<SolutionView>();
 
   useEffect(() => {
