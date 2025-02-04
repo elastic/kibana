@@ -177,6 +177,9 @@ export function columnToOperation(
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
       ? column.params.interval
       : undefined,
+    hasArraySupport:
+      isColumnOfType<LastValueIndexPatternColumn>('last_value', column) &&
+      column.params.showArrayValues,
   };
 }
 

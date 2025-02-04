@@ -39,6 +39,7 @@ import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualizatio
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { MetricVisualizationState } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
+import { isMetricNumericType } from './helpers';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -216,9 +217,8 @@ function PrimaryMetricEditor(props: SubProps) {
   if (accessor == null) {
     return null;
   }
-  const currentData = frame.activeData?.[state.layerId];
 
-  const isMetricNumeric = isNumericFieldForDatatable(currentData, accessor);
+  const isMetricNumeric = isMetricNumericType(props.datasource, accessor);
 
   const hasDynamicColoring = Boolean(isMetricNumeric && state.palette);
 

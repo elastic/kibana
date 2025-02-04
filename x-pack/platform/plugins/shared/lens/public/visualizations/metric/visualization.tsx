@@ -33,6 +33,7 @@ import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
 import { MetricVisualizationState } from './types';
+import { isMetricNumericType } from './helpers';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -657,9 +658,9 @@ export const getMetricVisualization = ({
     const hasStaticColoring = !!state.color;
     const hasDynamicColoring = !!state.palette;
 
-    const currentData = frame?.activeData?.[state.layerId];
-    const isMetricNumeric = Boolean(
-      state.metricAccessor && isNumericFieldForDatatable(currentData, state.metricAccessor)
+    const isMetricNumeric = isMetricNumericType(
+      frame?.datasourceLayers[state.layerId],
+      state.metricAccessor
     );
 
     return {
