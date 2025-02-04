@@ -663,7 +663,7 @@ export const ModelsList: FC<Props> = ({
           <DeleteModelsModal
             onClose={(refreshList) => {
               modelsToDelete.forEach((model) => {
-                trainedModelsService.cleanupModelOperations(model.model_id);
+                trainedModelsService.removeScheduledDeployments(model.model_id);
               });
 
               setItemIdToExpandedRowMap((prev) => {

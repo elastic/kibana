@@ -251,8 +251,9 @@ export class TrainedModelsService {
     );
   }
 
-  public cleanupModelOperations(modelId: string) {
-    this.markDownloadAborted(modelId);
+  /** Removes scheduled deployments for a model */
+  public removeScheduledDeployments(modelId: string) {
+    this.abortDownload(modelId);
     this.setScheduledDeployments?.(
       this.scheduledDeployments.filter((deployment) => deployment.modelId !== modelId)
     );
@@ -265,7 +266,7 @@ export class TrainedModelsService {
     );
   }
 
-  private updateUiStateForDeployment(modelId: string) {
+  private setDeployingStateForModel(modelId: string) {
     const currentModels = this.modelItems;
     const updatedModels = currentModels.map((model) =>
       isBaseNLPModelItem(model) && model.model_id === modelId
@@ -275,7 +276,7 @@ export class TrainedModelsService {
     this._modelItems$.next(updatedModels);
   }
 
-  private markDownloadAborted(modelId: string) {
+  private abortDownload(modelId: string) {
     this.abortedDownloads.add(modelId);
   }
 
@@ -402,7 +403,7 @@ export class TrainedModelsService {
       .pipe(
         filter((model) => this.isModelReadyForDeployment(model)),
         take(1),
-        tap(() => this.updateUiStateForDeployment(deployment.modelId)),
+        tap(() => this.setDeployingStateForModel(deployment.modelId)),
         switchMap(() => {
           return from(this.trainedModelsApiService.startModelAllocation(deployment));
         }),
