@@ -373,7 +373,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 fill
                 onClick={() => {
                   createIndex({ indexName: sanitizedName, language: null });
-                  setSelectedIndex({ label: sanitizedName });
+                  setSelectedIndex({ label: formatApiName(connector.name)});
                 }}
                 isLoading={isSaveLoading || isExistLoading}
                 disabled={indexExists[sanitizedName]}
