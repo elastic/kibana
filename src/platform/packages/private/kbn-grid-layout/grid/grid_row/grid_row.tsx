@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
