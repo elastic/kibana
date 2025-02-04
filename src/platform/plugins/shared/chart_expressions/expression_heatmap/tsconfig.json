@@ -30,7 +30,6 @@
     "@kbn/visualization-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/transpose-utils",
-    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",
