@@ -10,15 +10,17 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ADD_SYNTHETICS_OVERVIEW_ACTION_ID } from './constants';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { openMonitorConfiguration } from '../common/monitors_open_configuration';
+import { CoreStart } from '@kbn/core/public';
 
 export function createStatusOverviewPanelAction(
-  getStartServices: StartServicesAccessor<ClientPluginsStart>
+  coreStart: CoreStart,
+  pluginStart: ClientPluginsStart
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
@@ -31,9 +33,6 @@ export function createStatusOverviewPanelAction(
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       try {
-        const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
-        const [coreStart, pluginStart] = await getStartServices();
-
         const initialState = await openMonitorConfiguration({
           coreStart,
           pluginStart,

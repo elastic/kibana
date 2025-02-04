@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MonitorFilters } from '../monitors_overview/types';
 import { ClientPluginsStart } from '../../../plugin';
-import { MonitorConfiguration } from './monitor_configuration';
+import { EuiSkeletonText } from '@elastic/eui';
 
 export async function openMonitorConfiguration({
   coreStart,
@@ -28,6 +28,12 @@ export async function openMonitorConfiguration({
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {
+    const LazyMonitorConfiguration = lazy(async () => {
+      const { MonitorConfiguration } = await import('./monitor_configuration');
+      return {
+        default: MonitorConfiguration,
+      };
+    });
     try {
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
@@ -38,18 +44,20 @@ export async function openMonitorConfiguration({
             }}
           >
             <QueryClientProvider client={queryClient}>
-              <MonitorConfiguration
-                title={title}
-                initialInput={initialState}
-                onCreate={(update: { filters: MonitorFilters }) => {
-                  flyoutSession.close();
-                  resolve(update);
-                }}
-                onCancel={() => {
-                  flyoutSession.close();
-                  reject();
-                }}
-              />
+              <Suspense fallback={<EuiSkeletonText />}>
+                <LazyMonitorConfiguration
+                  title={title}
+                  initialInput={initialState}
+                  onCreate={(update: { filters: MonitorFilters }) => {
+                    flyoutSession.close();
+                    resolve(update);
+                  }}
+                  onCancel={() => {
+                    flyoutSession.close();
+                    reject();
+                  }}
+                />
+              </Suspense>
             </QueryClientProvider>
           </KibanaContextProvider>,
           coreStart
