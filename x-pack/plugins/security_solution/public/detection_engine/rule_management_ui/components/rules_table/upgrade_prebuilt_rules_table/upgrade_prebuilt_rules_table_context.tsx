@@ -15,7 +15,6 @@ import type {
   RuleUpgradeInfoForReview,
 } from '../../../../../../common/api/detection_engine';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type {
   RuleUpgradeState,
   RulesUpgradeState,
@@ -127,7 +126,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     tags: [],
     ruleSource: [],
   });
-  const { addError } = useAppToasts();
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
@@ -215,8 +213,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         }
 
         await upgradeSpecificRulesRequest(ruleUpgradeSpecifiers);
-      } catch (err) {
-        addError(err, { title: i18n.UPDATE_ERROR });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         const upgradedRuleIdsSet = new Set(ruleUpgradeSpecifiers.map((x) => x.rule_id));
 
@@ -230,7 +228,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       rulesUpgradeState,
       upgradeSpecificRulesRequest,
       isPrebuiltRulesCustomizationEnabled,
-      addError,
     ]
   );
 

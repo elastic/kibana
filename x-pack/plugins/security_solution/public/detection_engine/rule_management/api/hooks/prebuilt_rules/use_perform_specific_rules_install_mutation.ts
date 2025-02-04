@@ -11,15 +11,16 @@ import type {
   PerformRuleInstallationResponseBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { PERFORM_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
-import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
-import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
-import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
 import type { BulkAction } from '../../api';
 import { performInstallSpecificRules } from '../../api';
-import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useBulkActionMutation } from '../use_bulk_action_mutation';
+import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
+import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
+import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
+import { prebuiltRulesMutationRetry } from './prebuilt_rules_mutation_retry';
+import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
+import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 
 export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
   'POST',
@@ -35,7 +36,7 @@ export interface UsePerformSpecificRulesInstallParams {
 export const usePerformSpecificRulesInstallMutation = (
   options?: UseMutationOptions<
     PerformRuleInstallationResponseBody,
-    Error,
+    unknown,
     UsePerformSpecificRulesInstallParams
   >
 ) => {
@@ -51,7 +52,7 @@ export const usePerformSpecificRulesInstallMutation = (
 
   return useMutation<
     PerformRuleInstallationResponseBody,
-    Error,
+    unknown,
     UsePerformSpecificRulesInstallParams
   >(
     (rulesToInstall: UsePerformSpecificRulesInstallParams) =>
@@ -59,7 +60,7 @@ export const usePerformSpecificRulesInstallMutation = (
     {
       ...options,
       mutationKey: PERFORM_SPECIFIC_RULES_INSTALLATION_KEY,
-      onSettled: (...args) => {
+      onSuccess: (...args) => {
         invalidatePrePackagedRulesStatus();
         invalidateFindRulesQuery();
         invalidateFetchRulesSnoozeSettings();
@@ -69,7 +70,7 @@ export const usePerformSpecificRulesInstallMutation = (
         invalidateRuleStatus();
         invalidateFetchCoverageOverviewQuery();
 
-        const [response, , { enable }] = args;
+        const [response, { enable }] = args;
 
         if (response && enable) {
           const ruleIdsToEnable = response.results.created.map((rule) => rule.id);
@@ -77,10 +78,11 @@ export const usePerformSpecificRulesInstallMutation = (
           mutateAsync({ bulkAction });
         }
 
-        if (options?.onSettled) {
-          options.onSettled(...args);
+        if (options?.onSuccess) {
+          options.onSuccess(...args);
         }
       },
+      retry: prebuiltRulesMutationRetry,
     }
   );
 };
