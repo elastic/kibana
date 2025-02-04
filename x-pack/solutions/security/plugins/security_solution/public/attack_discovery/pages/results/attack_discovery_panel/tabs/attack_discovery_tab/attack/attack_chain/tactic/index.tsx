@@ -22,8 +22,8 @@ interface Props {
 const TacticComponent: React.FC<Props> = ({ detected, tactic }) => {
   const { euiTheme } = useEuiTheme();
 
-  const WIDTH = 120; // px
-  const TICK_COUNT = 10;
+  const WIDTH = 144; // px
+  const TICK_COUNT = 12;
 
   const ticks = useMemo(
     () => (
