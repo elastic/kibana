@@ -15,6 +15,7 @@ import {
   SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
+  Error as _Error,
 } from '../../shared_imports';
 import { UiMetricService } from './ui_metric';
 import {
@@ -29,7 +30,7 @@ export class ApiService {
   private client: HttpSetup | undefined;
   private uiMetricService: UiMetricService | undefined;
 
-  private useRequest<R = any, E = Error>(config: UseRequestConfig) {
+  private useRequest<R = any, E = _Error>(config: UseRequestConfig) {
     if (!this.client) {
       throw new Error('Api service has not be initialized.');
     }

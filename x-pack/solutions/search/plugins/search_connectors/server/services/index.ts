@@ -106,8 +106,8 @@ export class AgentlessConnectorsInfraService {
               }
 
               if (input.compiled_input.connector_id == null) {
-                this.logger.debug(`Policy ${policy.id} is missing connector_id, skipping`);
-                continue;
+                this.logger.debug(`Policy ${policy.id} is missing connector_id`);
+                // No need to skip, that's fine
               }
 
               if (input.compiled_input.connector_name == null) {
@@ -265,7 +265,11 @@ export const getConnectorsToDeploy = (
 
     // If no package policies reference this connector by id then it should be deployed
     if (
-      packagePolicies.every((packagePolicy) => packagePolicy.connector_settings.id !== connector.id)
+      packagePolicies.every(
+        (packagePolicy) =>
+          connector.id !== packagePolicy.connector_settings.id &&
+          connector.id !== packagePolicy.package_policy_id
+      )
     ) {
       results.push(connector);
     }
