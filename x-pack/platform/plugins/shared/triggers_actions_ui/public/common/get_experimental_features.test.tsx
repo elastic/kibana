@@ -24,7 +24,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
         ruleKqlBar: true,
         isMustacheAutocompleteOn: false,
         showMustacheAutocompleteSwitch: false,
-        isUsingRuleCreateFlyout: false,
       },
     });
 
@@ -61,10 +60,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
     expect(result).toEqual(false);
 
     result = getIsExperimentalFeatureEnabled('showMustacheAutocompleteSwitch');
-
-    expect(result).toEqual(false);
-
-    result = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
 
     expect(result).toEqual(false);
 

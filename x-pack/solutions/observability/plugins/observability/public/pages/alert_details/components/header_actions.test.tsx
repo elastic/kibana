@@ -38,7 +38,7 @@ const mockNavigateToApp = {
   mockNavigateToApp: jest.fn(),
 };
 
-const mockGetEditRuleFlyout = jest.fn(() => (
+const mockGetRuleFormFlyout = jest.fn(() => (
   <div data-test-subj="edit-rule-flyout">mocked component</div>
 ));
 
@@ -48,7 +48,7 @@ const mockKibana = () => {
       ...kibanaStartMock.startContract(),
       triggersActionsUi: {
         ...triggersActionsUiMock.createStart(),
-        getEditRuleFlyout: mockGetEditRuleFlyout,
+        getRuleFormFlyout: mockGetRuleFormFlyout,
       },
       cases: mockCases,
       http: mockHttp,

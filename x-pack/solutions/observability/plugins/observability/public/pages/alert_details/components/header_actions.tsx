@@ -62,15 +62,16 @@ export function HeaderActions({
   alertStatus,
   onUntrackAlert,
 }: HeaderActionsProps) {
+  const { services } = useKibana();
   const {
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+    triggersActionsUi: { getRuleFormFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
     application: { navigateToApp },
     investigate: investigatePlugin,
-  } = useKibana().services;
+  } = services;
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
@@ -344,11 +345,13 @@ export function HeaderActions({
       </EuiFlexGroup>
       {rule && ruleConditionsFlyoutOpen ? (
         <EditRuleFlyout
-          initialRule={rule}
-          onClose={() => {
+          plugins={services}
+          id={rule.id}
+          onCancel={() => {
             setRuleConditionsFlyoutOpen(false);
           }}
-          onSave={async () => {
+          onSubmit={() => {
+            setRuleConditionsFlyoutOpen(false);
             refetch();
           }}
         />

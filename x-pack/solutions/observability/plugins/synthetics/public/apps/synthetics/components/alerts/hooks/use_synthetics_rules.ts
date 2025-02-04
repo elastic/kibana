@@ -68,7 +68,9 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, isOpen, hasMonitors, defaultRulesEnabled]);
 
-  const { triggersActionsUi } = useKibana<ClientPluginsStart>().services;
+  const { triggersActionsUi, ...plugins } = useKibana<ClientPluginsStart>().services;
+
+  const onClose = useMemo(() => () => dispatch(setAlertFlyoutVisible(null)), [dispatch]);
 
   const EditAlertFlyout = useMemo(() => {
     const initialRule =
@@ -76,9 +78,11 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     if (!initialRule || isNewRule) {
       return null;
     }
-    return triggersActionsUi.getEditRuleFlyout({
-      onClose: () => dispatch(setAlertFlyoutVisible(null)),
-      initialRule,
+    return triggersActionsUi.getRuleFormFlyout({
+      plugins,
+      onCancel: onClose,
+      onSubmit: onClose,
+      id: initialRule.id,
     });
   }, [
     alertFlyoutVisible,
@@ -86,17 +90,20 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     defaultRules?.statusRule,
     isNewRule,
     triggersActionsUi,
-    dispatch,
+    plugins,
+    onClose,
   ]);
 
   const NewRuleFlyout = useMemo(() => {
     if (!isNewRule || !alertFlyoutVisible) {
       return null;
     }
-    return triggersActionsUi.getAddRuleFlyout({
+    return triggersActionsUi.getRuleFormFlyout({
+      plugins,
       consumer: 'uptime',
       ruleTypeId: alertFlyoutVisible,
-      onClose: () => dispatch(setAlertFlyoutVisible(null)),
+      onCancel: onClose,
+      onSubmit: onClose,
       initialValues: {
         name:
           alertFlyoutVisible === SYNTHETICS_TLS_RULE
@@ -108,7 +115,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
               }),
       },
     });
-  }, [isNewRule, triggersActionsUi, dispatch, alertFlyoutVisible]);
+  }, [isNewRule, alertFlyoutVisible, triggersActionsUi, plugins, onClose]);
 
   return useMemo(
     () => ({ loading, EditAlertFlyout, NewRuleFlyout }),

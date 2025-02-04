@@ -9,27 +9,34 @@
 
 import { EuiFlyout, EuiPortal } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
-import type { RuleFormData } from '../types';
+import type { RuleFormData, RuleTypeMetaData } from '../types';
 import { RuleFormStepId } from '../constants';
 import { RuleFlyoutBody } from './rule_flyout_body';
 import { RuleFlyoutShowRequest } from './rule_flyout_show_request';
-import { useRuleFormScreenContext } from '../hooks';
+import { useRuleFormScreenContext, useRuleFormState } from '../hooks';
 import { RuleFlyoutSelectConnector } from './rule_flyout_select_connector';
+import { ConfirmRuleClose } from '../components';
 
 interface RuleFlyoutProps {
   isEdit?: boolean;
   isSaving?: boolean;
   onCancel?: () => void;
   onSave: (formData: RuleFormData) => void;
+  onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
 }
 
 export const RuleFlyout = ({
   onSave,
   isEdit = false,
   isSaving = false,
-  onCancel = () => {},
+  // Input is named onCancel for consistency with RulePage but rename it to onClose for more clarity on its
+  // function within the flyout. This avoids the compulsion to name a function something like onCancelCancel when
+  // we're displaying the confirmation modal for closing the flyout.
+  onCancel: onClose = () => {},
+  onChangeMetaData = () => {},
 }: RuleFlyoutProps) => {
   const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(undefined);
+  const [isConfirmCloseModalVisible, setIsConfirmCloseModalVisible] = useState(false);
 
   const {
     isConnectorsScreenVisible,
@@ -51,21 +58,37 @@ export const RuleFlyout = ({
     setIsShowRequestScreenVisible(false);
   }, [setIsShowRequestScreenVisible]);
 
+  const onCancelClose = useCallback(() => {
+    setIsConfirmCloseModalVisible(false);
+  }, []);
+
   const hideCloseButton = useMemo(
     () => isShowRequestScreenVisible || isConnectorsScreenVisible,
     [isConnectorsScreenVisible, isShowRequestScreenVisible]
   );
 
+  const { touched, onInteraction } = useRuleFormState();
+
+  const onClickCloseOrCancelButton = useCallback(() => {
+    if (touched) {
+      setIsConfirmCloseModalVisible(true);
+    } else {
+      onClose();
+    }
+  }, [touched, setIsConfirmCloseModalVisible, onClose]);
+
   return (
     <EuiPortal>
       <EuiFlyout
         ownFocus
-        onClose={onCancel}
+        onClose={onClickCloseOrCancelButton}
         aria-labelledby="flyoutTitle"
         size="m"
         maxWidth={500}
         className="ruleFormFlyout__container"
         hideCloseButton={hideCloseButton}
+        onClick={onInteraction}
+        onKeyDown={onInteraction}
       >
         {isShowRequestScreenVisible ? (
           <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
@@ -74,12 +97,16 @@ export const RuleFlyout = ({
         ) : (
           <RuleFlyoutBody
             onSave={onSave}
-            onCancel={onCancel}
+            onCancel={onClickCloseOrCancelButton}
             isEdit={isEdit}
             isSaving={isSaving}
             onShowRequest={onOpenShowRequest}
             initialStep={initialStep}
+            onChangeMetaData={onChangeMetaData}
           />
+        )}
+        {isConfirmCloseModalVisible && (
+          <ConfirmRuleClose onCancel={onCancelClose} onConfirm={onClose} />
         )}
       </EuiFlyout>
     </EuiPortal>

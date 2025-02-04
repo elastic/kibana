@@ -32,44 +32,42 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
   onCloseFlyout,
   onSave,
 }) => {
-  const { triggersActionsUi } = useAppDependencies();
+  const { triggersActionsUi, ...plugins } = useAppDependencies();
 
   const AlertFlyout = useMemo(() => {
     if (!triggersActionsUi) return;
 
     const commonProps = {
-      onClose: () => {
+      plugins,
+      onCancel: () => {
         onCloseFlyout();
       },
-      onSave: async () => {
+      onSubmit: async () => {
         if (onSave) {
           onSave();
         }
+        onCloseFlyout();
       },
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getEditRuleFlyout({
+      return triggersActionsUi.getRuleFormFlyout({
         ...commonProps,
-        initialRule: {
-          ...initialAlert,
-          ruleTypeId: initialAlert.alertTypeId,
-        },
+        id: initialAlert.id,
       });
     }
 
-    return triggersActionsUi.getAddRuleFlyout({
+    return triggersActionsUi.getRuleFormFlyout({
       ...commonProps,
       consumer: 'stackAlerts',
-      canChangeTrigger: false,
       ruleTypeId: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
-      metadata: {},
+      initialMetadata: {},
       initialValues: {
         params: ruleParams!,
       },
     });
     // deps on id to avoid re-rendering on auto-refresh
-  }, [triggersActionsUi, initialAlert, ruleParams, onCloseFlyout, onSave]);
+  }, [triggersActionsUi, plugins, initialAlert, ruleParams, onCloseFlyout, onSave]);
 
   return <>{AlertFlyout}</>;
 };

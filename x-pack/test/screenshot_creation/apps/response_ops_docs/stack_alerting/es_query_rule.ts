@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot('cases-action', screenshotDirectories, 1400, 1024);
 
-      const cancelEditButton = await testSubjects.find('cancelSaveEditedRuleButton');
+      const cancelEditButton = await testSubjects.find('ruleFlyoutFooterCancelButton');
       await cancelEditButton.click();
       const confirmCancelButton = await testSubjects.find('confirmModalConfirmButton');
       await confirmCancelButton.click();

@@ -64,6 +64,7 @@ export interface Props {
 }
 
 export function SloListCompactView({ sloList, loading, error }: Props) {
+  const { services } = useKibana();
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -71,8 +72,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     share: {
       url: { locators },
     },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
-  } = useKibana().services;
+    triggersActionsUi: { getRuleFormFlyout: AddRuleFlyout },
+  } = services;
   const spaceId = useSpace();
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
@@ -135,8 +136,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     setSloToDisable(undefined);
   };
 
-  const handleSavedRule = async () => {
+  const handleSavedRule = () => {
     queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
+    setSloToAddRule(undefined);
   };
 
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
@@ -531,6 +533,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       />
       {sloToAddRule ? (
         <AddRuleFlyout
+          plugins={services}
           consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
@@ -538,11 +541,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
             name: `${sloToAddRule.name} burn rate rule`,
             params: { sloId: sloToAddRule.id },
           }}
-          onSave={handleSavedRule}
-          onClose={() => {
+          onSubmit={handleSavedRule}
+          onCancel={() => {
             setSloToAddRule(undefined);
           }}
-          useRuleProducer
+          shouldUseRuleProducer
         />
       ) : null}
 

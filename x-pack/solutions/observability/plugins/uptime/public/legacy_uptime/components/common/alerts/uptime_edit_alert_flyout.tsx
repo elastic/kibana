@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   Rule,
@@ -28,17 +28,21 @@ export const UptimeEditAlertFlyoutComponent = ({
   initialAlert,
   setAlertFlyoutVisibility,
 }: Props) => {
-  const { triggersActionsUi } = useKibana<KibanaDeps>().services;
+  const { triggersActionsUi, ...plugins } = useKibana<KibanaDeps>().services;
+
+  const onClose = useCallback(() => {
+    setAlertFlyoutVisibility(false);
+  }, [setAlertFlyoutVisibility]);
 
   const EditAlertFlyout = useMemo(
     () =>
-      triggersActionsUi.getEditRuleFlyout({
-        initialRule: initialAlert,
-        onClose: () => {
-          setAlertFlyoutVisibility(false);
-        },
+      triggersActionsUi.getRuleFormFlyout({
+        id: initialAlert.id,
+        onCancel: onClose,
+        onSubmit: onClose,
+        plugins,
       }),
-    [initialAlert, setAlertFlyoutVisibility, triggersActionsUi]
+    [initialAlert, triggersActionsUi, onClose, plugins]
   );
   return <>{alertFlyoutVisible && EditAlertFlyout}</>;
 };

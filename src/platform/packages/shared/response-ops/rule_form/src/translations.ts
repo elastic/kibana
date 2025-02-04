@@ -638,7 +638,7 @@ export const RULE_FORM_CANCEL_MODAL_CONFIRM = i18n.translate(
 export const RULE_FORM_CANCEL_MODAL_CANCEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFormCancelModalCancel',
   {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Keep editing',
   }
 );
 

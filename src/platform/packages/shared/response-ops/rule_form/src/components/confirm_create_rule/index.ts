@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './rule_page';
-export * from './rule_page_name_input';
-export * from './rule_page_footer';
+export * from './confirm_create_rule';

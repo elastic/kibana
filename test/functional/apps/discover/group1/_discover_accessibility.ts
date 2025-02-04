@@ -27,9 +27,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const hasFocus = async (testSubject: string) => {
-    const targetElement = await testSubjects.find(testSubject);
     const activeElement = await find.activeElement();
-    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
+    const activeElementTestID = await activeElement._webElement.getAttribute('data-test-subj');
+    if (activeElementTestID !== testSubject) {
+      log.debug(`hasFocus: Active element test subj ${activeElementTestID} is not ${testSubject}`);
+    } else {
+      log.debug(`hasFocus: Active element test subj is ${activeElementTestID}`);
+    }
+    return activeElementTestID === testSubject;
   };
 
   describe('discover accessibility', () => {
@@ -75,7 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await focusAndPressButton('discoverAlertsButton');
         expect(await hasFocus('discoverAlertsButton')).to.be(false);
         await focusAndPressButton('discoverCreateAlertButton');
-        expect(await testSubjects.exists('addRuleFlyoutTitle')).to.be(true);
+        // Increase timeout. The rule flyout has to load asynchronously when the user clicks the create rule button,
+        // so a higher timeout here reduces flakiness in the test
+        expect(await testSubjects.exists('addRuleFlyoutTitle', { timeout: 20000 })).to.be(true);
         await retry.try(async () => {
           await browser.pressKeys(browser.keys.ESCAPE);
           // A bug exists with the create rule flyout where sometimes the confirm modal

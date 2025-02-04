@@ -22,7 +22,8 @@ export function EditBurnRateRuleFlyout({
   refetchRules: () => void;
 }) {
   const {
-    triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout },
+    triggersActionsUi: { getRuleFormFlyout: EditRuleFlyout },
+    ...plugins
   } = useKibana().services;
 
   const handleSavedRule = async () => {
@@ -35,6 +36,11 @@ export function EditBurnRateRuleFlyout({
   };
 
   return isEditRuleFlyoutOpen && rule ? (
-    <EditRuleFlyout initialRule={rule} onSave={handleSavedRule} onClose={handleCloseRuleFlyout} />
+    <EditRuleFlyout
+      plugins={plugins}
+      id={rule.id}
+      onSubmit={handleSavedRule}
+      onCancel={handleCloseRuleFlyout}
+    />
   ) : null;
 }

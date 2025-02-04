@@ -79,23 +79,20 @@ const CreateAlertFlyout: React.FC<{
     [adHocDataViews]
   );
 
-  return triggersActionsUi?.getAddRuleFlyout({
-    metadata: discoverMetadata,
+  return triggersActionsUi?.getRuleFormFlyout<EsQueryAlertMetaData>({
+    plugins: services,
+    initialMetadata: discoverMetadata,
     consumer: 'alerts',
-    onClose: (_, metadata) => {
-      onUpdateAdHocDataViews(metadata!.adHocDataViewList);
-      onFinishAction();
-    },
-    onSave: async (metadata) => {
-      onUpdateAdHocDataViews(metadata!.adHocDataViewList);
-    },
-    canChangeTrigger: false,
+    onCancel: onFinishAction,
+    onSubmit: onFinishAction,
+    onChangeMetaData: (metadata: EsQueryAlertMetaData) =>
+      onUpdateAdHocDataViews(metadata.adHocDataViewList),
     ruleTypeId: ES_QUERY_ID,
     initialValues: { params: getParams() },
     validConsumers: EsQueryValidConsumer,
-    useRuleProducer: true,
+    shouldUseRuleProducer: true,
     // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
-    initialSelectedConsumer: AlertConsumers.LOGS,
+    multiConsumerSelection: AlertConsumers.LOGS,
   });
 };
 
