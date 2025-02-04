@@ -17,7 +17,7 @@ const configSchema = schema.object({
   // Config namespace for developer-specific settings.
   developer: schema.maybe(
     schema.object({
-      // Settings for the project switcher.
+      // Settings for the project switcher.  This is now deprecated.
       projectSwitcher: schema.maybe(
         schema.object({
           // Should the switcher be enabled?

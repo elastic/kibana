@@ -117,7 +117,6 @@ function validateServerlessMode(serverlessMode) {
   }
 
   if (serverlessMode === true) {
-    // Defaulting to read the project-switcher's settings in `serverless.recent.dev.yml`
     return null;
   }
 
