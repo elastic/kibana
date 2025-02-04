@@ -6232,10 +6232,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-explorer-plugin@link:x-pack/solutions/observability/plugins/logs_explorer":
-  version "0.0.0"
-  uid ""
-
 "@kbn/logs-shared-plugin@link:x-pack/platform/plugins/shared/logs_shared":
   version "0.0.0"
   uid ""
