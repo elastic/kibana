@@ -585,8 +585,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]unified_components[\/\\]data_table[\/\\]custom_timeline_data_grid_body.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]unified_components[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]timeline[\/\\]unified_components[\/\\]styles.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]timelines[\/\\]public[\/\\]components[\/\\]hover_actions[\/\\]actions[\/\\]overflow.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]timelines[\/\\]public[\/\\]components[\/\\]loading[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]timelines[\/\\]public[\/\\]mock[\/\\]test_providers.tsx/,
     /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]public[\/\\]applications[\/\\]resolver_test[\/\\]index.tsx/,
     /src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]react[\/\\]kibana_context[\/\\]styled[\/\\]styled_provider.tsx/,
