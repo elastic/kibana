@@ -38,9 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover esql view', function () {
-    // see details: https://github.com/elastic/kibana/issues/188816
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
@@ -335,7 +332,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        if (await testSubjects.exists('~nav-item-observability_project_nav')) {
+          expect(availableDataViews).to.eql([
+            'All logs',
+            'kibana_sample_data_flights',
+            'logstash-*',
+          ]);
+        } else {
+          expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        }
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });

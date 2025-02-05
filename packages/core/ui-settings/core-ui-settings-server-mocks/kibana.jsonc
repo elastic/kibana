@@ -1,6 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/core-ui-settings-server-mocks",
-  "devOnly": true,
-  "owner": "@elastic/appex-sharedux"
-}

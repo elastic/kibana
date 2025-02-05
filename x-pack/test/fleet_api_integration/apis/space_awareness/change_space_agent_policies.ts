@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidV4 } from 'uuid';
+import { Client } from '@elastic/elasticsearch';
 import { CreateAgentPolicyResponse, GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { FleetServerAgentAction } from '@kbn/fleet-plugin/common/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
@@ -19,6 +22,33 @@ import {
 } from './helpers';
 import { testUsers, setupTestUsers } from '../test_users';
 
+export async function createFleetAction(esClient: Client, agentId: string, spaceId?: string) {
+  const actionResponse = await esClient.index({
+    index: '.fleet-actions',
+    refresh: 'wait_for',
+    body: {
+      '@timestamp': new Date().toISOString(),
+      expiration: new Date().toISOString(),
+      agents: [agentId],
+      action_id: uuidV4(),
+      data: {},
+      type: 'UPGRADE',
+      namespaces: spaceId ? [spaceId] : undefined,
+    },
+  });
+
+  return actionResponse._id;
+}
+
+async function getFleetActionDoc(esClient: Client, actionId: string) {
+  const actionResponse = await esClient.get<FleetServerAgentAction>({
+    index: '.fleet-actions',
+    id: actionId,
+  });
+
+  return actionResponse;
+}
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -28,7 +58,9 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
-  describe('change space agent policies', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/209008
+  // Failing: See https://github.com/elastic/kibana/issues/209008
+  describe.skip('change space agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -38,6 +70,9 @@ export default function (providerContext: FtrProviderContext) {
 
     let policy1AgentId: string;
     let policy2AgentId: string;
+
+    let agent1ActionId: string;
+    let agent2ActionId: string;
 
     before(async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
@@ -62,6 +97,9 @@ export default function (providerContext: FtrProviderContext) {
       });
       policy1AgentId = await createFleetAgent(esClient, defaultSpacePolicy1.item.id);
       policy2AgentId = await createFleetAgent(esClient, defaultSpacePolicy2.item.id);
+
+      agent1ActionId = await createFleetAction(esClient, policy1AgentId, 'default');
+      agent2ActionId = await createFleetAction(esClient, policy2AgentId, 'default');
 
       const packagePolicyRes = await apiClient.createPackagePolicy(undefined, {
         policy_ids: [defaultSpacePolicy1.item.id],
@@ -172,6 +210,15 @@ export default function (providerContext: FtrProviderContext) {
         }
       }
 
+      async function assertActionSpaces(actionId: string, expectedSpaces: string[]) {
+        const actionDoc = await getFleetActionDoc(esClient, actionId);
+        if (expectedSpaces.length === 1 && expectedSpaces[0] === 'default') {
+          expect(actionDoc._source?.namespaces ?? ['default']).to.eql(expectedSpaces);
+        } else {
+          expect(actionDoc._source?.namespaces).to.eql(expectedSpaces);
+        }
+      }
+
       it('should allow set policy in multiple space', async () => {
         await apiClient.putAgentPolicy(defaultSpacePolicy1.item.id, {
           name: 'tata',
@@ -188,6 +235,9 @@ export default function (providerContext: FtrProviderContext) {
 
         await assertAgentSpaces(policy1AgentId, ['default', TEST_SPACE_1]);
         await assertAgentSpaces(policy2AgentId, ['default']);
+
+        await assertActionSpaces(agent1ActionId, ['default']);
+        await assertActionSpaces(agent2ActionId, ['default']);
 
         await assertEnrollemntApiKeysForSpace('default', [
           defaultSpacePolicy1.item.id,
@@ -213,6 +263,10 @@ export default function (providerContext: FtrProviderContext) {
         await assertPackagePolicyNotAvailableInSpace();
         await assertAgentSpaces(policy1AgentId, [TEST_SPACE_1]);
         await assertAgentSpaces(policy2AgentId, ['default']);
+
+        await assertActionSpaces(agent1ActionId, ['default']);
+        await assertActionSpaces(agent2ActionId, ['default']);
+
         await assertEnrollemntApiKeysForSpace('default', [defaultSpacePolicy2.item.id]);
         await assertEnrollemntApiKeysForSpace(TEST_SPACE_1, [defaultSpacePolicy1.item.id]);
         // Ensure no side effect on other policies

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { LegacyRuleActions } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_actions_legacy';

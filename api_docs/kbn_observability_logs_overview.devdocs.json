@@ -21,7 +21,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -75,7 +75,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -95,7 +95,7 @@
                 "text": "LogsOverviewErrorContentProps"
               }
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -114,7 +114,7 @@
         "signature": [
           "({}: {}) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview_loading_content.tsx",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview_loading_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,7 +128,7 @@
             "signature": [
               "{}"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview_loading_content.tsx",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview_loading_content.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -146,7 +146,7 @@
         "tags": [],
         "label": "DataViewLogsSourceConfiguration",
         "description": [],
-        "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -160,7 +160,7 @@
             "signature": [
               "\"data_view\""
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -180,7 +180,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -194,7 +194,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -208,7 +208,7 @@
         "tags": [],
         "label": "IndexNameLogsSourceConfiguration",
         "description": [],
-        "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,7 +222,7 @@
             "signature": [
               "\"index_name\""
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -233,7 +233,7 @@
             "tags": [],
             "label": "indexName",
             "description": [],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -244,7 +244,7 @@
             "tags": [],
             "label": "timestampField",
             "description": [],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -255,7 +255,7 @@
             "tags": [],
             "label": "messageField",
             "description": [],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -269,7 +269,7 @@
         "tags": [],
         "label": "LogsOverviewErrorContentProps",
         "description": [],
-        "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -283,7 +283,7 @@
             "signature": [
               "Error | undefined"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -297,7 +297,7 @@
         "tags": [],
         "label": "LogsOverviewProps",
         "description": [],
-        "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -316,6 +316,8 @@
               "LogCategoriesGridChangeTimeCellDependencies",
               " & ",
               "LogCategoryDocumentExamplesTableDependencies",
+              " & ",
+              "DiscoverLinkDependencies",
               " & { search: ",
               {
                 "pluginId": "@kbn/search-types",
@@ -336,7 +338,7 @@
               },
               "; }"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,7 +353,7 @@
               "QueryDslQueryContainer",
               "[] | undefined"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,7 +374,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -386,7 +388,7 @@
             "signature": [
               "{ start: string; end: string; }"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -400,7 +402,7 @@
         "tags": [],
         "label": "SharedSettingLogsSourceConfiguration",
         "description": [],
-        "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -414,7 +416,7 @@
             "signature": [
               "\"shared_setting\""
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -428,7 +430,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -442,7 +444,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+            "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -467,6 +469,8 @@
           "LogCategoriesGridChangeTimeCellDependencies",
           " & ",
           "LogCategoryDocumentExamplesTableDependencies",
+          " & ",
+          "DiscoverLinkDependencies",
           " & { search: ",
           {
             "pluginId": "@kbn/search-types",
@@ -487,7 +491,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -524,7 +528,7 @@
             "text": "DataViewLogsSourceConfiguration"
           }
         ],
-        "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
+        "path": "x-pack/platform/packages/shared/observability/logs_overview/src/utils/logs_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

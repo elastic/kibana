@@ -296,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // update apiKey to fix decryption error
         await request
-          .post(`/api/alerts/alert/${ruleId}/_update_api_key`)
+          .post(`/api/alerting/rule/${ruleId}/_update_api_key`)
           .set('kbn-xsrf', 'xxx')
           .expect(204);
 

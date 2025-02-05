@@ -315,6 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // check available formats for ES_FIELD_TYPES.BOOLEAN
             expectFormatterTypes: [
               FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.COLOR,
               FIELD_FORMAT_IDS.STATIC_LOOKUP,
               FIELD_FORMAT_IDS.STRING,
               FIELD_FORMAT_IDS.URL,
@@ -403,8 +404,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
-              await testSubjects.setValue('~colorEditorColorPicker', '#ffffff');
-              await testSubjects.setValue('~colorEditorBackgroundPicker', '#ff0000');
+              await testSubjects.click('~colorEditorColorPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
+              await testSubjects.click('~colorEditorBackgroundPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');

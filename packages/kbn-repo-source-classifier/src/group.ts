@@ -19,36 +19,38 @@ const DEFAULT_MODULE_ATTRS: ModuleAttrs = {
   visibility: 'shared',
 };
 
-const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = {
-  'src/platform/plugins/shared': {
-    group: 'platform',
-    visibility: 'shared',
-  },
-  'src/platform/plugins/internal': {
-    group: 'platform',
-    visibility: 'private',
-  },
-  'x-pack/platform/plugins/shared': {
-    group: 'platform',
-    visibility: 'shared',
-  },
-  'x-pack/platform/plugins/internal': {
-    group: 'platform',
-    visibility: 'private',
-  },
-  'x-pack/solutions/observability/plugins': {
-    group: 'observability',
-    visibility: 'private',
-  },
-  'x-pack/solutions/security/plugins': {
-    group: 'security',
-    visibility: 'private',
-  },
-  'x-pack/solutions/search/plugins': {
-    group: 'search',
-    visibility: 'private',
-  },
-};
+const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugins']
+  .map<Record<string, ModuleAttrs>>((type) => ({
+    [`src/platform/${type}/shared`]: {
+      group: 'platform',
+      visibility: 'shared',
+    },
+    [`src/platform/${type}/private`]: {
+      group: 'platform',
+      visibility: 'private',
+    },
+    [`x-pack/platform/${type}/shared`]: {
+      group: 'platform',
+      visibility: 'shared',
+    },
+    [`x-pack/platform/${type}/private`]: {
+      group: 'platform',
+      visibility: 'private',
+    },
+    [`x-pack/solutions/observability/${type}`]: {
+      group: 'observability',
+      visibility: 'private',
+    },
+    [`x-pack/solutions/security/${type}`]: {
+      group: 'security',
+      visibility: 'private',
+    },
+    [`x-pack/solutions/search/${type}`]: {
+      group: 'search',
+      visibility: 'private',
+    },
+  }))
+  .reduce((acc, current) => ({ ...acc, ...current }), {});
 
 /**
  * Determine a plugin's grouping information based on the path where it is defined

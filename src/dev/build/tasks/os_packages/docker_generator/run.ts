@@ -51,7 +51,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:32099b99697d9da842c1ccacdbef1beee05a68cddb817e858d7656df45ed4c93';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:8df3ca6e1468dfda09359c47162bff2df9f9b48986037e8324b63e9347a3ce17';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;

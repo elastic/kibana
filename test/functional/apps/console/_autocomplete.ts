@@ -52,12 +52,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should provide basic auto-complete functionality', async () => {
       await PageObjects.console.enterText(`GET _search\n`);
-      await PageObjects.console.pressEnter();
       await PageObjects.console.enterText(`{\n\t"query": {`);
       await PageObjects.console.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.promptAutocomplete();
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+    });
+
+    it('should not show duplicate suggestions', async () => {
+      await PageObjects.console.enterText(`POST _ingest/pipeline/_simulate
+{
+  "pipeline": {
+    "processors": [
+      {
+        "script": {`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.sleepForDebouncePeriod();
+      await PageObjects.console.enterText(`"`);
+      expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+      // Iterate on the first 10 suggestions (the ones that are only visible without scrolling)
+      const suggestions = [];
+      for (let i = 0; i < 10; i++) {
+        suggestions.push(await PageObjects.console.getAutocompleteSuggestion(i));
+      }
+
+      // and expect the array to not have duplicates
+      expect(suggestions).to.eql(_.uniq(suggestions));
     });
 
     describe('Autocomplete behavior', () => {
@@ -123,6 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('JSON autocompletion with placeholder fields', async () => {
         await PageObjects.console.enterText('GET _search\n');
         await PageObjects.console.enterText('{');
+        await PageObjects.console.sleepForDebouncePeriod();
         await PageObjects.console.pressEnter();
 
         for (const char of '"ag') {
@@ -137,15 +159,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.be.eql(
+        // Verify that the autocomplete suggestion is inserted into the editor
+        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.contain(
           `
-GET _search
-{
-    "aggs": {
-      "NAME": {
-        "AGG_TYPE": {}
-      }
-    }
+"aggs": {
+  "NAME": {
+    "AGG_TYPE": {}
+  }
 }
 `.replace(/\s/g, '')
         );
@@ -351,8 +371,7 @@ GET _search
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/198109
-    describe.skip('index fields autocomplete', () => {
+    describe('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {
@@ -371,10 +390,50 @@ GET _search
 
       it('fields autocomplete only shows fields of the index', async () => {
         await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText('GET _search\n{\n"fields": ["');
+        await PageObjects.console.enterText('GET _search\n{\n"fields": [');
+        // Wait for the autocomplete request to finish loading
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // Trigger the autocomplete for the field we previously added
+        await PageObjects.console.enterText('te');
 
         expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
         expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);
+      });
+    });
+
+    describe('Autocomplete shouldnt trigger within', () => {
+      beforeEach(async () => {
+        await PageObjects.console.skipTourIfExists();
+        await PageObjects.console.clearEditorText();
+      });
+
+      it('a hash comment', async () => {
+        await PageObjects.console.enterText(`# GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a simple double slash comment', async () => {
+        await PageObjects.console.enterText(`// GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a single line block comment', async () => {
+        await PageObjects.console.enterText(`/* GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a multiline block comment', async () => {
+        await PageObjects.console.enterText(`/*
+          GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
     });
   });

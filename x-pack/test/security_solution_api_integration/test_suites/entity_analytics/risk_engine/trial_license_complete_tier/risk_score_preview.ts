@@ -622,6 +622,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(scores).to.eql({
         host: [],
+        service: [],
         user: [],
       });
     });

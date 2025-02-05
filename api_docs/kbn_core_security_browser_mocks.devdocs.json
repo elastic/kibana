@@ -14,7 +14,7 @@
         "tags": [],
         "label": "securityServiceMock",
         "description": [],
-        "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+        "path": "src/core/packages/security/browser-mocks/src/security_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => { setup: jest.Mock<any, any, any>; start: jest.Mock<any, any, any>; stop: jest.Mock<any, any, any>; }"
             ],
-            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "path": "src/core/packages/security/browser-mocks/src/security_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -43,16 +43,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-security-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-public.SecurityServiceSetup",
-                "text": "SecurityServiceSetup"
-              },
+              "SecurityServiceSetup",
               ">"
             ],
-            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "path": "src/core/packages/security/browser-mocks/src/security_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -67,16 +61,10 @@
             "description": [],
             "signature": [
               "() => jest.MockedObjectDeep<",
-              {
-                "pluginId": "@kbn/core-security-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-public.SecurityServiceStart",
-                "text": "SecurityServiceStart"
-              },
+              "SecurityServiceStart",
               ">"
             ],
-            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "path": "src/core/packages/security/browser-mocks/src/security_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -91,16 +79,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-security-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-public.SecurityServiceSetup",
-                "text": "SecurityServiceSetup"
-              },
+              "SecurityServiceSetup",
               ">"
             ],
-            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "path": "src/core/packages/security/browser-mocks/src/security_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -115,16 +97,10 @@
             "description": [],
             "signature": [
               "() => jest.MockedObjectDeep<",
-              {
-                "pluginId": "@kbn/core-security-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-public.SecurityServiceStart",
-                "text": "SecurityServiceStart"
-              },
+              "SecurityServiceStart",
               ">"
             ],
-            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "path": "src/core/packages/security/browser-mocks/src/security_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -139,40 +115,18 @@
             "description": [],
             "signature": [
               "(props?: Partial<Omit<",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
-              ", \"roles\"> & { roles: string[]; }>) => { username: string; enabled: boolean; metadata: { _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; }; email: string; full_name: string; profile_uid: string; authentication_provider: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticationProvider",
-                "text": "AuthenticationProvider"
-              },
+              "AuthenticatedUser",
+              ", \"roles\"> & { roles: string[]; }>) => { username: string; enabled: boolean; metadata: { _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; }; email: string; operator?: boolean | undefined; full_name: string; profile_uid: string; api_key?: ",
+              "ApiKeyDescriptor",
+              " | undefined; authentication_provider: ",
+              "AuthenticationProvider",
               "; authentication_realm: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.UserRealm",
-                "text": "UserRealm"
-              },
+              "UserRealm",
               "; lookup_realm: ",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.UserRealm",
-                "text": "UserRealm"
-              },
+              "UserRealm",
               "; authentication_type: string; elastic_cloud_user: boolean; roles: string[]; }"
             ],
-            "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+            "path": "src/core/packages/security/browser-mocks/src/security_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -185,16 +139,10 @@
                 "description": [],
                 "signature": [
                   "Partial<Omit<",
-                  {
-                    "pluginId": "@kbn/core-security-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSecurityCommonPluginApi",
-                    "section": "def-common.AuthenticatedUser",
-                    "text": "AuthenticatedUser"
-                  },
+                  "AuthenticatedUser",
                   ", \"roles\"> & { roles: string[]; }>"
                 ],
-                "path": "packages/core/security/core-security-browser-mocks/src/security_service.mock.ts",
+                "path": "src/core/packages/security/browser-mocks/src/security_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

@@ -39,7 +39,7 @@
           },
           "; }"
         ],
-        "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +59,7 @@
                 "text": "ServiceDefinitionVersioned"
               }
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,7 +101,7 @@
             "text": "ServiceTransforms"
           }
         ],
-        "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,7 +121,7 @@
                 "text": "ServiceDefinitionVersioned"
               }
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -136,7 +136,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -148,7 +148,7 @@
             "tags": [],
             "label": "_compiled",
             "description": [],
-            "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -169,7 +169,7 @@
                     "text": "ObjectMigrationDefinition"
                   }
                 ],
-                "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -207,7 +207,7 @@
           },
           " | null; }"
         ],
-        "path": "packages/kbn-object-versioning/lib/object_transform.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/object_transform.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +223,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-object-versioning/lib/object_transform.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/object_transform.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -243,7 +243,7 @@
         "tags": [],
         "label": "ObjectMigrationDefinition",
         "description": [],
-        "path": "packages/kbn-object-versioning/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -265,7 +265,7 @@
               },
               "<any, any, any, any>"
             ],
-            "path": "packages/kbn-object-versioning/lib/types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -289,7 +289,7 @@
           },
           "<UpIn, UpOut, DownIn, DownOut>"
         ],
-        "path": "packages/kbn-object-versioning/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -311,7 +311,7 @@
               },
               "<O>"
             ],
-            "path": "packages/kbn-object-versioning/lib/types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -325,7 +325,7 @@
                 "signature": [
                   "I"
                 ],
-                "path": "packages/kbn-object-versioning/lib/types.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -340,7 +340,7 @@
                 "signature": [
                   "number | \"latest\" | undefined"
                 ],
-                "path": "packages/kbn-object-versioning/lib/types.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -352,7 +352,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "packages/kbn-object-versioning/lib/types.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -368,7 +368,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "packages/kbn-object-versioning/lib/types.ts",
+                    "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -395,7 +395,7 @@
               },
               "<O>"
             ],
-            "path": "packages/kbn-object-versioning/lib/types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -409,7 +409,7 @@
                 "signature": [
                   "DownIn"
                 ],
-                "path": "packages/kbn-object-versioning/lib/types.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -424,7 +424,7 @@
                 "signature": [
                   "number | \"latest\" | undefined"
                 ],
-                "path": "packages/kbn-object-versioning/lib/types.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -436,7 +436,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "packages/kbn-object-versioning/lib/types.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -452,7 +452,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "packages/kbn-object-versioning/lib/types.ts",
+                    "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -479,7 +479,7 @@
               },
               " | null"
             ],
-            "path": "packages/kbn-object-versioning/lib/types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -493,7 +493,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/kbn-object-versioning/lib/types.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -508,7 +508,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/kbn-object-versioning/lib/types.ts",
+                "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -526,7 +526,7 @@
         "tags": [],
         "label": "ServiceDefinitionVersioned",
         "description": [],
-        "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -547,7 +547,7 @@
                 "text": "ServicesDefinition"
               }
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -561,7 +561,7 @@
         "tags": [],
         "label": "ServicesDefinition",
         "description": [],
-        "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -591,7 +591,7 @@
               },
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -621,7 +621,7 @@
               },
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -659,7 +659,7 @@
               },
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -697,7 +697,7 @@
               },
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,7 +727,7 @@
               },
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -757,7 +757,7 @@
               },
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -779,7 +779,7 @@
               },
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -793,7 +793,7 @@
         "tags": [],
         "label": "ServiceTransforms",
         "description": [],
-        "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -823,7 +823,7 @@
               },
               "<any, any, any, any>; }; }"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -853,7 +853,7 @@
               },
               "<any, any, any, any>; }; }"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -891,7 +891,7 @@
               },
               "<any, any, any, any>; }; }"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -929,7 +929,7 @@
               },
               "<any, any, any, any>; }; }"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -959,7 +959,7 @@
               },
               "<any, any, any, any>; }; }"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -989,7 +989,7 @@
               },
               "<any, any, any, any>; }; }"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1011,7 +1011,7 @@
               },
               "<any, any, any, any>; }; }"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1035,7 +1035,7 @@
           },
           "<UpIn, UpOut, DownIn, DownOut>"
         ],
-        "path": "packages/kbn-object-versioning/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1056,7 +1056,7 @@
               },
               "<any> | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1077,7 +1077,7 @@
               },
               "<DownIn, DownOut> | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1098,7 +1098,7 @@
               },
               "<UpIn, UpOut> | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1141,7 +1141,7 @@
             "text": "ServiceTransforms"
           }
         ],
-        "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1162,7 +1162,7 @@
                 "text": "ServiceDefinitionVersioned"
               }
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1173,7 +1173,7 @@
             "tags": [],
             "label": "requestVersion",
             "description": [],
-            "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1195,7 +1195,7 @@
               },
               "; } | undefined"
             ],
-            "path": "packages/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1212,7 +1212,7 @@
         "signature": [
           "(input: I) => O"
         ],
-        "path": "packages/kbn-object-versioning/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1227,7 +1227,7 @@
             "signature": [
               "I"
             ],
-            "path": "packages/kbn-object-versioning/lib/types.ts",
+            "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1252,7 +1252,7 @@
           },
           "; }"
         ],
-        "path": "packages/kbn-object-versioning/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1267,7 +1267,7 @@
         "signature": [
           "number"
         ],
-        "path": "packages/kbn-object-versioning/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

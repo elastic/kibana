@@ -20,8 +20,8 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     deleteTimelines();
     createTimelineTemplate().then((response) => {
       cy.wrap(response).as('templateResponse');
-      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
-      cy.wrap(response.body.data.persistTimeline.timeline.title).as('templateTitle');
+      cy.wrap(response.body.savedObjectId).as('templateId');
+      cy.wrap(response.body.title).as('templateTitle');
     });
   });
 

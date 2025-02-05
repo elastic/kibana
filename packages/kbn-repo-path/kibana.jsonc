@@ -1,6 +1,10 @@
 {
   "type": "shared-common",
   "id": "@kbn/repo-path",
-  "owner": "@elastic/kibana-operations",
+  "owner": [
+    "@elastic/kibana-operations"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "devOnly": true
 }

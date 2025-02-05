@@ -102,6 +102,55 @@ router.get({
 }, handler);
 ```
 
+### Naming conventions for privileges
+1. **Privilege should start with a valid `ApiOperation`**:
+   - **Valid operations**: `manage`, `read`, `update`, `delete`, `create`.
+   - Use the corresponding methods from the `ApiPrivileges` utility class: `ApiPrivileges.manage`, `ApiPrivileges.read`, etc.
+2. **Use `_` as the separator** between the operation and the subject.
+
+**Examples**:
+Incorrect privilege names ❌
+- `read-entity-a`: Uses `-` instead of `_`.
+- `delete_entity-a`: Mixes `_` and `-`.
+- `entity_manage`: Places the subject name before the operation.
+
+Correct privilege names ✅
+- `read_entity_a`
+- `delete_entity_a`
+- `manage_entity`
+
+### Configuring operator and superuser privileges
+We have two special predefined privilege sets that can be used in security configuration:
+1. Operator
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [ReservedPrivilegesSet.operator, '<privilege_2>'],
+    },
+  },
+  ...
+}, handler);
+```
+Operator privileges check is enforced only if operator privileges are enabled in the Elasticsearch configuration.
+For more information on operator privileges, refer to the [Operator privileges documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/operator-privileges.html).
+If operator privileges are disabled, we skip the check for it, so the only privilege checked from the example above is `<privilege_2>`.
+Operator privileges cannot be used as standalone, it is required to explicitly specify additional privileges in the configuration to ensure that the route is protected even when operator privileges are disabled.
+
+2. Superuser
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [ReservedPrivilegesSet.superuser],
+    },
+  },
+  ...
+}, handler);
+```
+
 ### Opting out of authorization for specific routes
 **Before migration:**
 ```ts
@@ -291,7 +340,7 @@ GET /api/oas?pathStartsWith=/your/api/path
 ## Migrating from `access` tags to `security` configuration
 We aim to use the same privileges that are currently defined with tags `access:<privilege_name>`.
 To assist with this migration, we have created eslint rule `no_deprecated_authz_config`, that will automatically convert your `access` tags to the new `security` configuration.
-It scans route definitions and converts `access` tags to the new `requiredPriviliges` configuration.
+It scans route definitions and converts `access` tags to the new `requiredPrivileges` configuration.
 
 Note: The rule is disabled by default to avoid automatic migrations without an oversight. You can perform migrations by running:
 

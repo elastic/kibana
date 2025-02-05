@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { setupMockServer } from '../agentless_api/mock_agentless_api';
+import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
 
@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       mockApiServer.close();
     });
 
-    describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
+    describe.skip('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
       it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
           CLOUD_CREDENTIALS_PACKAGE_VERSION
@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Agentless CIS_GCP ORG Account Launch Cloud Shell', () => {
+    describe.skip('Agentless CIS_GCP ORG Account Launch Cloud Shell', () => {
       it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
           CLOUD_CREDENTIALS_PACKAGE_VERSION

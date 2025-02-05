@@ -386,7 +386,7 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(reviewResponse.rules[0].diff.fields.description).toBeUndefined();
 
             expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
           });
         });
@@ -430,7 +430,7 @@ export default ({ getService }: FtrProviderContext): void => {
               has_base_version: false,
             });
             expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);

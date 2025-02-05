@@ -41,7 +41,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +61,7 @@
                 "text": "Props"
               }
             ],
-            "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,7 +93,7 @@
           " | undefined; } & ",
           "EuiImageProps"
         ],
-        "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

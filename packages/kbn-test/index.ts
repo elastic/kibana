@@ -15,13 +15,23 @@ export { startServersCli, startServers } from './src/functional_tests/start_serv
 // @internal
 export { runTestsCli, runTests } from './src/functional_tests/run_tests';
 export {
+  runElasticsearch,
+  runKibanaServer,
+  parseRawFlags,
+  getArgValue,
+  remapPluginPaths,
+  getKibanaCliArg,
+  getKibanaCliLoggers,
+  cleanupElasticsearch,
+} from './src/functional_tests/lib';
+
+export { initLogsDir } from './src/functional_tests/lib';
+export {
   SamlSessionManager,
   type SamlSessionManagerOptions,
   type HostOptions,
   type GetCookieOptions,
 } from './src/auth';
-export { runElasticsearch, runKibanaServer } from './src/functional_tests/lib';
-export { getKibanaCliArg, getKibanaCliLoggers } from './src/functional_tests/lib/kibana_cli_args';
 
 export type {
   CreateTestEsClusterOptions,
@@ -38,6 +48,7 @@ export {
 } from './src/es';
 
 export { kbnTestConfig } from './kbn_test_config';
+export type { UrlParts } from './kbn_test_config';
 
 export {
   kibanaServerTestUser,
@@ -58,8 +69,6 @@ export { getUrl } from './src/jest/get_url';
 
 export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
-export { runCheckFtrCodeOwnersCli } from './src/functional_test_runner/run_check_ftr_code_owners';
-
 export { runJest } from './src/jest/run';
 
 export * from './src/kbn_archiver_cli';
@@ -69,3 +78,10 @@ export * from './src/kbn_client';
 export * from './src/find_test_plugin_paths';
 
 export { getDockerFileMountPath } from '@kbn/es';
+
+// Docker image to use for Fleet API integration tests.
+// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
+// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
+export const fleetPackageRegistryDockerImage =
+  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
+  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';

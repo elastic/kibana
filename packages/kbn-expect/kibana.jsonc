@@ -1,6 +1,11 @@
 {
   "type": "shared-common",
   "id": "@kbn/expect",
-  "devOnly": true,
-  "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],
+  "owner": [
+    "@elastic/kibana-operations",
+    "@elastic/appex-qa"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
 }

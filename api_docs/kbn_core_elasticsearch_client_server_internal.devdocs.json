@@ -20,13 +20,7 @@
         "description": [],
         "signature": [
           "(config: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClientConfig",
-            "text": "ElasticsearchClientConfig"
-          },
+          "ElasticsearchClientConfig",
           ", { logger, type, scoped, getExecutionContext, agentFactoryProvider, kibanaVersion, }: { logger: ",
           {
             "pluginId": "@kbn/logging",
@@ -40,7 +34,7 @@
           "; kibanaVersion: string; }) => ",
           "default"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+        "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,15 +46,9 @@
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClientConfig",
-                "text": "ElasticsearchClientConfig"
-              }
+              "ElasticsearchClientConfig"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,7 +60,7 @@
             "tags": [],
             "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentFactoryProvider,\n    kibanaVersion,\n  }",
             "description": [],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -92,7 +80,7 @@
                     "text": "Logger"
                   }
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+                "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -103,7 +91,7 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+                "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -117,7 +105,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+                "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -131,7 +119,7 @@
                 "signature": [
                   "(() => string | undefined) | undefined"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+                "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -147,7 +135,7 @@
                 "signature": [
                   "AgentFactoryProvider"
                 ],
-                "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+                "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -158,7 +146,7 @@
                 "tags": [],
                 "label": "kibanaVersion",
                 "description": [],
-                "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
+                "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -182,7 +170,7 @@
           "ElasticsearchClientError",
           ") => string"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+        "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -196,7 +184,7 @@
             "signature": [
               "ElasticsearchClientError"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -218,23 +206,11 @@
           "(event: ",
           "DiagnosticResult",
           "<unknown, unknown>, apisToRedactInLogs: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchApiToRedactInLogs",
-            "text": "ElasticsearchApiToRedactInLogs"
-          },
+          "ElasticsearchApiToRedactInLogs",
           "[] | undefined) => ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-            "section": "def-server.RequestDebugMeta",
-            "text": "RequestDebugMeta"
-          }
+          "RequestDebugMeta"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+        "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -249,7 +225,7 @@
               "DiagnosticResult",
               "<unknown, unknown>"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -262,16 +238,10 @@
             "label": "apisToRedactInLogs",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchApiToRedactInLogs",
-                "text": "ElasticsearchApiToRedactInLogs"
-              },
+              "ElasticsearchApiToRedactInLogs",
               "[] | undefined"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -291,7 +261,7 @@
         "description": [
           "\nExposes the APIs to fetch stats of the existing agents."
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
+        "path": "src/core/packages/elasticsearch/client-server-internal/src/agent_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -306,15 +276,9 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.ElasticsearchClientsMetrics",
-                "text": "ElasticsearchClientsMetrics"
-              }
+              "ElasticsearchClientsMetrics"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/agent_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -332,7 +296,7 @@
         "description": [
           "\nThe logger-relevant request meta of an ES request"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+        "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -345,7 +309,7 @@
             "description": [
               "\nThe requested method"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,7 +322,7 @@
             "description": [
               "\nThe requested endpoint + querystring"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -371,7 +335,7 @@
             "description": [
               "\nThe request body (it may be redacted)"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,7 +351,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
+            "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -409,7 +373,7 @@
           " | ",
           "Agent"
         ],
-        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
+        "path": "src/core/packages/elasticsearch/client-server-internal/src/agent_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

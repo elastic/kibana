@@ -33,12 +33,18 @@ export default function ({ getService }: FtrProviderContext) {
         password: string;
         writeAccess?: boolean;
         tags?: string;
+        readUser?: boolean;
       }
     ) => {
       let resp;
-      const { statusCodes, SPACE_ID, username, password, writeAccess } = options;
-      const tags = !writeAccess ? '[uptime-read]' : options.tags ?? '[uptime-read,uptime-write]';
-      const getStatusMessage = (respStatus: string) =>
+      const { statusCodes, SPACE_ID, username, password, writeAccess, readUser } = options;
+      let tags = !writeAccess ? '[uptime-read]' : options.tags ?? '[uptime-read,uptime-write]';
+      if ((method === 'POST' || method === 'DELETE') && path.includes('private_locations')) {
+        tags = readUser
+          ? '[private-location-write,uptime-write]'
+          : '[uptime-read,private-location-write,uptime-write]';
+      }
+      const getStatusMessage = (respStatus: string | number) =>
         `Expected ${statusCodes?.join(
           ','
         )}, got ${respStatus} status code doesn't match, for path: ${path} and method ${method}`;
@@ -132,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
           password,
           writeAccess: route.writeAccess ?? true,
           tags: '[uptime-write]',
+          readUser: true,
         });
       }
     });

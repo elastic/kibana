@@ -1,0 +1,29 @@
+# REVERSE
+
+The REVERSE function returns a reversed form of the input string.
+
+## Syntax
+
+`REVERSE(str)`
+
+### Parameters
+
+#### str
+
+The string you want to reverse. If the string is `null`, the function will also return `null`.
+
+## Examples
+
+Here's an example of how to reverse a string:
+
+```esql
+ROW message = "Some Text"
+| EVAL message_reversed = REVERSE(message);
+```
+
+REVERSE also works with unicode characters, keeping unicode grapheme clusters intact during reversal:
+
+```esql
+ROW bending_arts = "💧🪨🔥💨"
+| EVAL bending_arts_reversed = REVERSE(bending_arts);
+```

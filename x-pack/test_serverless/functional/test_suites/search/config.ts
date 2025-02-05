@@ -23,11 +23,13 @@ export default createTestConfig({
     `--xpack.cloud.serverless.project_name=ES3_FTR_TESTS`,
     `--xpack.cloud.deployment_url=/projects/elasticsearch/fakeprojectid`,
     '--xpack.dataUsage.enabled=true',
+    '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller
     '--xpack.dataUsage.autoops.enabled=true',
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
+    '--xpack.searchSynonyms.enabled=true',
   ],
   apps: {
     serverlessElasticsearch: {
@@ -44,6 +46,9 @@ export default createTestConfig({
     },
     elasticsearchIndices: {
       pathname: '/app/elasticsearch/indices',
+    },
+    searchInferenceEndpoints: {
+      pathname: '/app/elasticsearch/relevance/inference_endpoints',
     },
   },
 });

@@ -1,0 +1,835 @@
+{
+  "id": "@kbn/palettes",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.KbnPalettes",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnPalettes",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalettes.palettes",
+            "type": "Object",
+            "tags": [],
+            "label": "#palettes",
+            "description": [],
+            "signature": [
+              "Map<string, ",
+              {
+                "pluginId": "@kbn/palettes",
+                "scope": "common",
+                "docId": "kibKbnPalettesPluginApi",
+                "section": "def-common.IKbnPalette",
+                "text": "IKbnPalette"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalettes.aliasMappings",
+            "type": "Object",
+            "tags": [],
+            "label": "#aliasMappings",
+            "description": [],
+            "signature": [
+              "Map<string, string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalettes.defaultPalette",
+            "type": "Object",
+            "tags": [],
+            "label": "#defaultPalette",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/palettes",
+                "scope": "common",
+                "docId": "kibKbnPalettesPluginApi",
+                "section": "def-common.IKbnPalette",
+                "text": "IKbnPalette"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalettes.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/palettes",
+                "id": "def-common.KbnPalettes.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "palettes",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/palettes",
+                    "scope": "common",
+                    "docId": "kibKbnPalettesPluginApi",
+                    "section": "def-common.IKbnPalette",
+                    "text": "IKbnPalette"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/palettes",
+                "id": "def-common.KbnPalettes.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "defaultPalette",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/palettes",
+                    "scope": "common",
+                    "docId": "kibKbnPalettesPluginApi",
+                    "section": "def-common.IKbnPalette",
+                    "text": "IKbnPalette"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalettes.query",
+            "type": "Function",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "@kbn/palettes",
+                "scope": "common",
+                "docId": "kibKbnPalettesPluginApi",
+                "section": "def-common.IKbnPalette",
+                "text": "IKbnPalette"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/palettes",
+                "id": "def-common.KbnPalettes.query.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalettes.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "@kbn/palettes",
+                "scope": "common",
+                "docId": "kibKbnPalettesPluginApi",
+                "section": "def-common.IKbnPalette",
+                "text": "IKbnPalette"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/palettes",
+                "id": "def-common.KbnPalettes.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalettes.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/palettes",
+                "scope": "common",
+                "docId": "kibKbnPalettesPluginApi",
+                "section": "def-common.IKbnPalette",
+                "text": "IKbnPalette"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/palettes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.getAppendedTag",
+        "type": "Function",
+        "tags": [],
+        "label": "getAppendedTag",
+        "description": [
+          "\nText wrapper to remove text-decoration from `EuiText`"
+        ],
+        "signature": [
+          "(label?: string | undefined) => \"\" | React.JSX.Element | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.getAppendedTag.$1",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.getKbnPalettes",
+        "type": "Function",
+        "tags": [],
+        "label": "getKbnPalettes",
+        "description": [],
+        "signature": [
+          "({ name, darkMode }: ",
+          "CoreTheme",
+          ") => ",
+          {
+            "pluginId": "@kbn/palettes",
+            "scope": "common",
+            "docId": "kibKbnPalettesPluginApi",
+            "section": "def-common.KbnPalettes",
+            "text": "KbnPalettes"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/palettes/get_kbn_palettes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.getKbnPalettes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ name, darkMode }",
+            "description": [],
+            "signature": [
+              "CoreTheme"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/palettes/get_kbn_palettes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.getPalettes",
+        "type": "Function",
+        "tags": [],
+        "label": "getPalettes",
+        "description": [],
+        "signature": [
+          "(darkMode: boolean) => ",
+          {
+            "pluginId": "@kbn/palettes",
+            "scope": "common",
+            "docId": "kibKbnPalettesPluginApi",
+            "section": "def-common.KbnPalettes",
+            "text": "KbnPalettes"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/palettes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.getPalettes.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "darkMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/palettes/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.useKbnPalettes",
+        "type": "Function",
+        "tags": [],
+        "label": "useKbnPalettes",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/palettes",
+            "scope": "common",
+            "docId": "kibKbnPalettesPluginApi",
+            "section": "def-common.KbnPalettes",
+            "text": "KbnPalettes"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/hooks/use_kbn_palettes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.IKbnPalette",
+        "type": "Interface",
+        "tags": [],
+        "label": "IKbnPalette",
+        "description": [
+          "\nCommon palette definition used throughout kibana"
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique identifier for the palette"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nDisplay name of this palette."
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.tag",
+            "type": "string",
+            "tags": [],
+            "label": "tag",
+            "description": [
+              "\nA tag for the palette displayed opposite of the `name`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of pallette"
+            ],
+            "signature": [
+              "\"gradient\" | \"categorical\""
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.colorCount",
+            "type": "number",
+            "tags": [],
+            "label": "colorCount",
+            "description": [
+              "\nNumber of colors to display"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.legacy",
+            "type": "boolean",
+            "tags": [],
+            "label": "legacy",
+            "description": [
+              "\nPalette belongs to an outdated theme set"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.aliases",
+            "type": "Array",
+            "tags": [],
+            "label": "aliases",
+            "description": [
+              "\nAlternate aliases/ids this palette matches"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.standalone",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "standalone",
+            "description": [
+              "\nExcluded from `getAll` but can still query for palette with `get`/`query`\n\nAn example would be `KbnPalette.Neutral` palette. I want to exclude it from the list of all available palettes, but I still want to `get`/`query` the palette."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.colors",
+            "type": "Function",
+            "tags": [],
+            "label": "colors",
+            "description": [
+              "\nReturns array of colors, optionally provide desired number of colors (`n`)"
+            ],
+            "signature": [
+              "(n?: number | undefined) => string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/palettes",
+                "id": "def-common.IKbnPalette.colors.$1",
+                "type": "number",
+                "tags": [],
+                "label": "n",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.IKbnPalette.getColor",
+            "type": "Function",
+            "tags": [],
+            "label": "getColor",
+            "description": [
+              "\nReturns color provided index and optional total number of colors"
+            ],
+            "signature": [
+              "(colorIndex: number, numberOfColors?: number | undefined) => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/palettes",
+                "id": "def-common.IKbnPalette.getColor.$1",
+                "type": "number",
+                "tags": [],
+                "label": "colorIndex",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/palettes",
+                "id": "def-common.IKbnPalette.getColor.$2",
+                "type": "number",
+                "tags": [],
+                "label": "numberOfColors",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.DEFAULT_FALLBACK_PALETTE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_FALLBACK_PALETTE",
+        "description": [],
+        "signature": [
+          "\"default\""
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.KbnPaletteType",
+        "type": "Type",
+        "tags": [],
+        "label": "KbnPaletteType",
+        "description": [],
+        "signature": [
+          "\"gradient\" | \"categorical\""
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.elasticPalette",
+        "type": "Object",
+        "tags": [],
+        "label": "elasticPalette",
+        "description": [
+          "\nThis is not correctly returning the updated vis colors from eui.\nAll gradient function work correctly."
+        ],
+        "signature": [
+          "KbnColorFnPalette"
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/palettes/categorical/elastic.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.KbnPalette",
+        "type": "Object",
+        "tags": [],
+        "label": "KbnPalette",
+        "description": [
+          "\nEnum of all kbn palette ids, including by type"
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalette.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "// Categorical palettes"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalette.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "// Gradient palettes"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalette.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "// Semantic palettes"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.KbnPalette.Amsterdam",
+            "type": "string",
+            "tags": [],
+            "label": "Amsterdam",
+            "description": [
+              "// ---- Deprecated palettes ----\n/**\n   * Amsterdam theme\n   * @deprecated use `KbnPalette.kibana7`\n   */"
+            ],
+            "signature": [
+              "\"eui_amsterdam_color_blind\""
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/palettes",
+        "id": "def-common.logLevelPalette",
+        "type": "Object",
+        "tags": [],
+        "label": "logLevelPalette",
+        "description": [
+          "\nDefines a palette to be used directly and does not fully implement IKbnPalette"
+        ],
+        "path": "src/platform/packages/shared/kbn-palettes/palettes/semantic/log_level.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.logLevelPalette.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"log_level\""
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/palettes/semantic/log_level.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.logLevelPalette.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-palettes/palettes/semantic/log_level.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.logLevelPalette.getColor",
+            "type": "Function",
+            "tags": [],
+            "label": "getColor",
+            "description": [],
+            "signature": [
+              "(key: \"Error\" | \"Other\" | \"Debug\" | \"Info\" | \"Notice\" | \"Alert\" | \"Emerg\" | \"Crit\" | \"Warn\") => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/palettes/semantic/log_level.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/palettes",
+                "id": "def-common.logLevelPalette.getColor.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "\"Error\" | \"Other\" | \"Debug\" | \"Info\" | \"Notice\" | \"Alert\" | \"Emerg\" | \"Crit\" | \"Warn\""
+                ],
+                "path": "src/platform/packages/shared/kbn-palettes/palettes/semantic/log_level.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/palettes",
+            "id": "def-common.logLevelPalette.colors",
+            "type": "Object",
+            "tags": [],
+            "label": "colors",
+            "description": [],
+            "signature": [
+              "{ Emerg: string; Alert: string; Crit: string; Error: string; Warn: string; Notice: string; Info: string; Debug: string; Other: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-palettes/palettes/semantic/log_level.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

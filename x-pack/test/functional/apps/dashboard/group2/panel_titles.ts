@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('Custom title');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.legacySaveToLibrary(getVisTitle(true));
+        await dashboardPanelActions.saveToLibrary(getVisTitle(true));
         await retry.tryForTime(500, async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
           const [newPanelTitle] = await dashboard.getPanelTitles();
@@ -113,7 +113,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('resetting description on a by reference panel sets it to the library title', async () => {
         await dashboardPanelActions.navigateToEditorFromFlyout();
-        // legacySaveToLibrary UI cannot set description
         await lens.save(
           getVisTitle(true),
           false,
@@ -142,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('Custom title');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.legacyUnlinkFromLibrary('Custom title');
+        await dashboardPanelActions.unlinkFromLibrary('Custom title');
         const [newPanelTitle] = await dashboard.getPanelTitles();
         expect(newPanelTitle).to.equal('Custom title');
       });
@@ -151,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.legacySaveToLibrary(getVisTitle(true));
+        await dashboardPanelActions.saveToLibrary(getVisTitle(true));
         await retry.tryForTime(500, async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
           const [newPanelTitle] = await dashboard.getPanelTitles();
@@ -160,7 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('unlinking a by reference panel without a custom title will keep the library title', async () => {
-        await dashboardPanelActions.legacyUnlinkFromLibrary(getVisTitle());
+        await dashboardPanelActions.unlinkFromLibrary(getVisTitle());
         const [newPanelTitle] = await dashboard.getPanelTitles();
         expect(newPanelTitle).to.equal(getVisTitle());
       });

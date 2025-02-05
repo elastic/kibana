@@ -13,7 +13,7 @@ steps:
       - check_types
       - check_oas_snapshot
     timeout_in_minutes: 120
-    parallelism: 2
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'

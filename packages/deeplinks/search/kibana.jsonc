@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/deeplinks-search",
-  "owner": "@elastic/search-kibana"
-}

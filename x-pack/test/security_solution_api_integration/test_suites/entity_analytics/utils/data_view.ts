@@ -10,7 +10,16 @@ export const dataViewRouteHelpersFactory = (
   supertest: SuperTest.Agent,
   namespace: string = 'default'
 ) => ({
-  create: (name: string) => {
+  create: async (name: string) => {
+    const { body: existingDataView, statusCode } = await supertest.get(
+      `/s/${namespace}/api/data_views/data_view/${name}-${namespace}`
+    );
+
+    if (statusCode === 200) {
+      // data view exists
+      return existingDataView;
+    }
+
     return supertest
       .post(`/s/${namespace}/api/data_views/data_view`)
       .set('kbn-xsrf', 'foo')

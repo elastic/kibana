@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const testIndexName = `index-ftr-test-${Math.random()}`;
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('Indices', function () {
     this.tags(['skipSvlSearch']);
@@ -73,7 +74,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       it('can delete index', async () => {
         await pageObjects.indexManagement.confirmDeleteModalIsVisible();
-        await pageObjects.indexManagement.expectIndexIsDeleted(testIndexName);
+        await retry.try(async () => {
+          await pageObjects.indexManagement.expectIndexIsDeleted(testIndexName);
+        });
       });
     });
   });

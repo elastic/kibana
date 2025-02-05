@@ -28,6 +28,7 @@ import {
   AppMountParameters,
   I18nStart,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExampleDefinition } from './types';
@@ -36,6 +37,7 @@ interface StartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 interface Props {

@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/alerting-comparators",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

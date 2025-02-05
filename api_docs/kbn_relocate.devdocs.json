@@ -1,0 +1,47 @@
+{
+  "id": "@kbn/relocate",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/relocate",
+        "id": "def-server.runKbnRelocateCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runKbnRelocateCli",
+        "description": [
+          "\nA CLI to move Kibana modules into the right folder structure,\naccording to the Sustainable Kibana Architecture"
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-relocate/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
