@@ -41,7 +41,7 @@ function useLifecycleState({
   const lifecycleActions = useMemo(() => {
     if (!definition) return [];
 
-    const actions = [];
+    const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
     const isWired = isWiredStreamGetResponse(definition);
     const isUnwired = isUnwiredStreamGetResponse(definition);
     const isIlm = isIlmLifecycle(definition.effective_lifecycle);

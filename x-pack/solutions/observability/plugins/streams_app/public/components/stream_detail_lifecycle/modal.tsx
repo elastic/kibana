@@ -272,15 +272,21 @@ function IlmModal({
       </EuiModalHeader>
 
       <EuiModalBody>
-        Select a pre-defined policy or visit{' '}
+        {i18n.translate('xpack.streams.streamDetailLifecycle.selectIlmOrVisit1', {
+          defaultMessage: 'Select a pre-defined policy or visit',
+        })}{' '}
         <EuiLink
           data-test-subj="streamsAppIlmModalIndexLifecyclePoliciesLink"
           target="_blank"
           href={ilmLocator?.getRedirectUrl({ page: 'policies_list' })}
         >
-          Index Lifecycle Policies
+          {i18n.translate('xpack.streams.streamDetailLifecycle.selectIlmOrVisit2', {
+            defaultMessage: 'Index Lifecycle Policies',
+          })}
         </EuiLink>{' '}
-        to create a new one.
+        {i18n.translate('xpack.streams.streamDetailLifecycle.selectIlmOrVisit3', {
+          defaultMessage: 'to create a new one.',
+        })}
         <EuiSpacer />
         <EuiPanel hasBorder hasShadow={false} paddingSize="s">
           <EuiSelectable
