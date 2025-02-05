@@ -1,0 +1,38 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/saved-objects-finder-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-data-discovery'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/saved-objects-finder-plugin'
+  description: Moon project for @kbn/saved-objects-finder-plugin
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
+  metadata:
+    sourceRoot: src/platform/plugins/shared/saved_objects_finder
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - server/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

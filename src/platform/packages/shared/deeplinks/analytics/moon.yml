@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/deeplinks-analytics'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-data-discovery'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/deeplinks-analytics'
+  description: Moon project for @kbn/deeplinks-analytics
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
+  metadata:
+    sourceRoot: src/platform/packages/shared/deeplinks/analytics
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

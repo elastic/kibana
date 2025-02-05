@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/serverless-observability-settings'
+type: unknown
+owners:
+  defaultOwner: '@elastic/appex-sharedux'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/serverless-observability-settings'
+  description: Moon project for @kbn/serverless-observability-settings
+  channel: ''
+  owner: '@elastic/appex-sharedux'
+  metadata:
+    sourceRoot: src/platform/packages/shared/serverless/settings/observability_project
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

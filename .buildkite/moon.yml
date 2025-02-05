@@ -1,0 +1,4 @@
+$schema: https://moonrepo.dev/schemas/project.json
+
+id: kibana-buildkite
+

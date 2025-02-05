@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/resolver-test-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/security-solution'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/resolver-test-plugin'
+  description: Moon project for @kbn/resolver-test-plugin
+  channel: ''
+  owner: '@elastic/security-solution'
+  metadata:
+    sourceRoot: x-pack/test/plugin_functional/plugins/resolver_test
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

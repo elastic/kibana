@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/core-capabilities-browser-mocks'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-core'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/core-capabilities-browser-mocks'
+  description: Moon project for @kbn/core-capabilities-browser-mocks
+  channel: ''
+  owner: '@elastic/kibana-core'
+  metadata:
+    sourceRoot: packages/core/capabilities/core-capabilities-browser-mocks
+tags:
+  - platform
+  - shared-browser
+  - dev
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

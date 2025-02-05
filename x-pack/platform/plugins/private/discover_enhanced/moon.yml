@@ -1,0 +1,40 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/discover-enhanced-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-data-discovery'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/discover-enhanced-plugin'
+  description: Moon project for @kbn/discover-enhanced-plugin
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
+  metadata:
+    sourceRoot: x-pack/platform/plugins/private/discover_enhanced
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '*.ts'
+    - common/**/*
+    - public/**/*
+    - server/**/*
+    - ui_tests/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

@@ -1,0 +1,38 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/unified-doc-viewer-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-data-discovery'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/unified-doc-viewer-plugin'
+  description: Moon project for @kbn/unified-doc-viewer-plugin
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
+  metadata:
+    sourceRoot: src/platform/plugins/shared/unified_doc_viewer
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - server/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

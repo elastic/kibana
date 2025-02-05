@@ -1,0 +1,38 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/entityManager-app-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/obs-entities'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/entityManager-app-plugin'
+  description: Moon project for @kbn/entityManager-app-plugin
+  channel: ''
+  owner: '@elastic/obs-entities'
+  metadata:
+    sourceRoot: x-pack/solutions/observability/plugins/entity_manager_app
+tags:
+  - observability
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - types/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/apm-utils'
+type: unknown
+owners:
+  defaultOwner: '@elastic/obs-ux-infra_services-team'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/apm-utils'
+  description: Moon project for @kbn/apm-utils
+  channel: ''
+  owner: '@elastic/obs-ux-infra_services-team'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-apm-utils
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

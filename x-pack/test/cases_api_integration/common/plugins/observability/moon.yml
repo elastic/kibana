@@ -1,0 +1,30 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/observability-fixtures-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/response-ops'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/observability-fixtures-plugin'
+  description: Moon project for @kbn/observability-fixtures-plugin
+  channel: ''
+  owner: '@elastic/response-ops'
+  metadata:
+    sourceRoot: x-pack/test/cases_api_integration/common/plugins/observability
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - public/**/*
+    - server/**/*
+    - common/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

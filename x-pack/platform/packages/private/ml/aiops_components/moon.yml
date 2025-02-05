@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/aiops-components'
+type: unknown
+owners:
+  defaultOwner: '@elastic/ml-ui'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/aiops-components'
+  description: Moon project for @kbn/aiops-components
+  channel: ''
+  owner: '@elastic/ml-ui'
+  metadata:
+    sourceRoot: x-pack/platform/packages/private/ml/aiops_components
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

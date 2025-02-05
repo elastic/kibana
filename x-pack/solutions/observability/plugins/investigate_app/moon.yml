@@ -1,0 +1,42 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/investigate-app-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/obs-ux-management-team'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/investigate-app-plugin'
+  description: Moon project for @kbn/investigate-app-plugin
+  channel: ''
+  owner: '@elastic/obs-ux-management-team'
+  metadata:
+    sourceRoot: x-pack/solutions/observability/plugins/investigate_app
+tags:
+  - observability
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - public/**/*.json
+    - server/**/*
+    - scripts/**/*
+    - .storybook/**/*
+    - '!target/**/*'
+    - '!.storybook/**/*.js'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

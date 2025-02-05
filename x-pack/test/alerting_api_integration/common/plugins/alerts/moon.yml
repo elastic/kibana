@@ -1,0 +1,30 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/alerting-api-integration-test-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/response-ops'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/alerting-api-integration-test-plugin'
+  description: Moon project for @kbn/alerting-api-integration-test-plugin
+  channel: ''
+  owner: '@elastic/response-ops'
+  metadata:
+    sourceRoot: x-pack/test/alerting_api_integration/common/plugins/alerts
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - public/**/*
+    - server/**/*
+    - common/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

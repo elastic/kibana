@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/cloud-integration-saml-provider-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-core'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/cloud-integration-saml-provider-plugin'
+  description: Moon project for @kbn/cloud-integration-saml-provider-plugin
+  channel: ''
+  owner: '@elastic/kibana-core'
+  metadata:
+    sourceRoot: x-pack/test/cloud_integration/plugins/saml_provider
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

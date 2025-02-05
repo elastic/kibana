@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/v8-profiler-examples-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/response-ops'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/v8-profiler-examples-plugin'
+  description: Moon project for @kbn/v8-profiler-examples-plugin
+  channel: ''
+  owner: '@elastic/response-ops'
+  metadata:
+    sourceRoot: examples/v8_profiler_examples
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - index.ts
+    - server/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

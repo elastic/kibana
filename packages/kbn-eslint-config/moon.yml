@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/eslint-config'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/eslint-config'
+  description: Moon project for @kbn/eslint-config
+  channel: ''
+  owner: '@elastic/kibana-operations'
+  metadata:
+    sourceRoot: packages/kbn-eslint-config
+tags:
+  - common
+  - shared-common
+  - dev
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  typecheck:
+    script: echo 'stubbed:noop'
+  lint_with_types:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

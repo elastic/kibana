@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/core-user-settings-server'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-security'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/core-user-settings-server'
+  description: Moon project for @kbn/core-user-settings-server
+  channel: ''
+  owner: '@elastic/kibana-security'
+  metadata:
+    sourceRoot: src/core/packages/user-settings/server
+tags:
+  - platform
+  - shared-server
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

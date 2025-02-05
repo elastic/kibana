@@ -1,0 +1,31 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/guided-onboarding-example-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/appex-sharedux'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/guided-onboarding-example-plugin'
+  description: Moon project for @kbn/guided-onboarding-example-plugin
+  channel: ''
+  owner: '@elastic/appex-sharedux'
+  metadata:
+    sourceRoot: examples/guided_onboarding_example
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - __jest__/**/*
+    - common/**/*
+    - public/**/*
+    - server/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

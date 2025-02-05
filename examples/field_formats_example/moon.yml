@@ -1,0 +1,32 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/field-formats-example-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-data-discovery'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/field-formats-example-plugin'
+  description: Moon project for @kbn/field-formats-example-plugin
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
+  metadata:
+    sourceRoot: examples/field_formats_example
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - index.ts
+    - common/**/*.ts
+    - public/**/*.ts
+    - public/**/*.tsx
+    - server/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

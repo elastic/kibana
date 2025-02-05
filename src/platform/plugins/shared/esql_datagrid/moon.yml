@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/esql-datagrid'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-esql'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/esql-datagrid'
+  description: Moon project for @kbn/esql-datagrid
+  channel: ''
+  owner: '@elastic/kibana-esql'
+  metadata:
+    sourceRoot: src/platform/plugins/shared/esql_datagrid
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

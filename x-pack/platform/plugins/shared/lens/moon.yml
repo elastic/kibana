@@ -1,0 +1,39 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/lens-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-visualizations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/lens-plugin'
+  description: Moon project for @kbn/lens-plugin
+  channel: ''
+  owner: '@elastic/kibana-visualizations'
+  metadata:
+    sourceRoot: x-pack/platform/plugins/shared/lens
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '*.ts'
+    - common/**/*
+    - public/**/*
+    - server/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

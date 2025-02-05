@@ -1,0 +1,36 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/visualization-ui-components'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-visualizations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/visualization-ui-components'
+  description: Moon project for @kbn/visualization-ui-components
+  channel: ''
+  owner: '@elastic/kibana-visualizations'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-visualization-ui-components
+tags:
+  - platform
+  - shared-browser
+  - prod
+fileGroups:
+  src:
+    - '**/*'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

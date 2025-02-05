@@ -1,0 +1,40 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/watcher-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-management'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/watcher-plugin'
+  description: Moon project for @kbn/watcher-plugin
+  channel: ''
+  owner: '@elastic/kibana-management'
+  metadata:
+    sourceRoot: x-pack/platform/plugins/private/watcher
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - __jest__/**/*
+    - server/**/*
+    - public/**/*
+    - common/**/*
+    - __fixtures__/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

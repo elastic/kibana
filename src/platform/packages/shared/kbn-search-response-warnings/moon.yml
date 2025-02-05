@@ -1,0 +1,38 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/search-response-warnings'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-data-discovery'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/search-response-warnings'
+  description: Moon project for @kbn/search-response-warnings
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-search-response-warnings
+tags:
+  - platform
+  - shared-browser
+  - prod
+fileGroups:
+  src:
+    - '*.ts'
+    - src/**/*
+    - __mocks__/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
