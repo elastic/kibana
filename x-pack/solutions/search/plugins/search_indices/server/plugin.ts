@@ -27,7 +27,6 @@ export class SearchIndicesPlugin
 
   public setup(core: CoreSetup) {
     this.logger.debug('searchIndices: Setup');
-    this.logger.info('searchIndices test');
     const router = core.http.createRouter();
 
     // Register server side APIs

@@ -27,6 +27,17 @@ export interface Props {
   valueFormatter?: ValueFormatter;
 }
 
+const NO_DATA_VALUE = i18n.translate('xpack.observability.customThreshold.rule.noDataValue', {
+  defaultMessage: 'No Data',
+});
+
+const THRESHOLD_NO_DATA_TITLE = i18n.translate(
+  'xpack.observability.customThreshold.rule.thresholdNoDataTitle',
+  {
+    defaultMessage: 'Alert when',
+  }
+);
+
 export function Threshold({
   chartProps: { theme, baseTheme },
   comparator,
@@ -61,20 +72,22 @@ export function Threshold({
                 title,
                 extra: (
                   <span>
-                    {i18n.translate(
-                      'xpack.observability.customThreshold.rule.thresholdExtraTitle',
-                      {
-                        values: {
-                          comparator,
-                          threshold: threshold.map((t) => valueFormatter(t)).join(' - '),
-                        },
-                        defaultMessage: `Alert when {comparator} {threshold}`,
-                      }
-                    )}
+                    {value
+                      ? i18n.translate(
+                          'xpack.observability.customThreshold.rule.thresholdExtraTitle',
+                          {
+                            values: {
+                              comparator,
+                              threshold: threshold.map((t) => valueFormatter(t)).join(' - '),
+                            },
+                            defaultMessage: `Alert when {comparator} {threshold}`,
+                          }
+                        )
+                      : THRESHOLD_NO_DATA_TITLE}
                   </span>
                 ),
                 color,
-                value,
+                value: value ?? NO_DATA_VALUE,
                 valueFormatter,
                 icon: ({ width, height, color: iconColor }) => (
                   <EuiIcon width={width} height={height} color={iconColor} type="alert" />
