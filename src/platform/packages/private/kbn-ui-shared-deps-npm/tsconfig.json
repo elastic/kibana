@@ -17,6 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/repo-info",
-    "@kbn/ui-shared-deps-src"
   ]
 }
