@@ -70,7 +70,6 @@ import {
 import { setStartServices } from './kibana_services';
 import { UptimeOverviewLocatorDefinition } from './locators/overview';
 import { UptimeDataHelper } from './legacy_uptime/app/uptime_overview_fetcher';
-// import { fetchIndexStatus } from './legacy_uptime/state/api/index_status';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -149,8 +148,6 @@ export class UptimePlugin
     }
     const getUptimeDataHelper = async () => {
       const [coreStart] = await core.getStartServices();
-      const { UptimeDataHelper } = await import('./legacy_uptime/app/uptime_overview_fetcher');
-
       return UptimeDataHelper(coreStart);
     };
 
