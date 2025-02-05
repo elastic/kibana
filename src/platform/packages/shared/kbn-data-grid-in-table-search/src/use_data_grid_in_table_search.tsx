@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import { EuiDataGridProps, EuiDataGridRefProps, useEuiTheme } from '@elastic/eui';
 import { InTableSearchControl, InTableSearchControlProps } from './in_table_search_control';
 import { RenderCellValueWrapper } from './types';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
+import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper';
 import { getHighlightColors } from './get_highlight_colors';
 
 export interface UseDataGridInTableSearchProps
@@ -94,7 +95,13 @@ export const useDataGridInTableSearch = (
           }
           return dataGridWrapper.contains?.(element) ?? false;
         }}
-        onChange={(searchTerm) => setInTableSearchState({ inTableSearchTerm: searchTerm || '' })}
+        onChange={(searchTerm) => {
+          const nextSearchTerm = searchTerm || '';
+          setInTableSearchState({ inTableSearchTerm: nextSearchTerm });
+          if (!nextSearchTerm) {
+            clearSearchTermRegExpCache();
+          }
+        }}
         onChangeCss={(styles) =>
           setInTableSearchState((prevState) => ({ ...prevState, inTableSearchTermCss: styles }))
         }
@@ -129,6 +136,12 @@ export const useDataGridInTableSearch = (
       inTableSearchTerm,
     };
   }, [cellContext, inTableSearchTerm]);
+
+  useEffect(() => {
+    return () => {
+      clearSearchTermRegExpCache();
+    };
+  }, []);
 
   return useMemo(
     () => ({

@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { escapeRegExp, memoize } from 'lodash';
+import { escapeRegExp } from 'lodash';
 import { HIGHLIGHT_CLASS_NAME, CELL_MATCH_INDEX_ATTRIBUTE } from './constants';
 import { InTableSearchHighlightsWrapperProps } from './types';
 
@@ -64,9 +64,21 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
   return <div ref={cellValueRef}>{children}</div>;
 };
 
-const getSearchTermRegExp = memoize((searchTerm: string): RegExp => {
-  return new RegExp(`(${escapeRegExp(searchTerm.trim())})`, 'gi');
-});
+const searchTermRegExpCache = new Map<string, RegExp>();
+
+const getSearchTermRegExp = (searchTerm: string): RegExp => {
+  if (searchTermRegExpCache.has(searchTerm)) {
+    return searchTermRegExpCache.get(searchTerm)!;
+  }
+
+  const searchTermRegExp = new RegExp(`(${escapeRegExp(searchTerm.trim())})`, 'gi');
+  searchTermRegExpCache.set(searchTerm, searchTermRegExp);
+  return searchTermRegExp;
+};
+
+export const clearSearchTermRegExpCache = () => {
+  searchTermRegExpCache.clear();
+};
 
 function modifyDOMAndAddSearchHighlights(
   originalNode: Node,
