@@ -15,7 +15,8 @@ import {
   isInheritLifecycle,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
+import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
   EuiButton,
@@ -44,31 +45,8 @@ export function RetentionMetadata({
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
 }) {
-  const [isMenuOpen, setMenuOpen] = useState(false);
+  const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
   const router = useStreamsAppRouter();
-
-  const Row = ({
-    metadata,
-    value,
-    button,
-  }: {
-    metadata: string;
-    value: ReactNode;
-    action?: string;
-    button?: ReactNode;
-  }) => {
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="xl">
-        <EuiFlexItem grow={1}>
-          <EuiText>
-            <b>{metadata}</b>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={4}>{value}</EuiFlexItem>
-        <EuiFlexItem grow={1}>{button}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
 
   const lifecycle = definition.effective_lifecycle;
 
@@ -80,7 +58,7 @@ export function RetentionMetadata({
             data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
             size="s"
             fullWidth
-            onClick={() => setMenuOpen(!isMenuOpen)}
+            onClick={toggleMenu}
           >
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
               defaultMessage: 'Edit data retention',
@@ -88,7 +66,7 @@ export function RetentionMetadata({
           </EuiButton>
         }
         isOpen={isMenuOpen}
-        closePopover={() => setMenuOpen(false)}
+        closePopover={closeMenu}
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
@@ -97,7 +75,7 @@ export function RetentionMetadata({
             <EuiContextMenuItem
               key={action}
               onClick={() => {
-                setMenuOpen(false);
+                closeMenu();
                 openEditModal(action);
               }}
             >
@@ -158,14 +136,14 @@ export function RetentionMetadata({
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
-      <Row
+      <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionPeriodLabel', {
           defaultMessage: 'Retention period',
         })}
         value={
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={isDisabledLifecycle(lifecycle) ? 'default' : '#BD1F70'}>
+              <EuiBadge color={isDisabledLifecycle(lifecycle) ? 'default' : 'accent'}>
                 {isDslLifecycle(lifecycle)
                   ? lifecycle.dsl.data_retention ?? '∞'
                   : isIlmLifecycle(lifecycle)
@@ -182,7 +160,7 @@ export function RetentionMetadata({
         button={contextualMenu}
       />
       <EuiHorizontalRule margin="m" />
-      <Row
+      <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionSourceLabel', {
           defaultMessage: 'Source',
         })}
@@ -194,5 +172,28 @@ export function RetentionMetadata({
         }
       />
     </EuiPanel>
+  );
+}
+
+function MetadataRow({
+  metadata,
+  value,
+  button,
+}: {
+  metadata: string;
+  value: ReactNode;
+  action?: string;
+  button?: ReactNode;
+}) {
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="xl">
+      <EuiFlexItem grow={1}>
+        <EuiText>
+          <b>{metadata}</b>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={4}>{value}</EuiFlexItem>
+      <EuiFlexItem grow={1}>{button}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

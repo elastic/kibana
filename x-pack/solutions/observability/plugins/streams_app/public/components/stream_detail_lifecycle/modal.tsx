@@ -44,13 +44,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useBoolean } from '@kbn/react-hooks';
+import useToggle from 'react-use/lib/useToggle';
 
-export enum LifecycleEditAction {
-  None,
-  Dsl,
-  Ilm,
-  Inherit,
-}
+export type LifecycleEditAction = 'none' | 'dsl' | 'ilm' | 'inherit';
 
 interface ModalOptions {
   closeModal: () => void;
@@ -65,15 +62,15 @@ export function EditLifecycleModal({
   action,
   ...options
 }: { action: LifecycleEditAction } & ModalOptions) {
-  if (action === LifecycleEditAction.None) {
+  if (action === 'none') {
     return null;
   }
 
-  if (action === LifecycleEditAction.Dsl) {
+  if (action === 'dsl') {
     return <DslModal {...options} />;
   }
 
-  if (action === LifecycleEditAction.Ilm) {
+  if (action === 'ilm') {
     return <IlmModal {...options} />;
   }
 
@@ -90,8 +87,8 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
 
   const [selectedUnit, setSelectedUnit] = useState(timeUnits[0]);
   const [retentionValue, setRetentionValue] = useState(1);
-  const [noRetention, setNoRetention] = useState(false);
-  const [showUnitMenu, setShowUnitMenu] = useState(false);
+  const [noRetention, toggleNoRetention] = useToggle(false);
+  const [showUnitMenu, { on: openUnitMenu, off: closeUnitMenu }] = useBoolean(false);
 
   return (
     <EuiModal onClose={closeModal}>
@@ -111,7 +108,7 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
         <EuiFieldNumber
           data-test-subj="streamsAppDslModalFieldNumber"
           value={retentionValue}
-          onChange={(e) => setRetentionValue(Number(e.target.value))}
+          onChange={(e) => setRetentionValue(e.target.valueAsNumber)}
           min={1}
           disabled={noRetention}
           fullWidth
@@ -119,7 +116,7 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
             <EuiPopover
               isOpen={showUnitMenu}
               panelPaddingSize="none"
-              closePopover={() => setShowUnitMenu(false)}
+              closePopover={closeUnitMenu}
               button={
                 <EuiButton
                   data-test-subj="streamsAppDslModalButton"
@@ -127,7 +124,7 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
                   iconType="arrowDown"
                   iconSide="right"
                   color="text"
-                  onClick={() => setShowUnitMenu(true)}
+                  onClick={openUnitMenu}
                 >
                   {selectedUnit.name}
                 </EuiButton>
@@ -136,18 +133,16 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
               <EuiContextMenuPanel
                 size="s"
                 items={timeUnits.map((unit) => (
-                  <EuiFlexItem>
-                    <EuiContextMenuItem
-                      key={unit.value}
-                      icon={selectedUnit.value === unit.value ? 'check' : 'empty'}
-                      onClick={() => {
-                        setShowUnitMenu(false);
-                        setSelectedUnit(unit);
-                      }}
-                    >
-                      {unit.name}
-                    </EuiContextMenuItem>
-                  </EuiFlexItem>
+                  <EuiContextMenuItem
+                    key={unit.value}
+                    icon={selectedUnit.value === unit.value ? 'check' : 'empty'}
+                    onClick={() => {
+                      closeUnitMenu();
+                      setSelectedUnit(unit);
+                    }}
+                  >
+                    {unit.name}
+                  </EuiContextMenuItem>
                 ))}
               />
             </EuiPopover>
@@ -159,7 +154,7 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
             defaultMessage: 'Keep data indefinitely',
           })}
           checked={noRetention}
-          onChange={() => setNoRetention(!noRetention)}
+          onChange={() => toggleNoRetention()}
         />
         <EuiSpacer />
       </EuiModalBody>

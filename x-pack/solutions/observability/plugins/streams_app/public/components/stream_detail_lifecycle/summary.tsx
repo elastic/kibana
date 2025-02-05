@@ -28,7 +28,7 @@ export function RetentionSummary({ definition }: { definition: IngestStreamGetRe
             defaultMessage: 'Retention summary',
           })}
         </h5>
-        {summary}
+        <p>{summary}</p>
       </EuiText>
     </EuiPanel>
   );
@@ -38,41 +38,29 @@ function summaryText(definition: IngestStreamGetResponse) {
   const lifecycle = definition.stream.ingest.lifecycle;
 
   if (isInheritLifecycle(lifecycle)) {
-    return (
-      <p>
-        {i18n.translate('xpack.streams.streamDetailLifecycle.inheritLifecycleNote', {
-          defaultMessage: 'This data stream is inheriting its lifecycle configuration.',
-        })}
-      </p>
-    );
+    return i18n.translate('xpack.streams.streamDetailLifecycle.inheritLifecycleNote', {
+      defaultMessage: 'This data stream is inheriting its lifecycle configuration.',
+    });
   } else if (isDslLifecycle(lifecycle)) {
-    const usingDsl =
-      isRoot(definition.stream.name) || isUnwiredStreamGetResponse(definition)
-        ? i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleRootNote', {
-            defaultMessage: 'This data stream is using a custom data retention.',
-          })
-        : i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleNonRootNote', {
-            defaultMessage:
-              'This data stream is using a custom data retention as an override at this level.',
-          });
-    return <p>{usingDsl}</p>;
+    return isRoot(definition.stream.name) || isUnwiredStreamGetResponse(definition)
+      ? i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleRootNote', {
+          defaultMessage: 'This data stream is using a custom data retention.',
+        })
+      : i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleNonRootNote', {
+          defaultMessage:
+            'This data stream is using a custom data retention as an override at this level.',
+        });
   } else if (isIlmLifecycle(lifecycle)) {
-    const usingIlm =
-      isRoot(definition.stream.name) || isUnwiredStreamGetResponse(definition)
-        ? i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyRootNote', {
-            defaultMessage: 'This data stream is using an ILM policy.',
-          })
-        : i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyNonRootNote', {
-            defaultMessage: 'This data stream is using an ILM policy as an override at this level.',
-          });
-    return <p>{usingIlm}</p>;
+    return isRoot(definition.stream.name) || isUnwiredStreamGetResponse(definition)
+      ? i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyRootNote', {
+          defaultMessage: 'This data stream is using an ILM policy.',
+        })
+      : i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyNonRootNote', {
+          defaultMessage: 'This data stream is using an ILM policy as an override at this level.',
+        });
   }
 
-  return (
-    <p>
-      {i18n.translate('xpack.streams.streamDetailLifecycle.disabledPolicyNote', {
-        defaultMessage: 'The retention for this data stream is disabled.',
-      })}
-    </p>
-  );
+  return i18n.translate('xpack.streams.streamDetailLifecycle.disabledPolicyNote', {
+    defaultMessage: 'The retention for this data stream is disabled.',
+  });
 }

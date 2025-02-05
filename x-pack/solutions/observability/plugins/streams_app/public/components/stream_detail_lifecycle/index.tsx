@@ -36,7 +36,7 @@ function useLifecycleState({
   isServerless: boolean;
 }) {
   const [updateInProgress, setUpdateInProgress] = useState(false);
-  const [openEditModal, setOpenEditModal] = useState(LifecycleEditAction.None);
+  const [openEditModal, setOpenEditModal] = useState<LifecycleEditAction>('none');
 
   const lifecycleActions = useMemo(() => {
     if (!definition) return [];
@@ -51,7 +51,7 @@ function useLifecycleState({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
           defaultMessage: 'Set specific retention days',
         }),
-        action: LifecycleEditAction.Dsl,
+        action: 'dsl',
       });
     }
 
@@ -60,7 +60,7 @@ function useLifecycleState({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.setLifecyclePolicy', {
           defaultMessage: 'Use a lifecycle policy',
         }),
-        action: LifecycleEditAction.Ilm,
+        action: 'ilm',
       });
     }
 
@@ -69,7 +69,7 @@ function useLifecycleState({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',
         }),
-        action: LifecycleEditAction.Inherit,
+        action: 'inherit',
       });
     }
 
@@ -119,12 +119,10 @@ export function StreamDetailLifecycle({
 
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
-  const getIlmPolicies = async () => {
-    const response = await http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
+  const getIlmPolicies = () =>
+    http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
       signal,
     });
-    return response;
-  };
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
     try {
@@ -146,7 +144,7 @@ export function StreamDetailLifecycle({
       });
 
       refreshDefinition();
-      setOpenEditModal(LifecycleEditAction.None);
+      setOpenEditModal('none');
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.updated', {
@@ -170,7 +168,7 @@ export function StreamDetailLifecycle({
       <EditLifecycleModal
         action={openEditModal}
         definition={definition}
-        closeModal={() => setOpenEditModal(LifecycleEditAction.None)}
+        closeModal={() => setOpenEditModal('none')}
         updateLifecycle={updateLifecycle}
         getIlmPolicies={getIlmPolicies}
         updateInProgress={updateInProgress}
@@ -178,26 +176,22 @@ export function StreamDetailLifecycle({
       />
 
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-              <EuiFlexGroup gutterSize="m">
-                <EuiFlexItem grow={1}>
-                  <RetentionSummary definition={definition} />
-                </EuiFlexItem>
+        <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow={1}>
+              <RetentionSummary definition={definition} />
+            </EuiFlexItem>
 
-                <EuiFlexItem grow={4}>
-                  <RetentionMetadata
-                    definition={definition}
-                    lifecycleActions={lifecycleActions}
-                    ilmLocator={ilmLocator}
-                    openEditModal={(action) => setOpenEditModal(action)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem grow={4}>
+              <RetentionMetadata
+                definition={definition}
+                lifecycleActions={lifecycleActions}
+                ilmLocator={ilmLocator}
+                openEditModal={(action) => setOpenEditModal(action)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiFlexItem>
     </>
   );
