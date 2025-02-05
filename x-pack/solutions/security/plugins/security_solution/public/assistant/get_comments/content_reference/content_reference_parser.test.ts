@@ -12,8 +12,7 @@ import { ContentReferenceParser } from './content_reference_parser';
 
 describe('ContentReferenceParser', () => {
   it('extracts references from poem', async () => {
-    const file = unified()
-      .use([[markdown, {}], ContentReferenceParser])
+    const file = unified().use([[markdown, {}], ContentReferenceParser])
       .parse(`With a wagging tail and a wet, cold nose,{reference(ccaSI)}
 A furry friend, from head to toes.{reference(ccaSI)}
 Loyal companion, always near,{reference(ccaSI)}
@@ -25,8 +24,11 @@ Their love's a gift, that always conquers.{reference(ccaSI)}
 So cherish your dog, with all your might,{reference(ccaSI)}
 Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
 
-
-    expect((file.children[0] as Parent).children.filter(child => (child.type as string) === 'contentReference')).toHaveLength(10);
+    expect(
+      (file.children[0] as Parent).children.filter(
+        (child) => (child.type as string) === 'contentReference'
+      )
+    ).toHaveLength(10);
   });
 
   it('eats space preceding content reference', async () => {
