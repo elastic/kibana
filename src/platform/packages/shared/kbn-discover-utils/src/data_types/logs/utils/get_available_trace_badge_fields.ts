@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './get_log_level_color';
-export * from './get_log_level_coalesed_value';
-export * from './get_available_resource_fields';
-export * from './get_all_logs_data_view_spec';
-export * from './get_available_trace_badge_fields';
+import { TraceFields } from '../../..';
+import * as constants from '../constants';
+
+export const getAvailableTraceBadgeFields = (traceDoc: TraceFields) => {
+  const availableTraceFields = [
+    constants.SERVICE_NAME_FIELD,
+    constants.EVENT_OUTCOME_FIELD,
+    constants.TRANSACTION_NAME_FIELD,
+    constants.TRANSACTION_DURATION_FIELD,
+  ] as const;
+
+  return availableTraceFields.filter((fieldName) => Boolean(traceDoc[fieldName]));
+};

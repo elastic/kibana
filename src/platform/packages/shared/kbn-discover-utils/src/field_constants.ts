@@ -14,7 +14,12 @@ export const LOG_LEVEL_FIELD = 'log.level';
 export const MESSAGE_FIELD = 'message';
 export const ERROR_MESSAGE_FIELD = 'error.message';
 export const EVENT_ORIGINAL_FIELD = 'event.original';
+export const EVENT_OUTCOME_FIELD = 'event.outcome';
+
+// Trace fields
 export const TRACE_ID_FIELD = 'trace.id';
+export const TRANSACTION_NAME_FIELD = 'transaction.name';
+export const TRANSACTION_DURATION_FIELD = 'transaction.duration.us';
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';

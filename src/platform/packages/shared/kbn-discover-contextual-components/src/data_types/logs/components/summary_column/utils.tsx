@@ -18,16 +18,27 @@ import {
   CLOUD_INSTANCE_ID_FIELD,
   CONTAINER_ID_FIELD,
   CONTAINER_NAME_FIELD,
+  EVENT_OUTCOME_FIELD,
   FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT,
   HOST_NAME_FIELD,
   ORCHESTRATOR_CLUSTER_NAME_FIELD,
   ORCHESTRATOR_NAMESPACE_FIELD,
   ORCHESTRATOR_RESOURCE_ID_FIELD,
   SERVICE_NAME_FIELD,
+  TRANSACTION_DURATION_FIELD,
+  TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { LogDocument, ResourceFields, getAvailableResourceFields } from '@kbn/discover-utils/src';
-import { useEuiTheme } from '@elastic/eui';
+import {
+  LogDocument,
+  ResourceFields,
+  TraceFields,
+  TraceDocument,
+  getAvailableResourceFields,
+  getAvailableTraceBadgeFields,
+} from '@kbn/discover-utils/src';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 /**
@@ -57,23 +68,130 @@ export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields =
   };
 };
 
+export const getUnformattedTraceBadgeFields = (doc: TraceDocument): TraceFields => {
+  const serviceName = getFieldValue(doc, SERVICE_NAME_FIELD);
+  const eventOutcome = getFieldValue(doc, EVENT_OUTCOME_FIELD);
+  const agentName = getFieldValue(doc, AGENT_NAME_FIELD);
+  const transactionName = getFieldValue(doc, TRANSACTION_NAME_FIELD);
+  const transactionDuration = getFieldValue(doc, TRANSACTION_DURATION_FIELD);
+
+  return {
+    [SERVICE_NAME_FIELD]: serviceName,
+    [EVENT_OUTCOME_FIELD]: eventOutcome,
+    [AGENT_NAME_FIELD]: agentName,
+    [TRANSACTION_NAME_FIELD]: transactionName,
+    [TRANSACTION_DURATION_FIELD]: transactionDuration,
+  };
+};
+
+const TransactionDurationIcon = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiIcon
+      color="hollow"
+      type="clock"
+      size="m"
+      css={css`
+        margin-right: ${euiTheme.size.xs};
+      `}
+    />
+  );
+};
+
 /**
  * createResourceFields definitions
  */
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 
-const resourceCustomComponentsMap: Partial<
-  Record<keyof ResourceFields, React.ComponentType<FieldBadgeWithActionsProps>>
-> = {
-  [SERVICE_NAME_FIELD]: ServiceNameBadgeWithActions,
-};
-
 export interface ResourceFieldDescriptor {
   ResourceBadge: React.ComponentType<FieldBadgeWithActionsProps>;
   Icon?: () => JSX.Element;
-  name: keyof ResourceFields;
+  name: keyof ResourceFields | keyof TraceFields;
   value: string;
 }
+
+const getResourceBadgeComponent = (
+  name: keyof ResourceFields | keyof TraceFields,
+  core: CoreStart,
+  share?: SharePluginStart
+): React.ComponentType<FieldBadgeWithActionsProps> => {
+  if (name === SERVICE_NAME_FIELD) {
+    return (props: FieldBadgeWithActionsProps) => (
+      <ServiceNameBadgeWithActions {...props} share={share} core={core} />
+    );
+  }
+
+  return (props: FieldBadgeWithActionsProps) => (
+    <FieldBadgeWithActions {...props} share={share} core={core} />
+  );
+};
+
+const getResourceBadgeIcon = (
+  name: keyof ResourceFields | keyof TraceFields,
+  fields: ResourceFields | TraceFields
+): (() => React.JSX.Element) | undefined => {
+  switch (name) {
+    case SERVICE_NAME_FIELD:
+      return () => {
+        const { euiTheme } = useEuiTheme();
+        return (
+          <AgentIcon
+            agentName={fields[AGENT_NAME_FIELD] as AgentName}
+            size="m"
+            css={css`
+              margin-right: ${euiTheme.size.xs};
+            `}
+          />
+        );
+      };
+    case EVENT_OUTCOME_FIELD:
+      return () => {
+        const { euiTheme } = useEuiTheme();
+
+        const value = (fields as TraceFields)[name as keyof TraceFields];
+
+        const color = value === 'failure' ? 'danger' : value === 'success' ? 'success' : 'subdued';
+
+        return (
+          <EuiIcon
+            color={color}
+            type="dot"
+            size="s"
+            css={css`
+              margin-right: ${euiTheme.size.xs};
+            `}
+          />
+        );
+      };
+    case TRANSACTION_DURATION_FIELD:
+      return TransactionDurationIcon;
+  }
+};
+
+export const createTraceBadgeFields = (
+  row: DataTableRecord,
+  dataView: DataView,
+  core: CoreStart,
+  share?: SharePluginStart
+): ResourceFieldDescriptor[] => {
+  const traceBadgeFields = getUnformattedTraceBadgeFields(row as TraceDocument);
+  const availableFields = getAvailableTraceBadgeFields(traceBadgeFields);
+
+  return availableFields.map((name) => {
+    const field = dataView.getFieldByName(name);
+    const formatter = field && dataView.getFormatterForField(field);
+    const rawValue = traceBadgeFields[name] as string;
+    const formattedField = formatter ? formatter.convert(rawValue) : rawValue;
+
+    return {
+      name,
+      value: name === TRANSACTION_DURATION_FIELD ? `${formattedField}µs` : formattedField,
+      ResourceBadge: getResourceBadgeComponent(name, core, share),
+      Icon: getResourceBadgeIcon(name, traceBadgeFields),
+    };
+  });
+};
 
 export const createResourceFields = (
   row: DataTableRecord,
@@ -81,36 +199,14 @@ export const createResourceFields = (
   share?: SharePluginStart
 ): ResourceFieldDescriptor[] => {
   const resourceDoc = getUnformattedResourceFields(row as LogDocument);
-
   const availableResourceFields = getAvailableResourceFields(resourceDoc);
 
-  const resourceFields = availableResourceFields.map((name) => {
-    const ResourceBadgeComponent = resourceCustomComponentsMap[name] ?? FieldBadgeWithActions;
-    const resourceBadgeComponentWithDependencies = (props: FieldBadgeWithActionsProps) => (
-      <ResourceBadgeComponent {...props} share={share} core={core} />
-    );
-    return {
-      name,
-      value: resourceDoc[name] as string,
-      ResourceBadge: resourceBadgeComponentWithDependencies,
-      ...(name === SERVICE_NAME_FIELD && {
-        Icon: () => {
-          const { euiTheme } = useEuiTheme();
-          return (
-            <AgentIcon
-              agentName={resourceDoc[AGENT_NAME_FIELD] as AgentName}
-              size="m"
-              css={css`
-                margin-right: ${euiTheme.size.xs};
-              `}
-            />
-          );
-        },
-      }),
-    };
-  });
-
-  return resourceFields;
+  return availableResourceFields.map((name) => ({
+    name,
+    value: resourceDoc[name] as string,
+    ResourceBadge: getResourceBadgeComponent(name, core, share),
+    Icon: getResourceBadgeIcon(name, resourceDoc),
+  }));
 };
 
 /**

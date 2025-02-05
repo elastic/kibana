@@ -55,6 +55,7 @@ const getSummaryProps = (
   shouldShowFieldHandler: () => true,
   core: corePluginMock.createStart(),
   share: sharePluginMock.createStartContract(),
+  isTracesSummary: false,
   ...opts,
 });
 

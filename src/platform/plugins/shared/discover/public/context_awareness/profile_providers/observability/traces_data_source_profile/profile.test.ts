@@ -36,6 +36,18 @@ describe('tracesDataSourceProfileProvider', () => {
         } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MATCH);
+
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        dataSource: {
+          type: DataSourceType.DataView,
+          dataViewId: 'apm_static_data_view_id_custom_view',
+        },
+        dataView: {
+          getIndexPattern: () => 'traces-*',
+        } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MATCH);
   });
 
   it('should NOT match when the data source is not the APM data view', () => {
