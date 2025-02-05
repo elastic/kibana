@@ -82,7 +82,8 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         onChangeToExpectedPage(expectedPageIndex);
       }
 
-      // The cell border is useful when the active match is not visible due to the limited cell boundaries
+      // Defines highlight styles for the active match.
+      // The cell border is useful when the active match is not visible due to the limited cell boundaries.
       onChangeCss(css`
         .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
           &:after {

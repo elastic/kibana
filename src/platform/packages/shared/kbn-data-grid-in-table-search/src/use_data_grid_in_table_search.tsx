@@ -63,6 +63,7 @@ export const useDataGridInTableSearch = (
 
     return wrapRenderCellValueWithInTableSearchSupport(
       renderCellValue,
+      // defines colors for the highlights
       colors.highlightColor,
       colors.highlightBackgroundColor
     );
