@@ -30,6 +30,7 @@ import { castArray } from 'lodash';
 import { ServiceNameLink } from '../sub_components/service_name_link';
 import { TraceIdLink } from '../sub_components/trace_id_link';
 import { TransactionNameLink } from '../sub_components/transaction_name_link';
+import { Timestamp } from '../sub_components/timestamp';
 
 export const getAttributeConfiguration = (
   attributes: TraceDocumentOverview
@@ -82,7 +83,7 @@ export const getAttributeConfiguration = (
       title: i18n.translate('discover.docViews.tracesOverview.details.timestamp.title', {
         defaultMessage: 'Start time',
       }),
-      content: <p>{attributes[TIMESTAMP_FIELD]}</p>,
+      content: <Timestamp timestamp={attributes[TIMESTAMP_FIELD]} />,
     },
     [SPAN_DURATION_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanDuration.title', {
