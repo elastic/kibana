@@ -18,12 +18,10 @@ export const checkValidNode = async (
     ignore_unavailable: true,
     index: indexPattern,
     terminate_after: 1,
-    body: {
-      size: 0,
-      query: {
-        match: {
-          [field]: id,
-        },
+    size: 0,
+    query: {
+      match: {
+        [field]: id,
       },
     },
   };

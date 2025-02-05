@@ -215,7 +215,7 @@ export class KibanaFramework {
               {
                 ...params,
                 ...frozenIndicesParams,
-              } as estypes.MsearchRequest,
+              } as estypes.SearchRequest,
               { signal }
             ),
         });
