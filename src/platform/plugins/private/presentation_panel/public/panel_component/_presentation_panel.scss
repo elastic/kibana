@@ -106,7 +106,7 @@
 .embPanel--editing {
   .embPanel--dragHandle {
     .embPanel--dragHandle:hover {
-      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(0.9, 0.7));
       cursor: move;
     }
   }
