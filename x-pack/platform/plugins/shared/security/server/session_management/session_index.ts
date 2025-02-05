@@ -864,13 +864,10 @@ export class SessionIndex {
       });
     }
 
-    const response = await this.options.elasticsearchClient.openPointInTime(
+    let response = await this.options.elasticsearchClient.openPointInTime(
       {
         index: this.aliasName,
         keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
-        // @ts-expect-error client support this option, but it is not documented and typed yet.
-        // once support added we should remove this expected type error
-        // https://github.com/elastic/elasticsearch-specification/issues/3144
         allow_partial_search_results: true,
       },
       { ignore: [404], meta: true }
@@ -878,22 +875,19 @@ export class SessionIndex {
 
     if (response.statusCode === 404) {
       await this.ensureSessionIndexExists();
-      ({ body: openPitResponse, statusCode } =
-        await this.options.elasticsearchClient.openPointInTime(
-          {
-            index: this.aliasName,
-            keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
-            allow_partial_search_results: true,
-          },
-          { meta: true }
-        ));
-    }
-
-    if (response.statusCode === 503) {
+      response = await this.options.elasticsearchClient.openPointInTime(
+        {
+          index: this.aliasName,
+          keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+          allow_partial_search_results: true,
+        },
+        { meta: true }
+      );
+    } else if (response.statusCode === 503) {
       throw new errors.ResponseError(response);
     }
 
-    let openPitResponse = response.body;
+    const openPitResponse = response.body;
     try {
       let searchAfter: SortResults | undefined;
       for (let i = 0; i < SESSION_INDEX_CLEANUP_BATCH_LIMIT; i++) {
