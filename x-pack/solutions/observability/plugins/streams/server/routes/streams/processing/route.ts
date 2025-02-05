@@ -353,16 +353,16 @@ export const processingSuggestionRoute = createServerRoute({
         total_count,
         total_examples: Array.from(total_examples).slice(0, NUMBER_SAMPLES_PER_PATTERN),
       }));
-    
+
     const chatResponses = await Promise.all(
       sortedStats.map((sample) =>
-        inferenceClient.chatComplete({
+        inferenceClient.output({
+          id: 'get_pattern_suggestions',
           connectorId: 'azure-gpt4',
           system: `Instructions:
         - You are an assistant for observability tasks with a strong knowledge of logs and log parsing.
         - Use JSON format as an array.
         - For each log source identified, provide the following information:
-            * Use 'source_name' as the key for the log source name.
             * Use 'parsing_rule' as the key for the parsing rule.
         - Use only Grok patterns for the parsing rule.
             * Use %{{pattern:name:type}} syntax for Grok patterns when possible.
@@ -371,10 +371,23 @@ export const processingSuggestionRoute = createServerRoute({
         
         Only answer with the JSON array, nothing else, no intro, no clarifying information!!!
         `,
-          messages: [
-            {
-              role: MessageRole.User,
-              content: `Logs:
+          schema: {
+            type: 'object',
+            properties: {
+              rules: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    parsing_rule: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          } as const,
+          input: `Logs:
         ${sample.total_examples.join('\n')}
         Given the raw messages, help us do the following: 
         1. Identify and name the log sources based on logs format - it should just be one!!!
@@ -385,24 +398,14 @@ export const processingSuggestionRoute = createServerRoute({
 
         Don't make the pattern too specific to the provided examples.
             `,
-            },
-          ],
         })
       )
     );
 
     const patterns = chatResponses.flatMap((chatResponse) => {
-      let content;
-      try {
-        content = JSON.parse(chatResponse.content);
-      } catch (e) {
-        return [];
-      }
-      let partialPatterns: string[] = [];
-      if (Array.isArray(content)) {
-        partialPatterns = sanitizePatterns(content);
-      }
-      return partialPatterns;
+      return (
+        chatResponse.output.rules?.map((rule) => rule.parsing_rule).filter(Boolean) as string[]
+      ).map(sanitizePattern);
     });
 
     const simulations = (
@@ -464,21 +467,10 @@ export const processingSuggestionRoute = createServerRoute({
   },
 });
 
-function sanitizePatterns(patterns: unknown[]): string[] {
-  return patterns
-    .filter(
-      (pattern) =>
-        typeof pattern === 'object' &&
-        pattern &&
-        typeof (pattern as Record<string, unknown>).parsing_rule === 'string'
-    )
-    .map((pattern) =>
-      (pattern as { parsing_rule: string }).parsing_rule.replace(
-        /%\{([^}]+):message\}/g,
-        '%{$1:message_derived}'
-      )
-    )
-    .map((pattern) => pattern.replace(/%\{([^}]+):@timestamp\}/g, '%{$1:@timestamp_derived}'));
+function sanitizePattern(pattern: string): string {
+  return pattern
+    .replace(/%\{([^}]+):message\}/g, '%{$1:message_derived}')
+    .replace(/%\{([^}]+):@timestamp\}/g, '%{$1:@timestamp_derived}');
 }
 
 export const processingRoutes = {
