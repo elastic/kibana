@@ -12,7 +12,7 @@ import React from 'react';
 
 import { mutateError } from '../../lib';
 import type { KibanaErrorBoundaryServices } from '../../types';
-import { useErrorBoundary } from '../services/error_boundary_services';
+import { useErrorBoundary } from '../services';
 import { SectionFatalPrompt, SectionRecoverablePrompt } from './message_components';
 
 interface SectionErrorBoundaryProps {
