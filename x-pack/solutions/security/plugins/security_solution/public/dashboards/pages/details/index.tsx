@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
@@ -54,8 +53,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const { sourcererDataView } = useSourcererDataView();
 
-  const { show: canReadDashboard } =
-    useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
+  const { show: canReadDashboard } = useCapabilities<DashboardCapabilities>('dashboard_v2');
   const errorState = useMemo(
     () => (canReadDashboard ? null : DashboardViewPromptState.NoReadPermission),
     [canReadDashboard]

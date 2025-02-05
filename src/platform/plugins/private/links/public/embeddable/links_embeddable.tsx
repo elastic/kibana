@@ -49,7 +49,7 @@ import {
   linksSerializeStateIsByReference,
 } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
-import { isParentApiCompatible } from '../actions/compatibility_check';
+import { isParentApiCompatible } from '../actions/add_links_panel_action';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 

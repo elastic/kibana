@@ -24,6 +24,7 @@ import {
   SUM_ID,
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -57,6 +58,15 @@ const typeToFn: Record<string, string> = {
   sum: 'aggSum',
   median: 'aggMedian',
   standard_deviation: 'aggStdDeviation',
+};
+
+const typeToESQLFn: Record<string, string> = {
+  min: 'MIN',
+  max: 'MAX',
+  average: 'AVG',
+  sum: 'SUM',
+  median: 'MEDIAN',
+  standard_deviation: 'MEDIAN_ABSOLUTE_DEVIATION',
 };
 
 const supportedTypes = ['number', 'histogram'];
@@ -212,6 +222,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           ),
         },
       ];
+    },
+    toESQL: (column, columnId, _indexPattern, layer) => {
+      if (column.timeShift) return;
+      if (!typeToESQLFn[type]) return;
+      return `${typeToESQLFn[type]}(${sanitazeESQLInput(column.sourceField)})`;
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {

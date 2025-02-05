@@ -23,6 +23,7 @@ import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic
 import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/ensure_latest_rules_package_installed';
 import { calculateRuleSourceForImport } from '../calculate_rule_source_for_import';
 import type { CalculatedRuleSource, IRuleSourceImporter } from './rule_source_importer_interface';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 interface RuleSpecifier {
   rule_id: string;
@@ -95,6 +96,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private context: SecuritySolutionApiRequestHandlerContext;
   private config: ConfigType;
   private ruleAssetsClient: IPrebuiltRuleAssetsClient;
+  private ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
   private latestPackagesInstalled: boolean = false;
   private matchingAssetsByRuleId: Record<string, PrebuiltRuleAsset> = {};
   private knownRules: RuleSpecifier[] = [];
@@ -104,14 +106,17 @@ export class RuleSourceImporter implements IRuleSourceImporter {
     config,
     context,
     prebuiltRuleAssetsClient,
+    ruleCustomizationStatus,
   }: {
     config: ConfigType;
     context: SecuritySolutionApiRequestHandlerContext;
     prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
+    ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
   }) {
+    this.config = config;
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.context = context;
-    this.config = config;
+    this.ruleCustomizationStatus = ruleCustomizationStatus;
   }
 
   /**
@@ -143,8 +148,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
       rule,
       prebuiltRuleAssetsByRuleId: this.matchingAssetsByRuleId,
       isKnownPrebuiltRule: this.availableRuleAssetIds.has(rule.rule_id),
-      isRuleCustomizationEnabled:
-        this.config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
+      ruleCustomizationStatus: this.ruleCustomizationStatus,
     });
   }
 
@@ -196,10 +200,17 @@ export const createRuleSourceImporter = ({
   config,
   context,
   prebuiltRuleAssetsClient,
+  ruleCustomizationStatus,
 }: {
   config: ConfigType;
   context: SecuritySolutionApiRequestHandlerContext;
   prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }): RuleSourceImporter => {
-  return new RuleSourceImporter({ config, context, prebuiltRuleAssetsClient });
+  return new RuleSourceImporter({
+    config,
+    context,
+    prebuiltRuleAssetsClient,
+    ruleCustomizationStatus,
+  });
 };
