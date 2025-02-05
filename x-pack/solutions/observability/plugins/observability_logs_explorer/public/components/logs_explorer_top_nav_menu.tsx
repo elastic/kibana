@@ -17,9 +17,8 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { filter, take } from 'rxjs';
 import {
   deprecationBadgeDescription,
   deprecationBadgeGuideline,
@@ -88,19 +87,10 @@ const ClassicTopNav = () => {
       theme,
     },
   } = useKibanaContextForPlugin();
-  /**
-   * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
-   * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
-   */
-  const [previousAppendExtension$] = useState(() =>
-    chrome.getBreadcrumbsAppendExtension$().pipe(filter(Boolean), take(1))
-  );
-
-  const previousAppendExtension = useObservable(previousAppendExtension$);
 
   useEffect(() => {
     if (chrome) {
-      chrome.setBreadcrumbsAppendExtension({
+      return chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           <EuiHeaderSection
             data-test-subj="logsExplorerHeaderMenu"
@@ -116,13 +106,7 @@ const ClassicTopNav = () => {
         ),
       });
     }
-
-    return () => {
-      if (chrome) {
-        chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
-      }
-    };
-  }, [chrome, i18nStart, previousAppendExtension, theme, euiTheme]);
+  }, [chrome, i18nStart, theme, euiTheme]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
