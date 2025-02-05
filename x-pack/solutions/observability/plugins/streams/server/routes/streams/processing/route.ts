@@ -10,17 +10,13 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
-  conditionSchema,
   FieldDefinitionConfig,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { isEmpty, isNumber, uniqBy } from 'lodash';
+import { get, isEmpty, uniqBy } from 'lodash';
 import { MessageRole } from '@kbn/inference-common';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
-import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -269,14 +265,9 @@ const suggestionsParamsSchema = z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
     field: z.string(),
-    condition: conditionSchema,
-    start: z.number().optional(),
-    end: z.number().optional(),
     samples: z.array(z.record(z.unknown())),
   }),
 });
-
-type SuggestionsParams = z.infer<typeof suggestionsParamsSchema>;
 
 export const processingSuggestionRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/processing/_suggestions',
@@ -299,44 +290,72 @@ export const processingSuggestionRoute = createServerRoute({
       body,
     } = params;
 
-    const { start, end, condition, field, samples } = body;
-    const query = condition ? conditionToQueryDsl(condition) : { match_all: {} };
-
-    const observabilityEsClient = createObservabilityEsClient({
-      client: scopedClusterClient.asCurrentUser,
-      logger,
-      plugin: 'streams',
-    });
-
-    const filter = {
-      bool: {
-        filter: [query, ...(isNumber(start) && isNumber(end) ? rangeQuery(start, end) : [])],
-      },
+    const { field, samples } = body;
+    // Step 1: EVAL pattern
+    const evalPattern = (sample: string) => {
+      return sample
+        .replace(/[ \t\n]+/g, ' ')
+        .replace(/[A-Za-z]+/g, 'a')
+        .replace(/[0-9]+/g, '0')
+        .replace(/(a a)+/g, 'a')
+        .replace(/(a0)+/g, 'f')
+        .replace(/(f:)+/g, 'f:')
+        .replace(/0(.0)+/g, 'p');
     };
 
-    const esqlQuery = `FROM ${id} 
-| EVAL pattern = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(${field}, "[ \\t\\n]+", " "), "[A-Za-z]+", "a"), "[0-9]+", "0"), "(a a)+", "a"),"(a0)+", "f"), "(f:)+", "f:"), "0(.0)+", "p")
-| STATS count=COUNT(), example=TOP(${field}, 3, "desc") BY pattern 
-| STATS total_count = SUM(count), format=TOP(pattern, 3, "desc"), total_examples=VALUES(example) BY LEFT(pattern, 10)
-| SORT total_count DESC
-| LIMIT 100
-`;
+    const inputPatterns = samples.map((sample) => ({
+      sample,
+      pattern: evalPattern(get(sample, field) as string),
+      fieldValue: get(sample, field) as string,
+    }));
 
-    const response = await observabilityEsClient.esql(
-      'log-patterns',
-      {
-        query: esqlQuery,
-        filter,
+    const NUMBER_PATTERN_CATEGORIES = 5;
+    const NUMBER_SAMPLES_PER_PATTERN = 8;
+
+    // Step 2: STATS count and example by pattern
+    const patternStats = inputPatterns.reduce((acc, { sample, pattern, fieldValue }) => {
+      if (!acc[pattern]) {
+        acc[pattern] = { count: 0, examples: new Set<string>() };
+      }
+      acc[pattern].count += 1;
+      acc[pattern].examples.add(fieldValue);
+      return acc;
+    }, {} as Record<string, { count: number; examples: Set<string> }>);
+
+    // Step 3: STATS total_count, format, total_examples by LEFT(pattern, 10)
+    const leftPatternStats = Object.entries(patternStats).reduce(
+      (acc, [pattern, { count, examples }]) => {
+        const leftPattern = pattern.slice(0, 10);
+        if (!acc[leftPattern]) {
+          acc[leftPattern] = {
+            total_count: 0,
+            format: new Set<string>(),
+            total_examples: new Set<string>(),
+          };
+        }
+        acc[leftPattern].total_count += count;
+        acc[leftPattern].format.add(pattern);
+        examples.forEach((example) => acc[leftPattern].total_examples.add(example));
+        return acc;
       },
-      { transform: 'none' }
+      {} as Record<
+        string,
+        { total_count: number; format: Set<string>; total_examples: Set<string> }
+      >
     );
 
-    const rawDataSamples = response.values
-      .slice(0, 3)
-      .map((row) => (row[2] as any[]).slice(0, 3).join('\n'));
+    // Step 4: SORT total_count DESC and LIMIT 100
+    const sortedStats = Object.entries(leftPatternStats)
+      .sort(([, a], [, b]) => b.total_count - a.total_count)
+      .slice(0, NUMBER_PATTERN_CATEGORIES)
+      .map(([leftPattern, { total_count, format, total_examples }]) => ({
+        leftPattern,
+        total_count,
+        total_examples: Array.from(total_examples).slice(0, NUMBER_SAMPLES_PER_PATTERN),
+      }));
 
     const chatResponses = await Promise.all(
-      rawDataSamples.map((sample) =>
+      sortedStats.map((sample) =>
         inferenceClient.chatComplete({
           connectorId: 'azure-gpt4',
           system: `Instructions:
@@ -356,7 +375,7 @@ export const processingSuggestionRoute = createServerRoute({
             {
               role: MessageRole.User,
               content: `Logs:
-        ${sample}
+        ${sample.total_examples.join('\n')}
         Given the raw messages, help us do the following: 
         1. Identify and name the distinct log sources based on logs format.
         2. Write a parsing rule for Elastic ingest pipeline to extract structured fields from the raw message.
