@@ -27,6 +27,11 @@ export interface RuleMigrationTaskStartParams {
   invocationConfig: RunnableConfig;
 }
 
+export interface RuleMigrationTaskRunParams extends RuleMigrationTaskStartParams {
+  model: ChatModel;
+  abortController: AbortController;
+}
+
 export interface RuleMigrationTaskCreateAgentParams extends RuleMigrationTaskStartParams {
   telemetryClient: SiemMigrationTelemetryClient;
   model: ChatModel;

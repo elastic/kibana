@@ -14,6 +14,7 @@ import type { GraphNode } from '../../types';
 
 export const getTranslationResultNode = (): GraphNode => {
   return async (state) => {
+    // Set defaults
     const elasticRule = {
       title: state.original_rule.title,
       description: state.original_rule.description || state.original_rule.title,
