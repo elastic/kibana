@@ -661,7 +661,7 @@ export function getDatasourceSuggestionsFromCurrentState(
           layerId: layers[0][0],
           changeType: 'unchanged',
         }),
-      ]);
+      ]) as Array<DatasourceSuggestion<PureFormBasedPrivateState>>;
   }
 
   return flatten(
@@ -726,7 +726,7 @@ export function getDatasourceSuggestionsFromCurrentState(
           }
         }
         return suggestions;
-      })
+      }) as Array<Array<DatasourceSuggestion<PureFormBasedPrivateState>>>
   );
 }
 

@@ -177,7 +177,7 @@ export async function getEditLensConfiguration(
       },
       [savedObjectId]
     );
-    const datasourceState = currentAttributes.state.datasourceStates[datasourceId];
+    const datasourceState = currentAttributes.state.datasourceStates.formBased;
     const storeDeps = {
       lensServices,
       datasourceMap,

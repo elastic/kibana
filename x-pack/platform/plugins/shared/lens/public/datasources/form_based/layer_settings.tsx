@@ -62,7 +62,7 @@ export function LayerSettingsPanel({
   const isSamplingValueDisabled = !isSamplingValueEnabled(layer);
   const currentValue = isSamplingValueDisabled
     ? samplingValues[samplingValues.length - 1].value
-    : state.layers[layerId].sampling;
+    : layer.sampling;
 
   return (
     <>

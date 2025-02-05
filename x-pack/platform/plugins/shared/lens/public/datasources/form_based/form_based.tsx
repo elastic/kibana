@@ -35,9 +35,11 @@ import {
   MAX_NUM_OF_COLUMNS,
 } from './esql_layer/utils';
 import {
+  hasOnlyFormBasedLayers,
   hasTextBasedLayers,
   isFormBasedLayer,
   isTextBasedLayer,
+  PureFormBasedPrivateState,
   TextBasedLayer,
   TextBasedPrivateState,
 } from './types';
@@ -58,6 +60,7 @@ import type {
   StateSetter,
   IndexPatternMap,
   DatasourceDataPanelProps,
+  DatasourceDimensionDropHandlerProps,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -790,10 +793,17 @@ export function getFormBasedDatasource({
         />
       );
     },
-
-    getDropProps,
-    onDrop,
-
+    getDropProps: (props) => {
+      if (hasTextBasedLayers(props.state)) {
+        return undefined;
+      }
+      return getDropProps(props as DatasourceDimensionDropHandlerProps<PureFormBasedPrivateState>);
+    },
+    onDrop: (props) => {
+      if (props.state && hasOnlyFormBasedLayers(props.state)) {
+        return onDrop(props as DatasourceDimensionDropHandlerProps<PureFormBasedPrivateState>);
+      }
+    },
     getCustomWorkspaceRenderer: (
       state: FormBasedPrivateState,
       dragging: DraggingIdentifier,
@@ -1091,8 +1101,9 @@ export function getFormBasedDatasource({
       fieldName,
       indexPatterns
     ) => {
-      if (state.initialContext || hasTextBasedLayers(state))
+      if (state.initialContext || hasTextBasedLayers(state)) {
         return getSuggestionsForVisualizeField(state, indexPatternId, fieldName);
+      }
       return getDatasourceSuggestionsForVisualizeField(
         state,
         indexPatternId,

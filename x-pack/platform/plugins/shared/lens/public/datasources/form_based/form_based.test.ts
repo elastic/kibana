@@ -10,7 +10,7 @@ import { SavedObjectReference } from '@kbn/core/public';
 import { isFragment } from 'react-is';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { FormBasedPersistedState, FormBasedPrivateState } from './types';
+import { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -4172,7 +4172,8 @@ describe('IndexPattern Data Source', () => {
       });
 
       expect(
-        (newState.layers.second.columns['new-col'] as TermsIndexPatternColumn).params.orderBy
+        ((newState.layers.second as FormBasedLayer).columns['new-col'] as TermsIndexPatternColumn)
+          .params.orderBy
       ).toEqual({
         type: 'column',
         columnId: 'col1SecondLayer',
@@ -4226,7 +4227,9 @@ describe('IndexPattern Data Source', () => {
 
     it('should be false if datasource states differ', () => {
       const differentPersistableState = cloneDeep(persistableState);
-      differentPersistableState.layers[layerId].columnOrder = ['something else'];
+      (differentPersistableState.layers[layerId] as FormBasedLayer).columnOrder = [
+        'something else',
+      ];
 
       expect(
         FormBasedDatasource.isEqual(

@@ -243,7 +243,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       setState(
         (prevState) => {
           let outputLayer: FormBasedLayer;
-          const prevLayer = layer;
+          const prevLayer = prevState.layers[layerId] as FormBasedLayer;
           if (isColumn(setter)) {
             outputLayer = {
               ...prevLayer,
@@ -253,7 +253,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               },
             };
           } else {
-            outputLayer = typeof setter === 'function' ? setter(prevlayer) : setter;
+            outputLayer = typeof setter === 'function' ? setter(prevLayer) : setter;
           }
           const newLayer = adjustColumnReferencesForChangedColumn(outputLayer, columnId);
           // Fire an info toast (eventually) on layer update
@@ -338,7 +338,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     if (typeof setter === 'function') {
       return setState(
         (prevState) => {
-          const newLayer = setter(addStaticValueColumn(prevlayer));
+          const prevLayer = prevState.layers[layerId];
+          const newLayer = setter(addStaticValueColumn(prevLayer));
           return mergeLayer({ state: prevState, layerId, newLayer });
         },
         {

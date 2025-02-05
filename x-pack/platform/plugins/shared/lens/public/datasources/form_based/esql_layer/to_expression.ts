@@ -46,9 +46,9 @@ function getExpressionForLayer(
   const timeFieldName = layer.timeField ?? undefined;
 
   const formatterOverrides: ExpressionAstFunction[] = layer.columns
-    .filter((col) => col.format)
+    .filter((col) => col.params?.format)
     .map((col) => {
-      const format = col.format!;
+      const format = col.params?.format!;
 
       const base: ExpressionAstFunction = {
         type: 'function',
