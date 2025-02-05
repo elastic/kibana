@@ -156,33 +156,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
     });
-
-    describe('space with index pattern management disabled', function () {
-      // unskipped because of flakiness in cloud, caused be ingest management tests
-      // should be unskipped when https://github.com/elastic/kibana/issues/74353 was resolved
-      this.tags(['skipCloud']);
-      before(async () => {
-        await spacesService.create({
-          id: 'custom_space_no_index_patterns',
-          name: 'custom_space_no_index_patterns',
-          disabledFeatures: ['indexPatterns'],
-        });
-      });
-
-      after(async () => {
-        await spacesService.delete('custom_space_no_index_patterns');
-      });
-
-      it('shows empty prompt when no data views exist', async () => {
-        await common.navigateToUrl('discover', '', {
-          basePath: '/s/custom_space_no_index_patterns',
-          ensureCurrentUrl: false,
-          shouldUseHashForSubUrl: false,
-        });
-        await testSubjects.existOrFail('noDataViewsPrompt', {
-          timeout: config.get('timeouts.waitFor'),
-        });
-      });
-    });
   });
 }

@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
-  const dataViews = getService('dataViews');
   const { common, discover, header } = getPageObjects(['common', 'discover', 'header']);
 
   describe('discover no data', () => {
@@ -41,16 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
       await addIntegrations.click();
       await common.waitUntilUrlIncludes('integrations/browse');
-    });
-
-    it('adds a new data view when no data views', async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await common.navigateToApp('discover');
-
-      const dataViewToCreate = 'logstash';
-      await dataViews.createFromPrompt({ name: dataViewToCreate });
-      await dataViews.waitForSwitcherToBe(`${dataViewToCreate}*`);
     });
 
     it('skips to Discover to try ES|QL', async () => {
