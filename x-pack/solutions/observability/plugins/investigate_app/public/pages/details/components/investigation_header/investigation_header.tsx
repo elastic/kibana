@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { formatDistance } from 'date-fns';
 import React from 'react';
 import { InvestigationStatusBadge } from '../../../../components/investigation_status_badge/investigation_status_badge';
