@@ -51,7 +51,7 @@ export function InvestigationHeader() {
               id="xpack.investigateApp.investigationHeader.startedLabel"
               defaultMessage="Started: {timeAgo}"
               values={{
-                timeAgo: <strong>{moment(investigation.createdAt).from(moment(), true)}</strong>,
+                timeAgo: <strong>{moment(investigation.createdAt).fromNow()}</strong>,
               }}
             />
           </EuiText>

@@ -9,12 +9,12 @@
 
 const Path = require('path');
 const Crypto = require('crypto');
-const dateFns = require('date-fns');
 
 const chalk = require('chalk');
 const LmdbStore = require('lmdb');
+const moment = require('moment');
 
-const GLOBAL_ATIME = dateFns.startOfDay(new Date()).valueOf();
+const GLOBAL_ATIME = moment().startOf('day').valueOf();
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
