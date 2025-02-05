@@ -274,7 +274,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('apply_dataview_indices', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/209010
+    describe.skip('apply_dataview_indices', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
