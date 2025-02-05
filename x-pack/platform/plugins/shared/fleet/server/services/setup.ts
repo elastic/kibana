@@ -63,6 +63,7 @@ import {
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
+import { createOrUpdateFleetSyncedIntegrationsIndex } from './setup/fleet_synced_integrations';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -308,6 +309,9 @@ async function createSetupSideEffects(
 
   logger.debug('Backfilling package policy supports_agentless field');
   await backfillPackagePolicySupportsAgentless(esClient);
+
+  logger.debug('Create or update fleet-synced-integrations index');
+  await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
