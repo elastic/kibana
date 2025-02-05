@@ -6992,6 +6992,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-oblt@link:packages/kbn-scout-oblt":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout-reporting@link:packages/kbn-scout-reporting":
   version "0.0.0"
   uid ""

@@ -1490,6 +1490,7 @@
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",
     "@kbn/scout": "link:packages/kbn-scout",
     "@kbn/scout-info": "link:packages/kbn-scout-info",
+    "@kbn/scout-oblt": "link:packages/kbn-scout-oblt",
     "@kbn/scout-reporting": "link:packages/kbn-scout-reporting",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
     "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
