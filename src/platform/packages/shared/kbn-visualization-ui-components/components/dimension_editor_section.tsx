@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, UseEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
 
 export const DimensionEditorSection = ({
   children,
@@ -20,39 +18,13 @@ export const DimensionEditorSection = ({
   children?: React.ReactNode | React.ReactNode[];
 }) => {
   return (
-    <div
-      css={css`
-        padding-bottom: ${euiThemeVars.euiSize};
-        padding-top: ${euiThemeVars.euiSize};
-        :first-child {
-          padding-top: 0;
-          .lnsDimensionEditorSection__border {
-            display: none;
-          }
-        }
-      `}
-    >
-      <div
-        className="lnsDimensionEditorSection__border"
-        css={css`
-          position: relative;
-          &:before {
-            content: '';
-            position: absolute;
-            top: -${euiThemeVars.euiSize};
-            right: -${euiThemeVars.euiSize};
-            left: -${euiThemeVars.euiSize};
-            border-top: 1px solid ${euiThemeVars.euiColorLightShade};
-          }
-        `}
-      />
+    <div css={DimensionEditorSectionStyles.self}>
+      <div css={DimensionEditorSectionStyles.divider} />
       {title && (
         <EuiTitle
           size="xxs"
           data-test-subj="lnsDimensionEditorSectionHeading"
-          css={css`
-            padding-bottom: ${euiThemeVars.euiSize};
-          `}
+          css={DimensionEditorSectionStyles.heading}
         >
           <h3>{title}</h3>
         </EuiTitle>
@@ -60,4 +32,28 @@ export const DimensionEditorSection = ({
       {children}
     </div>
   );
+};
+
+const DimensionEditorSectionStyles = {
+  self: ({ euiTheme }: UseEuiTheme) => `
+    padding-bottom: ${euiTheme.size.base};
+    padding-top: ${euiTheme.size.base};
+    &:first-child {
+      padding-top: 0;
+    }
+  `,
+  divider: ({ euiTheme }: UseEuiTheme) => `
+    position: relative;
+    &:before {
+      content: '';
+      position: absolute;
+      top: -${euiTheme.size.base};
+      right: -${euiTheme.size.base};
+      left: -${euiTheme.size.base};
+      border-top: 1px solid ${euiTheme.colors.lightShade};
+    }
+  `,
+  heading: ({ euiTheme }: UseEuiTheme) => `
+    padding-bottom: ${euiTheme.size.base};
+  `,
 };
