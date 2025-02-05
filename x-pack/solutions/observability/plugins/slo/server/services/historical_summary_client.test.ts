@@ -185,7 +185,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
     });
 
@@ -219,7 +219,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
     });
   });
@@ -250,7 +250,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
       expect(results[0].data).toHaveLength(180);
     });
@@ -285,7 +285,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
     });
   });
@@ -318,7 +318,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
       expect(results[0].data).toHaveLength(108);
     });
@@ -352,7 +352,7 @@ describe('FetchHistoricalSummary', () => {
       });
 
       results[0].data.forEach((dailyResult) =>
-        expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+        expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
       );
 
       expect(results[0].data).toHaveLength(108);
@@ -388,7 +388,7 @@ describe('FetchHistoricalSummary', () => {
     ).toEqual({ term: { 'slo.instanceId': 'host-abc' } });
 
     results[0].data.forEach((dailyResult) =>
-      expect(dailyResult).toMatchSnapshot({ date: expect.any(Date) })
+      expect(dailyResult).toMatchSnapshot({ date: expect.any(String) })
     );
     expect(results[0].data).toHaveLength(180);
   });
