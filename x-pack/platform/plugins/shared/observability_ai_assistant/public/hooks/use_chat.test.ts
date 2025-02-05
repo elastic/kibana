@@ -32,13 +32,7 @@ const mockChatService: MockedChatService = {
   hasFunction: jest.fn().mockReturnValue(false),
   hasRenderFunction: jest.fn().mockReturnValue(true),
   renderFunction: jest.fn(),
-  getSystemMessage: jest.fn().mockReturnValue({
-    '@timestamp': new Date().toISOString(),
-    message: {
-      content: 'system',
-      role: MessageRole.System,
-    },
-  }),
+  getSystemMessage: jest.fn().mockReturnValue('system'),
   getScopes: jest.fn(),
 };
 

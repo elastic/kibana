@@ -208,18 +208,6 @@ describe('Observability AI Assistant client', () => {
     });
   }
 
-  function system(content: string | Omit<Message['message'], 'role'>): Message {
-    return merge(
-      {
-        '@timestamp': new Date().toString(),
-        message: {
-          role: MessageRole.System,
-        },
-      },
-      typeof content === 'string' ? { message: { content } } : content
-    );
-  }
-
   function user(content: string | Omit<Message['message'], 'role'>): Message {
     return merge(
       {
@@ -286,7 +274,8 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          systemMessage: 'This is a system message',
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           persist: true,

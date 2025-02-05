@@ -22,7 +22,6 @@ export const messageRt: t.Type<Message> = t.type({
   message: t.intersection([
     t.type({
       role: t.union([
-        t.literal(MessageRole.System),
         t.literal(MessageRole.Assistant),
         t.literal(MessageRole.Function),
         t.literal(MessageRole.User),
@@ -67,6 +66,7 @@ export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
       token_count: tokenCountRt,
     }),
   ]),
+  systemMessage: t.string,
   messages: t.array(messageRt),
   labels: t.record(t.string, t.string),
   numeric_labels: t.record(t.string, t.number),

@@ -515,20 +515,14 @@ export class KibanaClient {
       evaluate: async ({ messages, conversationId, errors }, criteria) => {
         const message = await chat('evaluate', {
           connectorIdOverride: evaluationConnectorId,
-          messages: [
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.System,
-                content: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
+          system: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
                 which helps our users make sense of their Observability data.
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
 
                 For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
                 assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
-              },
-            },
+          messages: [
             {
               '@timestamp': new Date().toString(),
               message: {

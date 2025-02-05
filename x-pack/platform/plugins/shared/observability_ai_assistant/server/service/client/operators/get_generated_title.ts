@@ -36,23 +36,16 @@ export function getGeneratedTitle({
 }): Observable<string | TokenCountEvent> {
   return from(
     chat('generate_title', {
+      system:
+        'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
       messages: [
-        {
-          '@timestamp': new Date().toString(),
-          message: {
-            role: MessageRole.System,
-            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`,
-          },
-        },
         {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.User,
-            content: messages
-              .filter((msg) => msg.message.role !== MessageRole.System)
-              .reduce((acc, curr) => {
-                return `${acc} ${curr.message.role}: ${curr.message.content}`;
-              }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
+            content: messages.reduce((acc, curr) => {
+              return `${acc} ${curr.message.role}: ${curr.message.content}`;
+            }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
           },
         },
       ],

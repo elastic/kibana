@@ -28,14 +28,8 @@ const client = {
 
 const connectorId = 'foo';
 
+const systemMessage = 'System message';
 const messages: Message[] = [
-  {
-    '@timestamp': new Date().toISOString(),
-    message: {
-      role: MessageRole.System,
-      content: 'System message',
-    },
-  },
   {
     '@timestamp': new Date().toISOString(),
     message: {

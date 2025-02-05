@@ -314,19 +314,13 @@ If available, include the link of the conversation at the end of your answer.`
       signal: new AbortController().signal,
       kibanaPublicUrl: (await resources.plugins.core.start()).http.basePath.publicBaseUrl,
       instructions: [backgroundInstruction],
+      systemMessage: getSystemMessageFromInstructions({
+        availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+        applicationInstructions: functionClient.getInstructions(),
+        userInstructions: [],
+        adHocInstructions: functionClient.getAdhocInstructions(),
+      }),
       messages: [
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.System,
-            content: getSystemMessageFromInstructions({
-              availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-              applicationInstructions: functionClient.getInstructions(),
-              userInstructions: [],
-              adHocInstructions: functionClient.getAdhocInstructions(),
-            }),
-          },
-        },
         {
           '@timestamp': new Date().toISOString(),
           message: {

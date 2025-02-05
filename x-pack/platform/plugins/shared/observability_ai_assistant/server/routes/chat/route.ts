@@ -32,6 +32,7 @@ const chatCompleteBaseRt = t.type({
       persist: toBooleanRt,
     }),
     t.partial({
+      systemMessage: t.string,
       conversationId: t.string,
       title: t.string,
       disableFunctions: t.union([
@@ -135,6 +136,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     body: t.intersection([
       t.type({
         name: t.string,
+        system: t.string,
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(functionRt),
@@ -149,7 +151,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     const { params } = resources;
 
     const {
-      body: { name, messages, connectorId, functions, functionCall },
+      body: { name, system, messages, connectorId, functions, functionCall },
     } = params;
 
     const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
@@ -158,6 +160,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
 
     const response$ = client.chat(name, {
       stream: true,
+      system,
       messages,
       connectorId,
       signal,
@@ -246,6 +249,7 @@ async function chatComplete(
 
   const {
     body: {
+      systemMessage,
       messages,
       connectorId,
       conversationId,
@@ -271,6 +275,7 @@ async function chatComplete(
   });
 
   const response$ = client.complete({
+    systemMessage,
     messages,
     connectorId,
     conversationId,

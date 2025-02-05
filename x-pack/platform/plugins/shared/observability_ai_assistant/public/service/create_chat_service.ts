@@ -25,7 +25,7 @@ import {
 } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { ChatCompletionChunkEvent, Message, MessageRole } from '../../common';
+import { ChatCompletionChunkEvent } from '../../common';
 import {
   StreamingChatResponseEventType,
   type BufferFlushEvent,
@@ -278,24 +278,17 @@ class ChatService {
     return this.renderFunctionRegistry.has(name);
   };
 
-  public getSystemMessage = (): Message => {
-    return {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.System,
-        content: this.systemMessage,
-      },
-    };
-  };
+  public getSystemMessage = (): string => this.systemMessage;
 
   public chat: ObservabilityAIAssistantChatService['chat'] = (
     name: string,
-    { connectorId, messages, functionCall, functions, signal }
+    { connectorId, system, messages, functionCall, functions, signal }
   ) => {
     return this.callStreamingApi('POST /internal/observability_ai_assistant/chat', {
       params: {
         body: {
           name,
+          system,
           messages,
           connectorId,
           functionCall,
@@ -316,6 +309,7 @@ class ChatService {
     getScreenContexts,
     connectorId,
     conversationId,
+    systemMessage,
     messages,
     persist,
     disableFunctions,
@@ -327,6 +321,7 @@ class ChatService {
         getScreenContexts,
         connectorId,
         conversationId,
+        systemMessage,
         messages,
         persist,
         disableFunctions,
