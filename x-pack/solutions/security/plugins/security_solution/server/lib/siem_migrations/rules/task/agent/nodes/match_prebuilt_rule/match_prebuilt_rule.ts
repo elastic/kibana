@@ -87,14 +87,9 @@ export const getMatchPrebuiltRuleNode = ({
       const matchedRule = prebuiltRules.find((r) => r.name === response.match);
       telemetryClient.reportPrebuiltRulesMatch({
         preFilterRules: prebuiltRules,
-        modelName: model.model,
         postFilterRule: matchedRule,
       });
       if (matchedRule) {
-        telemetryClient.reportRuleTranslationSuccess({
-          prebuiltMatch: true,
-          modelName: model.model,
-        });
         return {
           comments,
           elastic_rule: {
