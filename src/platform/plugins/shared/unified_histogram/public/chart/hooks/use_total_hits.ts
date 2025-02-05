@@ -13,6 +13,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MutableRefObject, useEffect, useRef } from 'react';
 import { catchError, filter, lastValueFrom, map, Observable, of } from 'rxjs';
+import { getHitsTotal } from '@kbn/data-plugin/common';
 import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
@@ -106,7 +107,7 @@ const fetchTotalHits = async ({
     return;
   }
 
-  onTotalHitsChange?.(UnifiedHistogramFetchStatus.loading, hits?.total);
+  onTotalHitsChange?.(UnifiedHistogramFetchStatus.loading, getHitsTotal(hits?.total));
 
   const newAbortController = new AbortController();
 
@@ -199,7 +200,7 @@ const fetchTotalHitsSearchSource = async ({
     })
     .pipe(
       filter((res) => !isRunningResponse(res)),
-      map((res) => res.rawResponse.hits.total as number),
+      map((res) => getHitsTotal(res.rawResponse.hits.total)),
       catchError((error: Error) => of(error))
     );
 
