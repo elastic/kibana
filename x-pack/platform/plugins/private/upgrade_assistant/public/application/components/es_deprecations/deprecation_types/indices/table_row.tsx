@@ -20,7 +20,7 @@ import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
 import { IndexFlyout, IndexFlyoutProps } from './flyout';
-import { ReindexStatusProvider, useReindexContext } from './context';
+import { IndexStatusProvider, useIndexContext } from './context';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -34,7 +34,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   deprecation,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const reindexState = useReindexContext();
+  const indexContext = useIndexContext();
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -53,7 +53,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
         props: {
           deprecation,
           closeFlyout,
-          ...reindexState,
+          ...indexContext,
         },
         flyoutProps: {
           onClose: closeFlyout,
@@ -63,7 +63,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
         },
       });
     }
-  }, [addContentToGlobalFlyout, deprecation, showFlyout, reindexState, closeFlyout]);
+  }, [addContentToGlobalFlyout, deprecation, showFlyout, indexContext, closeFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -99,8 +99,8 @@ export const IndexTableRow: React.FunctionComponent<TableRowProps> = (props) => 
   } = useAppContext();
 
   return (
-    <ReindexStatusProvider indexName={props.deprecation.index!} api={api}>
+    <IndexStatusProvider indexName={props.deprecation.index!} api={api}>
       <IndexTableRowCells {...props} />
-    </ReindexStatusProvider>
+    </IndexStatusProvider>
   );
 };

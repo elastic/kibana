@@ -19,7 +19,7 @@ import {
 import { ReindexStatus } from '../../../../../../common/types';
 import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
-import { useReindexContext } from './context';
+import { useIndexContext } from './context';
 
 const i18nTexts = {
   reindexLoadingStatusText: i18n.translate(
@@ -77,7 +77,7 @@ const i18nTexts = {
 };
 
 export const ReindexResolutionCell: React.FunctionComponent = () => {
-  const { reindexState } = useReindexContext();
+  const { reindexState } = useIndexContext();
   const hasExistingAliases = reindexState.meta.aliases.length > 0;
 
   if (reindexState.loadingState === LoadingState.Loading) {
