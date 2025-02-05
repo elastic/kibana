@@ -60,7 +60,7 @@ export function registerSystemIndicesMigrationRoutes({
           reason: 'Relies on es client for authorization',
         },
       },
-      validate: false
+      validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
