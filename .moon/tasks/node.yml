@@ -21,6 +21,7 @@ tasks:
       mergeArgs: append
     args:
       - scripts/jest.js
+      - '--cache'
       - '--passWithNoTests'
   jestCI:
     description: Run jest tests (in band)

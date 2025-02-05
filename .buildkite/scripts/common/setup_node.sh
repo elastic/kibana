@@ -71,3 +71,8 @@ fi
 YARN_GLOBAL_BIN=$(yarn global bin)
 export YARN_GLOBAL_BIN
 export PATH="$PATH:$YARN_GLOBAL_BIN"
+
+npm_install_global @moonrepo/cli
+MOON_GLOBAL_BIN=$(which moon)
+export MOON_GLOBAL_BIN
+export PATH="$PATH:$MOON_GLOBAL_BIN"
