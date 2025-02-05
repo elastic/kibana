@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -25,20 +26,25 @@ export const AlertFlyout = (props: Props) => {
   const { visible, setVisible } = props;
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
+
   const AddAlertFlyout = useMemo(
-    () =>
-      triggersActionsUI &&
-      triggersActionsUI.getRuleFormFlyout({
-        plugins: services,
-        consumer: 'infrastructure',
-        onCancel: onCloseFlyout,
-        onSubmit: onCloseFlyout,
-        ruleTypeId: METRIC_THRESHOLD_ALERT_TYPE_ID,
-        initialMetadata: {
-          currentOptions: props.options,
-          series: props.series,
-        },
-      }),
+    () => {
+      if (!triggersActionsUI) return null;
+      const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
+      return (
+        <RuleFormFlyoutLazy
+          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+          consumer="infrastructure"
+          onCancel={onCloseFlyout}
+          onSubmit={onCloseFlyout}
+          ruleTypeId={METRIC_THRESHOLD_ALERT_TYPE_ID}
+          initialMetadata={{
+            currentOptions: props.options,
+            series: props.series,
+          }}
+        />
+      );
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggersActionsUI, onCloseFlyout]
   );

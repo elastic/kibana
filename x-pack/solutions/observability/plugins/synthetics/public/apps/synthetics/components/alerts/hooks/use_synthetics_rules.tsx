@@ -6,7 +6,9 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { selectDynamicSettings } from '../../../state/settings';
@@ -68,7 +70,10 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, isOpen, hasMonitors, defaultRulesEnabled]);
 
-  const { triggersActionsUi, ...plugins } = useKibana<ClientPluginsStart>().services;
+  const {
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+    ...plugins
+  } = useKibana<CoreStart & ClientPluginsStart>().services;
 
   const onClose = useMemo(() => () => dispatch(setAlertFlyoutVisible(null)), [dispatch]);
 
@@ -78,19 +83,22 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     if (!initialRule || isNewRule) {
       return null;
     }
-    return triggersActionsUi.getRuleFormFlyout({
-      plugins,
-      onCancel: onClose,
-      onSubmit: onClose,
-      id: initialRule.id,
-    });
+    return (
+      <RuleFormFlyoutLazy
+        plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
+        onCancel={onClose}
+        onSubmit={onClose}
+        id={initialRule.id}
+      />
+    );
   }, [
     alertFlyoutVisible,
     defaultRules?.tlsRule,
     defaultRules?.statusRule,
     isNewRule,
-    triggersActionsUi,
     plugins,
+    ruleTypeRegistry,
+    actionTypeRegistry,
     onClose,
   ]);
 
@@ -98,24 +106,25 @@ export const useSyntheticsRules = (isOpen: boolean) => {
     if (!isNewRule || !alertFlyoutVisible) {
       return null;
     }
-    return triggersActionsUi.getRuleFormFlyout({
-      plugins,
-      consumer: 'uptime',
-      ruleTypeId: alertFlyoutVisible,
-      onCancel: onClose,
-      onSubmit: onClose,
-      initialValues: {
-        name:
-          alertFlyoutVisible === SYNTHETICS_TLS_RULE
-            ? i18n.translate('xpack.synthetics.alerting.defaultRuleName.tls', {
-                defaultMessage: 'Synthetics monitor TLS rule',
-              })
-            : i18n.translate('xpack.synthetics.alerting.defaultRuleName', {
-                defaultMessage: 'Synthetics monitor status rule',
-              }),
-      },
-    });
-  }, [isNewRule, alertFlyoutVisible, triggersActionsUi, plugins, onClose]);
+    return (
+      <RuleFormFlyoutLazy
+        plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
+        onCancel={onClose}
+        onSubmit={onClose}
+        ruleTypeId={alertFlyoutVisible}
+        initialValues={{
+          name:
+            alertFlyoutVisible === SYNTHETICS_TLS_RULE
+              ? i18n.translate('xpack.synthetics.alerting.defaultRuleName.tls', {
+                  defaultMessage: 'Synthetics monitor TLS rule',
+                })
+              : i18n.translate('xpack.synthetics.alerting.defaultRuleName', {
+                  defaultMessage: 'Synthetics monitor status rule',
+                }),
+        }}
+      />
+    );
+  }, [isNewRule, alertFlyoutVisible, plugins, ruleTypeRegistry, actionTypeRegistry, onClose]);
 
   return useMemo(
     () => ({ loading, EditAlertFlyout, NewRuleFlyout }),

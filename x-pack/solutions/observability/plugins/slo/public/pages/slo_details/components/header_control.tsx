@@ -13,6 +13,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -44,7 +45,7 @@ export function HeaderControl({ slo }: Props) {
   const {
     application: { navigateToUrl, capabilities },
     http: { basePath },
-    triggersActionsUi: { getRuleFormFlyout: AddRuleFlyout },
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
 
   const hasApmReadCapabilities = capabilities.apm.show;
@@ -401,8 +402,8 @@ export function HeaderControl({ slo }: Props) {
       />
 
       {isRuleFlyoutVisible ? (
-        <AddRuleFlyout
-          plugins={services}
+        <RuleFormFlyoutLazy
+          plugins={{ ...services, actionTypeRegistry, ruleTypeRegistry }}
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onCancel={onCloseRuleFlyout}

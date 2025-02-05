@@ -7,7 +7,6 @@
 
 import { Plugin as CorePlugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
-import { RuleFormProps } from '@kbn/response-ops-rule-form';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { RuleAction } from '@kbn/alerting-plugin/common';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
@@ -47,7 +46,6 @@ import { getActionFormLazy } from './common/get_action_form';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getRuleFormFlyoutLazy } from './common/get_rule_form_flyout';
 import { getFieldBrowserLazy } from './common/get_field_browser';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -93,7 +91,6 @@ import type {
   RuleTagBadgeOptions,
   RuleTagBadgeProps,
   RuleTagFilterProps,
-  RuleTypeMetaData,
   RuleTypeModel,
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
@@ -120,13 +117,6 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getRuleFormFlyout: <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
-    props: Omit<RuleFormProps<MetaData>, 'plugins'> & {
-      // Use Partial<RuleFormProps['plugins']> for compatibility with useKibana hooks that return
-      // possibly undefined plugins. Use validateRuleFormPlugins to ensure that the plugins are not undefined.
-      plugins: Omit<Partial<RuleFormProps['plugins']>, 'actionTypeRegistry' | 'ruleTypeRegistry'>;
-    }
-  ) => ReactElement<RuleFormProps<MetaData>>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
   getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
     props: P
@@ -483,16 +473,6 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
-        });
-      },
-      getRuleFormFlyout: (props) => {
-        return getRuleFormFlyoutLazy({
-          ...props,
-          plugins: {
-            ...validateRuleFormPlugins(props.plugins),
-            actionTypeRegistry: this.actionTypeRegistry,
-            ruleTypeRegistry: this.ruleTypeRegistry,
-          },
         });
       },
       getAlertsStateTable: (props: AlertsTableStateProps & LazyLoadProps) => {

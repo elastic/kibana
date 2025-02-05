@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -24,20 +25,24 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   alertTypeId,
   setAlertFlyoutVisibility,
 }: Props) => {
-  const { triggersActionsUi, ...plugins } = useKibana<KibanaDeps>().services;
+  const {
+    triggersActionsUi: { actionTypeRegistry, ruleTypeRegistry },
+    ...plugins
+  } = useKibana<KibanaDeps>().services;
   const onCloseAlertFlyout = useCallback(
     () => setAlertFlyoutVisibility(false),
     [setAlertFlyoutVisibility]
   );
   const AddAlertFlyout = useMemo(
-    () =>
-      triggersActionsUi.getRuleFormFlyout({
-        plugins,
-        consumer: 'uptime',
-        onCancel: onCloseAlertFlyout,
-        onSubmit: onCloseAlertFlyout,
-        ruleTypeId: alertTypeId,
-      }),
+    () => (
+      <RuleFormFlyoutLazy
+        plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
+        consumer="uptime"
+        onCancel={onCloseAlertFlyout}
+        onSubmit={onCloseAlertFlyout}
+        ruleTypeId={alertTypeId}
+      />
+    ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [onCloseAlertFlyout, alertTypeId]
   );

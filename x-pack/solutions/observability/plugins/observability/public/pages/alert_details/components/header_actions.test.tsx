@@ -38,9 +38,9 @@ const mockNavigateToApp = {
   mockNavigateToApp: jest.fn(),
 };
 
-const mockGetRuleFormFlyout = jest.fn(() => (
-  <div data-test-subj="edit-rule-flyout">mocked component</div>
-));
+jest.mock('@kbn/response-ops-rule-form/lazy', () => ({
+  RuleFormFlyoutLazy: jest.fn(() => <div data-test-subj="edit-rule-flyout">mocked component</div>),
+}));
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -48,7 +48,6 @@ const mockKibana = () => {
       ...kibanaStartMock.startContract(),
       triggersActionsUi: {
         ...triggersActionsUiMock.createStart(),
-        getRuleFormFlyout: mockGetRuleFormFlyout,
       },
       cases: mockCases,
       http: mockHttp,

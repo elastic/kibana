@@ -11,6 +11,8 @@ import type {
   Rule,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 
 interface Props {
@@ -28,20 +30,26 @@ export const UptimeEditAlertFlyoutComponent = ({
   initialAlert,
   setAlertFlyoutVisibility,
 }: Props) => {
-  const { triggersActionsUi, ...plugins } = useKibana<KibanaDeps>().services;
+  const { triggersActionsUi, ...plugins } = useKibana<CoreStart & KibanaDeps>().services;
 
   const onClose = useCallback(() => {
     setAlertFlyoutVisibility(false);
   }, [setAlertFlyoutVisibility]);
 
   const EditAlertFlyout = useMemo(
-    () =>
-      triggersActionsUi.getRuleFormFlyout({
-        id: initialAlert.id,
-        onCancel: onClose,
-        onSubmit: onClose,
-        plugins,
-      }),
+    () => (
+      <RuleFormFlyoutLazy
+        id={initialAlert.id}
+        onCancel={onClose}
+        onSubmit={onClose}
+        plugins={{
+          ...plugins,
+          ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+        }}
+      />
+    ),
+
     [initialAlert, triggersActionsUi, onClose, plugins]
   );
   return <>{alertFlyoutVisible && EditAlertFlyout}</>;

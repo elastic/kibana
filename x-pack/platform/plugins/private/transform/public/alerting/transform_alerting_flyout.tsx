@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { memoize } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -37,8 +38,10 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
   const AlertFlyout = useMemo(() => {
     if (!triggersActionsUi) return;
 
+    const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
+
     const commonProps = {
-      plugins,
+      plugins: { ...plugins, ruleTypeRegistry, actionTypeRegistry },
       onCancel: () => {
         onCloseFlyout();
       },
@@ -51,21 +54,20 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getRuleFormFlyout({
-        ...commonProps,
-        id: initialAlert.id,
-      });
+      return <RuleFormFlyoutLazy {...commonProps} id={initialAlert.id} />;
     }
 
-    return triggersActionsUi.getRuleFormFlyout({
-      ...commonProps,
-      consumer: 'stackAlerts',
-      ruleTypeId: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
-      initialMetadata: {},
-      initialValues: {
-        params: ruleParams!,
-      },
-    });
+    return (
+      <RuleFormFlyoutLazy
+        {...commonProps}
+        consumer={'stackAlerts'}
+        ruleTypeId={TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH}
+        initialMetadata={{}}
+        initialValues={{
+          params: ruleParams!,
+        }}
+      />
+    );
     // deps on id to avoid re-rendering on auto-refresh
   }, [triggersActionsUi, plugins, initialAlert, ruleParams, onCloseFlyout, onSave]);
 

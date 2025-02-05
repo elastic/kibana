@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { BurnRateRuleParams } from '../../../../typings';
@@ -22,7 +23,7 @@ export function EditBurnRateRuleFlyout({
   refetchRules: () => void;
 }) {
   const {
-    triggersActionsUi: { getRuleFormFlyout: EditRuleFlyout },
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
     ...plugins
   } = useKibana().services;
 
@@ -36,8 +37,8 @@ export function EditBurnRateRuleFlyout({
   };
 
   return isEditRuleFlyoutOpen && rule ? (
-    <EditRuleFlyout
-      plugins={plugins}
+    <RuleFormFlyoutLazy
+      plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
       id={rule.id}
       onSubmit={handleSavedRule}
       onCancel={handleCloseRuleFlyout}

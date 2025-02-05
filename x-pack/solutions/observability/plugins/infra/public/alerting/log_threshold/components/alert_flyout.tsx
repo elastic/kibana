@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
@@ -20,21 +21,22 @@ export const AlertFlyout = (props: Props) => {
   const { visible, setVisible } = props;
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
-  const AddAlertFlyout = useMemo(
-    () =>
-      triggersActionsUI &&
-      triggersActionsUI.getRuleFormFlyout({
-        plugins: services,
-        consumer: 'logs',
-        onSubmit: onCloseFlyout,
-        onCancel: onCloseFlyout,
-        ruleTypeId: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
-        initialMetadata: {
+  const AddAlertFlyout = useMemo(() => {
+    if (!triggersActionsUI) return null;
+    const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
+    return (
+      <RuleFormFlyoutLazy
+        plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+        consumer="logs"
+        onCancel={onCloseFlyout}
+        onSubmit={onCloseFlyout}
+        ruleTypeId={LOG_DOCUMENT_COUNT_RULE_TYPE_ID}
+        initialMetadata={{
           isInternal: true,
-        },
-      }),
-    [triggersActionsUI, services, onCloseFlyout]
-  );
+        }}
+      />
+    );
+  }, [triggersActionsUI, services, onCloseFlyout]);
 
   return <>{visible && AddAlertFlyout}</>;
 };

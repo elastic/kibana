@@ -15,11 +15,11 @@ import {
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useActor } from '@xstate/react';
 import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
 import { Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
-import type { AlertParams } from '@kbn/observability-plugin/public/components/custom_threshold/types';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
@@ -27,8 +27,6 @@ import useAsync from 'react-use/lib/useAsync';
 import { useBoolean } from '@kbn/react-hooks';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
-
-type ThresholdRuleTypeParams = Pick<AlertParams, 'searchConfiguration'>;
 
 const defaultQuery: Query = {
   language: 'kuery',
@@ -67,26 +65,29 @@ export const AlertsPopover = () => {
         pageState.context.allSelection
       ).toDataviewSpec();
 
-      return triggersActionsUi.getRuleFormFlyout<ThresholdRuleTypeParams>({
-        plugins: { application, http, ...services },
-        consumer: 'logs',
-        ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-        initialValues: {
-          params: {
-            searchConfiguration: {
-              index,
-              query: getQuery(logsExplorerState.query),
-              filter: getDiscoverFiltersFromState(
-                index.id,
-                logsExplorerState.filters,
-                logsExplorerState.controls
-              ),
+      const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
+      return (
+        <RuleFormFlyoutLazy
+          plugins={{ application, http, ruleTypeRegistry, actionTypeRegistry, ...services }}
+          consumer="logs"
+          ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+          initialValues={{
+            params: {
+              searchConfiguration: {
+                index,
+                query: getQuery(logsExplorerState.query),
+                filter: getDiscoverFiltersFromState(
+                  index.id,
+                  logsExplorerState.filters,
+                  logsExplorerState.controls
+                ),
+              },
             },
-          },
-        },
-        onCancel: closeAddRuleFlyout,
-        onSubmit: closeAddRuleFlyout,
-      });
+          }}
+          onCancel={closeAddRuleFlyout}
+          onSubmit={closeAddRuleFlyout}
+        />
+      );
     }
   }, [
     isAddRuleFlyoutOpen,

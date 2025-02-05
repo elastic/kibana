@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
@@ -67,7 +68,11 @@ export function HeaderActions({
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: { getRuleFormFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+    triggersActionsUi: {
+      ruleTypeRegistry,
+      actionTypeRegistry,
+      getRuleSnoozeModal: RuleSnoozeModal,
+    },
     http,
     application: { navigateToApp },
     investigate: investigatePlugin,
@@ -344,8 +349,8 @@ export function HeaderActions({
         </EuiFlexItem>
       </EuiFlexGroup>
       {rule && ruleConditionsFlyoutOpen ? (
-        <EditRuleFlyout
-          plugins={services}
+        <RuleFormFlyoutLazy
+          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
           id={rule.id}
           onCancel={() => {
             setRuleConditionsFlyoutOpen(false);

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -30,24 +31,28 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
   const { customMetrics = [], accountId, region } = inventoryPrefill;
 
   const AddAlertFlyout = useMemo(
-    () =>
-      triggersActionsUI &&
-      triggersActionsUI.getRuleFormFlyout({
-        plugins: services,
-        consumer: 'infrastructure',
-        onCancel: onCloseFlyout,
-        onSubmit: onCloseFlyout,
-        ruleTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-        initialMetadata: {
-          accountId,
-          options,
-          nodeType,
-          filter,
-          customMetrics,
-          region,
-        },
-        shouldUseRuleProducer: true,
-      }),
+    () => {
+      if (!triggersActionsUI) return null;
+      const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
+      return (
+        <RuleFormFlyoutLazy
+          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+          consumer={'infrastructure'}
+          onCancel={onCloseFlyout}
+          onSubmit={onCloseFlyout}
+          ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
+          initialMetadata={{
+            accountId,
+            options,
+            nodeType,
+            filter,
+            customMetrics,
+            region,
+          }}
+          shouldUseRuleProducer
+        />
+      );
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggersActionsUI, visible]
   );

@@ -42,7 +42,11 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
           ObservabilityAIAssistantMultipaneFlyoutContext,
           service: mockService,
         },
-        triggersActionsUi: { getRuleFormFlyout: {}, getAddConnectorFlyout: {} },
+        triggersActionsUi: {
+          ruleTypeRegistry: {},
+          actionTypeRegistry: {},
+          getAddConnectorFlyout: {},
+        },
       }}
     >
       <ObservabilityAIAssistantChatServiceContext.Provider value={mockChatService}>

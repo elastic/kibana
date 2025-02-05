@@ -22,6 +22,7 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { AppMenuDiscoverParams } from './types';
 import { DiscoverServices } from '../../../../../build_services';
@@ -47,7 +48,9 @@ const CreateAlertFlyout: React.FC<{
   const query = stateContainer.appState.getState().query;
 
   const { dataView, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = discoverParams;
-  const { triggersActionsUi } = services;
+  const {
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+  } = services;
   const timeField = getTimeField(dataView);
 
   /**
@@ -79,21 +82,28 @@ const CreateAlertFlyout: React.FC<{
     [adHocDataViews]
   );
 
-  return triggersActionsUi?.getRuleFormFlyout<EsQueryAlertMetaData>({
-    plugins: services,
-    initialMetadata: discoverMetadata,
-    consumer: 'alerts',
-    onCancel: onFinishAction,
-    onSubmit: onFinishAction,
-    onChangeMetaData: (metadata: EsQueryAlertMetaData) =>
-      onUpdateAdHocDataViews(metadata.adHocDataViewList),
-    ruleTypeId: ES_QUERY_ID,
-    initialValues: { params: getParams() },
-    validConsumers: EsQueryValidConsumer,
-    shouldUseRuleProducer: true,
-    // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
-    multiConsumerSelection: AlertConsumers.LOGS,
-  });
+  return (
+    <RuleFormFlyoutLazy
+      plugins={{
+        ...services,
+        ruleTypeRegistry,
+        actionTypeRegistry,
+      }}
+      initialMetadata={discoverMetadata}
+      consumer={'alerts'}
+      onCancel={onFinishAction}
+      onSubmit={onFinishAction}
+      onChangeMetaData={(metadata: EsQueryAlertMetaData) =>
+        onUpdateAdHocDataViews(metadata.adHocDataViewList)
+      }
+      ruleTypeId={ES_QUERY_ID}
+      initialValues={{ params: getParams() }}
+      validConsumers={EsQueryValidConsumer}
+      shouldUseRuleProducer
+      // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
+      multiConsumerSelection={AlertConsumers.LOGS}
+    />
+  );
 };
 
 export const getAlertsAppMenuItem = ({

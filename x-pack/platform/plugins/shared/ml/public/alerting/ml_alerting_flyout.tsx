@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
@@ -38,14 +39,16 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
   onSave,
 }) => {
   const {
-    services: { triggersActionsUi, ...plugins },
+    services: { triggersActionsUi, ...services },
   } = useMlKibana();
 
   const AlertFlyout = useMemo(() => {
     if (!triggersActionsUi) return;
 
+    const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
+
     const commonProps = {
-      plugins,
+      plugins: { ...services, ruleTypeRegistry, actionTypeRegistry },
       onCancel: () => {
         onCloseFlyout();
       },
@@ -58,25 +61,24 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getRuleFormFlyout({
-        ...commonProps,
-        id: initialAlert.id,
-      });
+      return <RuleFormFlyoutLazy {...commonProps} id={initialAlert.id} />;
     }
 
-    return triggersActionsUi.getRuleFormFlyout({
-      ...commonProps,
-      consumer: PLUGIN_ID,
-      ruleTypeId: ML_ALERT_TYPES.ANOMALY_DETECTION,
-      initialMetadata: {},
-      initialValues: {
-        params: {
-          jobSelection: {
-            jobIds,
+    return (
+      <RuleFormFlyoutLazy
+        {...commonProps}
+        consumer={PLUGIN_ID}
+        ruleTypeId={ML_ALERT_TYPES.ANOMALY_DETECTION}
+        initialMetadata={{}}
+        initialValues={{
+          params: {
+            jobSelection: {
+              jobIds,
+            },
           },
-        },
-      },
-    });
+        }}
+      />
+    );
     // deps on id to avoid re-rendering on auto-refresh
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggersActionsUi, initialAlert?.id, jobIds]);

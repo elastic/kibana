@@ -50,9 +50,6 @@ const triggersActionsUiStartMock = {
           </QueryClientProvider>
         );
       },
-      getRuleFormFlyout: jest.fn(() => (
-        <div data-test-subj="add-rule-flyout">mocked component</div>
-      )),
       getRuleAlertsSummary: jest.fn(() => (
         <div data-test-subj="rule-alerts-summary">mocked component</div>
       )),

@@ -45,7 +45,7 @@ export function useKibana() {
               },
             },
           },
-          triggersActionsUi: { getRuleFormFlyout: {}, getAddConnectorFlyout: {} },
+          triggersActionsUi: { getAddConnectorFlyout: {} },
         },
       },
       uiSettings: {

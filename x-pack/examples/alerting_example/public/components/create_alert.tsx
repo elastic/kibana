@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 
@@ -14,7 +15,7 @@ import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 export const CreateAlert = ({
-  triggersActionsUi: { getRuleFormFlyout: AddRuleFlyout },
+  triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
 }: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>) => {
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
 
@@ -37,8 +38,8 @@ export const CreateAlert = ({
       </EuiFlexItem>
       <EuiFlexItem>
         {ruleFlyoutVisible ? (
-          <AddRuleFlyout
-            plugins={services}
+          <RuleFormFlyoutLazy
+            plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
             consumer={ALERTING_EXAMPLE_APP_ID}
             onCancel={onCloseAlertFlyout}
             onSubmit={onCloseAlertFlyout}

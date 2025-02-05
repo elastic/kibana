@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { AppMenuActionId, AppMenuActionType, AppMenuRegistry } from '@kbn/discover-utils';
 import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AppMenuExtensionParams } from '../../../..';
@@ -74,7 +76,11 @@ const registerDatasetQualityLink = (
 
 const registerCustomThresholdRuleAction = (
   registry: AppMenuRegistry,
-  { data, triggersActionsUi, ...services }: ProfileProviderServices,
+  {
+    data,
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+    ...services
+  }: ProfileProviderServices,
   { dataView }: AppMenuExtensionParams
 ) => {
   registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
@@ -91,22 +97,24 @@ const registerCustomThresholdRuleAction = (
         const index = dataView?.toMinimalSpec();
         const { filters, query } = data.query.getState();
 
-        return triggersActionsUi.getRuleFormFlyout({
-          plugins: { data, ...services },
-          consumer: 'logs',
-          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          initialValues: {
-            params: {
-              searchConfiguration: {
-                index,
-                query,
-                filter: filters,
+        return (
+          <RuleFormFlyoutLazy
+            plugins={{ data, ruleTypeRegistry, actionTypeRegistry, ...services }}
+            consumer={'logs'}
+            ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
+            initialValues={{
+              params: {
+                searchConfiguration: {
+                  index,
+                  query,
+                  filter: filters,
+                },
               },
-            },
-          },
-          onCancel: onFinishAction,
-          onSubmit: onFinishAction,
-        });
+            }}
+            onSubmit={onFinishAction}
+            onCancel={onFinishAction}
+          />
+        );
       },
     },
   });

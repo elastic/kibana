@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -89,15 +90,20 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     setShowFlyout(false);
     showBottomBar();
   }, []);
+
+  const {
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+  } = Legacy.shims;
   const flyoutUi = useMemo(
     () =>
-      showFlyout &&
-      Legacy.shims.triggersActionsUi.getRuleFormFlyout({
-        plugins: services,
-        id: alert.id,
-        onSubmit: onClose,
-        onCancel: onClose,
-      }),
+      showFlyout && (
+        <RuleFormFlyoutLazy
+          plugins={{ ruleTypeRegistry, actionTypeRegistry, ...services }}
+          id={alert.id}
+          onSubmit={onClose}
+          onCancel={onClose}
+        />
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [showFlyout]
   );

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -13,15 +15,15 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RuleFormProps } from '@kbn/response-ops-rule-form';
 import React, { Suspense, lazy } from 'react';
-import type { RuleTypeMetaData } from '../types';
+import type { RuleFormProps } from '../src/rule_form';
+import type { RuleTypeMetaData } from '../src/types';
 
 const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<any>>> = lazy(() =>
-  import('@kbn/response-ops-rule-form').then((module) => ({ default: module.RuleForm }))
+  import('../src/rule_form').then((module) => ({ default: module.RuleForm }))
 );
 
-export const getRuleFormFlyoutLazy = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
+export const RuleFormFlyoutLazy = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
   props: RuleFormProps<MetaData>
 ) => {
   const isEdit = !!props.id;
