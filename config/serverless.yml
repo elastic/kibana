@@ -235,3 +235,12 @@ discover.enableUiSettingsValidations: true
 xpack.dataUsage.enabled: true
 # This feature is disabled in Serverless until fully tested within a Serverless environment
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
+<<<<<<< HEAD
+=======
+
+# Ensure Serverless is using the Amsterdam theme
+uiSettings.experimental.defaultTheme: "amsterdam"
+
+# This feature is disabled in Serverless until Inference Endpoint become enabled within a Serverless environment
+xpack.stack_connectors.enableExperimental: ['inferenceConnectorOff']
+>>>>>>> ba0b1eca91ab ([Inference Connector] Enable inference connector for ESS by default, disable it for Serverless (#209197))
