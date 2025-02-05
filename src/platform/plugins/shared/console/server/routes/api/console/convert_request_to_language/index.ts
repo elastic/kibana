@@ -77,6 +77,12 @@ export const registerConvertRequestRoute = ({
   router.post(
     {
       path: '/api/console/convert_request_to_language',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Uses the request-converter library to convert requests to a different language',
+        },
+      },
       validate: routeValidationConfig,
     },
     handler

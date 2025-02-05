@@ -17,7 +17,16 @@ const paramsSchema = schema.object({
 
 export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
   // Get all pipelines
-  router.get({ path: API_BASE_PATH, validate: false }, async (ctx, req, res) => {
+  router.get({
+    path: API_BASE_PATH,
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on es client for authorization',
+      },
+    },
+    validate: false
+  }, async (ctx, req, res) => {
     const { client: clusterClient } = (await ctx.core).elasticsearch;
 
     try {
