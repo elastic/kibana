@@ -15,7 +15,9 @@ import { v4 } from 'uuid';
 import { TimeRange } from '@kbn/es-query';
 import { PanelPackage } from '@kbn/presentation-containers';
 
+import { ViewMode } from '@kbn/presentation-publishing';
 import {
+  MockDashboardApi,
   MockSerializedDashboardState,
   MockedDashboardPanelMap,
   MockedDashboardRowMap,
@@ -29,7 +31,7 @@ export const useMockDashboardApi = ({
   savedState,
 }: {
   savedState: MockSerializedDashboardState;
-}) => {
+}): MockDashboardApi => {
   const mockDashboardApi = useMemo(() => {
     const panels$ = new BehaviorSubject<MockedDashboardPanelMap>(savedState.panels);
     const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -48,8 +50,11 @@ export const useMockDashboardApi = ({
       }),
       filters$: new BehaviorSubject([]),
       query$: new BehaviorSubject(''),
-      viewMode$: new BehaviorSubject('edit'),
+      viewMode$: new BehaviorSubject<ViewMode>('edit'),
       panels$,
+      getPanelCount: () => {
+        return Object.keys(panels$.getValue()).length;
+      },
       rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),
       expandedPanelId$,
       expandPanel: (id: string) => {
@@ -64,7 +69,7 @@ export const useMockDashboardApi = ({
         delete panels[id]; // the grid layout component will handle compacting, if necessary
         mockDashboardApi.panels$.next(panels);
       },
-      replacePanel: (id: string, newPanel: PanelPackage) => {
+      replacePanel: async (id: string, newPanel: PanelPackage): Promise<string> => {
         const currentPanels = mockDashboardApi.panels$.getValue();
         const otherPanels = { ...currentPanels };
         const oldPanel = currentPanels[id];
@@ -75,8 +80,9 @@ export const useMockDashboardApi = ({
           explicitInput: { ...newPanel.initialState, id: newId },
         };
         mockDashboardApi.panels$.next(otherPanels);
+        return newId;
       },
-      addNewPanel: async (panelPackage: PanelPackage) => {
+      addNewPanel: async (panelPackage: PanelPackage): Promise<undefined> => {
         // we are only implementing "place at top" here, for demo purposes
         const currentPanels = mockDashboardApi.panels$.getValue();
         const otherPanels = { ...currentPanels };
@@ -104,6 +110,7 @@ export const useMockDashboardApi = ({
             },
           },
         });
+        return undefined;
       },
       canRemovePanels: () => true,
     };
