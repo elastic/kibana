@@ -149,10 +149,14 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
       <EuiFlexGroup
         className={classes}
         // highlights the field using token, TODO: migrate whole SCSS file to emotions
-        css={css`
-          background-color: ${isFromScript ? euiTheme.colors.backgroundBasePrimary : undefined};
-          font-weight: ${isFromScript ? 600 : undefined};
-        `}
+        css={
+          isFromScript
+            ? css`
+                background-color: ${euiTheme.colors.backgroundBasePrimary};
+                font-weight: ${euiTheme.font.weight.bold};
+              `
+            : undefined
+        }
         gutterSize="none"
         data-test-subj="listItem"
       >

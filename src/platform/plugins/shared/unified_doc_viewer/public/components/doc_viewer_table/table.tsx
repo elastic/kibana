@@ -513,6 +513,12 @@ export const DocViewerTable = ({
           css={css`
             min-block-size: 0;
             display: block;
+            .euiDataGridRow {
+              &:hover {
+                // we keep using a deprecated shade until proper token is available
+                background-color: ${euiTheme.colors.lightestShade};
+              }
+            }
           `}
         >
           <EuiDataGrid
@@ -529,13 +535,6 @@ export const DocViewerTable = ({
             renderCellPopover={renderCellPopover}
             pagination={pagination}
             leadingControlColumns={leadingControlColumns}
-            css={css`
-              .euiDataGridRow {
-                &:hover {
-                  background-color: ${euiTheme.colors.backgroundLightText};
-                }
-              }
-            `}
           />
         </EuiFlexItem>
       )}
