@@ -392,6 +392,7 @@ import type {
   StartRuleMigrationResponse,
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
+  UpdateRuleMigrationRequestParamsInput,
   UpdateRuleMigrationRequestBodyInput,
   UpdateRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestParamsInput,
@@ -2267,7 +2268,7 @@ detection engine rules.
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
     return this.kbnClient
       .request<UpdateRuleMigrationResponse>({
-        path: '/internal/siem_migrations/rules',
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2616,6 +2617,7 @@ export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
 }
 export interface UpdateRuleMigrationProps {
+  params: UpdateRuleMigrationRequestParamsInput;
   body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
