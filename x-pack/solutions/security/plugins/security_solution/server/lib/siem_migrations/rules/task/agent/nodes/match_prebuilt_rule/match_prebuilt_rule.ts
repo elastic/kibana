@@ -45,7 +45,7 @@ export const getMatchPrebuiltRuleNode = ({
       techniqueIds.join(',')
     );
     if (prebuiltRules.length === 0) {
-      telemetryClient.reportPrebuiltRulesMatch({ preFilterRules: [], modelName: model.model });
+      telemetryClient.reportPrebuiltRulesMatch({ preFilterRules: [] });
 
       return {
         comments: [
