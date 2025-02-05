@@ -36,7 +36,11 @@ export function getConnectorType(
       actionParams: ObsAIAssistantActionParams
     ): Promise<GenericValidationResult<ObsAIAssistantActionParams>> => {
       const validationResult = {
-        errors: { connector: new Array<string>(), message: new Array<string>() },
+        errors: {
+          connector: [] as string[],
+          message: [] as string[],
+          prompts: [] as string[],
+        },
       };
 
       if (!actionParams.connector) {
