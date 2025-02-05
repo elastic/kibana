@@ -96,10 +96,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     isFullMatch: boolean;
     searchValue: string;
   }>();
-  const [sanitizedName, setSanitizedName] = useState<string>(
-    prefixConnectorIndex(formatApiName(connector.name))
-  );
   const sanitizedNameWithoutPrefix = formatApiName(connector.name);
+  const [sanitizedName, setSanitizedName] = useState<string>(
+    prefixConnectorIndex(sanitizedNameWithoutPrefix)
+  );
   const [selectedIndex, setSelectedIndex] = useState<
     { label: string; shouldCreate?: boolean } | undefined
   >(
@@ -193,7 +193,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   useEffect(() => {
     // Suggested name for managed connector should include the content- prefix
-    setSanitizedName(prefixConnectorIndex(formatApiName(connector.name)));
+    setSanitizedName(prefixConnectorIndex(sanitizedNameWithoutPrefix));
   }, [connector.name]);
 
   const { hash } = useLocation();
