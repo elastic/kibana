@@ -15,6 +15,7 @@ import {
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { ApiPrivileges } from '@kbn/security-authorization-core-common';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
@@ -72,7 +73,11 @@ export class ObservabilityAIAssistantPlugin
       privileges: {
         all: {
           app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant', 'manage_llm_product_doc'],
+          api: [
+            OBSERVABILITY_AI_ASSISTANT_FEATURE_ID,
+            'ai_assistant',
+            ApiPrivileges.manage('llm_product_doc'),
+          ],
           catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
           savedObject: {
             all: [],

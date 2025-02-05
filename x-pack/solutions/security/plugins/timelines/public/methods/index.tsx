@@ -7,22 +7,13 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
+import { LastUpdatedAtProps } from '../components';
 
 const LastUpdatedLazy = lazy(() => import('../components/last_updated'));
 export const getLastUpdatedLazy = (props: LastUpdatedAtProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <LastUpdatedLazy {...props} />
-    </Suspense>
-  );
-};
-
-const LoadingPanelLazy = lazy(() => import('../components/loading'));
-export const getLoadingPanelLazy = (props: LoadingPanelProps) => {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <LoadingPanelLazy {...props} />
     </Suspense>
   );
 };
