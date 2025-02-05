@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FieldIcon } from './src/field_icon';
-export type { FieldIconProps } from './src/field_icon';
-export { FieldButton } from './src/field_button';
-export type { FieldButtonProps, ButtonSize } from './src/field_button';
-export { FieldNameWithIcon } from './src/field_name_with_icon';
-export type { FieldNameWithIconProps } from './src/field_name_with_icon';
+export { FieldNameWithIcon } from './field_name_with_icon';
+export type { FieldNameWithIconProps } from './field_name_with_icon';

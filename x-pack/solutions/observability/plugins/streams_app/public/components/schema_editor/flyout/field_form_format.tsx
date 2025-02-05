@@ -17,12 +17,12 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldDefinitionConfig } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
-import { SchemaEditorEditingState } from '../hooks/use_editing_state';
+import { SchemaField } from '../types';
 
-type FieldFormFormatProps = Pick<
-  SchemaEditorEditingState,
-  'nextFieldType' | 'nextFieldFormat' | 'setNextFieldFormat'
->;
+interface FieldFormFormatProps {
+  field: SchemaField;
+  onChange: (format: SchemaField['format']) => void;
+}
 
 const DEFAULT_FORMAT = 'strict_date_optional_time||epoch_millis';
 
@@ -42,7 +42,7 @@ export const typeSupportsFormat = (type?: FieldDefinitionConfig['type']) => {
 };
 
 export const FieldFormFormat = (props: FieldFormFormatProps) => {
-  if (!typeSupportsFormat(props.nextFieldType)) {
+  if (!typeSupportsFormat(props.field.type)) {
     return null;
   }
   return <FieldFormFormatSelection {...props} />;
@@ -50,13 +50,13 @@ export const FieldFormFormat = (props: FieldFormFormatProps) => {
 
 const FieldFormFormatSelection = (props: FieldFormFormatProps) => {
   const [isFreeform, toggleIsFreeform] = useToggle(
-    props.nextFieldFormat !== undefined && !isPopularFormat(props.nextFieldFormat)
+    props.field.format !== undefined && !isPopularFormat(props.field.format)
   );
 
   const onToggle = useCallback(
     (e: EuiSwitchEvent) => {
-      if (!e.target.checked && !isPopularFormat(props.nextFieldFormat)) {
-        props.setNextFieldFormat(undefined);
+      if (!e.target.checked && !isPopularFormat(props.field.format)) {
+        props.onChange(undefined);
       }
       toggleIsFreeform();
     },
@@ -85,13 +85,13 @@ const PopularFormatsSelector = (props: FieldFormFormatProps) => {
   return (
     <EuiSelect
       hasNoInitialSelection={
-        props.nextFieldFormat === undefined || !isPopularFormat(props.nextFieldFormat)
+        props.field.format === undefined || !isPopularFormat(props.field.format)
       }
       data-test-subj="streamsAppSchemaEditorFieldFormatPopularFormats"
       onChange={(event) => {
-        props.setNextFieldFormat(event.target.value as PopularFormatOption);
+        props.onChange(event.target.value as PopularFormatOption);
       }}
-      value={props.nextFieldFormat}
+      value={props.field.format}
       options={POPULAR_FORMATS.map((format) => ({
         text: format,
         value: format,
@@ -105,8 +105,8 @@ const FreeformFormatInput = (props: FieldFormFormatProps) => {
     <EuiFieldText
       data-test-subj="streamsAppFieldFormFormatField"
       placeholder="yyyy/MM/dd"
-      value={props.nextFieldFormat ?? ''}
-      onChange={(e) => props.setNextFieldFormat(e.target.value)}
+      value={props.field.format ?? ''}
+      onChange={(e) => props.onChange(e.target.value)}
     />
   );
 };
