@@ -6,6 +6,8 @@
  */
 
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   VALUE_LISTS_MODAL_ACTIVATOR,
   VALUE_LIST_CLOSE_BUTTON,
@@ -133,12 +135,15 @@ const uploadListItemData = (
     .filter((line) => line.trim() !== '')
     .join('\n');
 
-  return rootRequest({
+  return cy.request({
     method: 'POST',
     url: `api/lists/items/_import?type=${type}&refresh=true`,
     encoding: 'binary',
     headers: {
       'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryJLrRH89J8QVArZyv',
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
     },
     body: `------WebKitFormBoundaryJLrRH89J8QVArZyv\nContent-Disposition: form-data; name="file"; filename="${file}"\n\n${removedEmptyLines}`,
     retryOnStatusCodeFailure: true,

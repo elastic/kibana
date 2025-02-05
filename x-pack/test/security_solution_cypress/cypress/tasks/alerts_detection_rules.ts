@@ -37,6 +37,7 @@ import {
   REFRESH_SETTINGS_SWITCH,
   ELASTIC_RULES_BTN,
   TOASTER_ERROR_BTN,
+  TOASTER_BODY,
   MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
   RULE_SEARCH_FIELD,
@@ -509,6 +510,15 @@ export const clickErrorToastBtn = () => {
 
 export const closeErrorToast = () => {
   cy.get(TOASTER_CLOSE_ICON).click();
+};
+
+export const checkToastMessageAndClose = (message: string) => {
+  cy.get(TOASTER_BODY)
+    .contains(message)
+    .parents(TOASTER_BODY)
+    .parent()
+    .find(TOASTER_CLOSE_ICON)
+    .click();
 };
 
 export const goToEditRuleActionsSettingsOf = (name: string) => {
