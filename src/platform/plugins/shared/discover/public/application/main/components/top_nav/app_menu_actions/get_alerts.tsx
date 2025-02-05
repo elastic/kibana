@@ -39,6 +39,8 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
   adHocDataViewList: DataView[];
 }
 
+const RuleFormFlyoutWithType = RuleFormFlyoutLazy<EsQueryAlertMetaData>;
+
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
@@ -83,7 +85,7 @@ const CreateAlertFlyout: React.FC<{
   );
 
   return (
-    <RuleFormFlyoutLazy
+    <RuleFormFlyoutWithType
       plugins={{
         ...services,
         ruleTypeRegistry,

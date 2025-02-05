@@ -17,12 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Suspense, lazy } from 'react';
 import type { RuleFormProps } from '../src/rule_form';
+import type { RuleTypeMetaData } from '../src/types';
 
 const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<any>>> = lazy(() =>
   import('../src/rule_form').then((module) => ({ default: module.RuleForm }))
 );
 
-export const RuleFormFlyoutLazy = (props: RuleFormProps) => {
+export const RuleFormFlyoutLazy = <MetaData extends RuleTypeMetaData>(
+  props: RuleFormProps<MetaData>
+) => {
   const isEdit = !!props.id;
   return (
     <Suspense
@@ -37,10 +40,10 @@ export const RuleFormFlyoutLazy = (props: RuleFormProps) => {
                 title={
                   <h2>
                     {isEdit
-                      ? i18n.translate('xpack.triggersActionsUI.ruleFormFlyout.loadingEditText', {
+                      ? i18n.translate('responseOpsRuleForm.ruleFormFlyoutLazy.loadingEditText', {
                           defaultMessage: 'Loading edit rule form',
                         })
-                      : i18n.translate('xpack.triggersActionsUI.ruleFormFlyout.loadingCreateText', {
+                      : i18n.translate('responseOpsRuleForm.ruleFormFlyoutLazy.loadingCreateText', {
                           defaultMessage: 'Loading create rule form',
                         })}
                   </h2>
