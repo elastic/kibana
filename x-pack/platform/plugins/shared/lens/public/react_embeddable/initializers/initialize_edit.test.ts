@@ -16,10 +16,11 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { ApplicationStart } from '@kbn/core/public';
 import { LensEmbeddableStartServices } from '../types';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 
 function createEditApi(
   servicesOverrides: Partial<LensEmbeddableStartServices> = {},
-  viewMode: 'edit' | 'view' = 'edit'
+  parentApiOverrides: Partial<PublishesViewMode | { isManaged: boolean }> = {}
 ) {
   const internalApi = getLensInternalApiMock();
   const runtimeState = getLensRuntimeStateMock();
@@ -31,6 +32,11 @@ function createEditApi(
     }),
     ...servicesOverrides,
   };
+  const parentApi = {
+    getAppContext: () => ({ currentAppId: 'lens' }),
+    viewMode$: new BehaviorSubject('edit'),
+    ...parentApiOverrides,
+  };
   return initializeEditApi(
     faker.string.uuid(),
     runtimeState,
@@ -41,7 +47,7 @@ function createEditApi(
     api,
     () => false, // DSL based
     services,
-    { getAppContext: () => ({ currentAppId: 'lens' }), viewMode$: new BehaviorSubject(viewMode) }
+    parentApi
   );
 }
 
@@ -76,11 +82,22 @@ describe('edit features', () => {
       // { read: false } here is expected the environment is in edit mode
       expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: false, write: false });
     });
+
+    it("should return false if it's a managed context", () => {
+      const editApi = createEditApi(undefined, {
+        isManaged: true,
+      });
+      expect(editApi.api.isEditingEnabled()).toBe(false);
+      // { read: false } here is expected the environment is in edit mode
+      expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: false, write: false });
+    });
   });
 
   describe('isReadOnlyEnabled()', () => {
     it('should be read only enabled if user has edit permissions', () => {
-      const editApi = createEditApi(undefined, 'view');
+      const editApi = createEditApi(undefined, {
+        viewMode$: new BehaviorSubject('view' as ViewMode),
+      });
       expect(editApi.api.isEditingEnabled()).toBe(false);
       // now it's in view mode, read should be true and write should be true too
       expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: true, write: true });
@@ -104,7 +121,9 @@ describe('edit features', () => {
             },
           } as unknown as ApplicationStart['capabilities'],
         },
-        'view'
+        {
+          viewMode$: new BehaviorSubject('view' as ViewMode),
+        }
       );
       expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: true, write: false });
       expect(editApi.api.isEditingEnabled()).toBe(false);
@@ -128,7 +147,9 @@ describe('edit features', () => {
             },
           } as unknown as ApplicationStart['capabilities'],
         },
-        'view'
+        {
+          viewMode$: new BehaviorSubject('view' as ViewMode),
+        }
       );
       expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: false, write: false });
       expect(editApi.api.isEditingEnabled()).toBe(false);
@@ -142,8 +163,8 @@ describe('edit features', () => {
               // can save a visualization but not edit in dashboard (see below)
               save: true,
               saveQuery: true,
-              // cannot see the visualization
-              show: false,
+              // can see the visualization
+              show: true,
               createShortUrl: true,
             },
             dashboard_v2: {
@@ -152,9 +173,38 @@ describe('edit features', () => {
             },
           } as unknown as ApplicationStart['capabilities'],
         },
-        'view'
+        {
+          viewMode$: new BehaviorSubject('view' as ViewMode),
+        }
       );
-      expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: false, write: false });
+      expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: true, write: false });
+      expect(editApi.api.isEditingEnabled()).toBe(false);
+    });
+
+    it('should enable read only mode on a managed context even if user has write permissions', () => {
+      const editApi = createEditApi(
+        {
+          capabilities: {
+            visualize_v2: {
+              // can save a visualization but not edit in dashboard (see below)
+              save: true,
+              saveQuery: true,
+              // can see the visualization
+              show: true,
+              createShortUrl: true,
+            },
+            dashboard_v2: {
+              // can edit in dashboard
+              showWriteControls: true,
+            },
+          } as unknown as ApplicationStart['capabilities'],
+        },
+        {
+          viewMode$: new BehaviorSubject('view' as ViewMode),
+          isManaged: true,
+        }
+      );
+      expect(editApi.api.isReadOnlyEnabled()).toEqual({ read: true, write: false });
       expect(editApi.api.isEditingEnabled()).toBe(false);
     });
   });
