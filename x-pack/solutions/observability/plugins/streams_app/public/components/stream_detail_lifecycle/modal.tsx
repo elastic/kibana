@@ -108,7 +108,14 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
         <EuiFieldNumber
           data-test-subj="streamsAppDslModalFieldNumber"
           value={retentionValue}
-          onChange={(e) => setRetentionValue(e.target.valueAsNumber)}
+          onChange={(e) => {
+            const valueAsNumber = e.target.valueAsNumber;
+            if (isNaN(valueAsNumber) || valueAsNumber < 1) {
+              setRetentionValue(1);
+            } else {
+              setRetentionValue(valueAsNumber);
+            }
+          }}
           min={1}
           disabled={noRetention}
           fullWidth
