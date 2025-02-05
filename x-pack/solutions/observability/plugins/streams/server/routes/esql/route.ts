@@ -18,6 +18,16 @@ import { createServerRoute } from '../create_server_route';
 
 export const executeEsqlRoute = createServerRoute({
   endpoint: 'POST /internal/streams/esql',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   params: z.object({
     body: z.object({
       query: z.string(),
