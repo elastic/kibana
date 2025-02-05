@@ -351,7 +351,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             <EuiSwitch
               compressed
               label={i18n.translate('xpack.lens.table.columnNavigationClickLabel', {
-                defaultMessage: 'Navigate on click',
+                defaultMessage: 'Navigate on click (with Dashboard Drilldowns)',
               })}
               showLabel={false}
               data-test-subj="lns-table-column-navigation-click"
