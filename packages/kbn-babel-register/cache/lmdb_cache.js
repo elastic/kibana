@@ -12,9 +12,8 @@ const Crypto = require('crypto');
 
 const chalk = require('chalk');
 const LmdbStore = require('lmdb');
-const moment = require('moment');
 
-const GLOBAL_ATIME = moment().startOf('day').valueOf();
+const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
