@@ -37,7 +37,6 @@
     "@kbn/streams-schema",
     "@kbn/es-errors",
     "@kbn/server-route-repository-utils",
-    "@kbn/inference-common",
     "@kbn/inference-plugin"
   ]
 }
