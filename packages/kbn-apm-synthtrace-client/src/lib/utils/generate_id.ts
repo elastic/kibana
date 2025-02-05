@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'node:crypto';
+
 let seq = 0;
 const pid = String(process.pid);
 
@@ -35,6 +37,6 @@ export function generateLongId() {
   return generateId(LONG_ID_LENGTH);
 }
 
-export function generateLongIdWithSeed(seed: string) {
-  return generateIdWithSeed(seed, LONG_ID_LENGTH);
+export function getErrorGroupingKey(content: string) {
+  return createHash('sha256').update(content).digest('hex');
 }

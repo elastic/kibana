@@ -13,7 +13,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '@kbn/observability-shared-plugin/common';
-import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateErrorData } from './generate_data';
 
@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 start: new Date(start).toISOString(),
                 end: new Date(end).toISOString(),
                 serviceName: 'synth-go',
-                errorGroupingKey: `${generateLongIdWithSeed('Error 1')}`,
+                errorGroupingKey: `${getErrorGroupingKey('Error 1')}`,
                 environment: 'ENVIRONMENT_ALL',
                 interval: '5m',
               },
@@ -192,11 +192,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }))
           ).to.eql([
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 1')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
               y: 250,
             },
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 0')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
               y: 125,
             },
           ]);
@@ -207,7 +207,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             params: {
               query: {
                 ...getOptions().params.query,
-                errorGroupingKey: `${generateLongIdWithSeed('Error 0')}`,
+                errorGroupingKey: `${getErrorGroupingKey('Error 0')}`,
                 groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
               },
             },
@@ -227,7 +227,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }))
           ).to.eql([
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 0')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
               y: 125,
             },
           ]);
@@ -288,19 +288,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }))
           ).to.eql([
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 1')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
               y: 250,
             },
             {
-              name: `synth-java_production_${generateLongIdWithSeed('Error 1')}`,
+              name: `synth-java_production_${getErrorGroupingKey('Error 1')}`,
               y: 250,
             },
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 0')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
               y: 125,
             },
             {
-              name: `synth-java_production_${generateLongIdWithSeed('Error 0')}`,
+              name: `synth-java_production_${getErrorGroupingKey('Error 0')}`,
               y: 125,
             },
           ]);
@@ -342,7 +342,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 ...getOptionsWithFilterQuery().params.query,
                 searchConfiguration: JSON.stringify({
                   query: {
-                    query: `service.name: synth-go and error.grouping_key: ${generateLongIdWithSeed(
+                    query: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
                       'Error 1'
                     )}`,
                     language: 'kuery',
@@ -432,11 +432,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }))
           ).to.eql([
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 1')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
               y: 250,
             },
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 0')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
               y: 125,
             },
           ]);
@@ -449,7 +449,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 ...getOptionsWithFilterQuery().params.query,
                 searchConfiguration: JSON.stringify({
                   query: {
-                    query: `service.name: synth-go and error.grouping_key: ${generateLongIdWithSeed(
+                    query: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
                       'Error 0'
                     )}`,
                     language: 'kuery',
@@ -474,7 +474,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }))
           ).to.eql([
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 0')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
               y: 125,
             },
           ]);
@@ -541,19 +541,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }))
           ).to.eql([
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 1')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
               y: 250,
             },
             {
-              name: `synth-java_production_${generateLongIdWithSeed('Error 1')}`,
+              name: `synth-java_production_${getErrorGroupingKey('Error 1')}`,
               y: 250,
             },
             {
-              name: `synth-go_production_${generateLongIdWithSeed('Error 0')}`,
+              name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
               y: 125,
             },
             {
-              name: `synth-java_production_${generateLongIdWithSeed('Error 0')}`,
+              name: `synth-java_production_${getErrorGroupingKey('Error 0')}`,
               y: 125,
             },
           ]);

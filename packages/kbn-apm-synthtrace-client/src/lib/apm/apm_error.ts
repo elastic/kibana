@@ -9,7 +9,7 @@
 
 import { ApmFields } from './apm_fields';
 import { Serializable } from '../serializable';
-import { generateLongIdWithSeed, generateShortId, generateLongId } from '../utils/generate_id';
+import { generateShortId, generateLongId, getErrorGroupingKey } from '../utils/generate_id';
 
 export class ApmError extends Serializable<ApmFields> {
   constructor(fields: ApmFields) {
@@ -29,7 +29,7 @@ export class ApmError extends Serializable<ApmFields> {
 
     data['error.grouping_key'] =
       this.fields['error.grouping_key'] ??
-      (errorMessage ? generateLongIdWithSeed(errorMessage) : generateLongId());
+      (errorMessage ? getErrorGroupingKey(errorMessage) : generateLongId());
 
     return [data];
   }

@@ -6,11 +6,11 @@
  */
 
 import { entities, apm, timerange, infra } from '@kbn/apm-synthtrace-client';
-import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 
-const SERVICE_ENTITY_ID = generateLongIdWithSeed('service');
-const HOST_ENTITY_ID = generateLongIdWithSeed('host');
-const CONTAINER_ENTITY_ID = generateLongIdWithSeed('container');
+const SERVICE_ENTITY_ID = getErrorGroupingKey('service');
+const HOST_ENTITY_ID = getErrorGroupingKey('host');
+const CONTAINER_ENTITY_ID = getErrorGroupingKey('container');
 
 export const SERVICE_NAME = 'service-entity';
 export const HOST_NAME = 'host-entity';
