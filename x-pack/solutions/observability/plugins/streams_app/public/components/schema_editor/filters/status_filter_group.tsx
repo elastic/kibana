@@ -8,24 +8,19 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSelectableProps } from '@elastic/eui';
-import { FIELD_STATUS_MAP } from '../configuration_maps';
+import { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { FilterGroup } from './filter_group';
-import { ChangeFilterGroups } from '../hooks/use_query_and_filters';
+import { FIELD_STATUS_MAP } from '../constants';
+import { TControlsChangeHandler } from '../hooks/use_controls';
+import { SchemaFieldStatus } from '../types';
 
 const BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.fieldStatusFilterGroupButtonLabel',
-  {
-    defaultMessage: 'Status',
-  }
+  { defaultMessage: 'Status' }
 );
 
-export const FieldStatusFilterGroup = ({
-  onChangeFilterGroup,
-}: {
-  onChangeFilterGroup: ChangeFilterGroups;
-}) => {
-  const [items, setItems] = useState<Array<{ label: string; key?: string }>>(() =>
+export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChangeHandler }) => {
+  const [items, setItems] = useState<EuiSelectableOption[]>(() =>
     Object.entries(FIELD_STATUS_MAP).map(([key, value]) => {
       return {
         label: value.label,
@@ -37,13 +32,13 @@ export const FieldStatusFilterGroup = ({
   const onChangeItems = useCallback<Required<EuiSelectableProps>['onChange']>(
     (nextItems) => {
       setItems(nextItems);
-      onChangeFilterGroup({
+      onChange({
         status: nextItems
           .filter((nextItem) => nextItem.checked === 'on')
-          .map((item) => item.key as string),
+          .map((item) => item.key as SchemaFieldStatus),
       });
     },
-    [onChangeFilterGroup]
+    [onChange]
   );
 
   return (
