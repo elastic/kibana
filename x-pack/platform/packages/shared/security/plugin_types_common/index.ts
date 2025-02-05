@@ -47,3 +47,5 @@ export type {
   CategorizedApiKey,
   ApiKeyAggregations,
 } from './src/api_keys/api_key';
+
+export { ApiOperation } from './src/authorization';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Prompt } from './types';
+import { Prompt } from '@kbn/security-ai-prompts';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -21,6 +21,9 @@ import {
   GEMINI_SYSTEM_PROMPT,
   GEMINI_USER_PROMPT,
   STRUCTURED_SYSTEM_PROMPT,
+  BEDROCK_CHAT_TITLE,
+  GEMINI_CHAT_TITLE,
+  DEFAULT_CHAT_TITLE,
 } from './prompts';
 
 export const promptGroupId = {
@@ -31,6 +34,7 @@ export const promptGroupId = {
 export const promptDictionary = {
   systemPrompt: `systemPrompt`,
   userPrompt: `userPrompt`,
+  chatTitle: `chatTitle`,
   attackDiscoveryDefault: `default`,
   attackDiscoveryRefine: `refine`,
   attackDiscoveryContinue: `continue`,
@@ -152,6 +156,29 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_GENERATION_INSIGHTS,
+    },
+  },
+  {
+    promptId: promptDictionary.chatTitle,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: DEFAULT_CHAT_TITLE,
+    },
+  },
+  {
+    promptId: promptDictionary.chatTitle,
+    promptGroupId: promptGroupId.aiAssistant,
+    provider: 'bedrock',
+    prompt: {
+      default: BEDROCK_CHAT_TITLE,
+    },
+  },
+  {
+    promptId: promptDictionary.chatTitle,
+    promptGroupId: promptGroupId.aiAssistant,
+    provider: 'gemini',
+    prompt: {
+      default: GEMINI_CHAT_TITLE,
     },
   },
 ];
