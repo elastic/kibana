@@ -35,7 +35,7 @@ export const GridRowTitle = React.memo(
 
     useEffect(() => {
       /**
-       * This subscription ensures that the row will re-render when the section title changes
+       * This subscription ensures that this component will re-render when the title changes
        */
       const titleSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
