@@ -37,8 +37,8 @@ import { ScaleOptions, Orientation } from '../../common/constants';
 
 const MAX_TAG_COUNT = 200;
 
-const tgcChartWrapperCss = () =>
-  css({
+const tgcChartCss = {
+  wrapper: css({
     flex: '1 1 0',
     display: 'flex',
     flexDirection: 'column',
@@ -47,19 +47,18 @@ const tgcChartWrapperCss = () =>
     '& text': {
       cursor: 'pointer',
     },
-  });
-
-const tgcChartLabelCss = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    width: '100%',
-    textAlign: 'center',
-    fontWeight: euiTheme.font.weight.bold,
-  });
-
-const tgcChartWarningCss = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    width: euiTheme.size.base,
-  });
+  }),
+  label: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      textAlign: 'center',
+      fontWeight: euiTheme.font.weight.bold,
+    }),
+  warning: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: euiTheme.size.base,
+    }),
+};
 
 export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
@@ -260,7 +259,7 @@ export const TagCloudChart = ({
   return (
     <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
-        <div css={tgcChartWrapperCss} ref={resizeRef} data-test-subj="tagCloudVisualization">
+        <div css={tgcChartCss.wrapper} ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
             <Settings
               // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
@@ -292,12 +291,12 @@ export const TagCloudChart = ({
             />
           </Chart>
           {label && showLabel && (
-            <div className="tgcChart__label" css={tgcChartLabelCss} data-test-subj="tagCloudLabel">
+            <div className="tgcChart__label" css={tgcChartCss.label} data-test-subj="tagCloudLabel">
               {label}
             </div>
           )}
           {!visParams.isPreview && warning && (
-            <div css={tgcChartWarningCss}>
+            <div css={tgcChartCss.warning}>
               <EuiIconTip
                 type="warning"
                 color="warning"
