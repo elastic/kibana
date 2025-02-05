@@ -474,6 +474,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('sorting', () => {
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+      });
+
       it('should sort correctly', async () => {
         const savedSearchName = 'testSorting';
 
@@ -641,8 +646,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should sort custom fields too', async () => {
-        const savedSearchName = 'testSortingForCustomFields';
+      it('should sort on custom vars too', async () => {
+        const savedSearchName = 'testSortingForCustomVars';
 
         await discover.selectTextBaseLang();
         await header.waitUntilLoadingHasFinished();
