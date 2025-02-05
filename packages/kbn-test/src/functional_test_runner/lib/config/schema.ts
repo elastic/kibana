@@ -11,6 +11,7 @@ import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
 import type { CustomHelpers } from 'joi';
+import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
@@ -175,6 +176,12 @@ export const schema = Joi.object()
           !!process.env.CI && !process.env.DISABLE_CI_LOG_OUTPUT_CAPTURE
         ),
         sendToCiStats: Joi.boolean().default(!!process.env.CI),
+      })
+      .default(),
+
+    scoutReporter: Joi.object()
+      .keys({
+        enabled: Joi.boolean().default(SCOUT_REPORTER_ENABLED),
       })
       .default(),
 

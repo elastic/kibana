@@ -1,0 +1,105 @@
+openapi: 3.0.3
+info:
+  title: Cel Input Attributes
+  version: "not applicable"
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PathOptions:
+      type: object
+      additionalProperties: true
+
+    CelDetails:
+      type: object
+      description: Details for building a CEL program.
+      required:
+        - path
+        - auth
+      properties:
+        path:
+          type: string
+        auth: 
+          $ref: "#/components/schemas/CelAuthType"
+        openApiDetails:
+          $ref: "#/components/schemas/OpenApiDetails"
+
+    OpenApiDetails:
+      type: object
+      description: Necessary OpenAPI spec details for building a CEL program.
+      required:
+        - operation
+        - schemas
+      properties:
+        operation:
+          type: string
+        schemas: 
+          type: string
+        auth:
+          type: string
+
+    GeneratedCelDetails:
+      type: object
+      description: Generated CEL details.
+      required:
+        - configFields
+        - program
+        - needsAuthConfigBlock
+        - stateSettings
+        - redactVars
+      properties:
+        configFields:
+          type: object
+          additionalProperties: true
+        program:
+          type: string
+        needsAuthConfigBlock:
+          type: boolean
+        stateSettings:
+          type: object
+          additionalProperties: true
+        redactVars:
+          type: array
+          items:
+            type: string
+    
+    CelInput:
+      type: object
+      description: Optional CEL input details.
+      required:
+        - authType
+        - configFields
+        - program
+        - needsAuthConfigBlock
+        - stateSettings
+        - redactVars
+        - url
+      properties:
+        authType:
+          $ref: "#/components/schemas/CelAuthType"  
+        configFields:
+          type: object
+          additionalProperties: true
+        needsAuthConfigBlock:
+          type: boolean
+        program:
+          type: string
+        stateSettings:
+          type: object
+          additionalProperties: true
+        redactVars:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+
+    CelAuthType:
+      type: string
+      description: The type of auth utilized for the input.
+      enum:
+        - basic
+        - digest
+        - oauth2
+        - header
+        

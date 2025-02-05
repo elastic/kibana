@@ -37,7 +37,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
   }, [cleanUp]);
 
   const [dataLoading, panels, timeRange] = useBatchedPublishingSubjects(
-    pageApi.dataLoading,
+    pageApi.dataLoading$,
     componentApi.panels$,
     pageApi.timeRange$
   );
@@ -95,7 +95,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
           <TopNav
             onSave={componentApi.onSave}
             resetUnsavedChanges={pageApi.resetUnsavedChanges}
-            unsavedChanges$={pageApi.unsavedChanges}
+            unsavedChanges$={pageApi.unsavedChanges$}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

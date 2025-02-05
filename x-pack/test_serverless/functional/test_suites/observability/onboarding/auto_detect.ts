@@ -11,13 +11,7 @@ import moment from 'moment';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'datasetQuality',
-    'observabilityLogsExplorer',
-    'common',
-    'svlCommonNavigation',
-    'svlCommonPage',
-  ]);
+  const PageObjects = getPageObjects(['common', 'svlCommonPage']);
 
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');

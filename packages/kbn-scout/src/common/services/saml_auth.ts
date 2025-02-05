@@ -16,18 +16,17 @@ import {
 } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { HostOptions, SamlSessionManager } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutServerConfig } from '../../types';
+import { ScoutTestConfig } from '../../types';
 import { Protocol } from '../../playwright/types';
-import { serviceLoadedMsg } from '../../playwright/utils';
+import { ScoutLogger } from './logger';
 
-const getResourceDirPath = (config: ScoutServerConfig) => {
+const getResourceDirPath = (config: ScoutTestConfig) => {
   return config.serverless
     ? path.resolve(SERVERLESS_ROLES_ROOT_PATH, config.projectType!)
     : path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH);
 };
 
-const createKibanaHostOptions = (config: ScoutServerConfig): HostOptions => {
+const createKibanaHostOptions = (config: ScoutTestConfig): HostOptions => {
   const kibanaUrl = new URL(config.hosts.kibana);
   kibanaUrl.username = config.auth.username;
   kibanaUrl.password = config.auth.password;
@@ -42,8 +41,8 @@ const createKibanaHostOptions = (config: ScoutServerConfig): HostOptions => {
 };
 
 export const createSamlSessionManager = (
-  config: ScoutServerConfig,
-  log: ToolingLog
+  config: ScoutTestConfig,
+  log: ScoutLogger
 ): SamlSessionManager => {
   const resourceDirPath = getResourceDirPath(config);
   const rolesDefinitionPath = path.resolve(resourceDirPath, 'roles.yml');
@@ -65,7 +64,7 @@ export const createSamlSessionManager = (
     cloudUsersFilePath: config.cloudUsersFilePath,
   });
 
-  log.debug(serviceLoadedMsg('samlAuth'));
+  log.serviceLoaded('samlAuth');
 
   return sessionManager;
 };

@@ -7,16 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli, runTestsCli } from './src/cli';
-export { expect, test, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
+export * as cli from './src/cli';
+export {
+  expect,
+  test,
+  spaceTest,
+  tags,
+  createPlaywrightConfig,
+  createLazyPageObject,
+  ingestTestDataHook,
+} from './src/playwright';
 export type {
-  ScoutPage,
   ScoutPlaywrightOptions,
   ScoutTestOptions,
+  ScoutPage,
   PageObjects,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
-  EsArchiverFixture,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
 } from './src/playwright';
 
-export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
+export type {
+  EsClient,
+  KbnClient,
+  KibanaUrl,
+  ScoutLogger,
+  ScoutServerConfig,
+  ScoutTestConfig,
+} from './src/types';

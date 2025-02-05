@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { defaultNamespace } from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -25,6 +26,7 @@ const integrationActions = {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
+    'discover',
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
@@ -57,6 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
   describe('Dataset quality details', function () {
+    // see details: https://github.com/elastic/kibana/issues/206734
+
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -322,23 +326,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('navigation', () => {
-      it('should go to log explorer page when the open in log explorer button is clicked', async () => {
+      it('should go to discover page when the open in discover button is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
         });
 
-        const logExplorerButton =
+        const discoverButton =
           await PageObjects.datasetQuality.getDatasetQualityDetailsHeaderButton();
 
-        await logExplorerButton.click();
+        await discoverButton.click();
 
-        // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(regularDatasetName);
+        // Confirm dataset selector text in discover
+        await retry.tryForTime(5000, async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+
+          originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        });
       });
 
-      it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
+      it('should go discover for degraded docs when the button next to breakdown selector is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
@@ -347,10 +353,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+        // Confirm dataset selector text in discover
+        await retry.tryForTime(5000, async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        });
       });
     });
 
@@ -393,7 +400,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
         const cellTexts = await countColumn.getCellTexts();
 
         await countColumn.sort('ascending');
@@ -408,7 +415,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
 
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
@@ -444,7 +451,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
         const cellTexts = await countColumn.getCellTexts();
 
         await synthtrace.index([
@@ -458,7 +465,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.refreshDetailsPageData();
 
         const updatedTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
-        const updatedCountColumn = updatedTable['Docs count'];
+        const updatedCountColumn =
+          updatedTable[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
 
         const updatedCellTexts = await updatedCountColumn.getCellTexts();
 

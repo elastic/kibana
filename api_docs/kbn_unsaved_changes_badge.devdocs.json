@@ -46,7 +46,7 @@
             "text": "TopNavMenuBadgeProps"
           }
         ],
-        "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+        "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +66,7 @@
                 "text": "TopNavUnsavedChangesBadgeParams"
               }
             ],
-            "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -97,7 +97,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+        "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,7 +117,7 @@
                 "text": "UnsavedChangesBadgeProps"
               }
             ],
-            "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -137,7 +137,7 @@
         "description": [
           "\nParams for getTopNavUnsavedChangesBadge"
         ],
-        "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+        "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -151,7 +151,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -167,7 +167,7 @@
             "signature": [
               "(() => Promise<unknown>) | undefined"
             ],
-            "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -181,7 +181,7 @@
             "signature": [
               "(() => Promise<unknown>) | undefined"
             ],
-            "path": "packages/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -197,7 +197,7 @@
         "description": [
           "\nProps for UnsavedChangesBadge"
         ],
-        "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+        "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -211,7 +211,7 @@
             "signature": [
               "() => Promise<unknown>"
             ],
-            "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -227,7 +227,7 @@
             "signature": [
               "(() => Promise<unknown>) | undefined"
             ],
-            "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -243,7 +243,7 @@
             "signature": [
               "(() => Promise<unknown>) | undefined"
             ],
-            "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -256,7 +256,7 @@
             "tags": [],
             "label": "badgeText",
             "description": [],
-            "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

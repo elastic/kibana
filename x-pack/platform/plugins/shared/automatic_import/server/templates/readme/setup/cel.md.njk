@@ -1,0 +1,10 @@
+### Collecting logs from Common Expression Language (CEL)
+
+The full documentation for the input are currently available [here](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-cel.html).
+CEL configurations are split into two main parts: Program and State, with an associated named Resource.
+
+The program is a CEL program that will obtain data from the API either by an HTTP request or a local file-system read operation, and then transform the data into a set of events and cursor states. The CEL environment that the program is run in is provided with an HTTP client that has been set-up with the user-specified authentication, proxy, rate limit and other options, and with a set of user-defined regular expressions that are available to use during execution.
+
+The state is passed into the program on start of execution and may contain configuration details not included in the standard set of options. The CEL program return value will be the state used during the next cycle of CEL execution, and will include the events to be published to Elasticsearch and then removed from the state. State values in general will not persist over restarts, but it may contain a cursor that is persisted. The cursor part of state is used when there is a need to keep long-lived state that will persist over restarts.
+
+The named resource is a string value that the CEL program can use to identify the location of the API and will usually either be a URL or a file path. It is included in the state as the `state.url`. CEL programs are not required to make use of this configuration, but its presence is required in the configuration.
