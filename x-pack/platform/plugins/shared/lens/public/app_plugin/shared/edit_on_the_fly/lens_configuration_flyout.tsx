@@ -21,7 +21,6 @@ import {
   keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 import {
   getAggregateQueryMode,
   isOfAggregateQueryType,
@@ -55,6 +54,7 @@ import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { useESQLVariables } from './use_esql_variables';
+import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -140,13 +140,10 @@ export function LensEditConfigurationFlyout({
       }
 
       const [defaultLayerId] = Object.keys(framePublicAPI.datasourceLayers);
-      const activeData = Object.entries(previousAdapters.current?.tables?.tables ?? {}).reduce<
-        Record<string, Datatable>
-      >((acc, [key, value], _index, tables) => {
-        const id = tables.length === 1 ? defaultLayerId : key;
-        acc[id] = value as Datatable;
-        return acc;
-      }, {});
+      const activeData = getActiveDataFromDatatable(
+        defaultLayerId,
+        previousAdapters.current?.tables?.tables
+      );
 
       layers.forEach((layer) => {
         const table = activeData[layer];
