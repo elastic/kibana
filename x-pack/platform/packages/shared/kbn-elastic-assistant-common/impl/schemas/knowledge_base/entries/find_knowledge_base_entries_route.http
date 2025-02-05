@@ -1,5 +1,5 @@
 ### Find all knowledge base entries
-GET http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries/_find
+GET http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries/_find
 Elastic-Api-Version: {{elasticApiVersion}}
 Authorization: Basic {{auth.admin.username}} {{auth.admin.password}}
 X-Kbn-Context: {{appContext.security}}

@@ -39,10 +39,10 @@ export const DragPreview = ({
           } else {
             const panel = proposedGridLayout[rowIndex].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
-            dragPreviewRef.current.style.height = `calc(1px * (${panel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
-            dragPreviewRef.current.style.width = `calc(1px * (${panel.width} * (var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
-            dragPreviewRef.current.style.top = `calc(1px * (${panel.row} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize))))`;
-            dragPreviewRef.current.style.left = `calc(1px * (${panel.column} * (var(--kbnGridColumnWidth) + var(--kbnGridGutterSize))))`;
+            dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
+            dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+            dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
+            dragPreviewRef.current.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
           }
         });
 
@@ -61,7 +61,6 @@ export const DragPreview = ({
       css={css`
         display: none;
         pointer-events: none;
-        position: absolute;
       `}
     />
   );

@@ -257,6 +257,27 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.contentReferencesStore",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "contentReferencesStore",
+            "description": [],
+            "signature": [
+              "false | ",
+              {
+                "pluginId": "@kbn/elastic-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnElasticAssistantCommonPluginApi",
+                "section": "def-common.ContentReferencesStore",
+                "text": "ContentReferencesStore"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.esClient",
             "type": "Object",
             "tags": [],

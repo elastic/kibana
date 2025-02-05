@@ -2011,11 +2011,11 @@
   integrity sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==
 
 "@bundled-es-modules/cookie@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@bundled-es-modules/cookie/-/cookie-2.0.0.tgz#c3b82703969a61cf6a46e959a012b2c257f6b164"
-  integrity sha512-Or6YHg/kamKHpxULAdSqhGqnWFneIXu1NKvvfBBzKGwpVsYuFIQ5aBPHDnnoR3ghW1nvSkALd+EF9iMtY7Vjxw==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@bundled-es-modules/cookie/-/cookie-2.0.1.tgz#b41376af6a06b3e32a15241d927b840a9b4de507"
+  integrity sha512-8o+5fRPLNbjbdGRRmJj3h6Hh1AQJf2dk3qQ/5ZFb+PXkRNiSoMGGUKlsgLfrxneb72axVJyIYji64E2+nNfYyw==
   dependencies:
-    cookie "^0.5.0"
+    cookie "^0.7.2"
 
 "@bundled-es-modules/statuses@^1.0.1":
   version "1.0.1"
@@ -2233,10 +2233,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@68.1.0":
-  version "68.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-68.1.0.tgz#7c2e471e984cb8cfe9a05dba8eda19ff26a880e7"
-  integrity sha512-4Wb0g9lgEpsgKJgdV6uqmY444elBJ5VhVJQ0ZUpnn8CV9mzEz8HqXAanpfqG9NTGca8C/EnwlSeQEgF+9orU4A==
+"@elastic/charts@69.1.0":
+  version "69.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-69.1.0.tgz#5dff4f10f59a66ab291961ace141a99356751924"
+  integrity sha512-Ab1c/8i4wf3guFtMe7tK6ZClZ7TWHk6lVEAXdJJmKd5SCaXvGHrz8mZi9HkAQmooAtm54bnt43Nli8DfIigITw==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -2304,10 +2304,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.16.0":
-  version "8.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.16.0.tgz#35c6729e15684154b8b3c391cfad34877d771cf0"
-  integrity sha512-uiPC6AePESl/jakx+ZLarLsLdxDHiCSrpAkkXJ5Q8A78vadEQsTGXRUVFwWWkS8gfGthnT3O+QK6BHXuszd0KQ==
+"@elastic/elasticsearch@^8.17.0":
+  version "8.17.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.17.0.tgz#0214265bc04a3fe0d23a410b8d08b28217aac540"
+  integrity sha512-FZ+gQUrPsMpQ2RRIXwTmCoUeFCEausMhp4eQOyxT9j1cwGXHJrhelR6jffM1SC95kQUkB7+TcTq7oQ+bG2BQ9g==
   dependencies:
     "@elastic/transport" "^8.9.1"
     apache-arrow "^18.0.0"
@@ -2332,25 +2332,25 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.8.tgz#b3a9e59449dfcc6e085ab43d447d95c1d9ee5e91"
-  integrity sha512-o/4Fvd3odZN8SSjok03vLJOif/vVb1oQW4zGCYhCrwyolccd6deAvcy84w5l8GVr61J6bTM9g/8vydqPudw6Ug==
+"@elastic/eui-theme-borealis@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.9.tgz#6aea79b15091e84235555236726f1bb1fc0da2bf"
+  integrity sha512-56tzAX5Go4RuSD1fuKvHiLPumGll1NYK1dG4E9OPe7xfLXBGdLjhdXabkJfUlc5OVX2xK9RI3TOmUiimqm8SJg==
 
-"@elastic/eui-theme-common@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.8.tgz#f5c88d2af39dfef412df73f35d16d584e1e64374"
-  integrity sha512-rzYFRPegUoGjp9eJj90LTsKF9SiKOgcOtAHDMl99yEbNXIV9jMfs54tRf7zMQq0/w+FZXJbOqhnUc4rdKUhVWw==
+"@elastic/eui-theme-common@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.9.tgz#42d4f15b6d8dd9f8976eb3f2d46fd59af3f37a9c"
+  integrity sha512-nmeqi+gZruBQtDOirPIGgZh0QejrlmeZixKaaM/iQca5rQiTNHAE29sSpGFk20+//yfiDPQMFee7PQU/A4R4Ow==
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@99.0.0-borealis.1":
-  version "99.0.0-borealis.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.0.0-borealis.1.tgz#1df3e18a50883f73855bb33c7a6fc044e68eecb1"
-  integrity sha512-6OuX+8jurohZRdq8I+KGYvmU0ajNrBhGCzRziDQNtofQv5fk2C60U5BQnPbX7Qp9gPkxApNlmAarYqMs/TfMSA==
+"@elastic/eui@99.1.0-borealis.0":
+  version "99.1.0-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.1.0-borealis.0.tgz#b5b34c749ac56b8ecd290fb715f56ba2e5f255ab"
+  integrity sha512-akDYl5ScBNwBm1sIsPHQVPq5rJpkgjg5Qtb2F1T36eWFp9ux5EVAqoFylsLBIaUnXiwVDkDAVH604IOrR46COg==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.8"
+    "@elastic/eui-theme-common" "0.0.9"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -4060,6 +4060,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/automatic-import-plugin@link:x-pack/platform/plugins/shared/automatic_import":
+  version "0.0.0"
+  uid ""
+
 "@kbn/avc-banner@link:src/platform/packages/shared/kbn-avc-banner":
   version "0.0.0"
   uid ""
@@ -4320,7 +4324,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser-mocks@link:packages/core/analytics/core-analytics-browser-mocks":
+"@kbn/core-analytics-browser-mocks@link:src/core/packages/analytics/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4332,7 +4336,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-mocks@link:packages/core/analytics/core-analytics-server-mocks":
+"@kbn/core-analytics-server-mocks@link:src/core/packages/analytics/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4348,7 +4352,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser-mocks@link:packages/core/application/core-application-browser-mocks":
+"@kbn/core-application-browser-mocks@link:src/core/packages/application/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4364,7 +4368,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-mocks@link:packages/core/apps/core-apps-browser-mocks":
+"@kbn/core-apps-browser-mocks@link:src/core/packages/apps/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4376,7 +4380,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-browser-mocks@link:packages/core/base/core-base-browser-mocks":
+"@kbn/core-base-browser-mocks@link:src/core/packages/base/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4392,7 +4396,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-server-mocks@link:packages/core/base/core-base-server-mocks":
+"@kbn/core-base-server-mocks@link:src/core/packages/base/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4400,7 +4404,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-browser-mocks@link:packages/core/capabilities/core-capabilities-browser-mocks":
+"@kbn/core-capabilities-browser-mocks@link:src/core/packages/capabilities/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4412,7 +4416,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server-mocks@link:packages/core/capabilities/core-capabilities-server-mocks":
+"@kbn/core-capabilities-server-mocks@link:src/core/packages/capabilities/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4424,7 +4428,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser-mocks@link:packages/core/chrome/core-chrome-browser-mocks":
+"@kbn/core-chrome-browser-mocks@link:src/core/packages/chrome/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4468,7 +4472,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser-mocks@link:packages/core/deprecations/core-deprecations-browser-mocks":
+"@kbn/core-deprecations-browser-mocks@link:src/core/packages/deprecations/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4484,7 +4488,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server-mocks@link:packages/core/deprecations/core-deprecations-server-mocks":
+"@kbn/core-deprecations-server-mocks@link:src/core/packages/deprecations/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4496,7 +4500,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser-mocks@link:packages/core/doc-links/core-doc-links-browser-mocks":
+"@kbn/core-doc-links-browser-mocks@link:src/core/packages/doc-links/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4508,7 +4512,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server-mocks@link:packages/core/doc-links/core-doc-links-server-mocks":
+"@kbn/core-doc-links-server-mocks@link:src/core/packages/doc-links/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4520,7 +4524,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-client-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-client-server-mocks":
+"@kbn/core-elasticsearch-client-server-mocks@link:src/core/packages/elasticsearch/client-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4528,7 +4532,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-server-mocks":
+"@kbn/core-elasticsearch-server-mocks@link:src/core/packages/elasticsearch/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4540,7 +4544,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-environment-server-mocks@link:packages/core/environment/core-environment-server-mocks":
+"@kbn/core-environment-server-mocks@link:src/core/packages/environment/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4548,7 +4552,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser-mocks@link:packages/core/execution-context/core-execution-context-browser-mocks":
+"@kbn/core-execution-context-browser-mocks@link:src/core/packages/execution-context/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4564,7 +4568,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server-mocks@link:packages/core/execution-context/core-execution-context-server-mocks":
+"@kbn/core-execution-context-server-mocks@link:src/core/packages/execution-context/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4576,7 +4580,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser-mocks@link:packages/core/fatal-errors/core-fatal-errors-browser-mocks":
+"@kbn/core-fatal-errors-browser-mocks@link:src/core/packages/fatal-errors/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4616,7 +4620,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser-mocks@link:packages/core/http/core-http-browser-mocks":
+"@kbn/core-http-browser-mocks@link:src/core/packages/http/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4632,11 +4636,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-context-server-mocks@link:packages/core/http/core-http-context-server-mocks":
+"@kbn/core-http-context-server-mocks@link:src/core/packages/http/context-server-mocks":
   version "0.0.0"
   uid ""
 
 "@kbn/core-http-plugin@link:test/plugin_functional/plugins/core_http":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-rate-limiter-internal@link:src/core/packages/http/rate-limiter-internal":
   version "0.0.0"
   uid ""
 
@@ -4652,7 +4660,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server-mocks@link:packages/core/http/core-http-resources-server-mocks":
+"@kbn/core-http-resources-server-mocks@link:src/core/packages/http/resources-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4664,7 +4672,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-router-server-mocks@link:packages/core/http/core-http-router-server-mocks":
+"@kbn/core-http-router-server-mocks@link:src/core/packages/http/router-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4672,7 +4680,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-mocks@link:packages/core/http/core-http-server-mocks":
+"@kbn/core-http-server-mocks@link:src/core/packages/http/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4688,7 +4696,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser-mocks@link:packages/core/i18n/core-i18n-browser-mocks":
+"@kbn/core-i18n-browser-mocks@link:src/core/packages/i18n/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4700,7 +4708,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server-mocks@link:packages/core/i18n/core-i18n-server-mocks":
+"@kbn/core-i18n-server-mocks@link:src/core/packages/i18n/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4712,7 +4720,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser-mocks@link:packages/core/injected-metadata/core-injected-metadata-browser-mocks":
+"@kbn/core-injected-metadata-browser-mocks@link:src/core/packages/injected-metadata/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4724,7 +4732,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-integrations-browser-mocks@link:packages/core/integrations/core-integrations-browser-mocks":
+"@kbn/core-integrations-browser-mocks@link:src/core/packages/integrations/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4732,7 +4740,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser-mocks@link:packages/core/lifecycle/core-lifecycle-browser-mocks":
+"@kbn/core-lifecycle-browser-mocks@link:src/core/packages/lifecycle/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4744,7 +4752,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server-mocks@link:packages/core/lifecycle/core-lifecycle-server-mocks":
+"@kbn/core-lifecycle-server-mocks@link:src/core/packages/lifecycle/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4756,7 +4764,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-browser-mocks@link:packages/core/logging/core-logging-browser-mocks":
+"@kbn/core-logging-browser-mocks@link:src/core/packages/logging/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4768,7 +4776,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server-mocks@link:packages/core/logging/core-logging-server-mocks":
+"@kbn/core-logging-server-mocks@link:src/core/packages/logging/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4780,7 +4788,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-collectors-server-mocks@link:packages/core/metrics/core-metrics-collectors-server-mocks":
+"@kbn/core-metrics-collectors-server-mocks@link:src/core/packages/metrics/collectors-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4788,7 +4796,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-server-mocks@link:packages/core/metrics/core-metrics-server-mocks":
+"@kbn/core-metrics-server-mocks@link:src/core/packages/metrics/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4808,7 +4816,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server-mocks@link:packages/core/node/core-node-server-mocks":
+"@kbn/core-node-server-mocks@link:src/core/packages/node/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4820,7 +4828,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser-mocks@link:packages/core/notifications/core-notifications-browser-mocks":
+"@kbn/core-notifications-browser-mocks@link:src/core/packages/notifications/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4832,7 +4840,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser-mocks@link:packages/core/overlays/core-overlays-browser-mocks":
+"@kbn/core-overlays-browser-mocks@link:src/core/packages/overlays/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4900,7 +4908,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser-mocks@link:packages/core/plugins/core-plugins-browser-mocks":
+"@kbn/core-plugins-browser-mocks@link:src/core/packages/plugins/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4920,7 +4928,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server-mocks@link:packages/core/plugins/core-plugins-server-mocks":
+"@kbn/core-plugins-server-mocks@link:src/core/packages/plugins/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4932,7 +4940,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server-mocks@link:packages/core/preboot/core-preboot-server-mocks":
+"@kbn/core-preboot-server-mocks@link:src/core/packages/preboot/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4948,7 +4956,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser-mocks@link:packages/core/rendering/core-rendering-browser-mocks":
+"@kbn/core-rendering-browser-mocks@link:src/core/packages/rendering/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -4960,7 +4968,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-server-mocks@link:packages/core/rendering/core-rendering-server-mocks":
+"@kbn/core-rendering-server-mocks@link:src/core/packages/rendering/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4980,7 +4988,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server-mocks@link:packages/core/saved-objects/core-saved-objects-api-server-mocks":
+"@kbn/core-saved-objects-api-server-mocks@link:src/core/packages/saved-objects/api-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -4992,7 +5000,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-base-server-mocks@link:packages/core/saved-objects/core-saved-objects-base-server-mocks":
+"@kbn/core-saved-objects-base-server-mocks@link:src/core/packages/saved-objects/base-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5000,7 +5008,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser-mocks@link:packages/core/saved-objects/core-saved-objects-browser-mocks":
+"@kbn/core-saved-objects-browser-mocks@link:src/core/packages/saved-objects/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -5016,7 +5024,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-import-export-server-mocks@link:packages/core/saved-objects/core-saved-objects-import-export-server-mocks":
+"@kbn/core-saved-objects-import-export-server-mocks@link:src/core/packages/saved-objects/import-export-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5024,7 +5032,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-migration-server-mocks@link:packages/core/saved-objects/core-saved-objects-migration-server-mocks":
+"@kbn/core-saved-objects-migration-server-mocks@link:src/core/packages/saved-objects/migration-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5032,7 +5040,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-server-mocks@link:packages/core/saved-objects/core-saved-objects-server-mocks":
+"@kbn/core-saved-objects-server-mocks@link:src/core/packages/saved-objects/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5080,7 +5088,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-server-mocks@link:packages/core/status/core-status-server-mocks":
+"@kbn/core-status-server-mocks@link:src/core/packages/status/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5096,11 +5104,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-kbn-server@link:packages/core/test-helpers/core-test-helpers-kbn-server":
+"@kbn/core-test-helpers-kbn-server@link:src/dev/packages/core-test-helpers-kbn-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-model-versions@link:packages/core/test-helpers/core-test-helpers-model-versions":
+"@kbn/core-test-helpers-model-versions@link:src/dev/packages/core-test-helpers-model-versions":
   version "0.0.0"
   uid ""
 
@@ -5116,7 +5124,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser-mocks@link:packages/core/theme/core-theme-browser-mocks":
+"@kbn/core-theme-browser-mocks@link:src/core/packages/theme/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -5128,7 +5136,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser-mocks@link:packages/core/ui-settings/core-ui-settings-browser-mocks":
+"@kbn/core-ui-settings-browser-mocks@link:src/core/packages/ui-settings/browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -5144,7 +5152,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server-mocks@link:packages/core/ui-settings/core-ui-settings-server-mocks":
+"@kbn/core-ui-settings-server-mocks@link:src/core/packages/ui-settings/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5160,7 +5168,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-server-mocks@link:packages/core/usage-data/core-usage-data-server-mocks":
+"@kbn/core-usage-data-server-mocks@link:src/core/packages/usage-data/server-mocks":
   version "0.0.0"
   uid ""
 
@@ -5253,6 +5261,10 @@
   uid ""
 
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-grid-in-table-search@link:src/platform/packages/shared/kbn-data-grid-in-table-search":
   version "0.0.0"
   uid ""
 
@@ -5365,6 +5377,10 @@
   uid ""
 
 "@kbn/default-nav-ml@link:src/platform/packages/private/default-nav/ml":
+  version "0.0.0"
+  uid ""
+
+"@kbn/delete-managed-asset-callout@link:src/platform/packages/shared/kbn-management/delete_managed_assets_callout":
   version "0.0.0"
   uid ""
 
@@ -5772,6 +5788,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/file-upload-common@link:x-pack/platform/packages/shared/file-upload-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/file-upload-plugin@link:x-pack/platform/plugins/private/file_upload":
   version "0.0.0"
   uid ""
@@ -5992,6 +6012,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-langchain@link:x-pack/platform/packages/shared/ai-infra/inference-langchain":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-plugin@link:x-pack/platform/plugins/shared/inference":
   version "0.0.0"
   uid ""
@@ -6017,10 +6041,6 @@
   uid ""
 
 "@kbn/inspector-plugin@link:src/platform/plugins/shared/inspector":
-  version "0.0.0"
-  uid ""
-
-"@kbn/integration-assistant-plugin@link:x-pack/platform/plugins/shared/integration_assistant":
   version "0.0.0"
   uid ""
 
@@ -6508,7 +6528,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
@@ -7064,7 +7084,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/search/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared_ui":
   version "0.0.0"
   uid ""
 
@@ -7077,6 +7097,10 @@
   uid ""
 
 "@kbn/searchprofiler-plugin@link:x-pack/platform/plugins/shared/searchprofiler":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-ai-prompts@link:x-pack/solutions/security/packages/security-ai-prompts":
   version "0.0.0"
   uid ""
 
@@ -7281,10 +7305,6 @@
   uid ""
 
 "@kbn/serverless-observability@link:x-pack/solutions/observability/plugins/serverless_observability":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-project-switcher@link:src/platform/packages/private/serverless/project_switcher":
   version "0.0.0"
   uid ""
 
@@ -8172,25 +8192,25 @@
     ncp "^2.0.0"
     typescript "^5.5.3"
 
-"@launchdarkly/js-sdk-common@2.12.0":
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.12.0.tgz#c22eb9fead687260d916a75f693c7d399f085b05"
-  integrity sha512-HIDxvgo1vksC9hsYy3517sgW0Ql+iW3fgwlq/CEigeBNmaa9/J1Pxo7LrKPzezEA0kaGedmt/DCzVVxVBmxSsQ==
+"@launchdarkly/js-sdk-common@2.13.0":
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.13.0.tgz#5fd767ec2369b8efb90d457f6d8b80856baba6a2"
+  integrity sha512-cRoOQWBEOOynY3YDHIF4am1ZxiGu6MFK4v8WyNR0zN+nVjdQiuuyfAbHB//1Q0nrc1aB0flOy6e8C51eHy+VeA==
 
-"@launchdarkly/js-server-sdk-common@2.10.0":
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.10.0.tgz#5bb0de97d86d66ffb0a92018bab7def289af1b46"
-  integrity sha512-zbqpmEFQW/ZElZnRYX6N4gMZMpviE0F75/IyxcifLAFsjGNouxllpOOPbdtrLiJnJ0ixzt5vbtnem4tbhlYNOw==
+"@launchdarkly/js-server-sdk-common@2.11.0":
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.11.0.tgz#bf0de806b5398dfbda1e5e0d051f63b3b9c4da35"
+  integrity sha512-0MAe0iHYhdye68Yuiq6183KhG53z3gXxtOJVuVbIF+wd6VsHXCnpDnrljbvT4yFVaY9R2YMIC5dIXALqUiXCpw==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.12.0"
+    "@launchdarkly/js-sdk-common" "2.13.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.7.2":
-  version "9.7.2"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.2.tgz#23929639f4b09da1f4c5bb77ca858d32c56505a4"
-  integrity sha512-gcRarEh0yQrlwbWDORwbfTk19M/FtZje60EIo/c4298D/sqJ906MYq0J2MmyklEuIdQx/V4qPK+ss9LCCLpm/Q==
+"@launchdarkly/node-server-sdk@^9.7.3":
+  version "9.7.3"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.3.tgz#e6072a16626184ae89920b5b655106805ddd59d4"
+  integrity sha512-z8mAdncXVwfKsK9LdcBp2BXbm5CfS9zJ2ZrabnYTNJpF2L14mZY2CG4z40CzM6v5bYxn8mxTPtOXeX1d2xPLTg==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.10.0"
+    "@launchdarkly/js-server-sdk-common" "2.11.0"
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.0.3"
 
@@ -8543,7 +8563,7 @@
   resolved "https://registry.yarnpkg.com/@msgpackr-extract/msgpackr-extract-win32-x64/-/msgpackr-extract-win32-x64-3.0.2.tgz#0f164b726869f71da3c594171df5ebc1c4b0a407"
   integrity sha512-O+6Gs8UeDbyFpbSh2CPEz/UOrrdWPTBYNblZK5CxxLisYt4kGX3Sc+czffFonyjiGSq3jWLwJS/CCJc7tBr4sQ==
 
-"@mswjs/http-middleware@^0.10.1":
+"@mswjs/http-middleware@0.10.1":
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@mswjs/http-middleware/-/http-middleware-0.10.1.tgz#7ff38c5398ba01efe98e16a0da24d612ffd69ccc"
   integrity sha512-I58RDHXzwKjMjaSO7aV7X0zUzbAvUEEDYsL9+I6Ro0zF5LgjnNdpZoMufG/WoYEenhDCgv7K+HMpLxGuhlfjKA==
@@ -9295,49 +9315,48 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@redux-saga/core@^1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@redux-saga/core/-/core-1.1.3.tgz#3085097b57a4ea8db5528d58673f20ce0950f6a4"
-  integrity sha512-8tInBftak8TPzE6X13ABmEtRJGjtK17w7VUs7qV17S8hCO5S3+aUTWZ/DBsBJPdE8Z5jOPwYALyvofgq1Ws+kg==
+"@redux-saga/core@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@redux-saga/core/-/core-1.3.0.tgz#2ce08b73d407fc6ea9e7f7d83d2e97d981a3a8b8"
+  integrity sha512-L+i+qIGuyWn7CIg7k1MteHGfttKPmxwZR5E7OsGikCL2LzYA0RERlaUY00Y3P3ZV2EYgrsYlBrGs6cJP5OKKqA==
   dependencies:
     "@babel/runtime" "^7.6.3"
-    "@redux-saga/deferred" "^1.1.2"
-    "@redux-saga/delay-p" "^1.1.2"
-    "@redux-saga/is" "^1.1.2"
-    "@redux-saga/symbols" "^1.1.2"
-    "@redux-saga/types" "^1.1.0"
-    redux "^4.0.4"
+    "@redux-saga/deferred" "^1.2.1"
+    "@redux-saga/delay-p" "^1.2.1"
+    "@redux-saga/is" "^1.1.3"
+    "@redux-saga/symbols" "^1.1.3"
+    "@redux-saga/types" "^1.2.1"
     typescript-tuple "^2.2.1"
 
-"@redux-saga/deferred@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@redux-saga/deferred/-/deferred-1.1.2.tgz#59937a0eba71fff289f1310233bc518117a71888"
-  integrity sha512-908rDLHFN2UUzt2jb4uOzj6afpjgJe3MjICaUNO3bvkV/kN/cNeI9PMr8BsFXB/MR8WTAZQq/PlTq8Kww3TBSQ==
+"@redux-saga/deferred@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@redux-saga/deferred/-/deferred-1.2.1.tgz#aca373a08ccafd6f3481037f2f7ee97f2c87c3ec"
+  integrity sha512-cmin3IuuzMdfQjA0lG4B+jX+9HdTgHZZ+6u3jRAOwGUxy77GSlTi4Qp2d6PM1PUoTmQUR5aijlA39scWWPF31g==
 
-"@redux-saga/delay-p@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@redux-saga/delay-p/-/delay-p-1.1.2.tgz#8f515f4b009b05b02a37a7c3d0ca9ddc157bb355"
-  integrity sha512-ojc+1IoC6OP65Ts5+ZHbEYdrohmIw1j9P7HS9MOJezqMYtCDgpkoqB5enAAZrNtnbSL6gVCWPHaoaTY5KeO0/g==
+"@redux-saga/delay-p@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@redux-saga/delay-p/-/delay-p-1.2.1.tgz#e72ac4731c5080a21f75b61bedc31cb639d9e446"
+  integrity sha512-MdiDxZdvb1m+Y0s4/hgdcAXntpUytr9g0hpcOO1XFVyyzkrDu3SKPgBFOtHn7lhu7n24ZKIAT1qtKyQjHqRd+w==
   dependencies:
-    "@redux-saga/symbols" "^1.1.2"
+    "@redux-saga/symbols" "^1.1.3"
 
-"@redux-saga/is@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@redux-saga/is/-/is-1.1.2.tgz#ae6c8421f58fcba80faf7cadb7d65b303b97e58e"
-  integrity sha512-OLbunKVsCVNTKEf2cH4TYyNbbPgvmZ52iaxBD4I1fTif4+MTXMa4/Z07L83zW/hTCXwpSZvXogqMqLfex2Tg6w==
+"@redux-saga/is@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@redux-saga/is/-/is-1.1.3.tgz#b333f31967e87e32b4e6b02c75b78d609dd4ad73"
+  integrity sha512-naXrkETG1jLRfVfhOx/ZdLj0EyAzHYbgJWkXbB3qFliPcHKiWbv/ULQryOAEKyjrhiclmr6AMdgsXFyx7/yE6Q==
   dependencies:
-    "@redux-saga/symbols" "^1.1.2"
-    "@redux-saga/types" "^1.1.0"
+    "@redux-saga/symbols" "^1.1.3"
+    "@redux-saga/types" "^1.2.1"
 
-"@redux-saga/symbols@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@redux-saga/symbols/-/symbols-1.1.2.tgz#216a672a487fc256872b8034835afc22a2d0595d"
-  integrity sha512-EfdGnF423glv3uMwLsGAtE6bg+R9MdqlHEzExnfagXPrIiuxwr3bdiAwz3gi+PsrQ3yBlaBpfGLtDG8rf3LgQQ==
+"@redux-saga/symbols@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@redux-saga/symbols/-/symbols-1.1.3.tgz#b731d56201719e96dc887dc3ae9016e761654367"
+  integrity sha512-hCx6ZvU4QAEUojETnX8EVg4ubNLBFl1Lps4j2tX7o45x/2qg37m3c6v+kSp8xjDJY+2tJw4QB3j8o8dsl1FDXg==
 
-"@redux-saga/types@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@redux-saga/types/-/types-1.1.0.tgz#0e81ce56b4883b4b2a3001ebe1ab298b84237204"
-  integrity sha512-afmTuJrylUU/0OtqzaRkbyYFFNgCF73Bvel/sw90pvGrWIZ+vyoIJqA6eMSoA6+nb443kTmulmBtC9NerXboNg==
+"@redux-saga/types@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@redux-saga/types/-/types-1.2.1.tgz#9403f51c17cae37edf870c6bc0c81c1ece5ccef8"
+  integrity sha512-1dgmkh+3so0+LlBWRhGA33ua4MYr7tUOj+a9Si28vUi0IUFNbff1T3sgpeDJI/LaC75bBYnQ0A3wXjn0OrRNBA==
 
 "@reduxjs/toolkit@1.9.7":
   version "1.9.7"
@@ -11299,10 +11318,10 @@
   resolved "https://registry.yarnpkg.com/@types/braces/-/braces-3.0.0.tgz#7da1c0d44ff1c7eb660a36ec078ea61ba7eb42cb"
   integrity sha512-TbH79tcyi9FHwbyboOKeRachRq63mSuWYXOflsNO9ZyE5ClQ/JaozNKl+aWUq87qPNsXasXxi2AbgfwIJ+8GQw==
 
-"@types/byte-size@^8.1.0":
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/@types/byte-size/-/byte-size-8.1.0.tgz#013a3995d1ff2d85ad27da0801029f13328bd91b"
-  integrity sha512-LCIlZh8vyx+I2fgRycE1D34c33QDppYY6quBYYoaOpQ1nGhJ/avSP2VlrAefVotjJxgSk6WkKo0rTcCJwGG7vA==
+"@types/byte-size@^8.1.2":
+  version "8.1.2"
+  resolved "https://registry.yarnpkg.com/@types/byte-size/-/byte-size-8.1.2.tgz#abb3d70ab62c400d8753bed1ff2aa315ef9ff7f5"
+  integrity sha512-jGyVzYu6avI8yuqQCNTZd65tzI8HZrLjKX9sdMqZrGWVlNChu0rf6p368oVEDCYJe5BMx2Ov04tD1wqtgTwGSA==
 
 "@types/cacheable-request@^6.0.1":
   version "6.0.1"
@@ -11813,10 +11832,17 @@
     expect "^29.0.0"
     pretty-format "^29.0.0"
 
-"@types/jquery@*", "@types/jquery@^3.3.31":
+"@types/jquery@*":
   version "3.3.31"
   resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.3.31.tgz#27c706e4bf488474e1cb54a71d8303f37c93451b"
   integrity sha512-Lz4BAJihoFw5nRzKvg4nawXPzutkv7wmfQ5121avptaSIXlDNJCUuxZxX/G+9EVidZGuO0UBlk+YjKbwRKJigg==
+  dependencies:
+    "@types/sizzle" "*"
+
+"@types/jquery@^3.5.32":
+  version "3.5.32"
+  resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.5.32.tgz#3eb0da20611b92c7c49ebed6163b52a4fdc57def"
+  integrity sha512-b9Xbf4CkMqS02YH8zACqN1xzdxc3cO735Qe5AbSUFmyOiaWAbcpqh9Wna+Uk0vgACvoQHpWDg2rGdHkYPLmCiQ==
   dependencies:
     "@types/sizzle" "*"
 
@@ -12239,10 +12265,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-is@^17.0.3":
-  version "17.0.3"
-  resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-17.0.3.tgz#2d855ba575f2fc8d17ef9861f084acc4b90a137a"
-  integrity sha512-aBTIWg1emtu95bLTLx0cpkxwGW3ueZv71nE2YFBpL8k/z5czEW8yYpOo8Dp+UUAFAtKwNaOsh/ioSeQnWlZcfw==
+"@types/react-is@~18.2.0":
+  version "18.2.4"
+  resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-18.2.4.tgz#95a92829de452662348ce08349ca65623c50daf7"
+  integrity sha512-wBc7HgmbCcrvw0fZjxbgz/xrrlZKzEqmABBMeSvpTvdm25u6KI6xdIi9pRE2G0C1Lw5ETFdcn4UbYZ4/rpqUYw==
   dependencies:
     "@types/react" "*"
 
@@ -12376,10 +12402,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.27":
-  version "4.1.27"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.27.tgz#e08000d649df6f099b4099432bd2fece9f50ea7b"
-  integrity sha512-ALqsj8D7Swb6MnBQuAQ58J3KC3yh6fLGtAmpBmnZX8j+0kmP7NaLt56CuzBw2W2bXPrvHFTgn8iekOQFUKXEQA==
+"@types/selenium-webdriver@^4.1.28":
+  version "4.1.28"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.28.tgz#7b4f3c50a67494f8fd6d396a2eaab7d9df1f9f34"
+  integrity sha512-Au7CXegiS7oapbB16zxPToY4Cjzi9UQQMf3W2ZZM8PigMLTGR3iUAHjPUTddyE5g1SBjT/qpmvlsAQLBfNAdKg==
   dependencies:
     "@types/node" "*"
     "@types/ws" "*"
@@ -12417,10 +12443,10 @@
     "@types/mime" "^1"
     "@types/node" "*"
 
-"@types/set-value@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/set-value/-/set-value-2.0.0.tgz#63d386b103926dcf49b50e16e0f6dd49983046be"
-  integrity sha512-k8dCJEC80F/mbsIOZ5Hj3YSzTVVVBwMdtP/M9Rtc2TM4F5etVd+2UG8QUiAUfbXm4fABedL2tBZnrBheY7UwpA==
+"@types/set-value@^4.0.3":
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/@types/set-value/-/set-value-4.0.3.tgz#ac7f5f9715c95c7351e02832df672a112428e587"
+  integrity sha512-tSuUcLl6kMzI+l0gG7FZ04xbIcynxNIYgWFj91LPAvRcn7W3L1EveXNdVjqFDgAZPjY1qCOsm8Sb1C70SxAPHw==
 
 "@types/sinon@^7.0.13":
   version "7.0.13"
@@ -13989,13 +14015,6 @@ atomic-sleep@^1.0.0:
   resolved "https://registry.yarnpkg.com/atomic-sleep/-/atomic-sleep-1.0.0.tgz#eb85b77a601fc932cfe432c5acd364a9e2c9075b"
   integrity sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==
 
-attr-accept@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-1.1.3.tgz#48230c79f93790ef2775fcec4f0db0f5db41ca52"
-  integrity sha512-iT40nudw8zmCweivz6j58g+RT33I4KbaIvRUhjNmDwO2WmsQUxFEZZYZ5w3vXe5x5MX9D7mfvA/XaLOZYFR9EQ==
-  dependencies:
-    core-js "^2.5.0"
-
 attr-accept@^2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-2.2.2.tgz#646613809660110749e92f2c10833b70968d929b"
@@ -14251,15 +14270,6 @@ babel-plugin-transform-typescript-metadata@^0.3.2:
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-babel-polyfill@^6.26.0:
-  version "6.26.0"
-  resolved "https://registry.yarnpkg.com/babel-polyfill/-/babel-polyfill-6.26.0.tgz#379937abc67d7895970adc621f284cd966cf2153"
-  integrity sha1-N5k3q8Z9eJWXCtxiHyhM2WbPIVM=
-  dependencies:
-    babel-runtime "^6.26.0"
-    core-js "^2.5.0"
-    regenerator-runtime "^0.10.5"
-
 babel-preset-current-node-syntax@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/babel-preset-current-node-syntax/-/babel-preset-current-node-syntax-1.0.0.tgz#cf5feef29551253471cfa82fc8e0f5063df07a77"
@@ -14286,7 +14296,7 @@ babel-preset-jest@^29.6.3:
     babel-plugin-jest-hoist "^29.6.3"
     babel-preset-current-node-syntax "^1.0.0"
 
-babel-runtime@6.x, babel-runtime@^6.26.0:
+babel-runtime@6.x:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   integrity sha512-ITKNuq2wKlW1fJg9sSW52eepoYgZBggvOAHC0u/CYu/qxQ9EVzThCgR69BnSXLHjy2f7SY5zaQ4yt7H9ZVxY2g==
@@ -14836,10 +14846,10 @@ builtin-status-codes@^3.0.0:
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
   integrity sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
 
-byte-size@^8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-8.1.0.tgz#6353d0bc14ab7a69abcefbf11f8db0145a862cb5"
-  integrity sha512-FkgMTAg44I0JtEaUAvuZTtU2a2YDmBRbQxdsQNSMtLCjhG0hMcF5b1IMN9UjSCJaU4nvlj/GER7B9sI4nKdCgA==
+byte-size@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-9.0.1.tgz#7014b9f0e11ea732a8f2c21bef1cb8a78c6c55ff"
+  integrity sha512-YLe9x3rabBrcI0cueCdLS2l5ONUKywcRpTs02B8KP9/Cimhj7o3ZccGrPnRvcbyHMbb7W79/3MUJl7iGgTXKEw==
 
 bytes@3.0.0:
   version "3.0.0"
@@ -15271,10 +15281,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^131.0.1:
-  version "131.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-131.0.1.tgz#bfbf47f6c2ad7a65c154ff47d321bd8c33b52a77"
-  integrity sha512-LHRh+oaNU1WowJjAkWsviN8pTzQYJDbv/FvJyrQ7XhjKdIzVh/s3GV1iU7IjMTsxIQnBsTjx+9jWjzCWIXC7ug==
+chromedriver@^132.0.0:
+  version "132.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-132.0.1.tgz#55f288943ac68ad262b3267e7696538d4bda918a"
+  integrity sha512-M3XyeyOdYfEiw3plMeEvF/iMwluOH9+8K5mJwFmxllFBPfHvDGX1Oeys3GNzMyhqQ1lJbRX7B6bp+323LLd5lg==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -15947,12 +15957,7 @@ cookie@0.7.1:
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.7.1.tgz#2f73c42142d5d5cf71310a74fc4ae61670e5dbc9"
   integrity sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==
 
-cookie@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
-  integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
-
-cookie@^0.7.1:
+cookie@^0.7.1, cookie@^0.7.2:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.7.2.tgz#556369c472a2ba910f2979891b526b3436237ed7"
   integrity sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==
@@ -16005,7 +16010,7 @@ core-js-pure@^3.8.1:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.26.0.tgz#7ad8a5dd7d910756f3124374b50026e23265ca9a"
   integrity sha512-LiN6fylpVBVwT8twhhluD9TzXmZQQsr2I2eIKtWNbZI1XMfBT7CV18itaN6RA7EtQd/SDdRx/wzvAShX2HvhQA==
 
-core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
+core-js@^2.4.0:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
@@ -19090,16 +19095,16 @@ fetch-blob@^3.1.2, fetch-blob@^3.1.4:
     node-domexception "^1.0.0"
     web-streams-polyfill "^3.0.3"
 
-fetch-mock@^7.3.9:
-  version "7.3.9"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.3.9.tgz#a80fd2a1728f72e0634ef7a9734bc61200096487"
-  integrity sha512-PgsTbiQBNapFz2P2UwDl3gowK3nZqfV4HdyDZ1dI4eTGGH9MLAeBglIPbyDbbNQoGYBOfla6/9uaiq7az2z4Aw==
+fetch-mock@^10.1.0:
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-10.1.0.tgz#b2cabb4f587eca747e395e97de28c62364f301fc"
+  integrity sha512-/2DFdUrn2afOifgXuq3ppTGOg/S8YAvjeEOlBJ4QgWiT24pYGozju3Hz5UQm1ynumY9hlzBHE2z0jd0PHD+fRg==
   dependencies:
-    babel-polyfill "^6.26.0"
-    core-js "^2.6.9"
-    glob-to-regexp "^0.4.0"
-    path-to-regexp "^2.2.1"
-    whatwg-url "^6.5.0"
+    debug "^4.1.1"
+    dequal "^2.0.3"
+    globrex "^0.1.2"
+    is-subset "^0.1.1"
+    regexparam "^3.0.0"
 
 fetch-retry@^5.0.2:
   version "5.0.3"
@@ -19965,7 +19970,7 @@ glob-to-regexp@^0.3.0:
   resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.3.0.tgz#8c5a1494d2066c570cc3bfe4496175acc4d502ab"
   integrity sha1-jFoUlNIGbFcMw7/kSWF1rMTVAqs=
 
-glob-to-regexp@^0.4.0, glob-to-regexp@^0.4.1:
+glob-to-regexp@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.4.1.tgz#c75297087c851b9a578bd217dd59a92f59fe546e"
   integrity sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==
@@ -20143,6 +20148,11 @@ globjoin@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/globjoin/-/globjoin-0.1.4.tgz#2f4494ac8919e3767c5cbb691e9f463324285d43"
   integrity sha1-L0SUrIkZ43Z8XLtpHp9GMyQoXUM=
+
+globrex@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
+  integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
 gonzales-pe@^4.3.0:
   version "4.3.0"
@@ -22631,10 +22641,10 @@ jpeg-exif@^1.1.4:
   resolved "https://registry.yarnpkg.com/jpeg-exif/-/jpeg-exif-1.1.4.tgz#781a65b6cd74f62cb1c493511020f8d3577a1c2b"
   integrity sha512-a+bKEcCjtuW5WTdgeXFzswSrdqi0jk4XlEtZlx5A94wCoBpFjfFTbo/Tra5SpNCl/YFZPvcV1dJc+TAYeg6ROQ==
 
-jquery@^3.5.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.0.tgz#c72a09f15c1bdce142f49dbf1170bdf8adac2470"
-  integrity sha512-JVzAR/AjBvVt2BmYhxRCSYysDsPcssdmTFnzyLEts9qNwmjmu4JTAMYubEfwVOSwpQ1I1sKKFcxhZCI2buerfw==
+jquery@^3.7.1:
+  version "3.7.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.7.1.tgz#083ef98927c9a6a74d05a6af02806566d16274de"
+  integrity sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==
 
 js-cookie@^2.2.1:
   version "2.2.1"
@@ -24647,10 +24657,10 @@ moment-duration-format@^2.3.2:
   resolved "https://registry.yarnpkg.com/moment-duration-format/-/moment-duration-format-2.3.2.tgz#5fa2b19b941b8d277122ff3f87a12895ec0d6212"
   integrity sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==
 
-moment-timezone@^0.5.46:
-  version "0.5.46"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.46.tgz#a21aa6392b3c6b3ed916cd5e95858a28d893704a"
-  integrity sha512-ZXm9b36esbe7OmdABqIWJuBBiLLwAjrN7CE+7sYdCCx82Nabt1wHDj8TVseS59QIlfFPbOoiBPm6ca9BioG4hw==
+moment-timezone@^0.5.47:
+  version "0.5.47"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.47.tgz#d4d1a21b78372d914d6d69ae285454732a429749"
+  integrity sha512-UbNt/JAWS0m/NJOebR0QMRHBk0hu03r5dx9GK8Cs0AS3I81yDcOc9k+DytPItgVvBP7J6Mf6U2n3BPAacAV9oA==
   dependencies:
     moment "^2.29.4"
 
@@ -24807,7 +24817,7 @@ msgpackr@^1.9.9:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@^2.4.12:
+msw@~2.5.2:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/msw/-/msw-2.5.2.tgz#dfce10b68dbabc2d5dafeb6d7fb82c3c7073a4d1"
   integrity sha512-eBsFgU30NYtrfC62XzS1rdAzFK+Br0zKU4ORqD9Qliq86362DWZyPiD6FLfMgy0Ktik83DPTXmqPMz2bqwmJdA==
@@ -25404,10 +25414,10 @@ oas-validator@^5.0.8:
     should "^13.2.1"
     yaml "^1.10.0"
 
-oas@^25.2.1:
-  version "25.2.1"
-  resolved "https://registry.yarnpkg.com/oas/-/oas-25.2.1.tgz#2cf0ac042e5ba7af0bfc2a9acea6d33699cd6b90"
-  integrity sha512-56NO/ThEzIQeniJHm12tFIIGaugcdZTxYWiWP0KV8W9DcdWRvk9tvBEKITFp9r62w7W25vobedpiApa9u/Aoxg==
+oas@^25.3.0:
+  version "25.3.0"
+  resolved "https://registry.yarnpkg.com/oas/-/oas-25.3.0.tgz#c55a3a557fc040c2e8ea5954dd017b746ae2ac3a"
+  integrity sha512-98HLqUASE1u4kS8o3O7ZqjT1LG5oNwNjG1oXTsMscYVl2RSW4gMzlrn80dpxjsxpMlVuqPPa/sUS5WFtkk+Xxg==
   dependencies:
     "@readme/json-schema-ref-parser" "^1.2.0"
     "@types/json-schema" "^7.0.11"
@@ -26175,11 +26185,6 @@ path-to-regexp@^1.7.0:
   integrity sha512-xIp7/apCFJuUHdDLWe8O1HIkb0kQrOMb/0u6FXQjemHn/ii5LrIzU6bdECnsiTF/GjZkMEKg1xdiZwNqDYlZ6g==
   dependencies:
     isarray "0.0.1"
-
-path-to-regexp@^2.2.1:
-  version "2.4.0"
-  resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-2.4.0.tgz"
-  integrity sha512-G6zHoVqC6GGTQkZwF4lkuEyMbVOjoBKAEybQUypI1WTkqinCOrq2x6U2+phkJ1XsEMTy4LjtwPI7HW+NVrRR2w==
 
 path-to-regexp@^6.3.0:
   version "6.3.0"
@@ -27540,14 +27545,6 @@ react-dropzone@^11.7.1:
     file-selector "^0.4.0"
     prop-types "^15.8.1"
 
-react-dropzone@^4.2.9:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-4.3.0.tgz#facdd7db16509772633c9f5200621ac01aa6706f"
-  integrity sha512-ULfrLaTSsd8BDa9KVAGCueuq1AN3L14dtMsGGqtP0UwYyjG4Vhf158f/ITSHuSPYkZXbvfcIiOlZsH+e3QWm+Q==
-  dependencies:
-    attr-accept "^1.1.3"
-    prop-types "^15.5.7"
-
 react-element-to-jsx-string@^14.3.4:
   version "14.3.4"
   resolved "https://registry.yarnpkg.com/react-element-to-jsx-string/-/react-element-to-jsx-string-14.3.4.tgz#709125bc72f06800b68f9f4db485f2c7d31218a8"
@@ -27665,6 +27662,11 @@ react-is@^16.12.0, react-is@^16.13.1, react-is@^16.6.0, react-is@^16.7.0, react-
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.3.1.tgz#e83557dc12eae63a99e003a46388b1dcbb44db7e"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
+react-is@~18.2.0:
+  version "18.2.0"
+  resolved "https://registry.npmjs.org/react-is/-/react-is-18.2.0.tgz"
+  integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
+
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
@@ -27765,10 +27767,10 @@ react-remove-scroll@^2.5.6:
     use-callback-ref "^1.3.0"
     use-sidecar "^1.1.2"
 
-react-reverse-portal@^2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.1.2.tgz#75b8daa186ccb9a040ba566d6391326431fccd51"
-  integrity sha512-li4puNtBmMMJhtI+IVxeSX0RvK1ft8qjPSbCih4OKQ/YUIcROc31Nmo22gv94hTx8EUfR7fzZY47RuZF2YRMdQ==
+react-reverse-portal@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.2.0.tgz#0a119f8ab00885fa8aebc03a9fd2111d0e76303c"
+  integrity sha512-y4odW09uzTtyJWs9E9YbY50FypJeRzEMhEjQUpzLOXZeTHCFE88WfklvRUddTJsizFWTzMOLTE4wNgYdzeQ7uw==
 
 react-router-config@^5.1.1:
   version "5.1.1"
@@ -28229,12 +28231,12 @@ redux-saga-testing@^2.0.2:
   resolved "https://registry.yarnpkg.com/redux-saga-testing/-/redux-saga-testing-2.0.2.tgz#a542b771a6b6584397198f35d47d07bae8dbfc9c"
   integrity sha512-8IVPTaEw0Typ9TGCAsktFrrU+I5ACbmwPmzW0DQjUgZvja0k1jP2ILnUn+fZDF1gT8c0L/Ubj//bsej5X3OkaQ==
 
-redux-saga@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-1.1.3.tgz#9f3e6aebd3c994bbc0f6901a625f9a42b51d1112"
-  integrity sha512-RkSn/z0mwaSa5/xH/hQLo8gNf4tlvT18qXDNvedihLcfzh+jMchDgaariQoehCpgRltEm4zHKJyINEz6aqswTw==
+redux-saga@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-1.3.0.tgz#a59ada7c28010189355356b99738c9fcb7ade30e"
+  integrity sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==
   dependencies:
-    "@redux-saga/core" "^1.1.3"
+    "@redux-saga/core" "^1.3.0"
 
 redux-thunk@^2.4.2:
   version "2.4.2"
@@ -28294,11 +28296,6 @@ regenerate@^1.4.0, regenerate@^1.4.2:
   resolved "https://registry.yarnpkg.com/regenerate/-/regenerate-1.4.2.tgz#b9346d8827e8f5a32f7ba29637d398b69014848a"
   integrity sha512-zrceR/XhGYU/d/opr2EKO7aRHUeiBI8qjtfHqADTwZd6Szfy16la6kqD0MIUs5z5hx6AaKa+PixpPrR289+I0A==
 
-regenerator-runtime@^0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.10.5.tgz#336c3efc1220adcedda2c9fab67b5a7955a33658"
-  integrity sha1-M2w+/BIgrc7dosn6tntaeVWjNlg=
-
 regenerator-runtime@^0.11.0:
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.11.1.tgz#be05ad7f9bf7d22e056f9726cee5017fbf19e2e9"
@@ -28343,6 +28340,11 @@ regexp.prototype.flags@^1.2.0, regexp.prototype.flags@^1.4.3, regexp.prototype.f
     define-properties "^1.2.1"
     es-errors "^1.3.0"
     set-function-name "^2.0.1"
+
+regexparam@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/regexparam/-/regexparam-3.0.0.tgz#1673e09d41cb7fd41eaafd4040a6aa90daa0a21a"
+  integrity sha512-RSYAtP31mvYLkAHrOlh25pCNQ5hWnT106VukGaaFfuJrZFkGRX5GhUAdPqpSDXxOhA2c4akmRuplv1mRqnBn6Q==
 
 regexpp@^3.0.0:
   version "3.2.0"
@@ -29268,10 +29270,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.27.0:
-  version "4.27.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.27.0.tgz#f0f26ce453805e7dc77151040442c67e441dbe7a"
-  integrity sha512-LkTJrNz5socxpPnWPODQ2bQ65eYx9JK+DQMYNihpTjMCqHwgWGYQnQTCAAche2W3ZP87alA+1zYPvgS8tHNzMQ==
+selenium-webdriver@^4.28.0:
+  version "4.28.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.28.1.tgz#0f6cc4fbc83cee3fdf8b116257656892957b72da"
+  integrity sha512-TwbTpu/NUQkorBODGAkGowJ8sar63bvqi66/tjqhS05rBl34HkVp8DoRg1cOv2iSnNonVSbkxazS3wjbc+NRtg==
   dependencies:
     "@bazel/runfiles" "^6.3.1"
     jszip "^3.10.1"
@@ -33294,15 +33296,6 @@ whatwg-url@^5.0.0:
     tr46 "~0.0.3"
     webidl-conversions "^3.0.0"
 
-whatwg-url@^6.5.0:
-  version "6.5.0"
-  resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-6.5.0.tgz#f2df02bff176fd65070df74ad5ccbb5a199965a8"
-  integrity sha512-rhRZRqx/TLJQWUpQ6bmrt2UV4f0HCQ463yQuONJqC6fO2VoEb1pTYddbe59SkYq87aoM5A3bdhMZiUiVws+fzQ==
-  dependencies:
-    lodash.sortby "^4.7.0"
-    tr46 "^1.0.1"
-    webidl-conversions "^4.0.2"
-
 whatwg-url@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-7.0.0.tgz#fde926fa54a599f3adf82dff25a9f7be02dc6edd"
@@ -33621,10 +33614,10 @@ xtend@~2.1.1:
   dependencies:
     object-keys "~0.4.0"
 
-xterm@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/xterm/-/xterm-5.1.0.tgz#3e160d60e6801c864b55adf19171c49d2ff2b4fc"
-  integrity sha512-LovENH4WDzpwynj+OTkLyZgJPeDom9Gra4DMlGAgz6pZhIDCQ+YuO7yfwanY+gVbn/mmZIStNOnVRU/ikQuAEQ==
+xterm@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/xterm/-/xterm-5.3.0.tgz#867daf9cc826f3d45b5377320aabd996cb0fce46"
+  integrity sha512-8QqjlekLUFTrU6x7xck1MsPzPA571K5zNqWm0M0oroYEWVOptZ0+ubQSkQ3uxIEhcIHRujJy6emDWX4A7qyFzg==
 
 y18n@^3.2.0:
   version "3.2.2"
