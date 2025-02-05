@@ -15,18 +15,18 @@ echo '--- Lint: eslint'
 # after possibly commiting fixed files to the repo
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 8 node scripts/eslint --no-cache --fix
+  moon run :lint --affected --remote -- --fix
 else
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 8 node scripts/eslint --no-cache
+  moon run :lint
 fi
 
 eslint_exit=$?
 # re-enable "Exit immediately" mode
 set -e;
 
-desc="node scripts/eslint --no-cache"
+desc="moon run :lint"
 if is_pr && ! is_auto_commit_disabled; then
-  desc="$desc --fix"
+  desc="$desc -- --fix"
 fi
 
 check_for_changed_files "$desc" true
