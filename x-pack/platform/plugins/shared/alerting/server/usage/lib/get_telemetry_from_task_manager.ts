@@ -14,6 +14,7 @@ import type {
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -122,16 +123,8 @@ export async function getFailedAndUnrecognizedTasksPerDay({
       countFailedAndUnrecognizedTasks: totalFailedAndUnrecognizedTasks ?? 0,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getFailedAndUnrecognizedTasksPerDay`, logger);
+
     return {
       hasErrors: true,
       errorMessage,

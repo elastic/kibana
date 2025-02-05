@@ -3,7 +3,7 @@
 exports[`useComparisonCss should render with basic diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1qc86qa",
+  "name": "14zju9t",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -15,7 +15,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
@@ -63,7 +63,7 @@ Object {
 exports[`useComparisonCss should render with basic diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1qc86qa",
+  "name": "14zju9t",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -75,7 +75,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
@@ -123,7 +123,7 @@ Object {
 exports[`useComparisonCss should render with chars diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "vd39me",
+  "name": "15v0erc",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -135,7 +135,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
@@ -173,7 +173,7 @@ Object {
 exports[`useComparisonCss should render with chars diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "z8l3vw",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -185,7 +185,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
@@ -215,7 +215,7 @@ Object {
 exports[`useComparisonCss should render with lines diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1nu19hw",
+  "name": "jvfp05",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -227,7 +227,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
@@ -293,7 +293,7 @@ Object {
 exports[`useComparisonCss should render with lines diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1mthx0u",
+  "name": "trn277",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -305,7 +305,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
@@ -341,7 +341,7 @@ Object {
 exports[`useComparisonCss should render with no diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "z8l3vw",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -353,7 +353,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
@@ -383,7 +383,7 @@ Object {
 exports[`useComparisonCss should render with words diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "vd39me",
+  "name": "15v0erc",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -395,7 +395,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
@@ -433,7 +433,7 @@ Object {
 exports[`useComparisonCss should render with words diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "z8l3vw",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -445,7 +445,7 @@ Object {
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #f7f8fc;
     }
 
     
