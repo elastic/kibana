@@ -498,7 +498,7 @@ export class SessionIndex {
       }
     } catch (err) {
       if (err instanceof errors.ResponseError && err.statusCode === 503) {
-        shardMissingCounter = shardMissingCounter + 1;
+        shardMissingCounter++;
         if (shardMissingCounter < 10) {
           logger.warn(
             `No shards found for session index, skipping session cleanup. This operation has failed ${shardMissingCounter} time(s)`
