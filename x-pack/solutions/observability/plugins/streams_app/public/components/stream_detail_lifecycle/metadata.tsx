@@ -141,7 +141,7 @@ export function RetentionMetadata({
           defaultMessage: 'Retention period',
         })}
         value={
-          <EuiFlexGroup>
+          <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiBadge color={isDisabledLifecycle(lifecycle) ? 'default' : 'accent'}>
                 {isDslLifecycle(lifecycle)
@@ -165,7 +165,7 @@ export function RetentionMetadata({
           defaultMessage: 'Source',
         })}
         value={
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             {ilmLink ? <EuiFlexItem grow={false}>{ilmLink}</EuiFlexItem> : null}
             <EuiFlexItem grow={false}>{lifecycleOrigin}</EuiFlexItem>
           </EuiFlexGroup>
@@ -186,7 +186,7 @@ function MetadataRow({
   button?: ReactNode;
 }) {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xl">
+    <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
       <EuiFlexItem grow={1}>
         <EuiText>
           <b>{metadata}</b>
