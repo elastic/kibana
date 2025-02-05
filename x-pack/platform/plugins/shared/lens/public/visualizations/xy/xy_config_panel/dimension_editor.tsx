@@ -132,7 +132,7 @@ export function DataDimensionEditor(
 
   const table = props.frame.activeData?.[layer.layerId];
   const { splitAccessor } = layer;
-  const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
+  const splitCategories = getColorCategories(table?.rows, splitAccessor);
 
   if (props.groupId === 'breakdown') {
     return !layer.collapseFn ? (

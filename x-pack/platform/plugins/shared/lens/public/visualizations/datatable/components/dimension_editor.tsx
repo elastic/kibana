@@ -105,7 +105,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   };
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
-  const categories = getColorCategories(currentData?.rows ?? [], accessor, false, [null]);
+  const categories = getColorCategories(currentData?.rows, accessor, [null]);
 
   return (
     <>
