@@ -71,6 +71,7 @@ const mockRollupResponse = {
 
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
+  const mockRollupSearchCaller = jest.fn();
   const mockStatusCaller = jest.fn();
   const mockGetCaller = jest.fn();
   const mockSubmitCaller = jest.fn();
@@ -92,6 +93,9 @@ describe('ES search strategy', () => {
           delete: mockDeleteCaller,
         },
         transport: { request: mockApiCaller },
+        rollup: {
+          rollupSearch: mockRollupSearchCaller,
+        },
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
@@ -286,7 +290,7 @@ describe('ES search strategy', () => {
       });
 
       it('calls the rollup API if the index is a rollup type', async () => {
-        mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+        mockRollupSearchCaller.mockResolvedValueOnce(mockRollupResponse);
 
         const params = { index: 'foo-程' };
         const esSearch = await enhancedEsSearchStrategyProvider(
@@ -306,10 +310,17 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockApiCaller).toBeCalled();
-        const { method, path } = mockApiCaller.mock.calls[0][0];
-        expect(method).toBe('POST');
-        expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+        expect(mockRollupSearchCaller).toBeCalled();
+        expect(mockRollupSearchCaller).toHaveBeenCalledWith(
+          {
+            index: 'foo-程',
+            ignore_unavailable: true,
+            max_concurrent_shard_requests: undefined,
+            timeout: '100ms',
+            track_total_hits: true,
+          },
+          { meta: true, signal: undefined }
+        );
       });
 
       it("doesn't call the rollup API if the index is a rollup type BUT rollups are disabled", async () => {

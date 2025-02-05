@@ -23,9 +23,11 @@ describe('query', () => {
 
   beforeEach(() => {
     req = {
-      timerange: {
-        min: '2017-01-01T00:00:00Z',
-        max: '2017-01-01T01:00:00Z',
+      body: {
+        timerange: {
+          min: '2017-01-01T00:00:00Z',
+          max: '2017-01-01T01:00:00Z',
+        },
       },
     };
     panel = {

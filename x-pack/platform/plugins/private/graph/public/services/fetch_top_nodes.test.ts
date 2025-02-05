@@ -36,23 +36,25 @@ describe('fetch_top_nodes', () => {
     expect(postMock).toHaveBeenCalledWith('../internal/graph/searchProxy', {
       body: JSON.stringify({
         index: 'test',
-        size: 0,
-        aggs: {
-          sample: {
-            sampler: {
-              shard_size: 5000,
-            },
-            aggs: {
-              top_values_field1: {
-                terms: {
-                  field: 'field1',
-                  size: 10,
-                },
+        body: {
+          size: 0,
+          aggs: {
+            sample: {
+              sampler: {
+                shard_size: 5000,
               },
-              top_values_field2: {
-                terms: {
-                  field: 'field2',
-                  size: 10,
+              aggs: {
+                top_values_field1: {
+                  terms: {
+                    field: 'field1',
+                    size: 10,
+                  },
+                },
+                top_values_field2: {
+                  terms: {
+                    field: 'field2',
+                    size: 10,
+                  },
                 },
               },
             },

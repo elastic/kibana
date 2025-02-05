@@ -70,10 +70,12 @@ describe('AbstractSearchStrategy', () => {
     const responses = await abstractSearchStrategy.search(
       requestContext,
       {
-        searchSession: {
-          sessionId: '1',
-          isRestore: false,
-          isStored: true,
+        body: {
+          searchSession: {
+            sessionId: '1',
+            isRestore: false,
+            isStored: true,
+          },
         },
         events: {
           aborted$: from([]),

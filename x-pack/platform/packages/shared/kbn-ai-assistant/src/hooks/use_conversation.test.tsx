@@ -508,16 +508,18 @@ describe('useConversation', () => {
               path: {
                 conversationId: 'my-conversation-id',
               },
-              conversation: {
-                '@timestamp': expect.any(String),
+              body: {
                 conversation: {
-                  title: 'my-new-title',
-                  id: 'my-conversation-id',
+                  '@timestamp': expect.any(String),
+                  conversation: {
+                    title: 'my-new-title',
+                    id: 'my-conversation-id',
+                  },
+                  labels: expect.anything(),
+                  messages: expect.anything(),
+                  numeric_labels: expect.anything(),
+                  public: expect.anything(),
                 },
-                labels: expect.anything(),
-                messages: expect.anything(),
-                numeric_labels: expect.anything(),
-                public: expect.anything(),
               },
             },
           },

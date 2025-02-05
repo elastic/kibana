@@ -377,7 +377,7 @@ describe('CsvGenerator', () => {
 
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
       expect(mockDataClient.search).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
@@ -676,7 +676,7 @@ describe('CsvGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',
@@ -762,7 +762,7 @@ describe('CsvGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
           strategy: 'es',

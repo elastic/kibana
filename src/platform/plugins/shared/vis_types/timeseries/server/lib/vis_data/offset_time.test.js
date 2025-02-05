@@ -13,9 +13,11 @@ import { offsetTime } from './offset_time';
 describe('offsetTime(req, by)', () => {
   test('should return a moment object for to and from', () => {
     const req = {
-      timerange: {
-        min: '2017-01-01T00:00:00Z',
-        max: '2017-01-01T01:00:00Z',
+      body: {
+        timerange: {
+          min: '2017-01-01T00:00:00Z',
+          max: '2017-01-01T01:00:00Z',
+        },
       },
     };
     const { from, to } = offsetTime(req, '');
@@ -27,9 +29,11 @@ describe('offsetTime(req, by)', () => {
 
   test('should return a moment object for to and from offset by 1 hour', () => {
     const req = {
-      timerange: {
-        min: '2017-01-01T00:00:00Z',
-        max: '2017-01-01T01:00:00Z',
+      body: {
+        timerange: {
+          min: '2017-01-01T00:00:00Z',
+          max: '2017-01-01T01:00:00Z',
+        },
       },
     };
     const { from, to } = offsetTime(req, '1h');
@@ -41,9 +45,11 @@ describe('offsetTime(req, by)', () => {
 
   test('should return a moment object for to and from offset by -2 minute', () => {
     const req = {
-      timerange: {
-        min: '2017-01-10T01:00:00Z',
-        max: '2017-01-10T02:00:00Z',
+      body: {
+        timerange: {
+          min: '2017-01-10T01:00:00Z',
+          max: '2017-01-10T02:00:00Z',
+        },
       },
     };
     const { from, to } = offsetTime(req, '-2m');
@@ -55,9 +61,11 @@ describe('offsetTime(req, by)', () => {
 
   test('should work when prefixing positive offsets with the plus sign', () => {
     const req = {
-      timerange: {
-        min: '2017-01-10T01:00:00Z',
-        max: '2017-01-10T02:00:00Z',
+      body: {
+        timerange: {
+          min: '2017-01-10T01:00:00Z',
+          max: '2017-01-10T02:00:00Z',
+        },
       },
     };
     const { from: fromSigned, to: toSigned } = offsetTime(req, '+1m');
