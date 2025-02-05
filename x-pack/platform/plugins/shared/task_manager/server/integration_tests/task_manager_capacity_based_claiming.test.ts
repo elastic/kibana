@@ -12,7 +12,7 @@ import { times } from 'lodash';
 import { TaskCost, TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
-import { injectTask, setupTestServers, retry } from './lib';
+import { injectTaskBulk, setupTestServers, retry } from './lib';
 import { CreateMonitoringStatsOpts } from '../monitoring';
 import { filter, map } from 'rxjs';
 import { isTaskManagerWorkerUtilizationStatEvent } from '../task_events';
@@ -94,8 +94,7 @@ jest.mock('../queries/task_claiming', () => {
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
-// FLAKY: https://github.com/elastic/kibana/issues/191117
-describe.skip('capacity based claiming', () => {
+describe('capacity based claiming', () => {
   const taskIdsToRemove: string[] = [];
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
@@ -170,9 +169,10 @@ describe.skip('capacity based claiming', () => {
     times(10, () => ids.push(uuidV4()));
 
     const now = new Date();
-    const runAt = new Date(now.valueOf() + 5000);
+    const runAt = new Date(now.valueOf() + 6000);
+    const tasks = [];
     for (const id of ids) {
-      await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+      tasks.push({
         id,
         taskType: '_normalCostType',
         params: {},
@@ -189,6 +189,8 @@ describe.skip('capacity based claiming', () => {
       });
       taskIdsToRemove.push(id);
     }
+
+    await injectTaskBulk(kibanaServer.coreStart.elasticsearch.client.asInternalUser, tasks);
 
     await retry(async () => {
       expect(mockTaskTypeNormalCostRunFn).toHaveBeenCalledTimes(10);
@@ -235,8 +237,9 @@ describe.skip('capacity based claiming', () => {
     const ids: string[] = [];
     times(6, () => ids.push(uuidV4()));
     const runAt1 = new Date(now.valueOf() - 5);
+    const tasks = [];
     for (const id of ids) {
-      await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+      tasks.push({
         id,
         taskType: '_normalCostType',
         params: {},
@@ -257,7 +260,7 @@ describe.skip('capacity based claiming', () => {
     // inject 1 XL cost task that will put us over the max cost capacity of 20
     const xlid = uuidV4();
     const runAt2 = now;
-    await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+    tasks.push({
       id: xlid,
       taskType: '_xlCostType',
       params: {},
@@ -277,7 +280,7 @@ describe.skip('capacity based claiming', () => {
     // inject one more normal cost task
     const runAt3 = new Date(now.valueOf() + 5);
     const lastid = uuidV4();
-    await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+    tasks.push({
       id: lastid,
       taskType: '_normalCostType',
       params: {},
@@ -293,6 +296,8 @@ describe.skip('capacity based claiming', () => {
       ownerId: null,
     });
     taskIdsToRemove.push(lastid);
+
+    await injectTaskBulk(kibanaServer.coreStart.elasticsearch.client.asInternalUser, tasks);
 
     // retry until all tasks have been run
     await retry(async () => {
