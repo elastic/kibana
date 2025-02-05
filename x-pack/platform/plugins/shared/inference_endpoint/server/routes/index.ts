@@ -13,6 +13,7 @@ import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/t
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
 import { addInferenceEndpoint } from '../lib/add_inference_endpoint';
+import { inferenceEndpointExists } from '../lib/inference_endpoint_exists';
 
 const inferenceEndpointSchema = schema.object({
   config: schema.object({
@@ -93,6 +94,45 @@ export const getInferenceServicesRoute = (
 
           return response.ok({
             body: result,
+          });
+        } catch (err) {
+          logger.error(err);
+          return response.customError({
+            body: err.message,
+            statusCode: err.statusCode,
+          });
+        }
+      }
+    );
+
+  router.versioned
+    .get({
+      access: 'internal',
+      path: '/internal/_inference/_exists/{inferenceId}',
+    })
+    .addVersion(
+      {
+        version: INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: schema.object({
+              inferenceId: schema.string(),
+            }),
+          },
+        },
+      },
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<{ isEndpointExists: boolean }>> => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+          const result = await inferenceEndpointExists(esClient, request.params.inferenceId);
+
+          return response.ok({
+            body: { isEndpointExists: result },
           });
         } catch (err) {
           logger.error(err);
