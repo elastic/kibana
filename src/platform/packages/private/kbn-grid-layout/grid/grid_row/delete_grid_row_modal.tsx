@@ -18,9 +18,9 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { GridLayoutStateManager } from '../types';
 import { deleteRow, movePanelsToRow } from '../utils/row_management';
-import { i18n } from '@kbn/i18n';
 
 export const DeleteGridRowModal = ({
   rowIndex,
