@@ -33,21 +33,21 @@ export const createStringValidationFunction =
   (stringValidator: (value: string) => ValidationError | undefined): SharedValidationFunction =>
   (value: unknown): ValidationError | undefined => {
     if (!isString(value)) {
-      return { code: 'NOT_STRING' };
+      return { code: 'ERR_NOT_STRING' };
     }
 
     if (!value.length) {
-      return { code: 'EMPTY' };
+      return { code: 'ERR_EMPTY' };
     }
 
     return stringValidator(value);
   };
 
 export const validateDomain = createStringValidationFunction((value) => {
-  return DOMAIN_REGEX.test(value) ? undefined : { code: 'INVALID_VALUE' };
+  return DOMAIN_REGEX.test(value) ? undefined : { code: 'ERR_NOT_VALID' };
 });
 export const validateGenericValue = createStringValidationFunction((value) => {
-  return GENERIC_REGEX.test(value) ? undefined : { code: 'INVALID_VALUE' };
+  return GENERIC_REGEX.test(value) ? undefined : { code: 'ERR_NOT_VALID' };
 });
 
 export const validateIp = (kind: 'ipv6' | 'ipv4') =>
@@ -57,12 +57,12 @@ export const validateIp = (kind: 'ipv6' | 'ipv4') =>
 
       if (parsed.kind() !== kind) {
         return {
-          code: 'INVALID_VALUE',
+          code: 'ERR_NOT_VALID',
         };
       }
     } catch (error) {
       return {
-        code: 'INVALID_VALUE',
+        code: 'ERR_NOT_VALID',
       };
     }
   });
@@ -72,7 +72,7 @@ export const validateUrl = createStringValidationFunction((value) => {
     new URL(value);
   } catch (error) {
     return {
-      code: 'INVALID_VALUE',
+      code: 'ERR_NOT_VALID',
     };
   }
 });
@@ -80,7 +80,7 @@ export const validateUrl = createStringValidationFunction((value) => {
 export const validateEmail = createStringValidationFunction((value: string) => {
   if (parseAddressList(value) != null) {
     return {
-      code: 'INVALID_VALUE',
+      code: 'ERR_NOT_EMAIL',
     };
   }
 });
