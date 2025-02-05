@@ -13,7 +13,7 @@ import {
   HasSerializedChildState,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import { PublishesViewMode } from '@kbn/presentation-publishing';
+import { PublishesWritableViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 
 export interface DashboardGridData {
@@ -45,7 +45,7 @@ export interface MockSerializedDashboardState {
 export type MockDashboardApi = PresentationContainer &
   CanAddNewPanel &
   HasSerializedChildState &
-  PublishesViewMode &
+  PublishesWritableViewMode &
   CanExpandPanels & {
     panels$: BehaviorSubject<MockedDashboardPanelMap>;
     rows$: BehaviorSubject<MockedDashboardRowMap>;

@@ -35,6 +35,7 @@ export const useMockDashboardApi = ({
   const mockDashboardApi = useMemo(() => {
     const panels$ = new BehaviorSubject<MockedDashboardPanelMap>(savedState.panels);
     const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+    const viewMode$ = new BehaviorSubject<ViewMode>('edit');
 
     return {
       getSerializedStateForChild: (id: string) => {
@@ -50,7 +51,8 @@ export const useMockDashboardApi = ({
       }),
       filters$: new BehaviorSubject([]),
       query$: new BehaviorSubject(''),
-      viewMode$: new BehaviorSubject<ViewMode>('edit'),
+      viewMode$,
+      setViewMode: (viewMode: ViewMode) => viewMode$.next(viewMode),
       panels$,
       getPanelCount: () => {
         return Object.keys(panels$.getValue()).length;

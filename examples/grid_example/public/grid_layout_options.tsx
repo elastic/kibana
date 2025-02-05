@@ -73,7 +73,7 @@ export const GridLayoutOptions = ({
             ]}
             idSelected={viewMode}
             onChange={(id) => {
-              mockDashboardApi.viewMode$.next(id);
+              mockDashboardApi.setViewMode(id as ViewMode);
             }}
           />
         </EuiFormRow>
