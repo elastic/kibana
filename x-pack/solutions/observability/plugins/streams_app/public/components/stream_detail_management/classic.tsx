@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
@@ -32,23 +32,6 @@ export function ClassicStreamDetailManagement({
     path: { key, subtab },
   } = useStreamsAppParams('/{key}/management/{subtab}');
 
-  const legacyDefinition = useMemo(() => {
-    if (!definition) {
-      return undefined;
-    }
-    return {
-      dashboards: definition.dashboards,
-      elasticsearch_assets: definition.elasticsearch_assets,
-      inherited_fields: {},
-      effective_lifecycle: definition.effective_lifecycle,
-      name: definition.stream.name,
-      data_stream_exists: definition.data_stream_exists,
-      stream: {
-        ...definition.stream,
-      },
-    };
-  }, [definition]);
-
   const tabs: ManagementTabs = {
     overview: {
       content: <UnmanagedStreamOverview definition={definition} />,
@@ -61,10 +44,7 @@ export function ClassicStreamDetailManagement({
   if (definition.data_stream_exists) {
     tabs.enrich = {
       content: (
-        <StreamDetailEnrichment
-          definition={legacyDefinition}
-          refreshDefinition={refreshDefinition}
-        />
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
         defaultMessage: 'Extract field',
