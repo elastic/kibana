@@ -308,6 +308,7 @@ export class Server {
       http: httpSetup,
       coreUsageData: coreUsageDataSetup,
       logging: loggingSetup,
+      docLinks: docLinksSetup,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
