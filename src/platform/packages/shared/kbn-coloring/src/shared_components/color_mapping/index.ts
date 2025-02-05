@@ -23,3 +23,4 @@ export {
   getPaletteColors,
   getColorsFromMapping,
 } from './config/default_color_mapping';
+export * from './components/assignment/utils';

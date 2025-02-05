@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  extractContainerType,
-  extractVisualizationType,
-  getOverridesFor,
-  isOnAggBasedEditor,
-} from './utils';
-export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
-export { isChartSizeEvent } from './types';
-export { getColorCategories, getLegacyColorCategories } from './color_categories';
+import { Config, CategoricalConfig, GradientConfig } from './types';
+
+export function isCategoricalColorConfig(config: Config): config is CategoricalConfig {
+  return config.colorMode.type === 'categorical';
+}
+
+export function isGradientColorConfig(config: Config): config is GradientConfig {
+  return config.colorMode.type === 'gradient';
+}

@@ -31,12 +31,15 @@ import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public'
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
-import { getColorCategories } from '@kbn/chart-expressions-common';
-import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
+import { getOriginalId } from '@kbn/transpose-utils';
 import { CoreTheme } from '@kbn/core/public';
 import { getKbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  getColorCategories,
+  getLegacyColorCategories,
+} from '@kbn/chart-expressions-common/color_categories';
 import type { LensTableRowContextMenuEvent } from '../../../types';
-import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
@@ -61,10 +64,8 @@ import {
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
-import {
-  getFieldMetaFromDatatable,
-  isNumericField,
-} from '../../../../common/expressions/datatable/utils';
+import { isNumericField } from '../../../../common/expressions/datatable/utils';
+import { getDatatableColumn } from '../../../../common/expressions/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
 
@@ -162,7 +163,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const { getType, dispatchEvent, renderMode, formatFactory, syncColors } = props;
 
-  const formatters: Record<string, ReturnType<FormatFactory>> = useMemo(
+  const formatters: Record<string, IFieldFormat> = useMemo(
     () =>
       firstLocalTable.columns.reduce(
         (map, column) => ({
@@ -402,19 +403,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         return cellColorFnMap.get(originalId)!;
       }
 
-      const dataType = getFieldMetaFromDatatable(firstLocalTable, originalId)?.type;
+      const colInfo = getDatatableColumn(firstLocalTable, originalId);
       const isBucketed = bucketedColumns.some((id) => id === columnId);
-      const colorByTerms = shouldColorByTerms(dataType, isBucketed);
+      const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
+      const categoryRows = (untransposedDataRef.current ?? firstLocalTable)?.rows;
 
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
-            categories: getColorCategories(
-              firstLocalTable.rows,
-              originalId,
-              isTransposeId(columnId),
-              [null]
-            ),
+            categories: colorMapping
+              ? getColorCategories(categoryRows, originalId, [null])
+              : getLegacyColorCategories(categoryRows, originalId, [null]),
           }
         : {
             type: 'ranges',

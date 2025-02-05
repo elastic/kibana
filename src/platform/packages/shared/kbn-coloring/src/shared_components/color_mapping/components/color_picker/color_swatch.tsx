@@ -30,7 +30,7 @@ import { getValidColor } from '../../color/color_math';
 
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
-  assignmentColor: ColorMapping.Config['assignments'][number]['color'];
+  assignmentColor: ColorMapping.Assignment['color'];
   index: number;
   total: number;
   palette: IKbnPalette;

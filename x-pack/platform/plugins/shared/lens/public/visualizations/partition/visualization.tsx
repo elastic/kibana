@@ -19,7 +19,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-components';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
@@ -127,9 +127,11 @@ export const getDefaultColorForMultiMetricDimension = ({
 export const getPieVisualization = ({
   paletteService,
   kibanaTheme,
+  formatFactory,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
+  formatFactory: FormatFactory;
 }): Visualization<PieVisualizationState, PersistedPieVisualizationState> => ({
   id: 'lnsPie',
   visualizationTypes,
@@ -508,6 +510,7 @@ export const getPieVisualization = ({
         paletteService={paletteService}
         palettes={palettes}
         isDarkMode={theme.darkMode}
+        formatFactory={formatFactory}
       />
     );
   },

@@ -498,6 +498,7 @@ export const getDatatableVisualization = ({
         isDarkMode={theme.darkMode}
         palettes={palettes}
         paletteService={paletteService}
+        formatFactory={formatFactory}
       />
     );
   },

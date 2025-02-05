@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  extractContainerType,
-  extractVisualizationType,
-  getOverridesFor,
-  isOnAggBasedEditor,
-} from './utils';
-export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
-export { isChartSizeEvent } from './types';
-export { getColorCategories, getLegacyColorCategories } from './color_categories';
+import { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+
+/**
+ * Determines is a field can have create a custom pattern to match during color mapping.
+ */
+export function canCreateCustomMatch(meta?: DatatableColumnMeta): boolean {
+  if (!meta) return false;
+  return (
+    (meta.type === 'number' || meta.type === 'string') &&
+    meta.params?.id !== 'range' &&
+    meta.params?.id !== 'multi_terms'
+  );
+}

@@ -28,7 +28,7 @@ import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugi
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { MultiFieldKey } from '@kbn/data-plugin/common';
 import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
@@ -131,7 +131,7 @@ export const TagCloudChart = ({
     return visData.rows.map((row) => {
       const tag = tagColumn === undefined ? 'all' : row[tagColumn];
 
-      const category = isMultiFieldKey(tag) ? tag.keys.map(String) : `${tag}`;
+      const category = MultiFieldKey.isInstance(tag) ? tag.keys.map(String) : `${tag}`;
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:

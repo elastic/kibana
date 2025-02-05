@@ -21,6 +21,7 @@ import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
+import { FormatFactory } from '@kbn/visualization-ui-components';
 import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
@@ -36,9 +37,11 @@ const METRIC_GROUP_ID = 'metric';
 export const getTagcloudVisualization = ({
   paletteService,
   kibanaTheme,
+  formatFactory,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
+  formatFactory: FormatFactory;
 }): Visualization<TagcloudState> => ({
   id: 'lnsTagcloud',
 
@@ -313,6 +316,7 @@ export const getTagcloudVisualization = ({
           frame={props.frame}
           panelRef={props.panelRef}
           isInlineEditing={props.isInlineEditing}
+          formatFactory={formatFactory}
         />
       );
     }
