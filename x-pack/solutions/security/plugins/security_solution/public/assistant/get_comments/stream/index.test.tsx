@@ -77,41 +77,56 @@ describe('StreamComment', () => {
   });
 
   it('renders citations correctly when content references are defined', () => {
-    render(<StreamComment {...{
-      ...testProps, content: "the sky is blue {reference(1234)}",
-      contentReferencesEnabled: true, 
-      contentReferencesVisible: true, 
-      contentReferences: {
-        "1234": {
-          id: "1234",
-          type: "SecurityAlertsPage"
-        }
-      }
-    }} />);
+    render(
+      <StreamComment
+        {...{
+          ...testProps,
+          content: 'the sky is blue {reference(1234)}',
+          contentReferencesEnabled: true,
+          contentReferencesVisible: true,
+          contentReferences: {
+            '1234': {
+              id: '1234',
+              type: 'SecurityAlertsPage',
+            },
+          },
+        }}
+      />
+    );
 
     expect(screen.getByText('[1]')).toBeInTheDocument();
-    expect(screen.getByTestId('ContentReferenceButton')).toBeEnabled()
+    expect(screen.getByTestId('ContentReferenceButton')).toBeEnabled();
   });
 
   it('renders citations correctly when content references null', () => {
-    render(<StreamComment {...{
-      ...testProps, content: "the sky is blue {reference(1234)}",
-      contentReferencesEnabled: true, 
-      contentReferencesVisible: true, 
-      contentReferences: null
-    }} />);
+    render(
+      <StreamComment
+        {...{
+          ...testProps,
+          content: 'the sky is blue {reference(1234)}',
+          contentReferencesEnabled: true,
+          contentReferencesVisible: true,
+          contentReferences: null,
+        }}
+      />
+    );
 
     expect(screen.getByText('[1]')).toBeInTheDocument();
-    expect(screen.getByTestId('ContentReferenceButton')).not.toBeEnabled()
+    expect(screen.getByTestId('ContentReferenceButton')).not.toBeEnabled();
   });
 
   it('renders citations correctly when content references are undefined', () => {
-    render(<StreamComment {...{
-      ...testProps, content: "the sky is blue {reference(1234)}",
-      contentReferencesEnabled: true, 
-      contentReferencesVisible: true, 
-      contentReferences: undefined
-    }} />);
+    render(
+      <StreamComment
+        {...{
+          ...testProps,
+          content: 'the sky is blue {reference(1234)}',
+          contentReferencesEnabled: true,
+          contentReferencesVisible: true,
+          contentReferences: undefined,
+        }}
+      />
+    );
 
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
