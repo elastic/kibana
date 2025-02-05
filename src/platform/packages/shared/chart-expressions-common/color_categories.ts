@@ -24,7 +24,7 @@ export function getColorCategories(
   if (!accessor) return [];
 
   return rows
-    .filter(({[accessor]: v}) => !(v === undefined || exclude?.includes(v)))
+    .filter(({ [accessor]: v }) => !(v === undefined || exclude?.includes(v)))
     .map((r) => {
       const v = r[accessor];
       // The categories needs to be stringified in their unformatted version.
