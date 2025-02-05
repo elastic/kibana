@@ -18,13 +18,6 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   </TestProvider>
 );
 
-const mockAnalyzeApi = jest.fn((_: unknown) => ({
-  results: ['/path1', '/path2'],
-}));
-jest.mock('../../../../../common/lib/api', () => ({
-  runAnalyzeApiGraph: (params: unknown) => mockAnalyzeApi(params),
-}));
-
 describe('CreateCelConfig', () => {
   let result: RenderResult;
   beforeEach(() => {
@@ -54,7 +47,7 @@ describe('CreateCelConfig', () => {
       const isExpanded = accordionButton?.getAttribute('aria-expanded');
       expect(isExpanded).toBe('false');
 
-      expect(result.queryByTestId('confirmSettingsStepMock')).toBeNull();
+      expect(result.queryByTestId('confirmSettingsStep')).toBeNull();
     });
   });
 });
