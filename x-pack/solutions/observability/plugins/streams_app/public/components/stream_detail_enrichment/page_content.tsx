@@ -83,8 +83,6 @@ export function StreamDetailEnrichmentContent({
     return <RootStreamEmptyPrompt />;
   }
 
-  const hasProcessors = !isEmpty(processors);
-
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
       <EuiSplitPanel.Inner

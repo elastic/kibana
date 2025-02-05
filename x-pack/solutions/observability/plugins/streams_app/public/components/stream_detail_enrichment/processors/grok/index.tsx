@@ -14,7 +14,7 @@ import { ProcessorFieldSelector } from '../processor_field_selector';
 import { OptionalFieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
-import { UseProcessingSimulatorReturnType } from '../../hooks/use_processing_simulator';
+import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
 
 export const GrokProcessorForm = ({
   definition,
@@ -22,7 +22,7 @@ export const GrokProcessorForm = ({
   samples,
 }: {
   definition?: StreamDefinition;
-  refreshSimulation?: UseProcessingSimulatorReturnType['refreshSimulation'];
+  refreshSimulation?: UseProcessingSimulatorReturn['refreshSimulation'];
   samples?: Array<Record<PropertyKey, unknown>>;
 }) => {
   return (
