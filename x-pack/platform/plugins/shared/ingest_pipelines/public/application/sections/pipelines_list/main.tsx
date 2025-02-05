@@ -40,6 +40,7 @@ import { PipelineTable } from './table';
 import { PipelineDetailsFlyout } from './details_flyout';
 import { PipelineNotFoundFlyout } from './not_found_flyout';
 import { PipelineDeleteModal } from './delete_modal';
+import { getErrorText } from '../utils';
 
 const getPipelineNameFromLocation = (location: Location) => {
   const { pipeline } = parse(location.search.substring(1));
@@ -114,7 +115,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             />
           </h2>
         }
-        body={<p>{error.message}</p>}
+        body={<p>{getErrorText(error)}</p>}
         actions={
           <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
             <FormattedMessage

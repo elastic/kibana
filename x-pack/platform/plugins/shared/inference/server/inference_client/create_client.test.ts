@@ -48,7 +48,11 @@ describe('createClient', () => {
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
-      expect(createInferenceClientMock).toHaveBeenCalledWith({ request, actions, logger });
+      expect(createInferenceClientMock).toHaveBeenCalledWith({
+        request,
+        actions,
+        logger: logger.get('client'),
+      });
 
       expect(bindClientMock).not.toHaveBeenCalled();
 
@@ -95,7 +99,7 @@ describe('createClient', () => {
       expect(createInferenceClientMock).toHaveBeenCalledWith({
         request,
         actions,
-        logger,
+        logger: logger.get('client'),
       });
 
       expect(bindClientMock).toHaveBeenCalledTimes(1);
