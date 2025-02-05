@@ -14,7 +14,7 @@ import { AgentIcon } from '@kbn/custom-icons';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
-const SERVICE_ENTITY_LOCATOR = 'SERVICE_ENTITY_LOCATOR';
+const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
 
 interface ServiceNameLinkProps {
   serviceName: string;
@@ -25,15 +25,23 @@ export function ServiceNameLink({ serviceName, agentName }: ServiceNameLinkProps
   const {
     share: { url: urlService },
     core,
+    data: dataService,
   } = getUnifiedDocViewerServices();
 
   const canViewApm = core.application.capabilities.apm?.show || false;
+  const { from: timeRangeFrom, to: timeRangeTo } =
+    dataService.query.timefilter.timefilter.getTime();
 
-  const apmLinkToServiceEntityLocator = urlService.locators.get<{ serviceName: string }>(
-    SERVICE_ENTITY_LOCATOR
-  );
+  const apmLinkToServiceEntityLocator = urlService.locators.get<{
+    serviceName: string;
+    rangeFrom: string;
+    rangeTo: string;
+  }>(SERVICE_OVERVIEW_LOCATOR_ID);
+
   const href = apmLinkToServiceEntityLocator?.getRedirectUrl({
     serviceName,
+    rangeFrom: timeRangeFrom,
+    rangeTo: timeRangeTo,
   });
 
   const routeLinkProps = href
@@ -41,7 +49,11 @@ export function ServiceNameLink({ serviceName, agentName }: ServiceNameLinkProps
         href,
         onClick: () => {
           // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
-          apmLinkToServiceEntityLocator?.navigate({ serviceName });
+          apmLinkToServiceEntityLocator?.navigate({
+            serviceName,
+            rangeFrom: timeRangeFrom,
+            rangeTo: timeRangeTo,
+          });
         },
       })
     : undefined;
