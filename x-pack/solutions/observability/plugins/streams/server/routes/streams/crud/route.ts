@@ -7,11 +7,15 @@
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import {
+  isGroupStreamDefinition,
   StreamDefinition,
   StreamGetResponse,
+  isWiredStreamDefinition,
   streamUpsertRequestSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { badData, badRequest } from '@hapi/boom';
+import { hasSupportedStreamsRoot } from '../../../lib/streams/root_stream_definition';
 import { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
@@ -76,9 +80,12 @@ export const streamDetailRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.id);
 
+    const indexPattern = isGroupStreamDefinition(streamEntity)
+      ? streamEntity.group.members.join(',')
+      : streamEntity.name;
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-      index: streamEntity.name,
+      index: indexPattern,
       body: {
         track_total_hits: true,
         query: {
@@ -144,6 +151,17 @@ export const editStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
+
+    if (!(await streamsClient.isStreamsEnabled())) {
+      throw badData('Streams are not enabled');
+    }
+
+    if (
+      isWiredStreamDefinition({ ...params.body.stream, name: params.path.id }) &&
+      !hasSupportedStreamsRoot(params.path.id)
+    ) {
+      throw badRequest('Cannot create wired stream due to unsupported root stream');
+    }
 
     return await streamsClient.upsertStream({
       request: params.body,
