@@ -78,7 +78,7 @@ export const validateUrl = createStringValidationFunction((value) => {
 });
 
 export const validateEmail = createStringValidationFunction((value: string) => {
-  if (parseAddressList(value) != null) {
+  if (parseAddressList(value) === null) {
     return {
       code: 'ERR_NOT_EMAIL',
     };
