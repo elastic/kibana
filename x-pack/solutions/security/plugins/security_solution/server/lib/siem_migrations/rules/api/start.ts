@@ -18,8 +18,9 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { withLicense } from './util/with_license';
+import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
 import { getRetryFilter } from './util/retry';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -49,12 +50,15 @@ export const registerSiemRuleMigrationsStartRoute = (
             connector_id: connectorId,
             retry,
           } = req.body;
-
+          let siemMigrationAuditLogger: SiemMigrationAuditLogger | undefined;
           try {
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
 
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-
+            const auditLogger = ctx.securitySolution.getAuditLogger();
+            if (auditLogger) {
+              siemMigrationAuditLogger = new SiemMigrationAuditLogger(auditLogger);
+            }
             if (retry) {
               const { updated } = await ruleMigrationsClient.task.updateToRetry(
                 migrationId,
@@ -76,9 +80,19 @@ export const registerSiemRuleMigrationsStartRoute = (
             if (!exists) {
               return res.noContent();
             }
+
+            siemMigrationAuditLogger?.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED,
+              id: migrationId,
+            });
             return res.ok({ body: { started } });
           } catch (err) {
             logger.error(err);
+            siemMigrationAuditLogger?.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED,
+              error: err,
+              id: migrationId,
+            });
             return res.badRequest({ body: err.message });
           }
         }
