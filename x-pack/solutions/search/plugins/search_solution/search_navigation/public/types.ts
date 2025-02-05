@@ -51,12 +51,6 @@ export interface ClassicNavItem {
   name?: ReactNode;
 }
 
-export type ClassicNavigationFactoryFn = (
-  items: ClassicNavItem[],
-  core: CoreStart,
-  history: ScopedHistory<unknown>
-) => SolutionNavProps | undefined;
-
 export interface SearchNavigationSetBreadcrumbsOptions {
   // When set to `true` breadcrumbs are only set when chrome style is set to classic.
   // This option is for pages who rely on Solution Navigation for breadcrumbs, but still
