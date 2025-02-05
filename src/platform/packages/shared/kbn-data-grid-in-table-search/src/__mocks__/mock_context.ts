@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { generateMockData } from './data';
-export { getRenderCellValueMock } from './render_cell_value_mock';
-export { DataGridWithInTableSearchExample } from './data_grid_example';
-export { MockContext, useMockContextValue } from './mock_context';
+import React from 'react';
+
+interface MockContextValue {
+  mockContextValue?: string;
+}
+
+export const MockContext = React.createContext<MockContextValue>({});
+
+export const useMockContextValue = () => React.useContext(MockContext).mockContextValue;
