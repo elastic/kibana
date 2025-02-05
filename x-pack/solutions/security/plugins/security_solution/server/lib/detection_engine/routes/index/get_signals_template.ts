@@ -6,7 +6,13 @@
  */
 
 import { merge } from 'lodash';
-import { SPACE_IDS } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_TYPE_ID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
@@ -42,7 +48,7 @@ export const SIGNALS_TEMPLATE_VERSION = 77;
   UI will call create_index_route and and go through the index update process. Increment this number if
   making changes to the field aliases we use to make signals forwards-compatible.
 */
-export const SIGNALS_FIELD_ALIASES_VERSION = 4;
+export const SIGNALS_FIELD_ALIASES_VERSION = 5;
 
 /**
   @constant
@@ -169,6 +175,22 @@ export const backwardsCompatibilityMappings = (spaceId: string) => [
       },
     },
   },
+  {
+    minVersion: 0,
+    maxVersion: 77,
+    mapping: {
+      runtime: {
+        [ALERT_RULE_CONSUMER]: {
+          type: 'keyword',
+          script: { source: "emit('siem')" },
+        },
+        [ALERT_RULE_TYPE_ID]: {
+          type: 'keyword',
+          script: { source: mapRuleTypeToRuleTypeIdScript(ruleTypeMappings) },
+        },
+      },
+    },
+  },
 ];
 
 export const createBackwardsCompatibilityMapping = (version: number, spaceId: string) => {
@@ -185,3 +207,12 @@ export const createBackwardsCompatibilityMapping = (version: number, spaceId: st
 
   return merge({ properties }, ...mappings, meta);
 };
+
+const mapRuleTypeToRuleTypeIdScript = (ruleTypeToRuleTypeIdMap: Record<string, string>): string => `
+  String rule_type = doc['${ALERT_RULE_TYPE}'].value;
+  ${Object.entries(ruleTypeToRuleTypeIdMap)
+    .map(
+      ([ruleType, ruleTypeId]) => `if (rule_type == '${ruleType}') return emit('${ruleTypeId}');`
+    )
+    .join('')}
+`;
