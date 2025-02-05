@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { IBasePath } from '@kbn/core-http-browser';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -46,11 +46,7 @@ export const getSloFormattedSummary = (
       : numeral(errorBudgetRemaining).format(percentFormat);
 
   const sloDetailsUrl = basePath.prepend(
-    paths.sloDetails(
-      slo.id,
-      ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
-      slo.remote?.remoteName
-    )
+    paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
   );
 
   return {
