@@ -700,9 +700,11 @@ components:
         - crowdstrike
       type: string
     AlertIds:
-      description: A list of alerts ids.
+      description: A list of alerts `id`s.
       items:
-        $ref: '#/components/schemas/NonEmptyString'
+        format: nonempty
+        minLength: 1
+        type: string
       minItems: 1
       type: array
     CaseIds:
@@ -919,11 +921,6 @@ components:
           type: string
       required:
         - hostStatuses
-    NonEmptyString:
-      description: A string that does not contain only whitespace characters
-      format: nonempty
-      minLength: 1
-      type: string
     NoParametersRequestSchema:
       type: object
       properties:
