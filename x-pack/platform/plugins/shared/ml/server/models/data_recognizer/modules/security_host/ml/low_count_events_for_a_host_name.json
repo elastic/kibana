@@ -2,7 +2,7 @@
   "description": "Security: Host - Looks for a sudden drop in host based traffic. This can be due to a range of security issues, such as a compromised system, a failed service, or a network misconfiguration.",
   "groups": ["security", "host"],
   "analysis_config": {
-    "bucket_span": "3h",
+    "bucket_span": "5m",
     "detectors": [
       {
         "detector_description": "low count of host based events",
