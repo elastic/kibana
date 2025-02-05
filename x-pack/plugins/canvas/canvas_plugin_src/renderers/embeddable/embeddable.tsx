@@ -15,9 +15,8 @@ import {
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC, memo } from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
-import { useSearchApi } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import {
   AggregateQuery,
