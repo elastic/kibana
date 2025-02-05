@@ -17,6 +17,9 @@ import {
   SUMMARY_INDEX_TEMPLATE_NAME,
 } from '../../common/constants';
 import { DefaultResourceInstaller } from './resource_installer';
+import { SLOConfig } from '../types';
+
+const DEFAULT_CONFIG: SLOConfig = {} as SLOConfig;
 
 describe('resourceInstaller', () => {
   it('installs the common resources when there is a version mismatch', async () => {
@@ -51,7 +54,11 @@ describe('resourceInstaller', () => {
       ],
     });
 
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+    const installer = new DefaultResourceInstaller(
+      mockClusterClient,
+      loggerMock.create(),
+      DEFAULT_CONFIG
+    );
 
     await installer.ensureCommonResourcesInstalled();
 
@@ -115,7 +122,11 @@ describe('resourceInstaller', () => {
       ],
     });
 
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+    const installer = new DefaultResourceInstaller(
+      mockClusterClient,
+      loggerMock.create(),
+      DEFAULT_CONFIG
+    );
 
     await installer.ensureCommonResourcesInstalled();
 
@@ -150,7 +161,11 @@ describe('resourceInstaller', () => {
         )
     );
 
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+    const installer = new DefaultResourceInstaller(
+      mockClusterClient,
+      loggerMock.create(),
+      DEFAULT_CONFIG
+    );
 
     await Promise.all([
       installer.ensureCommonResourcesInstalled(),

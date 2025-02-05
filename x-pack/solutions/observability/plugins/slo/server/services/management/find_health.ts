@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FindSLOHealthParams, FindSLOHealthResponse } from '@kbn/slo-schema';
 import { HEALTH_INDEX_PATTERN } from '../../../common/constants';
 import { SLOHealth } from '../../domain/models';
 
 export class FindSLOHealth {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private logger: Logger,
-    private spaceId: string
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
 
   public async execute(params: FindSLOHealthParams): Promise<FindSLOHealthResponse> {
     const parsedFilters = parseFilters(params.filters);

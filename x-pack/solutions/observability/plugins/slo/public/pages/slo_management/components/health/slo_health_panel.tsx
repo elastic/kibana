@@ -35,8 +35,8 @@ export function SloHealthPanel() {
   const [query, setQuery] = useState<string>();
   const [filters, setFilters] = useState<Filter[]>([]);
   const [statusFilter, setStatusFilter] = useState<Filter>();
-  const [sortBy, setSortBy] = useState<FindSLOHealthSortBy>('status');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortBy] = useState<FindSLOHealthSortBy>('status');
+  const [sortDirection] = useState<'asc' | 'desc'>('asc');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 

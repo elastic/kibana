@@ -23,10 +23,10 @@ export const findSLOHealthRoute = createSloServerRoute({
   params: findSLOHealthParamsSchema,
   handler: async ({ context, request, params, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
+    const [spaceId, coreContext] = await Promise.all([getSpaceId(plugins, request), context.core]);
 
-    const spaceId = await getSpaceId(plugins, request);
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const findSLOHealth = new FindSLOHealth(esClient, logger, spaceId);
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const findSLOHealth = new FindSLOHealth(esClient, spaceId);
 
     return await executeWithErrorHandler(() => findSLOHealth.execute(params?.query ?? {}));
   },
