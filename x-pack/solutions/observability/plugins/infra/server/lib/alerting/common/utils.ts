@@ -15,7 +15,7 @@ import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_tec
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { type Group } from '@kbn/observability-alerting-rule-utils';
+import { type Group } from '@kbn/alerting-rule-utils';
 import type { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type {
