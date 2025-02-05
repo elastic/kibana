@@ -34,9 +34,8 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
     silent
   ) {
     const [match] = value.match(/^\s?{reference/) || [];
-    if (!match) return false;
 
-    if (value.includes('\n')) return false;
+    if (!match) return false;
 
     if (value[match.length] !== '(') return false;
 
