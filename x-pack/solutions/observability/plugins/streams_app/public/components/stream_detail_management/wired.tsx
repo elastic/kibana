@@ -15,7 +15,7 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 
-type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor';
+type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor' | 'lifecycle';
 
 function isValidManagementSubTab(value: string): value is ManagementSubTabs {
   return ['route', 'enrich', 'schemaEditor', 'lifecycle'].includes(value);
