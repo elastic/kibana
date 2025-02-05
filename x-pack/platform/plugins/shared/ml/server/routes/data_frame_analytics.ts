@@ -397,7 +397,10 @@ export function dataFrameAnalyticsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const body = await mlClient.explainDataFrameAnalytics(
-            request.body,
+            {
+              // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 (_meta)
+              body: request.body,
+            },
             getAuthorizationHeader(request)
           );
           return response.ok({
@@ -616,7 +619,8 @@ export function dataFrameAnalyticsRoutes(
           const body = await mlClient.updateDataFrameAnalytics(
             {
               id: analyticsId,
-              ...request.body,
+              // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 (_meta)
+              body: request.body,
             },
             getAuthorizationHeader(request)
           );
