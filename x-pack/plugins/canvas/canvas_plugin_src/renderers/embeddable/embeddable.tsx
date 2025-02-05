@@ -15,7 +15,7 @@ import {
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { omit } from 'lodash';
 import {
