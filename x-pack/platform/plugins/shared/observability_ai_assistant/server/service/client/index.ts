@@ -480,7 +480,7 @@ export class ObservabilityAIAssistantClient {
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
-      functionCallingMode?: string;
+      functionCallingMode?: FunctionCallingMode;
       tracer: LangTracer;
       stream: TStream;
     }
@@ -513,7 +513,7 @@ export class ObservabilityAIAssistantClient {
       ),
       toolChoice,
       tools,
-      functionCalling: functionCallingMode as FunctionCallingMode,
+      functionCalling: functionCallingMode,
     };
 
     if (stream) {
