@@ -1,10 +1,12 @@
 $schema: https://moonrepo.dev/schemas/project.json
 
 fileGroups:
-  sharedGlobals: []
+  sharedGlobals: [ ]
   default:
-  - '**/*'
-  production: []
+    - '**/*'
+  production: [ ]
+  src:
+    - 'src/**/*'
 
 tasks:
   greet:
@@ -31,9 +33,13 @@ tasks:
       - '--passWithNoTests'
       - '--runInBand'
   lint:
-    script: |
-      cd $MOON_WORKSPACE_ROOT && node scripts/eslint.js $MOON_PROJECT_ROOT --no-error-on-unmatched-pattern
-    deps: []
+    command: node
+    args:
+      - $workspaceRoot/scripts/eslint.js
+      - $projectRoot
+      - '--no-error-on-unmatched-pattern'
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       # Source and test files
       - 'src/**/*'
@@ -80,8 +86,3 @@ tasks:
       runFromWorkspaceRoot: true
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'
-
-  env:
-    script: env
-  ping:
-    script: cd $MOON_WORKSPACE_ROOT && echo $MOON_PROJECT_ID >> ping.log

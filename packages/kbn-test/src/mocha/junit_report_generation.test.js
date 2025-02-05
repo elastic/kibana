@@ -59,9 +59,9 @@ describe('dev/mocha/junit report generation', () => {
     const isForcedSerialRun = process.argv.includes('--runInBand');
 
     expect(testsuite.$).toMatchObject({
-      'command-line': isForcedSerialRun ?
-        expect.stringContaining('scripts/jest') :
-        expect.stringContaining('node_modules/jest-worker/build/workers/processChild.js'),
+      'command-line': isForcedSerialRun
+        ? expect.stringContaining('scripts/jest')
+        : expect.stringContaining('node_modules/jest-worker/build/workers/processChild.js'),
       failures: '2',
       name: 'test',
       skipped: '1',
@@ -75,8 +75,8 @@ describe('dev/mocha/junit report generation', () => {
       // the command line is only processChild.js, no more info to validate here;
     } else {
       const commandLine = testsuite.$['command-line'];
-      expect(commandLine).toMatch(/--config.packages\/kbn-test\/jest\.config\.js/)
-      expect(commandLine).toMatch(/--passWithNoTests/)
+      expect(commandLine).toMatch(/--config.packages\/kbn-test\/jest\.config\.js/);
+      expect(commandLine).toMatch(/--passWithNoTests/);
     }
 
     // there are actually only three tests, but since the hook failed
