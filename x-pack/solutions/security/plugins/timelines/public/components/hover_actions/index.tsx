@@ -10,16 +10,13 @@ import React, { ReactElement } from 'react';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import type { AddToTimelineButtonProps } from './actions/add_to_timeline';
-import type { ColumnToggleProps } from './actions/column_toggle';
 import type { CopyProps } from './actions/copy';
-import type { HoverActionComponentProps, FilterValueFnArgs } from './actions/types';
-import type { OverflowButtonProps } from './actions/overflow';
+import type { FilterValueFnArgs, HoverActionComponentProps } from './actions/types';
 
 export interface HoverActionsConfig {
   getAddToTimelineButton: (
     props: AddToTimelineButtonProps
   ) => ReactElement<AddToTimelineButtonProps>;
-  getColumnToggleButton: (props: ColumnToggleProps) => ReactElement<ColumnToggleProps>;
   getCopyButton: (props: CopyProps) => ReactElement<CopyProps>;
   getFilterForValueButton: (
     props: HoverActionComponentProps & FilterValueFnArgs
@@ -27,7 +24,6 @@ export interface HoverActionsConfig {
   getFilterOutValueButton: (
     props: HoverActionComponentProps & FilterValueFnArgs
   ) => ReactElement<HoverActionComponentProps & FilterValueFnArgs>;
-  getOverflowButton: (props: OverflowButtonProps) => ReactElement<HoverActionComponentProps>;
 }
 
 const AddToTimelineButtonLazy = React.lazy(() => import('./actions/add_to_timeline'));
@@ -39,15 +35,6 @@ const getAddToTimelineButtonLazy = (store: Store, props: AddToTimelineButtonProp
           <AddToTimelineButtonLazy {...props} />
         </I18nProvider>
       </Provider>
-    </React.Suspense>
-  );
-};
-
-const ColumnToggleButtonLazy = React.lazy(() => import('./actions/column_toggle'));
-const getColumnToggleButtonLazy = (props: ColumnToggleProps) => {
-  return (
-    <React.Suspense fallback={<EuiLoadingSpinner />}>
-      <ColumnToggleButtonLazy {...props} />
     </React.Suspense>
   );
 };
@@ -79,21 +66,10 @@ const getFilterOutValueButtonLazy = (props: HoverActionComponentProps & FilterVa
   );
 };
 
-const OverflowButtonLazy = React.lazy(() => import('./actions/overflow'));
-const getOverflowButtonLazy = (props: OverflowButtonProps) => {
-  return (
-    <React.Suspense fallback={<EuiLoadingSpinner />}>
-      <OverflowButtonLazy {...props} />
-    </React.Suspense>
-  );
-};
-
 export const getHoverActions = (store?: Store): HoverActionsConfig => ({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   getAddToTimelineButton: getAddToTimelineButtonLazy.bind(null, store!),
-  getColumnToggleButton: getColumnToggleButtonLazy,
   getCopyButton: getCopyButtonLazy,
   getFilterForValueButton: getFilterForValueButtonLazy,
   getFilterOutValueButton: getFilterOutValueButtonLazy,
-  getOverflowButton: getOverflowButtonLazy,
 });
