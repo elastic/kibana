@@ -384,6 +384,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.malware.max_file_size_bytes',
+    first_supported_version: '8.16.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.max_file_size_bytes',
+      {
+        defaultMessage:
+          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -605,6 +616,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'The threshold that should be used for evaluating malware. Allowed values are normal, conservative, and aggressive. Default: normal.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.malware.max_file_size_bytes',
+    first_supported_version: '8.16.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.max_file_size_bytes',
+      {
+        defaultMessage:
+          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
       }
     ),
   },
@@ -853,6 +875,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.malware.max_file_size_bytes',
+    first_supported_version: '8.16.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.max_file_size_bytes',
+      {
+        defaultMessage:
+          'The maximum file size in bytes that should be used for evaluating malware. Default: 78643200.',
       }
     ),
   },
