@@ -508,9 +508,11 @@ components:
         - microsoft_defender_endpoint
       type: string
     AlertIds:
-      description: A list of alerts ids.
+      description: A list of alerts `id`s.
       items:
-        $ref: '#/components/schemas/NonEmptyString'
+        format: nonempty
+        minLength: 1
+        type: string
       minItems: 1
       type: array
     CaseIds:
@@ -662,7 +664,22 @@ components:
           required:
             - parameters
     GetProcessesRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
     HostPathScriptParameters:
       type: object
       properties:
@@ -681,7 +698,22 @@ components:
       required:
         - hostPath
     IsolateRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
     KillProcessRouteRequestBody:
       allOf:
         - type: object
@@ -761,33 +793,6 @@ components:
           type: string
       required:
         - hostStatuses
-    NonEmptyString:
-      description: A string that does not contain only whitespace characters
-      format: nonempty
-      minLength: 1
-      type: string
-    NoParametersRequestSchema:
-      type: object
-      properties:
-        body:
-          type: object
-          properties:
-            agent_type:
-              $ref: '#/components/schemas/AgentTypes'
-            alert_ids:
-              $ref: '#/components/schemas/AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/CaseIds'
-            comment:
-              $ref: '#/components/schemas/Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Parameters'
-          required:
-            - endpoint_ids
-      required:
-        - body
     Page:
       default: 1
       description: Page number
@@ -942,7 +947,22 @@ components:
       minLength: 1
       type: array
     UnisolateRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
     UploadRouteRequestBody:
       allOf:
         - type: object

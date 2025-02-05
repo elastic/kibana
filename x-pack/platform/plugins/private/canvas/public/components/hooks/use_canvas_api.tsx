@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { ViewMode } from '@kbn/presentation-publishing';
@@ -20,6 +20,8 @@ import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { CANVAS_APP } from '../../../common/lib';
 import { coreServices } from '../../services/kibana_services';
+
+const reload$ = new Subject<void>();
 
 export const useCanvasApi: () => CanvasContainerApi = () => {
   const selectedPageId = useSelector(getSelectedPage);
@@ -48,6 +50,10 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         },
         currentAppId: CANVAS_APP,
       }),
+      reload$,
+      reload: () => {
+        reload$.next();
+      },
       viewMode$: new BehaviorSubject<ViewMode>('edit'), // always in edit mode
       addNewPanel: async ({
         panelType,
