@@ -99,6 +99,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private logger: Logger;
   private poller: TaskPoller<string, TimedFillPoolResult>;
+  private started = false;
 
   public pool: TaskPool;
 
@@ -123,9 +124,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   constructor({
     logger,
     middleware,
+    config,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
-    config,
     taskStore,
     definitions,
     executionContext,
@@ -225,15 +226,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
-      if (areESAndSOAvailable) {
-        // start polling for work
+      if (areESAndSOAvailable && !this.started) {
         this.poller.start();
-      } else if (!areESAndSOAvailable) {
-        this.logger.info(
-          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
-        );
-        this.poller.stop();
-        this.pool.cancelRunningTasks();
+        this.started = true;
       }
     });
   }
