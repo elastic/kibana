@@ -8,6 +8,9 @@
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SavedObject } from '@kbn/core/types';
+import type { DataStreamsAction } from './data_stream_types';
+
+export * from './data_stream_types';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 
@@ -229,6 +232,7 @@ export interface EnrichedDeprecationInfo
   > {
   type:
     | keyof estypes.MigrationDeprecationsResponse
+    | 'data_streams'
     | 'health_indicator'
     | 'ilm_policies'
     | 'templates';
@@ -240,6 +244,7 @@ export interface EnrichedDeprecationInfo
     | MlAction
     | IndexSettingAction
     | ClusterSettingAction
+    | DataStreamsAction
     | HealthIndicatorAction;
   resolveDuringUpgrade: boolean;
 }
