@@ -59,7 +59,6 @@ export function getEsClient(elasticsearch: Elasticsearch) {
       password,
     },
     Connection: HttpConnection,
-    requestTimeout: 30_000,
   });
 
   return client;

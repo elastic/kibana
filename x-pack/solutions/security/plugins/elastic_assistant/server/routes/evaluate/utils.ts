@@ -8,7 +8,6 @@
 import { Client, Example } from 'langsmith';
 import type { Logger } from '@kbn/core/server';
 import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
-import { HttpConnection } from '@elastic/elasticsearch';
 
 /**
  * Fetches a dataset from LangSmith. Note that `client` will use env vars unless langSmithApiKey is specified
@@ -27,11 +26,7 @@ export const fetchLangSmithDataset = async (
   }
 
   try {
-    const client = new Client({
-      apiKey: langSmithApiKey,
-      Connection: HttpConnection,
-      requestTimeout: 30_000,
-    });
+    const client = new Client({ apiKey: langSmithApiKey });
 
     const examples = [];
     for await (const example of client.listExamples({ datasetName })) {
@@ -59,11 +54,7 @@ export const fetchLangSmithDatasets = async ({
   langSmithApiKey?: string;
 }): Promise<string[]> => {
   try {
-    const client = new Client({
-      apiKey: langSmithApiKey,
-      Connection: HttpConnection,
-      requestTimeout: 30_000,
-    });
+    const client = new Client({ apiKey: langSmithApiKey });
     const datasets = [];
     for await (const dataset of client.listDatasets()) {
       datasets.push(dataset);

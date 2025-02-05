@@ -47,7 +47,6 @@ const getEmbeddingClient = (config: TaskConfig) => {
     // generating embeddings takes time
     requestTimeout: 10 * 60 * 1000,
     Connection: HttpConnection,
-    requestTimeout: 30_000,
   });
 };
 

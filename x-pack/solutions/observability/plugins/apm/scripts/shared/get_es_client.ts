@@ -28,7 +28,6 @@ export function getEsClient({
     requestTimeout: 120000,
     auth,
     Connection: HttpConnection,
-    requestTimeout: 30_000,
   });
 
   const originalSearch = client.search.bind(client);
