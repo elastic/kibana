@@ -16,7 +16,7 @@ export const ProcessorFieldSelector = () => {
     name: 'field',
     rules: {
       required: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorRequiredError',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorRequiredError',
         { defaultMessage: 'A field value is required.' }
       ),
     },
@@ -28,11 +28,11 @@ export const ProcessorFieldSelector = () => {
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorLabel',
         { defaultMessage: 'Field' }
       )}
       helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorHelpText',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorHelpText',
         { defaultMessage: 'Field to search for matches.' }
       )}
       isInvalid={invalid}
