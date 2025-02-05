@@ -6,7 +6,15 @@
  */
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiCallOut, EuiCode, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import * as i18n from './translations';
 
 export const MissingPrivilegesDescription = React.memo<{ privileges: string[] }>(
@@ -48,8 +56,13 @@ export const MissingPrivilegesTooltip = React.memo<MissingPrivilegesTooltip>(
 MissingPrivilegesTooltip.displayName = 'MissingPrivilegesTooltip';
 
 export const MissingPrivilegesCallOut = React.memo<PropsWithChildren<{}>>(({ children }) => {
+  const { euiTheme } = useEuiTheme();
+  const calloutCss = css`
+    border-radius: ${euiTheme.border.radius.small};
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+  `;
   return (
-    <EuiCallOut title={i18n.PRIVILEGES_MISSING_TITLE} iconType="iInCircle">
+    <EuiCallOut title={i18n.PRIVILEGES_MISSING_TITLE} iconType="iInCircle" css={calloutCss}>
       {children}
     </EuiCallOut>
   );
