@@ -90,7 +90,7 @@ const failedDocsDetailsRoute = createDatasetQualityServerRoute({
     },
   },
   async handler(resources): Promise<FailedDocsDetails> {
-    const { context, params, getEsCapabilities } = resources;
+    const { context, params, getEsCapabilities, logger } = resources;
     const coreContext = await context.core;
     const { dataStream } = params.path;
     const isServerless = (await getEsCapabilities()).serverless;
@@ -99,13 +99,23 @@ const failedDocsDetailsRoute = createDatasetQualityServerRoute({
       throw notImplemented('Failure store is not available in serverless mode');
     }
 
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    try {
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    return await getFailedDocsDetails({
-      esClient,
-      dataStream,
-      ...params.query,
-    });
+      return await getFailedDocsDetails({
+        esClient,
+        dataStream,
+        ...params.query,
+      });
+    } catch (e) {
+      logger.error(`Failed to get ${dataStream} failed docs: ${e}`);
+
+      return {
+        count: 0,
+        lastOccurrence: 0,
+        timeSeries: [],
+      };
+    }
   },
 });
 
@@ -128,7 +138,7 @@ const failedDocsErrorsRoute = createDatasetQualityServerRoute({
     },
   },
   async handler(resources): Promise<FailedDocsErrorsResponse> {
-    const { context, params, getEsCapabilities } = resources;
+    const { context, params, getEsCapabilities, logger } = resources;
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const isServerless = (await getEsCapabilities()).serverless;
@@ -137,11 +147,19 @@ const failedDocsErrorsRoute = createDatasetQualityServerRoute({
       throw notImplemented('Failure store is not available in serverless mode');
     }
 
-    return await getFailedDocsErrors({
-      esClient,
-      dataStream: params.path.dataStream,
-      ...params.query,
-    });
+    try {
+      return await getFailedDocsErrors({
+        esClient,
+        dataStream: params.path.dataStream,
+        ...params.query,
+      });
+    } catch (e) {
+      logger.error(`Failed to get ${params.path.dataStream} failed docs errors: ${e}`);
+
+      return {
+        errors: [],
+      };
+    }
   },
 });
 
