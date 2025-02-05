@@ -22,8 +22,8 @@ export interface EsqlTable {
 
 export const performEsqlRequest = async ({
   esClient,
-  requestParams,
-  queryString,
+  requestBody,
+  requestQueryParams,
 }: {
   logger?: Logger;
   esClient: ElasticsearchClient;
