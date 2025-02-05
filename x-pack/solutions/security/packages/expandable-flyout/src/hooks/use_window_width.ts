@@ -10,13 +10,13 @@ import { useDispatch } from '../store/redux';
 import { setDefaultWidthsAction } from '../store/actions';
 
 const RESOLUTION_BREAKPOINTS = {
-  RIGHT_SECTION: {
+  RIGHT: {
     MIN: 992, // resolution below which the width is fixed to 380px
     OVERLAY_MAX: 1920, // resolution above which the overlay width is fixed to 750px
     PUSH_MIN: 1600, // resolution below which the push width is fixed to 380px
     PUSH_MAX: 2560, // resolution above which the push width is fixed to 600px
   },
-  LEFT_SECTION: {
+  LEFT: {
     MIN: 1600, // resolution below which the overlay width goes full width (minus the padding) and the push width goes to its fixed 380px
   },
 };
@@ -26,17 +26,12 @@ const NAVIGATION_WIDTH = 200;
 const SECTION_WIDTHS = {
   RIGHT: {
     MIN: 380,
-    MAX_OVERLAY: 750,
-    MAX_PUSH: 600,
+    OVERLAY_MAX: 750,
+    PUSH_MAX: 600,
   },
   LEFT: {
-    OVERLAY: {
-      MAX: 1500,
-    },
-    PUSH: {
-      MIN: 380,
-      MAX: 1000,
-    },
+    OVERLAY_MAX: 1500,
+    PUSH_MIN: 380,
   },
 };
 
@@ -71,7 +66,7 @@ const calculateRightSectionDefaultWidths = (
 
   // for window widths between 380px and 992px, the width is fixed to the 380px
   // EUI automatically switches a push flyout to overlay below 992px, so the push value here is actually a bit unnecessary but we return it anyway to ensure the redux store is always populated with a value
-  if (windowWidth < RESOLUTION_BREAKPOINTS.RIGHT_SECTION.MIN) {
+  if (windowWidth < RESOLUTION_BREAKPOINTS.RIGHT.MIN) {
     return {
       overlay: SECTION_WIDTHS.RIGHT.MIN,
       push: SECTION_WIDTHS.RIGHT.MIN,
@@ -80,26 +75,24 @@ const calculateRightSectionDefaultWidths = (
 
   // in overlay mode, the width will linearly scale from 380px (at 992px resolution) to 750px (at 1920px resolution)
   const ratioWidthOverlayMode =
-    (SECTION_WIDTHS.RIGHT.MAX_OVERLAY - SECTION_WIDTHS.RIGHT.MIN) *
-    ((windowWidth - RESOLUTION_BREAKPOINTS.RIGHT_SECTION.MIN) /
-      (RESOLUTION_BREAKPOINTS.RIGHT_SECTION.OVERLAY_MAX -
-        RESOLUTION_BREAKPOINTS.RIGHT_SECTION.MIN));
+    (SECTION_WIDTHS.RIGHT.OVERLAY_MAX - SECTION_WIDTHS.RIGHT.MIN) *
+    ((windowWidth - RESOLUTION_BREAKPOINTS.RIGHT.MIN) /
+      (RESOLUTION_BREAKPOINTS.RIGHT.OVERLAY_MAX - RESOLUTION_BREAKPOINTS.RIGHT.MIN));
   // this will ensure that in push in mode the width will never go bigger than 750px in higher resolutions
   const overlayWidth = Math.min(
     SECTION_WIDTHS.RIGHT.MIN + ratioWidthOverlayMode,
-    SECTION_WIDTHS.RIGHT.MAX_OVERLAY
+    SECTION_WIDTHS.RIGHT.OVERLAY_MAX
   );
 
   // in push mode, the width will linearly scale from 380px (at 1600px resolution) to 600px (at 2560px resolution)
   const ratioWidthPushMode =
-    (SECTION_WIDTHS.RIGHT.MAX_PUSH - SECTION_WIDTHS.RIGHT.MIN) *
-    ((windowWidth - RESOLUTION_BREAKPOINTS.RIGHT_SECTION.PUSH_MIN) /
-      (RESOLUTION_BREAKPOINTS.RIGHT_SECTION.PUSH_MAX -
-        RESOLUTION_BREAKPOINTS.RIGHT_SECTION.PUSH_MIN));
+    (SECTION_WIDTHS.RIGHT.PUSH_MAX - SECTION_WIDTHS.RIGHT.MIN) *
+    ((windowWidth - RESOLUTION_BREAKPOINTS.RIGHT.PUSH_MIN) /
+      (RESOLUTION_BREAKPOINTS.RIGHT.PUSH_MAX - RESOLUTION_BREAKPOINTS.RIGHT.PUSH_MIN));
   // this will ensure that in push mode the width will never go bigger than 600px in higher resolutions
   const pushWidth = Math.min(
     SECTION_WIDTHS.RIGHT.MIN + ratioWidthPushMode,
-    SECTION_WIDTHS.RIGHT.MAX_PUSH
+    SECTION_WIDTHS.RIGHT.PUSH_MAX
   );
 
   return {
@@ -130,18 +123,18 @@ const calculateLeftSectionDefaultWidths = (
   // for window widths below 1600px, the overlay width will use the remaining space (minus a small padding)
   // for window widths above 1600px, the overlay width will use 80% of the remaining space, while never going bigger than 1500px
   const overlayWidth =
-    windowWidth <= RESOLUTION_BREAKPOINTS.LEFT_SECTION.MIN
+    windowWidth <= RESOLUTION_BREAKPOINTS.LEFT.MIN
       ? windowWidth - rightSectionWidthOverlay - FULL_WIDTH_PADDING
       : Math.min(
           ((windowWidth - rightSectionWidthOverlay) * 80) / 100,
-          SECTION_WIDTHS.LEFT.OVERLAY.MAX
+          SECTION_WIDTHS.LEFT.OVERLAY_MAX
         );
 
   // for window widths below 1600px, the push width will be fixed to 380px
   // for window widths above 1600px, the push width will use 40% of the remaining space (excluding the navigation width)
   const pushWidth =
-    windowWidth <= RESOLUTION_BREAKPOINTS.LEFT_SECTION.MIN
-      ? SECTION_WIDTHS.LEFT.PUSH.MIN
+    windowWidth <= RESOLUTION_BREAKPOINTS.LEFT.MIN
+      ? SECTION_WIDTHS.LEFT.PUSH_MIN
       : ((windowWidth - rightSectionWidthPush - NAVIGATION_WIDTH) * 40) / 100;
 
   return {
