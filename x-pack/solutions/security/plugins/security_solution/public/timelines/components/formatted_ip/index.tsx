@@ -19,7 +19,6 @@ import {
   DraggableWrapper,
 } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
-import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
 import type { DataProvider } from '../timeline/data_providers/data_provider';
@@ -219,25 +218,15 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           title={title}
         />
       ) : (
-        <Content field={fieldName} tooltipContent={fieldName}>
-          <NetworkDetailsLink
-            Component={Component}
-            ip={address}
-            isButton={isButton}
-            onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
-            title={title}
-          />
-        </Content>
+        <NetworkDetailsLink
+          Component={Component}
+          ip={address}
+          isButton={isButton}
+          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+          title={title}
+        />
       ),
-    [
-      Component,
-      address,
-      fieldName,
-      isButton,
-      isInTimelineContext,
-      openNetworkDetailsSidePanel,
-      title,
-    ]
+    [Component, address, isButton, isInTimelineContext, openNetworkDetailsSidePanel, title]
   );
 
   const render: ComponentProps<typeof DraggableWrapper>['render'] = useCallback(
