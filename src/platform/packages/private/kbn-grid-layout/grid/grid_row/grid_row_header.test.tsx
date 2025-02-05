@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import { RenderResult, act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
