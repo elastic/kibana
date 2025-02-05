@@ -28,14 +28,15 @@ import {
   VisualizeESQLUserIntention,
   type ChatActionClickPayload,
   type Feedback,
+  aiAssistantFunctionCallingMode,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { FunctionCallingMode } from '@kbn/inference-common';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
-import { useSimulatedFunctionCalling } from '../hooks/use_simulated_function_calling';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -47,6 +48,7 @@ import { WelcomeMessage } from './welcome_message';
 import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { deserializeMessage } from '../utils/deserialize_message';
+import { useKibana } from '../hooks/use_kibana';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -138,7 +140,14 @@ export function ChatBody({
 
   const chatService = useAIAssistantChatService();
 
-  const { simulatedFunctionCallingEnabled } = useSimulatedFunctionCalling();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
+  const functionCallingMode = uiSettings!.get<FunctionCallingMode>(
+    aiAssistantFunctionCallingMode,
+    'auto'
+  );
 
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
     initialConversationId,
@@ -409,7 +418,7 @@ export function ChatBody({
           </div>
         </EuiFlexItem>
 
-        {simulatedFunctionCallingEnabled ? (
+        {functionCallingMode === 'simulated' ? (
           <EuiFlexItem grow={false}>
             <SimulatedFunctionCallingCallout />
           </EuiFlexItem>

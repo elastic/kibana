@@ -187,7 +187,7 @@ export class ObservabilityAIAssistantClient {
     isPublic?: boolean;
     kibanaPublicUrl?: string;
     instructions?: AdHocInstruction[];
-    functionCallingMode?: string;
+    functionCallingMode?: FunctionCallingMode;
     disableFunctions?:
       | boolean
       | {
@@ -307,7 +307,7 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
-                useSimulatedFunctionCalling: functionCallingMode === 'simulated',
+                functionCallingMode,
               })
             );
           }),

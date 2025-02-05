@@ -9,6 +9,7 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
+import { FunctionCallingMode } from '@kbn/inference-common';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
 import type {
   AdHocInstruction,
@@ -167,7 +168,7 @@ export class ChatFunctionClient {
     messages,
     signal,
     connectorId,
-    useSimulatedFunctionCalling,
+    functionCallingMode,
   }: {
     chat: FunctionCallChatFunction;
     name: string;
@@ -175,7 +176,7 @@ export class ChatFunctionClient {
     messages: Message[];
     signal: AbortSignal;
     connectorId: string;
-    useSimulatedFunctionCalling: boolean;
+    functionCallingMode: FunctionCallingMode;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -194,7 +195,7 @@ export class ChatFunctionClient {
         screenContexts: this.screenContexts,
         chat,
         connectorId,
-        useSimulatedFunctionCalling,
+        functionCallingMode,
       },
       signal
     );
