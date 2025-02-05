@@ -2837,7 +2837,6 @@
         "cypress"
       ],
       "reviewers": [
-        "team:apm",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3463,26 +3462,6 @@
       "groupName": "redux-saga-testing",
       "matchDepNames": [
         "redux-saga-testing"
-      ],
-      "reviewers": [
-        "team:obs-ux-management-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open",
-        "ci:all-cypress-suites",
-        "Team:obs-ux-management"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "date-fns",
-      "matchDepNames": [
-        "date-fns"
       ],
       "reviewers": [
         "team:obs-ux-management-team"
