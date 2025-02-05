@@ -87,7 +87,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       <>
         <HeaderPage
           border={false}
-          showBackButton={true}
           data-test-subj="case-view-title"
           titleNode={
             <EditableTitle
