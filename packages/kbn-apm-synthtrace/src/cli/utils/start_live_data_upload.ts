@@ -63,21 +63,25 @@ export async function startLiveDataUpload({
   // @ts-expect-error upgrade typescript v4.9.5
   const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
 
-  process.on('SIGINT', () => closeStreams());
-  process.on('SIGTERM', () => closeStreams());
-  process.on('SIGQUIT', () => closeStreams());
+  process.on('SIGINT', () => closeStreamsAndTeardown());
+  process.on('SIGTERM', () => closeStreamsAndTeardown());
+  process.on('SIGQUIT', () => closeStreamsAndTeardown());
 
-  async function closeStreams() {
+  async function closeStreamsAndTeardown() {
     if (scenarioTearDown) {
-      await scenarioTearDown({
-        apmEsClient,
-        logsEsClient,
-        infraEsClient,
-        otelEsClient,
-        syntheticsEsClient,
-        entitiesEsClient,
-        entitiesKibanaClient,
-      });
+      try {
+        await scenarioTearDown({
+          apmEsClient,
+          logsEsClient,
+          infraEsClient,
+          otelEsClient,
+          syntheticsEsClient,
+          entitiesEsClient,
+          entitiesKibanaClient,
+        });
+      } catch (error) {
+        logger.error('Error during scenario teardown', error);
+      }
     }
 
     currentStreams.forEach((stream) => {
