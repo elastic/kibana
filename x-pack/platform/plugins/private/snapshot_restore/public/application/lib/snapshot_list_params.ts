@@ -51,14 +51,9 @@ const resetSearchOptions = (listParams: SnapshotListParams): SnapshotListParams 
 });
 
 export const escapeString = (inputString: string) => {
-  // List of characters to unescape
-  const unescapeSpecialChars = /\\([{}()\\])/g;
-
-  // List of characters to escape
-  const escapeSpecialChars = /[{}()\\]/g;
-
-  // Unescape any special char and escape again to avoid double escaping
-  return inputString.replace(unescapeSpecialChars, '$1').replace(escapeSpecialChars, '\\$&');
+  return inputString.replace(/\\([{}()\\])|([{}()\\])/g, (match, unescaped, needsEscape) =>
+    unescaped ? match : `\\${needsEscape}`
+  );
 };
 
 // to init the query for repository and policyName search passed via url

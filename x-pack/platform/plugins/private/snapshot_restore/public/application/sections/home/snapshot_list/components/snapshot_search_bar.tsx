@@ -137,12 +137,10 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
 
   const onSearchBarChange = (args: EuiSearchBarOnChangeArgs) => {
     const { query: changedQuery, error: queryError } = args;
+
     if (changedQuery) {
       changedQuery.text = escapeString(changedQuery.text);
-    }
-    if (queryError) {
-      setError(queryError);
-    } else if (changedQuery) {
+
       setError(null);
       setQuery(changedQuery);
       if (changedQuery.ast.clauses.length > 1) {
@@ -150,6 +148,8 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       } else {
         setCachedListParams(getListParams(listParams, changedQuery));
       }
+    } else if (queryError) {
+      setError(queryError);
     }
   };
 
