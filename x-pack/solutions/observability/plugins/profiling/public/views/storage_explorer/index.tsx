@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
@@ -63,17 +62,6 @@ export function StorageExplorerView() {
   const totalNumberOfDistinctProbabilisticValues =
     storageExplorerSummaryState.data?.totalNumberOfDistinctProbabilisticValues || 0;
   const hasDistinctProbabilisticValues = totalNumberOfDistinctProbabilisticValues > 1;
-
-  const { onPageReady } = usePerformanceContext();
-
-  if (storageExplorerSummaryState.status === AsyncStatus.Settled) {
-    onPageReady({
-      meta: {
-        rangeFrom,
-        rangeTo,
-      },
-    });
-  }
 
   return (
     <ProfilingAppPageTemplate
@@ -134,7 +122,10 @@ export function StorageExplorerView() {
         </EuiFlexItem>
         {selectedTab === 'host_breakdown' ? (
           <EuiFlexItem grow={false}>
-            <HostBreakdown hasDistinctProbabilisticValues={hasDistinctProbabilisticValues} />
+            <HostBreakdown
+              hasDistinctProbabilisticValues={hasDistinctProbabilisticValues}
+              storageExplorerSummaryStateStatus={storageExplorerSummaryState.status}
+            />
           </EuiFlexItem>
         ) : null}
         {selectedTab === 'data_breakdown' ? (
