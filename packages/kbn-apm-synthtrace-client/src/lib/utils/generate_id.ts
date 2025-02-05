@@ -25,10 +25,6 @@ function generateId(length: number = LONG_ID_LENGTH) {
   return generatedId;
 }
 
-function generateIdWithSeed(seed: string, length: number = LONG_ID_LENGTH) {
-  return seed?.padStart(length, '0');
-}
-
 export function generateShortId() {
   return generateId(SHORT_ID_LENGTH);
 }
