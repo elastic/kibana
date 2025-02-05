@@ -238,7 +238,7 @@ describe.each([
       if (legacy) {
         it('should return the same index of the behind text palette for same key', () => {
           const palette = palettes.default;
-  
+
           const color1 = palette.getCategoricalColor(
             [
               {
@@ -276,7 +276,7 @@ describe.each([
           );
           const color1Index = euiPaletteColorBlind({ rotations: 2 }).indexOf(color1!);
           const color2Index = euiPaletteColorBlindBehindText({ rotations: 2 }).indexOf(color2!);
-  
+
           expect(color1Index).toEqual(color2Index);
         });
       }
