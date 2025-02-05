@@ -16,7 +16,6 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { get, isEmpty, uniqBy } from 'lodash';
-import { MessageRole } from '@kbn/inference-common';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
