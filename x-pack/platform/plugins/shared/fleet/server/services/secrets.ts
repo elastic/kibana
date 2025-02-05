@@ -704,16 +704,16 @@ export async function deleteSOSecrets(
  * Takes a generic object T and its secret paths
  * Creates new secrets and returns the references
  */
-export async function extractAndWriteSOSecrets<T>(opts: {
+async function extractAndWriteSOSecrets<T>(opts: {
   soObject: T;
   esClient: ElasticsearchClient;
   secretPaths: SOSecretPath[];
   secretHashes?: Record<string, any>;
-}): Promise<{ so: T; secretReferences: PolicySecretReference[] }> {
+}): Promise<{ soObjectWithSecrets: T; secretReferences: PolicySecretReference[] }> {
   const { soObject, esClient, secretPaths, secretHashes = {} } = opts;
 
   if (secretPaths.length === 0) {
-    return { so: soObject, secretReferences: [] };
+    return { soObjectWithSecrets: soObject, secretReferences: [] };
   }
 
   const secrets = await createSecrets({
@@ -732,7 +732,7 @@ export async function extractAndWriteSOSecrets<T>(opts: {
   });
 
   return {
-    so: objectWithSecretRefs,
+    soObjectWithSecrets: objectWithSecretRefs,
     secretReferences: secrets.map(({ id }) => ({ id })),
   };
 }
@@ -742,7 +742,7 @@ export async function extractAndWriteSOSecrets<T>(opts: {
  * Takes a generic object T to update and its old and new secret paths
  * Updates secrets and returns the references
  */
-export async function extractAndUpdateSOSecrets<T>(opts: {
+async function extractAndUpdateSOSecrets<T>(opts: {
   updatedSoObject: Partial<T>;
   oldSecretPaths: SOSecretPath[];
   updatedSecretPaths: SOSecretPath[];
@@ -792,7 +792,54 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
 }
 
 // Outputs functions
-export function getOutputSecretPaths(
+export async function extractAndWriteOutputSecrets(opts: {
+  output: NewOutput;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{ output: NewOutput; secretReferences: PolicySecretReference[] }> {
+  const { output, esClient, secretHashes = {} } = opts;
+  const secretPaths = getOutputSecretPaths(output.type, output).filter(
+    (path) => typeof path.value === 'string'
+  );
+  const secretRes = await extractAndWriteSOSecrets<NewOutput>({
+    soObject: output,
+    secretPaths,
+    esClient,
+    secretHashes,
+  });
+  return { output: secretRes.soObjectWithSecrets, secretReferences: secretRes.secretReferences };
+}
+
+export async function extractAndUpdateOutputSecrets(opts: {
+  oldOutput: Output;
+  outputUpdate: Partial<Output>;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{
+  outputUpdate: Partial<Output>;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldOutput, outputUpdate, esClient, secretHashes } = opts;
+  const outputType = outputUpdate.type || oldOutput.type;
+  const oldSecretPaths = getOutputSecretPaths(oldOutput.type, oldOutput);
+  const updatedSecretPaths = getOutputSecretPaths(outputType, outputUpdate);
+
+  const secretRes = await extractAndUpdateSOSecrets<Output>({
+    updatedSoObject: outputUpdate,
+    oldSecretPaths,
+    updatedSecretPaths,
+    esClient,
+    secretHashes: outputUpdate.is_preconfigured ? secretHashes : undefined,
+  });
+  return {
+    outputUpdate: secretRes.updatedSoObject,
+    secretReferences: secretRes.secretReferences,
+    secretsToDelete: secretRes.secretsToDelete,
+  };
+}
+
+function getOutputSecretPaths(
   outputType: NewOutput['type'],
   output: NewOutput | Partial<Output>
 ): SOSecretPath[] {
@@ -889,7 +936,7 @@ export function getOutputSecretReferences(output: Output): PolicySecretReference
   return outputSecretPaths;
 }
 // Fleet server hosts functions
-export function getFleetServerHostsSecretPaths(
+function getFleetServerHostsSecretPaths(
   fleetServerHost: NewFleetServerHost | Partial<FleetServerHost>
 ): SOSecretPath[] {
   const secretPaths: SOSecretPath[] = [];
@@ -908,6 +955,55 @@ export function getFleetServerHostsSecretPaths(
   }
 
   return secretPaths;
+}
+
+export async function extractAndWriteFleetServerHostsSecrets(opts: {
+  fleetServerHost: NewFleetServerHost;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{ fleetServerHost: NewFleetServerHost; secretReferences: PolicySecretReference[] }> {
+  const { fleetServerHost, esClient, secretHashes = {} } = opts;
+
+  const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost).filter(
+    (path) => typeof path.value === 'string'
+  );
+  const secretRes = await extractAndWriteSOSecrets<NewFleetServerHost>({
+    soObject: fleetServerHost,
+    secretPaths,
+    esClient,
+    secretHashes,
+  });
+  return {
+    fleetServerHost: secretRes.soObjectWithSecrets,
+    secretReferences: secretRes.secretReferences,
+  };
+}
+
+export async function extractAndUpdateFleetServerHostsSecrets(opts: {
+  oldFleetServerHost: NewFleetServerHost;
+  fleetServerHostUpdate: Partial<NewFleetServerHost>;
+  esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
+}): Promise<{
+  fleetServerHostUpdate: Partial<NewFleetServerHost>;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldFleetServerHost, fleetServerHostUpdate, esClient, secretHashes } = opts;
+  const oldSecretPaths = getFleetServerHostsSecretPaths(oldFleetServerHost);
+  const updatedSecretPaths = getFleetServerHostsSecretPaths(fleetServerHostUpdate);
+  const secretsRes = await extractAndUpdateSOSecrets<FleetServerHost>({
+    updatedSoObject: fleetServerHostUpdate,
+    oldSecretPaths,
+    updatedSecretPaths,
+    esClient,
+    secretHashes,
+  });
+  return {
+    fleetServerHostUpdate: secretsRes.updatedSoObject,
+    secretReferences: secretsRes.secretReferences,
+    secretsToDelete: secretsRes.secretsToDelete,
+  };
 }
 
 export async function deleteFleetServerHostsSecrets(opts: {

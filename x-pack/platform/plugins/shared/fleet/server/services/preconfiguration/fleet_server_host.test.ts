@@ -74,8 +74,8 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
           is_default: false,
           is_preconfigured: false,
           ssl: {
-            certificate_authorities: 'cert authorities',
-            es_certificate_authorities: 'es cert authorities',
+            certificate_authorities: ['cert authorities'],
+            es_certificate_authorities: ['es cert authorities'],
             certificate: 'path/to/cert',
             es_certificate: 'path/to/EScert',
           },

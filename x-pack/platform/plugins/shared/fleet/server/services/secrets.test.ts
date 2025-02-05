@@ -24,10 +24,12 @@ import { appContextService } from './app_context';
 import {
   getPolicySecretPaths,
   diffSecretPaths,
-  diffOutputSecretPaths,
+  diffSOSecretPaths,
   extractAndWriteSecrets,
   extractAndUpdateSecrets,
   extractAndUpdateOutputSecrets,
+  extractAndWriteFleetServerHostsSecrets,
+  extractAndUpdateFleetServerHostsSecrets,
 } from './secrets';
 
 describe('secrets', () => {
@@ -1440,11 +1442,129 @@ describe('secrets', () => {
       expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
     });
   });
+  describe('extractAndWriteFleetServerHostsSecrets', () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    esClientMock.transport.request.mockImplementation(async (req) => {
+      return {
+        id: uuidv4(),
+      };
+    });
+
+    beforeEach(() => {
+      esClientMock.transport.request.mockClear();
+    });
+
+    it('should create new secrets', async () => {
+      const fleetServerHost = {
+        id: 'id1',
+        name: 'fleet server 1',
+        host_urls: [],
+        is_default: false,
+        is_preconfigured: false,
+        ssl: {
+          certificate_authorities: ['cert authorities'],
+          es_certificate_authorities: ['es cert authorities'],
+          certificate: 'path/to/cert',
+          es_certificate: 'path/to/EScert',
+        },
+        secrets: {
+          ssl: {
+            key: 'key1',
+            es_key: 'key2',
+          },
+        },
+      };
+      const res = await extractAndWriteFleetServerHostsSecrets({
+        fleetServerHost,
+        esClient: esClientMock,
+      });
+      expect(res.fleetServerHost).toEqual({
+        ...fleetServerHost,
+        secrets: {
+          ssl: {
+            es_key: {
+              id: expect.any(String),
+            },
+            key: {
+              id: expect.any(String),
+            },
+          },
+        },
+      });
+      expect(res.secretReferences).toEqual([{ id: expect.anything() }, { id: expect.anything() }]);
+    });
+  });
+
+  describe('extractAndUpdateFleetServerHostsSecrets', () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    esClientMock.transport.request.mockImplementation(async (req) => {
+      return {
+        id: uuidv4(),
+      };
+    });
+
+    beforeEach(() => {
+      esClientMock.transport.request.mockClear();
+    });
+
+    it('should update existing secrets', async () => {
+      const fleetServerHost = {
+        id: 'id1',
+        name: 'fleet server 1',
+        host_urls: [],
+        is_default: false,
+        is_preconfigured: false,
+        ssl: {
+          certificate_authorities: ['cert authorities'],
+          es_certificate_authorities: ['es cert authorities'],
+          certificate: 'path/to/cert',
+          es_certificate: 'path/to/EScert',
+        },
+        secrets: {
+          ssl: {
+            key: 'key1',
+            es_key: 'key2',
+          },
+        },
+      };
+      const updatedFleetServerHost = {
+        ...fleetServerHost,
+        secrets: {
+          ssl: {
+            key: 'newkey1',
+            es_key: 'newkey2',
+          },
+        },
+      };
+      const res = await extractAndUpdateFleetServerHostsSecrets({
+        oldFleetServerHost: fleetServerHost,
+        fleetServerHostUpdate: updatedFleetServerHost,
+        esClient: esClientMock,
+      });
+      expect(res.fleetServerHostUpdate).toEqual({
+        ...fleetServerHost,
+        secrets: {
+          ssl: {
+            es_key: {
+              id: expect.any(String),
+            },
+            key: {
+              id: expect.any(String),
+            },
+          },
+        },
+      });
+      expect(res.secretReferences).toEqual([{ id: expect.anything() }, { id: expect.anything() }]);
+      expect(res.secretsToDelete).toEqual([{ id: undefined }, { id: undefined }]);
+    });
+  });
 });
 
-describe('diffOutputSecretPaths', () => {
+describe('diffSOSecretPaths', () => {
   it('should return empty array if no secrets', () => {
-    expect(diffOutputSecretPaths([], [])).toEqual({
+    expect(diffSOSecretPaths([], [])).toEqual({
       toCreate: [],
       toDelete: [],
       noChange: [],
@@ -1459,7 +1579,7 @@ describe('diffOutputSecretPaths', () => {
         },
       },
     ];
-    expect(diffOutputSecretPaths(paths, paths)).toEqual({
+    expect(diffSOSecretPaths(paths, paths)).toEqual({
       toCreate: [],
       toDelete: [],
       noChange: paths,
@@ -1487,7 +1607,7 @@ describe('diffOutputSecretPaths', () => {
       },
     ];
 
-    expect(diffOutputSecretPaths(paths, paths.slice().reverse())).toEqual({
+    expect(diffSOSecretPaths(paths, paths.slice().reverse())).toEqual({
       toCreate: [],
       toDelete: [],
       noChange: paths,
@@ -1517,7 +1637,7 @@ describe('diffOutputSecretPaths', () => {
       },
     ];
 
-    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
+    expect(diffSOSecretPaths(paths1, paths2)).toEqual({
       toCreate: [
         {
           path: 'somepath2',
@@ -1534,46 +1654,9 @@ describe('diffOutputSecretPaths', () => {
       ],
       noChange: [paths1[0]],
     });
-  });
-  it('double secret modified', () => {
-    const paths1 = [
-      {
-        path: 'somepath1',
-        value: {
-          id: 'secret-1',
-        },
-      },
-      {
-        path: 'somepath2',
-        value: {
-          id: 'secret-2',
-        },
-      },
-    ];
 
-    const paths2 = [
-      {
-        path: 'somepath1',
-        value: 'newvalue1',
-      },
-      {
-        path: 'somepath2',
-        value: 'newvalue2',
-      },
-    ];
-
-    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
-      toCreate: [
-        {
-          path: 'somepath1',
-          value: 'newvalue1',
-        },
-        {
-          path: 'somepath2',
-          value: 'newvalue2',
-        },
-      ],
-      toDelete: [
+    it('double secret modified', () => {
+      const pathsDouble1 = [
         {
           path: 'somepath1',
           value: {
@@ -1586,38 +1669,76 @@ describe('diffOutputSecretPaths', () => {
             id: 'secret-2',
           },
         },
-      ],
-      noChange: [],
-    });
-  });
+      ];
 
-  it('single secret added', () => {
-    const paths1 = [
-      {
-        path: 'somepath1',
-        value: {
-          id: 'secret-1',
+      const pathsDouble2 = [
+        {
+          path: 'somepath1',
+          value: 'newvalue1',
         },
-      },
-    ];
+        {
+          path: 'somepath2',
+          value: 'newvalue2',
+        },
+      ];
 
-    const paths2 = [
-      paths1[0],
-      {
-        path: 'somepath2',
-        value: 'newvalue',
-      },
-    ];
+      expect(diffSOSecretPaths(pathsDouble1, pathsDouble2)).toEqual({
+        toCreate: [
+          {
+            path: 'somepath1',
+            value: 'newvalue1',
+          },
+          {
+            path: 'somepath2',
+            value: 'newvalue2',
+          },
+        ],
+        toDelete: [
+          {
+            path: 'somepath1',
+            value: {
+              id: 'secret-1',
+            },
+          },
+          {
+            path: 'somepath2',
+            value: {
+              id: 'secret-2',
+            },
+          },
+        ],
+        noChange: [],
+      });
+    });
 
-    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
-      toCreate: [
+    it('single secret added', () => {
+      const pathsSingle1 = [
+        {
+          path: 'somepath1',
+          value: {
+            id: 'secret-1',
+          },
+        },
+      ];
+
+      const pathsSingle2 = [
+        paths1[0],
         {
           path: 'somepath2',
           value: 'newvalue',
         },
-      ],
-      toDelete: [],
-      noChange: [paths1[0]],
+      ];
+
+      expect(diffSOSecretPaths(pathsSingle1, pathsSingle2)).toEqual({
+        toCreate: [
+          {
+            path: 'somepath2',
+            value: 'newvalue',
+          },
+        ],
+        toDelete: [],
+        noChange: [paths1[0]],
+      });
     });
   });
 });

@@ -44,9 +44,8 @@ import { escapeSearchQueryPhrase } from './saved_object';
 import {
   deleteFleetServerHostsSecrets,
   deleteSecrets,
-  getFleetServerHostsSecretPaths,
-  extractAndUpdateSOSecrets,
-  extractAndWriteSOSecrets,
+  extractAndUpdateFleetServerHostsSecrets,
+  extractAndWriteFleetServerHostsSecrets,
   isSecretStorageEnabled,
 } from './secrets';
 
@@ -100,13 +99,11 @@ export async function createFleetServerHost(
 
   // Store secret values if enabled; if not, store plain text values
   if (await isSecretStorageEnabled(esClient, soClient)) {
-    const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost);
-    const { so: fleetServerHostWithSecrets } = await extractAndWriteSOSecrets<NewFleetServerHost>({
-      soObject: fleetServerHost,
-      secretPaths,
-      esClient,
-    });
-
+    const { fleetServerHost: fleetServerHostWithSecrets } =
+      await extractAndWriteFleetServerHostsSecrets({
+        fleetServerHost,
+        esClient,
+      });
     if (fleetServerHostWithSecrets.secrets)
       data.secrets = fleetServerHostWithSecrets.secrets as FleetServerHostSOAttributes['secrets'];
   } else {
@@ -260,16 +257,13 @@ export async function updateFleetServerHost(
 
   // Store secret values if enabled; if not, store plain text values
   if (await isSecretStorageEnabled(esClient, soClient)) {
-    const oldSecretPaths = getFleetServerHostsSecretPaths(originalItem);
-    const updatedSecretPaths = getFleetServerHostsSecretPaths(data);
-    const secretsRes = await extractAndUpdateSOSecrets<FleetServerHost>({
-      updatedSoObject: data,
-      oldSecretPaths,
-      updatedSecretPaths,
+    const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
+      oldFleetServerHost: originalItem,
+      fleetServerHostUpdate: data,
       esClient,
     });
 
-    updateData.secrets = secretsRes.updatedSoObject
+    updateData.secrets = secretsRes.fleetServerHostUpdate
       .secrets as FleetServerHostSOAttributes['secrets'];
     secretsToDelete = secretsRes.secretsToDelete;
   } else {
