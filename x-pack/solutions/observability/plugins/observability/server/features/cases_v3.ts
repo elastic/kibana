@@ -10,29 +10,15 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
-import { casesFeatureId, casesFeatureIdV3, observabilityFeatureId } from '../../common';
+import { casesFeatureIdV3, casesFeatureId, observabilityFeatureId } from '../../common';
 
-export const getCasesFeature = (
+export const getCasesFeatureV3 = (
   casesCapabilities: CasesUiCapabilities,
   casesApiTags: CasesApiTags
 ): KibanaFeatureConfig => ({
-  deprecated: {
-    // TODO: Add docLinks to link to documentation about the deprecation
-    notice: i18n.translate(
-      'xpack.observability.featureRegistry.linkObservabilityTitle.deprecationMessage',
-      {
-        defaultMessage:
-          'The {currentId} permissions are deprecated, please see {casesFeatureIdV3}.',
-        values: {
-          currentId: casesFeatureId,
-          casesFeatureIdV3,
-        },
-      }
-    ),
-  },
-  id: casesFeatureId,
-  name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitleDeprecated', {
-    defaultMessage: 'Cases (Deprecated)',
+  id: casesFeatureIdV3,
+  name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
+    defaultMessage: 'Cases',
   }),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.observability,
@@ -42,7 +28,7 @@ export const getCasesFeature = (
   cases: [observabilityFeatureId],
   privileges: {
     all: {
-      api: [...casesApiTags.all, ...casesApiTags.createComment],
+      api: casesApiTags.all,
       app: [casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: {
@@ -50,29 +36,12 @@ export const getCasesFeature = (
         read: [observabilityFeatureId],
         update: [observabilityFeatureId],
         push: [observabilityFeatureId],
-        createComment: [observabilityFeatureId],
-        reopenCase: [observabilityFeatureId],
-        assign: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],
         read: [...filesSavedObjectTypes],
       },
-      ui: [
-        ...casesCapabilities.all,
-        ...casesCapabilities.createComment,
-        ...casesCapabilities.reopenCase,
-        ...casesCapabilities.assignCase,
-      ],
-      replacedBy: {
-        default: [{ feature: casesFeatureIdV3, privileges: ['all'] }],
-        minimal: [
-          {
-            feature: casesFeatureIdV3,
-            privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
-          },
-        ],
-      },
+      ui: casesCapabilities.all,
     },
     read: {
       api: casesApiTags.read,
@@ -86,10 +55,6 @@ export const getCasesFeature = (
         read: [...filesSavedObjectTypes],
       },
       ui: casesCapabilities.read,
-      replacedBy: {
-        default: [{ feature: casesFeatureIdV3, privileges: ['read'] }],
-        minimal: [{ feature: casesFeatureIdV3, privileges: ['minimal_read'] }],
-      },
     },
   },
   subFeatures: [
@@ -116,7 +81,6 @@ export const getCasesFeature = (
                 delete: [observabilityFeatureId],
               },
               ui: casesCapabilities.delete,
-              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['cases_delete'] }],
             },
           ],
         },
@@ -147,7 +111,94 @@ export const getCasesFeature = (
                 settings: [observabilityFeatureId],
               },
               ui: casesCapabilities.settings,
-              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['cases_settings'] }],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: i18n.translate('xpack.observability.featureRegistry.addCommentsSubFeatureName', {
+        defaultMessage: 'Create comments & attachments',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              api: casesApiTags.createComment,
+              id: 'create_comment',
+              name: i18n.translate(
+                'xpack.observability.featureRegistry.addCommentsSubFeatureDetails',
+                {
+                  defaultMessage: 'Add comments to cases',
+                }
+              ),
+              includeIn: 'all',
+              savedObject: {
+                all: [...filesSavedObjectTypes],
+                read: [...filesSavedObjectTypes],
+              },
+              cases: {
+                createComment: [observabilityFeatureId],
+              },
+              ui: casesCapabilities.createComment,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: i18n.translate('xpack.observability.featureRegistry.reopenCaseSubFeatureName', {
+        defaultMessage: 'Re-open',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'case_reopen',
+              name: i18n.translate(
+                'xpack.observability.featureRegistry.reopenCaseSubFeatureDetails',
+                {
+                  defaultMessage: 'Re-open closed cases',
+                }
+              ),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              cases: {
+                reopenCase: [observabilityFeatureId],
+              },
+              ui: casesCapabilities.reopenCase,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: i18n.translate('xpack.observability.features.assignUsersSubFeatureName', {
+        defaultMessage: 'Assign users',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'cases_assign',
+              name: i18n.translate('xpack.observability.features.assignUsersSubFeatureName', {
+                defaultMessage: 'Assign users to cases',
+              }),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              cases: {
+                assign: [observabilityFeatureId],
+              },
+              ui: casesCapabilities.assignCase,
             },
           ],
         },
