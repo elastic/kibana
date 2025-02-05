@@ -27,37 +27,35 @@ const toggleIsCollapsed = jest
 
 describe('GridRowHeader', () => {
   const renderGridRowHeader = (propsOverrides: Partial<GridRowHeaderProps> = {}) => {
-    const gridLayoutStateManager =
-      propsOverrides.gridLayoutStateManager ?? gridLayoutStateManagerMock;
     return render(
       <GridRowHeader
         rowIndex={0}
-        toggleIsCollapsed={() => toggleIsCollapsed(0, gridLayoutStateManager)}
-        gridLayoutStateManager={gridLayoutStateManager}
-        {...omit(propsOverrides, 'gridLayoutStateManager')}
+        toggleIsCollapsed={() => toggleIsCollapsed(0, gridLayoutStateManagerMock)}
+        gridLayoutStateManager={gridLayoutStateManagerMock}
+        {...propsOverrides}
       />
     );
   };
 
+  beforeEach(() => {
+    toggleIsCollapsed.mockClear();
+    act(() => {
+      gridLayoutStateManagerMock.gridLayout$.next(getSampleLayout());
+    });
+  });
+
   it('renders the panel count', async () => {
-    const gridLayoutStateManager = gridLayoutStateManagerMock;
-    const component = renderGridRowHeader({ gridLayoutStateManager });
+    const component = renderGridRowHeader();
     const initialCount = component.getByTestId('kbnGridRowHeader--panelCount');
     expect(initialCount.textContent).toBe('(8 panels)');
 
     act(() => {
-      gridLayoutStateManager.gridLayout$.next([
+      const currentRow = gridLayoutStateManagerMock.gridLayout$.getValue()[0];
+      gridLayoutStateManagerMock.gridLayout$.next([
         {
-          title: 'Large section',
-          isCollapsed: false,
+          ...currentRow,
           panels: {
-            panel1: {
-              id: 'panel1',
-              row: 0,
-              column: 0,
-              width: 12,
-              height: 6,
-            },
+            panel1: currentRow.panels.panel1,
           },
         },
       ]);
@@ -69,15 +67,18 @@ describe('GridRowHeader', () => {
     });
   });
 
+  it('clicking title calls `toggleIsCollapsed`', async () => {
+    const component = renderGridRowHeader();
+    const title = component.getByTestId('kbnGridRowTitle');
+
+    expect(toggleIsCollapsed).toBeCalledTimes(0);
+    expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].isCollapsed).toBe(false);
+    await userEvent.click(title);
+    expect(toggleIsCollapsed).toBeCalledTimes(1);
+    expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].isCollapsed).toBe(true);
+  });
+
   describe('title editor', () => {
-    const gridLayoutStateManager = gridLayoutStateManagerMock;
-
-    afterEach(() => {
-      act(() => {
-        gridLayoutStateManager.gridLayout$.next(getSampleLayout());
-      });
-    });
-
     const setTitle = async (component: RenderResult) => {
       const input = component.getByTestId('euiInlineEditModeInput');
       expect(input.getAttribute('value')).toBe('Large section');
@@ -86,19 +87,22 @@ describe('GridRowHeader', () => {
       expect(input.getAttribute('value')).toBe('Large section 123');
     };
 
-    it('clicking on edit icon triggers inline title editor', async () => {
-      const component = renderGridRowHeader({ gridLayoutStateManager });
+    it('clicking on edit icon triggers inline title editor and does not toggle collapsed', async () => {
+      const component = renderGridRowHeader();
       const editIcon = component.getByTestId('kbnGridRowTitle--edit');
 
       expect(component.queryByTestId('kbnGridRowTitle--editor')).not.toBeInTheDocument();
+      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].isCollapsed).toBe(false);
       await userEvent.click(editIcon);
       expect(component.getByTestId('kbnGridRowTitle--editor')).toBeInTheDocument();
+      expect(toggleIsCollapsed).toBeCalledTimes(0);
+      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].isCollapsed).toBe(false);
     });
 
     it('can update the title', async () => {
-      const component = renderGridRowHeader({ gridLayoutStateManager });
+      const component = renderGridRowHeader();
       expect(component.getByTestId('kbnGridRowTitle').textContent).toBe('Large section');
-      expect(gridLayoutStateManager.gridLayout$.getValue()[0].title).toBe('Large section');
+      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].title).toBe('Large section');
 
       const editIcon = component.getByTestId('kbnGridRowTitle--edit');
       await userEvent.click(editIcon);
@@ -108,11 +112,11 @@ describe('GridRowHeader', () => {
 
       expect(component.queryByTestId('kbnGridRowTitle--editor')).not.toBeInTheDocument();
       expect(component.getByTestId('kbnGridRowTitle').textContent).toBe('Large section 123');
-      expect(gridLayoutStateManager.gridLayout$.getValue()[0].title).toBe('Large section 123');
+      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].title).toBe('Large section 123');
     });
 
     it('clicking on cancel closes the inline title editor without updating title', async () => {
-      const component = renderGridRowHeader({ gridLayoutStateManager });
+      const component = renderGridRowHeader();
       const editIcon = component.getByTestId('kbnGridRowTitle--edit');
       await userEvent.click(editIcon);
 
@@ -122,7 +126,7 @@ describe('GridRowHeader', () => {
 
       expect(component.queryByTestId('kbnGridRowTitle--editor')).not.toBeInTheDocument();
       expect(component.getByTestId('kbnGridRowTitle').textContent).toBe('Large section');
-      expect(gridLayoutStateManager.gridLayout$.getValue()[0].title).toBe('Large section');
+      expect(gridLayoutStateManagerMock.gridLayout$.getValue()[0].title).toBe('Large section');
     });
   });
 });
