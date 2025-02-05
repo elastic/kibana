@@ -1727,7 +1727,6 @@
     "cypress-network-idle": "^1.14.2",
     "cypress-real-events": "^1.11.0",
     "cypress-recurse": "^1.35.2",
-    "date-fns": "^2.29.3",
     "dependency-check": "^4.1.0",
     "dependency-cruiser": "^16.8.0",
     "ejs": "^3.1.10",
