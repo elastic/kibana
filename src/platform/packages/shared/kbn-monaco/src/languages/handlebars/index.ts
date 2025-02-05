@@ -11,4 +11,6 @@ import type { LangModuleType } from '../../types';
 import { languageConfiguration, lexerRules } from './language';
 import { ID } from './constants';
 
+export { ID as HANDLEBARS_LANG_ID } from './constants';
+
 export const HandlebarsLang: LangModuleType = { ID, languageConfiguration, lexerRules };

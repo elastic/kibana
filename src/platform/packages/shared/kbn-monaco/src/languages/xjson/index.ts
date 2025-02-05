@@ -15,4 +15,6 @@ import { ID } from './constants';
 import { lexerRules, languageConfiguration } from './lexer_rules';
 import type { LangModuleType } from '../../types';
 
+export { ID as XJSON_LANG_ID } from './constants';
+
 export const XJsonLang: LangModuleType = { ID, lexerRules, languageConfiguration };

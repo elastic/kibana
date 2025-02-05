@@ -13,9 +13,9 @@ import type { LangModuleType } from '../../types';
 import { languageConfiguration, lexerRules } from './language';
 import { ID } from './constants';
 
-export const YamlLang: LangModuleType = { ID, languageConfiguration, lexerRules };
+export { ID as YAML_LANG_ID } from './constants';
 
-export const YAML_LANG_ID = YamlLang.ID;
+export const YamlLang: LangModuleType = { ID, languageConfiguration, lexerRules };
 
 const monacoYamlDefaultOptions: MonacoYamlOptions = {
   completion: true,

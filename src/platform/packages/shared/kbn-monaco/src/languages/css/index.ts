@@ -11,4 +11,6 @@ import type { LangModuleType } from '../../types';
 import { lexerRules, languageConfiguration } from './language';
 import { ID } from './constants';
 
+export { ID as CSS_LANG_ID } from './constants';
+
 export const CssLang: LangModuleType = { ID, lexerRules, languageConfiguration };

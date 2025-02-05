@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ID = 'markdown';
+export const ID = 'markdown' as const;

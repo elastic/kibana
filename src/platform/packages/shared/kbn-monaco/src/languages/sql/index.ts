@@ -11,4 +11,6 @@ import type { LangModuleType } from '../../types';
 import { ID } from './constants';
 import { lexerRules } from './lexer_rules';
 
+export { ID as SQL_LANG_ID } from './constants';
+
 export const SQLLang: LangModuleType = { ID, lexerRules };
