@@ -43,7 +43,7 @@ $domDragDropZLevel3: 3;
 @mixin mixinDomDroppableActive($borderWidth: $euiBorderWidthThin) {
   background-color: transparentize($euiColorBackgroundLightSuccess, .7) !important;
   &:before {
-    border-color: $euiColorBorderBaseSuccess !important;
+    border-color: $euiColorBorderStrongSuccess !important;
   }
 }
 
@@ -52,7 +52,7 @@ $domDragDropZLevel3: 3;
 @mixin mixinDomDroppableHover($borderWidth: $euiBorderWidthThin) {
   background-color: transparentize($euiColorBackgroundFilledSuccess, .75) !important;
   &:before {
-    border-color: $euiColorBorderBaseSuccess !important;
+    border-color: $euiColorBorderStrongSuccess !important;
   }
 }
 
