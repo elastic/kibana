@@ -1,4 +1,5 @@
-@import '../../variables';
+$lnsPanelMinWidth: $euiSize * 18;
+
 
 .lnsFrameLayout {
   padding: 0;
@@ -67,7 +68,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   // This also means needing to add same amount of margin to page content and suggestion items
   padding: $euiSize $euiSize 0;
   position: relative;
-  z-index: $lnsZLevel1;
+  z-index: 1;
   border-left: $euiBorderThin;
   border-right: $euiBorderThin;
   @include euiScrollBar;

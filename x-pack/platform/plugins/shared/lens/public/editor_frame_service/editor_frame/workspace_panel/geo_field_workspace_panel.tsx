@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -15,7 +15,6 @@ import { Droppable } from '@kbn/dom-drag-drop';
 import { IndexPattern } from '../../../types';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { APP_ID } from '../../../../common/constants';
-import './geo_field_workspace_panel.scss';
 
 interface Props {
   fieldType: string;
@@ -53,7 +52,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
           </h2>
           <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__promptIllustration" />
           <Droppable
-            className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
+            css={DroppableStyles}
             dataTestSubj="lnsGeoFieldWorkspace"
             dropTypes={['field_add']}
             order={dragDropOrder}
@@ -74,3 +73,11 @@ export function GeoFieldWorkspacePanel(props: Props) {
     </div>
   );
 }
+
+export const DroppableStyles = ({ euiTheme }: UseEuiTheme) => {
+  return `
+    padding: ${euiTheme.size.xxl} ${euiTheme.size.xxxl};
+    border: ${euiTheme.border.thin};
+    border-radius: ${euiTheme.border.radius};
+  `;
+};

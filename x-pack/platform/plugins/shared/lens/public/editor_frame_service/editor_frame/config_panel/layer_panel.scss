@@ -1,5 +1,3 @@
-@import '../../../mixins';
-
 .lnsLayerPanel {
   margin-bottom: $euiSize;
 
@@ -79,6 +77,33 @@
 .domDroppable--replacing {
   .dimensionTrigger__textLabel {
     text-decoration: line-through;
+  }
+}
+
+// Removes EUI focus ring
+@mixin removeEuiFocusRing {
+  outline: none;
+
+  &:focus-visible {
+    outline-style: none;
+  }
+}
+
+// Passes focus ring styles down to a child of a focused element
+@mixin passDownFocusRing($target) {
+  @include removeEuiFocusRing;
+
+  #{$target} {
+    @include euiFocusBackground;
+    outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+  }
+
+  &:focus-visible #{$target} {
+    outline-style: auto; // Chrome
+  }
+
+  &:not(:focus-visible) #{$target} {
+    outline: none;
   }
 }
 

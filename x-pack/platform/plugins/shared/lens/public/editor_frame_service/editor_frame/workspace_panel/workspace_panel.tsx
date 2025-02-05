@@ -773,7 +773,6 @@ export const VisualizationWrapper = ({
       ref={nodeRef}
     >
       <ExpressionRendererComponent
-        className="lnsExpressionRenderer__component"
         padding={displayOptions?.noPadding ? undefined : 'm'}
         expression={expression!}
         allowCache={true}

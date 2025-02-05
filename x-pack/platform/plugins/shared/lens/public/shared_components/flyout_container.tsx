@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './flyout_container.scss';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -18,9 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
+  UseEuiTheme,
+  euiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
+import { FlyoutContainerStyles } from './flyout.styles';
 
 function fromExcludedClickTarget(event: Event) {
   for (
@@ -69,12 +70,14 @@ export function FlyoutContainer({
 
   useEffect(() => {
     if (!isInlineEditing) {
-      document.body.classList.toggle('lnsBody--overflowHidden', isOpen);
+      if (isOpen) {
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+      }
       return () => {
         if (isOpen) {
           setFocusTrapIsEnabled(false);
         }
-        document.body.classList.remove('lnsBody--overflowHidden');
+        document.body.style.overflow = '';
       };
     }
   }, [isInlineEditing, isOpen]);
@@ -100,10 +103,13 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
-          className="lnsDimensionContainer"
-          css={css`
-            box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
-          `}
+          css={[
+            FlyoutContainerStyles,
+            css`
+              box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
+            `,
+            DimensionContainerStyles.self,
+          ]}
           onAnimationEnd={() => {
             if (isOpen) {
               // EuiFocusTrap interferes with animating elements with absolute position:
@@ -113,7 +119,7 @@ export function FlyoutContainer({
             }
           }}
         >
-          <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
+          <EuiFlyoutHeader hasBorder css={DimensionContainerStyles.header}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
@@ -131,12 +137,7 @@ export function FlyoutContainer({
               )}
               <EuiFlexItem grow={true}>
                 <EuiTitle size="xs">
-                  <h2
-                    id="lnsDimensionContainerTitle"
-                    className="lnsDimensionContainer__headerTitle"
-                  >
-                    {label}
-                  </h2>
+                  <h2 id="lnsDimensionContainerTitle">{label}</h2>
                 </EuiTitle>
               </EuiFlexItem>
 
@@ -157,10 +158,17 @@ export function FlyoutContainer({
             </EuiFlexGroup>
           </EuiFlyoutHeader>
 
-          <div className="lnsDimensionContainer__content">{children}</div>
+          <div
+            className="eui-yScroll"
+            css={css`
+              flex: 1;
+            `}
+          >
+            {children}
+          </div>
 
           {customFooter || (
-            <EuiFlyoutFooter className="lnsDimensionContainer__footer">
+            <EuiFlyoutFooter css={DimensionContainerStyles.footer}>
               <EuiButtonEmpty
                 flush="left"
                 size="s"
@@ -183,3 +191,32 @@ export function FlyoutContainer({
     </div>
   );
 }
+
+const DimensionContainerStyles = {
+  self: (euiThemeContext: UseEuiTheme) => {
+    return `
+    // But with custom positioning to keep it within the sidebar contents
+    max-width: none !important;
+    left: 0;
+    z-index: ${euiThemeContext.euiTheme.levels.menu};
+    ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
+      height: 100% !important;
+      position: absolute;
+      top: 0 !important;
+    }
+
+    .lnsFrameLayout__sidebar-isFullscreen & {
+      border-left: ${
+        euiThemeContext.euiTheme.border.thin
+      }; // Force border regardless of theme in fullscreen
+      box-shadow: none;
+    }
+  `;
+  },
+  header: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.base};
+  `,
+  footer: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.base};
+  `,
+};
