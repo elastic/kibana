@@ -1107,10 +1107,6 @@ describe('Session index', () => {
     });
 
     it('should throw error if shards are missing for more than 10 tries', async () => {
-      const operationFailureReason = new Error(
-        'Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed 10 times.'
-      );
-
       const failureReason = new errors.ResponseError({
         statusCode: 503,
         body: {
