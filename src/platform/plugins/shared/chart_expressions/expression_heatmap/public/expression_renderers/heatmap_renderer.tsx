@@ -47,6 +47,8 @@ const heatmapContainerCss = ({ euiTheme }: UseEuiTheme) =>
     width: '100%',
     height: '100%',
     padding: euiTheme.size.s,
+    // the FocusTrap is adding extra divs which are making the visualization redraw twice
+    // with a visible glitch. This make the chart library resilient to this extra reflow
     overflow: 'auto hidden',
     userSelect: 'text',
   });
