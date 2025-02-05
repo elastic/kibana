@@ -11,8 +11,8 @@ import { Section } from '../../../common/constants';
 import type { IndexDetailsTabId } from '../../../common/constants';
 import { ExtensionsService } from '../../services/extensions_service';
 import { IndexDetailsSection } from '../../../common/constants';
-import { breadcrumbService, IndexManagementBreadcrumb } from './breadcrumbs';
-
+import { IndexManagementBreadcrumb } from './breadcrumbs';
+import { BreadcrumbService } from './breadcrumbs';
 export const getTemplateListLink = () => `/templates`;
 
 export const getTemplateDetailsLink = (name: string, isLegacy?: boolean) => {
@@ -94,6 +94,7 @@ export const navigateToIndexDetailsPage = (
   extensionsService: ExtensionsService,
   application: ApplicationStart,
   http: HttpSetup,
+  breadcrumbService: BreadcrumbService,
   tabId?: IndexDetailsSection
 ) => {
   if (!extensionsService.indexDetailsPageRoute) {

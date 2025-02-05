@@ -49,7 +49,7 @@ export enum IndexManagementBreadcrumb {
   indicesList = 'indicesList',
 }
 
-class BreadcrumbService {
+export class BreadcrumbService {
   private breadcrumbs: {
     [key in IndexManagementBreadcrumb]?: EuiBreadcrumb[];
   } = {

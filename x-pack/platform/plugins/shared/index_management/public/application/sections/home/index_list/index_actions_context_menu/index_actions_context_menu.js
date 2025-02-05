@@ -25,6 +25,7 @@ import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
 import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { AppContext } from '../../../../app_context';
+import { breadcrumbService } from '../../../../services/breadcrumbs';
 
 export class IndexActionsContextMenu extends Component {
   static contextType = AppContext;
@@ -88,6 +89,7 @@ export class IndexActionsContextMenu extends Component {
             extensionsService,
             application,
             http,
+            breadcrumbService,
             IndexDetailsSection.Overview
           );
         },
@@ -104,6 +106,7 @@ export class IndexActionsContextMenu extends Component {
             extensionsService,
             application,
             http,
+            breadcrumbService,
             IndexDetailsSection.Settings
           );
         },
@@ -120,6 +123,7 @@ export class IndexActionsContextMenu extends Component {
             extensionsService,
             application,
             http,
+            breadcrumbService,
             IndexDetailsSection.Mappings
           );
         },
