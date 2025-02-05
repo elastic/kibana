@@ -125,51 +125,35 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
                 : [];
             }
 
-            describe(`wrapped = ${isWrapped}`, () => {
-              test('no errors on correct usage, waning on square brackets', async () => {
+            describe('... METADATA <indices>', () => {
+              test('no errors on correct METADATA ... usage', async () => {
                 const { expectErrors } = await setup();
 
-                await expectErrors(`from index ${setWrapping('METADATA _id')}`, []);
-                await expectErrors(
-                  `from index ${setWrapping('METADATA _id')}`,
-                  [],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from index ${setWrapping('metadata _id')}`,
-                  [],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from index ${setWrapping('METADATA _id, _source')}`,
-                  [],
-                  addBracketsWarning()
-                );
+                await expectErrors('from index metadata _id', []);
+                await expectErrors('from index metadata _id, \t\n _index\n ', []);
               });
 
-              test('validates fields', async () => {
+              test('errors when wrapped in parentheses', async () => {
                 const { expectErrors } = await setup();
 
-                await expectErrors(
-                  `from index ${setWrapping('METADATA _id, _source2')}`,
-                  [
+                await expectErrors(`from index (metadata _id)`, [
+                  "SyntaxError: mismatched input '(metadata' expecting <EOF>",
+                ]);
+              });
+
+              describe('validates fields', () => {
+                test('validates fields', async () => {
+                  const { expectErrors } = await setup();
+
+                  await expectErrors(`from index METADATA _id, _source2`, [
                     `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
                       ', '
                     )}]`,
-                  ],
-                  addBracketsWarning()
-                );
-                await expectErrors(
-                  `from index ${setWrapping('metadata _id, _source')} ${setWrapping(
-                    'METADATA _id2'
-                  )}`,
-                  [
-                    isWrapped
-                      ? "SyntaxError: mismatched input '[' expecting <EOF>"
-                      : "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
-                  ],
-                  addBracketsWarning()
-                );
+                  ]);
+                  await expectErrors(`from index metadata _id, _source METADATA _id2`, [
+                    "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
+                  ]);
+                });
               });
             });
           }
