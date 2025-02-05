@@ -46,7 +46,7 @@ export const ProcessorTypeSelector = ({
     <EuiFormRow
       fullWidth
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.typeSelectorLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
       helpText={getProcessorDescription(esDocUrl)(processorType)}
@@ -59,7 +59,7 @@ export const ProcessorTypeSelector = ({
         onChange={handleChange}
         fullWidth
         placeholder={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.typeSelectorPlaceholder',
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorPlaceholder',
           { defaultMessage: 'Grok, Dissect ...' }
         )}
       />
@@ -73,7 +73,7 @@ const availableProcessors: TAvailableProcessors = {
     inputDisplay: 'Dissect',
     getDocUrl: (esDocUrl: string) => (
       <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectHelpText"
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectHelpText"
         defaultMessage="Uses {dissectLink} patterns to extract matches from a field."
         values={{
           dissectLink: (
@@ -97,7 +97,7 @@ const availableProcessors: TAvailableProcessors = {
     inputDisplay: 'Grok',
     getDocUrl: (esDocUrl: string) => (
       <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokHelpText"
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.grokHelpText"
         defaultMessage="Uses {grokLink} expressions to extract matches from a field."
         values={{
           grokLink: (

@@ -36,7 +36,6 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import React, { useCallback, useEffect } from 'react';
 import {
-  ReadStreamDefinition,
   isRoot,
   isDescendantOf,
   RoutingDefinition,
@@ -92,9 +91,9 @@ function useRoutingState({
   );
 
   // Child streams: either represents the child streams as they are, or the new order from drag and drop.
-  const [childStreams, setChildStreams] = React.useState<
-    ReadStreamDefinition['stream']['ingest']['routing']
-  >(definition?.stream.ingest.routing ?? []);
+  const [childStreams, setChildStreams] = React.useState<RoutingDefinition[]>(
+    definition?.stream.ingest.routing ?? []
+  );
 
   useEffect(() => {
     setChildStreams(definition?.stream.ingest.routing ?? []);

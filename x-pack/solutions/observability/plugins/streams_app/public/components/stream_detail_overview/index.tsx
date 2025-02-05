@@ -307,7 +307,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
     [streamsRepositoryClient]
   );
 
-  const childDefinitions = useMemo(() => {
+  const childrenStreams = useMemo(() => {
     if (!stream) {
       return [];
     }
@@ -316,7 +316,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
     );
   }, [stream, streamsListFetch.value?.streams]);
 
-  if (stream && childDefinitions?.length === 1) {
+  if (stream && childrenStreams?.length === 1) {
     return (
       <EuiFlexItem grow>
         <EuiFlexGroup alignItems="center" justifyContent="center">
@@ -362,5 +362,5 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
     );
   }
 
-  return <StreamsList definitions={childDefinitions} showControls={false} />;
+  return <StreamsList streams={childrenStreams} showControls={false} />;
 }
