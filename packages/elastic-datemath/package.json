@@ -6,6 +6,6 @@
   "main": "./target_node/index.js",
   "types": "./target_types/index.d.ts",
   "peerDependencies": {
-    "moment": "^2.24.0"
+    "moment": "^2.30.1"
   }
 }
