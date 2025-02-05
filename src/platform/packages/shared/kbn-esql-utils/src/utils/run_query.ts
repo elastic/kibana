@@ -25,7 +25,7 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
-      end: endNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
+      end: endNamedParams ? dateMath.parse(time.to, { roundUp: true })?.toISOString() : undefined,
     };
     const namedParams = [];
     if (timeParams?.start) {
