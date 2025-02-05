@@ -682,7 +682,7 @@ export const tasks: TelemetryTask[] = [
                 },
               },
             });
-            const aggregatedServices: Record<string, number> = {};
+            const aggregatedServices: Record<OpenTelemetryAgentName, number> = {};
             for (const bucket of response.aggregations?.agent_name.buckets ?? []) {
               const fullAgentName = bucket.key as string;
               aggregatedServices[fullAgentName] = bucket.services.value || 0;
