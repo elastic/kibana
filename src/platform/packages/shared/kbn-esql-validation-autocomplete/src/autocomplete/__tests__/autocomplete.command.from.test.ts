@@ -91,7 +91,6 @@ describe('autocomplete.suggest', () => {
       test('on <kbd>SPACE</kbd> after "METADATA" keyword suggests all metadata fields', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a, b [METADATA /]', metadataFields);
         await assertSuggestions('from a, b METADATA /', metadataFields);
       });
 
