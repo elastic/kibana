@@ -73,7 +73,7 @@ export class TrainedModelsService {
   private savedObjectsApiService!: SavedObjectsApiService;
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
-  private deploymentsInProgress = new Set<StartAllocationParams>();
+  private deployingModelIds = new Set<string>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -378,25 +378,22 @@ export class TrainedModelsService {
         .pipe(
           distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
           mergeMap((deployments) =>
-            from(deployments).pipe(mergeMap((deployment) => this.handleDeployment(deployment)))
+            from(deployments).pipe(mergeMap((deployment) => this.handleDeployment$(deployment)))
           )
         )
         .subscribe()
     );
   }
 
-  private handleDeployment(deployment: StartAllocationParams): Observable<unknown> {
+  private handleDeployment$(
+    deployment: StartAllocationParams
+  ): Observable<{ acknowledge: boolean }> {
     return of(deployment).pipe(
-      // Make sure it still exists in the scheduled deployments
-      filter(() => {
-        const found = this.scheduledDeployments.find((d) => d === deployment);
-        return Boolean(found);
-      }),
       // Only proceed if we haven't seen and started it before
-      filter(() => !this.isDeploymentForModelAlreadyRunning(deployment)),
+      filter(() => !this.isDeploymentForModelAlreadyRunning(deployment.modelId)),
       tap(() => {
         // Mark as running so we don't do it multiple times
-        this.deploymentsInProgress.add(deployment);
+        this.deployingModelIds.add(deployment.modelId);
       }),
       // If model is already deployed with that ID, skip
       filter(() => {
@@ -433,6 +430,7 @@ export class TrainedModelsService {
               .getValue()
               .filter((d) => d.modelId !== deployment.modelId);
             this._scheduledDeployments$.next(updatedDeployments);
+            this.deployingModelIds.delete(deployment.modelId);
             this.fetchModels();
           }),
           tap({
@@ -473,8 +471,8 @@ export class TrainedModelsService {
     );
   }
 
-  private isDeploymentForModelAlreadyRunning(deployment: StartAllocationParams): boolean {
-    return this.deploymentsInProgress.has(deployment);
+  private isDeploymentForModelAlreadyRunning(modelId: string): boolean {
+    return this.deployingModelIds.has(modelId);
   }
 
   /**
@@ -564,7 +562,7 @@ export class TrainedModelsService {
   private cleanupService() {
     // Clear operation state
     this.downloadInProgress.clear();
-    this.deploymentsInProgress.clear();
+    this.deployingModelIds.clear();
     this.abortedDownloads.clear();
     this.downloadStatusFetchInProgress = false;
 
