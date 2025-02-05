@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { Response } from 'superagent';
-import differenceInMilliseconds from 'date-fns/differenceInMilliseconds';
+import { differenceInMilliseconds } from 'date-fns';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
