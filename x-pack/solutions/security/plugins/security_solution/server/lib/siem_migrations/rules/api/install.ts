@@ -14,8 +14,9 @@ import {
   InstallMigrationRulesRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { withLicense } from './util/with_license';
+import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
 import { installTranslated } from './util/installation';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsInstallRoute = (
   router: SecuritySolutionPluginRouter,
@@ -41,6 +42,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
         async (context, req, res): Promise<IKibanaResponse<InstallMigrationRulesResponse>> => {
           const { migration_id: migrationId } = req.params;
           const { ids, enabled = false } = req.body;
+          let siemMigrationAuditLogger: SiemMigrationAuditLogger | undefined;
 
           try {
             const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
@@ -48,7 +50,14 @@ export const registerSiemRuleMigrationsInstallRoute = (
             const securitySolutionContext = ctx.securitySolution;
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
-
+            const auditLogger = ctx.securitySolution.getAuditLogger();
+            if (auditLogger) {
+              siemMigrationAuditLogger = new SiemMigrationAuditLogger(auditLogger);
+            }
+            siemMigrationAuditLogger?.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULE,
+              id: migrationId,
+            });
             const installed = await installTranslated({
               migrationId,
               ids,
@@ -61,6 +70,11 @@ export const registerSiemRuleMigrationsInstallRoute = (
             return res.ok({ body: { installed } });
           } catch (err) {
             logger.error(err);
+            siemMigrationAuditLogger?.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULE,
+              error: err,
+              id: migrationId,
+            });
             return res.badRequest({ body: err.message });
           }
         }
