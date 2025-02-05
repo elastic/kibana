@@ -32,13 +32,13 @@ export const byDataColorPaletteMap = (
 
       if (color) return color;
 
-      const colorIndex = colorIndexMap.get(key) ?? 0;
+      const colorIndex = colorIndexMap.get(key) ?? -1;
       color =
         paletteDefinition.getCategoricalColor(
           [
             {
               name: key,
-              totalSeriesAtDepth: colorCache.size,
+              totalSeriesAtDepth: colorIndexMap.size,
               rankAtDepth: colorIndex,
             },
           ],
@@ -237,6 +237,18 @@ export const getColor = (
 
   if (chartType === ChartTypes.MOSAIC && layerIndex < columnsLength - 1) {
     return defaultColor;
+  }
+
+  // Needed for syncColor use case only
+  if (isTreemapOrMosaicChart(chartType)) {
+    // for treemap use the top layer for coloring, for mosaic use the second layer
+    if (seriesLayers.length > 1) {
+      if (chartType === ChartTypes.MOSAIC) {
+        seriesLayers.shift();
+      } else {
+        seriesLayers.pop();
+      }
+    }
   }
 
   const outputColor = paletteService?.get(visParams.palette.name).getCategoricalColor(
