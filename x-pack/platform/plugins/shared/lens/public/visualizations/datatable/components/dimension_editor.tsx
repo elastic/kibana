@@ -344,7 +344,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.lens.table.columnNavigationClickLabel', {
-              defaultMessage: 'Navigate on click',
+              defaultMessage: 'Navigate on click (with Dashboard Drilldowns)',
             })}
             display="columnCompressed"
           >
