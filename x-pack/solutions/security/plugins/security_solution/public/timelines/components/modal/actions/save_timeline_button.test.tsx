@@ -58,7 +58,7 @@ describe('SaveTimelineButton', () => {
 
     expect(getByTestId('timeline-modal-save-timeline')).toBeInTheDocument();
     expect(getByText('Save')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-save-timeline')).toHaveStyle('background-color: #07C');
+    expect(getByTestId('timeline-modal-save-timeline').className).toContain('primary');
 
     expect(queryByTestId('save-timeline-modal')).not.toBeInTheDocument();
   });
@@ -87,7 +87,7 @@ describe('SaveTimelineButton', () => {
 
     expect(queryByText('Save')).not.toBeInTheDocument();
     expect(getByText('TEST')).toBeInTheDocument();
-    expect(getByTestId('TEST_ID')).toHaveStyle('background-color: #FEC514');
+    expect(getByTestId('TEST_ID').className).toContain('warning');
   });
 
   it('should open the timeline save modal', async () => {
