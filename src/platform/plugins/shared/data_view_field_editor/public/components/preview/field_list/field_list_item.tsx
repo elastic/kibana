@@ -151,7 +151,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
         // highlights the field using token, TODO: migrate whole SCSS file to emotions
         css={css`
           background-color: ${isFromScript ? euiTheme.colors.backgroundBasePrimary : undefined};
-          font-weight: ${isFromScript ? 600 : 'normal'};
+          font-weight: ${isFromScript ? 600 : undefined};
         `}
         gutterSize="none"
         data-test-subj="listItem"
