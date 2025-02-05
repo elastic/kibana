@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexItem, EuiInlineEditTitle, EuiLink, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { GridLayoutStateManager } from '../types';
 
@@ -73,7 +74,9 @@ export const GridRowTitle = React.memo(
               onSave={updateTitle}
               onCancel={() => setEditTitleOpen(false)}
               startWithEditOpen
-              inputAriaLabel="Edit title inline"
+              inputAriaLabel={i18n.translate('kbnGridLayout.row.editTitleAriaLabel', {
+                defaultMessage: 'Edit section title',
+              })}
             />
           </EuiFlexItem>
         ) : (
