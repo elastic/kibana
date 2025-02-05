@@ -207,7 +207,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         <EuiPanel color="transparent" paddingSize="s">
           <EuiFormRow
             label={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
+              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.Label',
               {
                 defaultMessage: 'Existing endpoints',
               }
