@@ -9497,7 +9497,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -9594,9 +9594,10 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
+                  value:
                     application: {}
                     cluster:
                       all: true
@@ -9631,6 +9632,9 @@ paths:
                     is_authenticated: true
                     username: elastic
               schema:
+                type: object
+                properties:
+                  has_encryption_key:
                     type: boolean
                   is_authenticated:
                     type: boolean
@@ -10545,13 +10549,14 @@ paths:
       operationId: SetAlertAssignees
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               add:
                 value:
                   assignees:
                     add:
                       - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
                   ids:
                     - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
               remove:
@@ -10567,6 +10572,9 @@ paths:
               properties:
                 assignees:
                   $ref: '#/components/schemas/Security_Detections_API_AlertAssignees'
+                  description: Details about the assignees to assign and unassign.
+                ids:
+                  $ref: '#/components/schemas/Security_Detections_API_AlertIds'
               required:
                 - assignees
                 - ids
@@ -10574,7 +10582,7 @@ paths:
       responses:
         '200':
           content:
-            application/ndjson; Elastic-Api-Version=2023-10-31:
+            application/ndjson:
               examples:
                 add:
                   value:
@@ -10629,7 +10637,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -10640,6 +10648,7 @@ paths:
                         sourceIndex: .siem-signals-default-000002
                         status: success
                         updated: '2021-01-06T22:05:56.859Z'
+                        version: 16
               schema:
                 items:
                   $ref: '#/components/schemas/Security_Detections_API_MigrationFinalizationResult'
@@ -10649,6 +10658,9 @@ paths:
           content:
             application/json:
               schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
           description: Invalid input data response
         '401':
           content:
@@ -10699,7 +10711,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -10719,6 +10731,9 @@ paths:
           content:
             application/json:
               schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
           description: Invalid input data response
         '401':
           content:
@@ -10743,7 +10758,7 @@ paths:
       operationId: CreateAlertsMigration
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               singleIndex:
                 value:
@@ -10769,7 +10784,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -10833,7 +10848,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -10897,7 +10912,7 @@ paths:
       operationId: SearchAlerts
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               query:
                 value:
@@ -10963,7 +10978,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -11023,7 +11038,7 @@ paths:
       operationId: SetAlertsStatus
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               byId:
                 value:
@@ -11070,7 +11085,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 byId:
                   value:
@@ -11143,7 +11158,7 @@ paths:
       operationId: SetAlertTags
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               add:
                 value:
@@ -11176,7 +11191,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -39266,7 +39281,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json:
@@ -39298,7 +39313,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json:
@@ -47600,7 +47615,7 @@ components:
           type: boolean
         scaling_factor:
           description: |
-            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value.
+            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. 
           type: integer
         type:
           description: Specifies the data type for the field.
@@ -58087,28 +58102,6 @@ components:
           type: string
       required:
         - hostStatuses
-    Security_Endpoint_Management_API_NoParametersRequestSchema:
-      type: object
-      properties:
-        body:
-          type: object
-          properties:
-            agent_type:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
-            alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
-            comment:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
-          required:
-            - endpoint_ids
-      required:
-        - body
     Security_Endpoint_Management_API_Page:
       default: 1
       description: Page number
@@ -63050,7 +63043,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.

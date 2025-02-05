@@ -8010,7 +8010,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -8717,7 +8717,7 @@ paths:
       operationId: SetAlertAssignees
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               add:
                 value:
@@ -8750,7 +8750,7 @@ paths:
       responses:
         '200':
           content:
-            application/ndjson; Elastic-Api-Version=2023-10-31:
+            application/ndjson:
               examples:
                 add:
                   value:
@@ -8782,7 +8782,7 @@ paths:
       operationId: SearchAlerts
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               query:
                 value:
@@ -8848,7 +8848,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -8909,7 +8909,7 @@ paths:
       operationId: SetAlertsStatus
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               byId:
                 value:
@@ -8956,7 +8956,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 byId:
                   value:
@@ -9030,7 +9030,7 @@ paths:
       operationId: SetAlertTags
       requestBody:
         content:
-          application/json; Elastic-Api-Version=2023-10-31:
+          application/json:
             examples:
               add:
                 value:
@@ -9063,7 +9063,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=2023-10-31:
+            application/json:
               examples:
                 success:
                   value:
@@ -51335,28 +51335,6 @@ components:
           type: string
       required:
         - hostStatuses
-    Security_Endpoint_Management_API_NoParametersRequestSchema:
-      type: object
-      properties:
-        body:
-          type: object
-          properties:
-            agent_type:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
-            alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
-            comment:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
-          required:
-            - endpoint_ids
-      required:
-        - body
     Security_Endpoint_Management_API_Page:
       default: 1
       description: Page number
@@ -56316,7 +56294,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.
