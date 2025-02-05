@@ -6,7 +6,17 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subscription, of, from, forkJoin, mergeMap, takeWhile } from 'rxjs';
+import {
+  Subscription,
+  of,
+  from,
+  forkJoin,
+  mergeMap,
+  takeWhile,
+  skip,
+  exhaustMap,
+  firstValueFrom,
+} from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
@@ -73,7 +83,6 @@ export class TrainedModelsService {
   private savedObjectsApiService!: SavedObjectsApiService;
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
-  private deployingModelIds = new Set<string>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -377,7 +386,7 @@ export class TrainedModelsService {
       this._scheduledDeployments$
         .pipe(
           distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-          mergeMap((deployments) =>
+          switchMap((deployments) =>
             from(deployments).pipe(mergeMap((deployment) => this.handleDeployment$(deployment)))
           )
         )
@@ -385,82 +394,87 @@ export class TrainedModelsService {
     );
   }
 
-  private handleDeployment$(
-    deployment: StartAllocationParams
-  ): Observable<{ acknowledge: boolean }> {
+  private handleDeployment$(deployment: StartAllocationParams) {
     return of(deployment).pipe(
-      // Only proceed if we haven't seen and started it before
-      filter(() => !this.isDeploymentForModelAlreadyRunning(deployment.modelId)),
-      tap(() => {
-        // Mark as running so we don't do it multiple times
-        this.deployingModelIds.add(deployment.modelId);
-      }),
-      // If model is already deployed with that ID, skip
-      filter(() => {
-        const model = this.getModel(deployment.modelId);
-
-        if (
-          model &&
-          isNLPModelItem(model) &&
-          model.deployment_ids.includes(deployment.deploymentParams.deployment_id!)
-        ) {
-          // It's already deployed, remove from schedule
-          this.removeScheduledDeployments({
-            deploymentId: deployment.deploymentParams.deployment_id!,
-          });
-          return false;
-        }
-        return true;
+      tap(() => this.fetchModels()),
+      // Make sure we operate on the latest model items
+      switchMap(() =>
+        this._modelItems$.pipe(
+          skip(1),
+          take(1),
+          tap((modelItems) => {
+            const model = modelItems.find((m) => m.model_id === deployment.modelId);
+            // If the model is already deployed, remove from schedule
+            if (model && this.isModelAlreadyDeployed(model, deployment)) {
+              this.removeScheduledDeployments({
+                deploymentId: deployment.deploymentParams.deployment_id!,
+              });
+            }
+          })
+        )
+      ),
+      // Stop further processing if the model is already deployed
+      filter((modelItems) => {
+        const model = modelItems.find((m) => m.model_id === deployment.modelId);
+        return !(model && this.isModelAlreadyDeployed(model, deployment));
       }),
       // Wait for the model to be ready for deployment (downloaded or started)
       switchMap(() => {
         return this.waitForModelReady(deployment.modelId);
       }),
-      switchMap(() => {
-        this.setDeployingStateForModel(deployment.modelId);
-
-        return from(this.trainedModelsApiService.startModelAllocation(deployment)).pipe(
-          finalize(() => {
-            this.removeScheduledDeployments({
-              deploymentId: deployment.deploymentParams.deployment_id!,
-            });
-            // Manually update the BehaviorSubject to ensure proper cleanup
-            // if user navigates away, as localStorage hook won't be available to handle updates
-            const updatedDeployments = this._scheduledDeployments$
-              .getValue()
-              .filter((d) => d.modelId !== deployment.modelId);
-            this._scheduledDeployments$.next(updatedDeployments);
-            this.deployingModelIds.delete(deployment.modelId);
-            this.fetchModels();
-          }),
-          tap({
-            next: () => {
-              this.displaySuccessToast?.({
-                title: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
-                  defaultMessage: 'Deployment started',
-                }),
-                text: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccessText', {
-                  defaultMessage: '"{deploymentId}" has started successfully.',
-                  values: {
-                    deploymentId: deployment.deploymentParams.deployment_id,
-                  },
-                }),
-              });
-            },
-            error: (error) => {
-              this.displayErrorToast?.(
-                error,
-                i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
-                  defaultMessage: 'Failed to start "{deploymentId}"',
-                  values: {
-                    deploymentId: deployment.deploymentParams.deployment_id,
-                  },
-                })
-              );
-            },
-          })
+      tap(() => this.setDeployingStateForModel(deployment.modelId)),
+      exhaustMap(() => {
+        return firstValueFrom(
+          this.trainedModelsApiService.startModelAllocation(deployment).pipe(
+            tap({
+              next: () => {
+                this.displaySuccessToast?.({
+                  title: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
+                    defaultMessage: 'Deployment started',
+                  }),
+                  text: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccessText', {
+                    defaultMessage: '"{deploymentId}" has started successfully.',
+                    values: {
+                      deploymentId: deployment.deploymentParams.deployment_id,
+                    },
+                  }),
+                });
+              },
+              error: (error) => {
+                this.displayErrorToast?.(
+                  error,
+                  i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
+                    defaultMessage: 'Failed to start "{deploymentId}"',
+                    values: {
+                      deploymentId: deployment.deploymentParams.deployment_id,
+                    },
+                  })
+                );
+              },
+              finalize: () => {
+                this.removeScheduledDeployments({
+                  deploymentId: deployment.deploymentParams.deployment_id!,
+                });
+                // Manually update the BehaviorSubject to ensure proper cleanup
+                // if user navigates away, as localStorage hook won't be available to handle updates
+                const updatedDeployments = this._scheduledDeployments$
+                  .getValue()
+                  .filter((d) => d.modelId !== deployment.modelId);
+                this._scheduledDeployments$.next(updatedDeployments);
+                this.fetchModels();
+              },
+            })
+          )
         );
       })
+    );
+  }
+
+  private isModelAlreadyDeployed(model: TrainedModelUIItem, deployment: StartAllocationParams) {
+    return !!(
+      model &&
+      isNLPModelItem(model) &&
+      model.deployment_ids.includes(deployment.deploymentParams.deployment_id!)
     );
   }
 
@@ -469,10 +483,6 @@ export class TrainedModelsService {
       filter((model): model is TrainedModelUIItem => this.isModelReadyForDeployment(model)),
       take(1)
     );
-  }
-
-  private isDeploymentForModelAlreadyRunning(modelId: string): boolean {
-    return this.deployingModelIds.has(modelId);
   }
 
   /**
@@ -562,7 +572,6 @@ export class TrainedModelsService {
   private cleanupService() {
     // Clear operation state
     this.downloadInProgress.clear();
-    this.deployingModelIds.clear();
     this.abortedDownloads.clear();
     this.downloadStatusFetchInProgress = false;
 
