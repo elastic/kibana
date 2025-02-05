@@ -40,8 +40,8 @@ describe('react monaco editor', () => {
 
     const configuredLanguages = window.MonacoEnvironment?.monaco.languages.getLanguages();
 
-    Object.entries(supportedLanguages).forEach(([k, v]) => {
-      expect(configuredLanguages?.some((l) => l?.id === v.ID)).toBe(true);
+    Object.values(supportedLanguages).forEach((v) => {
+      expect(configuredLanguages?.some((l) => l?.id === v)).toBe(true);
     });
   });
 

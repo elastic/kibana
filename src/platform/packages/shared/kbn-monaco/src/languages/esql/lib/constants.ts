@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ESQL_LANG_ID = 'esql';
-export const ESQL_LIGHT_THEME_ID = 'esqlThemeLight';
-export const ESQL_DARK_THEME_ID = 'esqlThemeDark';
+export const ESQL_LANG_ID = 'esql' as const;
+export const ESQL_LIGHT_THEME_ID = 'esqlThemeLight' as const;
+export const ESQL_DARK_THEME_ID = 'esqlThemeDark' as const;
 
 export const ESQL_TOKEN_POSTFIX = '.esql';

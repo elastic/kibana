@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// @ts-check
 const path = require('path');
+
+/**
+ * @typedef {(import('./src/register_globals').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
+ */
 
 const getWorkerEntry = (language) => {
   switch (language) {
@@ -28,10 +33,11 @@ const getWorkerEntry = (language) => {
 };
 
 /**
- * @param {string[]} languages - list of supported languages to build workers for
+ * @param {WorkerType} languages
  * @returns {import('webpack').Configuration}
  */
 const workerConfig = (languages) => ({
+  // @ts-expect-error we are unable to type NODE_ENV
   mode: process.env.NODE_ENV || 'development',
   entry: languages.reduce((entries, language) => {
     entries[language] = getWorkerEntry(language);
@@ -95,4 +101,4 @@ const workerConfig = (languages) => ({
   },
 });
 
-module.exports = workerConfig(['default', 'json', 'painless', 'xjson', 'esql', 'yaml', 'console']);
+module.exports = workerConfig(['default', 'json', 'xjson', 'painless', 'esql', 'yaml', 'console']);

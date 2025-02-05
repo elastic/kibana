@@ -9,8 +9,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
-import { CodeEditor } from '@kbn/code-editor';
+import { monaco, CodeEditor, CONSOLE_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { formatRequestBodyDoc } from '../../../lib/utils';
 import { DevToolsSettings } from '../../../services';
@@ -64,7 +63,7 @@ export const HistoryViewer = ({
           readOnly: true,
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode ? 'on' : 'off',
-          theme: CONSOLE_THEME_ID,
+          theme: CONSOLE_LANG_ID,
           automaticLayout: true,
         }}
       />

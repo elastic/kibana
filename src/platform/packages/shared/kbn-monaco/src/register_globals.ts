@@ -8,26 +8,27 @@
  */
 
 import {
-  XJsonLang,
-  PainlessLang,
-  ESQLLang,
-  ConsoleLang,
-  ConsoleOutputLang,
-  YamlLang,
+  XJSON_LANG_ID,
+  PAINLESS_LANG_ID,
+  ESQL_LANG_ID,
+  CONSOLE_LANG_ID,
+  YAML_LANG_ID,
 } from './languages';
 import { monaco } from './monaco_imports';
 
-export const DEFAULT_WORKER_ID = 'default';
+export const DEFAULT_WORKER_ID = 'default' as const;
 
 const langSpecificWorkerIds = [
-  XJsonLang.ID,
-  PainlessLang.ID,
-  ESQLLang.ID,
   monaco.languages.json.jsonDefaults.languageId,
-  YamlLang.ID,
-  ConsoleLang.ID,
-  ConsoleOutputLang.ID,
-];
+  XJSON_LANG_ID,
+  PAINLESS_LANG_ID,
+  ESQL_LANG_ID,
+  YAML_LANG_ID,
+  CONSOLE_LANG_ID,
+] as const;
+
+// exported for use in webpack config to build workers
+export type LangSpecificWorkerIds = [typeof DEFAULT_WORKER_ID, ...typeof langSpecificWorkerIds];
 
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
   export interface Environment {

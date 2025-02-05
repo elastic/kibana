@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const CONSOLE_LANG_ID = 'console';
-export const CONSOLE_OUTPUT_LANG_ID = 'consoleOutput';
-export const CONSOLE_POSTFIX = '.console';
+export const CONSOLE_LANG_ID = 'console' as const;
+export const CONSOLE_OUTPUT_LANG_ID = 'consoleOutput' as const;
+export const CONSOLE_POSTFIX = '.console' as const;

@@ -23,10 +23,6 @@ import {
 import { foldingRangeProvider } from './folding_range_provider';
 
 export { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
-/**
- * export the theme id for the console language
- */
-export { CONSOLE_THEME_ID } from './language';
 
 export const ConsoleLang: LangModuleType = {
   ID: CONSOLE_LANG_ID,

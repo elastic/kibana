@@ -11,4 +11,6 @@ import type { LangModuleType } from '../../types';
 import { languageConfiguration, lexerRules } from './language';
 import { ID } from './constants';
 
+export { ID as MARKDOWN_LANG_ID } from './constants';
+
 export const MarkdownLang: LangModuleType = { ID, languageConfiguration, lexerRules };

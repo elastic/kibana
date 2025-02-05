@@ -7,14 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { XJsonLang } from './xjson';
+import { registerLanguage } from '../helpers';
+
+import { XJsonLang, XJSON_LANG_ID } from './xjson';
+import { PainlessLang, PAINLESS_LANG_ID } from './painless';
+import { SQLLang, SQL_LANG_ID } from './sql';
+import { ESQLLang, ESQL_LANG_ID } from './esql';
+import { YamlLang, YAML_LANG_ID } from './yaml';
+import { ConsoleLang, ConsoleOutputLang, CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './console';
+import { MarkdownLang, MARKDOWN_LANG_ID } from './markdown';
+import { GrokLang, GROK_LANG_ID } from './grok';
+import { HandlebarsLang, HANDLEBARS_LANG_ID } from './handlebars';
+import { CssLang, CSS_LANG_ID } from './css';
+import { HJsonLang, HJSON_LANG_ID } from './hjson';
+
+// export all language ids
+export {
+  XJSON_LANG_ID,
+  SQL_LANG_ID,
+  ESQL_LANG_ID,
+  YAML_LANG_ID,
+  CONSOLE_LANG_ID,
+  CONSOLE_OUTPUT_LANG_ID,
+  MARKDOWN_LANG_ID,
+  GROK_LANG_ID,
+  HANDLEBARS_LANG_ID,
+  CSS_LANG_ID,
+  HJSON_LANG_ID,
+  PAINLESS_LANG_ID,
+};
+
+// export all language definitions
+export {
+  XJsonLang,
+  PainlessLang,
+  SQLLang,
+  ESQLLang,
+  YamlLang,
+  ConsoleLang,
+  ConsoleOutputLang,
+  MarkdownLang,
+  GrokLang,
+  HandlebarsLang,
+  CssLang,
+  HJsonLang,
+};
+
+export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID } from './esql';
+export {
+  getParsedRequestsProvider,
+  ConsoleParsedRequestsProvider,
+  createOutputParser,
+} from './console';
+export type { ParsedRequest } from './console';
 export * from './painless';
-export { SQLLang } from './sql';
-export { ESQLLang } from './esql';
-export { YamlLang } from './yaml';
-export { ConsoleLang, ConsoleOutputLang } from './console';
-export { MarkdownLang } from './markdown';
-export { GrokLang } from './grok';
-export { HandlebarsLang } from './handlebars';
-export { CssLang } from './css';
-export { HJsonLang } from './hjson';
+export { configureMonacoYamlSchema } from './yaml';
+
+export const initializeSupportedLanguages = () => {
+  [
+    XJsonLang,
+    PainlessLang,
+    SQLLang,
+    ESQLLang,
+    YamlLang,
+    ConsoleLang,
+    ConsoleOutputLang,
+    MarkdownLang,
+    GrokLang,
+    HandlebarsLang,
+    CssLang,
+    HJsonLang,
+  ].forEach((lang) => registerLanguage(lang));
+};
