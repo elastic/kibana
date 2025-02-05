@@ -63,6 +63,7 @@
         <% for (var varName in globals) { %>
             <% if (globals[varName] != undefined) { %>
                 window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
+                window.__kbnHardenPrototypes__ = false;
             <% } %>
         <% } %>
           </script>
