@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import type { ExpressionColor } from '@elastic/eui/src/components/expression/expression';
 import type { EuiFacetGroupLayout } from '@elastic/eui/src/components/facet/facet_group';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { ListTypeText, ViewerStatus } from '../types';
 import * as i18n from '../translations';
 import illustration from '../assets/images/illustration_product_no_results_magnifying_glass.svg';
@@ -33,10 +32,6 @@ interface EmptyViewerStateProps {
   onEmptyButtonStateClick?: () => void | null;
 }
 
-const panelCss = css`
-  margin: ${euiThemeVars.euiSizeL} 0;
-  padding: ${euiThemeVars.euiSizeL} 0;
-`;
 const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
   title,
   body,
@@ -47,6 +42,10 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
   onEmptyButtonStateClick,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const panelCss = css`
+    margin: ${euiTheme.size.l} 0;
+    padding: ${euiTheme.size.l} 0;
+  `;
 
   const euiEmptyPromptProps = useMemo(() => {
     switch (viewerStatus) {

@@ -6,8 +6,8 @@
  */
 
 export * from './ingest';
-export * from './legacy';
 
 export * from './api';
 export * from './core';
 export * from './helpers';
+export * from './group';
