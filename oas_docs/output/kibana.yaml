@@ -25966,24 +25966,6 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
-                        certificate:
-                          nullable: true
-                          type: string
-                        certificate_authorities:
-                          nullable: true
-                          type: string
-                        certificate_key:
-                          nullable: true
-                          type: string
-                        es_certificate:
-                          nullable: true
-                          type: string
-                        es_certificate_authorities:
-                          nullable: true
-                          type: string
-                        es_certificate_key:
-                          nullable: true
-                          type: string
                         host_urls:
                           items:
                             type: string
@@ -26004,6 +25986,55 @@ paths:
                         proxy_id:
                           nullable: true
                           type: string
+                        secrets:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ssl:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                es_key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                                key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                        ssl:
+                          additionalProperties: false
+                          nullable: true
+                          type: object
+                          properties:
+                            certificate:
+                              type: string
+                            certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            es_certificate:
+                              type: string
+                            es_certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            es_key:
+                              type: string
+                            key:
+                              type: string
                       required:
                         - id
                         - name
@@ -26057,24 +26088,6 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                certificate:
-                  nullable: true
-                  type: string
-                certificate_authorities:
-                  nullable: true
-                  type: string
-                certificate_key:
-                  nullable: true
-                  type: string
-                es_certificate:
-                  nullable: true
-                  type: string
-                es_certificate_authorities:
-                  nullable: true
-                  type: string
-                es_certificate_key:
-                  nullable: true
-                  type: string
                 host_urls:
                   items:
                     type: string
@@ -26095,6 +26108,55 @@ paths:
                 proxy_id:
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        es_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    es_certificate:
+                      type: string
+                    es_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    es_key:
+                      type: string
+                    key:
+                      type: string
               required:
                 - name
                 - host_urls
@@ -26110,24 +26172,6 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      certificate:
-                        nullable: true
-                        type: string
-                      certificate_authorities:
-                        nullable: true
-                        type: string
-                      certificate_key:
-                        nullable: true
-                        type: string
-                      es_certificate:
-                        nullable: true
-                        type: string
-                      es_certificate_authorities:
-                        nullable: true
-                        type: string
-                      es_certificate_key:
-                        nullable: true
-                        type: string
                       host_urls:
                         items:
                           type: string
@@ -26148,6 +26192,55 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
                       - id
                       - name
@@ -26242,24 +26335,6 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      certificate:
-                        nullable: true
-                        type: string
-                      certificate_authorities:
-                        nullable: true
-                        type: string
-                      certificate_key:
-                        nullable: true
-                        type: string
-                      es_certificate:
-                        nullable: true
-                        type: string
-                      es_certificate_authorities:
-                        nullable: true
-                        type: string
-                      es_certificate_key:
-                        nullable: true
-                        type: string
                       host_urls:
                         items:
                           type: string
@@ -26280,6 +26355,55 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
                       - id
                       - name
@@ -26328,24 +26452,6 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                certificate:
-                  nullable: true
-                  type: string
-                certificate_authorities:
-                  nullable: true
-                  type: string
-                certificate_key:
-                  nullable: true
-                  type: string
-                es_certificate:
-                  nullable: true
-                  type: string
-                es_certificate_authorities:
-                  nullable: true
-                  type: string
-                es_certificate_key:
-                  nullable: true
-                  type: string
                 host_urls:
                   items:
                     type: string
@@ -26360,6 +26466,55 @@ paths:
                 proxy_id:
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        es_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    es_certificate:
+                      type: string
+                    es_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    es_key:
+                      type: string
+                    key:
+                      type: string
               required:
                 - proxy_id
       responses:
@@ -26374,24 +26529,6 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
-                      certificate:
-                        nullable: true
-                        type: string
-                      certificate_authorities:
-                        nullable: true
-                        type: string
-                      certificate_key:
-                        nullable: true
-                        type: string
-                      es_certificate:
-                        nullable: true
-                        type: string
-                      es_certificate_authorities:
-                        nullable: true
-                        type: string
-                      es_certificate_key:
-                        nullable: true
-                        type: string
                       host_urls:
                         items:
                           type: string
@@ -26412,6 +26549,55 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
                       - id
                       - name
