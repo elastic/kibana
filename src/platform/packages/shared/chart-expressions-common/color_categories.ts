@@ -24,9 +24,9 @@ export function getColorCategories(
   if (!accessor) return [];
 
   return rows
-    .map((r) => r[accessor])
-    .filter((v) => !(v === undefined || exclude?.includes(v)))
-    .map((v) => {
+    .filter(({[accessor]: v}) => !(v === undefined || exclude?.includes(v)))
+    .map((r) => {
+      const v = r[accessor];
       // The categories needs to be stringified in their unformatted version.
       // We can't distinguish between a number and a string from a text input and the match should
       // work with both numeric field values and string values.
