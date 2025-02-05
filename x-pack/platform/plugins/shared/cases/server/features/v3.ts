@@ -12,9 +12,15 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { APP_ID, FEATURE_ID, FEATURE_ID_V3 } from '../../common/constants';
+import { APP_ID, FEATURE_ID_V3 } from '../../common/constants';
 import { createUICapabilities, getApiTags } from '../../common';
-import { CASES_DELETE_SUB_PRIVILEGE_ID, CASES_SETTINGS_SUB_PRIVILEGE_ID } from './constants';
+import {
+  CASES_DELETE_SUB_PRIVILEGE_ID,
+  CASES_SETTINGS_SUB_PRIVILEGE_ID,
+  CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID,
+  CASES_REOPEN_SUB_PRIVILEGE_ID,
+  CASES_ASSIGN_SUB_PRIVILEGE_ID,
+} from './constants';
 
 /**
  * The order of appearance in the feature privilege page
@@ -24,24 +30,14 @@ import { CASES_DELETE_SUB_PRIVILEGE_ID, CASES_SETTINGS_SUB_PRIVILEGE_ID } from '
 
 const FEATURE_ORDER = 3100;
 
-export const getV1 = (): KibanaFeatureConfig => {
+export const getV3 = (): KibanaFeatureConfig => {
   const capabilities = createUICapabilities();
   const apiTags = getApiTags(APP_ID);
 
   return {
-    deprecated: {
-      notice: i18n.translate('xpack.cases.features.casesFeature.deprecationMessage', {
-        defaultMessage:
-          'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
-        values: {
-          currentId: FEATURE_ID,
-          casesFeatureIdV2: FEATURE_ID_V3,
-        },
-      }),
-    },
-    id: FEATURE_ID,
-    name: i18n.translate('xpack.cases.features.casesFeatureNameDeprecated', {
-      defaultMessage: 'Cases (Deprecated)',
+    id: FEATURE_ID_V3,
+    name: i18n.translate('xpack.cases.features.casesFeatureName', {
+      defaultMessage: 'Cases',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
     scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
@@ -53,15 +49,12 @@ export const getV1 = (): KibanaFeatureConfig => {
     cases: [APP_ID],
     privileges: {
       all: {
-        api: [...apiTags.all, ...apiTags.createComment],
+        api: apiTags.all,
         cases: {
           create: [APP_ID],
           read: [APP_ID],
           update: [APP_ID],
           push: [APP_ID],
-          createComment: [APP_ID],
-          reopenCase: [APP_ID],
-          assign: [APP_ID],
         },
         management: {
           insightsAndAlerting: [APP_ID],
@@ -70,21 +63,7 @@ export const getV1 = (): KibanaFeatureConfig => {
           all: [...filesSavedObjectTypes],
           read: [...filesSavedObjectTypes],
         },
-        ui: [
-          ...capabilities.all,
-          ...capabilities.createComment,
-          ...capabilities.reopenCase,
-          ...capabilities.assignCase,
-        ],
-        replacedBy: {
-          default: [{ feature: FEATURE_ID_V3, privileges: ['all'] }],
-          minimal: [
-            {
-              feature: FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
-            },
-          ],
-        },
+        ui: capabilities.all,
       },
       read: {
         api: apiTags.read,
@@ -99,10 +78,6 @@ export const getV1 = (): KibanaFeatureConfig => {
           read: [...filesSavedObjectTypes],
         },
         ui: capabilities.read,
-        replacedBy: {
-          default: [{ feature: FEATURE_ID_V3, privileges: ['read'] }],
-          minimal: [{ feature: FEATURE_ID_V3, privileges: ['minimal_read'] }],
-        },
       },
     },
     subFeatures: [
@@ -129,9 +104,6 @@ export const getV1 = (): KibanaFeatureConfig => {
                   delete: [APP_ID],
                 },
                 ui: capabilities.delete,
-                replacedBy: [
-                  { feature: FEATURE_ID_V3, privileges: [CASES_DELETE_SUB_PRIVILEGE_ID] },
-                ],
               },
             ],
           },
@@ -159,9 +131,88 @@ export const getV1 = (): KibanaFeatureConfig => {
                   settings: [APP_ID],
                 },
                 ui: capabilities.settings,
-                replacedBy: [
-                  { feature: FEATURE_ID_V3, privileges: [CASES_SETTINGS_SUB_PRIVILEGE_ID] },
-                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.addCommentsSubFeatureName', {
+          defaultMessage: 'Create comments & attachments',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                api: apiTags.createComment,
+                id: CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID,
+                name: i18n.translate('xpack.cases.features.addCommentsSubFeatureDetails', {
+                  defaultMessage: 'Add comments to cases',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [...filesSavedObjectTypes],
+                  read: [...filesSavedObjectTypes],
+                },
+                cases: {
+                  createComment: [APP_ID],
+                },
+                ui: capabilities.createComment,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.reopenCaseSubFeatureName', {
+          defaultMessage: 'Re-open',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: CASES_REOPEN_SUB_PRIVILEGE_ID,
+                name: i18n.translate('xpack.cases.features.reopenCaseSubFeatureDetails', {
+                  defaultMessage: 'Re-open closed cases',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  reopenCase: [APP_ID],
+                },
+                ui: capabilities.reopenCase,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.assignUsersSubFeatureName', {
+          defaultMessage: 'Assign users',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: CASES_ASSIGN_SUB_PRIVILEGE_ID,
+                name: i18n.translate('xpack.cases.features.assignUsersSubFeatureName', {
+                  defaultMessage: 'Assign users to cases',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  assign: [APP_ID],
+                },
+                ui: capabilities.assignCase,
               },
             ],
           },
