@@ -23,7 +23,7 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
   contentReferenceNode,
   securityAlertsPageContentReference,
 }) => {
-  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters()
+  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {
