@@ -27,18 +27,16 @@ export const performEsqlRequest = async ({
 }: {
   logger?: Logger;
   esClient: ElasticsearchClient;
-  requestParams: Record<string, unknown>;
-  queryString?: { drop_null_columns?: boolean };
+  requestBody: Record<string, unknown>;
+  requestQueryParams?: { drop_null_columns?: boolean };
 }): Promise<EsqlTable> => {
   const search = async () => {
     try {
       const rawResponse = await esClient.transport.request<EsqlTable>({
         method: 'POST',
         path: '/_query',
-        body: {
-          ...requestParams,
-        },
-        querystring: queryString,
+        body: requestBody,
+        querystring: requestQueryParams,
       });
       return {
         rawResponse,

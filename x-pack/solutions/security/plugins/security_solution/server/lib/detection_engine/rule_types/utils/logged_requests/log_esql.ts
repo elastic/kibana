@@ -8,13 +8,13 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const logEsqlRequest = (
-  esqlRequest: {
+  requestBody: {
     query: string;
     filter: QueryDslQueryContainer;
   },
-  queryString?: { drop_null_columns?: boolean }
+  requestQueryParams?: { drop_null_columns?: boolean }
 ): string => {
-  const urlParams = Object.entries(queryString ?? {})
+  const urlParams = Object.entries(requestQueryParams ?? {})
     .reduce<string[]>((acc, [key, value]) => {
       if (value != null) {
         acc.push(`${key}=${value}`);
@@ -24,5 +24,5 @@ export const logEsqlRequest = (
     }, [])
     .join('&');
 
-  return `POST _query${urlParams ? `?${urlParams}` : ''}\n${JSON.stringify(esqlRequest, null, 2)}`;
+  return `POST _query${urlParams ? `?${urlParams}` : ''}\n${JSON.stringify(requestBody, null, 2)}`;
 };
