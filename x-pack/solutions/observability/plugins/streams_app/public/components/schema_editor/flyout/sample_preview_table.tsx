@@ -6,27 +6,26 @@
  */
 
 import React, { useMemo } from 'react';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig, WiredStreamDefinition } from '@kbn/streams-schema';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
-import { isFullFieldDefinition } from '../hooks/use_editing_state';
 import { LoadingPanel } from '../../loading_panel';
+import { SchemaField, isSchemaFieldTyped } from '../types';
 
 interface SamplePreviewTableProps {
-  definition: WiredStreamGetResponse;
-  nextFieldDefinition?: Partial<NamedFieldDefinitionConfig>;
-  streamsRepositoryClient: StreamsRepositoryClient;
+  stream: WiredStreamDefinition;
+  nextField: SchemaField;
 }
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
-  const { nextFieldDefinition, ...rest } = props;
-  if (isFullFieldDefinition(nextFieldDefinition)) {
-    return <SamplePreviewTableContent nextFieldDefinition={nextFieldDefinition} {...rest} />;
+  const { nextField, ...rest } = props;
+  if (isSchemaFieldTyped(nextField)) {
+    return <SamplePreviewTableContent nextField={nextField} {...rest} />;
   } else {
     return null;
   }
@@ -35,33 +34,32 @@ export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
 const SAMPLE_DOCUMENTS_TO_SHOW = 20;
 
 const SamplePreviewTableContent = ({
-  definition,
-  nextFieldDefinition,
-  streamsRepositoryClient,
-}: SamplePreviewTableProps & { nextFieldDefinition: NamedFieldDefinitionConfig }) => {
+  stream,
+  nextField,
+}: SamplePreviewTableProps & { nextField: NamedFieldDefinitionConfig }) => {
+  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
+
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/schema/fields_simulation', {
         signal,
         params: {
           path: {
-            id: definition.stream.name,
+            id: stream.name,
           },
           body: {
-            field_definitions: [nextFieldDefinition],
+            field_definitions: [nextField],
           },
         },
       });
     },
-    [definition.stream.name, nextFieldDefinition, streamsRepositoryClient],
-    {
-      disableToastOnError: true,
-    }
+    [stream.name, nextField, streamsRepositoryClient],
+    { disableToastOnError: true }
   );
 
   const columns = useMemo(() => {
-    return [nextFieldDefinition.name];
-  }, [nextFieldDefinition.name]);
+    return [nextField.name];
+  }, [nextField.name]);
 
   if (loading) {
     return <LoadingPanel />;
