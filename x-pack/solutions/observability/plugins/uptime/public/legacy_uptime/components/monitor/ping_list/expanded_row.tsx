@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTitle, formatNumber } from '@elastic/eui';
+import { formatNumber } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCodeBlock,
@@ -52,53 +52,53 @@ const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
 const BodyExcerpt = ({ content }: { content: string }) =>
   content ? <EuiCodeBlock overflowHeight={250}>{content}</EuiCodeBlock> : null;
 
-export const PingListExpandedRowComponent = ({ ping }: Props) => (
-  <EuiFlexGroup direction="column">
-    {ping?.http?.response?.redirects && (
+export const PingListExpandedRowComponent = ({ ping }: Props) => {
+  const listItems = [];
+
+  // Show the error block
+  if (ping.error) {
+    listItems.push({
+      title: i18n.translate('xpack.uptime.pingList.expandedRow.error', {
+        defaultMessage: 'Error',
+      }),
+      description: <EuiText>{ping.error.message}</EuiText>,
+    });
+  }
+
+  // Show the body, if present
+  if (ping.http?.response?.body) {
+    const body = ping.http.response.body;
+
+    listItems.push({
+      title: i18n.translate('xpack.uptime.pingList.expandedRow.response_body', {
+        defaultMessage: 'Response Body',
+      }),
+      description: (
+        <>
+          <BodyDescription body={body} />
+          <EuiSpacer size={'s'} />
+          {body.content ? <BodyExcerpt content={body.content || ''} /> : <DocLinkForBody />}
+        </>
+      ),
+    });
+  }
+  return (
+    <EuiFlexGroup direction="column">
+      {ping?.http?.response?.redirects && (
+        <EuiFlexItem>
+          <PingRedirects monitorStatus={ping} showTitle={true} />
+        </EuiFlexItem>
+      )}
+      {ping?.http?.response?.headers && (
+        <EuiFlexItem>
+          <PingHeaders headers={ping?.http?.response?.headers} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
-        <PingRedirects monitorStatus={ping} showTitle={true} />
+        <EuiCallOut color={ping?.error ? 'danger' : 'primary'}>
+          <EuiDescriptionList listItems={listItems} />
+        </EuiCallOut>
       </EuiFlexItem>
-    )}
-    {ping?.http?.response?.headers && (
-      <EuiFlexItem>
-        <PingHeaders headers={ping?.http?.response?.headers} />
-      </EuiFlexItem>
-    )}
-    <EuiFlexItem>
-      <EuiCallOut color={ping?.error ? 'danger' : 'primary'}>
-        {ping.http?.response?.body && (
-          // Show the body, if present
-          <>
-            <EuiTitle size="xs">
-              <h5>
-                {i18n.translate('xpack.uptime.pingList.expandedRow.response_body', {
-                  defaultMessage: 'Response Body',
-                })}
-              </h5>
-            </EuiTitle>
-            <BodyDescription body={ping.http.response.body} />
-            <EuiSpacer size={'s'} />
-            {ping.http.response.body.content ? (
-              <BodyExcerpt content={ping.http.response.body.content || ''} />
-            ) : (
-              <DocLinkForBody />
-            )}
-          </>
-        )}
-        {ping.error && (
-          // Show the error block
-          <EuiDescriptionList
-            listItems={[
-              {
-                title: i18n.translate('xpack.uptime.pingList.expandedRow.error', {
-                  defaultMessage: 'Error',
-                }),
-                description: ping.error.message,
-              },
-            ]}
-          />
-        )}
-      </EuiCallOut>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+    </EuiFlexGroup>
+  );
+};

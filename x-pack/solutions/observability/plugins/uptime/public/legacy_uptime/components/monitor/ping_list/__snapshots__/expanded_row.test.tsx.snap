@@ -7,7 +7,11 @@ exports[`PingListExpandedRow doesn't render list items if the body field is unde
   <EuiFlexItem>
     <EuiCallOut
       color="primary"
-    />
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -19,7 +23,11 @@ exports[`PingListExpandedRow doesn't render list items if the http field is unde
   <EuiFlexItem>
     <EuiCallOut
       color="primary"
-    />
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -31,7 +39,11 @@ exports[`PingListExpandedRow doesn't render list items if the response field is 
   <EuiFlexItem>
     <EuiCallOut
       color="primary"
-    />
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -44,34 +56,34 @@ exports[`PingListExpandedRow renders error information when an error field is pr
     <EuiCallOut
       color="danger"
     >
-      <EuiTitle
-        size="xs"
-      >
-        <h5>
-          Response Body
-        </h5>
-      </EuiTitle>
-      <BodyDescription
-        body={
-          Object {
-            "bytes": 1200000,
-            "content": "<http><head><title>The Title</title></head><body></body></http>",
-            "hash": "testhash",
-          }
-        }
-      />
-      <EuiSpacer
-        size="s"
-      />
-      <BodyExcerpt
-        content="<http><head><title>The Title</title></head><body></body></http>"
-      />
       <EuiDescriptionList
         listItems={
           Array [
             Object {
-              "description": "Forbidden",
+              "description": <EuiText>
+                Forbidden
+              </EuiText>,
               "title": "Error",
+            },
+            Object {
+              "description": <React.Fragment>
+                <BodyDescription
+                  body={
+                    Object {
+                      "bytes": 1200000,
+                      "content": "<http><head><title>The Title</title></head><body></body></http>",
+                      "hash": "testhash",
+                    }
+                  }
+                />
+                <EuiSpacer
+                  size="s"
+                />
+                <BodyExcerpt
+                  content="<http><head><title>The Title</title></head><body></body></http>"
+                />
+              </React.Fragment>,
+              "title": "Response Body",
             },
           ]
         }
@@ -89,27 +101,31 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
     <EuiCallOut
       color="primary"
     >
-      <EuiTitle
-        size="xs"
-      >
-        <h5>
-          Response Body
-        </h5>
-      </EuiTitle>
-      <BodyDescription
-        body={
-          Object {
-            "bytes": 1200000,
-            "content": "<http><head><title>The Title</title></head><body></body></http>",
-            "hash": "testhash",
-          }
+      <EuiDescriptionList
+        listItems={
+          Array [
+            Object {
+              "description": <React.Fragment>
+                <BodyDescription
+                  body={
+                    Object {
+                      "bytes": 1200000,
+                      "content": "<http><head><title>The Title</title></head><body></body></http>",
+                      "hash": "testhash",
+                    }
+                  }
+                />
+                <EuiSpacer
+                  size="s"
+                />
+                <BodyExcerpt
+                  content="<http><head><title>The Title</title></head><body></body></http>"
+                />
+              </React.Fragment>,
+              "title": "Response Body",
+            },
+          ]
         }
-      />
-      <EuiSpacer
-        size="s"
-      />
-      <BodyExcerpt
-        content="<http><head><title>The Title</title></head><body></body></http>"
       />
     </EuiCallOut>
   </EuiFlexItem>
@@ -129,44 +145,53 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
       <div
         class="euiText emotion-euiText-s-euiTextColor-default"
       >
-        <h5
-          class="euiTitle emotion-euiTitle-xs"
+        <dl
+          class="euiDescriptionList emotion-euiDescriptionList-row-left"
+          data-type="row"
         >
-          Response Body
-        </h5>
-        <div
-          class="euiText emotion-euiText-m"
-        >
-          Body size is 1MB.
-        </div>
-        <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-m"
-        >
-          Body not recorded. Read our 
-          <a
-            class="euiLink emotion-euiLink-primary"
-            data-test-subj="syntheticsDocLinkForBodyDocsLink"
-            href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
-            rel="noopener noreferrer"
-            target="_blank"
+          <dt
+            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
           >
-            docs
-            <span
-              class="emotion-EuiExternalLinkIcon"
-              data-euiicon-type="popout"
-              role="presentation"
-            />
-            <span
-              class="emotion-euiScreenReaderOnly"
+            Response Body
+          </dt>
+          <dd
+            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          >
+            <div
+              class="euiText emotion-euiText-m"
             >
-              (external, opens in a new tab or window)
-            </span>
-          </a>
-           for more information on recording response bodies.
-        </div>
+              Body size is 1MB.
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+            />
+            <div
+              class="euiText emotion-euiText-m"
+            >
+              Body not recorded. Read our 
+              <a
+                class="euiLink emotion-euiLink-primary"
+                data-test-subj="syntheticsDocLinkForBodyDocsLink"
+                href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                docs
+                <span
+                  class="emotion-EuiExternalLinkIcon"
+                  data-euiicon-type="popout"
+                  role="presentation"
+                />
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  (external, opens in a new tab or window)
+                </span>
+              </a>
+               for more information on recording response bodies.
+            </div>
+          </dd>
+        </dl>
       </div>
     </div>
   </div>
@@ -181,25 +206,29 @@ exports[`PingListExpandedRow shallow renders link to docs if body is not recorde
     <EuiCallOut
       color="primary"
     >
-      <EuiTitle
-        size="xs"
-      >
-        <h5>
-          Response Body
-        </h5>
-      </EuiTitle>
-      <BodyDescription
-        body={
-          Object {
-            "bytes": 1200000,
-            "hash": "testhash",
-          }
+      <EuiDescriptionList
+        listItems={
+          Array [
+            Object {
+              "description": <React.Fragment>
+                <BodyDescription
+                  body={
+                    Object {
+                      "bytes": 1200000,
+                      "hash": "testhash",
+                    }
+                  }
+                />
+                <EuiSpacer
+                  size="s"
+                />
+                <DocLinkForBody />
+              </React.Fragment>,
+              "title": "Response Body",
+            },
+          ]
         }
       />
-      <EuiSpacer
-        size="s"
-      />
-      <DocLinkForBody />
     </EuiCallOut>
   </EuiFlexItem>
 </EuiFlexGroup>

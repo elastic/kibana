@@ -100,27 +100,31 @@ describe('PingListExpandedRow', () => {
           <EuiCallOut
             color="primary"
           >
-            <EuiTitle
-              size="xs"
-            >
-              <h5>
-                Response Body
-              </h5>
-            </EuiTitle>
-            <BodyDescription
-              body={
-                Object {
-                  "bytes": 1200000,
-                  "content": "<http><head><title>The Title</title></head><body></body></http>",
-                  "hash": "testhash",
-                }
+            <EuiDescriptionList
+              listItems={
+                Array [
+                  Object {
+                    "description": <React.Fragment>
+                      <BodyDescription
+                        body={
+                          Object {
+                            "bytes": 1200000,
+                            "content": "<http><head><title>The Title</title></head><body></body></http>",
+                            "hash": "testhash",
+                          }
+                        }
+                      />
+                      <EuiSpacer
+                        size="s"
+                      />
+                      <BodyExcerpt
+                        content="<http><head><title>The Title</title></head><body></body></http>"
+                      />
+                    </React.Fragment>,
+                    "title": "Response Body",
+                  },
+                ]
               }
-            />
-            <EuiSpacer
-              size="s"
-            />
-            <BodyExcerpt
-              content="<http><head><title>The Title</title></head><body></body></http>"
             />
           </EuiCallOut>
         </EuiFlexItem>
