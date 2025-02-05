@@ -119,8 +119,8 @@ export interface TraceDocumentOverview
     UserAgentTraceFields {
   '@timestamp': string;
   'trace.id': string;
-  'service.name'?: string;
-  'agent.name'?: string;
+  'service.name': string;
+  'agent.name': string;
   'parent.id'?: string;
   'http.response.status_code'?: string;
 }
