@@ -270,11 +270,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
-              defaultMessage: 'Add multi-field',
-            })
+                defaultMessage: 'Add multi-field',
+              })
             : i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addFieldButtonLabel', {
-              defaultMessage: 'Add field',
-            })}
+                defaultMessage: 'Add field',
+              })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

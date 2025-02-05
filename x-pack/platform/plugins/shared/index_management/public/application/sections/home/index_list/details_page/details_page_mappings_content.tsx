@@ -232,15 +232,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         const inferenceIdsInPendingList = forceSaveMappings
           ? []
           : Object.values(denormalizedFields)
-            .filter(isSemanticTextField)
-            .map((field) => field.inference_id)
-            .filter(
-              (inferenceId: string) =>
-                inferenceId &&
-                inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
-                !inferenceToModelIdMap?.[inferenceId].isDeployed &&
-                !isInferencePreconfigured(inferenceId)
-            );
+              .filter(isSemanticTextField)
+              .map((field) => field.inference_id)
+              .filter(
+                (inferenceId: string) =>
+                  inferenceId &&
+                  inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
+                  !inferenceToModelIdMap?.[inferenceId].isDeployed &&
+                  !isInferencePreconfigured(inferenceId)
+              );
         setHasSavedFields(true);
         if (inferenceIdsInPendingList.length === 0) {
           const { error } = await updateIndexMappings(indexName, denormalizedFields);
@@ -300,9 +300,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           '',
           previousState.filter.selectedDataTypes.length > 0
             ? getFieldsMatchingFilterFromState(
-              previousState,
-              previousState.filter.selectedDataTypes
-            )
+                previousState,
+                previousState.filter.selectedDataTypes
+              )
             : previousState.fields.byId
         ),
       },
