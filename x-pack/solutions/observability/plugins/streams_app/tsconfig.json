@@ -57,7 +57,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/dashboard-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/fields-metadata-plugin",
-    "@kbn/zod"
+    "@kbn/fields-metadata-plugin"
   ]
 }
