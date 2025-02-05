@@ -50,6 +50,7 @@ export interface ProcessorPanelProps {
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
   isInitiallyOpen?: boolean;
   onAddProcessor: UseDefinitionReturn['addProcessor'];
+  samples: Array<Record<PropertyKey, unknown>>;
 }
 
 export interface EditProcessorPanelProps extends ProcessorPanelProps {
@@ -63,6 +64,7 @@ export function AddProcessorPanel({
   onWatchProcessor,
   refreshSimulation,
   definition,
+  samples,
 }: AddProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -177,6 +179,7 @@ export function AddProcessorPanel({
               <GrokProcessorForm
                 refreshSimulation={refreshSimulation}
                 definition={definition.stream}
+                samples={samples}
               />
             )}
             {type === 'dissect' && <DissectProcessorForm />}

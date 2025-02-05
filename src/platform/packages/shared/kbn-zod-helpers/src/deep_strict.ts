@@ -311,11 +311,11 @@ export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
     const excessKeys = difference([...keys.all], [...keys.handled]);
 
     if (excessKeys.length) {
-      context.addIssue({
-        code: ZodIssueCode.unrecognized_keys,
-        keys: excessKeys,
-        message: `Excess keys are not allowed`,
-      });
+      // context.addIssue({
+      //   code: ZodIssueCode.unrecognized_keys,
+      //   keys: excessKeys,
+      //   message: `Excess keys are not allowed`,
+      // });
     }
     return value;
   }, schema);

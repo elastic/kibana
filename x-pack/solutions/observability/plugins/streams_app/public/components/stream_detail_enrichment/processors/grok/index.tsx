@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  EuiAccordion,
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -16,6 +18,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -35,17 +38,23 @@ import { UseProcessingSimulatorReturnType } from '../../hooks/use_processing_sim
 export const GrokProcessorForm = ({
   definition,
   refreshSimulation,
+  samples,
 }: {
   definition?: StreamDefinition;
   refreshSimulation?: UseProcessingSimulatorReturnType['refreshSimulation'];
+  samples?: Array<Record<PropertyKey, unknown>>;
 }) => {
   return (
     <>
       <ProcessorFieldSelector />
       <GrokPatternsEditor />
       <EuiSpacer size="m" />
-      {refreshSimulation && definition && (
-        <GrokAiSuggestions definition={definition} refreshSimulation={refreshSimulation} />
+      {refreshSimulation && definition && samples && (
+        <GrokAiSuggestions
+          definition={definition}
+          refreshSimulation={refreshSimulation}
+          samples={samples}
+        />
       )}
       <EuiSpacer size="m" />
       <OptionalFieldsAccordion>
@@ -60,12 +69,41 @@ export const GrokProcessorForm = ({
   );
 };
 
-function GrokAiSuggestions({
+function GrokAiSuggestions(props: {
+  definition: StreamDefinition;
+  refreshSimulation: UseProcessingSimulatorReturnType['refreshSimulation'];
+  samples: Array<Record<PropertyKey, unknown>>;
+}) {
+  const forcedStateAccordionId = useGeneratedHtmlId({
+    prefix: 'grokaisuggestions',
+  });
+  const [trigger, setTrigger] = useState<'closed' | 'open'>('closed');
+
+  return (
+    <EuiAccordion
+      id={forcedStateAccordionId}
+      forceState={trigger}
+      onToggle={() => {
+        setTrigger((t) => (t === 'closed' ? 'open' : 'closed'));
+      }}
+      buttonContent={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.noSuggestions',
+        { defaultMessage: '✨ AI suggestions' }
+      )}
+    >
+      {trigger === 'open' && <InnerGrokAiSuggestions {...props} />}
+    </EuiAccordion>
+  );
+}
+
+function InnerGrokAiSuggestions({
   definition,
   refreshSimulation,
+  samples,
 }: {
   definition: StreamDefinition;
   refreshSimulation: UseProcessingSimulatorReturnType['refreshSimulation'];
+  samples: Array<Record<PropertyKey, unknown>>;
 }) {
   const { dependencies } = useKibana();
   const {
@@ -96,11 +134,12 @@ function GrokAiSuggestions({
             condition: { always: {} },
             start,
             end,
+            samples,
           },
         },
       });
     },
-    [definition.name, end, fieldValue, start, streamsRepositoryClient],
+    [definition.name, end, fieldValue, samples, start, streamsRepositoryClient],
     { disableToastOnError: true }
   );
   if (isLoadingSuggestions) {
@@ -108,19 +147,21 @@ function GrokAiSuggestions({
   }
 
   const refreshButton = (
-    <EuiButton
-      size="s"
-      data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
-      iconType={'refresh'}
-      onClick={refreshSuggestions}
-    >
-      {i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
-        {
-          defaultMessage: 'Refresh suggestions',
-        }
-      )}
-    </EuiButton>
+    <EuiFlexGroup alignItems="flexStart">
+      <EuiButton
+        size="s"
+        data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
+        iconType={'refresh'}
+        onClick={refreshSuggestions}
+      >
+        {i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
+          {
+            defaultMessage: 'Generate new suggestions',
+          }
+        )}
+      </EuiButton>
+    </EuiFlexGroup>
   );
 
   if (suggestionsError) {
@@ -143,42 +184,55 @@ function GrokAiSuggestions({
       </>
     );
   }
+  const currentPatterns = form.getValues().patterns;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.noSuggestions',
-          { defaultMessage: '✨ AI suggestions' }
-        )}{' '}
-        {refreshButton}
-      </EuiText>
-      {suggestions.patterns.map((pattern) => (
-        <EuiFlexGroup responsive={false} wrap={false} key={pattern}>
-          <EuiFlexItem grow>
-            <EuiCodeBlock paddingSize="s">{pattern}</EuiCodeBlock>
-          </EuiFlexItem>
-          <EuiButtonIcon
-            onClick={() => {
-              const currentState = form.getValues();
-              const hasNoPatterns =
-                !currentState.patterns || !currentState.patterns.some(({ value }) => value);
-              if (hasNoPatterns) {
-                form.setValue('patterns', [{ value: pattern }]);
-              } else {
-                form.setValue('patterns', [...currentState.patterns, { value: pattern }]);
-              }
-              refreshSimulation();
-            }}
-            data-test-subj="streamsAppGrokAiSuggestionsButton"
-            iconType="plusInCircle"
-            aria-label={i18n.translate(
-              'xpack.streams.grokAiSuggestions.euiButtonIcon.addPatternLabel',
-              { defaultMessage: 'Add pattern' }
-            )}
-          />
-        </EuiFlexGroup>
-      ))}
+      {suggestions.patterns.map((pattern, i) => {
+        if (currentPatterns && currentPatterns.some(({ value }) => value === pattern)) {
+          return null;
+        }
+        return (
+          <EuiFlexGroup responsive={false} wrap={false} key={pattern}>
+            <EuiFlexItem grow>
+              <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                <EuiCodeBlock paddingSize="s">{pattern}</EuiCodeBlock>
+                <EuiBadge color="hollow">
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.matchRate',
+                    {
+                      defaultMessage: 'Match rate: {matchRate}%',
+                      values: {
+                        matchRate: (suggestions.simuations[i].success_rate * 100).toFixed(2),
+                      },
+                    }
+                  )}
+                </EuiBadge>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiButtonIcon
+              onClick={() => {
+                const currentState = form.getValues();
+                const hasNoPatterns =
+                  !currentState.patterns || !currentState.patterns.some(({ value }) => value);
+                if (hasNoPatterns) {
+                  form.setValue('patterns', [{ value: pattern }]);
+                } else {
+                  form.setValue('patterns', [...currentState.patterns, { value: pattern }]);
+                }
+                refreshSimulation();
+              }}
+              data-test-subj="streamsAppGrokAiSuggestionsButton"
+              iconType="plusInCircle"
+              aria-label={i18n.translate(
+                'xpack.streams.grokAiSuggestions.euiButtonIcon.addPatternLabel',
+                { defaultMessage: 'Add pattern' }
+              )}
+            />
+          </EuiFlexGroup>
+        );
+      })}
+      {refreshButton}
     </EuiFlexGroup>
   );
 }

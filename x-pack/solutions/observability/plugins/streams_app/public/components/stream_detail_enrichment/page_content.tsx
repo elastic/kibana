@@ -137,6 +137,7 @@ export function StreamDetailEnrichmentContent({
                     onAddProcessor={addProcessor}
                     onWatchProcessor={watchProcessor}
                     refreshSimulation={refreshSimulation}
+                    samples={samples}
                   />
                 </EuiPanel>
               </EuiResizablePanel>

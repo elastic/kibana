@@ -16,7 +16,7 @@ import {
   processorDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { isEmpty, isNumber } from 'lodash';
+import { isEmpty, isNumber, uniqBy } from 'lodash';
 import { MessageRole } from '@kbn/inference-common';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
@@ -272,6 +272,7 @@ const suggestionsParamsSchema = z.object({
     condition: conditionSchema,
     start: z.number().optional(),
     end: z.number().optional(),
+    samples: z.array(z.record(z.unknown())),
   }),
 });
 
@@ -298,7 +299,7 @@ export const processingSuggestionRoute = createServerRoute({
       body,
     } = params;
 
-    const { start, end, condition, field } = body;
+    const { start, end, condition, field, samples } = body;
     const query = condition ? conditionToQueryDsl(condition) : { match_all: {} };
 
     const observabilityEsClient = createObservabilityEsClient({
@@ -321,8 +322,6 @@ export const processingSuggestionRoute = createServerRoute({
 | LIMIT 100
 `;
 
-    console.log(JSON.stringify(filter, null, 2));
-
     const response = await observabilityEsClient.esql(
       'log-patterns',
       {
@@ -332,15 +331,9 @@ export const processingSuggestionRoute = createServerRoute({
       { transform: 'none' }
     );
 
-    console.log(esqlQuery);
-    console.log(JSON.stringify(response, null, 2));
-    console.log(JSON.stringify(response, null, 2));
-
     const rawDataSamples = response.values
       .slice(0, 3)
       .map((row) => (row[2] as any[]).slice(0, 3).join('\n'));
-
-    console.log(JSON.stringify(rawDataSamples, null, 2));
 
     const chatResponses = await Promise.all(
       rawDataSamples.map((sample) =>
@@ -392,24 +385,80 @@ export const processingSuggestionRoute = createServerRoute({
       return partialPatterns;
     });
 
-    if (!Array.isArray(patterns)) {
-      return {
-        patterns: [],
-        chatResponses,
-      };
-    }
+    const simulations = (
+      await Promise.all(
+        patterns.map(async (pattern) => {
+          // Validate match on current sample
+          const simulationBody = prepareSimulationBody({
+            path: {
+              id,
+            },
+            body: {
+              processing: [
+                {
+                  grok: {
+                    field,
+                    if: { always: {} },
+                    patterns: [pattern],
+                  },
+                },
+              ],
+              documents: samples,
+            },
+          });
+          const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
+          const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
+
+          try {
+            assertSimulationResult(simulationResult, simulationDiffs);
+          } catch (e) {
+            return null;
+          }
+
+          const simulationResponse = prepareSimulationResponse(
+            simulationResult,
+            simulationBody.docs,
+            simulationDiffs,
+            []
+          );
+
+          if (simulationResponse.success_rate === 0) {
+            return null;
+          }
+
+          return {
+            ...simulationResponse,
+            pattern,
+          };
+        })
+      )
+    ).filter(Boolean);
+
+    const deduplicatedSimulations = uniqBy(simulations, (simulation) => simulation!.pattern);
 
     return {
-      patterns,
+      patterns: deduplicatedSimulations.map((simulation) => simulation!.pattern),
       chatResponses,
+      simuations: deduplicatedSimulations as Array<ReturnType<typeof prepareSimulationResponse>>,
     };
   },
 });
 
 function sanitizePatterns(patterns: unknown[]): string[] {
   return patterns
-    .filter((pattern) => typeof pattern.parsing_rule === 'string')
-    .map((pattern) => pattern.parsing_rule.replace(/%\{([^}]+):message\}/g, '%{$1:message_derived}'));
+    .filter(
+      (pattern) =>
+        typeof pattern === 'object' &&
+        pattern &&
+        typeof (pattern as Record<string, unknown>).parsing_rule === 'string'
+    )
+    .map((pattern) =>
+      (pattern as { parsing_rule: string }).parsing_rule.replace(
+        /%\{([^}]+):message\}/g,
+        '%{$1:message_derived}'
+      )
+    )
+    .map((pattern) => pattern.replace(/%\{([^}]+):@timestamp\}/g, '%{$1:@timestamp_derived}'));
 }
 
 export const processingRoutes = {
