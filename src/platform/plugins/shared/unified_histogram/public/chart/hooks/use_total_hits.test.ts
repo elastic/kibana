@@ -71,7 +71,10 @@ describe('useTotalHits', () => {
           isPartial: false,
           rawResponse: {
             hits: {
-              total: 42,
+              total: {
+                relation: 'eq',
+                value: 42,
+              },
             },
           },
         }) as any;

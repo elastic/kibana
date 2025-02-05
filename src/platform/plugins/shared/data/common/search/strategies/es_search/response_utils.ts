@@ -20,6 +20,6 @@ export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
   return { total, loaded };
 }
 
-export function getHitsTotal(total: estypes.SearchHitsMetadata['total']): number {
-  return typeof total === 'number' ? total : total?.value ?? 0;
+export function getHitsTotal(total: estypes.SearchHitsMetadata['total']): number | undefined {
+  return typeof total === 'number' ? total : total?.value;
 }

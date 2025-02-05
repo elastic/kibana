@@ -233,7 +233,10 @@ describe('SearchInterceptor', () => {
             "hits": Object {
               "hits": Array [],
               "max_score": null,
-              "total": 61,
+              "total": Object {
+                "relation": "eq",
+                "value": 61,
+              },
             },
             "timed_out": false,
             "took": 2,
@@ -277,7 +280,10 @@ describe('SearchInterceptor', () => {
             "hits": Object {
               "hits": Array [],
               "max_score": null,
-              "total": 61,
+              "total": Object {
+                "relation": "eq",
+                "value": 61,
+              },
             },
             "timed_out": false,
             "took": 2,
@@ -342,7 +348,10 @@ describe('SearchInterceptor', () => {
             "hits": Object {
               "hits": Array [],
               "max_score": null,
-              "total": 61,
+              "total": Object {
+                "relation": "eq",
+                "value": 61,
+              },
             },
             "timed_out": false,
             "took": 1,
@@ -375,7 +384,10 @@ describe('SearchInterceptor', () => {
             "hits": Object {
               "hits": Array [],
               "max_score": null,
-              "total": 61,
+              "total": Object {
+                "relation": "eq",
+                "value": 61,
+              },
             },
             "timed_out": false,
             "took": 1,
@@ -556,7 +568,10 @@ describe('SearchInterceptor', () => {
               "hits": Object {
                 "hits": Array [],
                 "max_score": null,
-                "total": 61,
+                "total": Object {
+                  "relation": "eq",
+                  "value": 61,
+                },
               },
               "timed_out": false,
               "took": 2,
