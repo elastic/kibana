@@ -416,6 +416,7 @@ export function createTestEsCluster<
       return new Client({
         node: this.getHostUrls()[0],
         Connection: HttpConnection,
+        requestTimeout: 30_000,
       });
     }
 

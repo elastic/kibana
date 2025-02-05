@@ -14,6 +14,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 
+import { HttpConnection } from '@elastic/elasticsearch';
 import { getEvaluatorLlm } from '../helpers/get_evaluator_llm';
 import { getCustomEvaluator } from '../helpers/get_custom_evaluator';
 import { getDefaultPromptTemplate } from '../helpers/get_custom_evaluator/get_default_prompt_template';
@@ -95,7 +96,11 @@ export const runEvaluations = async ({
       });
 
       const evalOutput = await evaluate(predict, {
-        client: new Client({ apiKey: langSmithApiKey }),
+        client: new Client({
+          apiKey: langSmithApiKey,
+          Connection: HttpConnection,
+          requestTimeout: 30_000,
+        }),
         data: datasetName ?? '',
         evaluators: [customEvaluator],
         experimentPrefix: name,

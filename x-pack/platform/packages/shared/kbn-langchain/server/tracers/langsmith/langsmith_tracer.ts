@@ -9,6 +9,7 @@ import { Client } from 'langsmith';
 import type { Logger } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import { HttpConnection } from '@elastic/elasticsearch';
 
 /**
  * Returns a custom LangChainTracer which adds the `exampleId` so Dataset 'Test' runs are written to LangSmith
@@ -38,7 +39,7 @@ export const getLangSmithTracer = ({
     const lcTracer = new LangChainTracer({
       projectName, // Shows as the 'test' run's 'name' in langsmith ui
       exampleId,
-      client: new Client({ apiKey }),
+      client: new Client({ apiKey, Connection: HttpConnection, requestTimeout: 30_000 }),
     });
 
     return [lcTracer];

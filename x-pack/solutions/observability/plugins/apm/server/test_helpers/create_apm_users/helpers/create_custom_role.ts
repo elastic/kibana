@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import type { Elasticsearch, Kibana } from '../create_apm_users';
 import { callKibana } from './call_kibana';
@@ -58,6 +58,8 @@ export function getEsClient(elasticsearch: Elasticsearch) {
       username,
       password,
     },
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
   return client;

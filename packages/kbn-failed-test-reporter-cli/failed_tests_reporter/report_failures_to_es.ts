@@ -37,6 +37,7 @@ export async function reportFailuresToEs(log: ToolingLog, failures: TestFailure[
       password: process.env.TEST_FAILURES_ES_PASSWORD,
     },
     Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
   const body = failures.flatMap((failure) => [

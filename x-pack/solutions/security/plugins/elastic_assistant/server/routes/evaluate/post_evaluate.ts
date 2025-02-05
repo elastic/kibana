@@ -32,6 +32,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { HttpConnection } from '@elastic/elasticsearch';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getModelOrOss } from '../../lib/prompt/helpers';
@@ -430,7 +431,11 @@ export const postEvaluateRoute = (
               data: datasetName ?? '',
               evaluators: [], // Evals to be managed in LangSmith for now
               experimentPrefix: name,
-              client: new Client({ apiKey: langSmithApiKey }),
+              client: new Client({
+                apiKey: langSmithApiKey,
+                Connection: HttpConnection,
+                requestTimeout: 30_000,
+              }),
               // prevent rate limiting and unexpected multiple experiment runs
               maxConcurrency: 5,
             })
