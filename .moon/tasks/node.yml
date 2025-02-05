@@ -55,28 +55,13 @@ tasks:
       - $projectRoot/tsconfig.json
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'
-  typecheck:
-    command:
-      - 'tsc'
-      - '--build'
-      - '$projectRoot/tsconfig.type_check.json'
-      - '--pretty'
-      - '--verbose'
+  genTypecheckConfig:
+    script: "node $workspaceRoot/scripts/type_check.js --project $projectRoot/tsconfig.json --config-only"
     inputs:
-      - '@group(src)'
-      - 'tsconfig.json'
-      - 'tsconfig.*.json'
+      - "tsconfig.json"
     outputs:
-      - 'target'
-    deps:
-      - '~:genTypecheckConfig'
-      - '^:typecheck'
-    options:
-      runFromWorkspaceRoot: true
-    env:
-      NODE_OPTIONS: '--max-old-space-size=12192'
-
-  typecheckQ:
+      - "tsconfig.moon.json"
+  typecheck:
     command:
       - 'tsc'
       - '--build'
@@ -89,12 +74,12 @@ tasks:
     outputs:
       - 'target'
     deps:
-      - '~:genTypecheckConfig'
-      - '^:typecheckQ'
+      - '@kbn/ts-type-check-cli:generateAllTypecheckConfigs'
+      - '^:typecheck'
     options:
       runFromWorkspaceRoot: true
     env:
-      NODE_OPTIONS: '--max-old-space-size=12192'
+      NODE_OPTIONS: '--max-old-space-size=8192'
 
   env:
     script: env
