@@ -81,6 +81,7 @@ export const useSearchApiKey = (): UseSearchApiKeyParams => {
     ) {
       (async () => {
         try {
+          const prevState: ApiKeyState = apiKeyState.status;
           updateApiKeyState({ status: Status.loading });
           const storedKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
 
@@ -88,7 +89,10 @@ export const useSearchApiKey = (): UseSearchApiKeyParams => {
             const { id, encoded } = JSON.parse(storedKey);
 
             if (await validateApiKey(id)) {
-              updateApiKeyState({ apiKey: encoded, status: Status.showHiddenKey });
+              updateApiKeyState({
+                apiKey: encoded,
+                status: prevState !== Status.uninitialized ? prevState : Status.showHiddenKey,
+              });
             } else {
               sessionStorage.removeItem(API_KEY_STORAGE_KEY);
               updateApiKeyState({ apiKey: null, status: Status.showCreateButton });
