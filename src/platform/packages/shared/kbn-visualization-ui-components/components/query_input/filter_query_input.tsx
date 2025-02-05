@@ -20,10 +20,10 @@ import {
   EuiPopoverProps,
   euiTextBreakWord,
   useEuiFontSize,
+  UseEuiTheme,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryInput, validateQuery } from '.';
 import type { QueryInputServices } from '.';
 
@@ -48,6 +48,13 @@ export interface FilterQueryInputProps {
   queryInputServices: QueryInputServices;
   appName: string;
 }
+
+const LinkStyles = ({ euiTheme }: UseEuiTheme) => `
+  ${euiTextBreakWord()};
+  ${useEuiFontSize('s')};
+  min-height: ${euiTheme.size.xl};
+  width: 100%;
+`;
 
 export function FilterQueryInput({
   inputFilter,
@@ -121,12 +128,7 @@ export function FilterQueryInput({
                       onClick={() => {
                         setFilterPopoverOpen(!filterPopoverOpen);
                       }}
-                      css={css`
-                        ${euiTextBreakWord()};
-                        ${useEuiFontSize('s')};
-                        min-height: ${euiThemeVars.euiSizeXL};
-                        width: 100%;
-                      `}
+                      css={LinkStyles}
                       color={isInputFilterValid ? 'text' : 'danger'}
                       title={i18n.translate(
                         'visualizationUiComponents.filterQueryInput.clickToEdit',

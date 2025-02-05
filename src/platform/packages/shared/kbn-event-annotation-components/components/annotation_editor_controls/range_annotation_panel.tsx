@@ -9,14 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker, UseEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import type {
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { isRangeAnnotationConfig } from '../..';
 import { defaultRangeAnnotationLabel, defaultAnnotationLabel } from './helpers';
 import { toLineAnnotationColor, toRangeAnnotationColor } from './helpers';
@@ -33,15 +31,7 @@ export const ConfigPanelApplyAsRangeSwitch = ({
 }) => {
   const isRange = isRangeAnnotationConfig(annotation);
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      className="lnsRowCompressedMargin"
-      css={css`
-        & + .lnsRowCompressedMargin {
-          margin-top: ${euiThemeVars.euiSizeS};
-        }
-      `}
-    >
+    <EuiFormRow display="columnCompressed">
       <EuiSwitch
         data-test-subj="lns-xyAnnotation-rangeSwitch"
         label={
@@ -94,6 +84,15 @@ export const ConfigPanelApplyAsRangeSwitch = ({
   );
 };
 
+const RowCompressedMarginStyle = ({ euiTheme }: UseEuiTheme) => `
+  & + .lnsRowCompressedMargin {
+    margin-top: ${euiTheme.size.s};
+  }
+  .euiFormControlLayout__prepend {
+    min-width: 50px; // makes both labels ("from" and "to") the same width
+  }
+`;
+
 export const ConfigPanelRangeDatePicker = ({
   value,
   label,
@@ -112,17 +111,10 @@ export const ConfigPanelRangeDatePicker = ({
   return (
     <EuiFormRow
       display="rowCompressed"
-      fullWidth
       label={label}
-      className="lnsConfigPanelAnnotations__date lnsRowCompressedMargin"
-      css={css`
-        & + .lnsRowCompressedMargin {
-          margin-top: ${euiThemeVars.euiSizeS};
-        }
-        .euiFormControlLayout__prepend {
-          min-width: 50px; // makes both labels ("from" and "to") the same width
-        }
-      `}
+      fullWidth
+      className="lnsRowCompressedMargin"
+      css={RowCompressedMarginStyle}
     >
       <EuiDatePicker
         compressed

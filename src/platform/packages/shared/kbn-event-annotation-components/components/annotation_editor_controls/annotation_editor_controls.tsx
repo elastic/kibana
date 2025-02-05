@@ -40,8 +40,6 @@ import type {
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
   defaultAnnotationColor,
@@ -366,12 +364,6 @@ const AnnotationEditorControls = ({
         >
           <EuiFormRow
             display="rowCompressed"
-            className="lnsRowCompressedMargin"
-            css={css`
-              & + .lnsRowCompressedMargin {
-                margin-top: ${euiThemeVars.euiSizeS};
-              }
-            `}
             fullWidth
             label={i18n.translate('eventAnnotationComponents.xyChart.annotation.tooltip', {
               defaultMessage: 'Show additional fields',
