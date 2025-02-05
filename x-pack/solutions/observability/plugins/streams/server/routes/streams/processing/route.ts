@@ -361,15 +361,16 @@ export const processingSuggestionRoute = createServerRoute({
           connectorId: 'azure-gpt4',
           system: `Instructions:
         - You are an assistant for observability tasks with a strong knowledge of logs and log parsing.
-        - Use JSON format as an array.
-        - For each log source identified, provide the following information:
+        - Use JSON format.
+        - For a single log source identified, provide the following information:
+            * Use 'source_name' as the key for the log source name.
             * Use 'parsing_rule' as the key for the parsing rule.
         - Use only Grok patterns for the parsing rule.
             * Use %{{pattern:name:type}} syntax for Grok patterns when possible.
             * Combine date and time into a single @timestamp field when it's possible.
+        - Use ECS (Elastic Common Schema) fields whenever possible.
         - You are correct, factual, precise, and reliable.
-        
-        Only answer with the JSON array, nothing else, no intro, no clarifying information!!!
+
         `,
           schema: {
             type: 'object',
@@ -379,6 +380,9 @@ export const processingSuggestionRoute = createServerRoute({
                 items: {
                   type: 'object',
                   properties: {
+                    source_name: {
+                      type: 'string',
+                    },
                     parsing_rule: {
                       type: 'string',
                     },
@@ -389,14 +393,10 @@ export const processingSuggestionRoute = createServerRoute({
           } as const,
           input: `Logs:
         ${sample.total_examples.join('\n')}
-        Given the raw messages, help us do the following: 
-        1. Identify and name the log sources based on logs format - it should just be one!!!
+        Given the raw messages coming from one data source, help us do the following: 
+        1. Name the log source based on logs format.
         2. Write a parsing rule for Elastic ingest pipeline to extract structured fields from the raw message.
         Make sure that the parsing rule is unique per log source.
-
-        When possible, use the ECS (Elastic Common Schema) field names for the structured fields.
-
-        Don't make the pattern too specific to the provided examples.
             `,
         })
       )
