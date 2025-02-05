@@ -29,6 +29,7 @@ import React from 'react';
 import { castArray } from 'lodash';
 import { ServiceNameLink } from '../sub_components/service_name_link';
 import { TraceIdLink } from '../sub_components/trace_id_link';
+import { TransactionNameLink } from '../sub_components/transaction_name_link';
 
 export const getAttributeConfiguration = (
   attributes: TraceDocumentOverview
@@ -44,7 +45,12 @@ export const getAttributeConfiguration = (
       title: i18n.translate('discover.docViews.tracesOverview.details.transactionName.title', {
         defaultMessage: 'Transaction name',
       }),
-      content: <p>{attributes[TRANSACTION_NAME_FIELD]}</p>,
+      content: (
+        <TransactionNameLink
+          serviceName={attributes[SERVICE_NAME_FIELD]}
+          transactionName={attributes[TRANSACTION_NAME_FIELD]}
+        />
+      ),
     },
     [SERVICE_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.service.title', {
