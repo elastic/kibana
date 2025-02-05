@@ -16,6 +16,7 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
+import { requiredPrivileges } from '@kbn/files-plugin/common/default_image_file_kind';
 import type { MetricsDataPluginStartDeps } from '../../../types';
 import type {
   CallWithRequestParams,
@@ -44,15 +45,12 @@ export class KibanaFramework {
     config: InfraRouteConfig<Params, Query, Body, Method>,
     handler: RequestHandler<Params, Query, Body, RequestHandlerContext>
   ) {
-    const defaultOptions = {
-      tags: ['access:infra'],
-    };
     const routeConfig = {
       path: config.path,
       validate: config.validate,
-      // Currently we have no use of custom options beyond tags, this can be extended
-      // beyond defaultOptions if it's needed.
-      options: defaultOptions,
+      security: {
+        authz: { requiredPrivileges: ['infra'] },
+      },
     };
     switch (config.method) {
       case 'get':
