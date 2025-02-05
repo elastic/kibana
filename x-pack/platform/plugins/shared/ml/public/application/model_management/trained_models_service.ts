@@ -561,14 +561,6 @@ export class TrainedModelsService {
     this.downloadStatusFetchInProgress = false;
   }
 
-  private hasActiveOperations(): boolean {
-    return (
-      this.downloadInProgress.size > 0 ||
-      this.deploymentsInProgress.size > 0 ||
-      this.downloadStatusFetchInProgress
-    );
-  }
-
   private cleanupService() {
     // Clear operation state
     this.downloadInProgress.clear();
@@ -606,19 +598,12 @@ export class TrainedModelsService {
       this.destroySubscription = undefined;
     }
 
-    if (this.hasActiveOperations()) {
-      this.destroySubscription = merge(
-        timer(0, 1000).pipe(
-          // Check if any operations are still in progress
-          map(() => this.hasActiveOperations())
-        )
-      )
+    // Wait for scheduled deployments to be empty before cleaning up
+    if (this.scheduledDeployments.length > 0) {
+      this.destroySubscription = this._scheduledDeployments$
         .pipe(
-          // Wait until all operations are complete
-          filter((hasOperations) => !hasOperations),
-          take(1),
-          // Add a small delay to ensure all cleanup is complete
-          delay(100)
+          filter((deployments) => deployments.length === 0),
+          take(1)
         )
         .subscribe({
           complete: () => {
