@@ -128,7 +128,10 @@ export function SearchApiKeysProvider({ getService, getPageObjects }: FtrProvide
     async createApiKeyFromFlyout() {
       const apiKeyName = 'Happy API Key';
       await testSubjects.click('createAPIKeyButton');
-      expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API key');
+
+      await retry.try(async () => {
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API key');
+      });
 
       await pageObjects.apiKeys.setApiKeyName(apiKeyName);
       await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
