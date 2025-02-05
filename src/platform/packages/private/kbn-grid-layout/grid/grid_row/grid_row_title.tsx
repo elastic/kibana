@@ -70,12 +70,8 @@ export const GridRowTitle = React.memo(
               size="xs"
               heading="h2"
               defaultValue={rowTitle}
-              onCancel={() => setEditTitleOpen(false)}
               onSave={updateTitle}
-              editModeProps={{
-                cancelButtonProps: { onClick: () => setEditTitleOpen(false) },
-                formRowProps: { className: 'editModeFormRow ' },
-              }}
+              onCancel={() => setEditTitleOpen(false)}
               startWithEditOpen
               inputAriaLabel="Edit title inline"
             />
