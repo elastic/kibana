@@ -899,7 +899,7 @@ export async function deleteOutputSecrets(opts: {
   const outputType = output.type;
   const outputSecretPaths = getOutputSecretPaths(outputType, output);
 
-  deleteSOSecrets(esClient, outputSecretPaths);
+  await deleteSOSecrets(esClient, outputSecretPaths);
 }
 
 export function getOutputSecretReferences(output: Output): PolicySecretReference[] {
@@ -1016,5 +1016,5 @@ export async function deleteFleetServerHostsSecrets(opts: {
     (path) => typeof path.value === 'string'
   );
 
-  deleteSOSecrets(esClient, secretPaths);
+  await deleteSOSecrets(esClient, secretPaths);
 }
