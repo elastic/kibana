@@ -353,7 +353,7 @@ export const processingSuggestionRoute = createServerRoute({
         total_count,
         total_examples: Array.from(total_examples).slice(0, NUMBER_SAMPLES_PER_PATTERN),
       }));
-
+    
     const chatResponses = await Promise.all(
       sortedStats.map((sample) =>
         inferenceClient.chatComplete({
@@ -377,16 +377,13 @@ export const processingSuggestionRoute = createServerRoute({
               content: `Logs:
         ${sample.total_examples.join('\n')}
         Given the raw messages, help us do the following: 
-        1. Identify and name the distinct log sources based on logs format.
+        1. Identify and name the log sources based on logs format - it should just be one!!!
         2. Write a parsing rule for Elastic ingest pipeline to extract structured fields from the raw message.
         Make sure that the parsing rule is unique per log source.
 
         When possible, use the ECS (Elastic Common Schema) field names for the structured fields.
 
-        Don't make the patterns too specific to the provided examples.
-        
-        Hints to separate the log sources:
-        - different log sources have different formats.
+        Don't make the pattern too specific to the provided examples.
             `,
             },
           ],
