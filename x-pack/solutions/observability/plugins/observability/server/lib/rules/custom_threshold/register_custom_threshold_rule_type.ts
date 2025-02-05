@@ -6,22 +6,17 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
-import { dataViewSpecSchema } from '@kbn/data-views-plugin/server/rest_api_routes/schema';
 import { i18n } from '@kbn/i18n';
 import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { COMPARATORS } from '@kbn/alerting-comparators';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { LEGACY_COMPARATORS } from '../../../../common/utils/convert_legacy_outside_comparator';
+import { customThresholdParamsSchema } from '@kbn/response-ops-rule-params/custom_threshold';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
-import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
-
 import {
   alertDetailUrlActionVariableDescription,
   cloudActionVariableDescription,
@@ -36,7 +31,6 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from './translations';
-import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import {
   createCustomThresholdExecutor,
   CustomThresholdLocators,
@@ -53,79 +47,12 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAle
   shouldWrite: true,
 };
 
-export const searchConfigurationSchema = schema.object({
-  index: schema.oneOf([schema.string(), dataViewSpecSchema]),
-  query: schema.object({
-    language: schema.string(),
-    query: schema.string({
-      validate: validateKQLStringFilter,
-    }),
-  }),
-  filter: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-        meta: schema.recordOf(schema.string(), schema.any()),
-      })
-    )
-  ),
-});
-
 export function thresholdRuleType(
   basePath: IBasePath,
   config: ObservabilityConfig,
   logger: Logger,
   locators: CustomThresholdLocators
 ) {
-  const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
-  const baseCriterion = {
-    threshold: schema.arrayOf(schema.number()),
-    comparator: oneOfLiterals(comparators),
-    timeUnit: schema.string(),
-    timeSize: schema.number(),
-  };
-  const allowedAggregators = Object.values(Aggregators);
-  allowedAggregators.splice(Object.values(Aggregators).indexOf(Aggregators.COUNT), 1);
-
-  const customCriterion = schema.object({
-    ...baseCriterion,
-    aggType: schema.maybe(schema.literal('custom')),
-    metric: schema.never(),
-    metrics: schema.arrayOf(
-      schema.oneOf([
-        schema.object({
-          name: schema.string(),
-          aggType: oneOfLiterals(allowedAggregators),
-          field: schema.string(),
-          filter: schema.never(),
-        }),
-        schema.object({
-          name: schema.string(),
-          aggType: schema.literal('count'),
-          filter: schema.maybe(
-            schema.string({
-              validate: validateKQLStringFilter,
-            })
-          ),
-          field: schema.never(),
-        }),
-      ])
-    ),
-    equation: schema.maybe(schema.string()),
-    label: schema.maybe(schema.string()),
-  });
-
-  const paramsSchema = schema.object(
-    {
-      criteria: schema.arrayOf(customCriterion),
-      groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-      alertOnNoData: schema.maybe(schema.boolean()),
-      alertOnGroupDisappear: schema.maybe(schema.boolean()),
-      searchConfiguration: searchConfigurationSchema,
-    },
-    { unknowns: 'allow' }
-  );
-
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
@@ -133,12 +60,12 @@ export function thresholdRuleType(
     }),
     fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {
-      params: paramsSchema,
+      params: customThresholdParamsSchema,
     },
     schemas: {
       params: {
         type: 'config-schema' as const,
-        schema: paramsSchema,
+        schema: customThresholdParamsSchema,
       },
     },
     defaultActionGroupId: FIRED_ACTION.id,
