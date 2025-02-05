@@ -3,7 +3,11 @@
 set -euo pipefail
 
 RELEASE_BUILD="${RELEASE_BUILD:="false"}"
-VERSION_QUALIFIER="${VERSION_QUALIFIER:="beta1"}"
+if [[ "$RELEASE_BUILD" == "true" ]]; then
+  VERSION_QUALIFIER="${VERSION_QUALIFIER:="beta1"}"
+else
+  VERSION_QUALIFIER="${VERSION_QUALIFIER:=""}"
+fi
 
 BASE_VERSION="$(jq -r '.version' package.json)"
 
