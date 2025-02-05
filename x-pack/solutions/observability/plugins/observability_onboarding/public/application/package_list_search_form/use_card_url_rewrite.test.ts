@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addPathParamToUrl, toOnboardingPath } from './use_integration_card_list';
+import { addPathParamToUrl, toOnboardingPath } from './use_card_url_rewrite';
 
 describe('useIntegratrionCardList', () => {
   describe('toOnboardingPath', () => {
