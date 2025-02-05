@@ -25,7 +25,7 @@ describe('WHERE <expression>', () => {
     scalar: true,
   });
   test('beginning an expression', async () => {
-    const { assertSuggestions } = await setup();
+    const { assertSuggestions, suggest } = await setup();
 
     await assertSuggestions('from a | where /', [
       ...getFieldNamesByType('any')
