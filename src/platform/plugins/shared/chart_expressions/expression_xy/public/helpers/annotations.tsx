@@ -11,7 +11,7 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { UseEuiTheme } from '@elastic/eui';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -22,8 +22,6 @@ import { hasIcon, iconSet } from './icon';
 import { AxesMap, getOriginalAxisPosition } from './axes_configuration';
 
 export const LINES_MARKER_SIZE = 20;
-
-
 
 type PartialReferenceLineDecorationConfig = Pick<
   ReferenceLineDecorationConfig,
@@ -36,6 +34,27 @@ type PartialMergedAnnotation = Pick<
   MergedAnnotation,
   'position' | 'icon' | 'textVisibility' | 'label' | 'isGrouped'
 >;
+
+const xyAnnotationNumberIconCss = {
+  self: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderRadius: euiTheme.size.base,
+      minWidth: euiTheme.size.base,
+      height: euiTheme.size.base,
+      backgroundColor: 'currentColor',
+    }),
+  text: css({
+    fontWeight: 500,
+    fontSize: '9px',
+    letterSpacing: '-.5px',
+    lineHeight: '11px',
+  }),
+};
+
+const xyAnnotationIconRotate90Css = css({
+  transform: 'rotate(90deg) !important',
+  transformOrigin: 'center',
+});
 
 const isExtendedDecorationConfig = (
   config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined
@@ -142,27 +161,6 @@ export function MarkerBody({
     </div>
   );
 }
-
-const xyAnnotationIconRotate90Css = css({
-  transform: 'rotate(90deg) !important',
-  transformOrigin: 'center',
-});
-
-const xyAnnotationNumberIconCss = {
-  self: css({
-    borderRadius: euiThemeVars.euiSize,
-    minWidth: euiThemeVars.euiSize,
-    height: euiThemeVars.euiSize,
-    backgroundColor: 'currentColor',
-  }),
-
-  text: css({
-    fontWeight: 500,
-    fontSize: '9px',
-    letterSpacing: '-.5px',
-    lineHeight: '11px',
-  }),
-};
 
 function NumberIcon({ number }: { number: number }) {
   return (
