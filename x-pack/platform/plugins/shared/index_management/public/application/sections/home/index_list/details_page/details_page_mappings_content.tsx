@@ -416,7 +416,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       flex-wrap: nowrap;
     }
   `;
-  
+
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
