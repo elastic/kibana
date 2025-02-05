@@ -148,8 +148,7 @@ export class RuleMigrationsTaskClient {
               );
               telemetryClient.reportRuleTranslation({
                 duration,
-                translationResult: migrationResult.translation_result,
-                prebuiltMatch: migrationResult.elastic_rule?.prebuilt_rule_id ? true : false,
+                migrationResult,
               });
               await this.data.rules.saveCompleted({
                 ...ruleMigration,

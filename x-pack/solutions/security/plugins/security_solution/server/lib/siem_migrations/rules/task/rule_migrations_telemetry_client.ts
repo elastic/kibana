@@ -15,6 +15,7 @@ import {
   SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
 } from '../../../telemetry/event_based/events';
 import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
+import type { MigrateRuleState } from './agent/types';
 
 interface IntegrationMatchEvent {
   preFilterIntegrations: RuleMigrationIntegration[];
@@ -29,8 +30,7 @@ interface PrebuiltRuleMatchEvent {
 interface RuleTranslationEvent {
   error?: string;
   duration?: number;
-  translationResult?: string;
-  prebuiltMatch?: boolean;
+  migrationResult?: MigrateRuleState;
 }
 
 interface SiemMigrationEvent {
@@ -78,12 +78,7 @@ export class SiemMigrationTelemetryClient {
       postFilterRuleCount: postFilterRule ? 1 : 0,
     });
   }
-  public reportRuleTranslation({
-    error,
-    translationResult,
-    prebuiltMatch,
-    duration,
-  }: RuleTranslationEvent): void {
+  public reportRuleTranslation({ error, migrationResult, duration }: RuleTranslationEvent): void {
     if (error) {
       this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE.eventType, {
         migrationId: this.migrationId,
@@ -94,10 +89,10 @@ export class SiemMigrationTelemetryClient {
     }
     this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS.eventType, {
       migrationId: this.migrationId,
-      translationResult,
+      translationResult: migrationResult?.translation_result,
       duration,
       model: this.modelName,
-      prebuiltMatch,
+      prebuiltMatch: migrationResult?.elastic_rule?.prebuilt_rule_id ? true : false,
     });
   }
   public reportSiemMigration({ error, stats, duration }: SiemMigrationEvent): void {
