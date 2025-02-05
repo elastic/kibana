@@ -70,7 +70,10 @@ export const useProcessingSimulator = ({
   const [liveDraftProcessors, setLiveDraftProcessors] = useState(draftProcessors);
 
   useEffect(() => {
-    setLiveDraftProcessors(draftProcessors);
+    setLiveDraftProcessors((prevLiveProcessors) => {
+      const inProgressDraft = prevLiveProcessors.find((proc) => proc.id === 'draft');
+      return inProgressDraft ? [...draftProcessors, inProgressDraft] : draftProcessors;
+    });
   }, [draftProcessors]);
 
   const watchProcessor = useMemo(

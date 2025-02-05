@@ -83,6 +83,7 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
   const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessor(data);
 
+    onWatchProcessor({ id: 'draft', deleteIfExists: true });
     onAddProcessor(processingDefinition, data.detected_fields);
     closePanel();
   };
