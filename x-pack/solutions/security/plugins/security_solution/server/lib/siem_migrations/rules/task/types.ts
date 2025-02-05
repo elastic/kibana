@@ -10,6 +10,8 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
 import type { getRuleMigrationAgent } from './agent';
+import type { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
+import type { ChatModel } from './util/actions_client_chat';
 
 export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;
 
@@ -26,7 +28,8 @@ export interface RuleMigrationTaskStartParams {
 }
 
 export interface RuleMigrationTaskCreateAgentParams extends RuleMigrationTaskStartParams {
-  abortController: AbortController;
+  telemetryClient: SiemMigrationTelemetryClient;
+  model: ChatModel;
 }
 
 export interface RuleMigrationTaskStartResult {

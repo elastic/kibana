@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
+import type { SiemMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { translateRuleState } from './state';
 
@@ -20,7 +20,7 @@ export interface TranslateRuleGraphParams {
   inferenceClient: InferenceClient;
   connectorId: string;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
-  telemetry: AnalyticsServiceSetup;
+  telemetryClient: SiemMigrationTelemetryClient;
   logger: Logger;
 }
 

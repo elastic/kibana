@@ -5,25 +5,14 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
   RuleTranslationResult,
 } from '../../../../../../../../../../common/siem_migrations/constants';
-import { SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS } from '../../../../../../../../telemetry/event_based/events';
-import type { ChatModel } from '../../../../../util/actions_client_chat';
 import type { GraphNode } from '../../types';
 
-interface GetTranslationResultNodeParams {
-  telemetry: AnalyticsServiceSetup;
-  model: ChatModel;
-}
-
-export const getTranslateRuleNode = ({
-  telemetry,
-  model,
-}: GetTranslationResultNodeParams): GraphNode => {
+export const getTranslationResultNode = (): GraphNode => {
   return async (state) => {
     const elasticRule = {
       title: state.original_rule.title,
@@ -50,11 +39,6 @@ export const getTranslateRuleNode = ({
         translationResult = RuleTranslationResult.FULL;
       }
     }
-    telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS.eventType, {
-      model: model.model,
-      migrationId: state.migrationId,
-      prebuiltMatch: true,
-    });
 
     return {
       elastic_rule: elasticRule,

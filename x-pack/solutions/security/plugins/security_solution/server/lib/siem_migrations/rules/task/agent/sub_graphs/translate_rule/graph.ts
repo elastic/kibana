@@ -13,7 +13,7 @@ import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
 import { getRetrieveIntegrationsNode } from './nodes/retrieve_integrations';
 import { getTranslateRuleNode } from './nodes/translate_rule';
-import { translationResultNode } from './nodes/translation_result';
+import { getTranslationResultNode } from './nodes/translation_result';
 import { getValidationNode } from './nodes/validation';
 import { translateRuleState } from './state';
 import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
@@ -27,20 +27,21 @@ export function getTranslateRuleGraph({
   connectorId,
   ruleMigrationsRetriever,
   logger,
-  telemetry,
+  telemetryClient,
 }: TranslateRuleGraphParams) {
   const translateRuleNode = getTranslateRuleNode({
     inferenceClient,
     connectorId,
     logger,
   });
+  const translationResultNode = getTranslationResultNode();
   const inlineQueryNode = getInlineQueryNode({ model, ruleMigrationsRetriever });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ inferenceClient, connectorId, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
     model,
     ruleMigrationsRetriever,
-    telemetry,
+    telemetryClient,
   });
   const ecsMappingNode = getEcsMappingNode({ inferenceClient, connectorId, logger });
 

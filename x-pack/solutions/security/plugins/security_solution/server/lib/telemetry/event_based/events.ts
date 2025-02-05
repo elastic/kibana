@@ -705,8 +705,6 @@ export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
   model: string;
   migrationId: string;
   duration: number;
-  pending: number;
-  processing: number;
   completed: number;
   failed: number;
   total: number;
@@ -729,18 +727,6 @@ export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
       type: 'long',
       _meta: {
         description: 'Duration of the migration in milliseconds',
-      },
-    },
-    pending: {
-      type: 'long',
-      _meta: {
-        description: 'Number of pending rules after migration',
-      },
-    },
-    processing: {
-      type: 'long',
-      _meta: {
-        description: 'Number of rules currently being migrated',
       },
     },
     completed: {
@@ -768,10 +754,17 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
   model: string;
   migrationId: string;
   duration: number;
+  translationResult: string;
   prebuiltMatch: boolean;
 }> = {
   eventType: 'siem_migrations_rule_translation_success',
   schema: {
+    translationResult: {
+      type: 'keyword',
+      _meta: {
+        description: 'Describes if the translation was full or partial',
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -903,6 +896,90 @@ export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
   },
 };
 
+export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
+  model: string;
+  error: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+}> = {
+  eventType: 'siem_migrations_migration_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for the migration failure',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
+  model: string;
+  error: string;
+  migrationId: string;
+}> = {
+  eventType: 'siem_migrations_rule_translation_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for the translation failure',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -922,6 +999,9 @@ export const events = [
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
+  SIEM_MIGRATIONS_MIGRATION_FAILURE,
+  SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
+  SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
   SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
 ];

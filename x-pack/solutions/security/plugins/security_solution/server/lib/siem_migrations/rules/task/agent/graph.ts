@@ -17,20 +17,20 @@ export function getRuleMigrationAgent({
   ruleMigrationsRetriever,
   connectorId,
   logger,
-  telemetry,
+  telemetryClient,
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
     logger,
     ruleMigrationsRetriever,
-    telemetry,
+    telemetryClient,
   });
   const translationSubGraph = getTranslateRuleGraph({
     model,
     inferenceClient,
     ruleMigrationsRetriever,
     connectorId,
-    telemetry,
+    telemetryClient,
     logger,
   });
   const createSemanticQueryNode = getCreateSemanticQueryNode({ model });

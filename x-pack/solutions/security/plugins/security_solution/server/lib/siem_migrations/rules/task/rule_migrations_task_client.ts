@@ -14,13 +14,13 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
-import { SIEM_MIGRATIONS_MIGRATION_SUCCESS } from '../../../telemetry/event_based/events';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
 import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';
 import { RuleMigrationsRetriever } from './retrievers';
+import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type {
   MigrationAgent,
   RuleMigrationTaskCreateAgentParams,
@@ -76,7 +76,7 @@ export class RuleMigrationsTaskClient {
   }
 
   private async run(params: RuleMigrationTaskStartParams): Promise<void> {
-    const { migrationId, invocationConfig } = params;
+    const { migrationId, invocationConfig, connectorId } = params;
     if (this.migrationsRunning.has(migrationId)) {
       // This should never happen, but just in case
       throw new Error(`Task already running for migration ID:${migrationId} `);
@@ -93,12 +93,24 @@ export class RuleMigrationsTaskClient {
       this.logger.debug(`Sleeping ${seconds}s for migration ID:${migrationId}`);
       await withAbortRace(new Promise((resolve) => setTimeout(resolve, seconds * 1000)));
     };
-    const migrationStart = Date.now();
-    const stats = { completed: 0, failed: 0 };
 
+    const migrationStart = Date.now();
+    const stats = { completed: 0, failed: 0, total: 0 };
+    const { actionsClient } = this.dependencies;
+    const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
+    const model = await actionsClientChat.createModel({
+      signal: abortController.signal,
+      temperature: 0.05,
+    });
+    const telemetryClient = new SiemMigrationTelemetryClient(
+      this.dependencies.telemetry,
+      migrationId,
+      model.model
+    );
     try {
       this.logger.debug(`Creating agent for migration ID:${migrationId}`);
-      const agent = await withAbortRace(this.createAgent({ ...params, abortController }));
+
+      const agent = await withAbortRace(this.createAgent({ ...params, model, telemetryClient }));
 
       const config: RunnableConfig = {
         ...invocationConfig,
@@ -123,7 +135,6 @@ export class RuleMigrationsTaskClient {
 
               const invocationData = {
                 original_rule: ruleMigration.original_rule,
-                migrationId,
               };
 
               // using withAbortRace is a workaround for the issue with the langGraph signal not working properly
@@ -135,7 +146,11 @@ export class RuleMigrationsTaskClient {
               this.logger.debug(
                 `Migration of rule "${ruleMigration.original_rule.title}" finished in ${duration}s`
               );
-
+              telemetryClient.reportRuleTranslation({
+                duration,
+                translationResult: migrationResult.translation_result,
+                prebuiltMatch: migrationResult.elastic_rule?.prebuilt_rule_id ? true : false,
+              });
               await this.data.rules.saveCompleted({
                 ...ruleMigration,
                 elastic_rule: migrationResult.elastic_rule,
@@ -148,9 +163,11 @@ export class RuleMigrationsTaskClient {
                 stats.failed++;
                 throw error;
               }
+              telemetryClient.reportRuleTranslation({
+                error,
+              });
               this.logger.error(
-                `Error migrating rule "${ruleMigration.original_rule.title}"`,
-                error
+                `Error migrating rule "${ruleMigration.original_rule.title} with error: ${error.message}"`
               );
               await this.data.rules.saveError({
                 ...ruleMigration,
@@ -177,35 +194,27 @@ export class RuleMigrationsTaskClient {
         this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
         return;
       } else {
+        const migrationDuration = (Date.now() - migrationStart) / 1000;
+        telemetryClient.reportSiemMigration({ error, stats, duration: migrationDuration });
         this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
     } finally {
       const migrationDuration = (Date.now() - migrationStart) / 1000;
-      const telemetry = this.dependencies.telemetry;
-      telemetry.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS.eventType, {
-        migrationId,
-        completed: stats.completed,
-        failed: stats.failed,
-        total: stats.completed + stats.failed,
-        duration: migrationDuration,
-      });
+      stats.total = stats.completed + stats.failed;
+      telemetryClient.reportSiemMigration({ stats, duration: migrationDuration });
+
       this.migrationsRunning.delete(migrationId);
       abortPromise.cleanup();
     }
   }
 
   private async createAgent({
-    migrationId,
     connectorId,
-    abortController,
+    migrationId,
+    model,
+    telemetryClient,
   }: RuleMigrationTaskCreateAgentParams): Promise<MigrationAgent> {
-    const { inferenceClient, actionsClient, rulesClient, savedObjectsClient } = this.dependencies;
-
-    const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
-    const model = await actionsClientChat.createModel({
-      signal: abortController.signal,
-      temperature: 0.05,
-    });
+    const { inferenceClient, rulesClient, savedObjectsClient } = this.dependencies;
 
     const ruleMigrationsRetriever = new RuleMigrationsRetriever(migrationId, {
       data: this.data,
@@ -220,7 +229,7 @@ export class RuleMigrationsTaskClient {
       model,
       inferenceClient,
       ruleMigrationsRetriever,
-      telemetry: this.dependencies.telemetry,
+      telemetryClient,
       logger: this.logger,
     });
   }
