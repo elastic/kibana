@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/observability-alerting-rule-utils",
+  "name": "@kbn/alerting-rule-utils",
   "description": "Utils shared between observability alerting rules",
   "private": true,
   "version": "1.0.0",
