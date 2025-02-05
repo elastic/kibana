@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 
 interface Props {
@@ -22,6 +22,8 @@ interface Props {
  * how far the percent bar should be drawn.
  */
 export const PercentageBadge = ({ timePercentage, label, valueType = 'percent' }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiBadge
       className={classNames({
@@ -29,6 +31,7 @@ export const PercentageBadge = ({ timePercentage, label, valueType = 'percent' }
         'prfDevTool__percentBadge__progress--time': valueType === 'time',
         'euiTextAlign--center': true,
       })}
+      color={euiTheme.colors.backgroundBaseSubdued}
       style={{ '--prfDevToolProgressPercentage': timePercentage + '%' } as any}
     >
       <span className="prfDevTool__progress--percent-ie" style={{ width: timePercentage + '%' }} />
