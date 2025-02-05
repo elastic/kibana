@@ -39,6 +39,6 @@ export interface SchemaEditorProps {
   withTableActions?: boolean;
 }
 
-export const isSchemeFieldTyped = (field: SchemaField): field is MappedSchemaField => {
+export const isSchemaFieldTyped = (field: SchemaField): field is MappedSchemaField => {
   return !!field && !!field.name && !!field.type;
 };

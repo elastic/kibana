@@ -15,7 +15,7 @@ import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
 import { LoadingPanel } from '../../loading_panel';
-import { SchemaField, isSchemeFieldTyped } from '../types';
+import { SchemaField, isSchemaFieldTyped } from '../types';
 
 interface SamplePreviewTableProps {
   stream: WiredStreamDefinition;
@@ -24,7 +24,7 @@ interface SamplePreviewTableProps {
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
   const { nextField, ...rest } = props;
-  if (isSchemeFieldTyped(nextField)) {
+  if (isSchemaFieldTyped(nextField)) {
     return <SamplePreviewTableContent nextField={nextField} {...rest} />;
   } else {
     return null;
