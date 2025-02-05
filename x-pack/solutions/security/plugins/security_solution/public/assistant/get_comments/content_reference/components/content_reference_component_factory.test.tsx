@@ -14,6 +14,9 @@ import type { ContentReferenceNode } from '../content_reference_parser';
 const testContentReferenceNode = { contentReferenceId: '1' } as ContentReferenceNode;
 
 jest.mock('../../../../common/lib/kibana', () => ({
+  useNavigation: jest.fn().mockReturnValue({
+    navigateTo: jest.fn(),
+  }),
   useKibana: jest.fn().mockReturnValue({
     services: {
       discover: {
