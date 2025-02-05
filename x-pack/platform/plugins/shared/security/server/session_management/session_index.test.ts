@@ -1131,7 +1131,11 @@ describe('Session index', () => {
         },
       };
 
-      await expect(sessionIndex.cleanUp(runContext)).rejects.toEqual(operationFailureReason);
+      await expect(sessionIndex.cleanUp(runContext)).resolves.toEqual({
+        error:
+          'Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed 10 times. {"error":{"type":"search_phase_execution_exception Root causes: no_shard_available_action_exception"}}',
+        state: { shardMissingCounter: 0 },
+      });
     });
 
     describe('concurrent session limit', () => {
