@@ -193,7 +193,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   useEffect(() => {
     // Suggested name for managed connector should include the content- prefix
-    setSanitizedName(prefixConnectorIndex(sanitizedNameWithoutPrefix));
+    setSanitizedName(prefixConnectorIndex(formatApiName(connector.name)));
   }, [connector.name]);
 
   const { hash } = useLocation();
