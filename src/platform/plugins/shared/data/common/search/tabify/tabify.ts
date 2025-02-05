@@ -177,7 +177,7 @@ export function tabifyAggResponse(
   // this can be lifted off once the full impact is assessed
   if (!topLevelBucket.doc_count) {
     if (!hasMultipleDocCountAtRootWithFilters) {
-      topLevelBucket.doc_count = getHitsTotal(esResponse.hits?.total);
+      topLevelBucket.doc_count = getHitsTotal(esResponse.hits?.total) ?? 0;
     }
   }
 
@@ -189,7 +189,7 @@ export function tabifyAggResponse(
       type: 'esaggs',
       source: aggConfigs.indexPattern.id,
       statistics: {
-        totalCount: getHitsTotal(esResponse.hits?.total),
+        totalCount: getHitsTotal(esResponse.hits?.total) ?? 0,
       },
     },
   };
