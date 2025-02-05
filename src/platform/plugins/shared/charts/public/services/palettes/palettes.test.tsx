@@ -10,8 +10,6 @@
 import { buildPalettes } from './palettes';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
-const itIf = (condition: boolean) => (condition ? it : it.skip);
-
 describe.each([
   ['palettes', false, buildPalettes({ name: 'borealis', darkMode: false })],
   ['legacyPalettes', true, buildPalettes({ name: 'amsterdam', darkMode: false })],
@@ -237,49 +235,51 @@ describe.each([
         expect(color1).toEqual(color2);
       });
 
-      itIf(legacy)('should return the same index of the behind text palette for same key', () => {
-        const palette = palettes.default;
-
-        const color1 = palette.getCategoricalColor(
-          [
+      if (legacy) {
+        it('should return the same index of the behind text palette for same key', () => {
+          const palette = palettes.default;
+  
+          const color1 = palette.getCategoricalColor(
+            [
+              {
+                name: 'klm',
+                rankAtDepth: 0,
+                totalSeriesAtDepth: 5,
+              },
+              {
+                name: 'def',
+                rankAtDepth: 0,
+                totalSeriesAtDepth: 2,
+              },
+            ],
             {
-              name: 'klm',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 5,
-            },
+              syncColors: true,
+            }
+          );
+          const color2 = palette.getCategoricalColor(
+            [
+              {
+                name: 'klm',
+                rankAtDepth: 3,
+                totalSeriesAtDepth: 5,
+              },
+              {
+                name: 'ghj',
+                rankAtDepth: 1,
+                totalSeriesAtDepth: 1,
+              },
+            ],
             {
-              name: 'def',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 2,
-            },
-          ],
-          {
-            syncColors: true,
-          }
-        );
-        const color2 = palette.getCategoricalColor(
-          [
-            {
-              name: 'klm',
-              rankAtDepth: 3,
-              totalSeriesAtDepth: 5,
-            },
-            {
-              name: 'ghj',
-              rankAtDepth: 1,
-              totalSeriesAtDepth: 1,
-            },
-          ],
-          {
-            syncColors: true,
-            behindText: true,
-          }
-        );
-        const color1Index = euiPaletteColorBlind({ rotations: 2 }).indexOf(color1!);
-        const color2Index = euiPaletteColorBlindBehindText({ rotations: 2 }).indexOf(color2!);
-
-        expect(color1Index).toEqual(color2Index);
-      });
+              syncColors: true,
+              behindText: true,
+            }
+          );
+          const color1Index = euiPaletteColorBlind({ rotations: 2 }).indexOf(color1!);
+          const color2Index = euiPaletteColorBlindBehindText({ rotations: 2 }).indexOf(color2!);
+  
+          expect(color1Index).toEqual(color2Index);
+        });
+      }
     });
   });
 
