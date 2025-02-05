@@ -26,9 +26,7 @@ describe('AllCellsRenderer', () => {
 
   it('processes all cells in all rows', async () => {
     const onFinish = jest.fn();
-    const renderCellValue = jest.fn(
-      wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue, 'black', 'green')
-    );
+    const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = 'cell';
 
