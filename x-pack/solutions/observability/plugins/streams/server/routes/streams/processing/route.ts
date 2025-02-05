@@ -73,20 +73,83 @@ export const simulateProcessorRoute = createServerRoute({
   },
 });
 
+/**
+ * All documents have an original_fields array that lists all fields that were present in the original document.
+ * This function removes the original_fields array and removes all fields that are not present in the original document.
+ * This needs to consider nested documents, e.g. if "a.b.c" is in the original_fields array, then "a": { "b": { "c": 1 } } should be kept.
+ */
+function reOriginalizeDocument(doc: Record<PropertyKey, unknown>) {
+  const buildNestedObject = (fields: string[], value: unknown) => {
+    if (fields.length === 0) return value;
+    const [first, ...rest] = fields;
+    return { [first]: buildNestedObject(rest, value) };
+  };
+
+  const mergeObjects = (
+    target: Record<PropertyKey, unknown>,
+    source: Record<PropertyKey, unknown>
+  ) => {
+    for (const key of Object.keys(source)) {
+      if (source[key] instanceof Object && key in target) {
+        Object.assign(
+          source[key],
+          mergeObjects(
+            target[key] as Record<PropertyKey, unknown>,
+            source[key] as Record<PropertyKey, unknown>
+          )
+        );
+      }
+    }
+    return { ...target, ...source };
+  };
+
+  let newDoc: Record<PropertyKey, unknown> = {};
+  const originalFields = new Set<string>();
+  (doc.original_fields as string[]).forEach((field: string) => {
+    originalFields.add(field);
+  });
+
+  originalFields.forEach((field) => {
+    const fieldParts = field.split('.');
+    const nestedObject = buildNestedObject(
+      fieldParts,
+      fieldParts.reduce((acc, part) => acc[part], doc)
+    );
+    newDoc = mergeObjects(newDoc, nestedObject);
+  });
+
+  return newDoc;
+}
+
 const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   const { path, body } = params;
   const { processing, documents, detected_fields } = body;
 
   const processors = formatToIngestProcessors(processing);
   const docs = documents.map((doc, id) => ({
-    _index: path.id,
+    _index: 'logs',
     _id: id.toString(),
-    _source: doc,
+    _source: reOriginalizeDocument(doc),
   }));
 
   const simulationBody: any = {
     docs,
     pipeline_substitutions: {
+      'logs@stream.processing': {
+        processors: [
+          {
+            dot_expander: {
+              field: '*',
+            },
+          },
+          {
+            pipeline: {
+              name: 'logs@stream.reroutes',
+              ignore_missing_pipeline: true,
+            },
+          },
+        ],
+      },
       [`${path.id}@stream.processing`]: {
         processors,
       },

@@ -45,6 +45,7 @@ export const DraggableProcessorListItem = ({
 );
 
 interface ProcessorListItemProps {
+  index: number;
   definition: ReadStreamDefinition;
   processor: EnrichmentUIProcessorDefinition;
   hasShadow: EuiPanelProps['hasShadow'];
@@ -53,6 +54,7 @@ interface ProcessorListItemProps {
 }
 
 const ProcessorListItem = ({
+  index,
   definition,
   processor,
   hasShadow = false,
@@ -95,6 +97,7 @@ const ProcessorListItem = ({
       </EuiFlexGroup>
       {isEditProcessorOpen && (
         <EditProcessorFlyout
+          index={index}
           key={`edit-processor`}
           definition={definition}
           processor={processor}

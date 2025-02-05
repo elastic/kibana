@@ -104,7 +104,8 @@ export const ProcessorOutcomePreview = ({
       case 'outcome_filter_matched':
       case 'outcome_filter_all':
       default:
-        return [formFields.field, ...detectedFieldsColumns];
+        const allFields = new Set([formFields.field, ...detectedFieldsColumns]);
+        return Array.from(allFields);
     }
   }, [formFields.field, detectedFieldsColumns, selectedDocsFilter]);
 

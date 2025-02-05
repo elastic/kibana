@@ -118,6 +118,7 @@ export function StreamDetailEnrichmentContent({
               <DraggableProcessorListItem
                 key={processor.id}
                 idx={idx}
+                index={idx}
                 definition={definition}
                 processor={processor}
                 onUpdateProcessor={updateProcessor}
