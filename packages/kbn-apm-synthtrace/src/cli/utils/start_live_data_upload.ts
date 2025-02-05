@@ -38,7 +38,11 @@ export async function startLiveDataUpload({
   } = await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
-  const { generate, bootstrap: scenarioBootsrap } = await scenario({ ...runOptions, logger });
+  const {
+    generate,
+    bootstrap: scenarioBootsrap,
+    teardown: scenarioTearDown,
+  } = await scenario({ ...runOptions, logger });
 
   if (scenarioBootsrap) {
     await scenarioBootsrap({
@@ -63,7 +67,19 @@ export async function startLiveDataUpload({
   process.on('SIGTERM', () => closeStreams());
   process.on('SIGQUIT', () => closeStreams());
 
-  function closeStreams() {
+  async function closeStreams() {
+    if (scenarioTearDown) {
+      await scenarioTearDown({
+        apmEsClient,
+        logsEsClient,
+        infraEsClient,
+        otelEsClient,
+        syntheticsEsClient,
+        entitiesEsClient,
+        entitiesKibanaClient,
+      });
+    }
+
     currentStreams.forEach((stream) => {
       stream.end(() => {
         process.exit(0);
