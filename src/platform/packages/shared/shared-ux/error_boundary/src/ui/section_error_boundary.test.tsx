@@ -128,9 +128,14 @@ describe('<KibanaSectionErrorBoundary>', () => {
     (await findByTestId('clickForErrorBtn')).click();
 
     expect(apm.captureError).toHaveBeenCalledTimes(1);
-    expect(apm.captureError).toHaveBeenCalledWith({
-      ...new Error('This is an error to show the test user!'),
-      context: 'fatal-error-react',
-    });
+    expect(apm.captureError).toHaveBeenCalledWith(
+      new Error('This is an error to show the test user!')
+    );
+    expect(Object.keys((apm.captureError as jest.Mock).mock.calls[0][0])).toEqual([
+      'react_error_type',
+    ]);
+    expect((apm.captureError as jest.Mock).mock.calls[0][0].react_error_type).toEqual(
+      'fatal-error-react'
+    );
   });
 });
