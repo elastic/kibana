@@ -300,6 +300,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       expect(screen.getByText('A')).toBeInTheDocument();
       expect(screen.getByText('B')).toBeInTheDocument();
       expect(screen.getByText('a')).toBeInTheDocument();
+      expect(screen.getByText('b')).toBeInTheDocument();
     });
 
     // Order ascending
