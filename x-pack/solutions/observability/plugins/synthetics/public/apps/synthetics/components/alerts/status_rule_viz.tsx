@@ -74,7 +74,8 @@ export const StatusRuleViz = ({
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               >
                 {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
-                  defaultMessage: '{total} existing monitors',
+                  defaultMessage:
+                    '{total} existing {total, plural, one {monitor} other {monitors}}',
                   values: { total: data?.enabledMonitorQueryIds.length },
                 })}
               </EuiButtonEmpty>
@@ -86,12 +87,12 @@ export const StatusRuleViz = ({
               })}
             </EuiPopoverTitle>
             {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFollowingPopoverLabel', {
-              defaultMessage: 'Rule applies to following existing monitors:',
+              defaultMessage: 'Rule applies to following existing monitors, showing first 100:',
             })}
             <EuiSpacer size="s" />
             <EuiListGroup
               css={{ maxHeight: '300px', overflowY: 'auto' }}
-              listItems={data?.monitors.map((mon) => ({
+              listItems={data?.monitors.slice(0, 100).map((mon) => ({
                 label: mon.name,
                 href: http.basePath.prepend(`/app/synthetics/monitors/${mon.id}`),
                 target: '_blank',
