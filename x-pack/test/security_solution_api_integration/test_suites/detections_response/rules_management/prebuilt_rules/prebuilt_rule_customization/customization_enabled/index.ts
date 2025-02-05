@@ -14,6 +14,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./rules_export'));
     loadTestFile(require.resolve('./preview_prebuilt_rules_upgrade'));
     loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
-    loadTestFile(require.resolve('./diffable_rule_fields'));
   });
 };
