@@ -31,7 +31,6 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
@@ -313,7 +312,9 @@ function PrimaryMetricEditor(props: SubProps) {
           />
         </EuiFormRow>
       )}
-      {!hasDynamicColoring && <StaticColorControls {...props} />}
+      {!hasDynamicColoring && (
+        <StaticColorControls state={state} setState={setState} isMetricNumeric={isMetricNumeric} />
+      )}
       {hasDynamicColoring && (
         <EuiFormRow
           display="columnCompressed"
@@ -367,15 +368,11 @@ function PrimaryMetricEditor(props: SubProps) {
 function StaticColorControls({
   state,
   setState,
-  frame,
-}: Pick<Props, 'state' | 'setState' | 'frame'>) {
+  isMetricNumeric,
+}: Pick<Props, 'state' | 'setState'> & { isMetricNumeric: boolean }) {
   const colorLabel = i18n.translate('xpack.lens.metric.color', {
     defaultMessage: 'Color',
   });
-  const currentData = frame.activeData?.[state.layerId];
-  const isMetricNumeric = Boolean(
-    state.metricAccessor && isNumericFieldForDatatable(currentData, state.metricAccessor)
-  );
 
   const setColor = useCallback(
     (color: string) => {
@@ -420,8 +417,8 @@ export function DimensionEditorAdditionalSection({
 }: VisualizationDimensionEditorProps<MetricVisualizationState>) {
   const { euiTheme } = useEuiTheme();
 
-  const currentData = frame.activeData?.[state.layerId];
-  if (accessor !== state.metricAccessor || !isNumericFieldForDatatable(currentData, accessor)) {
+  const isMetricNumeric = isMetricNumericType(datasource, accessor);
+  if (accessor !== state.metricAccessor || !isMetricNumeric) {
     return null;
   }
 
