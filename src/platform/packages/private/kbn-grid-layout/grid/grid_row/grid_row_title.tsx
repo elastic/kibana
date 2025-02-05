@@ -34,6 +34,9 @@ export const GridRowTitle = React.memo(
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
 
     useEffect(() => {
+      /**
+       * This subscription ensures that the row will re-render when the section title changes
+       */
       const titleSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
           map((gridLayout) => gridLayout[rowIndex]?.title ?? ''),
@@ -57,10 +60,6 @@ export const GridRowTitle = React.memo(
       },
       [rowIndex, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
     );
-
-    useEffect(() => {
-      if (!editTitleOpen) return;
-    }, [editTitleOpen]);
 
     return (
       <>

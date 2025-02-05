@@ -20,6 +20,7 @@ import {
 
 import { GridLayoutStateManager } from '../types';
 import { deleteRow, movePanelsToRow } from '../utils/row_management';
+import { i18n } from '@kbn/i18n';
 
 export const DeleteGridRowModal = ({
   rowIndex,
@@ -40,9 +41,14 @@ export const DeleteGridRowModal = ({
         <EuiModalHeaderTitle>Delete section</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {`Are you sure you want to remove this section and its ${
-          Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels).length
-        } panels?`}
+        {i18n.translate('kbnGridLayout.deleteGridRowModal.body', {
+          defaultMessage:
+            'Are you sure you want to remove this section and its {panelCount} {panelCount, plural, one {panel} other {panels}}?',
+          values: {
+            panelCount: Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
+              .length,
+          },
+        })}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
@@ -50,7 +56,9 @@ export const DeleteGridRowModal = ({
             setDeleteModalVisible(false);
           }}
         >
-          Cancel
+          {i18n.translate('kbnGridLayout.deleteGridRowModal.cancelButton', {
+            defaultMessage: 'Cancel',
+          })}
         </EuiButtonEmpty>
         <EuiButton
           onClick={() => {
@@ -61,7 +69,9 @@ export const DeleteGridRowModal = ({
           fill
           color="danger"
         >
-          Yes
+          {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteAllPanels', {
+            defaultMessage: 'Yes',
+          })}
         </EuiButton>
         <EuiButton
           onClick={() => {
@@ -76,7 +86,9 @@ export const DeleteGridRowModal = ({
           }}
           fill
         >
-          Delete section only
+          {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteSection', {
+            defaultMessage: 'Delete section only',
+          })}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

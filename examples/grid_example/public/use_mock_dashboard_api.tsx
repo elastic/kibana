@@ -110,7 +110,6 @@ export const useMockDashboardApi = ({
             },
           },
         });
-        return undefined;
       },
       canRemovePanels: () => true,
     };

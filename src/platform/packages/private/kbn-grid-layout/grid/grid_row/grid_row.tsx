@@ -74,6 +74,7 @@ export const GridRow = ({
 
       /**
        * This subscription ensures that the row will re-render when one of the following changes:
+       * - Collapsed state
        * - Panel IDs (adding/removing/replacing, but not reordering)
        */
       const rowStateSubscription = combineLatest([

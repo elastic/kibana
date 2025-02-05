@@ -38,6 +38,10 @@ export const GridRowHeader = React.memo(
     );
 
     useEffect(() => {
+      /**
+       * This subscription is responsible for controlling whether or not the section title is
+       * editable and hiding all other "edit mode" actions (delete section, move section, etc)
+       */
       const accessModeSubscription = gridLayoutStateManager.accessMode$
         .pipe(distinctUntilChanged())
         .subscribe((accessMode) => {
@@ -86,7 +90,7 @@ export const GridRowHeader = React.memo(
                 <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
                   <EuiText color="subdued" size="s">{`(${
                     /**
-                     * we can get away with grabbing the panel count without React state because this count
+                     * We can get away with grabbing the panel count without React state because this count
                      * is only rendered when the section is collapsed, and the count can only be updated when
                      * the section isn't collapsed
                      */
@@ -118,11 +122,17 @@ export const GridRowHeader = React.memo(
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} css={[styles.hiddenOnCollapsed, styles.floatToRight]}>
-                      <EuiButtonIcon
+                      {/*
+                        This was added as a placeholder to get the desired UI here; however, since the
+                        functionality will be implemented in https://github.com/elastic/kibana/issues/190381
+                        and this button doesn't do anything yet, I'm choosing to hide it for now. I am keeping
+                        the `FlexItem` wrapper so that the UI still looks correct.
+                      */}
+                      {/* <EuiButtonIcon
                         iconType="move"
                         color="text"
                         className="kbnGridLayout--moveRowIcon"
-                      />
+                      /> */}
                     </EuiFlexItem>
                   </>
                 )}
