@@ -16,7 +16,6 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
-import { requiredPrivileges } from '@kbn/files-plugin/common/default_image_file_kind';
 import type { MetricsDataPluginStartDeps } from '../../../types';
 import type {
   CallWithRequestParams,
