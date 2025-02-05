@@ -403,26 +403,26 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       <EuiSpacer />
     </EuiFlexItem>
   );
+
+  const showAboutMappingsStyles = css`
+    ${useEuiBreakpoint(['xl'])} {
+      max-width: 480px;
+    }
+  `;
+
+  const mappingsWrapperStyles = css`
+    height: 100%;
+    ${useEuiBreakpoint(['xl'])} {
+      flex-wrap: nowrap;
+    }
+  `;
+  
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
-      <EuiFlexGroup
-        wrap
-        direction="rowReverse"
-        css={css`
-          height: 100%;
-        `}
-      >
+      <EuiFlexGroup wrap direction="rowReverse" css={mappingsWrapperStyles}>
         {showAboutMappings && (
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              min-width: 400px;
-              ${useEuiBreakpoint(['xl'])} {
-                max-width: 480px;
-              }
-            `}
-          >
+          <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
             <EuiPanel grow={false} paddingSize="l" color="subdued">
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
