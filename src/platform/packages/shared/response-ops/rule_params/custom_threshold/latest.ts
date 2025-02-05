@@ -7,16 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
-import { Logo, type Props } from './logo';
-
-export const Loader = (props: Props) => (
-  <div className="kbnWelcomeView" id="kbn_loading_message" data-test-subj="kbnLoadingMessage">
-    <div className="kbnLoaderWrap">
-      <Logo {...props} />
-      <div className="kbnWelcomeText">Loading Project</div>
-      <div className="kbnProgress" />
-    </div>
-  </div>
-);
+export * from './v1';

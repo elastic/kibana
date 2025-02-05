@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/serverless/project_switcher'],
-};
+export { customThresholdParamsSchema } from './latest';
+export { customThresholdParamsSchema as customThresholdParamsSchemaV1 } from './v1';
