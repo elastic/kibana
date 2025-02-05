@@ -59,6 +59,11 @@ export const GrokPatternsEditor = ({
     name: 'patterns',
   });
 
+  const { dependencies } = useKibana();
+  const { observabilityAIAssistant } = dependencies.start;
+
+  const aiAssistantEnabled = observabilityAIAssistant?.service.isEnabled();
+
   const fieldsWithError = fields.map((field, id) => {
     return {
       ...field,
@@ -119,7 +124,7 @@ export const GrokPatternsEditor = ({
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      {refreshSimulation && definition && samples ? (
+      {aiAssistantEnabled && refreshSimulation && definition && samples ? (
         <GrokAiSuggestions
           definition={definition}
           refreshSimulation={refreshSimulation}

@@ -380,6 +380,10 @@ export const processingSuggestionRoute = createServerRoute({
         1. Identify and name the distinct log sources based on logs format.
         2. Write a parsing rule for Elastic ingest pipeline to extract structured fields from the raw message.
         Make sure that the parsing rule is unique per log source.
+
+        When possible, use the ECS (Elastic Common Schema) field names for the structured fields.
+
+        Don't make the patterns too specific to the provided examples.
         
         Hints to separate the log sources:
         - different log sources have different formats.
