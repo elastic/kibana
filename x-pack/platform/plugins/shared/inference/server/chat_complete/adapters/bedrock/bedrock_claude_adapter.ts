@@ -15,6 +15,7 @@ import {
 } from '@kbn/inference-common';
 import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
+import { convertUpstreamError } from '../../utils';
 import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
 import {
   BedrockChunkMember,
@@ -57,8 +58,8 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }

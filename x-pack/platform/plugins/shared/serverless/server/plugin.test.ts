@@ -6,7 +6,6 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { config } from './config';
 import { ServerlessPlugin } from './plugin';
 
 describe('Serverless Plugin', () => {
@@ -14,13 +13,7 @@ describe('Serverless Plugin', () => {
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
   beforeEach(() => {
-    plugin = new ServerlessPlugin(
-      coreMock.createPluginInitializerContext(
-        config.schema.validate({
-          enabled: true,
-        })
-      )
-    );
+    plugin = new ServerlessPlugin();
 
     mockCoreSetup = coreMock.createSetup({
       pluginStartContract: {},
