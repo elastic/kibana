@@ -148,7 +148,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
           throw new Error(`Custom roles are not supported for the current deployment`);
         }
-        const roleDescriptor = { ...supportedRoleDescriptors.get(role), metadata: {} };
+        const roleDescriptor = supportedRoleDescriptors.get(role);
         if (!roleDescriptor) {
           throw new Error(
             role === CUSTOM_ROLE
@@ -159,7 +159,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         log.debug(
           `Creating API key for ${role} with privileges: ${JSON.stringify(roleDescriptor)}`
         );
-        roleDescriptors = { [role]: roleDescriptor };
+        roleDescriptors = { [role]: { ...roleDescriptor, metadata: undefined } };
       }
 
       const payload = createApiKeyPayload(role, roleDescriptors);
