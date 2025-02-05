@@ -17,15 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Suspense, lazy } from 'react';
 import type { RuleFormProps } from '../src/rule_form';
-import type { RuleTypeMetaData } from '../src/types';
 
 const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<any>>> = lazy(() =>
   import('../src/rule_form').then((module) => ({ default: module.RuleForm }))
 );
 
-export const RuleFormFlyoutLazy = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
-  props: RuleFormProps<MetaData>
-) => {
+export const RuleFormFlyoutLazy = (props: RuleFormProps) => {
   const isEdit = !!props.id;
   return (
     <Suspense

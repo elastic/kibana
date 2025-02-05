@@ -63,11 +63,11 @@ export interface RuleFormPlugins {
   charts: ChartsPluginSetup;
   settings: SettingsStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  dataViews?: DataViewsPublicPluginStart;
 }
 
 export interface RuleFormState<

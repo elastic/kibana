@@ -74,7 +74,6 @@ import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
-import { validateRuleFormPlugins } from './common/validate_rule_form_plugins';
 
 import type {
   ActionTypeModel,

@@ -9,6 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 
 interface Props {
   alertFlyoutVisible: boolean;
@@ -16,9 +21,13 @@ interface Props {
   setAlertFlyoutVisibility: (value: boolean) => void;
 }
 
-interface KibanaDeps {
+type KibanaDeps = {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-}
+  dataViews: DataViewsPublicPluginStart;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+} & CoreStart;
 
 export const UptimeAlertsFlyoutWrapperComponent = ({
   alertFlyoutVisible,

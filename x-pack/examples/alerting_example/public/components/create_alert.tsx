@@ -6,7 +6,11 @@
  */
 
 import React, { useState, useCallback } from 'react';
-
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
@@ -14,12 +18,19 @@ import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
+type KibanaDeps = {
+  dataViews: DataViewsPublicPluginStart;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+} & CoreStart;
+
 export const CreateAlert = ({
   triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
 }: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>) => {
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
 
-  const { services } = useKibana();
+  const { services } = useKibana<KibanaDeps>();
 
   const onCloseAlertFlyout = useCallback(
     () => setRuleFlyoutVisibility(false),

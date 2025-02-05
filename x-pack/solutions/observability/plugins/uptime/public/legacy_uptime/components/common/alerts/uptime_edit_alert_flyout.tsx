@@ -13,6 +13,10 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 
 interface Props {
@@ -21,16 +25,20 @@ interface Props {
   setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-interface KibanaDeps {
+type KibanaDeps = {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-}
+  dataViews: DataViewsPublicPluginStart;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+} & CoreStart;
 
 export const UptimeEditAlertFlyoutComponent = ({
   alertFlyoutVisible,
   initialAlert,
   setAlertFlyoutVisibility,
 }: Props) => {
-  const { triggersActionsUi, ...plugins } = useKibana<CoreStart & KibanaDeps>().services;
+  const { triggersActionsUi, ...plugins } = useKibana<KibanaDeps>().services;
 
   const onClose = useCallback(() => {
     setAlertFlyoutVisibility(false);

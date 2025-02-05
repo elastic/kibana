@@ -8,8 +8,8 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';

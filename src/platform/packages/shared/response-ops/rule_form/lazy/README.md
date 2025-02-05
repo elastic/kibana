@@ -1,0 +1,1 @@
+This export path is only for components that lazy load other components located in the /src folder. Use it if importing `@kbn/response-ops-rule-form` directly increases your plugin's bundle size too much.

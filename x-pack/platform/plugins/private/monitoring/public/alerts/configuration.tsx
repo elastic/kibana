@@ -8,18 +8,32 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { Fragment, useCallback, useMemo } from 'react';
-import { CommonAlert } from '../../common/types/alerts';
-import { Legacy } from '../legacy_shims';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
+import { Legacy } from '../legacy_shims';
+import { CommonAlert } from '../../common/types/alerts';
 
 interface Props {
   alert: CommonAlert;
   compressed?: boolean;
 }
+
+type KibanaDeps = {
+  dataViews: DataViewsPublicPluginStart;
+  charts?: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+} & CoreStart;
+
 export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   const { alert, compressed } = props;
   const [showFlyout, setShowFlyout] = React.useState(false);
@@ -27,7 +41,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   const [isMuted, setIsMuted] = React.useState(alert.muteAll);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  const { services } = useKibana();
+  const { services } = useKibana<KibanaDeps>();
 
   async function disableAlert() {
     setIsSaving(true);
@@ -96,7 +110,8 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   } = Legacy.shims;
   const flyoutUi = useMemo(
     () =>
-      showFlyout && (
+      showFlyout &&
+      isValidRuleFormPlugins(services) && (
         <RuleFormFlyoutLazy
           plugins={{ ruleTypeRegistry, actionTypeRegistry, ...services }}
           id={alert.id}

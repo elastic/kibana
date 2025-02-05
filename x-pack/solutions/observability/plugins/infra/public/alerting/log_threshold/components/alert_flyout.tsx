@@ -6,8 +6,8 @@
  */
 
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 

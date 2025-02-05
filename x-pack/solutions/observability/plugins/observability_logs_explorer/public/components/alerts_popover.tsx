@@ -16,6 +16,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { useActor } from '@xstate/react';
 import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
 import { Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
@@ -42,8 +43,9 @@ function getQuery(query?: Query | AggregateQuery): Query {
 
 export const AlertsPopover = () => {
   const {
-    services: { triggersActionsUi, slo, application, http, ...services },
+    services: { triggersActionsUi, slo, ...services },
   } = useKibanaContextForPlugin();
+  const { application, http } = services;
   const manageRulesLinkProps = useLinkProps({ app: 'observability', pathname: '/alerts/rules' });
 
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
@@ -57,6 +59,7 @@ export const AlertsPopover = () => {
     if (
       isAddRuleFlyoutOpen &&
       triggersActionsUi &&
+      isValidRuleFormPlugins(services) &&
       pageState.matches({ initialized: 'validLogsExplorerState' })
     ) {
       const { logsExplorerState } = pageState.context;
@@ -68,7 +71,7 @@ export const AlertsPopover = () => {
       const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
       return (
         <RuleFormFlyoutLazy
-          plugins={{ application, http, ruleTypeRegistry, actionTypeRegistry, ...services }}
+          plugins={{ ruleTypeRegistry, actionTypeRegistry, ...services }}
           consumer="logs"
           ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
           initialValues={{
@@ -89,15 +92,7 @@ export const AlertsPopover = () => {
         />
       );
     }
-  }, [
-    isAddRuleFlyoutOpen,
-    triggersActionsUi,
-    pageState,
-    application,
-    http,
-    services,
-    closeAddRuleFlyout,
-  ]);
+  }, [isAddRuleFlyoutOpen, triggersActionsUi, pageState, services, closeAddRuleFlyout]);
 
   const createSLOFlyout = useMemo(() => {
     if (isCreateSLOFlyoutOpen && pageState.matches({ initialized: 'validLogsExplorerState' })) {

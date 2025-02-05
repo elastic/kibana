@@ -6,8 +6,8 @@
  */
 
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import type { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
