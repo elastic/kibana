@@ -11,14 +11,15 @@ import { Condition, conditionSchema } from '../conditions';
 import { createIsNarrowSchema } from '../../../helpers';
 
 export interface ProcessorBase {
+  description?: string;
   if: Condition;
+  ignore_failure?: boolean;
 }
 
 export interface GrokProcessorConfig extends ProcessorBase {
   field: string;
   patterns: string[];
   pattern_definitions?: Record<string, string>;
-  ignore_failure?: boolean;
   ignore_missing?: boolean;
 }
 
@@ -27,7 +28,9 @@ export interface GrokProcessorDefinition {
 }
 
 const processorBaseSchema = z.object({
+  description: z.optional(z.string()),
   if: conditionSchema,
+  ignore_failure: z.optional(z.boolean()),
 });
 
 export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = z.strictObject({
@@ -35,9 +38,8 @@ export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = 
     processorBaseSchema,
     z.object({
       field: NonEmptyString,
-      patterns: z.array(NonEmptyString),
+      patterns: z.array(NonEmptyString).nonempty(),
       pattern_definitions: z.optional(z.record(z.string())),
-      ignore_failure: z.optional(z.boolean()),
       ignore_missing: z.optional(z.boolean()),
     })
   ),
@@ -47,7 +49,6 @@ export interface DissectProcessorConfig extends ProcessorBase {
   field: string;
   pattern: string;
   append_separator?: string;
-  ignore_failure?: boolean;
   ignore_missing?: boolean;
 }
 
@@ -63,7 +64,6 @@ export const dissectProcessorDefinitionSchema: z.Schema<DissectProcessorDefiniti
         field: NonEmptyString,
         pattern: NonEmptyString,
         append_separator: z.optional(NonEmptyString),
-        ignore_failure: z.optional(z.boolean()),
         ignore_missing: z.optional(z.boolean()),
       })
     ),
@@ -78,7 +78,7 @@ export type ProcessorConfig = BodyOf<ProcessorDefinition>;
 
 export type ProcessorType = UnionKeysOf<ProcessorDefinition>;
 
-type ProcessorTypeOf<TProcessorDefinition extends ProcessorDefinition> =
+export type ProcessorTypeOf<TProcessorDefinition extends ProcessorDefinition> =
   UnionKeysOf<TProcessorDefinition> & ProcessorType;
 
 export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union([
@@ -96,15 +96,20 @@ export const isDissectProcessorDefinition = createIsNarrowSchema(
   dissectProcessorDefinitionSchema
 );
 
+const processorTypes: ProcessorType[] = (processorDefinitionSchema as z.ZodUnion<any>).options.map(
+  (option: z.ZodUnion<any>['options'][number]) => Object.keys(option.shape)[0]
+);
+
 export function getProcessorType<TProcessorDefinition extends ProcessorDefinition>(
   processor: TProcessorDefinition
 ): ProcessorTypeOf<TProcessorDefinition> {
-  return Object.keys(processor)[0] as ProcessorTypeOf<TProcessorDefinition>;
+  return processorTypes.find((type) => type in processor) as ProcessorTypeOf<TProcessorDefinition>;
 }
 
-export function getProcessorConfig(processor: ProcessorDefinition): ProcessorConfig {
-  if ('grok' in processor) {
-    return processor.grok;
-  }
-  return processor.dissect;
+export function getProcessorConfig<TProcessorDefinition extends ProcessorDefinition>(
+  processor: TProcessorDefinition
+): ProcessorConfig {
+  const type = getProcessorType(processor);
+
+  return processor[type as keyof TProcessorDefinition];
 }

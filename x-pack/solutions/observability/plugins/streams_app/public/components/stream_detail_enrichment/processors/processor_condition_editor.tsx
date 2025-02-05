@@ -11,7 +11,7 @@ import { ConditionEditor } from '../../condition_editor';
 import { ProcessorFormState } from '../types';
 
 export const ProcessorConditionEditor = () => {
-  const { field } = useController<ProcessorFormState, 'condition'>({ name: 'condition' });
+  const { field } = useController<ProcessorFormState, 'if'>({ name: 'if' });
 
   return <ConditionEditor condition={field.value} onConditionChange={field.onChange} />;
 };
