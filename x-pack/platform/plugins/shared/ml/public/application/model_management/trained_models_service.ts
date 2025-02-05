@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subscription, of, from, merge, delay, forkJoin, mergeMap, takeWhile } from 'rxjs';
+import { Subscription, of, from, forkJoin, mergeMap, takeWhile } from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
