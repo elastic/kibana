@@ -81,7 +81,7 @@ export const useSearchApiKey = (): UseSearchApiKeyParams => {
     ) {
       (async () => {
         try {
-          const prevState: ApiKeyState = apiKeyState.status;
+          const prevState = apiKeyState.status;
           updateApiKeyState({ status: Status.loading });
           const storedKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
 
