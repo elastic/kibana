@@ -17,11 +17,13 @@ export const getHighlightColors = (euiTheme: EuiThemeComputed<{}>) => {
   const isAmsterdamTheme = euiTheme.themeName.toLowerCase().includes('amsterdam');
 
   return {
-    highlightColor: isAmsterdamTheme ? euiTheme.colors.ink : euiTheme.colors.textAccent,
+    highlightColor: isAmsterdamTheme ? euiTheme.colors.plainDark : euiTheme.colors.textAccent,
     highlightBackgroundColor: isAmsterdamTheme
       ? AMSTERDAM_HIGHLIGHT_COLOR
       : euiTheme.colors.backgroundLightAccent,
-    activeHighlightColor: isAmsterdamTheme ? euiTheme.colors.ink : euiTheme.colors.textInverse,
+    activeHighlightColor: isAmsterdamTheme
+      ? euiTheme.colors.plainDark
+      : euiTheme.colors.textInverse,
     activeHighlightBackgroundColor: isAmsterdamTheme
       ? AMSTERDAM_ACTIVE_HIGHLIGHT_COLOR
       : euiTheme.colors.backgroundFilledAccent,
