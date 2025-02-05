@@ -17,11 +17,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'sum',
-      operationWithField: 'sum("system.cpu.user.pct")',
-      sourceField: '"system.cpu.user.pct"',
-    },
+    'sum("system.cpu.user.pct")',
   ],
   [
     {
@@ -30,11 +26,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'max',
-      operationWithField: 'max("system.cpu.user.pct")',
-      sourceField: '"system.cpu.user.pct"',
-    },
+    'max("system.cpu.user.pct")',
   ],
   [
     {
@@ -43,11 +35,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'min',
-      operationWithField: 'min("system.cpu.user.pct")',
-      sourceField: '"system.cpu.user.pct"',
-    },
+    'min("system.cpu.user.pct")',
   ],
   [
     {
@@ -56,24 +44,16 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'average',
-      operationWithField: 'average("system.cpu.user.pct")',
-      sourceField: '"system.cpu.user.pct"',
-    },
+    'average("system.cpu.user.pct")',
   ],
   [
     {
       aggType: Aggregators.COUNT,
-      field: '',
-      filter: 'system.cpu.user.pct: *',
+      field: 'system.cpu.user.pct',
+      filter: '',
       name: '',
     },
-    {
-      operation: 'count',
-      operationWithField: `count(kql='system.cpu.user.pct: *')`,
-      sourceField: '""',
-    },
+    'count(___records___)',
   ],
   [
     {
@@ -82,24 +62,8 @@ const useCases = [
       filter: `container.name:container's name-1`,
       name: '',
     },
-    {
-      operation: 'count',
-      operationWithField: `count(kql='container.name:container\\'s name-1')`,
-      sourceField: '""',
-    },
-  ],
-  [
-    {
-      aggType: Aggregators.COUNT,
-      field: '',
-      filter: 'host.name: host-*',
-      name: '',
-    },
-    {
-      operation: 'count',
-      operationWithField: `count(kql='host.name: host-*')`,
-      sourceField: '""',
-    },
+    `count(___records___, kql='container.name:container\\'s name-1')`,
+    ,
   ],
   [
     {
@@ -108,11 +72,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'unique_count',
-      operationWithField: 'unique_count("system.cpu.user.pct")',
-      sourceField: '"system.cpu.user.pct"',
-    },
+    'unique_count("system.cpu.user.pct")',
   ],
   [
     {
@@ -121,11 +81,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'unique_count',
-      operationWithField: 'unique_count("field.name/with/slashes")',
-      sourceField: '"field.name/with/slashes"',
-    },
+    'unique_count("field.name/with/slashes")',
   ],
   [
     {
@@ -134,11 +90,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'percentile',
-      operationWithField: 'percentile("system.cpu.user.pct", percentile=95)',
-      sourceField: '"system.cpu.user.pct"',
-    },
+    'percentile("system.cpu.user.pct", percentile=95)',
   ],
   [
     {
@@ -147,11 +99,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'percentile',
-      operationWithField: 'percentile("system.cpu.user.pct", percentile=99)',
-      sourceField: '"system.cpu.user.pct"',
-    },
+    'percentile("system.cpu.user.pct", percentile=99)',
   ],
   [
     {
@@ -160,11 +108,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    {
-      operation: 'counter_rate',
-      operationWithField: `counter_rate(max("system.network.in.bytes"), kql='')`,
-      sourceField: '"system.network.in.bytes"',
-    },
+    `counter_rate(max("system.network.in.bytes"), kql='')`,
   ],
   [
     {
@@ -173,11 +117,7 @@ const useCases = [
       filter: 'host.name : "foo"',
       name: '',
     },
-    {
-      operation: 'counter_rate',
-      operationWithField: `counter_rate(max("system.network.in.bytes"), kql='host.name : "foo"')`,
-      sourceField: '"system.network.in.bytes"',
-    },
+    `counter_rate(max("system.network.in.bytes"), kql='host.name : "foo"')`,
   ],
 ];
 

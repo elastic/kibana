@@ -8,24 +8,14 @@
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { GenericMetric } from './rule_condition_chart';
 
-export interface LensOperation {
-  operation: string;
-  operationWithField: string;
-  sourceField: string;
-}
-
-export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOperation => {
+export const getLensOperationFromRuleMetric = (metric: GenericMetric): string => {
   const { aggType, field, filter = '' } = metric;
   let operation: string = aggType;
   const operationArgs: string[] = [];
   const escapedFilter = filter.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   if (aggType === Aggregators.RATE) {
-    return {
-      operation: 'counter_rate',
-      operationWithField: `counter_rate(max("${field}"), kql='${escapedFilter}')`,
-      sourceField: `"${field}"` || '',
-    };
+    return `counter_rate(max("${field}"), kql='${escapedFilter}')`;
   }
 
   if (aggType === Aggregators.AVERAGE) operation = 'average';
@@ -33,8 +23,10 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   if (aggType === Aggregators.P95 || aggType === Aggregators.P99) operation = 'percentile';
   if (aggType === Aggregators.COUNT) operation = 'count';
 
-  if (field) {
-    operationArgs.push(`"${field}"`);
+  if (aggType === Aggregators.COUNT) {
+    operationArgs.push('___records___');
+  } else {
+    operationArgs.push(`"${field}"` || '');
   }
 
   if (aggType === Aggregators.P95) {
@@ -46,11 +38,8 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   }
 
   if (escapedFilter) operationArgs.push(`kql='${escapedFilter}'`);
-  return {
-    operation,
-    operationWithField: `${operation}(${operationArgs.join(', ')})`,
-    sourceField: `"${field}"` || '',
-  };
+
+  return operation + '(' + operationArgs.join(', ') + ')';
 };
 
 export const getBufferThreshold = (threshold?: number): string =>
