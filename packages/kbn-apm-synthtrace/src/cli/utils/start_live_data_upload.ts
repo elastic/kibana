@@ -72,7 +72,6 @@ export async function startLiveDataUpload({
           apmEsClient,
           logsEsClient,
           infraEsClient,
-          otelEsClient,
           syntheticsEsClient,
           entitiesEsClient,
           entitiesKibanaClient,
