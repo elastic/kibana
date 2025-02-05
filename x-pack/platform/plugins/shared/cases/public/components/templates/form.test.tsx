@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, within, act } from '@testing-library/react';
+import { screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
@@ -163,8 +163,6 @@ describe('TemplateForm', () => {
     expect(await within(description).findByTestId('form-optional-field-label')).toBeInTheDocument();
   });
 
-  // TODO: This test needs revisiting, it likely times out because of slow user events after
-  // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
   it('serializes the template field data correctly', async () => {
     let formState: FormState<TemplateFormProps>;
 
@@ -177,7 +175,7 @@ describe('TemplateForm', () => {
       </>
     );
 
-    await waitFor(() => {
+    await waitFor(async () => {
       expect(formState).not.toBeUndefined();
     });
 
@@ -195,10 +193,7 @@ describe('TemplateForm', () => {
     await user.paste('bar');
     await user.keyboard('{enter}');
     const submitSpy = jest.spyOn(formState!, 'submit');
-
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -253,9 +248,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -324,9 +317,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -386,9 +377,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -455,9 +444,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -536,9 +523,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -641,9 +626,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -753,9 +736,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -826,9 +807,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -863,9 +842,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -900,9 +877,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -942,9 +917,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
@@ -982,9 +955,7 @@ describe('TemplateForm', () => {
 
     const submitSpy = jest.spyOn(formState!, 'submit');
 
-    await act(async () => {
-      await user.click(screen.getByText('testSubmit'));
-    });
+    fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
       expect(submitSpy).toHaveReturnedWith(
