@@ -35,7 +35,7 @@ export interface UseProcessingSimulatorProps {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
-export interface UseProcessingSimulatorReturnType {
+export interface UseProcessingSimulatorReturn {
   hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
@@ -52,7 +52,7 @@ export interface UseProcessingSimulatorReturnType {
 export const useProcessingSimulator = ({
   definition,
   processors,
-}: UseProcessingSimulatorProps): UseProcessingSimulatorReturnType => {
+}: UseProcessingSimulatorProps): UseProcessingSimulatorReturn => {
   const { dependencies } = useKibana();
   const {
     data,
@@ -71,7 +71,10 @@ export const useProcessingSimulator = ({
   const [liveDraftProcessors, setLiveDraftProcessors] = useState(draftProcessors);
 
   useEffect(() => {
-    setLiveDraftProcessors(draftProcessors);
+    setLiveDraftProcessors((prevLiveProcessors) => {
+      const inProgressDraft = prevLiveProcessors.find((proc) => proc.id === 'draft');
+      return inProgressDraft ? [...draftProcessors, inProgressDraft] : draftProcessors;
+    });
   }, [draftProcessors]);
 
   const watchProcessor = useMemo(

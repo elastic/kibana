@@ -40,7 +40,7 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { SortableList } from '../../sortable_list';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
-import { UseProcessingSimulatorReturnType } from '../../hooks/use_processing_simulator';
+import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
 
 export const GrokPatternsEditor = ({
   definition,
@@ -48,7 +48,7 @@ export const GrokPatternsEditor = ({
   samples,
 }: {
   definition?: StreamDefinition;
-  refreshSimulation?: UseProcessingSimulatorReturnType['refreshSimulation'];
+  refreshSimulation?: UseProcessingSimulatorReturn['refreshSimulation'];
   samples?: Array<Record<PropertyKey, unknown>>;
 }) => {
   const {
@@ -215,7 +215,7 @@ function GrokAiSuggestions({
   extraButtons,
 }: {
   definition: StreamDefinition;
-  refreshSimulation: UseProcessingSimulatorReturnType['refreshSimulation'];
+  refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
   samples: Array<Record<PropertyKey, unknown>>;
   extraButtons?: React.ReactNode;
 }) {

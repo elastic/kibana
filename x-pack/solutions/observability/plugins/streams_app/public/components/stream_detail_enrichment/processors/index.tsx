@@ -39,12 +39,12 @@ import {
 } from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { UseDefinitionReturn } from '../hooks/use_definition';
-import { UseProcessingSimulatorReturnType } from '../hooks/use_processing_simulator';
+import { UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
-  onWatchProcessor: UseProcessingSimulatorReturnType['watchProcessor'];
-  refreshSimulation: UseProcessingSimulatorReturnType['refreshSimulation'];
+  onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
+  refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
 }
 
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
@@ -91,6 +91,7 @@ export function AddProcessorPanel({
   const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessor(data);
 
+    onWatchProcessor({ id: 'draft', deleteIfExists: true });
     onAddProcessor(processingDefinition, data.detected_fields);
     closePanel();
   };

@@ -32,9 +32,10 @@ export function PreviewTable({
   }, [displayColumns, documents]);
 
   const gridColumns = useMemo(() => {
-    return Array.from(columns).map((column) => ({
+    return columns.map((column) => ({
       id: column,
       displayAsText: column,
+      initialWidth: columns.length > 10 ? 250 : undefined,
     }));
   }, [columns]);
 
