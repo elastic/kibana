@@ -35,6 +35,7 @@ export {
   isESQLColumnGroupable,
   isESQLFieldGroupable,
   TextBasedLanguages,
+  sanitazeESQLInput,
   queryCannotBeSampled,
   mapVariableToColumn,
   getValuesFromQueryField,
