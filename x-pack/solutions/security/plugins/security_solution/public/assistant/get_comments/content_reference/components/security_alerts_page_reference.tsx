@@ -40,7 +40,7 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
       },
         true, "(global:(timerange:(fromStr:now-24h,kind:relative,toStr:now)))");
     },
-    [navigateToApp]
+    [navigateToApp, openAlertsPageWithFilters]
   );
 
   return (

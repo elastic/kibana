@@ -26,7 +26,7 @@ So cherish your dog, with all your might,{reference(ccaSI)}
 Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
 
 
-    expect((file.children[0] as Parent).children.filter(child => (child.type as string) == 'contentReference')).toHaveLength(10);
+    expect((file.children[0] as Parent).children.filter(child => (child.type as string) === 'contentReference')).toHaveLength(10);
   });
 
   it('eats space preceding content reference', async () => {
