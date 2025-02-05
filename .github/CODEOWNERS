@@ -392,7 +392,6 @@ src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
-src/platform/packages/private/serverless/project_switcher @elastic/appex-sharedux
 src/platform/packages/private/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/private/serverless/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
@@ -2213,6 +2212,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
@@ -2702,3 +2702,7 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine

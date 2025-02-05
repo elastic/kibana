@@ -21,7 +21,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import {
   ReadStreamDefinition,
-  isUnwiredReadStream,
+  isUnwiredStreamGetResponse,
   isWiredReadStream,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -131,7 +131,10 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
 
   const docCountFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition || (isUnwiredReadStream(definition) && !definition.data_stream_exists)) {
+      if (
+        !definition ||
+        (isUnwiredStreamGetResponse(definition) && !definition.data_stream_exists)
+      ) {
         return undefined;
       }
       return streamsRepositoryClient.fetch('GET /api/streams/{id}/_details', {
