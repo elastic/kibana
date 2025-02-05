@@ -18,6 +18,8 @@ import {
   MappingRuntimeFields,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
+import { filter, switchMap } from 'rxjs';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../use_kibana';
 import { emptyEqualsToAlways } from '../../util/condition';
 
@@ -51,11 +53,12 @@ export const useAsyncSample = (options: Options) => {
   const [refreshId, setRefreshId] = useState(0);
 
   const convertedCondition = useMemo(() => {
-    return options.condition ? emptyEqualsToAlways(options.condition) : undefined;
+    const condition = options.condition ? emptyEqualsToAlways(options.condition) : undefined;
+    return condition && 'always' in condition ? undefined : condition;
   }, [options.condition]);
 
   useEffect(() => {
-    if (!convertedCondition || !options.start || !options.end) {
+    if (!options.start || !options.end) {
       setDocuments([]);
       setApproximateMatchingPercentage(undefined);
       return;
@@ -70,18 +73,17 @@ export const useAsyncSample = (options: Options) => {
       .search({
         params: {
           index: options.streamDefinition.stream.name,
-          body: getDocumentsSearchBody(convertedCondition, options, runtimeMappings),
+          body: getDocumentsSearchBody(options, runtimeMappings, convertedCondition),
         },
       })
       .subscribe({
         next: (result) => {
-          if (result.rawResponse.hits?.hits) {
-            setDocuments((prev) =>
-              prev.concat(result.rawResponse.hits.hits.map((hit) => hit._source))
-            );
-          }
-          if (!result.isRunning) {
+          if (!isRunningResponse(result)) {
             toggleIsLoadingDocuments(false);
+          }
+
+          if (result.rawResponse.hits?.hits) {
+            setDocuments((prev) => result.rawResponse.hits.hits.map((hit) => hit._source));
           }
         },
         error: (e) => {
@@ -90,24 +92,53 @@ export const useAsyncSample = (options: Options) => {
         },
       });
 
-    // Document counts
     toggleIsLoadingDocumentCounts(true);
     setApproximateMatchingPercentage(undefined);
     const documentCountsSubscription = data.search
       .search({
         params: {
           index: options.streamDefinition.stream.name,
-          body: getDocumentCountsSearchBody(convertedCondition, options, runtimeMappings),
+          body: getDocumentCountForSampleRateSearchBody(options),
         },
       })
+      .pipe(
+        filter((result) => !isRunningResponse(result)),
+        switchMap((response) => {
+          const docCount =
+            response.rawResponse.hits.total &&
+            typeof response.rawResponse.hits.total !== 'number' &&
+            'value' in response.rawResponse.hits.total
+              ? response.rawResponse.hits.total.value
+              : response.rawResponse.hits.total;
+
+          const probability = calculateProbability(docCount);
+
+          return data.search.search({
+            params: {
+              index: options.streamDefinition.stream.name,
+              body: getDocumentCountsSearchBody(
+                options,
+                runtimeMappings,
+                probability,
+                convertedCondition
+              ),
+            },
+          });
+        })
+      )
       .subscribe({
         next: (result) => {
-          if (!result.isRunning) {
+          if (!isRunningResponse(result)) {
             toggleIsLoadingDocumentCounts(false);
           }
           // Aggregations don't return partial results so we just wait until the end
-          if (!result.isRunning && result.rawResponse?.aggregations) {
-            const randomSampleDocCount = result.rawResponse.aggregations.sample.doc_count;
+          if (result.rawResponse?.aggregations) {
+            // We need to divide this by the sampling / probability factor:
+            // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html#random-sampler-special-cases
+            const randomSampleDocCount =
+              result.rawResponse.aggregations.sample.doc_count /
+              result.rawResponse.aggregations.sample.probability;
+
             const matchingDocCount = result.rawResponse.aggregations.sample.matching_docs.doc_count;
 
             const percentage = (100 * matchingDocCount) / randomSampleDocCount;
@@ -153,7 +184,9 @@ export type AsyncSample = ReturnType<typeof useAsyncSample>;
 // Conditions could be using fields which are not indexed or they could use it with other types than they are eventually mapped as.
 // Because of this we can't rely on mapped fields to draw a sample, instead we need to use runtime fields to simulate what happens during
 // ingest in the painless condition checks.
-const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition: Condition) => {
+const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition?: Condition) => {
+  if (!condition) return {};
+
   const wiredMappedFields =
     'wired' in streamDefinition.stream.ingest ? streamDefinition.stream.ingest.wired.fields : {};
   const mappedFields = Object.keys(wiredMappedFields).concat(
@@ -171,9 +204,9 @@ const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition:
 };
 
 const getDocumentsSearchBody = (
-  condition: Condition,
   options: Options,
-  runtimeMappings: MappingRuntimeFields
+  runtimeMappings: MappingRuntimeFields,
+  condition?: Condition
 ) => {
   const { size, start, end } = options;
 
@@ -209,10 +242,30 @@ const getDocumentsSearchBody = (
   return searchBody;
 };
 
+const getDocumentCountForSampleRateSearchBody = (options: Options) => {
+  const { start, end } = options;
+
+  const searchBody = {
+    query: {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis',
+        },
+      },
+    },
+    track_total_hits: true,
+    size: 0,
+  };
+  return searchBody;
+};
+
 const getDocumentCountsSearchBody = (
-  condition: Condition,
   options: Options,
-  runtimeMappings: MappingRuntimeFields
+  runtimeMappings: MappingRuntimeFields,
+  probability: number,
+  condition?: Condition
 ) => {
   const { start, end } = options;
 
@@ -235,7 +288,7 @@ const getDocumentCountsSearchBody = (
     aggs: {
       sample: {
         random_sampler: {
-          probability: 0.1,
+          probability,
         },
         aggs: {
           matching_docs: {
@@ -250,4 +303,16 @@ const getDocumentCountsSearchBody = (
     track_total_hits: false,
   };
   return searchBody;
+};
+
+const calculateProbability = (docCount?: number) => {
+  if (!docCount) return 1;
+  const probabilityThreshold = 100000;
+  if (docCount > probabilityThreshold) {
+    const probability = probabilityThreshold / docCount;
+    // Values between 0.5 and 1 are not supported by the random sampler
+    return probability <= 0.5 ? probability : 1;
+  } else {
+    return 1;
+  }
 };

@@ -14,8 +14,6 @@ import {
 import { css } from '@emotion/css';
 import React from 'react';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
-import React from 'react';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';

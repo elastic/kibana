@@ -101,7 +101,11 @@ export function PreviewPanel({
     );
   }
 
-  if (isLoadingDocuments) {
+  if (
+    routingAppState.debouncedChildUnderEdit &&
+    routingAppState.debouncedChildUnderEdit.isNew &&
+    isLoadingDocuments
+  ) {
     content = (
       <PreviewPanelIllustration>
         <EuiText size="xs" textAlign="center">
@@ -111,7 +115,11 @@ export function PreviewPanel({
     );
   }
 
-  if (documents.length === 0) {
+  if (
+    routingAppState.debouncedChildUnderEdit &&
+    routingAppState.debouncedChildUnderEdit.isNew &&
+    documents.length === 0
+  ) {
     content = (
       <PreviewPanelIllustration>
         <EuiText size="xs" textAlign="center">
@@ -123,7 +131,11 @@ export function PreviewPanel({
     );
   }
 
-  if (documentsError) {
+  if (
+    routingAppState.debouncedChildUnderEdit &&
+    routingAppState.debouncedChildUnderEdit.isNew &&
+    documentsError
+  ) {
     content = (
       <PreviewPanelIllustration>
         <EuiFlexItem grow>
@@ -139,7 +151,11 @@ export function PreviewPanel({
     );
   }
 
-  if (documents.length > 0) {
+  if (
+    routingAppState.debouncedChildUnderEdit &&
+    routingAppState.debouncedChildUnderEdit.isNew &&
+    documents.length > 0
+  ) {
     content = (
       <EuiFlexItem grow>
         <EuiFlexGroup direction="column">
