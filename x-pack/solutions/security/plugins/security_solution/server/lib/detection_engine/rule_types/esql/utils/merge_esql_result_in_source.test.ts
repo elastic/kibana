@@ -39,4 +39,14 @@ describe('mergeEsqlResultInSource', () => {
       'log.syslog.hostname': 'esql host',
     });
   });
+
+  it('ES|QL field should be merged into source without dropping any existing fields', () => {
+    const source = { 'log.syslog': { hostname: 'host-1', other: 'other' } };
+    const esqlResult = { 'log.syslog.hostname': 'esql host' };
+
+    expect(mergeEsqlResultInSource(source, esqlResult)).toEqual({
+      'log.syslog': { other: 'other' },
+      'log.syslog.hostname': 'esql host',
+    });
+  });
 });
