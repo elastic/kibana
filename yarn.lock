@@ -3956,6 +3956,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting_rule_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-state-types@link:x-pack/platform/packages/private/kbn-alerting-state-types":
   version "0.0.0"
   uid ""
@@ -6236,6 +6240,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs_overview":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logs-shared-plugin@link:x-pack/platform/plugins/shared/logs_shared":
   version "0.0.0"
   uid ""
@@ -6544,10 +6552,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alerting-rule-utils@link:x-pack/platform/packages/shared/observability/alerting_rule_utils":
-  version "0.0.0"
-  uid ""
-
 "@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting_test_data":
   version "0.0.0"
   uid ""
@@ -6561,10 +6565,6 @@
   uid ""
 
 "@kbn/observability-logs-explorer-plugin@link:x-pack/solutions/observability/plugins/observability_logs_explorer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/observability-logs-overview@link:x-pack/platform/packages/shared/observability/logs_overview":
   version "0.0.0"
   uid ""
 
@@ -7752,7 +7752,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timelines-plugin@link:x-pack/solutions/security/plugins/timelines":
+"@kbn/timelines-plugin@link:x-pack/platform/plugins/shared/timelines":
   version "0.0.0"
   uid ""
 

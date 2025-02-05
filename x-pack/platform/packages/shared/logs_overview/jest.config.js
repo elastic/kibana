@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './row_to_document';
-export * from './generate_alert_id';
-export * from './merge_esql_result_in_source';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/logs_overview'],
+};

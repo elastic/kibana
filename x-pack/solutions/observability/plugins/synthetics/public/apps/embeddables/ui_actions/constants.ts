@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/observability/alerting_rule_utils'],
-};
+export const ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID =
+  'CREATE_SYNTHETICS_MONITORS_OVERVIEW_EMBEDDABLE';
+export const ADD_SYNTHETICS_OVERVIEW_ACTION_ID = 'CREATE_SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE';
