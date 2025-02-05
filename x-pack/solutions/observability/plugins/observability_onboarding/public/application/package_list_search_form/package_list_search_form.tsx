@@ -9,120 +9,80 @@ import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
-import React, { useRef, Suspense, useEffect } from 'react';
+import React, { useRef, useMemo } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
-import { PackageList, fetchAvailablePackagesHook } from './lazy';
-import { useIntegrationCardList } from './use_integration_card_list';
-import { CustomCard } from './types';
+import { useCardUrlRewrite } from './use_card_url_rewrite';
+import { PackageList } from '../package_list/package_list';
 
 interface Props {
+  searchQuery: string;
+  setSearchQuery: (searchQuery: string) => void;
   /**
-   * A subset of either existing card names to feature, or virtual
-   * cards to display. The inclusion of CustomCards will override the default
-   * list functionality.
+   * A list of custom items to include into the package list
    */
-  customCards?: CustomCard[];
-  /**
-   * Override the default `observability` option.
-   */
+  customCards?: IntegrationCardItem[];
   selectedCategory?: string[];
-  showSearchBar?: boolean;
   packageListRef?: React.Ref<HTMLDivElement>;
-  searchQuery?: string;
-  setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
   flowCategory?: string | null;
-  flowSearch?: string;
-  /**
-   * When enabled, custom and integration cards are joined into a single list.
-   */
-  joinCardLists?: boolean;
   excludePackageIdList?: string[];
-  onLoaded?: () => void;
 }
 
 type WrapperProps = Props & {
   useAvailablePackages: AvailablePackagesHookType;
 };
 
-const Loading = () => <EuiSkeletonText isLoading={true} lines={10} />;
+const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType> =>
+  import('@kbn/fleet-plugin/public')
+    .then((module) => module.AvailablePackagesHook())
+    .then((hook) => hook.useAvailablePackages);
+
+const Loading = () => <EuiSkeletonText isLoading={true} lines={5} />;
 
 const PackageListGridWrapper = ({
-  selectedCategory = ['observability', 'os_system'],
   useAvailablePackages,
-  showSearchBar = false,
   packageListRef,
   searchQuery,
   setSearchQuery,
   customCards,
   flowCategory,
-  flowSearch,
-  joinCardLists = false,
   excludePackageIdList = [],
-  onLoaded,
 }: WrapperProps) => {
-  const { filteredCards, isLoading } = useAvailablePackages({
+  const { filteredCards: integrationCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
   });
+  const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 
-  const list: IntegrationCardItem[] = useIntegrationCardList(
-    filteredCards,
-    selectedCategory,
-    excludePackageIdList,
-    customCards,
-    flowCategory,
-    flowSearch,
-    joinCardLists
-  );
-
-  useEffect(() => {
-    if (!isLoading && onLoaded !== undefined) {
-      onLoaded();
-    }
-  }, [isLoading, onLoaded]);
+  const list: IntegrationCardItem[] = useMemo(() => {
+    return (customCards ?? [])
+      .concat(integrationCards)
+      .filter((card) =>
+        card.categories.some((category) => ['observability', 'os_system'].includes(category))
+      )
+      .filter((card) => !excludePackageIdList.includes(card.id))
+      .map(rewriteUrl);
+  }, [customCards, excludePackageIdList, integrationCards, rewriteUrl]);
 
   if (isLoading) return <Loading />;
 
-  const showPackageList = (showSearchBar && !!searchQuery) || showSearchBar === false;
-
   return (
-    <Suspense fallback={<Loading />}>
-      <div ref={packageListRef}>
-        {showSearchBar && (
-          <EuiSearchBar
-            box={{
-              incremental: true,
-            }}
-            onChange={({ queryText, error }) => {
-              if (error) return;
+    <div ref={packageListRef}>
+      <EuiSearchBar
+        box={{
+          incremental: true,
+        }}
+        onChange={({ queryText, error }) => {
+          if (error) return;
 
-              setSearchQuery?.(queryText);
-            }}
-            query={searchQuery ?? ''}
-          />
-        )}
-        {showPackageList && (
-          <PackageList
-            list={list}
-            searchTerm={searchQuery ?? ''}
-            showControls={false}
-            showSearchTools={false}
-            // we either don't need these properties (yet) or handle them upstream, but
-            // they are marked as required in the original API.
-            selectedCategory=""
-            setSearchTerm={() => {}}
-            setCategory={() => {}}
-            categories={[]}
-            setUrlandReplaceHistory={() => {}}
-            setUrlandPushHistory={() => {}}
-            showCardLabels={true}
-          />
-        )}
-      </div>
-    </Suspense>
+          setSearchQuery(queryText);
+        }}
+        query={searchQuery}
+      />
+      {searchQuery !== '' && <PackageList list={list} searchTerm={searchQuery} />}
+    </div>
   );
 };
 
-const WithAvailablePackages = React.forwardRef(
+export const PackageListSearchForm = React.forwardRef(
   (props: Props, packageListRef?: React.Ref<HTMLDivElement>) => {
     const ref = useRef<AvailablePackagesHookType | null>(null);
 
@@ -176,5 +136,3 @@ const WithAvailablePackages = React.forwardRef(
     );
   }
 );
-
-export { WithAvailablePackages as OnboardingFlowPackageList };
