@@ -66,7 +66,7 @@ describe('extendSearchParamsWithRuntimeFields', () => {
       .toMatchInlineSnapshot(`
       Object {
         "runtime_mappings": Object {
-          "foo": Object {},
+          "test": Object {},
         },
       }
     `);
