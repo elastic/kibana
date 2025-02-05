@@ -3426,6 +3426,20 @@
             "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.InMemoryConnector.exposeConfig",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exposeConfig",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -254,6 +254,7 @@ export interface DocLinks {
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
     readonly dashboardImportExport: string;
+    readonly upgradeNotes: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;
@@ -277,6 +278,9 @@ export interface DocLinks {
   };
   readonly server: {
     readonly protocol: string;
+  };
+  readonly logging: {
+    readonly enableDeprecationHttpDebugLogs: string;
   };
   readonly securitySolution: {
     readonly aiAssistant: string;
@@ -315,6 +319,7 @@ export interface DocLinks {
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
+    readonly legacyBulkApiDeprecations: string;
   };
   readonly query: {
     readonly eql: string;
@@ -389,6 +394,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    slo: string;
     sloBurnRateRule: string;
     aiAssistant: string;
   }>;

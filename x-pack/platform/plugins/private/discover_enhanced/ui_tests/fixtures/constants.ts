@@ -8,14 +8,24 @@
 export const LOGSTASH_DEFAULT_START_TIME = '2015-09-19T06:31:44.000Z';
 export const LOGSTASH_DEFAULT_END_TIME = '2015-09-23T18:31:44.000Z';
 
+/**
+ * Should be used in "single thread" tests to set default Data View
+ * @example uiSettings.set({ defaultIndex: testData.DATA_VIEW_ID.ECOMMERCE });
+ */
 export const DATA_VIEW_ID = {
   ECOMMERCE: '5193f870-d861-11e9-a311-0fa548c5f953',
   LOGSTASH: 'logstash-*',
+  NO_TIME_FIELD: 'c1e8af24-c7b7-4d9b-ab0e-e408c88d29c9',
 };
 
-export const DATA_VIEW = {
+/**
+ * Should be used in "parallel tests" to set default Data View, because ids are generated and can't be hardcoded
+ * @example scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.ECOMMERCE);
+ */
+export const DATA_VIEW_NAME = {
   ECOMMERCE: 'ecommerce',
   LOGSTASH: 'logstash-*',
+  NO_TIME_FIELD: 'without-timefield',
 };
 
 export const LOGSTASH_OUT_OF_RANGE_DATES = {

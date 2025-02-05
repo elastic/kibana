@@ -17,6 +17,7 @@ import { LandingPage } from '../pages/landing/landing';
 import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
+import { RulePage } from '../pages/rules/rule';
 import {
   ALERTS_PATH,
   ALERT_DETAIL_PATH,
@@ -34,6 +35,7 @@ import {
   OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
   OLD_SLO_DETAIL_PATH,
   OLD_SLO_EDIT_PATH,
+  CREATE_RULE_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
@@ -129,6 +131,13 @@ export const routes = {
   [RULE_DETAIL_PATH]: {
     handler: () => {
       return <RuleDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [CREATE_RULE_PATH]: {
+    handler: () => {
+      return <RulePage />;
     },
     params: {},
     exact: true,

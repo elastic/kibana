@@ -8,21 +8,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const SETUP_SIEM_MIGRATION_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tour.setupSiemMigrationTourTitle',
+  'xpack.securitySolution.siemMigrations.rules.tour.setupSiemMigrationGuide.title',
   {
     defaultMessage: 'Streamlined SIEM migration',
   }
 );
 
 export const SETUP_SIEM_MIGRATION_TOUR_SUBTITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tour.setupSiemMigrationTourTitle',
+  'xpack.securitySolution.siemMigrations.rules.tour.setupSiemMigrationGuide.subtitle',
   {
     defaultMessage: 'New onboarding guide!',
   }
 );
 
 export const SETUP_SIEM_MIGRATION_TOUR_CONTENT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tour.setupSiemMigrationTourContent',
+  'xpack.securitySolution.siemMigrations.rules.tour.setupSiemMigrationGuide.content',
   {
     defaultMessage:
       'This is a step-by-step guide to quickly import your SIEM rules, assets, and data to Elastic Security. Powered by AI.',
@@ -30,7 +30,7 @@ export const SETUP_SIEM_MIGRATION_TOUR_CONTENT = i18n.translate(
 );
 
 export const FINISH_TOUR_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tour.finishButton',
+  'xpack.securitySolution.siemMigrations.rules.tour.setupSiemMigrationGuide.finishButton',
   {
     defaultMessage: 'OK',
   }

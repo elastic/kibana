@@ -79,7 +79,7 @@
         "label": "AssistantScope",
         "description": [],
         "signature": [
-          "\"all\" | \"search\" | \"observability\""
+          "\"search\" | \"observability\" | \"all\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
         "deprecated": false,

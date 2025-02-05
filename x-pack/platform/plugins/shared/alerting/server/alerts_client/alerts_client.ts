@@ -15,7 +15,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
@@ -231,7 +231,7 @@ export class AlertsClient<
   }
 
   public async search<Aggregation = unknown>(
-    queryBody: SearchRequest
+    queryBody: SearchRequest['body']
   ): Promise<SearchResult<AlertData, Aggregation>> {
     const esClient = await this.options.elasticsearchClientPromise;
     const index = this.isUsingDataStreams()
@@ -242,7 +242,7 @@ export class AlertsClient<
       aggregations,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
-      ...queryBody,
+      body: queryBody,
       ignore_unavailable: true,
     });
 
@@ -376,6 +376,8 @@ export class AlertsClient<
       throw new Error(`Must specify either execution UUID or time range for AAD alert query.`);
     }
 
+    const maxAlertLimit = this.legacyAlertsClient.getMaxAlertLimit();
+
     const getQueryParams = {
       executionUuid,
       start,
@@ -383,6 +385,7 @@ export class AlertsClient<
       ruleId,
       excludedAlertInstanceIds,
       alertsFilter,
+      maxAlertLimit,
     };
 
     const formatAlert = this.ruleType.alerts?.formatAlert;
@@ -568,7 +571,7 @@ export class AlertsClient<
           refresh: this.isServerless ? true : 'wait_for',
           index: this.indexTemplateAndPattern.alias,
           require_alias: !this.isUsingDataStreams(),
-          operations: bulkBody,
+          body: bulkBody,
         });
 
         // If there were individual indexing errors, they will be returned in the success response
@@ -641,12 +644,14 @@ export class AlertsClient<
       );
     }
     const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
+    const maxAlertLimit = this.legacyAlertsClient.getMaxAlertLimit();
 
     const query = getMaintenanceWindowAlertsQuery({
       executionUuid,
       ruleId,
       maintenanceWindows,
       action: isLifecycleAlert ? 'open' : undefined,
+      maxAlertLimit,
     });
 
     const response = await this.search<ScopedQueryAggregationResult>(query);

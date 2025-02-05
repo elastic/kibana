@@ -17,7 +17,7 @@ import {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesSavedObjectId,
-  PublishesWritablePanelTitle,
+  PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
   PublishingSubject,
   SerializedTimeRange,
@@ -100,7 +100,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesWritablePanelTitle &
+  PublishesWritableTitle &
   PublishesSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &

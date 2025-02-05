@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Alert } from '@kbn/alerts-as-data-utils';

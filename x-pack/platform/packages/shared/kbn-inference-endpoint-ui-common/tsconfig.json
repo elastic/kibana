@@ -19,7 +19,6 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/search-connectors",
     "@kbn/es-ui-shared-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/core-http-browser",

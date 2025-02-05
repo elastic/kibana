@@ -57,6 +57,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
       const codeSignaturesHits = (
         await esClient.search<FileEventDoc>({
           index: FILE_EVENTS_INDEX_PATTERN,
+          size: eventIds.length,
           query: {
             bool: {
               must: [

@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import type { ConfigProperties } from '@kbn/inference-endpoint-ui-common';
 import {
   ConfigSchema,
   SecretsSchema,
@@ -23,7 +24,6 @@ import {
   DashboardActionParamsSchema,
   DashboardActionResponseSchema,
 } from './schema';
-import { ConfigProperties } from '../dynamic_config/types';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;
@@ -49,11 +49,3 @@ export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
-
-export interface InferenceProvider {
-  service: string;
-  name: string;
-  task_types: string[];
-  logo?: string;
-  configurations: FieldsConfiguration;
-}

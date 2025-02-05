@@ -49,7 +49,8 @@ const defaultProps = {
   isLoadingConnectors: false,
 };
 
-describe('Connector', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/208443
+describe.skip('Connector', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

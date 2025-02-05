@@ -27,21 +27,23 @@ export const getMockedSearchApi = ({
   searchSource: SearchSource;
   savedSearch: SavedSearch;
 }) => {
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   return {
     api: {
       uuid: 'testEmbeddable',
-      savedObjectId: new BehaviorSubject<string | undefined>(undefined),
-      dataViews: new BehaviorSubject<DataView[] | undefined>([
+      savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
         searchSource.getField('index') ?? dataViewMock,
       ]),
-      panelTitle: new BehaviorSubject<string | undefined>(undefined),
-      defaultPanelTitle: new BehaviorSubject<string | undefined>(undefined),
-      hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
+      title$: new BehaviorSubject<string | undefined>(undefined),
+      defaultTitle$: new BehaviorSubject<string | undefined>(undefined),
+      hideTitle$: new BehaviorSubject<boolean | undefined>(false),
       fetchContext$: new BehaviorSubject<FetchContext | undefined>(undefined),
       timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
       setTimeRange: jest.fn(),
-      dataLoading: new BehaviorSubject<boolean | undefined>(undefined),
-      blockingError: new BehaviorSubject<Error | undefined>(undefined),
+      dataLoading$,
+      blockingError$,
       fetchWarnings$: new BehaviorSubject<SearchResponseIncompleteWarning[]>([]),
       savedSearch$: new BehaviorSubject<SavedSearch>(savedSearch),
     },
@@ -59,6 +61,10 @@ export const getMockedSearchApi = ({
       totalHitCount: new BehaviorSubject<number | undefined>(0),
       columnsMeta: new BehaviorSubject<Record<string, DatatableColumnMeta> | undefined>(undefined),
       inspectorAdapters: new BehaviorSubject<Adapters>({}),
+    },
+    setters: {
+      setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
+      setBlockingError: (error: Error | undefined) => blockingError$.next(error),
     },
   };
 };

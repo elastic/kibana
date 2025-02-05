@@ -263,8 +263,8 @@ describe('Dashboard link component', () => {
 
   test('current dashboard is not a clickable href', async () => {
     const parentApi = createMockLinksParent({});
-    parentApi.savedObjectId = new BehaviorSubject<string | undefined>('123');
-    parentApi.panelTitle = new BehaviorSubject<string | undefined>('current dashboard');
+    parentApi.savedObjectId$ = new BehaviorSubject<string | undefined>('123');
+    parentApi.title$ = new BehaviorSubject<string | undefined>('current dashboard');
 
     render(
       <DashboardLinkComponent
@@ -310,9 +310,9 @@ describe('Dashboard link component', () => {
   test('current dashboard title updates when parent changes', async () => {
     const parentApi = {
       ...createMockLinksParent({}),
-      panelTitle: new BehaviorSubject<string | undefined>('old title'),
-      panelDescription: new BehaviorSubject<string | undefined>('old description'),
-      savedObjectId: new BehaviorSubject<string | undefined>('123'),
+      title$: new BehaviorSubject<string | undefined>('old title'),
+      description$: new BehaviorSubject<string | undefined>('old description'),
+      savedObjectId$: new BehaviorSubject<string | undefined>('123'),
     };
 
     const { rerender } = render(
@@ -328,7 +328,7 @@ describe('Dashboard link component', () => {
     );
     expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('old title');
 
-    parentApi.panelTitle.next('new title');
+    parentApi.title$.next('new title');
     rerender(
       <DashboardLinkComponent
         link={{
@@ -367,7 +367,7 @@ describe('Dashboard link component', () => {
   test('can override link label for the current dashboard', async () => {
     const customLabel = 'my new label for the current dashboard';
     const parentApi = createMockLinksParent({});
-    parentApi.savedObjectId = new BehaviorSubject<string | undefined>('123');
+    parentApi.savedObjectId$ = new BehaviorSubject<string | undefined>('123');
 
     render(
       <DashboardLinkComponent

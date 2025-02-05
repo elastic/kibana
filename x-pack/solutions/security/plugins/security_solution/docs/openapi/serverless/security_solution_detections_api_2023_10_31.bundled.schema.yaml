@@ -32,6 +32,42 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                success:
+                  value:
+                    application: {}
+                    cluster:
+                      all: true
+                      manage: true
+                      manage_api_key: true
+                      manage_index_templates: true
+                      manage_ml: true
+                      manage_own_api_key: true
+                      manage_pipeline: true
+                      manage_security: true
+                      manage_transform: true
+                      monitor: true
+                      monitor_ml: true
+                      monitor_transform: true
+                    has_all_requested: true
+                    has_encryption_key: true
+                    index:
+                      .alerts-security.alerts-default:
+                        all: true
+                        create: true
+                        create_doc: true
+                        create_index: true
+                        delete: true
+                        delete_index: true
+                        index: true
+                        maintenance: true
+                        manage: true
+                        monitor: true
+                        read: true
+                        view_index_metadata: true
+                        write: true
+                    is_authenticated: true
+                    username: elastic
               schema:
                 type: object
                 properties:
@@ -333,6 +369,18 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: Gaps range start
+          in: query
+          name: gaps_range_start
+          required: false
+          schema:
+            type: string
+        - description: Gaps range end
+          in: query
+          name: gaps_range_end
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -574,6 +622,25 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              add:
+                value:
+                  assignees:
+                    add:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
+                  ids:
+                    - >-
+                      681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
+              remove:
+                value:
+                  assignees:
+                    add: []
+                    remove:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                  ids:
+                    - >-
+                      681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
             schema:
               type: object
               properties:
@@ -582,13 +649,32 @@ paths:
                   description: Details about the assignees to assign and unassign.
                 ids:
                   $ref: '#/components/schemas/AlertIds'
-                  description: List of alerts ids to assign and unassign passed assignees.
               required:
                 - assignees
                 - ids
         required: true
       responses:
         '200':
+          content:
+            application/ndjson:
+              examples:
+                add:
+                  value:
+                    batches: 1,
+                    deleted: 0,
+                    failures: []
+                    noops: 0,
+                    requests_per_second: '-1,'
+                    retries:
+                      - bulk: 0,
+                      - search: 0
+                    throttled_millis: 0,
+                    throttled_until_millis: 0,
+                    timed_out: false,
+                    took: 76,
+                    total: 1,
+                    updated: 1,
+                    version_conflicts: 0,
           description: Indicates a successful call.
         '400':
           description: Invalid request.
@@ -602,6 +688,35 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              query:
+                value:
+                  aggs:
+                    alertsByGrouping:
+                      terms:
+                        field: host.name
+                        size: 10
+                    missingFields:
+                      missing:
+                        field: host.name
+                  query:
+                    bool:
+                      filter:
+                        - bool:
+                            filter:
+                              - match_phrase:
+                                  kibana.alert.workflow_status: open
+                            must: []
+                            must_not:
+                              - exists:
+                                  field: kibana.alert.building_block_type
+                            should: []
+                        - range:
+                            '@timestamp':
+                              gte: 2025-01-17T08:00:00.000Z
+                              lte: 2025-01-18T07:59:59.999Z
+                  runtime_mappings: {}
+                  size: 0
             schema:
               description: Elasticsearch query and aggregation request
               type: object
@@ -639,6 +754,31 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                success:
+                  value:
+                    _shards:
+                      failed: 0
+                      skipped: 0
+                      successful: 1
+                      total: 1
+                    aggregations:
+                      alertsByGrouping:
+                        buckets:
+                          - doc_count: 5
+                            key: Host-f43kkddfyc
+                        doc_count_error_upper_bound: 0
+                        sum_other_doc_count: 0
+                      missingFields:
+                        doc_count: 0
+                    hits:
+                      hits: []
+                      max_score: null
+                      total:
+                        relation: eq
+                        value: 5
+                    timed_out: false
+                    took: 0
               schema:
                 additionalProperties: true
                 description: Elasticsearch search response
@@ -675,6 +815,44 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              byId:
+                value:
+                  signal_ids:
+                    - >-
+                      80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  status: closed
+              byQuery:
+                value:
+                  conflicts: proceed
+                  query:
+                    bool:
+                      filter:
+                        - '@timestamp':
+                            format: strict_date_optional_time
+                            gte: 2024-10-23T07:00:00.000Z
+                            lte: 2025-01-21T20:12:11.704Z
+                          range: null
+                        - bool:
+                            filter:
+                              bool:
+                                filter:
+                                  - match_phrase:
+                                      kibana.alert.workflow_status: open
+                                  - '@timestamp':
+                                      format: strict_date_optional_time
+                                      gte: 2024-10-23T07:00:00.000Z
+                                      lte: 2025-01-21T20:12:11.704Z
+                                    range: null
+                                must: []
+                                must_not:
+                                  - exists:
+                                      field: kibana.alert.building_block_type
+                                should: []
+                      must: []
+                      must_not: []
+                      should: []
+                  status: closed
             schema:
               oneOf:
                 - $ref: '#/components/schemas/SetAlertsStatusByIds'
@@ -687,6 +865,41 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                byId:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 81
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+                byQuery:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 100
+                    total: 17
+                    updated: 17
+                    version_conflicts: 0
               schema:
                 additionalProperties: true
                 description: Elasticsearch update by query response
@@ -726,6 +939,25 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              add:
+                value:
+                  ids:
+                    - >-
+                      549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+                  tags:
+                    tags_to_add:
+                      - Duplicate
+                    tags_to_remove: []
+              remove:
+                value:
+                  ids:
+                    - >-
+                      549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+                  tags:
+                    tags_to_add: []
+                    tags_to_remove:
+                      - Duplicate
             schema:
               type: object
               properties:
@@ -744,6 +976,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1,
+                    deleted: 0,
+                    failures: []
+                    noops: 0,
+                    requests_per_second: '-1,'
+                    retries:
+                      bulk: 0,
+                      search: 0
+                    throttled_millis: 0,
+                    throttled_until_millis: 0,
+                    timed_out: false,
+                    took: 68,
+                    total: 1,
+                    updated: 1,
+                    version_conflicts: 0,
               schema:
                 additionalProperties: true
                 description: Elasticsearch update by query response
@@ -794,22 +1044,28 @@ components:
       type: object
       properties:
         add:
-          description: A list of users ids to assign.
           items:
-            $ref: '#/components/schemas/NonEmptyString'
+            description: A list of users ids to assign.
+            format: nonempty
+            minLength: 1
+            type: string
           type: array
         remove:
-          description: A list of users ids to unassign.
           items:
-            $ref: '#/components/schemas/NonEmptyString'
+            description: A list of users ids to unassign.
+            format: nonempty
+            minLength: 1
+            type: string
           type: array
       required:
         - add
         - remove
     AlertIds:
-      description: A list of alerts ids.
+      description: A list of alerts `id`s.
       items:
-        $ref: '#/components/schemas/NonEmptyString'
+        format: nonempty
+        minLength: 1
+        type: string
       minItems: 1
       type: array
     AlertsIndex:
@@ -831,6 +1087,9 @@ components:
         - additionalProperties: true
           type: object
     AlertStatus:
+      description: >-
+        The status of an alert, which can be `open`, `acknowledged`,
+        `in-progress`, or `closed`.
       enum:
         - open
         - closed
@@ -884,8 +1143,16 @@ components:
         - suppress
       type: string
     AlertTag:
-      $ref: '#/components/schemas/NonEmptyString'
+      description: >-
+        Use alert tags to organize related alerts into categories that you can
+        filter and group.
+      format: nonempty
+      minLength: 1
+      type: string
     AlertTags:
+      description: >-
+        List of keywords to organize related alerts into categories that you can
+        filter and group.
       items:
         $ref: '#/components/schemas/AlertTag'
       type: array
@@ -1025,6 +1292,7 @@ components:
     BulkActionsDryRunErrCode:
       enum:
         - IMMUTABLE
+        - PREBUILT_CUSTOMIZATION_LICENSE
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
@@ -4282,6 +4550,19 @@ components:
           description: Duration in seconds of execution gap
           minimum: 0
           type: integer
+        gap_range:
+          description: Range of the execution gap
+          type: object
+          properties:
+            gte:
+              description: Start date of the execution gap
+              type: string
+            lte:
+              description: End date of the execution gap
+              type: string
+          required:
+            - gte
+            - lte
         total_enrichment_duration_ms:
           description: >-
             Total time spent enriching documents during current rule execution
@@ -4418,8 +4699,8 @@ components:
           type: integer
         request:
           $ref: '#/components/schemas/NonEmptyString'
-      required:
-        - request
+        request_type:
+          $ref: '#/components/schemas/NonEmptyString'
     RulePreviewLogs:
       type: object
       properties:
@@ -4995,8 +5276,11 @@ components:
       type: object
       properties:
         signal_ids:
+          description: List of alert `id`s.
           items:
-            $ref: '#/components/schemas/NonEmptyString'
+            format: nonempty
+            minLength: 1
+            type: string
           minItems: 1
           type: array
         status:
@@ -5022,6 +5306,7 @@ components:
         - query
         - status
     SetAlertTags:
+      description: Object with list of tags to add and remove.
       type: object
       properties:
         tags_to_add:

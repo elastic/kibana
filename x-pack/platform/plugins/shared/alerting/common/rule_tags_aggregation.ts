@@ -8,7 +8,7 @@
 import type {
   AggregationsAggregationContainer,
   AggregationsCompositeAggregation,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AggregateOptions } from '../server/application/rule/methods/aggregate/types';
 
 export type RuleTagsAggregationOptions = Pick<AggregateOptions, 'filter' | 'search'> & {
