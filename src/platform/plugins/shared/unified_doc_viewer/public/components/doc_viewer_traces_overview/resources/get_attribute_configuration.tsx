@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { castArray } from 'lodash';
 import { ServiceNameLink } from '../sub_components/service_name_link';
+import { TraceIdLink } from '../sub_components/trace_id_link';
 
 export const getAttributeConfiguration = (
   attributes: TraceDocumentOverview
@@ -60,7 +61,7 @@ export const getAttributeConfiguration = (
       title: i18n.translate('discover.docViews.tracesOverview.details.traceId.title', {
         defaultMessage: 'Trace ID',
       }),
-      content: <p>{attributes[TRACE_ID_FIELD]}</p>,
+      content: <TraceIdLink traceId={attributes[TRACE_ID_FIELD]} />,
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]: {
       title: i18n.translate(
