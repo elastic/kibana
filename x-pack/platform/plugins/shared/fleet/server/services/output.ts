@@ -77,9 +77,10 @@ import { auditLoggingService } from './audit_logging';
 import {
   deleteOutputSecrets,
   deleteSecrets,
-  extractAndUpdateOutputSecrets,
-  extractAndWriteOutputSecrets,
+  extractAndUpdateSOSecrets,
+  extractAndWriteSOSecrets,
   isOutputSecretStorageEnabled,
+  getOutputSecretPaths,
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
@@ -670,8 +671,10 @@ class OutputService {
 
     // Store secret values if enabled; if not, store plain text values
     if (await isOutputSecretStorageEnabled(esClient, soClient)) {
-      const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
-        output,
+      const secretPaths = getOutputSecretPaths(output.type, output);
+      const { so: outputWithSecrets } = await extractAndWriteSOSecrets<NewOutput>({
+        soObject: output,
+        secretPaths,
         esClient,
         secretHashes: output.is_preconfigured ? options?.secretHashes : undefined,
       });
@@ -1100,14 +1103,17 @@ class OutputService {
 
     // Store secret values if enabled; if not, store plain text values
     if (await isOutputSecretStorageEnabled(esClient, soClient)) {
-      const secretsRes = await extractAndUpdateOutputSecrets({
-        oldOutput: originalOutput,
-        outputUpdate: data,
+      const oldSecretPaths = getOutputSecretPaths(originalOutput.type, originalOutput);
+      const updatedSecretPaths = getOutputSecretPaths(data.type || originalOutput.type, data);
+      const secretsRes = await extractAndUpdateSOSecrets<Output>({
+        updatedSoObject: data,
+        oldSecretPaths,
+        updatedSecretPaths,
         esClient,
         secretHashes: data.is_preconfigured ? secretHashes : undefined,
       });
 
-      updateData.secrets = secretsRes.outputUpdate.secrets;
+      updateData.secrets = secretsRes.updatedSoObject.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
       if (data.type === outputType.Logstash && updateData.type === outputType.Logstash) {

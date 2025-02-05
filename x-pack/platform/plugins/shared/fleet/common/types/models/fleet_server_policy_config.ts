@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export type FleetServerHostSecret =
-  | string
-  | {
-      id: string;
-      hash?: string;
-    };
+import type { SOSecret } from './secret';
 
 export interface NewFleetServerHost {
   name: string;
@@ -29,8 +23,8 @@ export interface NewFleetServerHost {
   } | null;
   secrets?: {
     ssl?: {
-      key?: FleetServerHostSecret;
-      es_key?: FleetServerHostSecret;
+      key?: SOSecret;
+      es_key?: SOSecret;
     };
   };
 }

@@ -19,7 +19,7 @@ import type {
   PreconfiguredOutput,
   Output,
   NewOutput,
-  OutputSecret,
+  SOSecret,
   KafkaOutput,
   NewLogstashOutput,
   NewRemoteElasticsearchOutput,
@@ -265,13 +265,13 @@ export async function cleanPreconfiguredOutputs(
   }
 }
 
-const hasHash = (secret?: OutputSecret): secret is { id: string; hash: string } => {
+const hasHash = (secret?: SOSecret): secret is { id: string; hash: string } => {
   return !!secret && typeof secret !== 'string' && !!secret.hash;
 };
 
 async function isSecretDifferent(
-  preconfiguredValue: OutputSecret | undefined,
-  existingSecret: OutputSecret | undefined
+  preconfiguredValue: SOSecret | undefined,
+  existingSecret: SOSecret | undefined
 ): Promise<boolean> {
   if (!existingSecret && preconfiguredValue) {
     return true;

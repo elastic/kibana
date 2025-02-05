@@ -117,7 +117,7 @@ export interface FleetServerHostSOAttributes {
       es_key?: { id: string };
     };
   };
-  ssl?: string | null; // encrypted ssl field
+  ssl?: string | null;
 }
 
 export interface PackagePolicySOAttributes {

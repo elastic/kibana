@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FleetServerHost, FleetServerHostSecret } from '../models';
+import type { FleetServerHost } from '../models';
+import type { SOSecret } from '../models';
 
 import type { ListResult } from './common';
 
@@ -31,8 +32,8 @@ export interface PutFleetServerHostsRequest {
     } | null;
     secrets?: {
       ssl?: {
-        key?: FleetServerHostSecret;
-        es_key?: FleetServerHostSecret;
+        key?: SOSecret;
+        es_key?: SOSecret;
       };
     };
   };
@@ -56,8 +57,8 @@ export interface PostFleetServerHostsRequest {
     } | null;
     secrets?: {
       ssl?: {
-        key?: FleetServerHostSecret;
-        es_key?: FleetServerHostSecret;
+        key?: SOSecret;
+        es_key?: SOSecret;
       };
     };
   };

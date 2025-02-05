@@ -44,8 +44,9 @@ import { escapeSearchQueryPhrase } from './saved_object';
 import {
   deleteFleetServerHostsSecrets,
   deleteSecrets,
-  extractAndUpdateFleetServerHostsSecrets,
-  extractAndWriteFleetServerHostsSecrets,
+  getFleetServerHostsSecretPaths,
+  extractAndUpdateSOSecrets,
+  extractAndWriteSOSecrets,
   isSecretStorageEnabled,
 } from './secrets';
 
@@ -99,12 +100,15 @@ export async function createFleetServerHost(
 
   // Store secret values if enabled; if not, store plain text values
   if (await isSecretStorageEnabled(esClient, soClient)) {
-    const { fleetServerHost: fleetServerHostWithSecrets } =
-      await extractAndWriteFleetServerHostsSecrets({
-        fleetServerHost,
-        esClient,
-      });
-    if (fleetServerHostWithSecrets.secrets) data.secrets = fleetServerHostWithSecrets.secrets;
+    const secretPaths = getFleetServerHostsSecretPaths(fleetServerHost);
+    const { so: fleetServerHostWithSecrets } = await extractAndWriteSOSecrets<NewFleetServerHost>({
+      soObject: fleetServerHost,
+      secretPaths,
+      esClient,
+    });
+
+    if (fleetServerHostWithSecrets.secrets)
+      data.secrets = fleetServerHostWithSecrets.secrets as FleetServerHostSOAttributes['secrets'];
   } else {
     if (
       (!fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) ||
@@ -256,13 +260,17 @@ export async function updateFleetServerHost(
 
   // Store secret values if enabled; if not, store plain text values
   if (await isSecretStorageEnabled(esClient, soClient)) {
-    const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
-      oldFleetServerHost: originalItem,
-      fleetServerHostUpdate: data,
+    const oldSecretPaths = getFleetServerHostsSecretPaths(originalItem);
+    const updatedSecretPaths = getFleetServerHostsSecretPaths(data);
+    const secretsRes = await extractAndUpdateSOSecrets<FleetServerHost>({
+      updatedSoObject: data,
+      oldSecretPaths,
+      updatedSecretPaths,
       esClient,
     });
 
-    updateData.secrets = secretsRes.fleetServerHostUpdate.secrets;
+    updateData.secrets = secretsRes.updatedSoObject
+      .secrets as FleetServerHostSOAttributes['secrets'];
     secretsToDelete = secretsRes.secretsToDelete;
   } else {
     if (
