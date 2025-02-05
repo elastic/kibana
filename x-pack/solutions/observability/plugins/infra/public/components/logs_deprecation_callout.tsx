@@ -21,13 +21,15 @@ const pageConfigurations = {
   stream: {
     dismissalStorageKey: 'log_stream_deprecation_callout_dismissed',
     message: i18n.translate('xpack.infra.logsDeprecationCallout.stream.exploreWithDiscover', {
-      defaultMessage: 'Logs Stream and Logs Explorer are set to be deprecated.',
+      defaultMessage:
+        'Logs Stream and Logs Explorer are set to be deprecated. Switch to Discover and enable the new Observability solution for an improved logs experience.',
     }),
   },
   settings: {
     dismissalStorageKey: 'log_settings_deprecation_callout_dismissed',
     message: i18n.translate('xpack.infra.logsDeprecationCallout.settings.exploreWithDiscover', {
-      defaultMessage: 'These settings only apply to the legacy Logs Stream app.',
+      defaultMessage:
+        'These settings only apply to the legacy Logs Stream app. Switch to Discover and enable the new Observability solution for an improved logs experience.',
     }),
   },
 };
