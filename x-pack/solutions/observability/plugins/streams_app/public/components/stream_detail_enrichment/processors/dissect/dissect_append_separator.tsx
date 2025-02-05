@@ -18,12 +18,12 @@ export const DissectAppendSeparator = () => {
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternSeparatorLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternSeparatorLabel',
         { defaultMessage: 'Append separator' }
       )}
       helpText={
         <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternSeparatorHelpText"
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternSeparatorHelpText"
           defaultMessage="If you specify a key modifier, this character separates the fields when appending results. Defaults to {value}."
           values={{ value: <EuiCode>&quot;&quot;</EuiCode> }}
         />
