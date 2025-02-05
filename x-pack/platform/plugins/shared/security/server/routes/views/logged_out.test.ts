@@ -38,7 +38,7 @@ describe('LoggedOut view routes', () => {
     expect(routeConfig.options).toEqual({ excludeFromOAS: true });
     expect(routeConfig.security).toEqual(
       expect.objectContaining({
-        authc: { enabled: 'optional' },
+        authc: { enabled: false, reason: expect.any(String) },
         authz: {
           enabled: false,
           reason: expect.any(String),
