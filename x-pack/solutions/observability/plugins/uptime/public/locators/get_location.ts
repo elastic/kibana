@@ -23,36 +23,38 @@ function isUptimeOverviewLocatorParams(
   );
 }
 
-export function getLocation(params: UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams) {
+export function getLocation(
+  params: UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams
+) {
   let qs = '';
 
-    if (isUptimeOverviewLocatorParams(params)) {
-      qs = Object.entries(params)
-        .map(([key, value]) => {
-          if (value) {
-            return `${key}=${value}`;
-          }
-        })
-        .join('&');
-    } else {
-      const searchParams: string[] = [];
-      if (params.host) searchParams.push(formatSearchKey('host.name', params.host));
-      if (params.container) searchParams.push(formatSearchKey('container.id', params.container));
-      if (params.pod) searchParams.push(formatSearchKey('kubernetes.pod.uid', params.pod));
-      if (params.ip) {
-        searchParams.push(formatSearchKey(`host.ip`, params.ip));
-        searchParams.push(formatSearchKey(`monitor.ip`, params.ip));
-      }
-      if (searchParams.length > 0) {
-        qs = `search=${searchParams.join(' OR ')}`;
-      }
+  if (isUptimeOverviewLocatorParams(params)) {
+    qs = Object.entries(params)
+      .map(([key, value]) => {
+        if (value) {
+          return `${key}=${value}`;
+        }
+      })
+      .join('&');
+  } else {
+    const searchParams: string[] = [];
+    if (params.host) searchParams.push(formatSearchKey('host.name', params.host));
+    if (params.container) searchParams.push(formatSearchKey('container.id', params.container));
+    if (params.pod) searchParams.push(formatSearchKey('kubernetes.pod.uid', params.pod));
+    if (params.ip) {
+      searchParams.push(formatSearchKey(`host.ip`, params.ip));
+      searchParams.push(formatSearchKey(`monitor.ip`, params.ip));
     }
+    if (searchParams.length > 0) {
+      qs = `search=${searchParams.join(' OR ')}`;
+    }
+  }
 
-    const path = `${OVERVIEW_ROUTE}${qs ? `?${qs}` : ''}`;
+  const path = `${OVERVIEW_ROUTE}${qs ? `?${qs}` : ''}`;
 
-    return {
-      app: 'uptime',
-      path,
-      state: {},
-    };
+  return {
+    app: 'uptime',
+    path,
+    state: {},
+  };
 }
