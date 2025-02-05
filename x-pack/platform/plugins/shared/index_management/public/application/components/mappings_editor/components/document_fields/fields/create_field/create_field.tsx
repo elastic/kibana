@@ -13,14 +13,13 @@ import {
   EuiOutsideClickDetector,
   EuiPanel,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
-import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
+import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
@@ -280,14 +279,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-
-  const { euiTheme } = useEuiTheme();
-
-  const paddingLeftCreateFieldWrapper = `${
-    isMultiField
-      ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
-      : paddingLeft
-  }px`;
 
   return (
     <>
