@@ -7,14 +7,15 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   GetRuleMigrationRequestParams,
   GetRuleMigrationRequestQuery,
   type GetRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { RuleMigrationGetOptions } from '../data/rule_migrations_data_rules_client';
+import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
@@ -40,45 +41,43 @@ export const registerSiemRuleMigrationsGetRoute = (
       },
       withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
         const { migration_id: migrationId } = req.params;
-        const {
-          page,
-          per_page: perPage,
-          sort_field: sortField,
-          sort_direction: sortDirection,
-          search_term: searchTerm,
-          ids,
-          is_prebuilt: isPrebuilt,
-          is_installed: isInstalled,
-          is_fully_translated: isFullyTranslated,
-          is_partially_translated: isPartiallyTranslated,
-          is_untranslatable: isUntranslatable,
-          is_failed: isFailed,
-        } = req.query;
+
+        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
+          const { page, per_page: size } = req.query;
           const options: RuleMigrationGetOptions = {
             filters: {
-              searchTerm,
-              ids,
-              prebuilt: isPrebuilt,
-              installed: isInstalled,
-              fullyTranslated: isFullyTranslated,
-              partiallyTranslated: isPartiallyTranslated,
-              untranslatable: isUntranslatable,
-              failed: isFailed,
+              searchTerm: req.query.search_term,
+              ids: req.query.ids,
+              prebuilt: req.query.is_prebuilt,
+              installed: req.query.is_installed,
+              fullyTranslated: req.query.is_fully_translated,
+              partiallyTranslated: req.query.is_partially_translated,
+              untranslatable: req.query.is_untranslatable,
+              failed: req.query.is_failed,
             },
-            sort: { sortField, sortDirection },
-            size: perPage,
-            from: page && perPage ? page * perPage : 0,
+            sort: { sortField: req.query.sort_field, sortDirection: req.query.sort_direction },
+            size,
+            from: page && size ? page * size : 0,
           };
 
           const result = await ruleMigrationsClient.data.rules.get(migrationId, options);
 
+          await siemMigrationAuditLogger.log({
+            action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED,
+            id: migrationId,
+          });
           return res.ok({ body: result });
         } catch (err) {
           logger.error(err);
+          await siemMigrationAuditLogger.log({
+            action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED,
+            id: migrationId,
+            error: err,
+          });
           return res.badRequest({ body: err.message });
         }
       })

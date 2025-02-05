@@ -8,15 +8,16 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { v4 as uuidV4 } from 'uuid';
-import { ResourceIdentifier } from '../../../../../common/siem_migrations/rules/resources';
 import { SIEM_RULE_MIGRATION_CREATE_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   CreateRuleMigrationRequestBody,
   CreateRuleMigrationRequestParams,
   type CreateRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { ResourceIdentifier } from '../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_rules_client';
+import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
@@ -44,14 +45,19 @@ export const registerSiemRuleMigrationsCreateRoute = (
         async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
           const originalRules = req.body;
           const migrationId = req.params.migration_id ?? uuidV4();
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
             const [firstOriginalRule] = originalRules;
             if (!firstOriginalRule) {
               return res.noContent();
             }
-
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+
+            await siemMigrationAuditLogger.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
+              id: migrationId,
+            });
 
             const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({
               migration_id: migrationId,
@@ -73,6 +79,11 @@ export const registerSiemRuleMigrationsCreateRoute = (
             return res.ok({ body: { migration_id: migrationId } });
           } catch (err) {
             logger.error(err);
+            await siemMigrationAuditLogger.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
+              id: migrationId,
+              error: err,
+            });
             return res.badRequest({ body: err.message });
           }
         }

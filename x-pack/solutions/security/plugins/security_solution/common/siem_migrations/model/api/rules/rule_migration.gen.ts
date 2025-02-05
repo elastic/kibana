@@ -18,9 +18,9 @@ import { z } from '@kbn/zod';
 import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import {
-  UpdateRuleMigrationData,
   RuleMigrationTaskStats,
   OriginalRule,
+  UpdateRuleMigrationData,
   RuleMigration,
   RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
@@ -266,6 +266,14 @@ export const StopRuleMigrationResponse = z.object({
    */
   stopped: z.boolean(),
 });
+
+export type UpdateRuleMigrationRequestParams = z.infer<typeof UpdateRuleMigrationRequestParams>;
+export const UpdateRuleMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type UpdateRuleMigrationRequestParamsInput = z.input<
+  typeof UpdateRuleMigrationRequestParams
+>;
 
 export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
 export const UpdateRuleMigrationRequestBody = z.array(UpdateRuleMigrationData);

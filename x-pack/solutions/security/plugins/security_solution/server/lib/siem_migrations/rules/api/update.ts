@@ -7,15 +7,17 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { authz } from './util/authz';
+import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   UpdateRuleMigrationRequestBody,
+  UpdateRuleMigrationRequestParams,
   type UpdateRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { withLicense } from './util/with_license';
+import { authz } from './util/authz';
+import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
 import { transformToInternalUpdateRuleMigrationData } from './util/update_rules';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsUpdateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -23,7 +25,7 @@ export const registerSiemRuleMigrationsUpdateRoute = (
 ) => {
   router.versioned
     .put({
-      path: SIEM_RULE_MIGRATIONS_PATH,
+      path: SIEM_RULE_MIGRATION_PATH,
       access: 'internal',
       security: { authz },
     })
@@ -31,16 +33,25 @@ export const registerSiemRuleMigrationsUpdateRoute = (
       {
         version: '1',
         validate: {
-          request: { body: buildRouteValidationWithZod(UpdateRuleMigrationRequestBody) },
+          request: {
+            params: buildRouteValidationWithZod(UpdateRuleMigrationRequestParams),
+            body: buildRouteValidationWithZod(UpdateRuleMigrationRequestBody),
+          },
         },
       },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<UpdateRuleMigrationResponse>> => {
+          const { migration_id: migrationId } = req.params;
           const rulesToUpdate = req.body;
+
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-
+            await siemMigrationAuditLogger.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULES,
+              id: migrationId,
+            });
             const transformedRuleToUpdate = rulesToUpdate.map(
               transformToInternalUpdateRuleMigrationData
             );
@@ -49,6 +60,11 @@ export const registerSiemRuleMigrationsUpdateRoute = (
             return res.ok({ body: { updated: true } });
           } catch (err) {
             logger.error(err);
+            await siemMigrationAuditLogger.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULES,
+              id: migrationId,
+              error: err,
+            });
             return res.badRequest({ body: err.message });
           }
         }

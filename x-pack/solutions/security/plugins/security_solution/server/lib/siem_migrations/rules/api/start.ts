@@ -18,9 +18,10 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
 import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
 import { getRetryFilter } from './util/retry';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -51,6 +52,7 @@ export const registerSiemRuleMigrationsStartRoute = (
             retry,
           } = req.body;
 
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
 
@@ -61,7 +63,6 @@ export const registerSiemRuleMigrationsStartRoute = (
             }
 
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-
             if (retry) {
               const { updated } = await ruleMigrationsClient.task.updateToRetry(
                 migrationId,
@@ -83,9 +84,20 @@ export const registerSiemRuleMigrationsStartRoute = (
             if (!exists) {
               return res.noContent();
             }
+
+            await siemMigrationAuditLogger.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED,
+              id: migrationId,
+            });
+
             return res.ok({ body: { started } });
           } catch (err) {
             logger.error(err);
+            await siemMigrationAuditLogger.log({
+              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED,
+              id: migrationId,
+              error: err,
+            });
             return res.badRequest({ body: err.message });
           }
         }

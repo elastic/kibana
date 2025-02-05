@@ -303,6 +303,8 @@ export const getIntegrations = async ({
 };
 
 export interface UpdateRulesParams {
+  /** `id` of the migration to install rules for */
+  migrationId: string;
   /** The list of migration rules data to update */
   rulesToUpdate: UpdateRuleMigrationData[];
   /** Optional AbortSignal for cancelling request */
@@ -310,12 +312,12 @@ export interface UpdateRulesParams {
 }
 /** Updates provided migration rules. */
 export const updateMigrationRules = async ({
+  migrationId,
   rulesToUpdate,
   signal,
 }: UpdateRulesParams): Promise<UpdateRuleMigrationResponse> => {
-  return KibanaServices.get().http.put<UpdateRuleMigrationResponse>(SIEM_RULE_MIGRATIONS_PATH, {
-    version: '1',
-    body: JSON.stringify(rulesToUpdate),
-    signal,
-  });
+  return KibanaServices.get().http.put<UpdateRuleMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
+    { version: '1', body: JSON.stringify(rulesToUpdate), signal }
+  );
 };
