@@ -140,7 +140,6 @@ async function start() {
       logsEsClient,
       infraEsClient,
       syntheticsEsClient,
-      otelEsClient,
       entitiesEsClient,
       entitiesKibanaClient,
     });
