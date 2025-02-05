@@ -53,7 +53,7 @@ export function TraceIdLink({ traceId }: TraceIdLinkProps) {
       })
     : undefined;
 
-  const content = <EuiText size="s">{traceId}</EuiText>;
+  const content = <EuiText size="xs">{traceId}</EuiText>;
 
   return (
     <>

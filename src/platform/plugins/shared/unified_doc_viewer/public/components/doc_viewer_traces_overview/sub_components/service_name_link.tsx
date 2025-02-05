@@ -62,11 +62,11 @@ export function ServiceNameLink({ serviceName, agentName }: ServiceNameLinkProps
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       {agentName && (
         <EuiFlexItem grow={false}>
-          <AgentIcon agentName={agentName as AgentName} size="l" />
+          <AgentIcon agentName={agentName as AgentName} size="m" />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <EuiText size="s">{serviceName}</EuiText>
+        <EuiText size="xs">{serviceName}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

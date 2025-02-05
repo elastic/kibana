@@ -62,7 +62,7 @@ export function TransactionNameLink({ transactionName, serviceName }: Transactio
       })
     : undefined;
 
-  const content = <EuiText size="s">{transactionName}</EuiText>;
+  const content = <EuiText size="xs">{transactionName}</EuiText>;
 
   return (
     <>
