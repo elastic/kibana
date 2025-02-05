@@ -284,8 +284,10 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
-      const filter = generateTrustedAppsFilter(insight);
-      expect(filter).toBe('exception-list-agnostic.attributes.entries.value:"example-value"');
+      const filter = generateTrustedAppsFilter(insight, 'test-id');
+      expect(filter).toBe(
+        '(exception-list-agnostic.attributes.tags:"policy:test-id" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.value:"example-value"'
+      );
     });
 
     it('should generate a filter for process.code_signature entries', () => {
@@ -306,9 +308,9 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
-      const filter = generateTrustedAppsFilter(insight);
-      expect(filter).toContain(
-        'exception-list-agnostic.attributes.entries.entries.value:(*Example,*Inc.*)'
+      const filter = generateTrustedAppsFilter(insight, 'test-id');
+      expect(filter).toBe(
+        '(exception-list-agnostic.attributes.tags:"policy:test-id" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.entries.value:(*Example,*Inc.*)'
       );
     });
 
@@ -336,9 +338,9 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
-      const filter = generateTrustedAppsFilter(insight);
-      expect(filter).toContain(
-        'exception-list-agnostic.attributes.entries.entries.value:(*Example,*\\(Inc.\\)*http\\://example.com*[example]*) AND exception-list-agnostic.attributes.entries.value:"example-value"'
+      const filter = generateTrustedAppsFilter(insight, 'test-id');
+      expect(filter).toBe(
+        '(exception-list-agnostic.attributes.tags:"policy:test-id" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.entries.value:(*Example,*\\(Inc.\\)*http\\://example.com*[example]*) AND exception-list-agnostic.attributes.entries.value:"example-value"'
       );
     });
 
@@ -360,58 +362,7 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
-      const filter = generateTrustedAppsFilter(insight);
-      expect(filter).toBe(undefined);
-    });
-
-    it('should prepend policy filter when packagePolicyId is provided with valid entries', () => {
-      const insight = getDefaultInsight({
-        remediation: {
-          exception_list_items: [
-            {
-              entries: [
-                {
-                  field: 'process.executable.caseless',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'example-value',
-                },
-              ],
-            },
-          ],
-        },
-      } as Partial<SecurityWorkflowInsight>);
-
-      const packagePolicyId = 'abc123';
-      const filter = generateTrustedAppsFilter(insight, packagePolicyId);
-
-      expect(filter).toBe(
-        '(exception-list-agnostic.attributes.tags:"policy:abc123" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.value:"example-value"'
-      );
-    });
-
-    it('should return undefined string if packagePolicyId is provided but no valid entries exist', () => {
-      const insight = getDefaultInsight({
-        remediation: {
-          exception_list_items: [
-            {
-              entries: [
-                {
-                  field: 'unknown-field',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'example-value',
-                },
-              ],
-            },
-          ],
-        },
-      } as Partial<SecurityWorkflowInsight>);
-
-      const packagePolicyId = 'def456';
-      const filter = generateTrustedAppsFilter(insight, packagePolicyId);
-
-      // Since there are no valid entries, the policy filter should not be applied on its own.
+      const filter = generateTrustedAppsFilter(insight, 'test-id');
       expect(filter).toBe(undefined);
     });
   });

@@ -165,7 +165,7 @@ export function getUniqueInsights(insights: SecurityWorkflowInsight[]): Security
 
 export const generateTrustedAppsFilter = (
   insight: SecurityWorkflowInsight,
-  packagePolicyId?: string
+  packagePolicyId: string
 ): string | undefined => {
   const filterParts =
     insight.remediation.exception_list_items
@@ -194,12 +194,9 @@ export const generateTrustedAppsFilter = (
 
   // Only create a filter if there are valid entries
   if (filterParts.length) {
-    let combinedFilter = filterParts.join(' AND ');
-    if (packagePolicyId) {
-      const policyFilter = `(exception-list-agnostic.attributes.tags:"policy:${packagePolicyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`;
-      combinedFilter = `${policyFilter} AND ${combinedFilter}`;
-    }
-    return combinedFilter;
+    const combinedFilter = filterParts.join(' AND ');
+    const policyFilter = `(exception-list-agnostic.attributes.tags:"policy:${packagePolicyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`;
+    return `${policyFilter} AND ${combinedFilter}`;
   }
 
   return undefined;
