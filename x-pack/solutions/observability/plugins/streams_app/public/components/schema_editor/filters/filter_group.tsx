@@ -13,8 +13,8 @@ import {
   EuiSelectableProps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
-import useToggle from 'react-use/lib/useToggle';
 
 export const FilterGroup = ({
   filterGroupButtonLabel,
@@ -25,7 +25,7 @@ export const FilterGroup = ({
   items: EuiSelectableOption[];
   onChange: Required<EuiSelectableProps>['onChange'];
 }) => {
-  const [isPopoverOpen, togglePopover] = useToggle(false);
+  const [isPopoverOpen, { off: closePopover, toggle }] = useBoolean(false);
 
   const filterGroupPopoverId = useGeneratedHtmlId({
     prefix: 'filterGroupPopover',
@@ -35,7 +35,7 @@ export const FilterGroup = ({
     <EuiFilterButton
       iconType="arrowDown"
       badgeColor="success"
-      onClick={togglePopover}
+      onClick={toggle}
       isSelected={isPopoverOpen}
       numFilters={items.length}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}
@@ -51,14 +51,10 @@ export const FilterGroup = ({
         id={filterGroupPopoverId}
         button={button}
         isOpen={isPopoverOpen}
-        closePopover={() => togglePopover(false)}
+        closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <EuiSelectable
-          aria-label={filterGroupButtonLabel}
-          options={items}
-          onChange={(...args) => onChange(...args)}
-        >
+        <EuiSelectable aria-label={filterGroupButtonLabel} options={items} onChange={onChange}>
           {(list) => (
             <div
               css={{
