@@ -159,8 +159,8 @@ export class RuleMigrationsTaskClient {
               });
               stats.completed++;
             } catch (error) {
+              stats.failed++;
               if (error instanceof AbortError) {
-                stats.failed++;
                 throw error;
               }
               telemetryClient.reportRuleTranslation({
@@ -195,6 +195,7 @@ export class RuleMigrationsTaskClient {
         return;
       } else {
         const migrationDuration = (Date.now() - migrationStart) / 1000;
+        stats.total = stats.completed + stats.failed;
         telemetryClient.reportSiemMigration({ error, stats, duration: migrationDuration });
         this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
