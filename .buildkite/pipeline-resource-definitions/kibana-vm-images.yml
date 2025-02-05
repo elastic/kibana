@@ -24,6 +24,7 @@ spec:
       default_branch: main
       repository: elastic/ci-agent-images
       pipeline_file: vm-images/.buildkite/pipeline.yml
+      cancel_intermediate_builds: true
       provider_settings:
         trigger_mode: none
       schedules:
