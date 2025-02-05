@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/observability-logs-overview",
+  "id": "@kbn/logs-overview",
   "owner": [
     "@elastic/obs-ux-logs-team"
   ],
