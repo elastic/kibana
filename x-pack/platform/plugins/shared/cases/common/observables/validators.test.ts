@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-describe('emailValidator', () => {
+import { validateDomain, validateEmail, validateGenericValue, validateIp } from './validators';
+
+describe('validateEmail', () => {
   it('should return an error if the value is not a string', () => {
-    const result = emailValidator({
+    const result = validateEmail({
       value: undefined,
       path: 'email',
-    } as Parameters<ValidationFunc>[0]);
+    });
 
     expect(result).toEqual({
       code: 'ERR_NOT_STRING',
@@ -20,10 +22,10 @@ describe('emailValidator', () => {
   });
 
   it('should return an error if the value is not a valid email', () => {
-    const result = emailValidator({
+    const result = validateEmail({
       value: 'invalid-email',
-      path: 'email',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toEqual({
       code: 'ERR_NOT_EMAIL',
       message: 'Value should be a valid email',
@@ -32,20 +34,21 @@ describe('emailValidator', () => {
   });
 
   it('should return undefined if the value is a valid email', () => {
-    const result = emailValidator({
+    const result = validateEmail({
       value: 'test@example.com',
-      path: 'email',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toBeUndefined();
   });
 });
 
 describe('genericValidator', () => {
   it('should return an error if the value is not a string', () => {
-    const result = genericValidator({
+    const result = validateGenericValue({
       value: 123,
       path: 'generic',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toEqual({
       code: 'ERR_NOT_STRING',
       message: 'Value should be a string',
@@ -54,10 +57,11 @@ describe('genericValidator', () => {
   });
 
   it('should return an error if the value is not valid', () => {
-    const result = genericValidator({
+    const result = validateGenericValue({
       value: 'invalid value!',
       path: 'generic',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toEqual({
       code: 'ERR_NOT_VALID',
       message: 'Value is invalid',
@@ -66,28 +70,31 @@ describe('genericValidator', () => {
   });
 
   it('should return undefined if the value is valid', () => {
-    const result = genericValidator({
+    const result = validateGenericValue({
       value: 'valid_value',
       path: 'generic',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toBeUndefined();
   });
 });
 
-describe('domainValidator', () => {
+describe('validateDomain', () => {
   it('should return undefined for a valid domain', () => {
-    const result = domainValidator({
+    const result = validateDomain({
       value: 'example.com',
       path: 'domain',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toBeUndefined();
   });
 
   it('should return an error for an invalid domain', () => {
-    const result = domainValidator({
+    const result = validateDomain({
       value: '-invalid.com',
       path: 'domain',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toEqual({
       code: 'ERR_NOT_VALID',
       message: 'Value is invalid',
@@ -96,10 +103,11 @@ describe('domainValidator', () => {
   });
 
   it('should return an error for hyphen-spaced strings', () => {
-    const result = domainValidator({
+    const result = validateDomain({
       value: 'test-test',
       path: 'domain',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toEqual({
       code: 'ERR_NOT_VALID',
       message: 'Value is invalid',
@@ -108,10 +116,11 @@ describe('domainValidator', () => {
   });
 
   it('should return an error for a non-string value', () => {
-    const result = domainValidator({
+    const result = validateDomain({
       value: 12345,
       path: 'domain',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toEqual({
       code: 'ERR_NOT_STRING',
       message: 'Value should be a string',
@@ -120,20 +129,22 @@ describe('domainValidator', () => {
   });
 });
 
-describe('ipv4Validator', () => {
+describe('validateIp', () => {
   it('should return undefined for a valid ipv4', () => {
-    const result = ipv4Validator({
+    const result = validateIp('ipv4')({
       value: '127.0.0.1',
       path: 'ipv4',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toBeUndefined();
   });
 
   it('should return an error for invalid ipv4', () => {
-    const result = domainValidator({
+    const result = validateIp('ipv4')({
       value: 'invalid ip',
       path: 'ipv4',
-    } as Parameters<ValidationFunc>[0]);
+    });
+
     expect(result).toEqual({
       code: 'ERR_NOT_VALID',
       message: 'Value is invalid',
