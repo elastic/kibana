@@ -62,6 +62,7 @@ import { getActiveMaintenanceWindowsRoute as getActiveMaintenanceWindowsRouteInt
 import { bulkGetMaintenanceWindowRoute as bulkGetMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/bulk_get/bulk_get_maintenance_windows_route';
 
 import { getMaintenanceWindowRoute } from './maintenance_window/apis/external/get/get_maintenance_window_route';
+import { createMaintenanceWindowRoute } from './maintenance_window/apis/external/create/create_maintenance_window_route';
 
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
@@ -137,7 +138,7 @@ export function defineRoutes(opts: RouteOptions) {
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
 
-  // Maintenance Window APIs
+  // Maintenance Window - Internal APIs
   createMaintenanceWindowRouteInternal(router, licenseState);
   getMaintenanceWindowRouteInternal(router, licenseState);
   updateMaintenanceWindowRouteInternal(router, licenseState);
@@ -148,7 +149,9 @@ export function defineRoutes(opts: RouteOptions) {
   getActiveMaintenanceWindowsRouteInternal(router, licenseState);
   bulkGetMaintenanceWindowRouteInternal(router, licenseState);
 
+  // Maintenance Window - External APIs
   getMaintenanceWindowRoute(router, licenseState);
+  createMaintenanceWindowRoute(router, licenseState);
 
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);

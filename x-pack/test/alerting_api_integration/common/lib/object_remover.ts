@@ -11,7 +11,7 @@ interface ObjectToRemove {
   spaceId: string;
   id: string;
   type: string;
-  plugin: string;
+  plugin?: string;
   isInternal?: boolean;
 }
 
@@ -27,7 +27,7 @@ export class ObjectRemover {
     spaceId: ObjectToRemove['spaceId'],
     id: ObjectToRemove['id'],
     type: ObjectToRemove['type'],
-    plugin: ObjectToRemove['plugin'],
+    plugin?: ObjectToRemove['plugin'],
     isInternal?: ObjectToRemove['isInternal']
   ) {
     this.objectsToRemove.push({ spaceId, id, type, plugin, isInternal });
@@ -36,10 +36,12 @@ export class ObjectRemover {
   async removeAll() {
     await Promise.all(
       this.objectsToRemove.map(({ spaceId, id, type, plugin, isInternal }) => {
+        const url = `${getUrlPrefix(spaceId)}/${isInternal ? 'internal' : 'api'}/${
+          plugin ? `${plugin}/` : ''
+        }${type}/${id}`;
+
         return this.supertest
-          .delete(
-            `${getUrlPrefix(spaceId)}/${isInternal ? 'internal' : 'api'}/${plugin}/${type}/${id}`
-          )
+          .delete(url)
           .set('kbn-xsrf', 'foo')
           .expect(plugin === 'saved_objects' ? 200 : 204);
       })

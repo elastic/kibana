@@ -8,14 +8,27 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
 
-const recurringScheduleSchema = schema.object({});
+// TODO schedule schema
+const scheduleSchema = schema.object({
+  duration: schema.number(),
+  start: schema.string(),
+  recurring: schema.maybe(
+    schema.object({
+      end: schema.maybe(schema.string()),
+      every: schema.maybe(schema.string()),
+      onWeekDay: schema.maybe(schema.arrayOf(schema.string())),
+      onMonthDay: schema.maybe(schema.arrayOf(schema.number())),
+      onMonth: schema.maybe(schema.arrayOf(schema.string())),
+      occurrences: schema.maybe(schema.number()),
+    })
+  ),
+});
 
 // TO REVIEW
 const maintenanceWindowResponseFieldsSchema = schema.object({
   id: schema.string(),
   title: schema.string(),
   enabled: schema.boolean(),
-  duration: schema.number(),
   expiration_date: schema.string(),
 
   created_by: schema.nullable(schema.string()),
@@ -43,5 +56,5 @@ const maintenanceWindowResponseFieldsSchema = schema.object({
 
 export const maintenanceWindowResponseSchema = schema.intersection([
   maintenanceWindowResponseFieldsSchema,
-  recurringScheduleSchema,
+  scheduleSchema,
 ]);

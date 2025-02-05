@@ -15,25 +15,26 @@ import {
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 import { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import {
-  getParamsSchemaV1,
-  GetMaintenanceWindowRequestParamsV1,
-  GetMaintenanceWindowResponseV1,
-} from '../../../../../../common/routes/maintenance_window/external/apis/get';
+  createMaintenanceWindowRequestBodySchemaV1,
+  CreateMaintenanceWindowRequestBodyV1,
+  CreateMaintenanceWindowResponseV1,
+} from '../../../../../../common/routes/maintenance_window/external/apis/create';
 import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
+import { transformCreateBodyV1 } from './transform_create_body';
 
-export const getMaintenanceWindowRoute = (
+export const createMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`,
+      path: BASE_MAINTENANCE_WINDOW_API_PATH,
       validate: {
-        params: getParamsSchemaV1,
+        body: createMaintenanceWindowRequestBodySchemaV1,
       },
       security: {
         authz: {
-          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
         },
       },
       options: {
@@ -44,15 +45,15 @@ export const getMaintenanceWindowRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForMaintenanceWindow();
 
+        const body: CreateMaintenanceWindowRequestBodyV1 = req.body;
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
-        const params: GetMaintenanceWindowRequestParamsV1 = req.params;
-
-        const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.get({
-          id: params.id,
+        const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.create({
+          data: transformCreateBodyV1(body),
         });
 
-        const response: GetMaintenanceWindowResponseV1 =
+        const response: CreateMaintenanceWindowResponseV1 =
           transformMaintenanceWindowToResponseV1(maintenanceWindow);
 
         return res.ok({

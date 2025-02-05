@@ -15,12 +15,22 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // POST needs to be implemented
-  describe.skip('getMaintenanceWindow', () => {
+  describe('getMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createParams = {
       title: 'test-maintenance-window',
       duration: 60 * 60 * 1000, // 1 hr
+      // TODO schedule schema
+      // every possible field should be passed
+      start: '2026-02-07T09:17:06.790Z',
+      // recurring: {
+      //   end: '',
+      //   every: '',
+      //   onWeekDay: '',
+      //   onMonthDay: '',
+      //   onMonth: '',
+      //   ocurrences: 1234,
+      // },
     };
     afterEach(() => objectRemover.removeAll());
 
@@ -33,13 +43,7 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
             .set('kbn-xsrf', 'foo')
             .send(createParams);
 
-          objectRemover.add(
-            space.id,
-            createdMaintenanceWindow.id,
-            'rules/maintenance_window',
-            'alerting',
-            true
-          );
+          objectRemover.add(space.id, createdMaintenanceWindow.id, 'maintenance_window');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/maintenance_window/${createdMaintenanceWindow.id}`)
@@ -61,11 +65,28 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+
               expect(response.body.title).to.eql('test-maintenance-window');
-              expect(response.body.duration).to.eql(3600000);
-              expect(response.body.r_rule.dtstart).to.eql(createParams.r_rule.dtstart);
-              expect(response.body.events.length).to.be.greaterThan(0);
               expect(response.body.status).to.eql('running');
+              expect(response.body.enabled).to.eql('test-maintenance-window');
+
+              expect(response.body.created_by).to.eql(user.username);
+              // expect(response.body.created_at).to.eql('test-maintenance-window');
+              expect(response.body.updated_by).to.eql(user.username);
+              // expect(response.body.updated_at).to.eql('test-maintenance-window');
+
+              expect(response.body.expiration_date).to.eql('test-maintenance-window'); // ?
+
+              // TODO schedule schema
+              // We want to guarantee every field is returned as expected
+              expect(response.body.duration).to.eql(createParams.duration);
+              expect(response.body.start).to.eql(createParams.start);
+              // expect(response.body.recurring.end).to.eql();
+              // expect(response.body.recurring.every).to.eql();
+              // expect(response.body.recurring.onWeekDay).to.eql();
+              // expect(response.body.recurring.onMonthDay).to.eql();
+              // expect(response.body.recurring.onMonth).to.eql();
+              // expect(response.body.recurring.occurrences).to.eql();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
