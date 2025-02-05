@@ -43,16 +43,15 @@ const legacyMtrVisContainerIsFilterableCss = ({ euiTheme }: UseEuiTheme) =>
     },
   });
 
-const legacyMtrVisContainerIsFullCss = () =>
-  css({
-    minHeight: '100%',
-    minWidth: 'max-content',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: '1 0 100%',
-  });
+const legacyMtrVisContainerIsFullCss = css({
+  minHeight: '100%',
+  minWidth: 'max-content',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flex: '1 0 100%',
+});
 
 interface MetricVisValueProps {
   metric: MetricOptions;

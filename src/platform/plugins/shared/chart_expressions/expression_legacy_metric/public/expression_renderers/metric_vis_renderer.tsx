@@ -27,22 +27,20 @@ import {
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
-import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
-const legacyMtrVisCss = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    height: '100%',
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    overflow: 'auto',
-  });
+const legacyMtrVisCss = css({
+  height: '100%',
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  overflow: 'auto',
+});
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
