@@ -187,6 +187,9 @@ export class RuleMigrationsTaskClient {
       } while (!isDone);
 
       this.logger.info(`Finished migration ID:${migrationId}`);
+      const migrationDuration = (Date.now() - migrationStart) / 1000;
+      stats.total = stats.completed + stats.failed;
+      telemetryClient.reportSiemMigration({ stats, duration: migrationDuration });
     } catch (error) {
       await this.data.rules.releaseProcessing(migrationId);
 
@@ -200,10 +203,6 @@ export class RuleMigrationsTaskClient {
         this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
     } finally {
-      const migrationDuration = (Date.now() - migrationStart) / 1000;
-      stats.total = stats.completed + stats.failed;
-      telemetryClient.reportSiemMigration({ stats, duration: migrationDuration });
-
       this.migrationsRunning.delete(migrationId);
       abortPromise.cleanup();
     }
