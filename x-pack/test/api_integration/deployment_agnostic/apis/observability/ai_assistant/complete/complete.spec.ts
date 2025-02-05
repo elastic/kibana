@@ -12,7 +12,6 @@ import expect from '@kbn/expect';
 import {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
-  ConversationUpdateEvent,
   MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
@@ -25,7 +24,7 @@ import {
   LlmResponseSimulator,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createOpenAiChunk } from '../../../../../../observability_ai_assistant_api_integration/common/create_openai_chunk';
-import { decodeEvents, getConversationCreatedEvent, getConversationUpdatedEvent } from '../helpers';
+import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 
@@ -411,7 +410,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
-      let conversationUpdatedEvent: ConversationUpdateEvent;
 
       before(async () => {
         void proxy
@@ -488,8 +486,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(updatedResponse.status).to.be(200);
 
         await proxy.waitForAllInterceptorsSettled();
-
-        conversationUpdatedEvent = getConversationUpdatedEvent(updatedResponse.body);
       });
 
       after(async () => {
