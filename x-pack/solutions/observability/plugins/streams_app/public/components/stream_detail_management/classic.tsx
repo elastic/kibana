@@ -15,7 +15,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { ManagementTabs, Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 
-type ManagementSubTabs = 'enrich' | 'overview';
+type ManagementSubTabs = 'enrich' | 'overview' | 'lifecycle';
 
 function isValidManagementSubTab(value: string): value is ManagementSubTabs {
   return ['enrich', 'overview', 'lifecycle'].includes(value);
