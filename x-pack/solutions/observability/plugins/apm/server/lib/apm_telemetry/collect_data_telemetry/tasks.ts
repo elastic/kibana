@@ -684,7 +684,6 @@ export const tasks: TelemetryTask[] = [
             });
             const aggregatedServices: Record<string, number> = {};
             for (const bucket of response.aggregations?.agent_name.buckets ?? []) {
-              // For example, bucket.key could be "opentelemetry/java/elastic"
               const fullAgentName = bucket.key as string;
               aggregatedServices[fullAgentName] = bucket.services.value || 0;
             }
@@ -1188,25 +1187,25 @@ export const tasks: TelemetryTask[] = [
             dynamicAgentData[agentKey] = {
               agent: {
                 activation_method: agentBucket[AGENT_ACTIVATION_METHOD].buckets
-                  .map((bucket: any) => bucket.key as string)
+                  .map((bucket) => bucket.key as string)
                   .slice(0, size),
                 version: agentBucket[AGENT_VERSION].buckets.map(
-                  (bucket: any) => bucket.key as string
+                  (bucket) => bucket.key as string
                 ),
               },
               service: {
                 framework: {
                   name: agentBucket[SERVICE_FRAMEWORK_NAME].buckets
-                    .map((bucket: any) => bucket.key as string)
+                    .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   version: agentBucket[SERVICE_FRAMEWORK_VERSION].buckets
-                    .map((bucket: any) => bucket.key as string)
+                    .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   composite: sortBy(
                     flatten(
                       agentBucket[SERVICE_FRAMEWORK_NAME].buckets.map((fwBucket: any) =>
                         fwBucket[SERVICE_FRAMEWORK_VERSION].buckets.map(
-                          (versionBucket: any) => ({
+                          (versionBucket) => ({
                             doc_count: versionBucket.doc_count,
                             name: toComposite(fwBucket.key, versionBucket.key),
                           })
@@ -1217,20 +1216,20 @@ export const tasks: TelemetryTask[] = [
                   )
                     .reverse()
                     .slice(0, size)
-                    .map((composite: any) => composite.name),
+                    .map((composite) => composite.name),
                 },
                 language: {
                   name: agentBucket[SERVICE_LANGUAGE_NAME].buckets
-                    .map((bucket: any) => bucket.key as string)
+                    .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   version: agentBucket[SERVICE_LANGUAGE_VERSION].buckets
-                    .map((bucket: any) => bucket.key as string)
+                    .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   composite: sortBy(
                     flatten(
                       agentBucket[SERVICE_LANGUAGE_NAME].buckets.map((langBucket: any) =>
                         langBucket[SERVICE_LANGUAGE_VERSION].buckets.map(
-                          (versionBucket: any) => ({
+                          (versionBucket) => ({
                             doc_count: versionBucket.doc_count,
                             name: toComposite(langBucket.key, versionBucket.key),
                           })
@@ -1241,20 +1240,20 @@ export const tasks: TelemetryTask[] = [
                   )
                     .reverse()
                     .slice(0, size)
-                    .map((composite: any) => composite.name),
+                    .map((composite) => composite.name),
                 },
                 runtime: {
                   name: agentBucket[SERVICE_RUNTIME_NAME].buckets
-                    .map((bucket: any) => bucket.key as string)
+                    .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   version: agentBucket[SERVICE_RUNTIME_VERSION].buckets
-                    .map((bucket: any) => bucket.key as string)
+                    .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   composite: sortBy(
                     flatten(
                       agentBucket[SERVICE_RUNTIME_NAME].buckets.map((runtimeBucket: any) =>
                         runtimeBucket[SERVICE_RUNTIME_VERSION].buckets.map(
-                          (versionBucket: any) => ({
+                          (versionBucket) => ({
                             doc_count: versionBucket.doc_count,
                             name: toComposite(runtimeBucket.key, versionBucket.key),
                           })
@@ -1265,7 +1264,7 @@ export const tasks: TelemetryTask[] = [
                   )
                     .reverse()
                     .slice(0, size)
-                    .map((composite: any) => composite.name),
+                    .map((composite) => composite.name),
                 },
               },
             };
