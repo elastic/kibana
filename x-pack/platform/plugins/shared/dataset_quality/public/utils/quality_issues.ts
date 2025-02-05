@@ -24,7 +24,7 @@ export function mapFailedDocsIssues(failedDocsDetails: FailedDocsDetails): Quali
     {
       ...failedDocsDetails,
       name: 'failedDocs',
-      type: 'failed' as QualityIssueType,
+      type: 'failed',
     },
   ];
 }

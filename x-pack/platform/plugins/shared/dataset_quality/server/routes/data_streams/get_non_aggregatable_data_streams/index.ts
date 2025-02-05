@@ -45,7 +45,7 @@ export async function getNonAggregatableDataStreams({
   // so we need to check the aggregatable field to determine
   const aggregatable = response.fields._ignored?._ignored?.non_aggregatable_indices
     ? datasets.length === 0
-    : response.fields._ignored?._ignored?.aggregatable;
+    : Boolean(response.fields._ignored?._ignored?.aggregatable);
 
   return {
     aggregatable,
