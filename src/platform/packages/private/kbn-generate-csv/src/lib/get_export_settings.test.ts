@@ -154,7 +154,7 @@ describe('getExportSettings', () => {
   describe('scroll duration function', () => {
     let spiedDateNow: jest.Spied<typeof Date.now>;
     let mockedTaskInstanceFields: TaskInstanceFields;
-    const durationApart: Duration = { minutes: 5 };
+    const durationApart: { minutes: number } = { minutes: 5 };
 
     beforeEach(() => {
       const now = Date.now();
