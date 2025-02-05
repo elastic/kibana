@@ -52,11 +52,7 @@ interface DailyAggBucket {
   };
 }
 
-export interface HistoricalSummaryClient {
-  fetch(list: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse>;
-}
-
-export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
+export class HistoricalSummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetch(params: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse> {
