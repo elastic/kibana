@@ -11,7 +11,6 @@ import { EuiLink } from '@elastic/eui';
 import type { ContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../../common/types';
 
@@ -24,10 +23,6 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
   contentReferenceNode,
   securityAlertsPageContentReference,
 }) => {
-  const {
-    application: { navigateToApp },
-  } = useKibana().services;
-
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters()
 
   const onClick = useCallback(
@@ -40,7 +35,7 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
       },
         true, "(global:(timerange:(fromStr:now-24h,kind:relative,toStr:now)))");
     },
-    [navigateToApp, openAlertsPageWithFilters]
+    [openAlertsPageWithFilters]
   );
 
   return (
