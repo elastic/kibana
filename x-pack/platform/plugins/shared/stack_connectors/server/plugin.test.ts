@@ -18,6 +18,10 @@ describe('Stack Connectors Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext();
+      mockParseExperimentalConfigValue.mockReturnValue({
+        ...experimentalFeaturesMock,
+      });
+
       plugin = new StackConnectorsPlugin(context);
       coreSetup = coreMock.createSetup();
     });
