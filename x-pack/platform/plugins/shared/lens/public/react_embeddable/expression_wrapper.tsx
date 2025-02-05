@@ -81,7 +81,6 @@ export function ExpressionWrapper({
       data-test-subj="lens-embeddable"
     >
       <ExpressionRendererComponent
-        className="lnsExpressionRenderer__component"
         padding={noPadding ? undefined : 's'}
         variables={variables}
         allowCache={true}

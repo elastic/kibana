@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './filters.scss';
 import React, { useState } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +23,7 @@ import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
-import { FilterPopover } from './filter_popover';
+import { DraggablePopoverButtonStyles, FilterPopover } from './filter_popover';
 import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 
@@ -275,6 +274,7 @@ export const FilterList = ({
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',
                     })}
+                    css={DraggablePopoverButtonStyles}
                   >
                     {filter.label || (filter.input.query as string) || defaultLabel}
                   </EuiLink>
@@ -285,9 +285,7 @@ export const FilterList = ({
         })}
       </DragDropBuckets>
       <NewBucketButton
-        onClick={() => {
-          onAddFilter();
-        }}
+        onClick={onAddFilter}
         label={i18n.translate('xpack.lens.indexPattern.filters.addaFilter', {
           defaultMessage: 'Add a filter',
         })}
