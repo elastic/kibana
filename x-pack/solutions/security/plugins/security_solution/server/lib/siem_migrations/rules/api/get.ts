@@ -7,14 +7,15 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   GetRuleMigrationRequestParams,
   GetRuleMigrationRequestQuery,
   type GetRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { RuleMigrationGetOptions } from '../data/rule_migrations_data_rules_client';
+import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsGetRoute = (
@@ -53,8 +54,13 @@ export const registerSiemRuleMigrationsGetRoute = (
           is_untranslatable: isUntranslatable,
           is_failed: isFailed,
         } = req.query;
+        let siemMigrationAuditLogger: SiemMigrationAuditLogger | undefined;
         try {
           const ctx = await context.resolve(['securitySolution']);
+          const auditLogger = ctx.securitySolution.getAuditLogger();
+          if (auditLogger) {
+            siemMigrationAuditLogger = new SiemMigrationAuditLogger(auditLogger);
+          }
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
           const options: RuleMigrationGetOptions = {
@@ -75,9 +81,18 @@ export const registerSiemRuleMigrationsGetRoute = (
 
           const result = await ruleMigrationsClient.data.rules.get(migrationId, options);
 
+          siemMigrationAuditLogger?.log({
+            action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED,
+            id: migrationId,
+          });
           return res.ok({ body: result });
         } catch (err) {
           logger.error(err);
+          siemMigrationAuditLogger?.log({
+            action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED,
+            error: err,
+            id: migrationId,
+          });
           return res.badRequest({ body: err.message });
         }
       })

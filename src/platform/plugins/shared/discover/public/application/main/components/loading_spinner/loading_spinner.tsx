@@ -8,26 +8,20 @@
  */
 
 import React from 'react';
-import {
-  EuiLoadingSpinner,
-  EuiTitle,
-  EuiSpacer,
-  useEuiPaddingSize,
-  useEuiBackgroundColor,
-} from '@elastic/eui';
+import { EuiLoadingSpinner, EuiTitle, EuiSpacer, UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 export function LoadingSpinner() {
-  const loadingSpinnerCss = css`
+  const loadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => css`
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     text-align: center;
-    padding: ${useEuiPaddingSize('l')} 0;
-    background-color: ${useEuiBackgroundColor('plain')};
+    padding: ${euiTheme.size.l} 0;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
     z-index: 3;
   `;
 
