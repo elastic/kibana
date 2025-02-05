@@ -22,10 +22,10 @@ import * as i18n from './translations';
 const GENERIC_OBSERVABLE_VALUE_TYPE = 'generic' as const;
 
 export const normalizeValueType = (
-  value: string
+  observableTypeKey: string
 ): keyof typeof fieldsConfig.value | typeof GENERIC_OBSERVABLE_VALUE_TYPE => {
-  if (value in fieldsConfig.value) {
-    return value as keyof typeof fieldsConfig.value;
+  if (observableTypeKey in fieldsConfig.value) {
+    return observableTypeKey as keyof typeof fieldsConfig.value;
   }
 
   return GENERIC_OBSERVABLE_VALUE_TYPE;
@@ -88,7 +88,7 @@ const observableValueFieldTypes = [
   },
 ];
 
-const fieldsConfigPerObservableType = observableValueFieldTypes.reduce(
+const fieldsValueConfigsPerObservableType = observableValueFieldTypes.reduce(
   (fieldsConfig, valueFieldConfig) => {
     fieldsConfig[valueFieldConfig.key ?? GENERIC_OBSERVABLE_VALUE_TYPE] = {
       label: valueFieldConfig.label,
@@ -101,9 +101,7 @@ const fieldsConfigPerObservableType = observableValueFieldTypes.reduce(
 );
 
 export const fieldsConfig = {
-  value: {
-    ...fieldsConfigPerObservableType,
-  },
+  value: fieldsValueConfigsPerObservableType,
   typeKey: {
     validations: [
       {
