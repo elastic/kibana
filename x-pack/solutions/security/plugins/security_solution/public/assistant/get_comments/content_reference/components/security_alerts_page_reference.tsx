@@ -28,17 +28,20 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
     application: { navigateToApp },
   } = useKibana().services;
 
-  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters()
+  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      openAlertsPageWithFilters({
-        selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-        fieldName: 'kibana.alert.workflow_status',
-        persist: false,
-      },
-        true, "(global:(timerange:(fromStr:now-24h,kind:relative,toStr:now)))");
+      openAlertsPageWithFilters(
+        {
+          selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+          fieldName: 'kibana.alert.workflow_status',
+          persist: false,
+        },
+        true,
+        '(global:(timerange:(fromStr:now-24h,kind:relative,toStr:now)))'
+      );
     },
     [navigateToApp, openAlertsPageWithFilters]
   );
