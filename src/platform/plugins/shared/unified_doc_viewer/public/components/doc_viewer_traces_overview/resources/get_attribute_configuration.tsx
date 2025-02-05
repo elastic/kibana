@@ -26,6 +26,8 @@ import {
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { castArray } from 'lodash';
+import { ServiceNameLink } from '../sub_components/service_name_link';
 
 export const getAttributeConfiguration = (
   attributes: TraceDocumentOverview
@@ -48,9 +50,10 @@ export const getAttributeConfiguration = (
         defaultMessage: 'Service',
       }),
       content: (
-        <p>
-          {attributes[AGENT_NAME_FIELD]} - {attributes[SERVICE_NAME_FIELD]}
-        </p>
+        <ServiceNameLink
+          serviceName={attributes[SERVICE_NAME_FIELD]}
+          agentName={castArray(attributes[AGENT_NAME_FIELD])[0]}
+        />
       ),
     },
     [TRACE_ID_FIELD]: {
