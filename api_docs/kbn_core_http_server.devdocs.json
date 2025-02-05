@@ -5353,10 +5353,6 @@
                 "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_create_route.ts"
               },
               {
-                "plugin": "serverless",
-                "path": "x-pack/platform/plugins/shared/serverless/server/plugin.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/routes/connector/create/create.ts"
               },
