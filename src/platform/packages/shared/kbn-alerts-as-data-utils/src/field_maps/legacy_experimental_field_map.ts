@@ -15,6 +15,7 @@ import {
   ALERT_GROUP,
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
+  ALERT_GROUPING,
 } from '@kbn/rule-data-utils';
 
 export const legacyExperimentalFieldMap = {
@@ -34,6 +35,12 @@ export const legacyExperimentalFieldMap = {
   [ALERT_GROUP]: {
     type: 'object',
     array: true,
+    required: false,
+  },
+  [ALERT_GROUPING]: {
+    type: 'object',
+    dynamic: false,
+    array: false,
     required: false,
   },
   [ALERT_GROUP_FIELD]: {

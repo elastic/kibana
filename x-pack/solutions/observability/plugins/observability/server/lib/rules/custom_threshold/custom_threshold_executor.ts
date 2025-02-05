@@ -11,6 +11,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
   ALERT_GROUP,
+  ALERT_GROUPING,
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
@@ -250,6 +251,9 @@ export const createCustomThresholdExecutor = ({
 
         const groups = groupByKeysObjectMapping[group];
 
+        const grouping: Record<string, string> = {};
+        groups?.forEach((groupObj) => (grouping[groupObj.field] = groupObj.value));
+
         const { uuid, start } = alertsClient.report({
           id: `${group}`,
           actionGroup: actionGroupId,
@@ -258,6 +262,7 @@ export const createCustomThresholdExecutor = ({
             [ALERT_EVALUATION_VALUES]: evaluationValues,
             [ALERT_EVALUATION_THRESHOLD]: threshold,
             [ALERT_GROUP]: groups,
+            [ALERT_GROUPING]: grouping,
             ...flattenAdditionalContext(additionalContext),
             ...getEcsGroups(groups),
           },

@@ -17,6 +17,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
+  ALERT_GROUPING,
 } from '@kbn/rule-data-utils';
 import { Group } from '../../../../common/typings';
 import {
@@ -80,4 +81,5 @@ export type CustomThresholdAlert = Omit<
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
   [ALERT_GROUP]?: Group[];
+  [ALERT_GROUPING]?: Record<string, string>;
 };
