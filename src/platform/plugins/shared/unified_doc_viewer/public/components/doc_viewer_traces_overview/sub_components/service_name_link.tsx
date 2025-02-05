@@ -40,7 +40,7 @@ export function ServiceNameLink({ serviceName, agentName }: ServiceNameLinkProps
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          // TODO add telemetry
+          // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
           apmLinkToServiceEntityLocator?.navigate({ serviceName });
         },
       })
@@ -57,16 +57,12 @@ export function ServiceNameLink({ serviceName, agentName }: ServiceNameLinkProps
         <EuiText size="s">{serviceName}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
-  ); // TODO fix UI issue with "open in new tab" icon
+  );
 
   return (
     <>
       {canViewApm && routeLinkProps ? (
-        <EuiLink
-          {...routeLinkProps}
-          target="_blank"
-          data-test-subj="unifiedDocViewTracesOverviewServiceNameLink"
-        >
+        <EuiLink {...routeLinkProps} data-test-subj="unifiedDocViewTracesOverviewServiceNameLink">
           {content}
         </EuiLink>
       ) : (
