@@ -28,7 +28,28 @@ function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
       <div>Test</div>
     </FlyoutWrapper>
   );
-  return result;
+  return {
+    ...result,
+    // rewrite the rerender function to work with the store wrapper
+    rerender: (props: Partial<FlyoutWrapperProps>) =>
+      result.rerender(
+        <FlyoutWrapper
+          isInlineFlyoutVisible
+          displayFlyoutHeader
+          isScrollable
+          isNewPanel
+          isSaveable
+          language={'Lens'}
+          onCancel={jest.fn()}
+          navigateToLensEditor={jest.fn()}
+          onApply={jest.fn()}
+          {...propsOverrides}
+          {...props}
+        >
+          <div>Test</div>
+        </FlyoutWrapper>
+      ),
+  };
 }
 
 describe('Flyout wrapper', () => {
@@ -40,14 +61,14 @@ describe('Flyout wrapper', () => {
       expect(screen.queryByRole('button', { name: 'Apply changes' })).toBeInTheDocument();
       // make sure the read only warning is not shown
       expect(
-        screen.queryByText('Read only panel changes will revert after closing')
+        screen.queryByText('Read-only: Changes will be reverted on close')
       ).not.toBeInTheDocument();
     });
     it('should show a warning and avoid any edit action when in read mode', async () => {
       mountFlyoutWrapper({ isReadOnly: true });
 
       expect(
-        screen.queryByText('Read only panel changes will revert after closing')
+        screen.queryByText('Read-only: Changes will be reverted on close')
       ).toBeInTheDocument();
 
       // make sure edit actions are not shown
@@ -55,19 +76,13 @@ describe('Flyout wrapper', () => {
       expect(screen.queryByRole('button', { name: 'Apply changes' })).not.toBeInTheDocument();
     });
 
-    it('should show the correct panel title for a creation panel scenario', async () => {
-      mountFlyoutWrapper();
-      expect(screen.getByText('Create Lens visualization')).toBeInTheDocument();
-    });
-
-    it('should show the correct panel title for an editing panel scenario', async () => {
-      mountFlyoutWrapper({ isNewPanel: false });
-      expect(screen.getByText('Edit Lens visualization')).toBeInTheDocument();
-    });
-
-    it('should show the correct panel title for a show panel scenario', async () => {
-      mountFlyoutWrapper({ isNewPanel: false, isReadOnly: true });
-      expect(screen.getByText('Audit Lens visualization')).toBeInTheDocument();
+    it('should show the only a single and consistent title no matter the context', async () => {
+      const component = mountFlyoutWrapper();
+      expect(screen.getByText('Configuration')).toBeInTheDocument();
+      component.rerender({ isNewPanel: true });
+      expect(screen.getByText('Configuration')).toBeInTheDocument();
+      component.rerender({ isNewPanel: false, isReadOnly: true });
+      expect(screen.getByText('Configuration')).toBeInTheDocument();
     });
   });
 

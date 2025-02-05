@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import {
+  HasEditCapabilities,
+  HasParentApi,
+  PublishesViewMode,
+  PublishesWritableViewMode,
+  ViewMode,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { ShowConfigPanelAction, ShowConfigPanelActionApi } from './show_config_panel_action';
 
@@ -18,7 +24,7 @@ describe('Show config panel action', () => {
 
   beforeEach(() => {
     const viewModeSubject = new BehaviorSubject<ViewMode>('view');
-    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
+    updateViewMode = jest.fn((viewMode) => viewModeSubject.next(viewMode));
 
     action = new ShowConfigPanelAction();
     context = {
@@ -48,13 +54,85 @@ describe('Show config panel action', () => {
   });
 
   it('is incompatible when view is not enabled', async () => {
-    context.embeddable.isReadOnlyEnabled = jest.fn().mockReturnValue(false);
+    context.embeddable.isReadOnlyEnabled = jest.fn().mockReturnValue({ read: false, write: false });
     expect(await action.isCompatible(context)).toBe(false);
   });
 
-  it('calls the onShowConfig method on execute', async () => {
+  it('calls the onShowConfig method on execute if user has no write permissions', async () => {
+    context.embeddable.isReadOnlyEnabled = jest.fn().mockReturnValue({ read: true, write: false });
     action.execute(context);
     expect(context.embeddable.onShowConfig).toHaveBeenCalled();
+  });
+
+  it('calls the onEdit method on execute if user has write permissions', async () => {
+    // share the same view mode as the embeddable
+    // @ts-expect-error viewMode$ is preset but TS wants additional type guards to be sure of it
+    const viewMode$ = context.embeddable.viewMode$;
+    const contextWithEditPermissions: {
+      embeddable: ShowConfigPanelActionApi &
+        HasEditCapabilities &
+        HasParentApi<PublishesWritableViewMode>;
+    } = {
+      ...context,
+      embeddable: {
+        ...context.embeddable,
+        // Write permission + edit enabled
+        isReadOnlyEnabled: jest.fn().mockReturnValue({ read: true, write: true }),
+        isEditingEnabled: jest.fn().mockReturnValue(true),
+        onEdit: jest.fn(),
+        parentApi: {
+          viewMode$,
+          setViewMode: updateViewMode,
+        },
+      },
+    };
+    await action.execute(contextWithEditPermissions);
+    // it should not call showConfig
+    expect(contextWithEditPermissions.embeddable.onShowConfig).not.toHaveBeenCalled();
+    // rather it should switch view mode for the parentApi and call onEdit
+    expect(contextWithEditPermissions.embeddable.parentApi.setViewMode).toHaveBeenCalledWith(
+      'edit'
+    );
+    expect(contextWithEditPermissions.embeddable.onEdit).toHaveBeenCalled();
+  });
+
+  it('calls the showConfig as fallback method on execute if user has write permissions but cannot edit for some reason', async () => {
+    // share the same view mode as the embeddable
+    // @ts-expect-error viewMode$ is preset but TS wants additional type guards to be sure of it
+    const viewMode$ = context.embeddable.viewMode$;
+    const contextWithEditPermissions: {
+      embeddable: ShowConfigPanelActionApi &
+        HasEditCapabilities &
+        HasParentApi<PublishesWritableViewMode>;
+    } = {
+      ...context,
+      embeddable: {
+        ...context.embeddable,
+        // Write permission + edit disabled (i.e. managed dashboard)
+        isReadOnlyEnabled: jest.fn().mockReturnValue({ read: true, write: true }),
+        isEditingEnabled: jest.fn().mockReturnValue(false),
+        onEdit: jest.fn(),
+        parentApi: {
+          viewMode$,
+          setViewMode: updateViewMode,
+        },
+      },
+    };
+    await action.execute(contextWithEditPermissions);
+    // it should switch view mode for the parentApi and call onEdit
+    expect(contextWithEditPermissions.embeddable.parentApi.setViewMode).toHaveBeenNthCalledWith(
+      1,
+      'edit'
+    );
+    // but since the user cannot edit, it should not call onEdit
+    expect(contextWithEditPermissions.embeddable.onEdit).not.toHaveBeenCalled();
+    // fallabck to switch back to view mode and read only panel
+    expect(contextWithEditPermissions.embeddable.parentApi.setViewMode).toHaveBeenNthCalledWith(
+      2,
+      'view'
+    );
+    // it should call showConfig
+    expect(contextWithEditPermissions.embeddable.onShowConfig).toHaveBeenCalled();
   });
 
   it('calls onChange when view mode changes', () => {
@@ -78,7 +156,7 @@ describe('Show config panel action', () => {
   });
 
   it('should show a different label based on the write permissions', () => {
-    expect(action.getDisplayName(context)).toBe('Configuration');
+    expect(action.getDisplayName(context)).toBe('Show A very fun panel type configuration');
     expect(
       action.getDisplayName({
         ...context,
@@ -87,6 +165,6 @@ describe('Show config panel action', () => {
           isReadOnlyEnabled: jest.fn().mockReturnValue({ read: true, write: true }),
         },
       })
-    ).toBe('Edit A very fun panel type');
+    ).toBe('Edit A very fun panel type configuration');
   });
 });

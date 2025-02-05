@@ -17,6 +17,9 @@ import {
   getViewModeSubject,
   HasReadOnlyCapabilities,
   hasReadOnlyCapabilities,
+  apiHasParentApi,
+  apiPublishesWritableViewMode,
+  hasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import {
   Action,
@@ -46,13 +49,16 @@ export class ShowConfigPanelAction
     const { write } = embeddable.isReadOnlyEnabled();
     return write
       ? i18n.translate('presentationPanel.action.editPanel.displayName', {
-          defaultMessage: 'Edit {value}',
+          defaultMessage: 'Edit {value} configuration',
           values: {
             value: embeddable.getTypeDisplayName(),
           },
         })
       : i18n.translate('presentationPanel.action.showConfigPanel.displayName', {
-          defaultMessage: 'Configuration',
+          defaultMessage: 'Show {value} configuration',
+          values: {
+            value: embeddable.getTypeDisplayName(),
+          },
         });
   }
 
@@ -79,8 +85,11 @@ export class ShowConfigPanelAction
     return write ? 'pencil' : 'glasses';
   }
 
+  /**
+   * The compatible check is scoped to the read only capabilities
+   * Note: it does not take into account write permissions
+   */
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    // check if the embeddable allows the read only mode even when the view mode is 'view'
     return Boolean(
       isApiCompatible(embeddable) &&
         getInheritedViewMode(embeddable) === 'view' &&
@@ -88,8 +97,31 @@ export class ShowConfigPanelAction
     );
   }
 
+  /**
+   * The execute method contains a compatibility check with a wider scope
+   * as it can detect permission and "hijack" the show action into an edit action
+   * if the user can edit the panel
+   */
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    const { write } = embeddable.isReadOnlyEnabled();
+    const currentViewMode = getInheritedViewMode(embeddable);
+    const shouldChangeMode = write && currentViewMode !== 'edit';
+    if (
+      shouldChangeMode &&
+      apiHasParentApi(embeddable) &&
+      apiPublishesWritableViewMode(embeddable.parentApi) &&
+      hasEditCapabilities(embeddable)
+    ) {
+      await embeddable.parentApi.setViewMode('edit');
+      if (embeddable.isEditingEnabled()) {
+        await embeddable.onEdit();
+        return;
+      }
+      // if user has no edit capabilities once switched to edit mode,
+      // restore the previous mode and show the config as read only
+      await embeddable.parentApi.setViewMode(currentViewMode ?? 'view');
+    }
     await embeddable.onShowConfig();
   }
 }

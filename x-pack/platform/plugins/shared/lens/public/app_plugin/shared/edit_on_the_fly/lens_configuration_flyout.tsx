@@ -588,7 +588,7 @@ export function LensEditConfigurationFlyout({
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
-                      defaultMessage: 'Visualization configuration',
+                      defaultMessage: 'Visualization layers',
                     })}
                   </h5>
                 </EuiTitle>

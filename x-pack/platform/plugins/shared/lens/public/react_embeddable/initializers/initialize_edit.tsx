@@ -63,6 +63,10 @@ function isEditMode(viewMode$: PublishingSubject<ViewMode>) {
   return viewMode$.getValue() === 'edit';
 }
 
+function hasManagedApi(api: unknown): api is { isManaged: boolean } {
+  return Boolean(api && typeof (api as { isManaged?: boolean }).isManaged === 'boolean');
+}
+
 /**
  * Initialize the edit API for the embeddable
  **/
@@ -88,6 +92,9 @@ export function initializeEditApi(
   cleanup: () => void;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
+  const isManaged = (currentState: LensRuntimeState) => {
+    return currentState.managed || (hasManagedApi(parentApi) ? parentApi.isManaged : false);
+  };
 
   const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
@@ -190,8 +197,12 @@ export function initializeEditApi(
     if (!isEditMode(viewMode$)) {
       return false;
     }
+    const currentState = getState();
     // check if it's in ES|QL mode
-    if (isTextBasedLanguage(getState()) && !isESQLModeEnabled()) {
+    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled()) {
+      return false;
+    }
+    if (isManaged(currentState)) {
       return false;
     }
     return (
@@ -244,7 +255,7 @@ export function initializeEditApi(
       viewMode$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.lens.embeddableDisplayName', {
-          defaultMessage: 'Lens',
+          defaultMessage: 'visualization',
         }),
       supportedTriggers,
       disabledActionIds$,
@@ -286,7 +297,7 @@ export function initializeEditApi(
       isReadOnlyEnabled: () => {
         return {
           read: Boolean(parentApi && apiHasAppContext(parentApi) && canShowConfig()),
-          write: Boolean(capabilities.dashboard_v2?.showWriteControls),
+          write: Boolean(capabilities.dashboard_v2?.showWriteControls && !isManaged(getState())),
         };
       },
       onShowConfig: async () => {

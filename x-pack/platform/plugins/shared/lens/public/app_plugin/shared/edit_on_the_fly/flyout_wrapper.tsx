@@ -27,28 +27,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutWrapperProps } from './types';
 
-function getPanelTitle(
-  language: string | undefined,
-  { isNewPanel, isReadOnly }: { isNewPanel?: boolean; isReadOnly?: boolean }
-) {
-  if (isReadOnly) {
-    return i18n.translate('xpack.lens.config.showVisualizationLabel', {
-      defaultMessage: 'Audit {lang} visualization',
-      values: { lang: language },
-    });
-  }
-  if (isNewPanel) {
-    return i18n.translate('xpack.lens.config.createVisualizationLabel', {
-      defaultMessage: 'Create {lang} visualization',
-      values: { lang: language },
-    });
-  }
-  return i18n.translate('xpack.lens.config.editVisualizationLabel', {
-    defaultMessage: 'Edit {lang} visualization',
-    values: { lang: language },
-  });
-}
-
 export const FlyoutWrapper = ({
   children,
   isInlineFlyoutVisible,
@@ -79,7 +57,9 @@ export const FlyoutWrapper = ({
                 <h2>
                   <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      {getPanelTitle(language, { isNewPanel, isReadOnly })}
+                      {i18n.translate('xpack.lens.config.showVisualizationLabel', {
+                        defaultMessage: 'Configuration',
+                      })}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
@@ -125,10 +105,10 @@ export const FlyoutWrapper = ({
       {isInlineFlyoutVisible && isReadOnly ? (
         <EuiCallOut
           title={i18n.translate('xpack.lens.config.readOnly', {
-            defaultMessage: 'Read only panel changes will revert after closing',
+            defaultMessage: 'Read-only: Changes will be reverted on close',
           })}
           aria-label={i18n.translate('xpack.lens.config.readOnly', {
-            defaultMessage: 'Read only panel changes will revert after closing',
+            defaultMessage: 'Read-only: Changes will be reverted on close',
           })}
           color="warning"
           iconType="warning"
