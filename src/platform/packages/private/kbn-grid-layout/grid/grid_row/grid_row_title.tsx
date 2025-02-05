@@ -77,13 +77,14 @@ export const GridRowTitle = React.memo(
               inputAriaLabel={i18n.translate('kbnGridLayout.row.editTitleAriaLabel', {
                 defaultMessage: 'Edit section title',
               })}
+              data-test-subj="kbnGridRowTitle--editor"
             />
           </EuiFlexItem>
         ) : (
           <>
             <EuiFlexItem grow={false}>
               <EuiLink onClick={toggleIsCollapsed}>
-                <EuiTitle size="xs">
+                <EuiTitle size="xs" data-test-subj="kbnGridRowTitle">
                   <h2>{rowTitle}</h2>
                 </EuiTitle>
               </EuiLink>
@@ -94,6 +95,10 @@ export const GridRowTitle = React.memo(
                   iconType="pencil"
                   onClick={() => setEditTitleOpen(true)}
                   color="text"
+                  aria-label={i18n.translate('kbnGridLayout.row.editRowTitle', {
+                    defaultMessage: 'Edit section title',
+                  })}
+                  data-test-subj="kbnGridRowTitle--edit"
                 />
               </EuiFlexItem>
             )}
