@@ -20,15 +20,17 @@ import {
 } from '@elastic/eui';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
+export interface SetupTechnologySelectorProps {
+  disabled: boolean;
+  setupTechnology: SetupTechnology;
+  onSetupTechnologyChange: (value: SetupTechnology) => void;
+}
+
 export const SetupTechnologySelector = ({
   disabled,
   setupTechnology,
   onSetupTechnologyChange,
-}: {
-  disabled: boolean;
-  setupTechnology: SetupTechnology;
-  onSetupTechnologyChange: (value: SetupTechnology) => void;
-}) => {
+}: SetupTechnologySelectorProps) => {
   const radioGroupItemId1 = useGeneratedHtmlId({
     prefix: 'radioGroupItem',
     suffix: 'agentless',

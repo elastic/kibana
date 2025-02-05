@@ -1263,6 +1263,7 @@
     "snakecase-keys": "^8.0.0",
     "source-map-support": "^0.5.19",
     "stats-lite": "^2.2.0",
+    "stream": "^0.0.3",
     "strip-ansi": "^6.0.0",
     "styled-components": "^5.3.11",
     "suricata-sid-db": "^1.0.2",

@@ -163,6 +163,16 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             plugins: ['@babel/plugin-transform-logical-assignment-operators'],
           },
         },
+        {
+          test: /node_modules[\/\\]@?stream[\/\\].*.js$/,
+          include: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            },
+          },
+        },
       ],
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
