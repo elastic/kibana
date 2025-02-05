@@ -68,7 +68,7 @@ export class HealthTask {
       return;
     }
 
-    if (!this.config.healthEnabled) {
+    if (!this.config.healthTaskEnabled) {
       return await taskManager.removeIfExists(this.taskId);
     }
 
@@ -108,7 +108,7 @@ export class HealthTask {
       return getDeleteTaskRunResult();
     }
 
-    if (!this.config.healthEnabled) {
+    if (!this.config.healthTaskEnabled) {
       this.logger.debug('[HealthTask] Task is disabled');
       return;
     }

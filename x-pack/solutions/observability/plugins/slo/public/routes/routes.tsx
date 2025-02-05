@@ -23,9 +23,11 @@ import {
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
 import { SloManagementPage } from '../pages/slo_management/slo_management_page';
+import { ExperimentalFeatures } from '../../common/config';
 
 export const getRoutes = (
-  isServerless?: boolean
+  isServerless?: boolean,
+  experimentalFeatures?: ExperimentalFeatures
 ): {
   [key: string]: {
     handler: () => React.ReactElement;
@@ -80,13 +82,17 @@ export const getRoutes = (
           },
         }
       : {}),
-    [SLOS_MANAGEMENT_PATH]: {
-      handler: () => {
-        return <SloManagementPage />;
-      },
-      params: {},
-      exact: true,
-    },
+    ...(!!experimentalFeatures?.management.enabled
+      ? {
+          [SLOS_MANAGEMENT_PATH]: {
+            handler: () => {
+              return <SloManagementPage />;
+            },
+            params: {},
+            exact: true,
+          },
+        }
+      : {}),
     [SLO_DETAIL_PATH]: {
       handler: () => {
         return <SloDetailsPage />;

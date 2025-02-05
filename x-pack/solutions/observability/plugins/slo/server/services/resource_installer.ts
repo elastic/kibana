@@ -49,7 +49,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
 
     let installTimeout;
 
-    const isHealthEnabled = this.config.healthEnabled;
+    const isHealthEnabled = this.config.healthTaskEnabled;
     try {
       installTimeout = setTimeout(() => (this.isInstalling = false), 60000);
 
