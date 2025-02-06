@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { StatusRuleInspect } from '../../../../../common/runtime_types/alert_rules/common';
+import { StatusRuleParamsProps } from '../../components/alerts/status_rule_ui';
 import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { createAsyncAction } from '../utils/actions';
 
@@ -23,3 +25,8 @@ export const enableDefaultAlertingSilentlyAction = createAsyncAction<void, DEFAU
 export const updateDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
   'updateDefaultAlertingAction'
 );
+
+export const inspectStatusRuleAction = createAsyncAction<
+  StatusRuleParamsProps['ruleParams'],
+  StatusRuleInspect
+>('inspectStatusRuleAction');

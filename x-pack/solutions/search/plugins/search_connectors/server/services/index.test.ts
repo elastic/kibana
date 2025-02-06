@@ -493,6 +493,48 @@ describe('AgentlessConnectorsInfraService', () => {
       const result = await service.deployConnector(connector);
       expect(result).toBe(sharepointOnlinePackagePolicy);
     });
+
+    test('passes supports_agentless flag and global tags correctly to agent policy creation and package policy creation', async () => {
+      const testConnector = {
+        id: '000000005',
+        name: 'Test Agentless Connector',
+        service_type: 'github',
+        is_deleted: false,
+      };
+
+      const fakeAgentPolicy = { id: 'agent-policy-005' } as AgentPolicy;
+      const fakePackagePolicy = {
+        id: 'package-policy-005',
+        policy_ids: ['agent-policy-005'],
+      } as PackagePolicy;
+
+      agentPolicyInterface.create.mockResolvedValue(fakeAgentPolicy);
+      packagePolicyService.create.mockResolvedValue(fakePackagePolicy);
+
+      const result = await service.deployConnector(testConnector);
+
+      expect(agentPolicyInterface.create).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        expect.objectContaining({
+          supports_agentless: true,
+          global_data_tags: [
+            { name: 'organization', value: 'elastic' },
+            { name: 'division', value: 'engineering' },
+            { name: 'team', value: 'search-extract-and-transform' },
+          ],
+        })
+      );
+
+      expect(packagePolicyService.create).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        expect.objectContaining({
+          supports_agentless: true,
+        })
+      );
+      expect(result).toBe(fakePackagePolicy);
+    });
   });
   describe('removeDeployment', () => {
     const packagePolicyId = 'this-is-package-policy-id';
