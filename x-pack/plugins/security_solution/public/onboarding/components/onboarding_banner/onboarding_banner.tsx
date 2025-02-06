@@ -7,21 +7,21 @@
 
 import React, { useCallback } from 'react';
 
-import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
+import { AVCResultsBanner, useIsStillYear2025 } from '@kbn/avc-banner';
 import { useStoredIsAVCBannerDismissed } from '../../hooks/use_stored_state';
 
 export const OnboardingBanner = React.memo(() => {
   const [isAVCBannerDismissed, setIsAVCBannerDismissed] = useStoredIsAVCBannerDismissed();
-  const isStillYear2024 = useIsStillYear2024();
+  const isStillYear2025 = useIsStillYear2025();
 
   const dismissAVCBanner = useCallback(() => {
     setIsAVCBannerDismissed(true);
   }, [setIsAVCBannerDismissed]);
 
-  if (isAVCBannerDismissed || !isStillYear2024) {
+  if (isAVCBannerDismissed || !isStillYear2025) {
     return null;
   }
 
-  return <AVCResultsBanner2024 onDismiss={dismissAVCBanner} />;
+  return <AVCResultsBanner onDismiss={dismissAVCBanner} />;
 });
 OnboardingBanner.displayName = 'OnboardingBanner';

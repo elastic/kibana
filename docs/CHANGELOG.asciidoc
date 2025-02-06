@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.16.3>>
 * <<release-notes-8.16.2>>
 * <<release-notes-8.16.1>>
 * <<release-notes-8.16.0>>
@@ -82,6 +83,29 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.16.3]]
+== {kib} 8.16.3
+The 8.16.3 release includes the following bug fixes.
+[float]
+[[fixes-v8.16.3]]
+=== Bug fixes
+Alerting::
+* Updates handling of invalid RRule params and prevents infinite looping ({kibana-pull}205650[#205650]).
+* Fixes an issue with saving ECS group by fields at the root level for query DSL rules ({kibana-pull}203769[#203769]).
+* Fixes race condition in alerting rules data view selector ({kibana-pull}203654[#203654]).
+Data ingestion and Fleet::
+* Fixes an issue with showing all agent tags when agent list is filtered ({kibana-pull}205163[#205163]).
+Elastic Observability solution::
+* Preserves `kuery` filters when switching between Universal Profiling pages in new solution navigation ({kibana-pull}203545[#203545]).
+Elastic Search solution::
+* Adds ML as required plugin to Search Assistant ({kibana-pull}204009[#204009]).
+* Fixes web crawler name inconsistencies ({kibana-pull}202738[#202738]).
+Elastic Security solution::
+For the Elastic Security 8.16.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes Integration and Datastream name validation ({kibana-pull}204943[#204943]).
+* Adds RBAC to the Automatic Import APIs ({kibana-pull}203882[#203882]).
+
 [[release-notes-8.16.2]]
 == {kib} 8.16.2
 
@@ -131,6 +155,28 @@ Machine Learning::
 [[release-notes-8.16.1]]
 == {kib} 8.16.1
 
+For information about the {kib} 8.16.1 release, review the following information.
+
+The 8.16.1 release includes the following known issues.
+
+[float]
+[[known-issues-8.16.1]]
+=== Known issues
+
+[discrete]
+[[known-201115]]
+.Kibana `Dev Tools > Console` incorrectly splits a request string that contains concatenated JSON objects, resulting in errors when submitting the requests to Elasticsearch.
+[%collapsible]
+====
+*Details* +
+The Console takes the body of the request and splits it into several JSON objects to send to Elasticsearch.  It is incorrectly parsing the concatenated JSON objects when braces appear within string values.
+
+*Workaround* +
+Send the request to Elasticsearch using other tools like curl.  This `Dev Tools > Console` bug is fixed in 8.16.2 and above.
+
+For more information, refer to {kibana-issue}200201[#200201] and {kibana-issue}201965[#201965].
+====
+
 The 8.16.1 release includes the following bug fixes.
 
 [float]
@@ -161,6 +207,8 @@ The 8.16.0 release includes the following known issues.
 [float]
 [[known-issues-8.16.0]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 [discrete]
 [[known-199902]]
@@ -195,6 +243,20 @@ More information can be found in the {observability-guide}/apm-collect-applicati
 For information about how to create APM API keys, please check the {observability-guide}/apm-api-key.html#apm-create-an-api-key[API key documentation].
 
 For more information, refer to {kibana-issue}199891[#199891] and {kibana-issue}199892[#199892].
+====
+
+[discrete]
+[[known-201115-2]]
+.Kibana `Dev Tools > Console` incorrectly splits a request string that contains concatenated JSON objects, resulting in errors when submitting the requests to Elasticsearch.
+[%collapsible]
+====
+*Details* +
+The Console takes the body of the request and splits it into several JSON objects to send to Elasticsearch.  It is incorrectly parsing the concatenated JSON objects when braces appear within string values.
+
+*Workaround* +
+Send the request to Elasticsearch using other tools like curl.  This `Dev Tools > Console` bug is fixed in 8.16.2 and above.
+
+For more information, refer to {kibana-issue}200201[#200201] and {kibana-issue}201965[#201965].
 ====
 
 [float]
@@ -754,6 +816,8 @@ The 8.15.0 release includes the following known issues.
 [[known-issues-8.15.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-178114]]
 .Kibana fails to start when processing YAML configuration keys that contain dotted notation in objects in arrays
@@ -1197,6 +1261,8 @@ For information about the {kib} 8.14.0 release, review the following information
 [float]
 [[known-issues-8.14.0]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 // tag::known-issue-186969[]
 .Creating or editing APM, {observability} and {stack-monitor-app} rules fails
@@ -1671,6 +1737,8 @@ For information about the {kib} 8.13.0 release, review the following information
 [[known-issues-8.13.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-179457]]
 .In Canvas, an empty text element incorrectly triggers a toast notification
@@ -2078,6 +2146,8 @@ For information about the {kib} 8.12.0 release, review the following information
 [[known-issues-8.12.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-177938-8.12]]
 .Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
@@ -2476,6 +2546,8 @@ For information about the {kib} 8.11.0 release, review the following information
 [[known-issues-8.11.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 // tag::known-issue-169170[]
 [discrete]
 .Gatekeeper error on macOS
@@ -2820,6 +2892,35 @@ Presentation::
 IMPORTANT: {kib} 8.10.0 has been withdrawn.
 
 For information about the {kib} 8.10.0 release, review the following information.
+[float]
+[[known-issues-8.10.0]]
+=== Known issues
+
+// tag::known-issue-187254[]
+.Errors appear when loading Observability Infrastructure inventory views after upgrading to version 8.10.0 or higher.
+[%collapsible]
+====
+*Details* +
+After upgrading to version 8.10.0 or higher, you may encounter errors when loading inventory views. 
+
+For more information, refer to https://github.com/elastic/kibana/issues/187254[#187254].
+
+*Workaround* +
+You can mitigate the issue by completing the following steps:
+
+. Search the `.kibana_*` index for `type: inventory_view`.
+
+. Copy the `_id` field, which will be formatted as `inventory-view:<id>`. For example, `inventory-view:3d3d06b0-f873-4373-8446-f6a8341cd8b1`. Omit the `inventory-view:` portion and copy only the string of `_id` characters.
+
+. The offending documents are those with fields `inventory-view.legend.steps` > 18. Delete these documents by running the following in *Console*:
+
+[source,js]
+----------------------------------
+DELETE kbn:/api/infra/inventory-views/<id> 
+----------------------------------
+====
+// end::known-issue-187254[]
+
 
 [float]
 [[security-updates-v8.10.0]]

@@ -18,9 +18,11 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('API /metrics/process_list', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm'));
+    before(() =>
+      esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes')
+    );
     after(() =>
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm')
+      esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes')
     );
 
     it('works', async () => {
@@ -35,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
               'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw',
             },
             sourceId: 'default',
-            to: 1564432800000,
+            to: 1680027660000,
             sortBy: {
               name: 'cpu',
               isAscending: false,
@@ -52,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { processList, summary } = decodeOrThrow(ProcessListAPIResponseRT)(response.body);
 
       expect(processList.length).to.be(10);
-      expect(summary.total).to.be(178);
+      expect(summary.total).to.be(313);
     });
   });
 }

@@ -15,10 +15,18 @@ import {
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { useSearchApi } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
+import {
+  AggregateQuery,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+  onlyDisabledFiltersChanged,
+} from '@kbn/es-query';
+import { BehaviorSubject } from 'rxjs';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
 import {
@@ -35,10 +43,12 @@ import { embeddableService } from '../../../public/services/kibana_services';
 
 const { embeddable: strings } = RendererStrings;
 
-// registry of references to embeddables on the workpad
+// registry of references to legacy embeddables on the workpad
 const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
+
+const children: Record<string, { setFilters: (filters: Filter[] | undefined) => void }> = {};
 
 const renderReactEmbeddable = ({
   type,
@@ -58,7 +68,13 @@ const renderReactEmbeddable = ({
   // wrap in functional component to allow usage of hooks
   const RendererWrapper: FC<{}> = () => {
     const getAppContext = useGetAppContext(core);
-    const searchApi = useSearchApi({ filters: input.filters });
+    const searchApi = useMemo(() => {
+      return {
+        filters$: new BehaviorSubject<Filter[] | undefined>(input.filters),
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+        timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+      };
+    }, []);
 
     return (
       <ReactEmbeddableRenderer
@@ -81,6 +97,22 @@ const renderReactEmbeddable = ({
             true
           );
           if (newExpression) handlers.onEmbeddableInputChange(newExpression);
+        }}
+        onApiAvailable={(api) => {
+          children[uuid] = {
+            ...api,
+            setFilters: (filters: Filter[] | undefined) => {
+              if (
+                !onlyDisabledFiltersChanged(searchApi.filters$.getValue(), filters, {
+                  ...COMPARE_ALL_OPTIONS,
+                  // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
+                  state: false,
+                })
+              ) {
+                searchApi.filters$.next(filters);
+              }
+            },
+          };
         }}
       />
     );
@@ -138,26 +170,32 @@ export const embeddableRendererFactory = (
       );
 
       if (embeddableService.reactEmbeddableRegistryHasKey(embeddableType)) {
-        /**
-         * Prioritize React embeddables
-         */
-        ReactDOM.render(
-          renderReactEmbeddable({
-            input,
-            handlers,
-            uuid: uniqueId,
-            type: embeddableType,
-            container: canvasApi,
-            core,
-          }),
-          domNode,
-          () => handlers.done()
-        );
+        const api = children[uniqueId];
+        if (!api) {
+          /**
+           * Prioritize React embeddables
+           */
+          ReactDOM.render(
+            renderReactEmbeddable({
+              input,
+              handlers,
+              uuid: uniqueId,
+              type: embeddableType,
+              container: canvasApi,
+              core,
+            }),
+            domNode,
+            () => handlers.done()
+          );
 
-        handlers.onDestroy(() => {
-          handlers.onEmbeddableDestroyed();
-          return ReactDOM.unmountComponentAtNode(domNode);
-        });
+          handlers.onDestroy(() => {
+            delete children[uniqueId];
+            handlers.onEmbeddableDestroyed();
+            return ReactDOM.unmountComponentAtNode(domNode);
+          });
+        } else {
+          api.setFilters(input.filters);
+        }
       } else if (!embeddablesRegistry[uniqueId]) {
         /**
          * Handle legacy embeddables - embeddable does not exist in registry

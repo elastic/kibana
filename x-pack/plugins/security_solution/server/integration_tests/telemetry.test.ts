@@ -20,7 +20,14 @@ import {
   TELEMETRY_CHANNEL_ENDPOINT_META,
 } from '../lib/telemetry/constants';
 
-import { eventually, setupTestServers, removeFile } from './lib/helpers';
+import {
+  eventually,
+  setupTestServers,
+  removeFile,
+  mockAxiosGet,
+  mockAxiosPost,
+  DEFAULT_GET_ROUTES,
+} from './lib/helpers';
 import {
   cleanupMockedAlerts,
   cleanupMockedExceptionLists,
@@ -37,6 +44,7 @@ import {
   mockEndpointData,
   getTelemetryReceiver,
   mockPrebuiltRulesData,
+  runSoonConfigTask,
 } from './lib/telemetry_helpers';
 
 import {
@@ -85,7 +93,21 @@ describe('telemetry tasks', () => {
   beforeAll(async () => {
     await removeFile(logFilePath);
 
-    const servers = await setupTestServers(logFilePath);
+    const servers = await setupTestServers(logFilePath, {
+      xpack: {
+        fleet: {
+          internal: {
+            registry: {
+              // Since `endpoint` is not available in EPR yet for
+              // kibana 9 (e.g., https://epr.elastic.co/search?package=endpoint&kibana.version=9.0.0)
+              // we need to ignore version checks
+              kibanaVersionCheckEnabled: false,
+            },
+          },
+        },
+      },
+    });
+
     esServer = servers.esServer;
     kibanaServer = servers.kibanaServer;
 
@@ -121,7 +143,17 @@ describe('telemetry tasks', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    mockAxiosGet();
+    mockAxiosPost(mockedAxiosPost);
+    mockAxiosGet(mockedAxiosGet, [
+      ...DEFAULT_GET_ROUTES,
+      [
+        /.*telemetry-buffer-and-batch-sizes-v1.*/,
+        {
+          status: 200,
+          data: fakeBufferAndSizesConfigAsyncDisabled,
+        },
+      ],
+    ]);
     deferred = [];
   });
 
@@ -195,21 +227,17 @@ describe('telemetry tasks', () => {
     });
 
     it('should use new sender when configured', async () => {
-      const configTaskType = 'security:telemetry-configuration';
-      const configTask = getTelemetryTask(tasks, configTaskType);
+      mockAxiosPost(mockedAxiosPost);
 
-      mockAxiosGet(fakeBufferAndSizesConfigAsyncEnabled);
-      await eventually(async () => {
-        await taskManagerPlugin.runSoon(configTask.getTaskId());
-      });
+      mockAxiosGet(mockedAxiosGet, [
+        ...DEFAULT_GET_ROUTES,
+        [
+          /.*telemetry-buffer-and-batch-sizes-v1.*/,
+          { status: 200, data: fakeBufferAndSizesConfigAsyncEnabled },
+        ],
+      ]);
 
-      // wait until the task finishes
-      await eventually(async () => {
-        const found = (await taskManagerPlugin.fetch()).docs.find(
-          (t) => t.taskType === configTaskType
-        );
-        expect(found).toBeFalsy();
-      });
+      await runSoonConfigTask(tasks, taskManagerPlugin);
 
       const [task, started] = await mockAndScheduleDetectionRulesTask();
 
@@ -225,13 +253,20 @@ describe('telemetry tasks', () => {
 
     it('should update sender queue config', async () => {
       const expectedConfig = fakeBufferAndSizesConfigWithQueues.sender_channels['task-metrics'];
-      const configTaskType = 'security:telemetry-configuration';
-      const configTask = getTelemetryTask(tasks, configTaskType);
 
-      mockAxiosGet(fakeBufferAndSizesConfigWithQueues);
-      await eventually(async () => {
-        await taskManagerPlugin.runSoon(configTask.getTaskId());
-      });
+      mockAxiosPost(mockedAxiosPost);
+      mockAxiosGet(mockedAxiosGet, [
+        ...DEFAULT_GET_ROUTES,
+        [
+          /.*telemetry-buffer-and-batch-sizes-v1.*/,
+          {
+            status: 200,
+            data: fakeBufferAndSizesConfigWithQueues,
+          },
+        ],
+      ]);
+
+      await runSoonConfigTask(tasks, taskManagerPlugin);
 
       await eventually(async () => {
         /* eslint-disable dot-notation */
@@ -822,31 +857,6 @@ describe('telemetry tasks', () => {
       const started = performance.now();
       await taskManagerPlugin.runSoon(task.getTaskId());
       return [task, started];
-    });
-  }
-
-  function mockAxiosGet(bufferConfig: unknown = fakeBufferAndSizesConfigAsyncDisabled) {
-    mockedAxiosPost.mockImplementation(
-      async (_url: string, _data?: unknown, _config?: AxiosRequestConfig<unknown> | undefined) => {
-        return { status: 200 };
-      }
-    );
-
-    mockedAxiosGet.mockImplementation(async (url: string) => {
-      if (url.startsWith(ENDPOINT_STAGING) && url.endsWith('ping')) {
-        return { status: 200 };
-      } else if (url.indexOf('kibana/manifest/artifacts') !== -1) {
-        return {
-          status: 200,
-          data: 'x-pack/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
-        };
-      } else if (url.indexOf('telemetry-buffer-and-batch-sizes-v1') !== -1) {
-        return {
-          status: 200,
-          data: bufferConfig,
-        };
-      }
-      return { status: 404 };
     });
   }
 

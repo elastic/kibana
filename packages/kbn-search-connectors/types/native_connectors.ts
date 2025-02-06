@@ -4376,6 +4376,45 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      auth_method: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethodLabel',
+          {
+            defaultMessage: 'Authentication Method',
+          }
+        ),
+        options: [
+          {
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethod.clientSecretLabel',
+              {
+                defaultMessage: 'Client Secret',
+              }
+            ),
+            value: 'secret',
+          },
+          {
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.sharepoint_online.configuration.authMethod.certificateLabel',
+              {
+                defaultMessage: 'Certificate',
+              }
+            ),
+            value: 'certificate',
+          },
+        ],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'certificate',
+      },
       secret_value: {
         default_value: null,
         depends_on: [],
@@ -4387,10 +4426,60 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: true,
         tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      certificate: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: 'certificate',
+          },
+        ],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.certificateLabel',
+          {
+            defaultMessage: 'Content of certificate file',
+          }
+        ),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      private_key: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: 'certificate',
+          },
+        ],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.privateKeyLabel',
+          {
+            defaultMessage: 'Content of private key file',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: true,
+        tooltip: null,
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -4407,7 +4496,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 5,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -4423,13 +4512,63 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '*',
       },
+      enumerate_all_sites: {
+        default_value: true,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesLabel',
+          { defaultMessage: 'Enumerate all sites?' }
+        ),
+        options: [],
+        order: 9,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesTooltip',
+          {
+            defaultMessage:
+              'If enabled, sites will be fetched in bulk, then filtered down to the configured list of sites. This is efficient when syncing many sites. If disabled, each configured site will be fetched with an individual request. This is efficient when syncing fewer sites.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_subsites: {
+        default_value: false,
+        depends_on: [{ field: 'enumerate_all_sites', value: false }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesLabel',
+          {
+            defaultMessage: 'Fetch sub-sites of configured sites?',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesTooltip',
+          {
+            defaultMessage:
+              'Whether subsites of the configured site(s) should be automatically fetched.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
       use_text_extraction_service: {
         default_value: false,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 6,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -4449,7 +4588,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 7,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -4480,7 +4619,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 8,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -4511,7 +4650,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 9,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -4542,7 +4681,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 10,
+        order: 15,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -4573,7 +4712,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 11,
+        order: 16,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -4581,56 +4720,6 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
-          }
-        ),
-        type: FieldType.BOOLEAN,
-        ui_restrictions: [],
-        validations: [],
-        value: true,
-      },
-      enumerate_all_sites: {
-        default_value: true,
-        depends_on: [],
-        display: DisplayType.TOGGLE,
-        label: i18n.translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesLabel',
-          { defaultMessage: 'Enumerate all sites?' }
-        ),
-        options: [],
-        order: 6,
-        required: false,
-        sensitive: false,
-        tooltip: i18n.translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesTooltip',
-          {
-            defaultMessage:
-              'If enabled, sites will be fetched in bulk, then filtered down to the configured list of sites. This is efficient when syncing many sites. If disabled, each configured site will be fetched with an individual request. This is efficient when syncing fewer sites.',
-          }
-        ),
-        type: FieldType.BOOLEAN,
-        ui_restrictions: [],
-        validations: [],
-        value: true,
-      },
-      fetch_subsites: {
-        default_value: false,
-        depends_on: [{ field: 'enumerate_all_sites', value: false }],
-        display: DisplayType.TOGGLE,
-        label: i18n.translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesLabel',
-          {
-            defaultMessage: 'Fetch sub-sites of configured sites?',
-          }
-        ),
-        options: [],
-        order: 7,
-        required: false,
-        sensitive: false,
-        tooltip: i18n.translate(
-          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesTooltip',
-          {
-            defaultMessage:
-              'Whether subsites of the configured site(s) should be automatically fetched.',
           }
         ),
         type: FieldType.BOOLEAN,

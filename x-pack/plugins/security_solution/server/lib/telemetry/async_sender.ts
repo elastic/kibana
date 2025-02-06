@@ -8,7 +8,7 @@ import axios from 'axios';
 import * as rx from 'rxjs';
 import _, { cloneDeep } from 'lodash';
 
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, EventTypeOpts, Logger, LogMeta } from '@kbn/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
@@ -17,7 +17,7 @@ import {
   type QueueConfig,
   type RetryConfig,
 } from './async_sender.types';
-import { TelemetryChannel, TelemetryCounter } from './types';
+import { type Nullable, TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
@@ -55,6 +55,8 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   private telemetryUsageCounter?: IUsageCounter;
   private senderUtils: SenderUtils | undefined;
 
+  private analytics: Nullable<AnalyticsServiceSetup>;
+
   constructor(logger: Logger) {
     this.logger = newTelemetryLogger(logger.get('telemetry_events.async_sender'));
   }
@@ -64,7 +66,8 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
     fallbackQueueConfig: QueueConfig,
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
-    telemetryUsageCounter?: IUsageCounter
+    telemetryUsageCounter?: IUsageCounter,
+    analytics?: AnalyticsServiceSetup
   ): void {
     this.logger.l(`Setting up ${AsyncTelemetryEventsSender.name}`);
 
@@ -77,6 +80,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
     this.telemetryReceiver = telemetryReceiver;
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
+    this.analytics = analytics;
 
     this.updateStatus(ServiceStatus.CONFIGURED);
   }
@@ -199,6 +203,13 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
       // flush the queues to get the new configuration asap
       this.flush$.next();
     }
+  }
+
+  public reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
+    if (!this.analytics) {
+      throw Error('analytics is unavailable');
+    }
+    this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
   }
 
   // internal methods
