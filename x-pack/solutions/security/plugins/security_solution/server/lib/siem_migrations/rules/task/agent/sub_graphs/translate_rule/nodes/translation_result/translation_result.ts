@@ -12,36 +12,38 @@ import {
 } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 
-export const translationResultNode: GraphNode = async (state) => {
-  // Set defaults
-  const elasticRule = {
-    title: state.original_rule.title,
-    description: state.original_rule.description || state.original_rule.title,
-    severity: DEFAULT_TRANSLATION_SEVERITY,
-    risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
-    ...state.elastic_rule,
-  };
+export const getTranslationResultNode = (): GraphNode => {
+  return async (state) => {
+    // Set defaults
+    const elasticRule = {
+      title: state.original_rule.title,
+      description: state.original_rule.description || state.original_rule.title,
+      severity: DEFAULT_TRANSLATION_SEVERITY,
+      risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
+      ...state.elastic_rule,
+    };
 
-  const query = elasticRule.query;
-  let translationResult;
+    const query = elasticRule.query;
+    let translationResult;
 
-  if (!query) {
-    translationResult = RuleTranslationResult.UNTRANSLATABLE;
-  } else {
-    if (query.startsWith('FROM logs-*')) {
-      elasticRule.query = query.replace('FROM logs-*', 'FROM [indexPattern]');
-      translationResult = RuleTranslationResult.PARTIAL;
-    } else if (state.validation_errors?.esql_errors) {
-      translationResult = RuleTranslationResult.PARTIAL;
-    } else if (query.match(/\[(macro|lookup):.*?\]/)) {
-      translationResult = RuleTranslationResult.PARTIAL;
+    if (!query) {
+      translationResult = RuleTranslationResult.UNTRANSLATABLE;
     } else {
-      translationResult = RuleTranslationResult.FULL;
+      if (query.startsWith('FROM logs-*')) {
+        elasticRule.query = query.replace('FROM logs-*', 'FROM [indexPattern]');
+        translationResult = RuleTranslationResult.PARTIAL;
+      } else if (state.validation_errors?.esql_errors) {
+        translationResult = RuleTranslationResult.PARTIAL;
+      } else if (query.match(/\[(macro|lookup):.*?\]/)) {
+        translationResult = RuleTranslationResult.PARTIAL;
+      } else {
+        translationResult = RuleTranslationResult.FULL;
+      }
     }
-  }
 
-  return {
-    elastic_rule: elasticRule,
-    translation_result: translationResult,
+    return {
+      elastic_rule: elasticRule,
+      translation_result: translationResult,
+    };
   };
 };
