@@ -12,7 +12,6 @@
   "kbn_references": [
     "@kbn/storybook",
     "@kbn/core",
-    "@kbn/monaco",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/i18n-react",

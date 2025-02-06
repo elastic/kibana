@@ -215,7 +215,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
-          theme: CONSOLE_THEME_ID,
+          theme: CONSOLE_LANG_ID,
           // Force the hover views to always render below the cursor to avoid clipping
           // when the cursor is near the top of the editor.
           hover: {
