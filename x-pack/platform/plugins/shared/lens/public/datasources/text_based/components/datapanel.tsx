@@ -30,6 +30,7 @@ import type { TextBasedPrivateState } from '../types';
 import { getStateFromAggregateQuery } from '../utils';
 import { FieldItem } from '../../common/field_item';
 import { getColumnsFromCache } from '../fieldlist_cache';
+import { DataPanelStyles } from '../../common/datapanel.styles';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -137,7 +138,7 @@ export function TextBasedDataPanel({
       }}
     >
       <FieldList
-        className="lnsInnerIndexPatternDataPanel"
+        css={DataPanelStyles}
         isProcessing={!dataHasLoaded}
         prepend={
           <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />
