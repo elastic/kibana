@@ -579,6 +579,7 @@ function LinkToStream({ name }: { name: string }) {
 
   return (
     <EuiLink
+      data-test-subj="streamsAppLinkToStreamLink"
       target="_blank"
       href={router.link('/{key}/{tab}', {
         path: {

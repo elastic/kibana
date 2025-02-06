@@ -6,4 +6,4 @@
  */
 
 export type { Asset, AssetType } from './assets';
-export * from './helpers/lifecycle';
+export { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
