@@ -1,0 +1,555 @@
+{
+  "id": "@kbn/logs-overview",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.LogsOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "LogsOverview",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "@kbn/logs-overview",
+            "scope": "public",
+            "docId": "kibKbnLogsOverviewPluginApi",
+            "section": "def-public.LogsOverviewProps",
+            "text": "LogsOverviewProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverview.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverview.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.LogsOverviewErrorContent",
+        "type": "Function",
+        "tags": [],
+        "label": "LogsOverviewErrorContent",
+        "description": [],
+        "signature": [
+          "({ error }: ",
+          {
+            "pluginId": "@kbn/logs-overview",
+            "scope": "public",
+            "docId": "kibKbnLogsOverviewPluginApi",
+            "section": "def-public.LogsOverviewErrorContentProps",
+            "text": "LogsOverviewErrorContentProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverviewErrorContent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ error }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logs-overview",
+                "scope": "public",
+                "docId": "kibKbnLogsOverviewPluginApi",
+                "section": "def-public.LogsOverviewErrorContentProps",
+                "text": "LogsOverviewErrorContentProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.LogsOverviewLoadingContent",
+        "type": "Function",
+        "tags": [],
+        "label": "LogsOverviewLoadingContent",
+        "description": [],
+        "signature": [
+          "({}: {}) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview_loading_content.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverviewLoadingContent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{}",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview_loading_content.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.DataViewLogsSourceConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataViewLogsSourceConfiguration",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.DataViewLogsSourceConfiguration.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"data_view\""
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.DataViewLogsSourceConfiguration.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.DataViewLogsSourceConfiguration.messageField",
+            "type": "string",
+            "tags": [],
+            "label": "messageField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.IndexNameLogsSourceConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexNameLogsSourceConfiguration",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.IndexNameLogsSourceConfiguration.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"index_name\""
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.IndexNameLogsSourceConfiguration.indexName",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.IndexNameLogsSourceConfiguration.timestampField",
+            "type": "string",
+            "tags": [],
+            "label": "timestampField",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.IndexNameLogsSourceConfiguration.messageField",
+            "type": "string",
+            "tags": [],
+            "label": "messageField",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.LogsOverviewErrorContentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogsOverviewErrorContentProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverviewErrorContentProps.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview_error_content.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.LogsOverviewProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogsOverviewProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverviewProps.dependencies",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dependencies",
+            "description": [],
+            "signature": [
+              "LogCategoriesControlBarDependencies",
+              " & ",
+              "LogCategoriesGridHistogramCellDependencies",
+              " & ",
+              "LogCategoriesGridChangeTimeCellDependencies",
+              " & ",
+              "LogCategoryDocumentExamplesTableDependencies",
+              " & ",
+              "DiscoverLinkDependencies",
+              " & { search: ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.ISearchGeneric",
+                "text": "ISearchGeneric"
+              },
+              "; } & { logsDataAccess: { services: { logSourcesService: ",
+              "LogSourcesService",
+              "; }; }; dataViews: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              },
+              "; }"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverviewProps.documentFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "documentFilters",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverviewProps.logsSource",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "logsSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logs-overview",
+                "scope": "public",
+                "docId": "kibKbnLogsOverviewPluginApi",
+                "section": "def-public.LogsSourceConfiguration",
+                "text": "LogsSourceConfiguration"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.LogsOverviewProps.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              "{ start: string; end: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.SharedSettingLogsSourceConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedSettingLogsSourceConfiguration",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.SharedSettingLogsSourceConfiguration.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"shared_setting\""
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.SharedSettingLogsSourceConfiguration.timestampField",
+            "type": "string",
+            "tags": [],
+            "label": "timestampField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/logs-overview",
+            "id": "def-public.SharedSettingLogsSourceConfiguration.messageField",
+            "type": "string",
+            "tags": [],
+            "label": "messageField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.LogsOverviewDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "LogsOverviewDependencies",
+        "description": [],
+        "signature": [
+          "LogCategoriesControlBarDependencies",
+          " & ",
+          "LogCategoriesGridHistogramCellDependencies",
+          " & ",
+          "LogCategoriesGridChangeTimeCellDependencies",
+          " & ",
+          "LogCategoryDocumentExamplesTableDependencies",
+          " & ",
+          "DiscoverLinkDependencies",
+          " & { search: ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.ISearchGeneric",
+            "text": "ISearchGeneric"
+          },
+          "; } & { logsDataAccess: { services: { logSourcesService: ",
+          "LogSourcesService",
+          "; }; }; dataViews: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "public",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-public.DataViewsServicePublic",
+            "text": "DataViewsServicePublic"
+          },
+          "; }"
+        ],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/components/logs_overview/logs_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/logs-overview",
+        "id": "def-public.LogsSourceConfiguration",
+        "type": "Type",
+        "tags": [],
+        "label": "LogsSourceConfiguration",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/logs-overview",
+            "scope": "public",
+            "docId": "kibKbnLogsOverviewPluginApi",
+            "section": "def-public.SharedSettingLogsSourceConfiguration",
+            "text": "SharedSettingLogsSourceConfiguration"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/logs-overview",
+            "scope": "public",
+            "docId": "kibKbnLogsOverviewPluginApi",
+            "section": "def-public.IndexNameLogsSourceConfiguration",
+            "text": "IndexNameLogsSourceConfiguration"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/logs-overview",
+            "scope": "public",
+            "docId": "kibKbnLogsOverviewPluginApi",
+            "section": "def-public.DataViewLogsSourceConfiguration",
+            "text": "DataViewLogsSourceConfiguration"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/logs_overview/src/utils/logs_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
