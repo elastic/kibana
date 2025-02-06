@@ -1188,8 +1188,6 @@
       "@kbn/logging-mocks/*": ["src/platform/packages/shared/kbn-logging-mocks/*"],
       "@kbn/logs-data-access-plugin": ["x-pack/platform/plugins/shared/logs_data_access"],
       "@kbn/logs-data-access-plugin/*": ["x-pack/platform/plugins/shared/logs_data_access/*"],
-      "@kbn/logs-explorer-plugin": ["x-pack/solutions/observability/plugins/logs_explorer"],
-      "@kbn/logs-explorer-plugin/*": ["x-pack/solutions/observability/plugins/logs_explorer/*"],
       "@kbn/logs-overview": ["x-pack/platform/packages/shared/logs_overview"],
       "@kbn/logs-overview/*": ["x-pack/platform/packages/shared/logs_overview/*"],
       "@kbn/logs-shared-plugin": ["x-pack/platform/plugins/shared/logs_shared"],
@@ -2098,7 +2096,9 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
