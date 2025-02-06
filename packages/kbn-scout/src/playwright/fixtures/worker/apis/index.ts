@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '@kbn/scout';
+import { mergeTests } from 'playwright/test';
+import { FleetApiFixture, fleetApiFixture } from './fleet';
 
-export class CustomLogsPage {
-  constructor(private readonly page: ScoutPage) {}
+export const apiFixtures = mergeTests(fleetApiFixture);
 
-  async goto() {
-    this.page.gotoApp('observabilityOnboarding/customLogs');
-  }
+export interface ApiFixtures {
+  fleetApi: FleetApiFixture;
+}
+
+export interface ApiParallelWorkerFixtures {
+  fleetApi: FleetApiFixture;
 }

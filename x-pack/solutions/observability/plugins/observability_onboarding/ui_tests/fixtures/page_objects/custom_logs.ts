@@ -123,7 +123,7 @@ export class CustomLogsPage {
   }
 
   async goto() {
-    this.page.goto(`${this.kbnUrl.app('observabilityOnboarding')}/customLogs`);
+    this.page.gotoApp('observabilityOnboarding/customLogs');
   }
 
   async clickBackButton() {
