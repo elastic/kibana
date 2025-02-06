@@ -1292,9 +1292,4 @@ export function registerEncryptedSavedObjects(
     attributesToEncrypt: new Set(['token']),
     attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
   });
-  encryptedSavedObjects.registerType({
-    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
-    attributesToIncludeInAAD: new Set(['service_token']),
-  });
 }
