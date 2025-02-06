@@ -25,7 +25,6 @@ interface InternalStateDataRequestParams {
 }
 
 export interface InternalState {
-  dataView: DataView | undefined;
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
@@ -44,7 +43,6 @@ export interface InternalState {
 }
 
 export interface InternalStateTransitions {
-  setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
   setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
@@ -91,7 +89,6 @@ export const { Provider: InternalStateProvider, useSelector: useInternalStateSel
 export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
-      dataView: undefined,
       isDataViewLoading: false,
       adHocDataViews: [],
       defaultProfileAdHocDataViewIds: [],
@@ -108,12 +105,6 @@ export function getInternalStateContainer() {
       dataRequestParams: {},
     },
     {
-      setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
-        ...prevState,
-        dataView: nextDataView,
-        expandedDoc:
-          nextDataView?.id !== prevState.dataView?.id ? undefined : prevState.expandedDoc,
-      }),
       setIsDataViewLoading: (prevState: InternalState) => (loading: boolean) => ({
         ...prevState,
         isDataViewLoading: loading,

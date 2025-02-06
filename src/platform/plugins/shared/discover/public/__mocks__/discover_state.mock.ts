@@ -13,13 +13,17 @@ import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
+import { BehaviorSubject } from 'rxjs';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
   savedSearch,
+  currentDataView$,
 }: {
   isTimeBased?: boolean;
   savedSearch?: SavedSearch;
+  currentDataView$?: BehaviorSubject<DataView | undefined>;
 }) {
   const history = createBrowserHistory();
   history.push('/');
@@ -27,6 +31,7 @@ export function getDiscoverStateMock({
     services: discoverServiceMock,
     history,
     customizationContext: mockCustomizationContext,
+    currentDataView$: currentDataView$ ?? new BehaviorSubject<DataView | undefined>(undefined),
   });
   container.savedSearchState.set(
     savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock

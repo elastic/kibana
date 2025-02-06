@@ -29,6 +29,8 @@ import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { DiscoverCustomizationId } from '../../../../customizations/customization_service';
+import { RuntimeStateProvider } from '../../state_management/redux';
+import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 
 const mockData = dataPluginMock.createStartContract();
 let mockQueryState = {
@@ -121,7 +123,11 @@ describe('useDiscoverHistogram', () => {
     };
 
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
-      <DiscoverMainProvider value={stateContainer}>{children as ReactElement}</DiscoverMainProvider>
+      <DiscoverMainProvider value={stateContainer}>
+        <RuntimeStateProvider currentDataView={dataViewMockWithTimeField}>
+          {children as ReactElement}
+        </RuntimeStateProvider>
+      </DiscoverMainProvider>
     );
 
     const hook = renderHook(

@@ -20,6 +20,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from './state_management/discover_state_provider';
+import { RuntimeStateProvider } from './state_management/redux';
 
 discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
   return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -41,11 +42,13 @@ describe('DiscoverMainApp', () => {
     });
 
     await act(async () => {
-      const component = await mountWithIntl(
+      const component = mountWithIntl(
         <Router history={history}>
           <KibanaContextProvider services={discoverServiceMock}>
             <DiscoverMainProvider value={stateContainer}>
-              <DiscoverMainApp {...props} />
+              <RuntimeStateProvider currentDataView={dataViewMock}>
+                <DiscoverMainApp {...props} />
+              </RuntimeStateProvider>
             </DiscoverMainProvider>
           </KibanaContextProvider>
         </Router>
@@ -53,7 +56,7 @@ describe('DiscoverMainApp', () => {
 
       // wait for lazy modules
       await new Promise((resolve) => setTimeout(resolve, 0));
-      await component.update();
+      component.update();
 
       expect(component.find(DiscoverTopNav).exists()).toBe(true);
     });

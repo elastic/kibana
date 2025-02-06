@@ -8,6 +8,7 @@
  */
 
 import React, { useContext } from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
 import useObservable from 'react-use/lib/useObservable';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { InternalStateProvider } from './discover_internal_state_container';
@@ -63,7 +64,9 @@ export const DiscoverMainProvider = ({
   return (
     <DiscoverStateProvider value={value}>
       <DiscoverAppStateProvider value={value.appState}>
-        <InternalStateProvider value={value.internalState}>{children}</InternalStateProvider>
+        <InternalStateProvider value={value.internalState}>
+          <ReduxProvider store={value.internalState2}>{children}</ReduxProvider>
+        </InternalStateProvider>
       </DiscoverAppStateProvider>
     </DiscoverStateProvider>
   );

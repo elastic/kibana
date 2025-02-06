@@ -139,6 +139,7 @@ export function getDataStateContainer({
   searchSessionManager,
   appStateContainer,
   internalStateContainer,
+  currentDataView$,
   getSavedSearch,
   setDataView,
 }: {
@@ -146,6 +147,7 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   appStateContainer: DiscoverAppStateContainer;
   internalStateContainer: DiscoverInternalStateContainer;
+  currentDataView$: BehaviorSubject<DataView | undefined>;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
@@ -265,7 +267,8 @@ export function getDataStateContainer({
             query: appStateContainer.getState().query,
           });
 
-          const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
+          const { resetDefaultProfileState } = internalStateContainer.getState();
+          const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
             ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
             : undefined;

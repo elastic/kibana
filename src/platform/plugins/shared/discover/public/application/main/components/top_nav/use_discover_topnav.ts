@@ -21,6 +21,7 @@ import {
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
+import { useCurrentDataView } from '../../state_management/redux';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -47,7 +48,7 @@ export const useDiscoverTopNav = ({
   const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();
   const shouldShowESQLToDataViewTransitionModal = !savedSearchId || savedSearchHasChanged;
-  const dataView = useInternalStateSelector((state) => state.dataView);
+  const dataView = useCurrentDataView();
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const isEsqlMode = useIsEsqlMode();
   const onOpenInspector = useInspector({

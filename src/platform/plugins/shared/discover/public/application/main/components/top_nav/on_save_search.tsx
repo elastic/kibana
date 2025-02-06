@@ -92,7 +92,7 @@ export async function onSaveSearch({
   onSaveCb?: () => void;
 }) {
   const { uiSettings, savedObjectsTagging } = services;
-  const dataView = state.internalState.getState().dataView;
+  const dataView = savedSearch.searchSource.getField('index');
   const overriddenVisContextAfterInvalidation =
     state.internalState.getState().overriddenVisContextAfterInvalidation;
 

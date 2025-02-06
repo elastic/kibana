@@ -52,6 +52,7 @@ import {
 import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useCurrentDataView } from '../../state_management/redux';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
@@ -308,7 +309,7 @@ export const useDiscoverHistogram = ({
     };
   }, [isEsqlMode, stateContainer.dataState.fetchChart$, esqlFetchComplete$, unifiedHistogram]);
 
-  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const dataView = useCurrentDataView();
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 

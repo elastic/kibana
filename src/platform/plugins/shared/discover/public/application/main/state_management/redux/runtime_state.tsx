@@ -8,17 +8,27 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { createContext, useContext, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { skip, type BehaviorSubject } from 'rxjs';
+import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 
 export interface DiscoverRuntimeState {
-  currentDataView$: BehaviorSubject<DataView>;
+  currentDataView: DataView;
 }
 
 const runtimeStateContext = createContext<DiscoverRuntimeState | undefined>(undefined);
 
-export const RuntimeStateProvider = runtimeStateContext.Provider;
+export const RuntimeStateProvider = ({
+  currentDataView,
+  children,
+}: PropsWithChildren<DiscoverRuntimeState>) => {
+  const runtimeState = useMemo<DiscoverRuntimeState>(
+    () => ({ currentDataView }),
+    [currentDataView]
+  );
+
+  return (
+    <runtimeStateContext.Provider value={runtimeState}>{children}</runtimeStateContext.Provider>
+  );
+};
 
 const useRuntimeState = () => {
   const context = useContext(runtimeStateContext);
@@ -30,9 +40,4 @@ const useRuntimeState = () => {
   return context;
 };
 
-export const useCurrentDataView = () => {
-  const { currentDataView$ } = useRuntimeState();
-  const [dataView$] = useState(() => currentDataView$.pipe(skip(1)));
-
-  return useObservable(dataView$, currentDataView$.getValue());
-};
+export const useCurrentDataView = () => useRuntimeState().currentDataView;

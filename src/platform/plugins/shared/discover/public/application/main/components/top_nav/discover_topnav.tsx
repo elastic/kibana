@@ -28,6 +28,7 @@ import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import './top_nav.scss';
+import { useCurrentDataView } from '../../state_management/redux';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -54,7 +55,7 @@ export const DiscoverTopNav = ({
   const query = useAppStateSelector((state) => state.query);
   const { savedDataViews, managedDataViews, adHocDataViews } =
     useInternalStateSelector(selectDataViewsForPicker);
-  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );

@@ -14,6 +14,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
+import type { BehaviorSubject } from 'rxjs';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
@@ -23,29 +24,31 @@ import { getDataViewAppState } from './get_switch_data_view_app_state';
 /**
  * Function executed when switching data view in the UI
  */
-export async function changeDataView(
-  id: string | DataView,
-  {
-    services,
-    internalState,
-    appState,
-  }: {
-    services: DiscoverServices;
-    internalState: DiscoverInternalStateContainer;
-    appState: DiscoverAppStateContainer;
-  }
-) {
-  addLog('[ui] changeDataView', { id });
+export async function changeDataView({
+  dataViewId,
+  services,
+  internalState,
+  currentDataView$,
+  appState,
+}: {
+  dataViewId: string | DataView;
+  services: DiscoverServices;
+  internalState: DiscoverInternalStateContainer;
+  currentDataView$: BehaviorSubject<DataView | undefined>;
+  appState: DiscoverAppStateContainer;
+}) {
+  addLog('[ui] changeDataView', { id: dataViewId });
 
   const { dataViews, uiSettings } = services;
-  const dataView = internalState.getState().dataView;
+  const currentDataView = currentDataView$.getValue();
   const state = appState.getState();
   let nextDataView: DataView | null = null;
 
   internalState.transitions.setIsDataViewLoading(true);
 
   try {
-    nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
+    nextDataView =
+      typeof dataViewId === 'string' ? await dataViews.get(dataViewId, false) : dataViewId;
 
     // If nextDataView is an ad hoc data view with no fields, refresh its field list.
     // This can happen when default profile data views are created without fields
@@ -57,7 +60,7 @@ export async function changeDataView(
     // Swallow the error and keep the current data view
   }
 
-  if (nextDataView && dataView) {
+  if (nextDataView && currentDataView) {
     // Reset the default profile state if we are switching to a different data view
     internalState.transitions.setResetDefaultProfileState({
       columns: true,
@@ -66,7 +69,7 @@ export async function changeDataView(
     });
 
     const nextAppState = getDataViewAppState(
-      dataView,
+      currentDataView,
       nextDataView,
       uiSettings.get(DEFAULT_COLUMNS_SETTING, []),
       state.columns || [],

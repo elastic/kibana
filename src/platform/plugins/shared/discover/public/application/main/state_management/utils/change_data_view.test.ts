@@ -19,15 +19,17 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { PureTransitionsToTransitions } from '@kbn/kibana-utils-plugin/common/state_containers';
 import { InternalStateTransitions } from '../discover_internal_state_container';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { internalStateActions } from '../redux';
+import { BehaviorSubject } from 'rxjs';
 
 const setupTestParams = (dataView: DataView | undefined) => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
-
-  const discoverState = getDiscoverStateMock({
-    savedSearch,
-  });
-  discoverState.internalState.transitions.setDataView(savedSearch.searchSource.getField('index')!);
+  const currentDataView$ = new BehaviorSubject<DataView | undefined>(undefined);
+  const discoverState = getDiscoverStateMock({ savedSearch, currentDataView$ });
+  discoverState.internalState2.dispatch(
+    internalStateActions.setDataView(savedSearch.searchSource.getField('index')!)
+  );
   services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));
   discoverState.appState.update = jest.fn();
   discoverState.internalState.transitions = {
@@ -38,13 +40,14 @@ const setupTestParams = (dataView: DataView | undefined) => {
     services,
     appState: discoverState.appState,
     internalState: discoverState.internalState,
+    currentDataView$,
   };
 };
 
 describe('changeDataView', () => {
   it('should set the right app state when a valid data view (which includes the preconfigured default column) to switch to is given', async () => {
     const params = setupTestParams(dataViewWithDefaultColumnMock);
-    await changeDataView(dataViewWithDefaultColumnMock.id!, params);
+    await changeDataView({ dataViewId: dataViewWithDefaultColumnMock.id!, ...params });
     expect(params.appState.update).toHaveBeenCalledWith({
       columns: ['default_column'], // default_column would be added as dataViewWithDefaultColumn has it as a mapped field
       dataSource: createDataViewDataSource({ dataViewId: 'data-view-with-user-default-column-id' }),
@@ -56,7 +59,7 @@ describe('changeDataView', () => {
 
   it('should set the right app state when a valid data view to switch to is given', async () => {
     const params = setupTestParams(dataViewComplexMock);
-    await changeDataView(dataViewComplexMock.id!, params);
+    await changeDataView({ dataViewId: dataViewComplexMock.id!, ...params });
     expect(params.appState.update).toHaveBeenCalledWith({
       columns: [], // default_column would not be added as dataViewComplexMock does not have it as a mapped field
       dataSource: createDataViewDataSource({ dataViewId: 'data-view-with-various-field-types-id' }),
@@ -68,7 +71,7 @@ describe('changeDataView', () => {
 
   it('should not set the app state when an invalid data view to switch to is given', async () => {
     const params = setupTestParams(undefined);
-    await changeDataView('data-view-with-various-field-types', params);
+    await changeDataView({ dataViewId: 'data-view-with-various-field-types', ...params });
     expect(params.appState.update).not.toHaveBeenCalled();
     expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(1, true);
     expect(params.internalState.transitions.setIsDataViewLoading).toHaveBeenNthCalledWith(2, false);
@@ -77,7 +80,7 @@ describe('changeDataView', () => {
   it('should call setResetDefaultProfileState correctly when switching data view', async () => {
     const params = setupTestParams(dataViewComplexMock);
     expect(params.internalState.transitions.setResetDefaultProfileState).not.toHaveBeenCalled();
-    await changeDataView(dataViewComplexMock.id!, params);
+    await changeDataView({ dataViewId: dataViewComplexMock.id!, ...params });
     expect(params.internalState.transitions.setResetDefaultProfileState).toHaveBeenCalledWith({
       columns: true,
       rowHeight: true,

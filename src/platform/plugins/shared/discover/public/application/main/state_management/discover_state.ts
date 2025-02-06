@@ -23,7 +23,7 @@ import {
 import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { merge } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import {
   AggregateQuery,
@@ -68,6 +68,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
+import { createInternalStateStore, internalStateActions, InternalStateStore } from './redux';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -90,6 +91,7 @@ export interface DiscoverStateContainerParams {
    * a custom url state storage
    */
   stateStorageContainer?: IKbnUrlStateStorage;
+  currentDataView$: BehaviorSubject<DataView | undefined>;
 }
 
 export interface LoadParams {
@@ -128,6 +130,7 @@ export interface DiscoverStateContainer {
    * Internal shared state that's used at several places in the UI
    */
   internalState: DiscoverInternalStateContainer;
+  internalState2: InternalStateStore;
   /**
    * State of saved search, the saved object of Discover
    */
@@ -242,6 +245,7 @@ export function getDiscoverStateContainer({
   services,
   customizationContext,
   stateStorageContainer,
+  currentDataView$,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -276,6 +280,8 @@ export function getDiscoverStateContainer({
    */
   const internalStateContainer = getInternalStateContainer();
 
+  const internalStateStore = createInternalStateStore({ services, currentDataView$ });
+
   /**
    * Saved Search State Container, the persisted saved object of Discover
    */
@@ -308,7 +314,7 @@ export function getDiscoverStateContainer({
   };
 
   const setDataView = (dataView: DataView) => {
-    internalStateContainer.transitions.setDataView(dataView);
+    internalStateStore.dispatch(internalStateActions.setDataView(dataView));
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
@@ -318,6 +324,7 @@ export function getDiscoverStateContainer({
     searchSessionManager,
     appStateContainer,
     internalStateContainer,
+    currentDataView$,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
@@ -332,7 +339,7 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const prevDataView = internalStateContainer.getState().dataView;
+    const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
     const nextDataView = await services.dataViews.create({
@@ -482,7 +489,7 @@ export function getDiscoverStateContainer({
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
       savedSearchContainer.update({
-        nextDataView: internalStateContainer.getState().dataView,
+        nextDataView: currentDataView$.getValue(),
         nextState: appStateContainer.getState(),
         useFilterAndQueryServices: true,
       });
@@ -545,10 +552,12 @@ export function getDiscoverStateContainer({
   /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
-  const onChangeDataView = async (id: string | DataView) => {
-    await changeDataView(id, {
+  const onChangeDataView = async (dataViewId: string | DataView) => {
+    await changeDataView({
+      dataViewId,
       services,
       internalState: internalStateContainer,
+      currentDataView$,
       appState: appStateContainer,
     });
   };
@@ -607,6 +616,7 @@ export function getDiscoverStateContainer({
     globalState: globalStateContainer,
     appState: appStateContainer,
     internalState: internalStateContainer,
+    internalState2: internalStateStore,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
     stateStorage,
