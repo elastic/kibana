@@ -7,11 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getRequestBase } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/create_apm_event_client/get_request_base';
 import type { PassThrough } from 'stream';
-import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { TRACE_ID } from '../../../common/es_fields/apm';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
 import { notifyFeatureUsage } from '../../feature';
@@ -25,7 +21,6 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getEsClient } from '../../lib/helpers/get_esql_client';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
@@ -41,7 +36,7 @@ const serviceMapRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   options: {
-    arrowStream: true,
+    stream: true,
   },
   handler: async (resources): Promise<PassThrough> => {
     const { config, context, params } = resources;
@@ -63,52 +58,14 @@ const serviceMapRoute = createApmServerRoute({
       query: { traceIds, start, end },
     } = params;
 
-    const [esqlClient] = await Promise.all([getEsClient(resources)]);
-
-    const { index, filters } = getRequestBase({
-      apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
-      indices: esqlClient.indices,
-    });
-
-    const entryIdsResponse = await esqlClient.esql<
-      { spanIds: string[] },
-      { transform: 'unflatten' }
-    >(
-      'get_service_paths_parent_ids',
-      {
-        query: `
-          FROM ${index.join(',')}
-          | STATS spanIds = TOP(span.id, 1, "DESC") WHERE span.destination.service.resource IS NOT NULL
-            BY service.name, agent.name, service.environment, span.destination.service.resource, event.outcome 
-          | WHERE spanIds IS NOT NULL
-          | LIMIT 10000 
-        `,
-        filter: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...termsQuery(TRACE_ID, ...(Array.isArray(traceIds) ? traceIds : [traceIds])),
-              ...filters,
-            ],
-          },
-        },
-        format: 'json',
-      },
-      { transform: 'unflatten' }
-    );
-
-    const spanIds = [
-      ...new Set(entryIdsResponse.hits.flatMap((p): string[] => p.spanIds).filter(Boolean)),
-    ];
+    const [apmEventClient] = await Promise.all([getApmEventClient(resources)]);
 
     return fetchServicePathsFromTraceIds({
-      index,
-      filters,
-      spanIds,
+      traceIds: Array.isArray(traceIds) ? traceIds : [traceIds],
       start,
       end,
       terminateAfter: config.serviceMapTerminateAfter,
-      esqlClient,
+      apmEventClient,
     });
   },
 });
