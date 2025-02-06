@@ -11,7 +11,6 @@ import {
   formatPersistedConversations,
 } from './helpers';
 import { AIConnector } from '../connectorland/connector_selector';
-import { Conversation } from '../assistant_context/types';
 
 describe('helpers', () => {
   describe('getDefaultConnector', () => {
@@ -117,65 +116,7 @@ describe('helpers', () => {
       data: conversationArray,
     };
 
-    it('should merge base conversations with user conversations when both are non-empty', () => {
-      const moreData = {
-        ...conversationsData,
-        data: [
-          {
-            ...defaultProps,
-            title: 'Conversation 3',
-            id: 'conversation_3',
-          },
-          {
-            ...defaultProps,
-            title: 'Conversation 4',
-            id: 'conversation_4',
-          },
-        ],
-      };
-
-      const result = formatPersistedConversations(moreData);
-
-      expect(result).toEqual({
-        conversation_1: {
-          title: 'Conversation 1',
-          id: 'conversation_1',
-          ...defaultProps,
-        },
-        conversation_2: {
-          title: 'Conversation 2',
-          id: 'conversation_2',
-          ...defaultProps,
-        },
-        conversation_3: {
-          title: 'Conversation 3',
-          id: 'conversation_3',
-          ...defaultProps,
-        },
-        conversation_4: {
-          title: 'Conversation 4',
-          id: 'conversation_4',
-          ...defaultProps,
-        },
-      });
-    });
-
-    it('should return base conversations when user conversations are empty', () => {
-      const result = formatPersistedConversations({
-        ...conversationsData,
-        total: 0,
-        data: [],
-      });
-
-      expect(result).toEqual(
-        conversationArray.reduce((acc: Record<string, Conversation>, conversation) => {
-          acc[conversation.id] = conversation;
-          return acc;
-        }, {})
-      );
-    });
-
-    it('should return user conversations when base conversations are empty', () => {
+    it('should format user conversations', () => {
       const result = formatPersistedConversations(conversationsData);
 
       expect(result).toEqual({
