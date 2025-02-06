@@ -357,7 +357,7 @@ export const processingSuggestionRoute = createServerRoute({
       sortedStats.map((sample) =>
         inferenceClient.output({
           id: 'get_pattern_suggestions',
-          connectorId: 'azure-gpt4',
+          connectorId: 'azure-open-ai',
           system: `Instructions:
         - You are an assistant for observability tasks with a strong knowledge of logs and log parsing.
         - Use JSON format.
