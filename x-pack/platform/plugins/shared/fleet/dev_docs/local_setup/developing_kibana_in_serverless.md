@@ -105,7 +105,7 @@ docker run \
     -e FLEET_ENROLL=1 \
     -e FLEET_ENROLLMENT_TOKEN=<enrollment_token>== \
     -e FLEET_INSECURE=1 \
-    --rm docker.elastic.co/beats/elastic-agent/elastic-agent:<version>
+    --rm docker.elastic.co/elastic-agent/elastic-agent:<version>
 ```
 
 ## Troubleshooting

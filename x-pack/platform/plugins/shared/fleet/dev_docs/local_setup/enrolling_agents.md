@@ -200,7 +200,7 @@ docker run \
   -e FLEET_SERVER_ENABLE=1 \
   -e FLEET_SERVER_POLICY_ID=fleet-server-policy \
   -p 8220:8220 \
-  --rm docker.elastic.co/beats/elastic-agent/elastic-agent:<version>
+  --rm docker.elastic.co/elastic-agent/elastic-agent:<version>
 ```
 
 where the version can be e.g. `8.13.3` or `8.15.0-SNAPSHOT`. You can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
@@ -227,7 +227,7 @@ docker run \
   -e FLEET_ENROLL=1 \
   -e FLEET_ENROLLMENT_TOKEN=<enrollment_token> \
   -e FLEET_INSECURE=1 \
-  --rm docker.elastic.co/beats/elastic-agent/elastic-agent:<version>
+  --rm docker.elastic.co/elastic-agent/elastic-agent:<version>
 ```
 
 After a short moment, the UI should confirm that the agent is enrolled and shipping data:
