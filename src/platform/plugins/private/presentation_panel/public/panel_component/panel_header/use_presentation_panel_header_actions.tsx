@@ -13,10 +13,10 @@ import { Subscription } from 'rxjs';
 
 import { uiActions } from '../../kibana_services';
 import {
-  panelBadgeTrigger,
-  panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
+  panelBadgeTrigger,
+  panelNotificationTrigger,
 } from '../../panel_actions';
 import { AnyApiAction } from '../../panel_actions/types';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
@@ -128,7 +128,6 @@ export const usePresentationPanelHeaderActions = <
       const badgeElement = (
         <EuiBadge
           key={badge.id}
-          className="embPanel__headerBadge"
           iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
           onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
           onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
