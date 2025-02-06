@@ -11,16 +11,46 @@ import { Writer } from 'mustache';
 import { getServices } from '../../kibana_services';
 
 const TEMPLATE_TAGS: [string, string] = ['{', '}'];
+interface Context {
+  lookup(name: string | number): string;
+  parent: Context | undefined;
+  cache: Record<string, any>;
+  view: {
+    curlyOpen: '{';
+    curlyClose: '}';
+    config: {
+      docs: {
+        base_url: string;
+        beats: {
+          filebeat: string;
+          metricbeat: string;
+          heartbeat: string;
+          winlogbeat: string;
+          auditbeat: string;
+        };
+        logstash: string;
+        version: string;
+      };
+      kibana: {
+        version: string;
+      };
+    };
+    params: Record<string, any>;
+  };
+}
+
+// Extend the MustacheWriter class to include the escapedValue method
+class CustomMustacheWriter extends Writer {
+  escapedValue(token: Array<string | number>, context: Context) {
+    const value = context.lookup(token[1]);
+    if (value != null) {
+      return value;
+    }
+  }
+}
 
 // Can not use 'Mustache' since its a global object
-const mustacheWriter = new Writer();
-// do not html escape output
-mustacheWriter.escapedValue = function escapedValue(token, context) {
-  const value = context.lookup(token[1]);
-  if (value != null) {
-    return value;
-  }
-};
+const mustacheWriter = new CustomMustacheWriter();
 
 export function replaceTemplateStrings(text: string, params = {}) {
   const { tutorialService, kibanaVersion, docLinks } = getServices();
@@ -50,5 +80,5 @@ export function replaceTemplateStrings(text: string, params = {}) {
     params,
   };
   mustacheWriter.parse(text, TEMPLATE_TAGS);
-  return mustacheWriter.render(text, variables);
+  return mustacheWriter.render(text, variables, {});
 }
