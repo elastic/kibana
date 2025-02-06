@@ -117,7 +117,7 @@
     "@elastic/ecs": "^8.11.5",
     "@elastic/elasticsearch": "^8.17.0",
     "@elastic/ems-client": "8.6.3",
-    "@elastic/eui": "98.2.1-borealis.1",
+    "@elastic/eui": "98.2.2-borealis.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "^1.2.3",
     "@elastic/numeral": "^2.5.1",
@@ -581,6 +581,7 @@
     "@kbn/inference-common": "link:x-pack/platform/packages/shared/ai-infra/inference-common",
     "@kbn/inference-endpoint-plugin": "link:x-pack/platform/plugins/shared/inference_endpoint",
     "@kbn/inference-endpoint-ui-common": "link:x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common",
+    "@kbn/inference-langchain": "link:x-pack/platform/packages/shared/ai-infra/inference-langchain",
     "@kbn/inference-plugin": "link:x-pack/platform/plugins/shared/inference",
     "@kbn/inference_integration_flyout": "link:x-pack/platform/packages/private/ml/inference_integration_flyout",
     "@kbn/infra-forge": "link:x-pack/platform/packages/private/kbn-infra-forge",
@@ -711,7 +712,6 @@
     "@kbn/observability-onboarding-plugin": "link:x-pack/solutions/observability/plugins/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/solutions/observability/plugins/observability",
     "@kbn/observability-shared-plugin": "link:x-pack/solutions/observability/plugins/observability_shared",
-    "@kbn/observability-synthetics-test-data": "link:x-pack/solutions/observability/packages/synthetics_test_data",
     "@kbn/observability-utils-browser": "link:x-pack/solutions/observability/packages/utils_browser",
     "@kbn/observability-utils-common": "link:x-pack/solutions/observability/packages/utils_common",
     "@kbn/observability-utils-server": "link:x-pack/solutions/observability/packages/utils_server",
@@ -1186,7 +1186,7 @@
     "minimatch": "^3.1.2",
     "moment": "^2.30.1",
     "moment-duration-format": "^2.3.2",
-    "moment-timezone": "^0.5.46",
+    "moment-timezone": "^0.5.47",
     "monaco-editor": "^0.44.0",
     "monaco-yaml": "^5.1.0",
     "murmurhash": "^2.0.1",
@@ -1215,7 +1215,7 @@
     "pretty-ms": "6.0.0",
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.0.0",
-    "puppeteer": "23.7.0",
+    "puppeteer": "24.1.1",
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
@@ -1233,7 +1233,7 @@
     "react-popper-tooltip": "^4.4.2",
     "react-recompose": "^0.33.0",
     "react-redux": "^7.2.8",
-    "react-reverse-portal": "^2.1.2",
+    "react-reverse-portal": "^2.2.0",
     "react-router": "^5.3.4",
     "react-router-config": "^5.1.1",
     "react-router-dom": "^5.3.4",
@@ -1304,7 +1304,8 @@
     "yaml": "^2.5.1",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
-    "zod": "^3.22.3"
+    "zod": "^3.22.3",
+    "zod-to-json-schema": "^3.23.0"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.1",
@@ -1470,6 +1471,7 @@
     "@kbn/mock-idp-plugin": "link:packages/kbn-mock-idp-plugin",
     "@kbn/mock-idp-utils": "link:packages/kbn-mock-idp-utils",
     "@kbn/observability-onboarding-e2e": "link:x-pack/solutions/observability/plugins/observability_onboarding/e2e",
+    "@kbn/observability-synthetics-test-data": "link:x-pack/solutions/observability/packages/synthetics_test_data",
     "@kbn/openapi-bundler": "link:packages/kbn-openapi-bundler",
     "@kbn/openapi-generator": "link:packages/kbn-openapi-generator",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
@@ -1877,8 +1879,7 @@
     "xml-crypto": "^6.0.0",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
-    "yarn-deduplicate": "^6.0.2",
-    "zod-to-json-schema": "^3.23.0"
+    "yarn-deduplicate": "^6.0.2"
   },
   "packageManager": "yarn@1.22.21"
 }
