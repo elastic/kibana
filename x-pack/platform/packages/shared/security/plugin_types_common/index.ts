@@ -12,6 +12,8 @@ export type {
   AuthenticationProvider,
 } from './src/authentication';
 export type {
+  QueryRolesRole,
+  QueryRolesResult,
   RemoteClusterPrivilege,
   Role,
   RoleIndexPrivilege,
@@ -45,3 +47,5 @@ export type {
   CategorizedApiKey,
   ApiKeyAggregations,
 } from './src/api_keys/api_key';
+
+export { ApiOperation } from './src/authorization';

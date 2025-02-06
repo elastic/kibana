@@ -26,6 +26,7 @@
       "security",
       "stackConnectors",
       "triggersActionsUi",
+      "uiActions"
     ],
     "optionalPlugins": [
       "cloud",

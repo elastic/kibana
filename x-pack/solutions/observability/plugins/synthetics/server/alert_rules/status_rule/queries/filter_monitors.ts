@@ -28,44 +28,47 @@ export async function queryFilterMonitors({
     return;
   }
   const filters = toElasticsearchQuery(fromKueryExpression(ruleParams.kqlQuery));
-  const { body: result } = await esClient.search({
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            FINAL_SUMMARY_FILTER,
-            getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
-            getTimeSpanFilter(),
-            {
-              term: {
-                'meta.space_id': spaceId,
+  const { body: result } = await esClient.search(
+    {
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              FINAL_SUMMARY_FILTER,
+              getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
+              getTimeSpanFilter(),
+              {
+                term: {
+                  'meta.space_id': spaceId,
+                },
               },
-            },
-            {
-              bool: {
-                should: filters,
+              {
+                bool: {
+                  should: filters,
+                },
               },
-            },
-            ...getFilters(ruleParams),
-          ],
+              ...getFilters(ruleParams),
+            ],
+          },
         },
-      },
-      aggs: {
-        ids: {
-          terms: {
-            size: 10000,
-            field: 'config_id',
+        aggs: {
+          ids: {
+            terms: {
+              size: 10000,
+              field: 'config_id',
+            },
           },
         },
       },
     },
-  });
+    'queryFilterMonitors'
+  );
 
   return result.aggregations?.ids.buckets.map((bucket) => bucket.key as string);
 }
 
-const getFilters = (ruleParams: StatusRuleParams) => {
+export const getFilters = (ruleParams: StatusRuleParams) => {
   const { monitorTypes, locations, tags, projects } = ruleParams;
   const filters: QueryDslQueryContainer[] = [];
   if (monitorTypes?.length) {
