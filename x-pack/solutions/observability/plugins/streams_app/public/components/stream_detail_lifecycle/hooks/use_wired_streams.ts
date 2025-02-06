@@ -37,7 +37,7 @@ export const useWiredStreams = ({ definition }: { definition: StreamGetResponse 
       .fetch('GET /api/streams', { signal })
       .then((response) => setWiredStreams(response.streams.filter(isWiredStreamDefinition)))
       .finally(() => setIsLoading(false));
-  }, [streamsRepositoryClient]);
+  }, [streamsRepositoryClient, definition, signal]);
 
   return {
     wiredStreams,
