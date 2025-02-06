@@ -24,7 +24,8 @@ function generateId(length: number = LONG_ID_LENGTH) {
 }
 
 function generateIdWithSeed(seed: string, length: number = LONG_ID_LENGTH) {
-  return seed?.padStart(length, '0');
+  const encodedSeed = seed.replace(/[/]/g, '_').replace(/[{}]/g, '');
+  return encodedSeed?.padStart(length, '0');
 }
 
 export function generateShortId() {
