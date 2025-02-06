@@ -327,12 +327,10 @@ export function handleFragment(
   innerText: string,
   isFragmentComplete: (fragment: string) => boolean,
   getSuggestionsForIncomplete: (
-    fragment: string,
-    rangeToReplace?: { start: number; end: number }
+    fragment: string
   ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>,
   getSuggestionsForComplete: (
-    fragment: string,
-    rangeToReplace: { start: number; end: number }
+    fragment: string
   ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>
 ): SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]> {
   /**
@@ -345,14 +343,10 @@ export function handleFragment(
   if (!fragment) {
     return getSuggestionsForIncomplete('');
   } else {
-    const rangeToReplace = {
-      start: innerText.length - fragment.length + 1,
-      end: innerText.length + 1,
-    };
     if (isFragmentComplete(fragment)) {
-      return getSuggestionsForComplete(fragment, rangeToReplace);
+      return getSuggestionsForComplete(fragment);
     } else {
-      return getSuggestionsForIncomplete(fragment, rangeToReplace);
+      return getSuggestionsForIncomplete(fragment);
     }
   }
 }

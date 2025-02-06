@@ -40,13 +40,10 @@ export async function suggest(
       return handleFragment(
         innerText,
         (fragment) => ['ASC', 'DESC'].some((completeWord) => noCaseCompare(completeWord, fragment)),
-        (_fragment, rangeToReplace) => {
-          return Object.values(sortModifierSuggestions).map((suggestion) => ({
-            ...suggestion,
-            rangeToReplace,
-          }));
+        (_fragment) => {
+          return Object.values(sortModifierSuggestions);
         },
-        (fragment, rangeToReplace) => {
+        (fragment) => {
           return [
             { ...pipeCompleteItem, text: ' | ' },
             { ...commaCompleteItem, text: ', ' },
@@ -56,7 +53,6 @@ export async function suggest(
             ...suggestion,
             filterText: fragment,
             text: fragment + suggestion.text,
-            rangeToReplace,
             command: TRIGGER_SUGGESTION_COMMAND,
           }));
         }
@@ -85,7 +81,7 @@ export async function suggest(
             rangeToReplace: { start, end },
           }));
         },
-        (fragment, rangeToReplace) => {
+        (fragment) => {
           return [
             { ...pipeCompleteItem, text: ' | ' },
             { ...commaCompleteItem, text: ', ' },
@@ -93,7 +89,6 @@ export async function suggest(
             ...suggestion,
             filterText: fragment,
             text: fragment + suggestion.text,
-            rangeToReplace,
             command: TRIGGER_SUGGESTION_COMMAND,
           }));
         }
@@ -124,7 +119,7 @@ export async function suggest(
   return await handleFragment(
     innerText,
     columnExists,
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+    (_fragment: string) => {
       // SORT fie<suggest>
       return [
         ...pushItUpInTheList(
@@ -134,7 +129,6 @@ export async function suggest(
             return {
               ...suggestion,
               command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
             };
           }),
           true
@@ -142,7 +136,7 @@ export async function suggest(
         ...functionSuggestions,
       ];
     },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+    (fragment: string) => {
       // SORT field<suggest>
       return [
         { ...pipeCompleteItem, text: ' | ' },
@@ -156,7 +150,6 @@ export async function suggest(
         filterText: fragment,
         text: fragment + s.text,
         command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
       }));
     }
   );

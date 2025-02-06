@@ -682,6 +682,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     scrollBeyondLastLine: false,
     theme: ESQL_LANG_ID,
     wordWrap: 'on',
+    wordSeparators: '`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?',
     wrappingIndent: 'none',
   };
 

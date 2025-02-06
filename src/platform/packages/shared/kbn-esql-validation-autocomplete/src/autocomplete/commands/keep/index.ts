@@ -39,7 +39,7 @@ export async function suggest(
   return handleFragment(
     innerText,
     (fragment) => columnExists(fragment),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+    (_fragment: string) => {
       // KEEP fie<suggest>
       return fieldSuggestions.map((suggestion) => {
         // if there is already a command, we don't want to override it
@@ -48,11 +48,10 @@ export async function suggest(
           ...suggestion,
           text: suggestion.text,
           command: TRIGGER_SUGGESTION_COMMAND,
-          rangeToReplace,
         };
       });
     },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+    (fragment: string) => {
       // KEEP field<suggest>
       const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
       if (fieldSuggestions.length > 1)
@@ -67,7 +66,6 @@ export async function suggest(
         filterText: fragment,
         text: fragment + s.text,
         command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
       }));
     }
   );
