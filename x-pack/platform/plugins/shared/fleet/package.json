@@ -5,7 +5,6 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "postinstall": "patch-package",
     "cypress_space_awareness": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../x-pack/solutions/security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../../../x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.ts --ftr-config-file ../../../../../x-pack/test/fleet_cypress/cli_config.space_awareness",
     "cypress_space_awareness:open": "yarn cypress_space_awareness open",
     "cypress_space_awareness:run": "yarn cypress_space_awareness run",
