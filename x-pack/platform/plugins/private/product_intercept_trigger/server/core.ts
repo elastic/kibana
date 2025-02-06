@@ -95,6 +95,8 @@ export class ProductInterceptTriggerCore {
               this.logger.debug('Product intercept trigger ticker is called!');
 
               return {
+                // leverage flag to delete a task if already scheduled, through user configuration
+                shouldDeleteTask: false,
                 // updating the state value provides the basis that allows us to infer if the user
                 // interacted with the dialog on the last run if there was one on the client
                 state: {
@@ -212,6 +214,7 @@ export class ProductInterceptTriggerCore {
 
     const existingTask = await this.fetchRegisteredTriggerTask();
 
+    // ideally we would only schedule the task if it's not already scheduled and the kibana is configured to use the product intercept dialog
     if (!existingTask) {
       this.logger.debug('No existing trigger task found, scheduling one');
 
@@ -225,6 +228,7 @@ export class ProductInterceptTriggerCore {
           runs: 0,
           firstScheduledAt: new Date().toISOString(),
         },
+        enabled: true,
         scope: [this.taskScope],
       });
     }
