@@ -29,7 +29,7 @@ import { createMappingsFor818Compatibility } from './8_18_alerts_compatibility_m
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 77;
+export const SIGNALS_TEMPLATE_VERSION = 87;
 /**
   @constant
   @type {number}
@@ -89,7 +89,8 @@ export const getSignalsTemplate = (index: string, aadIndexAliasName: string, spa
               type: 'constant_keyword',
               value: spaceId,
             },
-          }
+          },
+          createMappingsFor818Compatibility()
         ),
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
