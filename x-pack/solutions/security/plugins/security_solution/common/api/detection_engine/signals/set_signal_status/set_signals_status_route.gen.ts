@@ -15,13 +15,16 @@
  */
 
 import { z } from '@kbn/zod';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
-import { NonEmptyString } from '../../../model/primitives.gen';
 import { AlertStatus } from '../../../model/alert.gen';
 
 export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
 export const SetAlertsStatusByIds = z.object({
-  signal_ids: z.array(NonEmptyString).min(1),
+  /**
+   * List of alert `id`s.
+   */
+  signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   status: AlertStatus,
 });
 
