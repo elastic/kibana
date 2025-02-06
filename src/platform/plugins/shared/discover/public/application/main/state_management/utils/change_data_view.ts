@@ -14,12 +14,12 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import type { BehaviorSubject } from 'rxjs';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from './get_switch_data_view_app_state';
+import { RuntimeStateManager } from '../redux';
 
 /**
  * Function executed when switching data view in the UI
@@ -28,19 +28,19 @@ export async function changeDataView({
   dataViewId,
   services,
   internalState,
-  currentDataView$,
+  runtimeStateManager,
   appState,
 }: {
   dataViewId: string | DataView;
   services: DiscoverServices;
   internalState: DiscoverInternalStateContainer;
-  currentDataView$: BehaviorSubject<DataView | undefined>;
+  runtimeStateManager: RuntimeStateManager;
   appState: DiscoverAppStateContainer;
 }) {
   addLog('[ui] changeDataView', { id: dataViewId });
 
   const { dataViews, uiSettings } = services;
-  const currentDataView = currentDataView$.getValue();
+  const currentDataView = runtimeStateManager.currentDataView$.getValue();
   const state = appState.getState();
   let nextDataView: DataView | null = null;
 

@@ -19,14 +19,13 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { PureTransitionsToTransitions } from '@kbn/kibana-utils-plugin/common/state_containers';
 import { InternalStateTransitions } from '../discover_internal_state_container';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { internalStateActions } from '../redux';
-import { BehaviorSubject } from 'rxjs';
+import { createRuntimeStateManager, internalStateActions } from '../redux';
 
 const setupTestParams = (dataView: DataView | undefined) => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
-  const currentDataView$ = new BehaviorSubject<DataView | undefined>(undefined);
-  const discoverState = getDiscoverStateMock({ savedSearch, currentDataView$ });
+  const runtimeStateManager = createRuntimeStateManager();
+  const discoverState = getDiscoverStateMock({ savedSearch, runtimeStateManager });
   discoverState.internalState2.dispatch(
     internalStateActions.setDataView(savedSearch.searchSource.getField('index')!)
   );
@@ -40,7 +39,7 @@ const setupTestParams = (dataView: DataView | undefined) => {
     services,
     appState: discoverState.appState,
     internalState: discoverState.internalState,
-    currentDataView$,
+    runtimeStateManager,
   };
 };
 

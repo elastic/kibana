@@ -22,7 +22,6 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { BehaviorSubject, skip } from 'rxjs';
 import type {
   AnalyticsNoDataPageKibanaDependencies,
   AnalyticsNoDataPageProps,
@@ -46,7 +45,12 @@ import {
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { useDefaultAdHocDataViews, useRootProfile } from '../../context_awareness';
-import { RuntimeStateProvider } from './state_management/redux';
+import {
+  RuntimeStateManager,
+  RuntimeStateProvider,
+  createRuntimeStateManager,
+  useRuntimeState,
+} from './state_management/redux';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -78,13 +82,13 @@ export function DiscoverMainRoute({
     getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
-  const [currentDataView$] = useState(() => new BehaviorSubject<DataView | undefined>(undefined));
+  const [runtimeStateManager] = useState(() => createRuntimeStateManager());
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
     history,
     services,
     customizationContext,
     stateStorageContainer,
-    currentDataView$,
+    runtimeStateManager,
   });
   const customizationService = useDiscoverCustomizationService({
     customizationCallbacks,
@@ -270,17 +274,17 @@ export function DiscoverMainRoute({
         await loadSavedSearch();
       } else {
         // restore the previously selected data view for a new state (when a saved search was open)
-        await loadSavedSearch(getLoadParamsForNewSearch({ stateContainer, currentDataView$ }));
+        await loadSavedSearch(getLoadParamsForNewSearch({ stateContainer, runtimeStateManager }));
       }
     };
 
     load();
   }, [
-    currentDataView$,
     customizationService,
     initializeProfileDataViews,
     loadSavedSearch,
     rootProfileState.rootProfileLoading,
+    runtimeStateManager,
     savedSearchId,
     stateContainer,
   ]);
@@ -291,8 +295,8 @@ export function DiscoverMainRoute({
     savedSearchId,
     onNewUrl: useCallback(() => {
       // restore the previously selected data view for a new state
-      loadSavedSearch(getLoadParamsForNewSearch({ stateContainer, currentDataView$ }));
-    }, [currentDataView$, loadSavedSearch, stateContainer]),
+      loadSavedSearch(getLoadParamsForNewSearch({ stateContainer, runtimeStateManager }));
+    }, [loadSavedSearch, runtimeStateManager, stateContainer]),
   });
 
   const onDataViewCreated = useCallback(
@@ -332,8 +336,7 @@ export function DiscoverMainRoute({
     [core, data.dataViews, dataViewEditor, noDataState, services.noDataPage, share]
   );
 
-  const [dataView$] = useState(() => currentDataView$.pipe(skip(1)));
-  const currentDataView = useObservable(dataView$, currentDataView$.getValue());
+  const currentDataView = useRuntimeState(runtimeStateManager.currentDataView$);
 
   if (error) {
     return <DiscoverError error={error} />;
@@ -402,16 +405,16 @@ const NoDataPage = ({
 
 function getLoadParamsForNewSearch({
   stateContainer,
-  currentDataView$,
+  runtimeStateManager,
 }: {
   stateContainer: DiscoverStateContainer;
-  currentDataView$: BehaviorSubject<DataView | undefined>;
+  runtimeStateManager: RuntimeStateManager;
 }): {
   nextDataView: LoadParams['dataView'];
   initialAppState: LoadParams['initialAppState'];
 } {
   const prevAppState = stateContainer.appState.getState();
-  const prevDataView = currentDataView$.getValue();
+  const prevDataView = runtimeStateManager.currentDataView$.getValue();
   const initialAppState =
     isDataSourceType(prevAppState.dataSource, DataSourceType.Esql) &&
     prevDataView &&

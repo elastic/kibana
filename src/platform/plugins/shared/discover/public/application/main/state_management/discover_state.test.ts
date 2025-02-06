@@ -32,8 +32,7 @@ import { copySavedSearch } from './discover_saved_search_container';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
-import { BehaviorSubject } from 'rxjs';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { createRuntimeStateManager } from './redux';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
@@ -54,12 +53,12 @@ async function getState(
     id: 'ad-hoc-id',
     title: 'test',
   });
-  const currentDataView$ = new BehaviorSubject<DataView | undefined>(undefined);
+  const runtimeStateManager = createRuntimeStateManager();
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
     customizationContext: mockCustomizationContext,
-    currentDataView$,
+    runtimeStateManager,
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
@@ -80,7 +79,7 @@ async function getState(
   return {
     history: nextHistory,
     state: nextState,
-    currentDataView$,
+    runtimeStateManager,
     getCurrentUrl,
   };
 }
@@ -98,7 +97,7 @@ describe('Test discover state', () => {
       services: discoverServiceMock,
       history,
       customizationContext: mockCustomizationContext,
-      currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+      runtimeStateManager: createRuntimeStateManager(),
     });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);
@@ -197,7 +196,7 @@ describe('Test discover state with overridden state storage', () => {
       history,
       customizationContext: mockCustomizationContext,
       stateStorageContainer: stateStorage,
-      currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+      runtimeStateManager: createRuntimeStateManager(),
     });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);
@@ -289,7 +288,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
     services: discoverServiceMock,
     history,
     customizationContext: mockCustomizationContext,
-    currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    runtimeStateManager: createRuntimeStateManager(),
   });
   discoverStateContainer.appState.update({
     dataSource: createDataViewDataSource({
@@ -426,10 +425,10 @@ describe('Test discover state actions', () => {
   });
 
   test('setDataView', async () => {
-    const { state, currentDataView$ } = await getState('');
-    expect(currentDataView$.getValue()).toBeUndefined();
+    const { state, runtimeStateManager } = await getState('');
+    expect(runtimeStateManager.currentDataView$.getValue()).toBeUndefined();
     state.actions.setDataView(dataViewMock);
-    expect(currentDataView$.getValue()).toBe(dataViewMock);
+    expect(runtimeStateManager.currentDataView$.getValue()).toBe(dataViewMock);
     expect(state.internalState2.getState().dataViewId).toBe(dataViewMock.id);
   });
 
@@ -1000,7 +999,7 @@ describe('Test discover state with embedded mode', () => {
         ...mockCustomizationContext,
         displayMode: 'embedded',
       },
-      currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+      runtimeStateManager: createRuntimeStateManager(),
     });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);

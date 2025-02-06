@@ -7,23 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { createInternalStateStore, internalStateActions } from '.';
+import { createInternalStateStore, createRuntimeStateManager, internalStateActions } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 describe('InternalStateStore', () => {
   it('should set data view', () => {
-    const currentDataView$ = new BehaviorSubject<DataView | undefined>(undefined);
+    const runtimeStateManager = createRuntimeStateManager();
     const store = createInternalStateStore({
       services: createDiscoverServicesMock(),
-      currentDataView$,
+      runtimeStateManager,
     });
     expect(store.getState().dataViewId).toBeUndefined();
-    expect(currentDataView$.value).toBeUndefined();
+    expect(runtimeStateManager.currentDataView$.value).toBeUndefined();
     store.dispatch(internalStateActions.setDataView(dataViewMock));
     expect(store.getState().dataViewId).toBe(dataViewMock.id);
-    expect(currentDataView$.value).toBe(dataViewMock);
+    expect(runtimeStateManager.currentDataView$.value).toBe(dataViewMock);
   });
 });

@@ -14,8 +14,8 @@ import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/p
 import { v4 as uuidv4 } from 'uuid';
 import { type PayloadAction, configureStore, createSlice } from '@reduxjs/toolkit';
 import { differenceBy, omit } from 'lodash';
-import type { Subject } from 'rxjs';
 import type { DiscoverServices } from '../../../../build_services';
+import { RuntimeStateManager } from './runtime_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
@@ -176,7 +176,7 @@ const internalStateSlice = createSlice({
 
 export interface InternalStateThunkDependencies {
   services: DiscoverServices;
-  currentDataView$: Subject<DataView | undefined>;
+  runtimeStateManager: RuntimeStateManager;
 }
 
 export const createInternalStateStore = (options: InternalStateThunkDependencies) =>
@@ -195,10 +195,10 @@ const setDataView =
   (
     dispatch: InternalStateDispatch,
     _: InternalStateGetState,
-    { currentDataView$ }: InternalStateThunkDependencies
+    { runtimeStateManager }: InternalStateThunkDependencies
   ) => {
     dispatch(internalStateSlice.actions.setDataViewId({ dataViewId: dataView.id }));
-    currentDataView$.next(dataView);
+    runtimeStateManager.currentDataView$.next(dataView);
   };
 
 export const internalStateActions = {

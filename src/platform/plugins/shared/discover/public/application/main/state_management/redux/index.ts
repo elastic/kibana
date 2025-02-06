@@ -18,6 +18,9 @@ export {
 
 export {
   type DiscoverRuntimeState,
+  type RuntimeStateManager,
+  createRuntimeStateManager,
+  useRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
 } from './runtime_state';

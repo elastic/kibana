@@ -30,6 +30,7 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
+import { RuntimeStateManager } from './redux';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -139,7 +140,7 @@ export function getDataStateContainer({
   searchSessionManager,
   appStateContainer,
   internalStateContainer,
-  currentDataView$,
+  runtimeStateManager,
   getSavedSearch,
   setDataView,
 }: {
@@ -147,7 +148,7 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   appStateContainer: DiscoverAppStateContainer;
   internalStateContainer: DiscoverInternalStateContainer;
-  currentDataView$: BehaviorSubject<DataView | undefined>;
+  runtimeStateManager: RuntimeStateManager;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
@@ -268,7 +269,7 @@ export function getDataStateContainer({
           });
 
           const { resetDefaultProfileState } = internalStateContainer.getState();
-          const dataView = currentDataView$.getValue();
+          const dataView = runtimeStateManager.currentDataView$.getValue();
           const defaultProfileState = dataView
             ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
             : undefined;
