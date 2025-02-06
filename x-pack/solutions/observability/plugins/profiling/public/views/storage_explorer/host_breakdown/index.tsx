@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -29,13 +28,10 @@ import { HostBreakdownChart } from './host_breakdown_chart';
 
 interface Props {
   hasDistinctProbabilisticValues: boolean;
-  storageExplorerSummaryStateStatus: AsyncStatus;
+  onReady: () => void;
 }
 
-export function HostBreakdown({
-  hasDistinctProbabilisticValues,
-  storageExplorerSummaryStateStatus,
-}: Props) {
+export function HostBreakdown({ hasDistinctProbabilisticValues, onReady }: Props) {
   const { query } = useProfilingParams('/storage-explorer');
   const { rangeFrom, rangeTo, kuery, indexLifecyclePhase } = query;
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -61,26 +57,14 @@ export function HostBreakdown({
       indexLifecyclePhase,
     ]
   );
-  const { onPageReady } = usePerformanceContext();
+
+  const status = storageExplorerHostDetailsState.status;
+
   useEffect(() => {
-    if (
-      storageExplorerSummaryStateStatus === AsyncStatus.Settled &&
-      storageExplorerHostDetailsState.status === AsyncStatus.Settled
-    ) {
-      onPageReady({
-        meta: {
-          rangeFrom,
-          rangeTo,
-        },
-      });
+    if (status === AsyncStatus.Settled) {
+      onReady();
     }
-  }, [
-    storageExplorerSummaryStateStatus,
-    storageExplorerHostDetailsState,
-    onPageReady,
-    rangeFrom,
-    rangeTo,
-  ]);
+  }, [status, onReady]);
 
   return (
     <>
