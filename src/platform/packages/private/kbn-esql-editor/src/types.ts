@@ -16,6 +16,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export interface ESQLEditorProps {
@@ -112,6 +113,7 @@ export interface EsqlPluginStartBase {
 export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   storage: Storage;
   uiActions: UiActionsStart;
