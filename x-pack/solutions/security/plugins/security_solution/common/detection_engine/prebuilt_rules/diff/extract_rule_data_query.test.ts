@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
+import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { KqlQueryType } from '../../../api/detection_engine';
 import {
   extractRuleEqlQuery,
@@ -28,6 +28,9 @@ const mockFilter: Filter = {
     term: {
       field: 'value',
     },
+  },
+  $state: {
+    store: FilterStateStore.APP_STATE,
   },
 };
 
@@ -61,11 +64,34 @@ describe('extract rule data queries', () => {
             meta: {
               negate: false,
               disabled: false,
-              type: 'phrase',
-              key: 'test',
-              params: {
-                query: 'value',
+            },
+            query: {
+              term: {
+                field: 'value',
               },
+            },
+          },
+        ],
+      });
+    });
+
+    it('normalizes filters without disabled field', () => {
+      const extractedKqlQuery = extractRuleKqlQuery(
+        'event.kind:alert',
+        'kuery',
+        [{ ...mockFilter, meta: { ...mockFilter.meta, disabled: undefined } }],
+        undefined
+      );
+
+      expect(extractedKqlQuery).toEqual({
+        type: KqlQueryType.inline_query,
+        query: 'event.kind:alert',
+        language: 'kuery',
+        filters: [
+          {
+            meta: {
+              negate: false,
+              disabled: false,
             },
             query: {
               term: {
