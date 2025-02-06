@@ -6,7 +6,11 @@
  */
 import { z } from '@kbn/zod';
 import { getFlattenedObject } from '@kbn/std';
-import { fieldDefinitionConfigSchema, isWiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  RecursiveRecord,
+  fieldDefinitionConfigSchema,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
@@ -107,7 +111,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   }): Promise<{
     status: 'unknown' | 'success' | 'failure';
     simulationError: string | null;
-    documentsWithRuntimeFieldsApplied: unknown[] | null;
+    documentsWithRuntimeFieldsApplied: RecursiveRecord[] | null;
   }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -171,7 +175,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       _index: params.path.id,
       _id: hit._id,
       _source: Object.fromEntries(
-        Object.entries(getFlattenedObject(hit._source as Record<string, unknown>)).filter(
+        Object.entries(getFlattenedObject(hit._source as RecursiveRecord)).filter(
           ([k]) => fieldDefinitionKeys.includes(k) || k === '@timestamp'
         )
       ),
@@ -260,7 +264,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           if (!hit.fields) {
             return {};
           }
-          return Object.keys(hit.fields).reduce<Record<string, unknown>>((acc, field) => {
+          return Object.keys(hit.fields).reduce<RecursiveRecord>((acc, field) => {
             acc[field] = hit.fields![field][0];
             return acc;
           }, {});
