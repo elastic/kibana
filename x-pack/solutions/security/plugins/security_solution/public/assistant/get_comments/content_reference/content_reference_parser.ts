@@ -63,7 +63,7 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
         body += char;
       }
 
-      return '';
+      return "";
     }
 
     const contentReferenceId = readArg('(', ')');
@@ -80,10 +80,6 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
       });
     }
 
-    if (!contentReferenceId) {
-      return false;
-    }
-
     if (silent) {
       return true;
     }
@@ -94,6 +90,9 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
     const contentReferenceBlock: ContentReferenceBlock = `{reference(${contentReferenceId})}`;
 
     const getContentReferenceCount = (id: string) => {
+      if (!id) {
+        return -1
+      }
       if (id in contentReferenceCounts) {
         return contentReferenceCounts[id];
       }
@@ -103,12 +102,14 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
 
     const toEat = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
 
-    return eat(toEat)({
+    const contentReferenceNode: ContentReferenceNode = {
       type: 'contentReference',
-      contentReferenceId,
+      contentReferenceId: contentReferenceId,
       contentReferenceCount: getContentReferenceCount(contentReferenceId),
       contentReferenceBlock,
-    } as ContentReferenceNode);
+    }
+
+    return eat(toEat)(contentReferenceNode);
   };
 
   tokenizeCustomCitation.notInLink = true;

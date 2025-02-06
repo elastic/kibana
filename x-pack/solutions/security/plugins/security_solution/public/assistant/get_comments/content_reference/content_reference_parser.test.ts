@@ -31,6 +31,19 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     ).toHaveLength(10);
   });
 
+  it('eats empty content reference', async () => {
+    const file = unified()
+      .use([[markdown, {}], ContentReferenceParser])
+      .parse('There is an empty content reference.{reference()}') as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'text', value: 'There is an empty content reference.' }),
+        expect.objectContaining({ type: 'contentReference', contentReferenceCount: -1, contentReferenceId: "" }),
+      ])
+    );
+  });
+
   it('eats space preceding content reference', async () => {
     const file = unified()
       .use([[markdown, {}], ContentReferenceParser])
