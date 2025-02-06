@@ -58,7 +58,7 @@ export function PreviewTable({
         if (!doc || typeof doc !== 'object') {
           return '';
         }
-        const value = (doc as Record<string, unknown>)[columnId];
+        const value = (doc as RecursiveRecord)[columnId];
         if (value === undefined || value === null) {
           return '';
         }
