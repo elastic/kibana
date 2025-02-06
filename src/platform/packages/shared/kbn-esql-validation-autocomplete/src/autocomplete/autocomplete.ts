@@ -107,8 +107,7 @@ import {
   extractTypeFromASTArg,
   getSuggestionsToRightOfOperatorExpression,
   checkFunctionInvocationComplete,
-  getOverlapRange,
-  KEYWORDS_WITH_SPACES,
+  getMultiWordKeywordMatchRange,
 } from './helper';
 import { FunctionParameter, isParameterType } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
@@ -284,20 +283,19 @@ export async function suggest(
     );
   }
 
-  for (const word of KEYWORDS_WITH_SPACES) {
-    const overlap = getOverlapRange(innerText.toLowerCase(), word.toLowerCase());
-    if (overlap.start < overlap.end) {
-      // there's an overlap so use that
-      return suggestionsPromise.then((suggestions) =>
+  const multiWordKeywordMatchRange = getMultiWordKeywordMatchRange(innerText);
+
+  return multiWordKeywordMatchRange
+    ? suggestionsPromise
+    : suggestionsPromise.then((suggestions) =>
         suggestions.map<SuggestionRawDefinition>((s) => {
-          const suggestionWithRange: SuggestionRawDefinition = { ...s, rangeToReplace: overlap };
+          const suggestionWithRange: SuggestionRawDefinition = {
+            ...s,
+            rangeToReplace: multiWordKeywordMatchRange,
+          };
           return suggestionWithRange;
         })
       );
-    }
-  }
-
-  return suggestionsPromise;
 }
 
 export function getFieldsByTypeRetriever(

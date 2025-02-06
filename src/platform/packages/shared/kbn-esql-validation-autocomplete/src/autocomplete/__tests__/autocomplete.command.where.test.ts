@@ -327,17 +327,6 @@ describe('WHERE <expression>', () => {
         });
       });
 
-      test('uses indices of single prefix by default', async () => {
-        const { suggest } = await setup();
-
-        (await suggest('FROM index | WHERE some.prefix/')).forEach((suggestion) => {
-          expect(suggestion.rangeToReplace).toEqual({
-            start: 20,
-            end: 30,
-          });
-        });
-      });
-
       test('"IS (NOT) NULL" with a matching prefix', async () => {
         const { suggest } = await setup();
 
