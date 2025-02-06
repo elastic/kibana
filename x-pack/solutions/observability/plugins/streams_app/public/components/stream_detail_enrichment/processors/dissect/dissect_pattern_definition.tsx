@@ -22,7 +22,7 @@ export const DissectPatternDefinition = () => {
     name: 'pattern',
     rules: {
       required: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternRequiredError',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternRequiredError',
         { defaultMessage: 'A pattern is required.' }
       ),
     },
@@ -33,12 +33,12 @@ export const DissectPatternDefinition = () => {
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternDefinitionsLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsLabel',
         { defaultMessage: 'Pattern' }
       )}
       helpText={
         <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternDefinitionsHelpText"
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsHelpText"
           defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {keyModifier} to alter the dissection behavior."
           values={{
             keyModifier: (
@@ -49,7 +49,7 @@ export const DissectPatternDefinition = () => {
                 href={esDocUrl}
               >
                 {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternDefinitionsLink',
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsLink',
                   { defaultMessage: 'key modifier' }
                 )}
               </EuiLink>
@@ -68,7 +68,7 @@ export const DissectPatternDefinition = () => {
         height={75}
         options={{ minimap: { enabled: false } }}
         aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternDefinitionsAriaLabel',
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsAriaLabel',
           { defaultMessage: 'Pattern editor' }
         )}
       />

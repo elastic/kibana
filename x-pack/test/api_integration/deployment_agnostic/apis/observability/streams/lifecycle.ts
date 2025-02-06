@@ -105,7 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect((updatedRootDefinition as WiredStreamGetResponse).stream.ingest.lifecycle).to.eql({
           dsl: { data_retention: '999d' },
         });
-        expect(updatedRootDefinition.effective_lifecycle).to.eql({
+        expect((updatedRootDefinition as WiredStreamGetResponse).effective_lifecycle).to.eql({
           dsl: { data_retention: '999d' },
           from: 'logs',
         });
