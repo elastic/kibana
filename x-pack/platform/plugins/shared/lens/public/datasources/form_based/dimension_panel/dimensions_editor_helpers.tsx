@@ -12,10 +12,9 @@
  * 2.0.
  */
 
-import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiButtonGroup, EuiFormRow, UseEuiTheme } from '@elastic/eui';
 import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
@@ -154,7 +153,7 @@ export const CalloutWarning = ({
     return (
       <>
         <EuiCallOut
-          className="lnsIndexPatternDimensionEditor__warning"
+          css={DimensionEditorWarningStyles}
           size="s"
           title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {
             defaultMessage: 'Static value currently applied',
@@ -174,7 +173,7 @@ export const CalloutWarning = ({
   return (
     <>
       <EuiCallOut
-        className="lnsIndexPatternDimensionEditor__warning"
+        css={DimensionEditorWarningStyles}
         size="s"
         title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
           defaultMessage: 'Formula currently applied',
@@ -251,4 +250,11 @@ export const DimensionEditorButtonGroups = ({
       />
     </EuiFormRow>
   );
+};
+
+const DimensionEditorWarningStyles = ({ euiTheme }: UseEuiTheme) => {
+  return `
+    margin-bottom: ${euiTheme.size.base};
+    margin-top: ${euiTheme.size.s};
+  `;
 };

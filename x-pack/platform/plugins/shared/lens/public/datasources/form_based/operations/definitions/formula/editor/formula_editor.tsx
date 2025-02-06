@@ -711,7 +711,11 @@ export function FormulaEditor({
         <div className="lnsFormula__editor">
           <div css={SharedEditorStyles.editorHeader}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem css={css`display: block;`}>
+              <EuiFlexItem
+                css={css`
+                  display: block;
+                `}
+              >
                 <EuiToolTip
                   content={
                     isWordWrapped
@@ -748,7 +752,12 @@ export function FormulaEditor({
                 </EuiToolTip>
               </EuiFlexItem>
 
-              <EuiFlexItem css={css`display: block;`} grow={false}>
+              <EuiFlexItem
+                css={css`
+                  display: block;
+                `}
+                grow={false}
+              >
                 <EuiButtonEmpty
                   onClick={() => {
                     toggleFullscreen();
@@ -799,7 +808,10 @@ export function FormulaEditor({
             />
 
             {!text ? (
-              <div className="lnsFormula__editorPlaceholder" css={SharedEditorStyles.editorPlaceholder}>
+              <div
+                className="lnsFormula__editorPlaceholder"
+                css={SharedEditorStyles.editorPlaceholder}
+              >
                 <EuiText color="subdued" size="s">
                   {i18n.translate('xpack.lens.formulaPlaceholderText', {
                     defaultMessage: 'Type a formula by combining functions with math, like:',
@@ -871,7 +883,9 @@ export function FormulaEditor({
                     button={
                       <EuiButtonEmpty
                         color={errorCount ? 'danger' : 'warning'}
-                        css={css`white-space: nowrap;`}
+                        css={css`
+                          white-space: nowrap;
+                        `}
                         className="lnsFormula__editorError"
                         iconType="warning"
                         size="xs"
@@ -902,7 +916,11 @@ export function FormulaEditor({
                       `}
                     >
                       {warnings.map(({ message, severity }, index) => (
-                        <div key={index} className="lnsFormula__warningText" css={SharedEditorStyles.warningText}>
+                        <div
+                          key={index}
+                          className="lnsFormula__warningText"
+                          css={SharedEditorStyles.warningText}
+                        >
                           <EuiText
                             size="s"
                             color={
@@ -1003,7 +1021,7 @@ const SharedEditorStyles = {
     & > * + * {
       margin-left: ${euiTheme.size.xs};
     }
-  `
+  `,
 };
 
 const DefaultEditorStyles = ({ euiTheme }: UseEuiTheme) => {
