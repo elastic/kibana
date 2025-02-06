@@ -6,7 +6,7 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import type { AxiosError } from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { OAuthTokenManager } from './o_auth_token_manager';
@@ -52,7 +52,6 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     params: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>
   ) {
     super(params);
-
     this.oAuthToken = new OAuthTokenManager({
       ...params,
       apiRequest: async (...args) => this.request(...args),
@@ -110,19 +109,45 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   ): Promise<R> {
     this.logger.debug(() => `Request:\n${JSON.stringify(req, null, 2)}`);
 
-    const bearerAccessToken = await this.oAuthToken.get(connectorUsageCollector);
-    const response = await this.request<R>(
-      {
-        ...req,
-        // We don't validate responses from Microsoft API's because we do not want failures for cases
-        // where the external system might add/remove/change values in the response that we have no
-        // control over.
-        responseSchema:
-          MicrosoftDefenderEndpointDoNotValidateResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
-        headers: { Authorization: `Bearer ${bearerAccessToken}` },
+    const requestOptions: SubActionRequestParams<R> = {
+      ...req,
+      // We don't validate responses from Microsoft API's because we do not want failures for cases
+      // where the external system might add/remove/change values in the response that we have no
+      // control over.
+      responseSchema:
+        MicrosoftDefenderEndpointDoNotValidateResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
+      headers: {
+        Authorization: `Bearer ${await this.oAuthToken.get(connectorUsageCollector)}`,
       },
-      connectorUsageCollector
-    );
+    };
+    let response: AxiosResponse<R>;
+    let was401RetryDone = false;
+
+    try {
+      response = await this.request<R>(requestOptions, connectorUsageCollector);
+    } catch (err) {
+      if (was401RetryDone) {
+        throw err;
+      }
+
+      this.logger.debug("API call failed! Determining if it's one we can retry");
+
+      // If error was a 401, then for some reason the token used was not valid (ex. perhaps the connector's credentials
+      // were updated). IN this case, we will try again by ensuring a new token is re-generated
+      if (err.message.includes('Status code: 401')) {
+        this.logger.warn(
+          `Received HTTP 401 (Unauthorized). Re-generating new access token and trying again`
+        );
+        was401RetryDone = true;
+        await this.oAuthToken.generateNew(connectorUsageCollector);
+        requestOptions.headers!.Authorization = `Bearer ${await this.oAuthToken.get(
+          connectorUsageCollector
+        )}`;
+        response = await this.request<R>(requestOptions, connectorUsageCollector);
+      } else {
+        throw err;
+      }
+    }
 
     return response.data;
   }

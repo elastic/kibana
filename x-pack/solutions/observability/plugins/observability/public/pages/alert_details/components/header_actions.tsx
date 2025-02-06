@@ -37,7 +37,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { CreateInvestigationResponse } from '@kbn/investigation-shared';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { Group } from '@kbn/observability-alerting-rule-utils';
+import { Group } from '@kbn/alerting-rule-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';

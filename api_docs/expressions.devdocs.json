@@ -6775,6 +6775,39 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-public.isSourceParamsESQL",
+        "type": "Function",
+        "tags": [],
+        "label": "isSourceParamsESQL",
+        "description": [],
+        "signature": [
+          "(obj: Record<string, unknown>) => boolean"
+        ],
+        "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.isSourceParamsESQL.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-public.parseExpression",
         "type": "Function",
         "tags": [],
@@ -7046,6 +7079,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.DatatableColumn.variable",
+            "type": "string",
+            "tags": [],
+            "label": "variable",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -11934,7 +11981,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -18444,6 +18491,20 @@
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.DatatableColumn.variable",
+            "type": "string",
+            "tags": [],
+            "label": "variable",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -21825,7 +21886,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -30297,6 +30358,20 @@
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumn.variable",
+            "type": "string",
+            "tags": [],
+            "label": "variable",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -30324,7 +30399,7 @@
               "\nThe Kibana normalized type of the column"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -36608,7 +36683,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,

@@ -60,19 +60,35 @@ export const useAwsCredentialsForm = ({
 }) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value, so we fall back to the default option.
-  const awsCredentialsType: AwsCredentialsType =
-    getAwsCredentialsType(input) || DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
 
   const options = getAwsCredentialsFormOptions();
 
   const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
 
   const setupFormat = getSetupFormatFromInput(input, hasCloudFormationTemplate);
+  const lastManualCredentialsType = useRef<string | undefined>(undefined);
+
+  // Assumes if the credentials type is not set, the default is CloudFormation
+  const awsCredentialsType: AwsCredentialsType =
+    getAwsCredentialsType(input) || AWS_SETUP_FORMAT.CLOUD_FORMATION;
 
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
   const fieldsSnapshot = useRef({});
-  const lastManualCredentialsType = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    // This should ony set the credentials after the initial render
+    if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
+      onChange({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+          'aws.credentials.type': {
+            value: awsCredentialsType,
+            type: 'text',
+          },
+        }),
+      });
+    }
+  }, [awsCredentialsType, input, newPolicy, onChange]);
 
   useEffect(() => {
     const isInvalid =
