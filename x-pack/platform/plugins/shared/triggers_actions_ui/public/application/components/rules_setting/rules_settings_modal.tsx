@@ -195,7 +195,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   const canShowFlappingSettings = readFlappingSettingsUI;
   const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
   const canShowQueryDelaySettings = readQueryDelaySettingsUI;
-  // TODO: Use real settings: https://github.com/elastic/kibana/issues/208615
+  // TODO: Use real settings: https://github.com/elastic/kibana/issues/210014
   // const canWriteAlertDeletionSettings = writeAlertDeletionUI && !hasAlertDeletionError;
   // const canShowAlertDeletionSettings = readAlertDeletionSettingsUI;
   const canWriteAlertDeletionSettings = isAlertDeletionSettingsEnabled && !hasAlertDeletionError;

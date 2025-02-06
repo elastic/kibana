@@ -50,7 +50,7 @@ export const ALERT_DELETION_ERROR_PROMPT_TITLE = i18n.translate(
 );
 
 export const ALERT_DELETION_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.alertDeletionTitle',
+  'xpack.triggersActionsUI.rulesSettings.modal.alertDeletionTitle',
   {
     defaultMessage: 'Alert deletion',
   }

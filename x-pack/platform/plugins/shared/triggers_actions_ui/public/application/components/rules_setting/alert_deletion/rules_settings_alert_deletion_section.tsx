@@ -30,17 +30,6 @@ import {
   THRESHOLD_LABEL,
 } from './translations';
 
-const ErrorPrompt = () => {
-  return (
-    <EuiEmptyPrompt
-      color="danger"
-      iconType="warning"
-      title={<h4>{ALERT_DELETION_ERROR_PROMPT_TITLE}</h4>}
-      body={<p>{ALERT_DELETION_ERROR_PROMPT_BODY}</p>}
-    />
-  );
-};
-
 interface Props {
   onChange: (key: keyof RulesSettingsAlertDeletionProperties, value: number | boolean) => void;
   settings: RulesSettingsAlertDeletionProperties;
@@ -54,8 +43,16 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
   if (!canShow) {
     return null;
   }
+
   if (hasError) {
-    return <ErrorPrompt />;
+    return (
+      <EuiEmptyPrompt
+        color="danger"
+        iconType="warning"
+        title={<h4>{ALERT_DELETION_ERROR_PROMPT_TITLE}</h4>}
+        body={<p>{ALERT_DELETION_ERROR_PROMPT_BODY}</p>}
+      />
+    );
   }
 
   return (
