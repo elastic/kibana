@@ -30,7 +30,9 @@
       "dashboard",
       "fieldsMetadata",
       "logsDataAccess",
-      "spaces"
+      "spaces",
+      "savedSearch",
+      "embeddable",
     ],
     "optionalPlugins": [
       "features",

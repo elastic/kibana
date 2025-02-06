@@ -53,6 +53,11 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { Subject } from 'rxjs';
 
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 
 import type { FleetAuthz } from '../common';
@@ -137,6 +142,9 @@ export interface FleetStartDeps {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
+  embeddable: EmbeddableStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {

@@ -24,7 +24,11 @@ import semverCoerce from 'semver/functions/coerce';
 import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { TimeRange } from '@kbn/es-query';
-import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
+// import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
+
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+
+import useAsync from 'react-use/lib/useAsync';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
@@ -239,6 +243,21 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       [measuredlogPanelHeight]
     );
 
+    const {
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+    } = useStartServices();
+
+    const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+
+    const timeRange = useMemo(() => ({ from: state.start, to: state.end }), [state]);
+
     if (!isLogFeatureAvailable) {
       return (
         <EuiCallOut
@@ -338,14 +357,31 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel paddingSize="none" panelRef={logsPanelRef} grow={false}>
-            <LogStream
+            {/* <LogStream
               logView={LOG_VIEW_SETTINGS}
               height={logPanelHeight}
               startTimestamp={dateRangeTimestamps.start}
               endTimestamp={dateRangeTimestamps.end}
               query={logStreamQuery}
               columns={LOG_VIEW_COLUMNS}
-            />
+            /> */}
+
+            {logSources.value ? (
+              <LazySavedSearchComponent
+                dependencies={{ embeddable, searchSource, dataViews }}
+                index={logSources.value}
+                timeRange={timeRange}
+                query={{
+                  language: 'kuery',
+                  query: logStreamQuery,
+                }}
+                height={'60vh'}
+                displayOptions={{
+                  enableDocumentViewer: true,
+                  enableFilters: false,
+                }}
+              />
+            ) : null}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
