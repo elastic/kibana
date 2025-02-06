@@ -44,6 +44,7 @@ import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
+import { EventOutcomeBadgeWithActions } from '../event_outcome_badge';
 /**
  * getUnformattedResourceFields definitions
  */
@@ -123,15 +124,16 @@ const getResourceBadgeComponent = (
   core: CoreStart,
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
-  if (name === SERVICE_NAME_FIELD) {
-    return (props: FieldBadgeWithActionsProps) => (
-      <ServiceNameBadgeWithActions {...props} share={share} core={core} />
-    );
+  switch (name) {
+    case SERVICE_NAME_FIELD:
+      return (props: FieldBadgeWithActionsProps) => (
+        <ServiceNameBadgeWithActions {...props} share={share} core={core} />
+      );
+    case EVENT_OUTCOME_FIELD:
+      return EventOutcomeBadgeWithActions;
+    default:
+      return FieldBadgeWithActions;
   }
-
-  return (props: FieldBadgeWithActionsProps) => (
-    <FieldBadgeWithActions {...props} share={share} core={core} />
-  );
 };
 
 const getResourceBadgeIcon = (
