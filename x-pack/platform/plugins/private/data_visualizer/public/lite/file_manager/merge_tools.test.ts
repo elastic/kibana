@@ -30,7 +30,7 @@ describe('merge_tools', () => {
       expect(result.mappingClashes).toEqual([]);
     });
 
-    it('should return merged mappings when all mappings are the keyword and text', () => {
+    it('should return merged mappings when a keyword mapping is being merged with a text mapping', () => {
       const files = [
         {
           getMappings: () => ({ properties: { field1: { type: 'text' } } }),
@@ -45,7 +45,7 @@ describe('merge_tools', () => {
       expect(result.mappingClashes).toEqual([]);
     });
 
-    it('should return merged mappings when all mappings are the text and keyword', () => {
+    it('should return merged mappings when a text mapping is being merged with a keyword mapping', () => {
       const files = [
         {
           getMappings: () => ({ properties: { field1: { type: 'keyword' } } }),
