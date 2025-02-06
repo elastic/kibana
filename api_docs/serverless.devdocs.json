@@ -428,23 +428,6 @@
     "misc": [
       {
         "parentPluginId": "serverless",
-        "id": "def-common.API_SWITCH_PROJECT",
-        "type": "string",
-        "tags": [],
-        "label": "API_SWITCH_PROJECT",
-        "description": [
-          "Internal API route responsible for switching between project configurations."
-        ],
-        "signature": [
-          "\"/internal/serverless/switch_project\""
-        ],
-        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "serverless",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],

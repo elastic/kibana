@@ -1236,42 +1236,6 @@
         },
         {
           "parentPluginId": "timelines",
-          "id": "def-public.TimelinesUIStart.getLoadingPanel",
-          "type": "Function",
-          "tags": [],
-          "label": "getLoadingPanel",
-          "description": [],
-          "signature": [
-            "(props: ",
-            "LoadingPanelProps",
-            ") => React.ReactElement<",
-            "LoadingPanelProps",
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "timelines",
-              "id": "def-public.TimelinesUIStart.getLoadingPanel.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "LoadingPanelProps"
-              ],
-              "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "timelines",
           "id": "def-public.TimelinesUIStart.getLastUpdated",
           "type": "Function",
           "tags": [],
