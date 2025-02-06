@@ -2332,20 +2332,20 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-common@0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.6.tgz#45dc17f1e6ddb688dde2befd3a5e32d87e59dd42"
-  integrity sha512-6Uglv3HO3vK1uOyQc9F3ThtedZazohWDzMJXaR7QsYb48y3GP97AALA7+IFlnfl6OimOD/nKKzUylJqEGxffvA==
+"@elastic/eui-theme-common@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.7.tgz#0e57b5325d52fd5813832a77f47f294204f3dc72"
+  integrity sha512-U9ii4Bl+S5zdbIH3WP01vebJboalhZ/ULlyZxc7zHmyA9Z2pONGOauUZUKE7v3nSmN6f53toNoa2pvn4ZqB+Yw==
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@98.2.1-borealis.1":
-  version "98.2.1-borealis.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.2.1-borealis.1.tgz#759acfdc2ddac94260e5869832f841f16d4d7e63"
-  integrity sha512-xJngnQycka54v7ptVUqJdOcTUuuhrf5/Nrg6EvhOFmMFuDECDSdsWqcbssZ7cCo6Cz0+7FrYWYvsNouK9TfhJA==
+"@elastic/eui@98.2.2-borealis.0":
+  version "98.2.2-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.2.2-borealis.0.tgz#61d37c2abab90af3fdb3ac5abf9309198b8c88b6"
+  integrity sha512-YAEYHcNQygGHpTSynssiE5YwmwtRJ+uYH2bFCkPY68KZhtRCCU3U7YCTYOFSgGm4ycEaHGtic7XwPREDroH7/A==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.6"
+    "@elastic/eui-theme-common" "0.0.7"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -13196,14 +13196,14 @@
   resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.4.2.tgz#669ab18923d93a8d8fb526241a2affc0d50abf9d"
   integrity sha512-AFJKVc/fCPtgSOnRst3xdYJwiEcUN9lDY7EO/YiRvFHYCJGgfzg+jpvZjkTOnBLGyrMJre9378pRxAc3fsR06A==
   dependencies:
-    "@xyflow/system" "0.0.43"
+    "@xyflow/system" "0.0.50"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.43":
-  version "0.0.43"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.43.tgz#5abe99b2542fa583c15a74efcdbb78b8ed825f49"
-  integrity sha512-1zHgad1cWr1mKm2xbFaarK0Jg8WRgaQ8ubSBIo/pRdq3fEgCuqgNkL9NSAP6Rvm8zi3+Lu4JPUMN+EEx5QgX9A==
+"@xyflow/system@0.0.50":
+  version "0.0.50"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.50.tgz#8517cb46e1523cc6abe620f3ad18f5a94315d7e3"
+  integrity sha512-HVUZd4LlY88XAaldFh2nwVxDOcdIBxGpQ5txzwfJPf+CAjj2BfYug1fHs2p4yS7YO8H6A3EFJQovBE8YuHkAdg==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-selection" "^3.0.10"
