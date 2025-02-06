@@ -6,6 +6,7 @@
  */
 import React, { ReactNode, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -26,6 +27,7 @@ interface Props {
   cluster?: ClusterPayload;
   nextButtonTestSubj: string;
   backButtonTestSubj?: string;
+  previousClusterMode?: typeof PROXY_MODE | typeof SNIFF_MODE;
 }
 
 export const ActionButtons: React.FC<Props> = ({
@@ -39,6 +41,7 @@ export const ActionButtons: React.FC<Props> = ({
   cluster,
   nextButtonTestSubj,
   backButtonTestSubj,
+  previousClusterMode,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState(false);
   const toggleRequest = useCallback(() => {
@@ -92,7 +95,11 @@ export const ActionButtons: React.FC<Props> = ({
         )}
       </EuiFlexItem>
       {isRequestVisible && cluster ? (
-        <RequestFlyout cluster={cluster} close={() => setIsRequestVisible(false)} />
+        <RequestFlyout
+          cluster={cluster}
+          close={() => setIsRequestVisible(false)}
+          previousClusterMode={previousClusterMode}
+        />
       ) : null}
     </EuiFlexGroup>
   );
