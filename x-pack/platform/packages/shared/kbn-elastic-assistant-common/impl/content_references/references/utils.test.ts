@@ -21,14 +21,14 @@ describe('utils', () => {
     ['{reference(1234)', '{reference(1234)'],
     ['{reference(1234)}{reference(1234)}{reference(1234)}', ''],
     ['{reference(1234)}reference(1234)}{reference(1234)}', 'reference(1234)}'],
-  ])('removesContentReferences from "%s"', async (input: string, expected: string) => {
+  ])('removesContentReferences from "%s"', (input: string, expected: string) => {
     const result = removeContentReferences(input);
 
     expect(result).toEqual(expected);
   });
 
   // https://github.com/elastic/kibana/security/code-scanning/539
-  it('removesContentReferences does not run in polynomial time', async () => {
+  it('removesContentReferences does not run in polynomial time', () => {
     const input = `${'{reference('.repeat(100000)}x${')'.repeat(100000)}`;
     const startTime = performance.now(); // Start timing
 
