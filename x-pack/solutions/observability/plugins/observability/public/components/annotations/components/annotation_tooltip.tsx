@@ -19,8 +19,6 @@ import { TimestampRangeLabel } from './timestamp_range_label';
 import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 import { AnnotationIcon } from './annotation_icon';
 
-import './annotations.scss';
-
 export function AnnotationTooltip({
   annotation,
 }: {
