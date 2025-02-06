@@ -14,7 +14,7 @@ import {
   ReindexCannotBeCancelled,
   ReindexTaskFailed,
   MetadataCannotBeGrabbed,
-  ReadonlyIndicesFailed,
+  ReadonlyTaskFailed,
 } from '../../lib/data_streams/error_symbols';
 import { ReindexError } from '../../lib/data_streams/error';
 
@@ -25,7 +25,7 @@ export const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         return kibanaResponseFactory.forbidden({ body: e.message });
       case IndexNotFound:
         return kibanaResponseFactory.notFound({ body: e.message });
-      case ReadonlyIndicesFailed:
+      case ReadonlyTaskFailed:
       case ReindexTaskFailed:
         // Bad data
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });

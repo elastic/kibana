@@ -335,7 +335,7 @@ export const dataStreamMigrationServiceFactory = ({
         const addBlock = await esClient.indices.addBlock({ index, block: 'read_only' });
 
         if (!unfreeze.acknowledged || !addBlock.acknowledged) {
-          throw error.readonlyIndicesFailed(`Could not set index ${index} to readonly.`);
+          throw error.readonlyTaskFailed(`Could not set index ${index} to readonly.`);
         }
       }
     },
