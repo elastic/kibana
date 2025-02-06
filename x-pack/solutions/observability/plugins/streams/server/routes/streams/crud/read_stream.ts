@@ -19,7 +19,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
-import { findInheritedLifecycle } from '../../../lib/streams/helpers/lifecycle';
+import { findInheritedLifecycle } from '../../../../common/helpers/lifecycle';
 
 export async function readStream({
   name,

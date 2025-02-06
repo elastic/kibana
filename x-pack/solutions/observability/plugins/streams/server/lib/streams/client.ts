@@ -63,7 +63,7 @@ import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
-import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
+import { findInheritedLifecycle, findInheritingStreams } from '../../../common/helpers/lifecycle';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
 
