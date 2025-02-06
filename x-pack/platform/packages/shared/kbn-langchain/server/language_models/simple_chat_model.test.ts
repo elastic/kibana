@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { PassThrough } from 'stream';
+import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 import { ActionsClientSimpleChatModel } from './simple_chat_model';

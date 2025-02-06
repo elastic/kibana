@@ -14,11 +14,11 @@ import {
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { Logger } from '@kbn/logging';
-import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { BaseMessage, UsageMetadata } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { Logger } from '@kbn/logging';
+import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';

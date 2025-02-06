@@ -19,8 +19,8 @@ import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { parseBedrockStream, parseBedrockStreamAsAsyncIterator } from '../utils/bedrock';
-import { parseGeminiStream, parseGeminiStreamAsAsyncIterator } from '../utils/gemini';
+import { parseGeminiStreamAsAsyncIterator, parseGeminiStream } from '../utils/gemini';
+import { parseBedrockStreamAsAsyncIterator, parseBedrockStream } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
 
 export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
