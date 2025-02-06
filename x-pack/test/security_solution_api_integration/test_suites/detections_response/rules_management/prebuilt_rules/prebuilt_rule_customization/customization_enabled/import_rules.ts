@@ -11,10 +11,14 @@ import {
   SAMPLE_PREBUILT_RULES_WITH_HISTORICAL_VERSIONS,
   combineArrayToNdJson,
   createHistoricalPrebuiltRuleAssetSavedObjects,
+  createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
+  deletePrebuiltRulesFleetPackage,
   fetchRule,
   getCustomQueryRuleParams,
   getInstalledRules,
+  getPrebuiltRulesAndTimelinesStatus,
+  installPrebuiltRules,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -24,12 +28,15 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
   const securitySolutionApi = getService('securitySolutionApi');
+  const retryService = getService('retry');
 
-  const importRules = async (rules: unknown[]) => {
+  const importRules = async (rules: unknown[], overwrite?: boolean) => {
     const buffer = Buffer.from(combineArrayToNdJson(rules));
 
     return securitySolutionApi
-      .importRules({ query: {} })
+      .importRules({
+        query: { overwrite },
+      })
       .attach('file', buffer, 'rules.ndjson')
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect(200);
@@ -59,9 +66,74 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('calculation of rule customization fields', () => {
-      it('defaults a versionless custom rule to "version: 1"', async () => {
-        const rule = getCustomQueryRuleParams({ rule_id: 'custom-rule', version: undefined });
+      it('rejects a rule with an existing rule_id when overwrite flag set to false', async () => {
+        await installPrebuiltRules(es, supertest);
+        const rule = getCustomQueryRuleParams({ rule_id: prebuiltRuleIds[0], version: 1 });
         const { body } = await importRules([rule]);
+
+        expect(body.errors).toHaveLength(1);
+        expect(body.errors[0]).toMatchObject({
+          error: {
+            message: `rule_id: \"rule-1\" already exists`,
+            status_code: 409,
+          },
+        });
+      });
+
+      it('imports a custom rule with a matching prebuilt rule_id and version', async () => {
+        const rule = getCustomQueryRuleParams({
+          rule_id: prebuiltRules[0].rule_id,
+          version: prebuiltRules[0].version,
+        });
+        const { body } = await importRules([rule]);
+
+        expect(body).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+          errors: [],
+        });
+
+        const importedRule = await fetchRule(supertest, { ruleId: rule.rule_id! });
+        expect(importedRule).toMatchObject({
+          rule_id: rule.rule_id,
+          version: 1,
+          rule_source: { type: 'external' },
+          immutable: true,
+        });
+      });
+
+      it('imports a custom rule with a matching custom rule_id and version', async () => {
+        const customRuleId = 'custom-rule-id';
+        await securitySolutionApi
+          .createRule({ body: getCustomQueryRuleParams({ rule_id: customRuleId, version: 1 }) })
+          .expect(200);
+
+        const rule = getCustomQueryRuleParams({
+          rule_id: customRuleId,
+          version: 1,
+        });
+        const { body } = await importRules([rule], true);
+
+        expect(body).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+          errors: [],
+        });
+
+        const importedRule = await fetchRule(supertest, { ruleId: customRuleId });
+        expect(importedRule).toMatchObject({
+          rule_id: customRuleId,
+          version: 1,
+          rule_source: { type: 'internal' },
+          immutable: false,
+        });
+      });
+
+      it('imports a new custom rule missing a version field', async () => {
+        const rule = getCustomQueryRuleParams({ rule_id: 'custom-rule', version: undefined });
+        const { body } = await importRules([rule], true);
 
         expect(body).toMatchObject({
           rules_count: 1,
@@ -99,6 +171,52 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('imports an existing custom rule missing a version field', async () => {
+        await securitySolutionApi
+          .createRule({ body: getCustomQueryRuleParams({ rule_id: 'custom-rule', version: 23 }) })
+          .expect(200);
+
+        const rule = getCustomQueryRuleParams({ rule_id: 'custom-rule', version: undefined });
+        const { body } = await importRules([rule], true);
+
+        expect(body).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+          errors: [],
+        });
+
+        const importedRule = await fetchRule(supertest, { ruleId: 'custom-rule' });
+        expect(importedRule).toMatchObject({
+          rule_id: 'custom-rule',
+          version: 1,
+          rule_source: { type: 'internal' },
+          immutable: false,
+        });
+      });
+
+      it('imports a prebuilt rule with a non-existing rule_id', async () => {
+        const rule = createRuleAssetSavedObject({ rule_id: 'wacky-rule-id', version: 1234 })[
+          'security-rule'
+        ];
+        const { body } = await importRules([rule]);
+
+        expect(body).toMatchObject({
+          rules_count: 1,
+          success: true,
+          success_count: 1,
+          errors: [],
+        });
+
+        const importedRule = await fetchRule(supertest, { ruleId: 'wacky-rule-id' });
+        expect(importedRule).toMatchObject({
+          rule_id: 'wacky-rule-id',
+          version: 1234,
+          rule_source: { type: 'internal' },
+          immutable: false,
+        });
+      });
+
       it('rejects a versionless prebuilt rule', async () => {
         const rule = getCustomQueryRuleParams({ rule_id: prebuiltRuleIds[0], version: undefined });
         const { body } = await importRules([rule]);
@@ -107,6 +225,19 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.errors[0]).toMatchObject({
           error: {
             message: `Prebuilt rules must specify a "version" to be imported. [rule_id: ${prebuiltRuleIds[0]}]`,
+            status_code: 400,
+          },
+        });
+      });
+
+      it('rejects a prebuilt rule without a rule_id', async () => {
+        const rule = getCustomQueryRuleParams({ rule_id: undefined, version: 1 });
+        const { body } = await importRules([rule]);
+
+        expect(body.errors).toHaveLength(1);
+        expect(body.errors[0]).toMatchObject({
+          error: {
+            message: `rule_id: Required`,
             status_code: 400,
           },
         });
@@ -135,9 +266,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('imports a combination of prebuilt and custom rules', async () => {
         const rules = [
           getCustomQueryRuleParams({ rule_id: 'custom-rule', version: 23 }),
-          getCustomQueryRuleParams({ rule_id: prebuiltRuleIds[0], version: 1234 }),
           getCustomQueryRuleParams({ rule_id: 'custom-rule-2', version: undefined }),
-          prebuiltRules[3],
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1234 })['security-rule'],
+          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 2 })['security-rule'],
         ];
         const { body } = await importRules(rules);
 
@@ -160,20 +291,20 @@ export default ({ getService }: FtrProviderContext): void => {
               immutable: false,
             }),
             expect.objectContaining({
-              rule_id: prebuiltRuleIds[0],
-              version: 1234,
-              rule_source: { type: 'external', is_customized: true },
-              immutable: true,
-            }),
-            expect.objectContaining({
               rule_id: 'custom-rule-2',
               version: 1,
               rule_source: { type: 'internal' },
               immutable: false,
             }),
             expect.objectContaining({
-              rule_id: prebuiltRules[3].rule_id,
-              version: prebuiltRules[3].version,
+              rule_id: 'rule-1',
+              version: 1234,
+              rule_source: { type: 'external', is_customized: true },
+              immutable: true,
+            }),
+            expect.objectContaining({
+              rule_id: 'rule-2',
+              version: 2,
               rule_source: { type: 'external', is_customized: false },
               immutable: true,
             }),
@@ -181,10 +312,10 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it("imports rules as custom when rules package isn't installed", async () => {
-        await deleteAllPrebuiltRuleAssets(es, log);
+      it('imports prebuilt rules when the rules package is not installed', async () => {
+        await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService }); // First we delete the rule package
 
-        const { body } = await importRules([prebuiltRules[0]]);
+        const { body } = await importRules([prebuiltRules[0]]); // Then we import a rule which should cause the rule package to be redownloaded
 
         expect(body).toMatchObject({
           rules_count: 1,
@@ -193,19 +324,8 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
         });
 
-        const { data: importedRules } = await getInstalledRules(supertest);
-
-        expect(importedRules).toHaveLength(1);
-        expect(importedRules).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              rule_id: prebuiltRules[0].rule_id,
-              version: prebuiltRules[0].version,
-              rule_source: { type: 'internal' },
-              immutable: false,
-            }),
-          ])
-        );
+        const status = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
+        expect(status.rules_installed).toEqual(1); // The rule package is now redownloaded and recognizes the rule_id as an installed rule
       });
     });
   });
