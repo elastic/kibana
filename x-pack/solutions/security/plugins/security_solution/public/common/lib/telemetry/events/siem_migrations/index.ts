@@ -71,7 +71,7 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
       },
     },
   },
-  [SiemMigrationsEventTypes.SetupMigrationOpenUpload]: {
+  [SiemMigrationsEventTypes.SetupMigrationOpenResources]: {
     ...migrationIdSchema,
     missingResourcesCount: {
       type: 'integer',
@@ -81,25 +81,16 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
       },
     },
   },
-  [SiemMigrationsEventTypes.SetupRulesQueryCopied]: {
-    connectorId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Connector ID',
-        optional: false,
-      },
-    },
-  },
-  [SiemMigrationsEventTypes.SetupRulesUploaded]: {
+  [SiemMigrationsEventTypes.SetupMigrationCreated]: {
     ...baseResultActionSchema,
-    connectorId: {
-      type: 'keyword',
+    migrationId: {
+      ...migrationIdSchema.migrationId,
       _meta: {
-        description: 'Connector ID',
-        optional: false,
+        ...migrationIdSchema.migrationId._meta,
+        optional: true, // Error case does not have the migration ID
       },
     },
-    count: {
+    rulesCount: {
       type: 'integer',
       _meta: {
         description: 'Number of rules uploaded',
@@ -107,37 +98,35 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
       },
     },
   },
+  [SiemMigrationsEventTypes.SetupRulesQueryCopied]: {
+    migrationId: {
+      ...migrationIdSchema.migrationId,
+      _meta: {
+        ...migrationIdSchema.migrationId._meta,
+        optional: true, // Migration is not usually created yet when the query is copied
+      },
+    },
+  },
   [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: {
     ...migrationIdSchema,
   },
-  [SiemMigrationsEventTypes.SetupMacrosUploaded]: {
+  [SiemMigrationsEventTypes.SetupLookupNameCopied]: {
+    ...migrationIdSchema,
+  },
+  [SiemMigrationsEventTypes.SetupResourcesUploaded]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
-    count: {
-      type: 'integer',
-      _meta: {
-        description: 'Number of macros uploaded',
-        optional: false,
-      },
-    },
-  },
-  [SiemMigrationsEventTypes.SetupLookupsQueryCopied]: {
-    ...migrationIdSchema,
-    lookupName: {
+    type: {
       type: 'keyword',
       _meta: {
-        description: 'The name of the lookup copied',
+        description: `Resource type, can be one of 'macro' or 'lookup'`,
         optional: false,
       },
     },
-  },
-  [SiemMigrationsEventTypes.SetupLookupsUploaded]: {
-    ...baseResultActionSchema,
-    ...migrationIdSchema,
     count: {
       type: 'integer',
       _meta: {
-        description: 'Number of lookups uploaded',
+        description: 'Number of resources uploaded',
         optional: false,
       },
     },

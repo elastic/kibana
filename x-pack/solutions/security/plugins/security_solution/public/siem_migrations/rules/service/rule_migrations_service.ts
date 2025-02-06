@@ -102,30 +102,47 @@ export class SiemRulesMigrationsService {
   }
 
   public async createRuleMigration(body: CreateRuleMigrationRequestBody): Promise<string> {
-    if (body.length === 0) {
+    const rulesCount = body.length;
+    if (rulesCount === 0) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
     }
-    // Batching creation to avoid hitting the max payload size limit of the API
-    let migrationId: string | undefined;
-    for (let i = 0; i < body.length; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
-      const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-      const response = await createRuleMigration({ migrationId, body: bodyBatch });
-      migrationId = response.migration_id;
+
+    try {
+      let migrationId: string | undefined;
+      // Batching creation to avoid hitting the max payload size limit of the API
+      for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+        const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+        const response = await createRuleMigration({ migrationId, body: bodyBatch });
+        migrationId = response.migration_id;
+      }
+      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
+      return migrationId as string;
+    } catch (error) {
+      this.telemetry.reportSetupMigrationCreated({ rulesCount, error });
+      throw error;
     }
-    return migrationId as string;
   }
 
   public async upsertMigrationResources(
     migrationId: string,
     body: UpsertRuleMigrationResourcesRequestBody
   ): Promise<void> {
-    if (body.length === 0) {
+    const count = body.length;
+    if (count === 0) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
     }
-    // Batching creation to avoid hitting the max payload size limit of the API
-    for (let i = 0; i < body.length; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
-      const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-      await upsertMigrationResources({ migrationId, body: bodyBatch });
+    // We assume all resources are of the same type. There is no use case for mixing types in a single upload
+    const type = body[0].type;
+    try {
+      // Batching creation to avoid hitting the max payload size limit of the API
+      for (let i = 0; i < count; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+        const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+        await upsertMigrationResources({ migrationId, body: bodyBatch });
+      }
+      this.telemetry.reportSetupResourceUploaded({ migrationId, type, count });
+    } catch (error) {
+      this.telemetry.reportSetupResourceUploaded({ migrationId, type, count, error });
+      throw error;
     }
   }
 

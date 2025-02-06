@@ -7,7 +7,10 @@
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
-import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigration,
+  RuleMigrationResourceType,
+} from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type { BaseResultActionParams } from '../../../common/lib/telemetry/events/siem_migrations/types';
 import { SiemMigrationsEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
@@ -37,19 +40,41 @@ export class SiemRulesMigrationsTelemetry {
     migrationId: string;
     missingResourcesCount: number;
   }) => {
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationOpenUpload, params);
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationOpenResources, params);
   };
 
-  reportSetupRulesQueryCopied = (params: { connectorId: string }) => {
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupRulesQueryCopied, params);
-  };
-
-  reportSetupRulesUploaded = (params: { connectorId: string; count: number; error?: Error }) => {
-    const { connectorId, count, error } = params;
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupRulesUploaded, {
-      connectorId,
-      count,
+  reportSetupMigrationCreated = (params: {
+    migrationId?: string;
+    rulesCount: number;
+    error?: Error;
+  }) => {
+    const { migrationId, rulesCount, error } = params;
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationCreated, {
+      migrationId,
+      rulesCount,
       ...this.getBaseResultParams(error),
+    });
+  };
+
+  reportSetupResourceUploaded = (params: {
+    migrationId: string;
+    type: RuleMigrationResourceType;
+    count: number;
+    error?: Error;
+  }) => {
+    const { migrationId, type, count, error } = params;
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupResourcesUploaded, {
+      migrationId,
+      count,
+      type,
+      ...this.getBaseResultParams(error),
+    });
+  };
+
+  reportSetupRulesQueryCopied = (params: { migrationId?: string }) => {
+    const { migrationId } = params;
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupRulesQueryCopied, {
+      migrationId,
     });
   };
 
@@ -57,26 +82,8 @@ export class SiemRulesMigrationsTelemetry {
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMacrosQueryCopied, params);
   };
 
-  reportSetupMacrosUploaded = (params: { migrationId: string; count: number; error?: Error }) => {
-    const { migrationId, count, error } = params;
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMacrosUploaded, {
-      migrationId,
-      count,
-      ...this.getBaseResultParams(error),
-    });
-  };
-
-  reportSetupLookupsQueryCopied = (params: { migrationId: string; lookupName: string }) => {
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupLookupsQueryCopied, params);
-  };
-
-  reportSetupLookupsUploaded = (params: { migrationId: string; count: number; error?: Error }) => {
-    const { migrationId, count, error } = params;
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupLookupsUploaded, {
-      migrationId,
-      count,
-      ...this.getBaseResultParams(error),
-    });
+  reportSetupLookupNameCopied = (params: { migrationId: string }) => {
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupLookupNameCopied, params);
   };
 
   reportStartTranslation = (params: {
@@ -99,7 +106,6 @@ export class SiemRulesMigrationsTelemetry {
 
   reportTranslatedRuleUpdate = (params: { ruleMigration: RuleMigration; error?: Error }) => {
     const { ruleMigration, error } = params;
-
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.TranslatedRuleUpdate, {
       migrationId: ruleMigration.migration_id,
       ruleMigrationId: ruleMigration.id,
