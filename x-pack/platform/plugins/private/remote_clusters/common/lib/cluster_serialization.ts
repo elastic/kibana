@@ -188,6 +188,8 @@ export function serializeCluster(
         }),
   };
 
+  // If the cluster is been deleted, we need to set all values to null
+  // If the cluster is been edited and the mode has changed, we need to set to null the previous mode settings values
   if (isDelete || (previousClusterMode && previousClusterMode !== mode)) {
     clusterData.proxy_address = proxyAddress || null;
     clusterData.proxy_socket_connections = proxySocketConnections || null;

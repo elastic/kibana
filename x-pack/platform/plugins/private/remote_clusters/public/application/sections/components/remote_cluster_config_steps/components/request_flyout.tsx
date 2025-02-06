@@ -21,11 +21,12 @@ import {
 } from '@elastic/eui';
 
 import { ClusterPayload, serializeCluster } from '../../../../../../common/lib';
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 
 interface Props {
   close: () => void;
   cluster: ClusterPayload;
-  previousClusterMode?: 'proxy' | 'sniff';
+  previousClusterMode?: typeof PROXY_MODE | typeof SNIFF_MODE;
 }
 
 export class RequestFlyout extends PureComponent<Props> {

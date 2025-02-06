@@ -6,6 +6,7 @@
  */
 import React, { ReactNode, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -26,7 +27,7 @@ interface Props {
   cluster?: ClusterPayload;
   nextButtonTestSubj: string;
   backButtonTestSubj?: string;
-  previousClusterMode?: 'proxy' | 'sniff';
+  previousClusterMode?: typeof PROXY_MODE | typeof SNIFF_MODE;
 }
 
 export const ActionButtons: React.FC<Props> = ({
