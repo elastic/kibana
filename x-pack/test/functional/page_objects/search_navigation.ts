@@ -8,13 +8,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const { common, indexManagement, header, solutionNavigation, searchIndexDetailsPage } =
-    getPageObjects([
-      'common',
-      'indexManagement',
-      'header',
-      'solutionNavigation'
-    ]);
+  const { common, indexManagement, header, solutionNavigation } =
+    getPageObjects(['common', 'indexManagement', 'header', 'solutionNavigation']);
   const testSubjects = getService('testSubjects');
 
   return {
@@ -41,10 +36,10 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'management:index_management',
       });
-      const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink')
-      for (const indexNameLink of indexNamesList){
-        if((await indexNameLink.getVisibleText()).includes(indexName)){
-          await indexNameLink.click()
+      const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink');
+      for (const indexNameLink of indexNamesList) {
+        if ((await indexNameLink.getVisibleText()).includes(indexName)) {
+          await indexNameLink.click();
           return;
         }
       }

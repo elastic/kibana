@@ -53,51 +53,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cleanUpSpace();
         await esDeleteAllIndices(indexName);
       });
-      describe('index management index list page', () => {
-        beforeEach(async () => {
-          // Navigate to search solution space
-          await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-          // Navigate to index management app
-          await pageObjects.common.navigateToApp('indexManagement', {
-            basePath: `s/${spaceCreated.id}`,
-          });
-          // Navigate to the indices tab
-          await pageObjects.indexManagement.changeTabs('indicesTab');
-          await pageObjects.header.waitUntilLoadingHasFinished();
-        });
-        describe('manage index action', () => {
-          beforeEach(async () => {
-            await pageObjects.indexManagement.manageIndex(indexName);
-            await pageObjects.indexManagement.manageIndexContextMenuExists();
-          });
-          it('navigates to overview tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('data');
-          });
-
-          it('navigates to settings tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('settings');
-          });
-          it('navigates to mappings tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('mappings');
-          });
-        });
-        describe('can view search index details', function () {
-          it('renders search index details with no documents', async () => {
-            await pageObjects.searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
-              0
-            );
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
-            await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExists();
-          });
-        });
-      });
       describe('search index details page', () => {
         before(async () => {
           // Navigate to the spaces management page which will log us in Kibana
@@ -121,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const indexNameCodeExample = 'test-my-index2';
           before(async () => {
             await es.indices.create({ index: indexNameCodeExample });
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexNameCodeExample);
           });
 
           after(async () => {
