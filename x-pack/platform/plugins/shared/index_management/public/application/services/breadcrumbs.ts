@@ -64,7 +64,6 @@ export class BreadcrumbService {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.contentLabel', {
           defaultMessage: 'Content',
         }),
-        href: ``,
       },
     ];
     this.breadcrumbs.home = [

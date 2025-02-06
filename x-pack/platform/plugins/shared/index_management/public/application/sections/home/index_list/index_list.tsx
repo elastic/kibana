@@ -26,15 +26,12 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
     page: 'indexManagementIndicesTab',
   });
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
+
   useEffect(() => {
-    if (cloud?.isServerlessEnabled) {
-      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
+    if (!cloud?.isServerlessEnabled && activeSolutionId === 'es') {
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indicesList);
     } else {
-      if (activeSolutionId === 'es') {
-        breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indicesList);
-      } else {
-        breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
-      }
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
     }
   }, [activeSolutionId, cloud]);
 

@@ -13,8 +13,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       'common',
       'indexManagement',
       'header',
-      'solutionNavigation',
-      'searchIndexDetailsPage',
+      'solutionNavigation'
     ]);
   const testSubjects = getService('testSubjects');
 
@@ -37,13 +36,18 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
         }
       });
     },
-
-    async navigateToIndexDetailPage() {
+    async navigateToIndexDetailPage(indexName: string) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'management:index_management',
       });
-      await searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(0);
+      const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink')
+      for (const indexNameLink of indexNamesList){
+        if((await indexNameLink.getVisibleText()).includes(indexName)){
+          await indexNameLink.click()
+          return;
+        }
+      }
       await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage(expectRedirect: boolean = false) {

@@ -39,7 +39,7 @@ describe('routing', () => {
       } as ExtensionsService;
 
       const breadcrumbs = {
-        setBreadcrumbs: jest.fn()
+        setBreadcrumbs: jest.fn(),
       } as unknown as BreadcrumbService;
 
       navigateToIndexDetailsPage('testIndex', '', extensionService, application, http, breadcrumbs);
