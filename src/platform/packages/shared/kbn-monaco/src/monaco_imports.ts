@@ -16,6 +16,7 @@ import 'monaco-editor/esm/vs/base/browser/defaultWorkerFactory';
 import 'monaco-editor/esm/vs/editor/browser/coreCommands.js';
 import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
 
+import 'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess';
 import 'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations.js'; // Needed for word-wise char navigation
 import 'monaco-editor/esm/vs/editor/contrib/linesOperations/browser/linesOperations.js'; // Needed for enabling shortcuts of removing/joining/moving lines
 import 'monaco-editor/esm/vs/editor/contrib/folding/browser/folding.js'; // Needed for folding

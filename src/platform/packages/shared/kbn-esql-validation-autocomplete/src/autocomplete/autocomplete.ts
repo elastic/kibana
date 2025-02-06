@@ -46,7 +46,6 @@ import {
   correctQuerySyntax,
   getColumnByName,
   sourceExists,
-  findFinalWord,
   getAllCommands,
   getExpressionType,
 } from '../shared/helpers';
@@ -631,7 +630,7 @@ async function getExpressionSuggestionsByType(
         const fieldFragmentSuggestions = await handleFragment(
           innerText,
           (fragment) => Boolean(getColumnByName(fragment, references)),
-          (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+          (_fragment: string) => {
             // COMMAND fie<suggest>
             return fieldSuggestions.map((suggestion) => {
               // if there is already a command, we don't want to override it
@@ -640,11 +639,10 @@ async function getExpressionSuggestionsByType(
                 ...suggestion,
                 text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
                 command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
               };
             });
           },
-          (fragment: string, rangeToReplace: { start: number; end: number }) => {
+          (fragment: string) => {
             // COMMAND field<suggest>
             if (['grok', 'dissect'].includes(command.name)) {
               return fieldSuggestions.map((suggestion) => {
@@ -654,7 +652,6 @@ async function getExpressionSuggestionsByType(
                   ...suggestion,
                   text: suggestion.text + ' ',
                   command: TRIGGER_SUGGESTION_COMMAND,
-                  rangeToReplace,
                 };
               });
             }
@@ -672,7 +669,6 @@ async function getExpressionSuggestionsByType(
               filterText: fragment,
               text: fragment + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
             }));
           }
         );
@@ -897,18 +893,6 @@ async function getExpressionSuggestionsByType(
       if (argDef.innerTypes?.includes('policy')) {
         // ... | ENRICH <suggest>
         const policies = await getPolicies();
-        const lastWord = findFinalWord(innerText);
-        if (lastWord !== '') {
-          policies.forEach((suggestion) => {
-            suggestions.push({
-              ...suggestion,
-              rangeToReplace: {
-                start: innerText.length - lastWord.length + 1,
-                end: innerText.length + 1,
-              },
-            });
-          });
-        }
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
         const indexes = getSourcesFromCommands(commands, 'index');
@@ -932,13 +916,8 @@ async function getExpressionSuggestionsByType(
             innerText,
             (fragment) =>
               sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
-            (_fragment, rangeToReplace) => {
-              return getSourceSuggestions(sources).map((suggestion) => ({
-                ...suggestion,
-                rangeToReplace,
-              }));
-            },
-            (fragment, rangeToReplace) => {
+            (_fragment) => getSourceSuggestions(sources),
+            (fragment) => {
               const exactMatch = sources.find(({ name: _name }) => _name === fragment);
               if (exactMatch?.dataStreams) {
                 // this is an integration name, suggest the datastreams
@@ -954,25 +933,21 @@ async function getExpressionSuggestionsByType(
                     filterText: fragment,
                     text: fragment + ' | ',
                     command: TRIGGER_SUGGESTION_COMMAND,
-                    rangeToReplace,
                   },
                   {
                     ...commaCompleteItem,
                     filterText: fragment,
                     text: fragment + ', ',
                     command: TRIGGER_SUGGESTION_COMMAND,
-                    rangeToReplace,
                   },
                   {
                     ...buildOptionDefinition(metadataOption),
                     filterText: fragment,
                     text: fragment + ' METADATA ',
                     asSnippet: false, // turn this off because $ could be contained within the source name
-                    rangeToReplace,
                   },
                   ...recommendedQueriesSuggestions.map((suggestion) => ({
                     ...suggestion,
-                    rangeToReplace,
                     filterText: fragment,
                     text: fragment + suggestion.text,
                   })),
@@ -1456,17 +1431,6 @@ async function getOptionArgsSuggestions(
             // in this case, we don't want to open the suggestions menu when the field is accepted
             // because we're keeping the suggestions simple here for now. Could always revisit.
             fieldSuggestions.forEach((s) => (s.command = undefined));
-
-            // attach the replacement range if needed
-            const lastWord = findFinalWord(innerText);
-            if (lastWord) {
-              // ENRICH ... WITH a <suggest>
-              const rangeToReplace = {
-                start: innerText.length - lastWord.length + 1,
-                end: innerText.length + 1,
-              };
-              fieldSuggestions.forEach((s) => (s.rangeToReplace = rangeToReplace));
-            }
             suggestions.push(...fieldSuggestions);
           }
         }
@@ -1521,19 +1485,14 @@ async function getOptionArgsSuggestions(
         ...(await handleFragment(
           innerText,
           (fragment) => METADATA_FIELDS.includes(fragment),
-          (_fragment, rangeToReplace) =>
-            buildFieldsDefinitions(filteredMetaFields).map((suggestion) => ({
-              ...suggestion,
-              rangeToReplace,
-            })),
-          (fragment, rangeToReplace) => {
+          (_fragment) => buildFieldsDefinitions(filteredMetaFields),
+          (fragment) => {
             const _suggestions = [
               {
                 ...pipeCompleteItem,
                 text: fragment + ' | ',
                 filterText: fragment,
                 command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
               },
             ];
             if (filteredMetaFields.length > 1) {
@@ -1542,7 +1501,6 @@ async function getOptionArgsSuggestions(
                 text: fragment + ', ',
                 filterText: fragment,
                 command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
               });
             }
             return _suggestions;

@@ -26,6 +26,29 @@ const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
 };
 
+export const ESQL_WORD_SEPARATORS = '`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?';
+
+/**
+ * COPIED FROM VSCODE CODEBASE at https://github.com/microsoft/vscode/blob/1c931b181d6922ddc1eac2469117fba2c500da07/src/vs/editor/common/core/wordHelper.ts#L30-L48
+ *
+ * Create a word definition regular expression based on word separators.
+ * Optionally provide allowed separators that should be included in words.
+ *
+ * The default would look like this:
+ * /(-?\d*\.\d\w*)|([^\`\~\!\@\#\$\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g
+ */
+function createWordRegExp(allowInWords: string = ''): RegExp {
+  let source = '(-?\\d*\\.\\d\\w*)|([^';
+  for (const sep of ESQL_WORD_SEPARATORS) {
+    if (allowInWords.indexOf(sep) >= 0) {
+      continue;
+    }
+    source += '\\' + sep;
+  }
+  source += '\\s]+)';
+  return new RegExp(source, 'g');
+}
+
 export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
@@ -54,6 +77,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       { open: '"""', close: '"""' },
       { open: '"', close: '"' },
     ],
+    wordPattern: createWordRegExp(),
   },
   validate: async (model: monaco.editor.ITextModel, code: string, callbacks?: ESQLCallbacks) => {
     const astAdapter = new ESQLAstAdapter(
