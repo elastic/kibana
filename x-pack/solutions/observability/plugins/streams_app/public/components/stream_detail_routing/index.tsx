@@ -36,13 +36,13 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import React, { useCallback, useEffect } from 'react';
 import {
-  ReadStreamDefinition,
   isRoot,
   isDescendantOf,
   RoutingDefinition,
   IngestUpsertRequest,
   getAncestorsAndSelf,
   WiredStreamGetResponse,
+  RecursiveRecord,
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
@@ -93,9 +93,9 @@ function useRoutingState({
   );
 
   // Child streams: either represents the child streams as they are, or the new order from drag and drop.
-  const [childStreams, setChildStreams] = React.useState<
-    ReadStreamDefinition['stream']['ingest']['routing']
-  >(definition?.stream.ingest.routing ?? []);
+  const [childStreams, setChildStreams] = React.useState<RoutingDefinition[]>(
+    definition?.stream.ingest.routing ?? []
+  );
 
   useEffect(() => {
     setChildStreams(definition?.stream.ingest.routing ?? []);
@@ -618,7 +618,7 @@ function PreviewPanelIllustration({
 }: {
   routingAppState: ReturnType<typeof useRoutingState>;
   previewSampleFetch: AbortableAsyncState<{
-    documents: unknown[];
+    documents: RecursiveRecord[];
   }>;
 }) {
   return (
