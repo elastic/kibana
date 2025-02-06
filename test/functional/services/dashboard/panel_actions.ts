@@ -176,7 +176,6 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickExpandPanelToggle() {
     this.log.debug(`clickExpandPanelToggle`);
-    await this.openContextMenu();
     await this.clickPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
   }
 
