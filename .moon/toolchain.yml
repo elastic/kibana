@@ -17,7 +17,7 @@ node:
   syncPackageManagerField: true
   syncVersionManagerConfig: nvm
   dedupeOnLockfileChange: false
-  syncProjectWorkspaceDependencies: true
+  syncProjectWorkspaceDependencies: false
 
 
 # Configures how moon integrates with TypeScript.

@@ -17,8 +17,6 @@ tags:
   - platform
   - shared-common
   - prod
-dependsOn:
-  - '@kbn/ui-shared-deps-src'
 fileGroups:
   src:
     - '**/*.ts'
@@ -31,6 +29,8 @@ tasks:
   jestCI:
     script: echo 'stubbed:noop'
   build:
-    script: yarn build
+    command: 'yarn'
+    args:
+      - 'build'
     outputs:
       - /bazel-bin/src/platform/packages/private/kbn-ui-shared-deps-npm

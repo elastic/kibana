@@ -349,7 +349,7 @@ export async function buildWebpackBundlesWithMoon(
   const packageNames = ['@kbn/ui-shared-deps-npm', '@kbn/ui-shared-deps-src', '@kbn/monaco'];
 
   const moonTargets = packageNames.map((n) => `${n}:build`);
-  await execa('moon', moonTargets.concat(dist ? ['--dist'] : []), {
+  await execa('moon', moonTargets.concat(dist ? ['--', '--dist'] : []), {
     cwd: REPO_ROOT,
     env: {
       ...process.env,

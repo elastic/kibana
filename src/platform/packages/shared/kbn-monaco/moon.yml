@@ -49,6 +49,8 @@ tasks:
     inputs:
       - '@group(src)'
   build:
-    script: yarn build
+    command: yarn
+    args:
+      - build
     outputs:
       - /bazel-bin/src/platform/packages/shared/kbn-monaco

@@ -13,9 +13,5 @@
       "src/**/*"
     ],
     "exclude": []
-  },
-  "dependencies": {
-    "@kbn/repo-info": "link:../../shared/kbn-repo-info",
-    "@kbn/ui-shared-deps-npm": "link:../kbn-ui-shared-deps-npm"
   }
 }

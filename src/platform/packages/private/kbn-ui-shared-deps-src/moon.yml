@@ -32,7 +32,9 @@ tasks:
   jestCI:
     script: echo 'stubbed:noop'
   build:
-    script: yarn build
+    command: yarn
+    args:
+      - build
     deps:
       - '@kbn/ui-shared-deps-npm:build'
     outputs:
