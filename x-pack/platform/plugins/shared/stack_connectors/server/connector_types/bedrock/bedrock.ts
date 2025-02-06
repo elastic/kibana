@@ -392,7 +392,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     )) as RunActionResponse;
-    return { message: res.completion.trim() };
+    return { message: res.completion.trim(), usage: res?.usage };
   }
 
   public async invokeAIRaw(
