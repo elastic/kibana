@@ -45,6 +45,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
         filteredRules.push({
           rule_id: rule.rule_id,
           name: rule.name,
+          query: rule?.query,
           description: rule.description,
           elser_embedding: `${rule.name} - ${rule.description}`,
           ...(mitreAttackIds?.length && { mitre_attack_ids: mitreAttackIds }),

@@ -63,6 +63,7 @@ export const getMatchPrebuiltRuleNode = ({
       return {
         name: rule.name,
         description: rule.description,
+        query: rule?.query,
       };
     });
 

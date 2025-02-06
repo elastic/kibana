@@ -73,5 +73,6 @@ export const prebuiltRulesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationPre
   description: { type: 'text', required: true },
   elser_embedding: { type: 'semantic_text', required: true },
   rule_id: { type: 'keyword', required: true },
+  query: { type: 'keyword', required: false },
   mitre_attack_ids: { type: 'keyword', array: true, required: false },
 };

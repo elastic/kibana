@@ -49,6 +49,7 @@ export interface RuleMigrationPrebuiltRule {
   description: string;
   elser_embedding: string;
   mitre_attack_ids?: string[];
+  query?: string;
 }
 
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;

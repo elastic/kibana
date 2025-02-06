@@ -73,7 +73,7 @@ export class RuleMigrationsTaskClient {
 
     // run the migration without awaiting it to execute it in the background
     this.run({ ...params, model, abortController }).catch((error) => {
-      this.logger.error(`Error executing migration ID:${migrationId}`, error);
+      this.logger.error(`Error executing migration ID:${migrationId} with error ${error}`);
     });
 
     return { exists: true, started: true };
