@@ -12,6 +12,7 @@ import {
 import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { sumBy, first, last } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 import { isFiniteNumber } from '../../utils/common';
@@ -26,7 +27,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const groupId = '0000000000000000000000000Error 1';
+  const groupId = `${getErrorGroupingKey('Error 1')}`;
 
   async function callApi(
     overrides?: RecursivePartial<

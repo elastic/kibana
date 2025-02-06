@@ -11,6 +11,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 import type { RoleCredentials } from '../../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -226,11 +227,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(omit(phpEntry, 'alertDetailsUrl', 'viewInAppUrl')).to.eql({
             environment: 'production',
             interval: '1 hr',
-            reason:
-              'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.',
+            reason: `Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: ${getErrorGroupingKey(
+              phpErrorMessage
+            )}, error name: a php error. Alert when > 1.`,
             serviceName: 'opbeans-php',
             transactionName: 'tx-php',
-            errorGroupingKey: '000000000000000000000a php error',
+            errorGroupingKey: `${getErrorGroupingKey(phpErrorMessage)}`,
             errorGroupingName: 'a php error',
             threshold: '1',
             triggerValue: '30',
@@ -247,8 +249,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const alertReasons = [alerts[0]['kibana.alert.reason'], alerts[1]['kibana.alert.reason']];
 
         expect(alertReasons).to.eql([
-          'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.',
-          'Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: 00000000000000000000a java error, error name: a java error. Alert when > 1.',
+          `Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: ${getErrorGroupingKey(
+            phpErrorMessage
+          )}, error name: a php error. Alert when > 1.`,
+          `Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: ${getErrorGroupingKey(
+            javaErrorMessage
+          )}, error name: a java error. Alert when > 1.`,
         ]);
       });
 
@@ -268,14 +274,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             serviceName: 'opbeans-php',
             environment: 'production',
             transactionName: 'tx-php',
-            errorGroupingKey: '000000000000000000000a php error',
+            errorGroupingKey: `${getErrorGroupingKey(phpErrorMessage)}`,
             errorGroupingName: phpErrorMessage,
           },
           {
             serviceName: 'opbeans-java',
             environment: 'production',
             transactionName: 'tx-java',
-            errorGroupingKey: '00000000000000000000a java error',
+            errorGroupingKey: `${getErrorGroupingKey(javaErrorMessage)}`,
             errorGroupingName: javaErrorMessage,
           },
         ]);
@@ -354,7 +360,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
 
         expect(alerts[0]['kibana.alert.reason']).to.be(
-          'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.'
+          `Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: ${getErrorGroupingKey(
+            phpErrorMessage
+          )}, error name: a php error. Alert when > 1.`
         );
       });
     });

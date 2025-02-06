@@ -10,6 +10,7 @@ import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 
@@ -22,7 +23,7 @@ type ErrorSampleDetails =
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
-
+  const errorMessage = 'Error 1';
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -85,7 +86,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         before(async () => {
           await generateData({ serviceName, start, end, apmSynthtraceEsClient });
           const response = await callErrorGroupSamplesApi({
-            groupId: '0000000000000000000000000Error 1',
+            groupId: `${getErrorGroupingKey(errorMessage)}`,
           });
           errorsSamplesResponse = response.body;
         });
@@ -113,7 +114,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           let errorSampleDetailsResponse: ErrorSampleDetails;
           before(async () => {
             const errorsSamplesResponse = await callErrorGroupSamplesApi({
-              groupId: '0000000000000000000000000Error 1',
+              groupId: `${getErrorGroupingKey(errorMessage)}`,
             });
 
             const errorId = errorsSamplesResponse.body.errorSampleIds[0];
@@ -124,13 +125,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           it('displays correct error grouping_key', () => {
             expect(errorSampleDetailsResponse.error.error.grouping_key).to.equal(
-              '0000000000000000000000000Error 1'
+              `${getErrorGroupingKey(errorMessage)}`
             );
           });
 
           it('displays correct error message', () => {
             expect(errorSampleDetailsResponse.error.error.exception?.[0].message).to.equal(
-              'Error 1'
+              errorMessage
             );
           });
         });
@@ -153,7 +154,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('returns 200', async () => {
           const errorsSamplesResponse = await callErrorGroupSamplesApi({
-            groupId: '0000000000000000000000000Error 1',
+            groupId: `${getErrorGroupingKey(errorMessage)}`,
           });
 
           const errorId = errorsSamplesResponse.body.errorSampleIds[0];
@@ -168,8 +169,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         before(async () => {
           const instance = service(serviceName, 'production', 'go').instance('a');
-          const errorMessage = 'Error 1';
-          const groupId = '0000000000000000000000000Error 1';
+          const groupId = `${getErrorGroupingKey(errorMessage)}`;
 
           await apmSynthtraceEsClient.index(
             timerange(start, end)
