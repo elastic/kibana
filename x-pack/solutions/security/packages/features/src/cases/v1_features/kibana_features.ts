@@ -42,7 +42,7 @@ export const getCasesBaseKibanaFeature = ({
         defaultMessage: 'Cases (Deprecated)',
       }
     ),
-    order: 1100,
+    order: 1200,
     category: DEFAULT_APP_CATEGORIES.security,
     scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [CASES_FEATURE_ID, 'kibana'],
