@@ -13,7 +13,7 @@ import {
   isDescendantOf,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
-import { orderBy } from 'lodash';
+import orderBy from 'lodash/orderBy';
 
 export function findInheritedLifecycle(
   definition: WiredStreamDefinition,
