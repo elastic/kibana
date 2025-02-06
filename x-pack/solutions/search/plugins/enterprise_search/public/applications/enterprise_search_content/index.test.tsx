@@ -18,7 +18,7 @@ import { SearchIndicesRouter } from './components/search_indices';
 import { EnterpriseSearchContent, EnterpriseSearchContentConfigured } from '.';
 
 describe('EnterpriseSearchContent', () => {
-  it('renders EnterpriseSearchContentConfigured when config.host is set & available', () => {
+  it('renders EnterpriseSearchContentConfigured', () => {
     setMockValues({
       config: { host: 'some.url' },
       errorConnectingMessage: '',

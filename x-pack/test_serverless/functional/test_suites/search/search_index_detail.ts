@@ -26,7 +26,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
 
-  describe('index details page - search solution', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/203508
+  // Failing: See https://github.com/elastic/kibana/issues/203508
+  describe.skip('index details page - search solution', function () {
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
@@ -73,6 +75,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         describe('API key details', () => {
+          // see details: https://github.com/elastic/kibana/issues/208695
+          this.tags(['failsOnMKI']);
           it('should show api key', async () => {
             await pageObjects.svlApiKeys.deleteAPIKeys();
             await svlSearchNavigation.navigateToIndexDetailPage(indexName);

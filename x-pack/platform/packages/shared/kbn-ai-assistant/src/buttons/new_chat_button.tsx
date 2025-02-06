@@ -24,7 +24,7 @@ export function NewChatButton(
     </EuiButton>
   ) : (
     <EuiButtonIcon
-      data-test-subj="observabilityAiAssistantNewChatButtonButton"
+      data-test-subj="observabilityAiAssistantNewChatButton"
       iconType="newChat"
       size="xs"
       {...nextProps}

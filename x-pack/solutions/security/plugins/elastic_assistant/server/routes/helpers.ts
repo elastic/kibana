@@ -12,6 +12,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
@@ -21,6 +22,9 @@ import {
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
   DEFEND_INSIGHTS_TOOL_ID,
+  ContentReferencesStore,
+  ContentReferences,
+  MessageMetadata,
 } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -98,10 +102,12 @@ export const getPluginNameFromRequest = ({
 
 export const getMessageFromRawResponse = ({
   rawContent,
+  metadata,
   isError,
   traceData,
 }: {
   rawContent?: string;
+  metadata?: MessageMetadata;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -111,6 +117,7 @@ export const getMessageFromRawResponse = ({
       role: 'assistant',
       content: rawContent,
       timestamp: dateTimeString,
+      metadata,
       isError,
       traceData,
     };
@@ -168,6 +175,7 @@ export interface AppendAssistantMessageToConversationParams {
   messageContent: string;
   replacements: Replacements;
   conversationId: string;
+  contentReferences?: ContentReferences | false;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -176,6 +184,7 @@ export const appendAssistantMessageToConversation = async ({
   messageContent,
   replacements,
   conversationId,
+  contentReferences,
   isError = false,
   traceData = {},
 }: AppendAssistantMessageToConversationParams) => {
@@ -183,6 +192,12 @@ export const appendAssistantMessageToConversation = async ({
   if (!conversation) {
     return;
   }
+
+  const metadata: MessageMetadata = {
+    ...(contentReferences ? { contentReferences } : {}),
+  };
+
+  const isMetadataPopulated = Boolean(contentReferences) !== false;
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -192,6 +207,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
+        metadata: isMetadataPopulated ? metadata : undefined,
         traceData,
         isError,
       }),
@@ -216,6 +232,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  contentReferencesStore: ContentReferencesStore | undefined;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;
@@ -235,6 +252,7 @@ export interface LangChainExecuteParams {
   getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
+  savedObjectsClient: SavedObjectsClientContract;
   systemPrompt?: string;
 }
 export const langChainExecute = async ({
@@ -245,6 +263,7 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  contentReferencesStore,
   isOssModel,
   context,
   actionsClient,
@@ -258,6 +277,7 @@ export const langChainExecute = async ({
   response,
   responseLanguage,
   isStream = true,
+  savedObjectsClient,
   systemPrompt,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
@@ -303,6 +323,7 @@ export const langChainExecute = async ({
     assistantTools,
     conversationId,
     connectorId,
+    contentReferencesStore,
     esClient,
     llmTasks,
     inference,
@@ -316,6 +337,7 @@ export const langChainExecute = async ({
     request,
     replacements,
     responseLanguage,
+    savedObjectsClient,
     size: request.body.size,
     systemPrompt,
     telemetry,

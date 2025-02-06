@@ -12,6 +12,8 @@ export const getMockEsDeprecations = () => {
     ml_settings: [],
     index_settings: {},
     data_streams: {},
+    ilm_policies: {},
+    templates: {},
   };
 };
 
