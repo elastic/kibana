@@ -62,6 +62,8 @@ export type {
   RulesSettingsFlapping,
   RulesSettingsQueryDelay,
   RulesSettingsProperties,
+  RulesSettingsAlertDeletionProperties,
+  RulesSettingsAlertDeletion,
   RulesSettings,
 } from './rules_settings';
 export {

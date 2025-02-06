@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useState, useRef } from 'react';
 import {
+  RulesSettingsAlertDeletionProperties,
   RulesSettingsFlappingProperties,
   RulesSettingsProperties,
   RulesSettingsQueryDelayProperties,
@@ -27,6 +28,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
+import { useFetchAlertDeletionSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alert_deletion_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -34,6 +36,7 @@ import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settin
 import { useUpdateRuleSettings } from '../../hooks/use_update_rules_settings';
 import { CenterJustifiedSpinner } from '../center_justified_spinner';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
+import { RulesSettingsAlertDeletionSection } from './alert_deletion/rules_settings_alert_deletion_section';
 
 export const RulesSettingsErrorPrompt = memo(() => {
   return (
@@ -105,11 +108,22 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     },
   } = capabilities;
 
+  const isAlertDeletionSettingsEnabled = getIsExperimentalFeatureEnabled(
+    'alertDeletionSettingsEnabled'
+  );
+
   const [flappingSettings, hasFlappingChanged, setFlappingSettings, resetFlappingSettings] =
     useResettableState<RulesSettingsFlappingProperties>();
 
   const [queryDelaySettings, hasQueryDelayChanged, setQueryDelaySettings, resetQueryDelaySettings] =
     useResettableState<RulesSettingsQueryDelayProperties>();
+
+  const [
+    alertDeletionSettings,
+    hasAlertDeletionChanged,
+    setAlertDeletionSettings,
+    resetAlertDeletionSettings,
+  ] = useResettableState<RulesSettingsAlertDeletionProperties>();
 
   const { isLoading: isFlappingLoading, isError: hasFlappingError } = useFetchFlappingSettings({
     http,
@@ -142,11 +156,31 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     },
   });
 
+  const { isLoading: isAlertDeletionLoading, isError: hasAlertDeletionError } =
+    useFetchAlertDeletionSettings({
+      http,
+      enabled: isVisible && isAlertDeletionSettingsEnabled,
+      onSuccess: (fetchedSettings) => {
+        if (!alertDeletionSettings) {
+          setAlertDeletionSettings(
+            {
+              isActiveAlertDeletionEnabled: fetchedSettings.isActiveAlertDeletionEnabled,
+              isInactiveAlertDeletionEnabled: fetchedSettings.isInactiveAlertDeletionEnabled,
+              activeAlertDeletionThreshold: fetchedSettings.activeAlertDeletionThreshold,
+              inactiveAlertDeletionThreshold: fetchedSettings.inactiveAlertDeletionThreshold,
+            },
+            true // TODO: rethink. Update the initial value so we don't need to fetch it from the server again
+          );
+        }
+      },
+    });
+
   const onCloseModal = useCallback(() => {
     resetFlappingSettings();
     resetQueryDelaySettings();
+    resetAlertDeletionSettings();
     onClose();
-  }, [onClose, resetFlappingSettings, resetQueryDelaySettings]);
+  }, [onClose, resetAlertDeletionSettings, resetFlappingSettings, resetQueryDelaySettings]);
 
   const { mutate } = useUpdateRuleSettings({
     onSave,
@@ -161,10 +195,18 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   const canShowFlappingSettings = readFlappingSettingsUI;
   const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
   const canShowQueryDelaySettings = readQueryDelaySettingsUI;
+  // TODO: Use real settings: https://github.com/elastic/kibana/issues/208615
+  // const canWriteAlertDeletionSettings = writeAlertDeletionUI && !hasAlertDeletionError;
+  // const canShowAlertDeletionSettings = readAlertDeletionSettingsUI;
+  const canWriteAlertDeletionSettings = isAlertDeletionSettingsEnabled && !hasAlertDeletionError;
+  const canShowAlertDeletionSettings = isAlertDeletionSettingsEnabled;
 
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,
-    key: keyof RulesSettingsFlappingProperties | keyof RulesSettingsQueryDelayProperties,
+    key:
+      | keyof RulesSettingsFlappingProperties
+      | keyof RulesSettingsQueryDelayProperties
+      | keyof RulesSettingsAlertDeletionProperties,
     value: boolean | number
   ) => {
     if (setting === 'flapping') {
@@ -194,6 +236,17 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
       };
       setQueryDelaySettings(newSettings);
     }
+
+    if (setting === 'alertDeletion') {
+      if (!alertDeletionSettings) {
+        return;
+      }
+      const newSettings = {
+        ...alertDeletionSettings,
+        [key]: value,
+      };
+      setAlertDeletionSettings(newSettings);
+    }
   };
 
   const handleSave = () => {
@@ -206,6 +259,11 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
       updatedSettings.queryDelay = queryDelaySettings;
       setQueryDelaySettings(queryDelaySettings!, true);
     }
+    if (canWriteAlertDeletionSettings && hasAlertDeletionChanged) {
+      updatedSettings.alertDeletion = alertDeletionSettings;
+      setAlertDeletionSettings(alertDeletionSettings!, true);
+    }
+
     mutate(updatedSettings);
   };
 
@@ -214,15 +272,12 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   }
 
   const maybeRenderForm = () => {
-    if (!canShowFlappingSettings && !canShowQueryDelaySettings) {
+    if (!canShowFlappingSettings && !canShowQueryDelaySettings && !canShowAlertDeletionSettings) {
       return <RulesSettingsErrorPrompt />;
     }
-    if (isFlappingLoading || isQueryDelayLoading) {
+    if (isFlappingLoading || isQueryDelayLoading || isAlertDeletionLoading) {
       return <CenterJustifiedSpinner />;
     }
-    const isAlertDeletionSettingsEnabled = getIsExperimentalFeatureEnabled(
-      'alertDeletionSettingsEnabled'
-    );
     return (
       <>
         {flappingSettings && (
@@ -234,7 +289,6 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
             hasError={hasFlappingError}
           />
         )}
-        {isAlertDeletionSettingsEnabled && <div>Alert Deletion Settings Placeholder</div>}
         {isServerless && queryDelaySettings && (
           <>
             <EuiSpacer />
@@ -244,6 +298,18 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
               canWrite={canWriteQueryDelaySettings}
               canShow={canShowQueryDelaySettings}
               hasError={hasQueryDelayError}
+            />
+          </>
+        )}
+        {alertDeletionSettings && (
+          <>
+            <EuiSpacer />
+            <RulesSettingsAlertDeletionSection
+              onChange={(key, value) => handleSettingsChange('alertDeletion', key, value)}
+              settings={alertDeletionSettings}
+              canWrite={canWriteAlertDeletionSettings}
+              canShow={canShowAlertDeletionSettings}
+              hasError={hasAlertDeletionError}
             />
           </>
         )}

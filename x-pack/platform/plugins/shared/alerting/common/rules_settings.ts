@@ -21,9 +21,11 @@ export type {
   RulesSettingsModificationMetadata,
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
+  RulesSettingsAlertDeletionProperties,
   RuleSpecificFlappingProperties,
   RulesSettingsFlapping,
   RulesSettingsQueryDelay,
+  RulesSettingsAlertDeletion,
   RulesSettingsProperties,
   RulesSettings,
 } from '@kbn/alerting-types';

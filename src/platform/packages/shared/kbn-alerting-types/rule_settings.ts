@@ -35,12 +35,24 @@ export interface RulesSettingsQueryDelayProperties {
 export type RulesSettingsQueryDelay = RulesSettingsQueryDelayProperties &
   RulesSettingsModificationMetadata;
 
+export interface RulesSettingsAlertDeletionProperties {
+  isActiveAlertDeletionEnabled: boolean;
+  isInactiveAlertDeletionEnabled: boolean;
+  activeAlertDeletionThreshold: number;
+  inactiveAlertDeletionThreshold: number;
+}
+
+export type RulesSettingsAlertDeletion = RulesSettingsAlertDeletionProperties &
+  RulesSettingsModificationMetadata;
+
 export interface RulesSettingsProperties {
   flapping?: RulesSettingsFlappingProperties;
   queryDelay?: RulesSettingsQueryDelayProperties;
+  alertDeletion?: RulesSettingsAlertDeletionProperties;
 }
 
 export interface RulesSettings {
   flapping?: RulesSettingsFlapping;
   queryDelay?: RulesSettingsQueryDelay;
+  alertDeletion?: RulesSettingsAlertDeletion;
 }
