@@ -8,7 +8,6 @@
  */
 
 import './annotations.scss';
-import './reference_lines/reference_lines.scss';
 
 import React, { Fragment } from 'react';
 import { snakeCase } from 'lodash';

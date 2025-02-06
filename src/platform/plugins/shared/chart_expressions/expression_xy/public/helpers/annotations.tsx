@@ -10,6 +10,7 @@
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -32,6 +33,29 @@ type PartialMergedAnnotation = Pick<
   MergedAnnotation,
   'position' | 'icon' | 'textVisibility' | 'label' | 'isGrouped'
 >;
+
+const xyDecorationRotatedWrapperCss = {
+  self: css`
+    display: inline-block;
+    width: ${LINES_MARKER_SIZE}px;
+    overflow: hidden;
+    line-height: 1.5;
+  `,
+
+  label: css`
+    display: inline-block;
+    max-width: ${LINES_MARKER_SIZE * 3}px;
+    white-space: nowrap;
+    transform: translate(0, 100%) rotate(-90deg);
+    transform-origin: 0 0;
+
+    &::after {
+      content: '';
+      float: left;
+      margin-top: 100%;
+    }
+  `,
+};
 
 const isExtendedDecorationConfig = (
   config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined
@@ -120,19 +144,8 @@ export function MarkerBody({
     );
   }
   return (
-    <div
-      className="xyDecorationRotatedWrapper"
-      data-test-subj="xyVisAnnotationText"
-      css={{
-        width: LINES_MARKER_SIZE,
-      }}
-    >
-      <div
-        className="eui-textTruncate xyDecorationRotatedWrapper__label"
-        css={{
-          maxWidth: LINES_MARKER_SIZE * 3,
-        }}
-      >
+    <div css={xyDecorationRotatedWrapperCss.self} data-test-subj="xyVisAnnotationText">
+      <div className="eui-textTruncate" css={xyDecorationRotatedWrapperCss.label}>
         {label}
       </div>
     </div>
