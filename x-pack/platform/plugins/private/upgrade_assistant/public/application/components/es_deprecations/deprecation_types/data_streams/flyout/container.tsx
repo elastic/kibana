@@ -54,13 +54,14 @@ const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   cancelReindex,
   loadDataStreamMetadata,
-  reindexState,
+  migrationState,
   startReindex,
   startReadonly,
+  cancelReadonly,
   closeFlyout,
   deprecation,
 }) => {
-  const { status, reindexWarnings, errorMessage, meta } = reindexState;
+  const { status, reindexWarnings, errorMessage, meta } = migrationState;
   const resolutionType = 'readonly' as const;
   const { index } = deprecation;
 
@@ -114,7 +115,8 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
 
   const onStopReadonly = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_STOP_READONLY_CLICK);
-  }, []);
+    await cancelReadonly();
+  }, [cancelReadonly]);
 
   const { docsSizeFormatted, indicesRequiringUpgradeDocsCount, lastIndexCreationDateFormatted } =
     useMemo(() => {
@@ -163,7 +165,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             }}
             lastIndexCreationDateFormatted={lastIndexCreationDateFormatted}
             meta={meta}
-            reindexState={reindexState}
+            migrationState={migrationState}
           />
         );
       }
@@ -210,7 +212,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
               setFlyoutStep('confirm');
             }}
             resolutionType={resolutionType}
-            reindexState={reindexState}
+            migrationState={migrationState}
             cancelAction={() => {
               if (resolutionType === 'readonly') {
                 onStopReadonly();
@@ -234,7 +236,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     }
   }, [
     flyoutStep,
-    reindexState,
+    migrationState,
     closeFlyout,
     onStartReindex,
     onStopReindex,

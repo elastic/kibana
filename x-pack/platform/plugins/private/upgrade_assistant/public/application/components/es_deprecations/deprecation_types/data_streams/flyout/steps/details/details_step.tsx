@@ -21,9 +21,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
+import type {
   DataStreamMetadata,
   DataStreamReindexStatus,
+  DataStreamResolutionType,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_reindex_state';
@@ -37,11 +38,11 @@ import { getPrimaryButtonLabel } from '../../messages';
 
 export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
-  reindexState: MigrationState;
-  startAction: (resolutionType: 'reindex' | 'readonly') => void;
+  migrationState: MigrationState;
+  startAction: (resolutionType: DataStreamResolutionType) => void;
   lastIndexCreationDateFormatted: string;
   meta: DataStreamMetadata;
-}> = ({ closeFlyout, reindexState, startAction, lastIndexCreationDateFormatted, meta }) => {
+}> = ({ closeFlyout, migrationState, startAction, lastIndexCreationDateFormatted, meta }) => {
   const {
     services: {
       api,
@@ -49,7 +50,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
     },
   } = useAppContext();
 
-  const { loadingState, status, hasRequiredPrivileges } = reindexState;
+  const { loadingState, status, hasRequiredPrivileges } = migrationState;
   const loading =
     loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
   const isCompleted = status === DataStreamReindexStatus.completed;
@@ -144,7 +145,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                 )
               }
             >
-              {reindexState.errorMessage}
+              {migrationState.errorMessage}
             </EuiCallOut>
             <EuiSpacer />
           </>

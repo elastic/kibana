@@ -9,11 +9,14 @@ import React from 'react';
 
 import { EuiFlyoutBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataStreamMetadata } from '../../../../../../../../../common/types';
+import type {
+  DataStreamMetadata,
+  DataStreamResolutionType,
+} from '../../../../../../../../../common/types';
 
 interface Props {
   meta: DataStreamMetadata;
-  resolutionType?: 'reindex' | 'readonly';
+  resolutionType?: DataStreamResolutionType;
 }
 
 export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({

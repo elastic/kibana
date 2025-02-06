@@ -12,7 +12,7 @@ import { useReindexStatus, MigrationState } from './use_reindex_state';
 
 export interface ReindexStateContext {
   loadDataStreamMetadata: () => Promise<void>;
-  reindexState: MigrationState;
+  migrationState: MigrationState;
 
   // reindex resolution actions
   startReindex: () => Promise<void>;
@@ -20,6 +20,7 @@ export interface ReindexStateContext {
 
   // readonly resolution actions
   startReadonly: () => Promise<void>;
+  cancelReadonly: () => Promise<void>;
 }
 
 const DataStreamReindexContext = createContext<ReindexStateContext | undefined>(undefined);
@@ -45,19 +46,26 @@ export const DataStreamReindexStatusProvider: React.FunctionComponent<Props> = (
   dataStreamName,
   children,
 }) => {
-  const { reindexState, startReindex, loadDataStreamMetadata, cancelReindex, startReadonly } =
-    useReindexStatus({
-      dataStreamName,
-      api,
-    });
+  const {
+    migrationState,
+    cancelReadonly,
+    startReindex,
+    loadDataStreamMetadata,
+    cancelReindex,
+    startReadonly,
+  } = useReindexStatus({
+    dataStreamName,
+    api,
+  });
 
   return (
     <DataStreamReindexContext.Provider
       value={{
-        reindexState,
+        migrationState,
         startReindex,
         cancelReindex,
         startReadonly,
+        cancelReadonly,
         loadDataStreamMetadata,
       }}
     >

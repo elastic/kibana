@@ -13,6 +13,7 @@ import {
   DataStreamMetadata,
   DataStreamReindexStatusResponse,
   DataStreamProgressDetails,
+  DataStreamResolutionType,
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
@@ -24,7 +25,7 @@ export interface MigrationState {
   loadingState: LoadingState;
   cancelLoadingState?: CancelLoadingState;
 
-  resolutionType?: 'reindex' | 'readonly';
+  resolutionType?: DataStreamResolutionType;
   status?: DataStreamReindexStatus;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
@@ -36,7 +37,7 @@ export interface MigrationState {
 }
 
 const getReindexState = (
-  reindexState: MigrationState,
+  migrationState: MigrationState,
   {
     reindexOp,
     warnings,
@@ -45,9 +46,9 @@ const getReindexState = (
   }: DataStreamReindexStatusResponse & { meta?: DataStreamMetadata | null }
 ) => {
   const newReindexState: MigrationState = {
-    ...reindexState,
+    ...migrationState,
     reindexWarnings: warnings,
-    meta: updatedMeta || reindexState.meta,
+    meta: updatedMeta || migrationState.meta,
     loadingState: LoadingState.Success,
   };
 
@@ -80,7 +81,7 @@ const getReindexState = (
     }
 
     if (
-      reindexState.cancelLoadingState === CancelLoadingState.Requested &&
+      migrationState.cancelLoadingState === CancelLoadingState.Requested &&
       reindexOp.status === DataStreamReindexStatus.inProgress
     ) {
       newReindexState.cancelLoadingState = CancelLoadingState.Loading;
@@ -97,7 +98,7 @@ export const useReindexStatus = ({
   dataStreamName: string;
   api: ApiService;
 }) => {
-  const [reindexState, setMigrationState] = useState<MigrationState>({
+  const [migrationState, setMigrationState] = useState<MigrationState>({
     loadingState: LoadingState.Loading,
     errorMessage: null,
     reindexTaskPercComplete: null,
@@ -121,7 +122,7 @@ export const useReindexStatus = ({
       clearPollInterval();
       try {
         if (resolutionType === 'readonly' && !readonlyState.current) {
-          readonlyState.current = readOnlyExecute(dataStreamName, reindexState.meta, api);
+          readonlyState.current = readOnlyExecute(dataStreamName, migrationState.meta, api);
         }
 
         let data: DataStreamReindexStatusResponse | undefined | null = null;
@@ -160,7 +161,7 @@ export const useReindexStatus = ({
         if (data.reindexOp && data.reindexOp.status === DataStreamReindexStatus.inProgress) {
           // Only keep polling if it exists and is in progress.
           pollIntervalIdRef.current = setTimeout(
-            () => pollingFunction(reindexState.resolutionType),
+            () => pollingFunction(migrationState.resolutionType),
             POLL_INTERVAL
           );
         }
@@ -175,12 +176,12 @@ export const useReindexStatus = ({
         });
       }
     },
-    [clearPollInterval, api, dataStreamName, reindexState.meta, reindexState.resolutionType]
+    [clearPollInterval, api, dataStreamName, migrationState.meta, migrationState.resolutionType]
   );
 
   const updateStatus = useCallback(async () => {
-    return pollingFunction(reindexState.resolutionType);
-  }, [pollingFunction, reindexState.resolutionType]);
+    return pollingFunction(migrationState.resolutionType);
+  }, [pollingFunction, migrationState.resolutionType]);
 
   const startReindex = useCallback(async () => {
     setMigrationState((prevValue: MigrationState) => {
@@ -193,7 +194,7 @@ export const useReindexStatus = ({
       };
     });
 
-    if (reindexState.status === DataStreamReindexStatus.failed) {
+    if (migrationState.status === DataStreamReindexStatus.failed) {
       try {
         await api.cancelDataStreamReindexTask(dataStreamName);
       } catch (_) {
@@ -220,7 +221,7 @@ export const useReindexStatus = ({
       return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
     });
     updateStatus();
-  }, [api, dataStreamName, updateStatus, reindexState.status]);
+  }, [api, dataStreamName, updateStatus, migrationState.status]);
 
   const loadDataStreamMetadata = useCallback(async () => {
     try {
@@ -299,10 +300,10 @@ export const useReindexStatus = ({
       };
     });
 
-    readonlyState.current = readOnlyExecute(dataStreamName, reindexState.meta, api);
+    readonlyState.current = readOnlyExecute(dataStreamName, migrationState.meta, api);
 
     pollingFunction('readonly');
-  }, [api, dataStreamName, reindexState, pollingFunction]);
+  }, [api, dataStreamName, migrationState, pollingFunction]);
 
   const cancelReadonly = useCallback(async () => {
     readonlyState.current = null;
@@ -332,7 +333,7 @@ export const useReindexStatus = ({
   }, [clearPollInterval]);
 
   return {
-    reindexState,
+    migrationState,
     loadDataStreamMetadata,
 
     startReindex,

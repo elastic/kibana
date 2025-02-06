@@ -87,9 +87,9 @@ const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
 };
 
 export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
-  const { reindexState } = useDataStreamReindexContext();
+  const { migrationState } = useDataStreamReindexContext();
 
-  if (reindexState.loadingState === LoadingState.Loading) {
+  if (migrationState.loadingState === LoadingState.Loading) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -97,14 +97,14 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            {getI18nTexts(reindexState.resolutionType).reindexLoadingStatusText}
+            {getI18nTexts(migrationState.resolutionType).reindexLoadingStatusText}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
-  switch (reindexState.status) {
+  switch (migrationState.status) {
     case DataStreamReindexStatus.inProgress:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -113,10 +113,10 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              {getI18nTexts(reindexState.resolutionType).reindexInProgressText}{' '}
+              {getI18nTexts(migrationState.resolutionType).reindexInProgressText}{' '}
               {getDataStreamReindexProgressLabel(
-                reindexState.status,
-                reindexState.reindexTaskPercComplete
+                migrationState.status,
+                migrationState.reindexTaskPercComplete
               )}
             </EuiText>
           </EuiFlexItem>
@@ -130,7 +130,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              {getI18nTexts(reindexState.resolutionType).reindexCompleteText}
+              {getI18nTexts(migrationState.resolutionType).reindexCompleteText}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -143,7 +143,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              {getI18nTexts(reindexState.resolutionType).reindexFailedText}
+              {getI18nTexts(migrationState.resolutionType).reindexFailedText}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -156,7 +156,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              {getI18nTexts(reindexState.resolutionType).reindexFetchFailedText}
+              {getI18nTexts(migrationState.resolutionType).reindexFetchFailedText}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -165,14 +165,16 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
       return (
         <EuiToolTip
           position="top"
-          content={getI18nTexts(reindexState.resolutionType).resolutionTooltipLabel}
+          content={getI18nTexts(migrationState.resolutionType).resolutionTooltipLabel}
         >
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="indexSettings" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">{getI18nTexts(reindexState.resolutionType).resolutionText}</EuiText>
+              <EuiText size="s">
+                {getI18nTexts(migrationState.resolutionType).resolutionText}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>

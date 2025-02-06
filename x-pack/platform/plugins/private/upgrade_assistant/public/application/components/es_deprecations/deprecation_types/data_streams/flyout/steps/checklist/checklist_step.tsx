@@ -20,7 +20,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
+import {
+  DataStreamReindexStatus,
+  DataStreamResolutionType,
+} from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_reindex_state';
 import { ReindexProgress } from './progress';
@@ -32,16 +35,16 @@ import { getPrimaryButtonLabel } from '../../messages';
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
-  reindexState: MigrationState;
-  resolutionType: 'reindex' | 'readonly';
+  migrationState: MigrationState;
+  resolutionType: DataStreamResolutionType;
   executeAction: () => void;
   cancelAction: () => void;
-}> = ({ closeFlyout, reindexState, resolutionType, executeAction, cancelAction }) => {
+}> = ({ closeFlyout, migrationState, resolutionType, executeAction, cancelAction }) => {
   const {
     services: { api },
   } = useAppContext();
 
-  const { loadingState, status, hasRequiredPrivileges } = reindexState;
+  const { loadingState, status, hasRequiredPrivileges } = migrationState;
   const loading =
     loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
   const isCompleted = status === DataStreamReindexStatus.completed;
@@ -133,7 +136,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 )
               }
             >
-              {reindexState.errorMessage}
+              {migrationState.errorMessage}
             </EuiCallOut>
             <EuiSpacer />
           </>
@@ -148,7 +151,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </p>
         </EuiText>
         <EuiSpacer />
-        <ReindexProgress reindexState={reindexState} />
+        <ReindexProgress migrationState={migrationState} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

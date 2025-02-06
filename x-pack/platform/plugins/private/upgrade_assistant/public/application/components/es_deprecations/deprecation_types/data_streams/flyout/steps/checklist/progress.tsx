@@ -20,7 +20,7 @@ import { ReindexingDocumentsStepTitle } from './progress_title';
 import { CancelLoadingState } from '../../../../../../types';
 
 interface Props {
-  reindexState: MigrationState;
+  migrationState: MigrationState;
 }
 
 /**
@@ -29,7 +29,7 @@ interface Props {
  */
 export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
   const { status, reindexTaskPercComplete, cancelLoadingState, taskStatus, resolutionType } =
-    props.reindexState;
+    props.migrationState;
 
   // The reindexing step is special because it generally lasts longer and can be cancelled mid-flight
   const reindexingDocsStep = {

@@ -14,6 +14,7 @@ export interface DataStreamsActionMetadata {
   reindexRequired: boolean;
 }
 
+export type DataStreamResolutionType = 'readonly' | 'reindex';
 export interface DataStreamsAction {
   type: 'dataStream';
   metadata: DataStreamsActionMetadata;
@@ -43,7 +44,7 @@ export type DataStreamWarningTypes = 'incompatibleDataStream' | 'affectExistingS
 
 export interface DataStreamReindexWarning {
   warningType: DataStreamWarningTypes;
-  resolutionType: 'readonly' | 'reindex';
+  resolutionType: DataStreamResolutionType;
   meta?: {
     [key: string]: string | string[];
   };

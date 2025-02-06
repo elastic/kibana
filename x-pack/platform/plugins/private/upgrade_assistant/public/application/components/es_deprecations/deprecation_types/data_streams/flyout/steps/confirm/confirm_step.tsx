@@ -22,6 +22,7 @@ import {
   DataStreamReindexWarning,
   DataStreamWarningTypes,
   DataStreamMetadata,
+  DataStreamResolutionType,
 } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
 import {
@@ -44,21 +45,18 @@ const warningToComponentMap: Record<
 };
 
 export const idForWarning = (id: number) => `reindexWarning-${id}`;
-interface WarningsConfirmationFlyoutProps {
-  hideWarningsStep: () => void;
-  startAction: () => void;
-  resolutionType: 'reindex' | 'readonly';
-  warnings: DataStreamReindexWarning[];
-  meta: DataStreamMetadata;
-}
 
 /**
  * Displays warning text about destructive changes required to reindex this index. The user
  * must acknowledge each change before being allowed to proceed.
  */
-export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
-  WarningsConfirmationFlyoutProps
-> = ({ warnings, hideWarningsStep, startAction, resolutionType, meta }) => {
+export const ConfirmReindexingFlyoutStep: React.FunctionComponent<{
+  hideWarningsStep: () => void;
+  startAction: () => void;
+  resolutionType: DataStreamResolutionType;
+  warnings: DataStreamReindexWarning[];
+  meta: DataStreamMetadata;
+}> = ({ warnings, hideWarningsStep, startAction, resolutionType, meta }) => {
   const {
     services: {
       core: { docLinks },
@@ -121,17 +119,21 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<
           }
         );
 
+  const warningsForResolutionType = warnings.filter(
+    (warning) => warning.resolutionType === resolutionType
+  );
+
   return (
     <>
       <EuiFlyoutBody>
-        {warnings.length > 0 && (
+        {warningsForResolutionType.length > 0 && (
           <>
             {resolutionType === 'reindex' && <ReindexWarningCallout />}
             {resolutionType === 'readonly' && <ReadonlyWarningCallout />}
             <EuiSpacer />
             <p>{actionClarification}</p>
             <EuiSpacer size="m" />
-            {warnings.map((warning, index) => {
+            {warningsForResolutionType.map((warning, index) => {
               const WarningCheckbox = warningToComponentMap[warning.warningType];
               return (
                 <WarningCheckbox
