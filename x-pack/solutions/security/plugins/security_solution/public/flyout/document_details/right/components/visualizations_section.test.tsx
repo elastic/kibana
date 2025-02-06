@@ -10,6 +10,11 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import {
+  uiMetricService,
+  GRAPH_PREVIEW,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
   GRAPH_PREVIEW_TEST_ID,
@@ -83,6 +88,14 @@ jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
 }));
 
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
+
+jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
+  uiMetricService: {
+    trackUiMetric: jest.fn(),
+  },
+}));
+
+const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
 const panelContextValue = {
   ...mockContextValue,
@@ -182,6 +195,10 @@ describe('<VisualizationsSection />', () => {
     const { getByTestId } = renderVisualizationsSection();
 
     expect(getByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(uiMetricServiceMock.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.LOADED,
+      GRAPH_PREVIEW
+    );
   });
 
   it('should not render the graph preview component if the graph feature is disabled', () => {
