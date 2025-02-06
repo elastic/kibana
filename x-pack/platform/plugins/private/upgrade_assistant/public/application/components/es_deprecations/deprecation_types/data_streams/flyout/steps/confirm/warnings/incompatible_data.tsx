@@ -19,7 +19,7 @@ export const IncompatibleDataInDataStreamWarningCheckbox: React.FunctionComponen
       warningId={id}
       label={
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.incompatibleDataWarningTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.incompatibleDataWarningTitle"
           defaultMessage="Reindex all incompatible data for this data stream"
         />
       }

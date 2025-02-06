@@ -29,7 +29,7 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.acceptChangesTitle"
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
               defaultMessage="Data Stream Migration Complete"
             />
           </h3>
@@ -37,7 +37,7 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
         <p>
           <FormattedMessage
-            id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.acceptChangesTitle"
+            id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
             defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindexing {reindexed} readonly {marked as readonly} other {executed}}."
             values={{ count: meta.indicesRequiringUpgradeCount, resolutionType }}
           />

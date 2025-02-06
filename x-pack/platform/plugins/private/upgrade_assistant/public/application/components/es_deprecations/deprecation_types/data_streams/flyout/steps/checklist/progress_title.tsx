@@ -20,7 +20,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Loading: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
           defaultMessage="Cancelling…"
         />
       );
@@ -28,7 +28,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Success: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
           defaultMessage="Cancelled"
         />
       );
@@ -36,7 +36,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Error: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
           defaultMessage="Failed to cancel {resolutionType, select, reindexing {reindexing} readonly {readonly} other {}}"
           values={{ resolutionType }}
         />
@@ -48,7 +48,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case DataStreamReindexStatus.inProgress: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
           defaultMessage="{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {}}"
           values={{ resolutionType }}
         />
@@ -57,7 +57,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case DataStreamReindexStatus.failed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
           defaultMessage="Failed to {resolutionType, select, reindexing {reindex} readonly {mark as readonly} other {}}"
           values={{ resolutionType }}
         />
@@ -65,14 +65,14 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case DataStreamReindexStatus.fetchFailed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.fetchFailed.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.fetchFailed.reindexingDocumentsStepTitle"
           defaultMessage="Fetching status failed"
         />
       );
     case DataStreamReindexStatus.cancelled:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelled.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelled.reindexingDocumentsStepTitle"
           defaultMessage="{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {}} cancelled"
           values={{ resolutionType }}
         />
@@ -80,7 +80,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case DataStreamReindexStatus.completed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.completed.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.completed.reindexingDocumentsStepTitle"
           defaultMessage="{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {}} completed"
           values={{ resolutionType }}
         />
@@ -89,7 +89,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     default: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
           defaultMessage="{resolutionType, select, reindexing {Reindex data stream} readonly {Mark data stream as readonly} other {Unknown action}}"
         />
       );

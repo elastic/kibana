@@ -88,13 +88,13 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<{
   const startActionButtonLabel =
     resolutionType === 'reindex'
       ? i18n.translate(
-          'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.startActionButtonLabel',
+          'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.startActionButtonLabel',
           {
             defaultMessage: 'Start reindexing',
           }
         )
       : i18n.translate(
-          'xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.startActionButtonLabel',
+          'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.startActionButtonLabel',
           {
             defaultMessage: 'Mark all read only',
           }
@@ -155,7 +155,7 @@ export const ConfirmReindexingFlyoutStep: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="arrowLeft" onClick={hideWarningsStep} flush="left">
               <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.backButtonLabel"
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.backButtonLabel"
                 defaultMessage="Back"
               />
             </EuiButtonEmpty>

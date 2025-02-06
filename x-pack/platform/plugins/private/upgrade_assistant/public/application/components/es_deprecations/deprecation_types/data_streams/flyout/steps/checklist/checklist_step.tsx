@@ -65,7 +65,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
                   defaultMessage="You do not have sufficient privileges to reindex this index"
                 />
               }
@@ -83,14 +83,14 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               data-test-subj="lowDiskSpaceCallout"
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.lowDiskSpaceCalloutTitle"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutTitle"
                   defaultMessage="Nodes with low disk space"
                 />
               }
             >
               <>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.lowDiskSpaceCalloutDescription"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutDescription"
                   defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
                 />
 
@@ -100,7 +100,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   {nodes.map(({ nodeName, available, nodeId }) => (
                     <li key={nodeId} data-test-subj="impactedNodeListItem">
                       <FormattedMessage
-                        id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.lowDiskSpaceUsedText"
+                        id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceUsedText"
                         defaultMessage="{nodeName} ({available} available)"
                         values={{
                           nodeName,
@@ -125,12 +125,12 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               title={
                 hasFetchFailed ? (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.fetchFailedCalloutTitle"
                     defaultMessage="Reindex status not available"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingFailedCalloutTitle"
                     defaultMessage="Reindexing error"
                   />
                 )
@@ -146,7 +146,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           <p>
             <FormattedMessage
               defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress."
-              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
             />
           </p>
         </EuiText>
@@ -158,7 +158,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
               <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.closeButtonLabel"
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.closeButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -176,7 +176,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                     data-test-subj="cancelDataStreamReindexingButton"
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.cancelReindexButtonLabel"
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelReindexButtonLabel"
                       defaultMessage="Cancel reindexing"
                     />
                   </EuiButton>

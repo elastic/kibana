@@ -16,28 +16,28 @@ export const getPrimaryButtonLabel = (status?: DataStreamReindexStatus) => {
     case DataStreamReindexStatus.failed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.tryAgainLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.tryAgainLabel"
           defaultMessage="Try again"
         />
       );
     case DataStreamReindexStatus.inProgress:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.reindexingLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.reindexingLabel"
           defaultMessage="Reindexing…"
         />
       );
     case DataStreamReindexStatus.cancelled:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.restartLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.restartLabel"
           defaultMessage="Restart reindexing"
         />
       );
     default:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.runReindexLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.runReindexLabel"
           defaultMessage="Start reindexing"
         />
       );
