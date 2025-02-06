@@ -555,6 +555,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
           request: {} as unknown as DiagnosticResult['meta']['request'],
         },
         warnings: [],
+        body: 'resource_not_found_exception',
         statusCode: 404,
       });
     }

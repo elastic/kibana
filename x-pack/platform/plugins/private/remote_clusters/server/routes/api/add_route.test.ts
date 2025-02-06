@@ -123,9 +123,6 @@ describe('ADD remote clusters', () => {
                 skip_unavailable: false,
                 mode: 'sniff',
                 node_connections: null,
-                proxy_address: null,
-                proxy_socket_connections: null,
-                server_name: null,
               },
             },
           },
@@ -178,10 +175,8 @@ describe('ADD remote clusters', () => {
           cluster: {
             remote: {
               test: {
-                seeds: null,
                 skip_unavailable: false,
                 mode: 'proxy',
-                node_connections: null,
                 proxy_address: '127.0.0.1:9300',
                 proxy_socket_connections: null,
                 server_name: 'foobar',
@@ -251,9 +246,6 @@ describe('ADD remote clusters', () => {
                 skip_unavailable: false,
                 mode: 'sniff',
                 node_connections: null,
-                proxy_address: null,
-                proxy_socket_connections: null,
-                server_name: null,
               },
             },
           },
