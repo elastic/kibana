@@ -98,7 +98,7 @@ pageLoadAssetSize:
   lens: 57135
   licenseManagement: 41817
   licensing: 29004
-  links: 44490
+  links: 8000
   lists: 22900
   logsDataAccess: 16759
   logsExplorer: 60000
@@ -158,7 +158,7 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 88160
-  slo: 37039
+  slo: 45000
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316

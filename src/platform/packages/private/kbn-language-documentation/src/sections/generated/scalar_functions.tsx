@@ -1384,6 +1384,9 @@ export const functions = {
   Match can be used on fields from the text family like  text and  semantic_text,
   as well as other field types like keyword, boolean, dates, and numeric types.
 
+  Match can use function named parameters to specify additional options for the match query.
+  All match query parameters are supported.
+
   For a simplified syntax, you can use the match operator \`:\` operator instead of \`MATCH\`.
 
   \`MATCH\` returns true if the provided query matches the row.

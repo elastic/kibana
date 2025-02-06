@@ -35,7 +35,6 @@ import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
-import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
@@ -49,6 +48,7 @@ import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
+import { calculateStartingCapacity } from './lib/create_managed_configuration';
 import {
   registerMarkRemovedTasksAsUnrecognizedDefinition,
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
@@ -331,12 +331,7 @@ export class TaskManagerPlugin
       }`
     );
 
-    const managedConfiguration = createManagedConfiguration({
-      config: this.config!,
-      errors$: taskStore.errors$,
-      defaultCapacity,
-      logger: this.logger,
-    });
+    const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
@@ -363,8 +358,8 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-        ...managedConfiguration,
         taskPartitioner,
+        startingCapacity,
       });
 
       this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
@@ -383,12 +378,12 @@ export class TaskManagerPlugin
       taskStore,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       config: this.config!,
-      managedConfig: managedConfiguration,
       logger: this.logger,
       adHocTaskCounter: this.adHocTaskCounter,
       taskDefinitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
       ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
+      startingCapacity,
     }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({
