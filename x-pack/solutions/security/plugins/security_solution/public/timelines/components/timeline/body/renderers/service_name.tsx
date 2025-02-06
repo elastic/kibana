@@ -13,18 +13,12 @@ import { EntityType } from '../../../../../../common/search_strategy';
 import { EntityDetailsLink } from '../../../../../common/components/links';
 import { ServicePanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 
 interface Props {
   contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
   isButton?: boolean;
   onClick?: () => void;
   value: string | number | undefined | null;
@@ -32,13 +26,8 @@ interface Props {
 }
 
 const ServiceNameComponent: React.FC<Props> = ({
-  fieldName,
   Component,
   contextId,
-  eventId,
-  fieldType,
-  isAggregatable,
-  isDraggable,
   isButton,
   onClick,
   title,
@@ -70,12 +59,11 @@ const ServiceNameComponent: React.FC<Props> = ({
             serviceName,
             contextID: contextId,
             scopeId: timelineID,
-            isDraggable,
           },
         },
       });
     },
-    [contextId, eventContext, isDraggable, isInTimelineContext, onClick, openFlyout, serviceName]
+    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, serviceName]
   );
 
   const content = useMemo(
@@ -96,25 +84,7 @@ const ServiceNameComponent: React.FC<Props> = ({
     [serviceName, isButton, isInTimelineContext, openServiceDetailsSidePanel, Component, title]
   );
 
-  return isString(value) && serviceName.length > 0 ? (
-    isDraggable ? (
-      <DefaultDraggable
-        field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        isDraggable={isDraggable}
-        tooltipContent={fieldName}
-        value={serviceName}
-      >
-        {content}
-      </DefaultDraggable>
-    ) : (
-      content
-    )
-  ) : (
-    getEmptyTagValue()
-  );
+  return isString(value) && serviceName.length > 0 ? content : getEmptyTagValue();
 };
 
 export const ServiceName = React.memo(ServiceNameComponent);
