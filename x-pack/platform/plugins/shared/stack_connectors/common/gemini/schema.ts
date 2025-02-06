@@ -8,6 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_GEMINI_MODEL } from './constants';
 
+export const TelemtryMetadataSchema = schema.object({
+  pluginId: schema.maybe(schema.string()),
+  aggregateBy: schema.maybe(schema.string()),
+});
+
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_GEMINI_MODEL }),
@@ -27,6 +32,7 @@ export const RunActionParamsSchema = schema.object({
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
   raw: schema.maybe(schema.boolean()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const RunApiResponseSchema = schema.object(
@@ -73,6 +79,7 @@ export const InvokeAIActionParamsSchema = schema.object({
       allowedFunctionNames: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
@@ -84,6 +91,7 @@ export const InvokeAIRawActionParamsSchema = schema.object({
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
   tools: schema.maybe(schema.arrayOf(schema.any())),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
