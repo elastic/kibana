@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
@@ -12,12 +12,13 @@ import { RedirectTo } from '../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 
-type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor';
+type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor' | 'lifecycle';
 
 function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['route', 'enrich', 'schemaEditor'].includes(value);
+  return ['route', 'enrich', 'schemaEditor', 'lifecycle'].includes(value);
 }
 
 export function WiredStreamDetailManagement({
@@ -33,22 +34,6 @@ export function WiredStreamDetailManagement({
     path: { key, subtab },
   } = useStreamsAppParams('/{key}/management/{subtab}');
 
-  const legacyDefinition = useMemo(() => {
-    if (!definition) {
-      return undefined;
-    }
-    return {
-      dashboards: definition.dashboards,
-      inherited_fields: definition.inherited_fields,
-      elasticsearch_assets: [],
-      effective_lifecycle: definition.effective_lifecycle,
-      name: definition.stream.name,
-      stream: {
-        ...definition.stream,
-      },
-    };
-  }, [definition]);
-
   const tabs = {
     route: {
       content: (
@@ -60,10 +45,7 @@ export function WiredStreamDetailManagement({
     },
     enrich: {
       content: (
-        <StreamDetailEnrichment
-          definition={legacyDefinition}
-          refreshDefinition={refreshDefinition}
-        />
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
         defaultMessage: 'Extract field',
@@ -79,6 +61,14 @@ export function WiredStreamDetailManagement({
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
+      }),
+    },
+    lifecycle: {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+        defaultMessage: 'Data retention',
       }),
     },
   };
