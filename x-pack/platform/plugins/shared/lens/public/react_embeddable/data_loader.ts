@@ -88,22 +88,17 @@ async function loadESQLAttributes(
   { dataViews, data, visualizationMap, datasourceMap, ...rest }: LensEmbeddableStartServices,
   updateAttributes: (attributes: LensRuntimeState['attributes']) => void
 ) {
-  console.log('init');
   // Early exit if ESQL is not supported
   if (!isESQLModeEnabled(rest)) {
     return;
   }
-  console.log('has esql');
   const indexName = await getIndexForESQLQuery({ dataViews });
   // Early exit if there's no data view to use
   if (!indexName) {
     return;
   }
-  console.log('has index');
 
   const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
-
-  console.log('has dataView');
 
   const esqlQuery = getInitialESQLQuery(dataView);
 
@@ -134,7 +129,6 @@ async function loadESQLAttributes(
   const allSuggestions =
     suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
 
-  console.log({ allSuggestions });
   // Lens might not return suggestions for some cases, i.e. in case of errors
   if (!allSuggestions.length) {
     return;
