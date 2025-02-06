@@ -37,6 +37,7 @@ const legacyMtrVisContainerIsFilterableCss = ({ euiTheme }: UseEuiTheme) =>
     cursor: 'pointer',
     transition: `transform ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
     transform: 'translate(0, 0)',
+
     '&:hover, &:focus': {
       boxShadow: 'none',
       transform: 'translate(0, -2px)',

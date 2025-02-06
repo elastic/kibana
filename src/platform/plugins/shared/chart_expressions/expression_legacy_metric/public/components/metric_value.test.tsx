@@ -21,6 +21,7 @@ const baseMetric: MetricOptions = {
   rowIndex: 0,
   colIndex: 0,
 };
+
 const font: MetricStyle = {
   spec: { fontSize: '12px' },
 
@@ -64,34 +65,6 @@ describe('MetricVisValue', () => {
     expect(component.find('button').exists()).toBe(false);
   });
 
-  it('should add -isfilterable class if onFilter is provided', () => {
-    const onFilter = jest.fn();
-    const component = shallow(
-      <MetricVisValue
-        style={font}
-        metric={baseMetric}
-        onFilter={onFilter}
-        colorFullBackground={false}
-        labelConfig={labelConfig}
-      />
-    );
-    component.simulate('click');
-    expect(component.find('.legacyMtrVis__container-isfilterable')).toHaveLength(1);
-  });
-
-  it('should not add -isfilterable class if onFilter is not provided', () => {
-    const component = shallow(
-      <MetricVisValue
-        style={font}
-        metric={baseMetric}
-        colorFullBackground={false}
-        labelConfig={labelConfig}
-      />
-    );
-    component.simulate('click');
-    expect(component.find('.legacyMtrVis__container-isfilterable')).toHaveLength(0);
-  });
-
   it('should call onFilter callback if provided', () => {
     const onFilter = jest.fn();
     const component = shallow(
@@ -105,18 +78,5 @@ describe('MetricVisValue', () => {
     );
     component.simulate('click');
     expect(onFilter).toHaveBeenCalled();
-  });
-
-  it('should add correct class name if colorFullBackground is true', () => {
-    const component = shallow(
-      <MetricVisValue
-        style={font}
-        metric={baseMetric}
-        onFilter={() => {}}
-        colorFullBackground={true}
-        labelConfig={labelConfig}
-      />
-    );
-    expect(component.find('.legacyMtrVis__container-isfull').exists()).toBe(true);
   });
 });
