@@ -51,7 +51,6 @@ const mockValues = {
   knowledgeBase: {
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
-  baseConversations: {},
   setKnowledgeBase: setKnowledgeBaseMock,
   http: mockHttp,
   anonymizationFieldsBulkActions: {},

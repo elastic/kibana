@@ -86,7 +86,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantAvailability: { isAssistantEnabled },
     assistantTelemetry,
     augmentMessageCodeBlocks,
-    baseConversations,
     getComments,
     getLastConversationId,
     http,
@@ -123,7 +122,7 @@ const AssistantComponent: React.FC<Props> = ({
     refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,
-  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({ http, isAssistantEnabled });
 
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
@@ -440,7 +439,6 @@ const AssistantComponent: React.FC<Props> = ({
     (promptTitle: string) => {
       if (currentConversation?.title) {
         assistantTelemetry?.reportAssistantQuickPrompt({
-          conversationId: currentConversation?.title,
           promptTitle,
         });
       }

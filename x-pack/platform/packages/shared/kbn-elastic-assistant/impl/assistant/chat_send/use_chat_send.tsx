@@ -122,7 +122,6 @@ export const useChatSend = ({
       });
 
       assistantTelemetry?.reportAssistantMessageSent({
-        conversationId: currentConversation.title,
         role: userMessage.role,
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
@@ -138,7 +137,6 @@ export const useChatSend = ({
         messages: [...updatedMessages, responseMessage],
       });
       assistantTelemetry?.reportAssistantMessageSent({
-        conversationId: currentConversation.title,
         role: responseMessage.role,
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,

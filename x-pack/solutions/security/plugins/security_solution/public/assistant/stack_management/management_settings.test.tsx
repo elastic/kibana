@@ -23,7 +23,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
   useFetchCurrentUserConversations: jest.fn(),
-  mergeBaseWithPersistedConversations: jest.fn(),
+  formatPersistedConversations: jest.fn(),
   WELCOME_CONVERSATION_TITLE: 'Welcome Conversation',
 }));
 jest.mock('@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management', () => ({
@@ -43,7 +43,6 @@ const useConversationMock = useConversation as jest.Mock;
 
 describe('ManagementSettings', () => {
   const queryClient = new QueryClient();
-  const baseConversations = { base: 'conversation' };
   const http = {};
   const getDefaultConversation = jest.fn();
   const setCurrentUserAvatar = jest.fn();
@@ -60,7 +59,6 @@ describe('ManagementSettings', () => {
     conversations: Record<string, Conversation>;
   }) => {
     useAssistantContextMock.mockReturnValue({
-      baseConversations,
       http,
       assistantAvailability: { isAssistantEnabled },
       setCurrentUserAvatar,

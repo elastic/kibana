@@ -12,7 +12,7 @@ import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
 import { useConversation } from '../use_conversation';
-import { getDefaultConnector, mergeBaseWithPersistedConversations } from '../helpers';
+import { getDefaultConnector, formatPersistedConversations } from '../helpers';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../api';
@@ -95,7 +95,7 @@ export const useAssistantOverlay = (
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations({}, conversationsData),
+      formatPersistedConversations(conversationsData),
     []
   );
   const { data: conversations, isLoading } = useFetchCurrentUserConversations({

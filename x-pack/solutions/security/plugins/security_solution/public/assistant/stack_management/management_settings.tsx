@@ -11,7 +11,7 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import {
-  mergeBaseWithPersistedConversations,
+  formatPersistedConversations,
   useAssistantContext,
   useFetchCurrentUserConversations,
   WELCOME_CONVERSATION_TITLE,
@@ -27,7 +27,6 @@ const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
 export const ManagementSettings = React.memo(() => {
   const {
-    baseConversations,
     http,
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
@@ -46,8 +45,8 @@ export const ManagementSettings = React.memo(() => {
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
+      formatPersistedConversations(conversationsData),
+    []
   );
   const { data: conversations } = useFetchCurrentUserConversations({
     http,

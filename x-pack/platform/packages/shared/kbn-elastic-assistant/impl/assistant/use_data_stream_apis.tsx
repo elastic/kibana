@@ -14,12 +14,11 @@ import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetc
 import { FetchConversationsResponse, useFetchPrompts } from './api';
 import {
   Conversation,
-  mergeBaseWithPersistedConversations,
+  formatPersistedConversations,
   useFetchCurrentUserConversations,
 } from '../..';
 
 interface Props {
-  baseConversations: Record<string, Conversation>;
   http: HttpSetup;
   isAssistantEnabled: boolean;
 }
@@ -45,16 +44,12 @@ export interface DataStreamApis {
   setIsStreaming: (isStreaming: boolean) => void;
 }
 
-export const useDataStreamApis = ({
-  http,
-  baseConversations,
-  isAssistantEnabled,
-}: Props): DataStreamApis => {
+export const useDataStreamApis = ({ http, isAssistantEnabled }: Props): DataStreamApis => {
   const [isStreaming, setIsStreaming] = useState(false);
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
+      formatPersistedConversations(conversationsData),
+    []
   );
   const {
     data: conversations,

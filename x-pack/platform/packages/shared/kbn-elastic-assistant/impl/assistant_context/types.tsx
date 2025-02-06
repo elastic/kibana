@@ -45,16 +45,15 @@ export interface Conversation {
 }
 
 export interface AssistantTelemetry {
-  reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
+  reportAssistantInvoked: (params: { invokedBy: string }) => void;
   reportAssistantMessageSent: (params: {
-    conversationId: string;
     role: string;
     actionTypeId: string;
     model?: string;
     provider?: string;
     isEnabledKnowledgeBase: boolean;
   }) => void;
-  reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
+  reportAssistantQuickPrompt: (params: { promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
 }
 

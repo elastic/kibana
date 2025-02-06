@@ -15,12 +15,10 @@ export enum AssistantEventTypes {
 }
 
 export interface ReportAssistantInvokedParams {
-  conversationId: string;
   invokedBy: string;
 }
 
 export interface ReportAssistantMessageSentParams {
-  conversationId: string;
   role: string;
   actionTypeId: string;
   provider?: string;
@@ -29,7 +27,6 @@ export interface ReportAssistantMessageSentParams {
 }
 
 export interface ReportAssistantQuickPromptParams {
-  conversationId: string;
   promptTitle: string;
 }
 

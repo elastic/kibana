@@ -75,7 +75,6 @@ export interface AssistantProviderProps {
   getComments: GetAssistantMessages;
   http: HttpSetup;
   inferenceEnabled?: boolean;
-  baseConversations: Record<string, Conversation>;
   nameSpace?: string;
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   title?: string;
@@ -105,7 +104,6 @@ export interface UseAssistantContext {
   ) => CodeBlockDetails[][];
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
-  baseConversations: Record<string, Conversation>;
   currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;
   http: HttpSetup;
@@ -159,7 +157,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   inferenceEnabled = false,
-  baseConversations,
   navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   productDocBase,
@@ -344,7 +341,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       unRegisterPromptContext,
       getLastConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
-      baseConversations,
       currentAppId,
       codeBlockRef,
       userProfileService,
@@ -386,7 +382,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       unRegisterPromptContext,
       getLastConversationId,
       setLocalStorageLastConversationId,
-      baseConversations,
       currentAppId,
       codeBlockRef,
       userProfileService,

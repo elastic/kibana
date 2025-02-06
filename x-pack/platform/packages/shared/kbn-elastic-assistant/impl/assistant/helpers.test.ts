@@ -8,9 +8,10 @@
 import {
   getDefaultConnector,
   getOptionalRequestParams,
-  mergeBaseWithPersistedConversations,
+  formatPersistedConversations,
 } from './helpers';
 import { AIConnector } from '../connectorland/connector_selector';
+import { Conversation } from '../assistant_context/types';
 
 describe('helpers', () => {
   describe('getDefaultConnector', () => {
@@ -84,7 +85,7 @@ describe('helpers', () => {
     });
   });
 
-  describe('mergeBaseWithPersistedConversations', () => {
+  describe('formatPersistedConversations', () => {
     const messages = [
       { content: 'Message 1', role: 'user' as const, timestamp: '2024-02-14T22:29:43.862Z' },
       { content: 'Message 2', role: 'user' as const, timestamp: '2024-02-14T22:29:43.862Z' },
@@ -96,23 +97,24 @@ describe('helpers', () => {
       apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
       replacements: {},
     };
-    const baseConversations = {
-      conversation_1: {
+    const conversationArray = [
+      {
         ...defaultProps,
         title: 'Conversation 1',
         id: 'conversation_1',
       },
-      conversation_2: {
+      {
         ...defaultProps,
         title: 'Conversation 2',
         id: 'conversation_2',
       },
-    };
+    ];
+
     const conversationsData = {
       page: 1,
       per_page: 10,
       total: 2,
-      data: Object.values(baseConversations).map((c) => c),
+      data: conversationArray,
     };
 
     it('should merge base conversations with user conversations when both are non-empty', () => {
@@ -132,7 +134,7 @@ describe('helpers', () => {
         ],
       };
 
-      const result = mergeBaseWithPersistedConversations(baseConversations, moreData);
+      const result = formatPersistedConversations(moreData);
 
       expect(result).toEqual({
         conversation_1: {
@@ -159,17 +161,22 @@ describe('helpers', () => {
     });
 
     it('should return base conversations when user conversations are empty', () => {
-      const result = mergeBaseWithPersistedConversations(baseConversations, {
+      const result = formatPersistedConversations({
         ...conversationsData,
         total: 0,
         data: [],
       });
 
-      expect(result).toEqual(baseConversations);
+      expect(result).toEqual(
+        conversationArray.reduce((acc: Record<string, Conversation>, conversation) => {
+          acc[conversation.id] = conversation;
+          return acc;
+        }, {})
+      );
     });
 
     it('should return user conversations when base conversations are empty', () => {
-      const result = mergeBaseWithPersistedConversations({}, conversationsData);
+      const result = formatPersistedConversations(conversationsData);
 
       expect(result).toEqual({
         conversation_1: {

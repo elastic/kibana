@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import {
   Conversation,
-  mergeBaseWithPersistedConversations,
+  formatPersistedConversations,
   useAssistantContext,
   useFetchCurrentUserConversations,
 } from '../../../../..';
@@ -51,14 +51,13 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     nameSpace,
     http,
     assistantAvailability: { isAssistantEnabled },
-    baseConversations,
     toasts,
   } = useAssistantContext();
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
+      formatPersistedConversations(conversationsData),
+    []
   );
 
   const { data: allPrompts, refetch: refetchPrompts, isFetched: promptsLoaded } = useFetchPrompts();

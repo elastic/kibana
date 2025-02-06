@@ -36,22 +36,22 @@ export const getMessageFromRawResponse = (
   }
 };
 
-export const mergeBaseWithPersistedConversations = (
-  baseConversations: Record<string, Conversation>,
+export const formatPersistedConversations = (
   conversationsData: FetchConversationsResponse
 ): Record<string, Conversation> => {
-  return [...(conversationsData?.data ?? []), ...Object.values(baseConversations)].reduce<
-    Record<string, Conversation>
-  >((transformed, conversation) => {
-    if (!isEmpty(conversation.id)) {
-      transformed[conversation.id] = conversation;
-    } else {
-      if (!some(Object.values(transformed), ['title', conversation.title])) {
-        transformed[conversation.title] = conversation;
+  return (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
+    (transformed, conversation) => {
+      if (!isEmpty(conversation.id)) {
+        transformed[conversation.id] = conversation;
+      } else {
+        if (!some(Object.values(transformed), ['title', conversation.title])) {
+          transformed[conversation.title] = conversation;
+        }
       }
-    }
-    return transformed;
-  }, {});
+      return transformed;
+    },
+    {}
+  );
 };
 /**
  * Returns a default connector if there is only one connector

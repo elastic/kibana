@@ -37,7 +37,7 @@ import { CONVERSATION_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_conte
 import { useSessionPagination } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { DEFAULT_PAGE_SIZE } from '../../settings/const';
 import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
-import { mergeBaseWithPersistedConversations } from '../../helpers';
+import { formatPersistedConversations } from '../../helpers';
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
 interface Props {
   connectors: AIConnector[] | undefined;
@@ -60,7 +60,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const {
     actionTypeRegistry,
     assistantAvailability: { isAssistantEnabled },
-    baseConversations,
     http,
     nameSpace,
     toasts,
@@ -68,8 +67,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
+      formatPersistedConversations(conversationsData),
+    []
   );
 
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();

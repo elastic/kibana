@@ -61,7 +61,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    baseConversations,
     getLastConversationId,
   } = useAssistantContext();
   const {
@@ -70,7 +69,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
     refetchCurrentUserConversations,
-  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({ http, isAssistantEnabled });
 
   const { currentConversation, handleOnConversationSelected } = useCurrentConversation({
     allSystemPrompts,
