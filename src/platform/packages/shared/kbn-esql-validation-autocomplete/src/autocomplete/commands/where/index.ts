@@ -25,7 +25,7 @@ import {
   getOperatorSuggestions,
   getSuggestionsAfterNot,
 } from '../../factories';
-import { getOverlapRange, getSuggestionsToRightOfOperatorExpression } from '../../helper';
+import { getSuggestionsToRightOfOperatorExpression } from '../../helper';
 import { getPosition } from './util';
 import { pipeCompleteItem } from '../../complete_items';
 import {
@@ -192,18 +192,6 @@ export async function suggest(
   if (getExpressionType(expressionRoot) === 'boolean') {
     suggestions.push(pipeCompleteItem);
   }
-
-  suggestions.forEach((s) => {
-    if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
-      // this suggestion has spaces in it (e.g. "IS NOT NULL")
-      // so we need to see if there's an overlap
-      const overlap = getOverlapRange(innerText, s.text);
-      if (overlap.start < overlap.end) {
-        // there's an overlap so use that
-        s.rangeToReplace = overlap;
-      }
-    }
-  });
 
   return suggestions;
 }

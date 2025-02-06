@@ -50,6 +50,18 @@ import { listCompleteItem } from './complete_items';
 import { removeMarkerArgFromArgsList } from '../shared/context';
 import { ESQLVariableType } from '../shared/types';
 
+/**
+ * This is a list of multi-word phrases that should be counted as a single ES|QL word
+ * when Monaco calculates prefix ranges for suggestions.
+ *
+ * For example, if the user types "... | WHERE field IS N/", Monaco should score
+ * suggestions against "IS N" instead of "N". It should replace the same range when a
+ * suggestion is accepted.
+ *
+ * See https://github.com/elastic/kibana/issues/209905 for more info.
+ */
+export const KEYWORDS_WITH_SPACES = ['IS NULL', 'IS NOT NULL', 'NULLS FIRST', 'NULLS LAST'];
+
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
 }
@@ -653,15 +665,6 @@ export async function getSuggestionsToRightOfOperatorExpression({
       }
     }
   }
-  return suggestions.map<SuggestionRawDefinition>((s) => {
-    const overlap = getOverlapRange(queryText, s.text);
-    const offset = overlap.start === overlap.end ? 1 : 0;
-    return {
-      ...s,
-      rangeToReplace: {
-        start: overlap.start + offset,
-        end: overlap.end + offset,
-      },
-    };
-  });
+
+  return suggestions;
 }
