@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from '../context/use_diagnostics';

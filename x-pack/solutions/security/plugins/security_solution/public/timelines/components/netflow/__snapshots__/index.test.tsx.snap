@@ -957,18 +957,14 @@ tr:hover .c3:focus::before {
                                                       class="c11"
                                                       data-test-subj="draggable-truncatable-content"
                                                     >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                                      <a
+                                                        class="euiLink emotion-euiLink-primary"
+                                                        data-test-subj="network-details"
+                                                        href="/ip/192.168.1.2/source/events"
+                                                        rel="noreferrer"
                                                       >
-                                                        <a
-                                                          class="euiLink emotion-euiLink-primary"
-                                                          data-test-subj="network-details"
-                                                          href="/ip/192.168.1.2/source/events"
-                                                          rel="noreferrer"
-                                                        >
-                                                          192.168.1.2
-                                                        </a>
-                                                      </span>
+                                                        192.168.1.2
+                                                      </a>
                                                     </span>
                                                   </div>
                                                 </div>
@@ -1699,18 +1695,14 @@ tr:hover .c3:focus::before {
                                                       class="c11"
                                                       data-test-subj="draggable-truncatable-content"
                                                     >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                                      <a
+                                                        class="euiLink emotion-euiLink-primary"
+                                                        data-test-subj="network-details"
+                                                        href="/ip/10.1.2.3/source/events"
+                                                        rel="noreferrer"
                                                       >
-                                                        <a
-                                                          class="euiLink emotion-euiLink-primary"
-                                                          data-test-subj="network-details"
-                                                          href="/ip/10.1.2.3/source/events"
-                                                          rel="noreferrer"
-                                                        >
-                                                          10.1.2.3
-                                                        </a>
-                                                      </span>
+                                                        10.1.2.3
+                                                      </a>
                                                     </span>
                                                   </div>
                                                 </div>

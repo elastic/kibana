@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import type { DraggableProvidedDragHandleProps } from '@elastic/eui';
 import {
   EuiText,
   EuiFlexGroup,
@@ -12,11 +13,10 @@ import {
   EuiIcon,
   EuiBadge,
   EuiPanel,
-  DraggableProvidedDragHandleProps,
   EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { Operation } from '.';
+import type { Operation } from '.';
 
 interface Props {
   id: string;

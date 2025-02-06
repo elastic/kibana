@@ -335,8 +335,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           flowSearch={integrationSearch}
           setSearchQuery={setIntegrationSearch}
           flowCategory={searchParams.get('category')}
-          customCards={customCards
-            ?.filter(
+          customCards={(customCards || [])
+            .filter(
               // Filter out collection cards and regular integrations that show up via search anyway
               (card) => card.type === 'virtual' && !card.isCollectionCard
             )

@@ -42,8 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/196866
-  describe.skip('discover esql view', function () {
+  describe('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);

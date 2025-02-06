@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import {
+import type {
   CategorizerStatus,
+  LogEntryCategoriesDatasetStats,
+} from '../../../../../common/http_api';
+import {
   getLatestLogEntryCategoryDatasetsStatsRequestPayloadRT,
   getLatestLogEntryCategoryDatasetsStatsSuccessResponsePayloadRT,
-  LogEntryCategoriesDatasetStats,
   LOG_ANALYSIS_GET_LATEST_LOG_ENTRY_CATEGORY_DATASETS_STATS_PATH,
 } from '../../../../../common/http_api';
 

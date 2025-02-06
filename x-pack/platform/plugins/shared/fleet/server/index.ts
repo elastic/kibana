@@ -40,6 +40,9 @@ export type { PackagePolicyClient } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 
+export { hasFleetServers } from './services/fleet_server';
+export { isAgentlessEnabled } from './services/utils/agentless';
+
 export type {
   FleetFromHostFileClientInterface,
   FleetToHostFileClientInterface,

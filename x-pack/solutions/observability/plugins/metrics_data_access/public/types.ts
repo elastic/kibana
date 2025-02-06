@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Search } from 'history';
+import type { Search } from 'history';
 import type { Plugin as PluginClass } from '@kbn/core/public';
 import type { MetricsDataClient } from './lib/metrics_client';
 import type { NodeMetricsTableProps } from './components/infrastructure_node_metrics_tables/shared';

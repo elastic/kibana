@@ -18,20 +18,19 @@ import { Route } from '@kbn/shared-ux-router';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
-import { DefaultTheme, ThemeProvider } from 'styled-components';
+import type { DefaultTheme } from 'styled-components';
+import { ThemeProvider } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { KibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import { ApmPluginContext } from '../../../context/apm_plugin/apm_plugin_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { BreadcrumbsContextProvider } from '../../../context/breadcrumbs/context';
 import { LicenseProvider } from '../../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
-import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { ApmErrorBoundary } from '../apm_error_boundary';
 import { apmRouter } from '../apm_route_config';
 import { TrackPageview } from '../track_pageview';

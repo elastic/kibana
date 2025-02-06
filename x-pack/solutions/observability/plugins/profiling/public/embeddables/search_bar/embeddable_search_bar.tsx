@@ -5,13 +5,11 @@
  * 2.0.
  */
 import { css } from '@emotion/react';
-import { EmbeddableProfilingSearchBarProps } from '@kbn/observability-shared-plugin/public';
+import type { EmbeddableProfilingSearchBarProps } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { ProfilingSearchBar } from '../../components/profiling_app_page_template/profiling_search_bar';
-import {
-  ProfilingEmbeddableProvider,
-  ProfilingEmbeddablesDependencies,
-} from '../profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import { ProfilingEmbeddableProvider } from '../profiling_embeddable_provider';
 
 export type EmbeddableSearchBarProps = EmbeddableProfilingSearchBarProps &
   ProfilingEmbeddablesDependencies;

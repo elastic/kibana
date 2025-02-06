@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { PackagePolicyVars, SettingsRow } from '../typings';
+import type { PackagePolicyVars, SettingsRow } from '../typings';
 import { FormRowSetting } from './form_row_setting';
 import { validateSettingValue } from './utils';
 

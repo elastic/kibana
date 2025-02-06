@@ -18,7 +18,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';

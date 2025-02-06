@@ -8,15 +8,13 @@
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { MetricsAPIResponse, MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
-import {
+import type {
   ESSearchClient,
-  CompositeResponseRT,
   MetricsESResponse,
-  AggregationResponseRT,
   AggregationResponse,
   CompositeResponse,
-  HistogramBucketRT,
 } from './types';
+import { CompositeResponseRT, AggregationResponseRT, HistogramBucketRT } from './types';
 import { EMPTY_RESPONSE } from './constants';
 import { createAggregations, createCompositeAggregations } from './lib/create_aggregations';
 import { convertBucketsToMetricsApiSeries } from './lib/convert_buckets_to_metrics_series';

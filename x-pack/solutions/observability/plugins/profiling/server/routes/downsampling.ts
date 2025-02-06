@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
-import { ProjectTimeQuery } from './query';
+import type { ProfilingESClient } from '../utils/create_profiling_es_client';
+import type { ProjectTimeQuery } from './query';
 
 export interface DownsampledEventsIndex {
   name: string;

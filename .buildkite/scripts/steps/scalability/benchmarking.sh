@@ -36,7 +36,6 @@ download_artifacts() {
   tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/kibana-default.tar.gz" -C "$KIBANA_BUILD_LOCATION" --strip=1
 
   cd "$KIBANA_DIR"
-  tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/kibana-default-plugins.tar.gz"
   tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/scalability_traces.tar.gz"
 }
 

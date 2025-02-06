@@ -6,7 +6,7 @@
  */
 import React, { createContext, useContext, type ReactChild } from 'react';
 import { Subject } from 'rxjs';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ENTITIES_LATEST_ALIAS } from '../../../common/entities';
 import { useAdHocDataView } from '../../hooks/use_adhoc_data_view';
 

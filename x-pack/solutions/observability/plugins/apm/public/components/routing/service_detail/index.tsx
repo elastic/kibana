@@ -27,7 +27,7 @@ import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
-import { SearchBar } from '../../shared/search_bar/search_bar';
+import type { SearchBar } from '../../shared/search_bar/search_bar';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
 import { ErrorGroupDetails } from '../../app/error_group_details';

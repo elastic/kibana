@@ -7,7 +7,7 @@
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { MergedServiceDashboard } from '..';
+import type { MergedServiceDashboard } from '..';
 import { SaveDashboardModal } from './save_dashboard_modal';
 
 export function LinkDashboard({

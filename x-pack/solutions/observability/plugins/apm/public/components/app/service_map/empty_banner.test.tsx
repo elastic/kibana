@@ -7,7 +7,8 @@
 
 import { act, waitFor } from '@testing-library/react';
 import cytoscape from 'cytoscape';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { renderWithTheme } from '../../../utils/test_helpers';

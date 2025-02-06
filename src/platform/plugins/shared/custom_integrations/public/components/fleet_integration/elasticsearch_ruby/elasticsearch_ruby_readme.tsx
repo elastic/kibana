@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import {

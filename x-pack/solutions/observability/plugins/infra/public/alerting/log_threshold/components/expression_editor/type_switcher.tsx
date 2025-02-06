@@ -8,11 +8,11 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiPopover, EuiSelect, EuiExpression } from '@elastic/eui';
-import {
+import type {
   PartialCriteria,
   ThresholdType,
-  isRatioRule,
 } from '../../../../../common/alerting/logs/log_threshold/types';
+import { isRatioRule } from '../../../../../common/alerting/logs/log_threshold/types';
 import { ExpressionLike } from './editor';
 
 const typePrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypePrefix', {

@@ -12,6 +12,7 @@ import { assetCriticalityServiceMock } from '../asset_criticality/asset_critical
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 import { mockGlobalState } from '../../../../public/common/mock';
+import { EntityType } from '../../../../common/search_strategy';
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
@@ -78,7 +79,7 @@ describe('calculateRiskScores()', () => {
       });
 
       it('creates an aggregation per specified identifierType', async () => {
-        params = { ...params, identifierType: 'host' };
+        params = { ...params, identifierType: EntityType.host };
         await calculateRiskScores(params);
         const [[call]] = (esClient.search as jest.Mock).mock.calls;
         expect(call).toEqual(
@@ -163,7 +164,7 @@ describe('calculateRiskScores()', () => {
       expect(response).toHaveProperty('scores');
       expect(response.scores.host).toHaveLength(2);
       expect(response.scores.user).toHaveLength(2);
-      expect(response.scores.service).toHaveLength(0);
+      expect(response.scores.service).toHaveLength(2);
     });
 
     it('calculates risk score for service when the experimental flag is enabled', async () => {

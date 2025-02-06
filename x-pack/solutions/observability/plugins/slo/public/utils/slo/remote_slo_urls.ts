@@ -6,59 +6,72 @@
  */
 
 import { encode } from '@kbn/rison';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import path from 'path';
 import { paths } from '../../../common/locators/paths';
+
+function createBaseRemoteSloDetailsUrl(
+  slo: SLOWithSummaryResponse,
+  spaceId: string = 'default'
+): URL | undefined {
+  if (!slo.remote || slo.remote.kibanaUrl === '') {
+    return undefined;
+  }
+
+  const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const detailsPath = paths.sloDetails(slo.id, slo.instanceId);
+
+  const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
+  return remoteUrl;
+}
 
 export function createRemoteSloDetailsUrl(
   slo: SLOWithSummaryResponse,
   spaceId: string = 'default'
 ) {
-  if (!slo.remote || slo.remote.kibanaUrl === '') {
-    return undefined;
-  }
-
-  const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const detailsPath = paths.sloDetails(
-    slo.id,
-    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-  );
-
-  const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
-  return remoteUrl.toString();
+  return createBaseRemoteSloDetailsUrl(slo, spaceId)?.toString();
 }
 
 export function createRemoteSloDeleteUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
-  if (!slo.remote || slo.remote.kibanaUrl === '') {
+  const remoteUrl = createBaseRemoteSloDetailsUrl(slo, spaceId);
+  if (!remoteUrl) {
     return undefined;
   }
 
-  const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const detailsPath = paths.sloDetails(
-    slo.id,
-    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-  );
-
-  const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
   remoteUrl.searchParams.append('delete', 'true');
-
   return remoteUrl.toString();
 }
 
 export function createRemoteSloResetUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
-  if (!slo.remote || slo.remote.kibanaUrl === '') {
+  const remoteUrl = createBaseRemoteSloDetailsUrl(slo, spaceId);
+  if (!remoteUrl) {
     return undefined;
   }
 
-  const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const detailsPath = paths.sloDetails(
-    slo.id,
-    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-  );
-
-  const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
   remoteUrl.searchParams.append('reset', 'true');
+  return remoteUrl.toString();
+}
 
+export function createRemoteSloEnableUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
+  const remoteUrl = createBaseRemoteSloDetailsUrl(slo, spaceId);
+  if (!remoteUrl) {
+    return undefined;
+  }
+
+  remoteUrl.searchParams.append('enable', 'true');
+  return remoteUrl.toString();
+}
+
+export function createRemoteSloDisableUrl(
+  slo: SLOWithSummaryResponse,
+  spaceId: string = 'default'
+) {
+  const remoteUrl = createBaseRemoteSloDetailsUrl(slo, spaceId);
+  if (!remoteUrl) {
+    return undefined;
+  }
+
+  remoteUrl.searchParams.append('disable', 'true');
   return remoteUrl.toString();
 }
 

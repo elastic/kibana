@@ -6,18 +6,17 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
+import type {
   EuiBasicTableColumn,
   CriteriaWithPagination,
   EuiTableSelectionType,
-  EuiText,
-  EuiLink,
 } from '@elastic/eui';
+import { EuiText, EuiLink } from '@elastic/eui';
 import createContainer from 'constate';
 import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
-import { CloudProvider } from '@kbn/custom-icons';
+import type { CloudProvider } from '@kbn/custom-icons';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
@@ -33,7 +32,8 @@ import type {
   InfraAssetMetricsItem,
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
-import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
+import type { Sorting } from './use_hosts_table_url_state';
+import { useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { ColumnHeader } from '../components/table/column_header';

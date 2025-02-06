@@ -6,10 +6,10 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, EsVersion } from '@kbn/test';
 import path from 'node:path';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/api_integration/config')
@@ -17,6 +17,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
+
+  const esVersion = EsVersion.getDefault();
+  const willRunEsv9 = esVersion.matchRange('9');
+
+  let esTestCluster = {
+    ...xPackFunctionalTestsConfig.get('esTestCluster'),
+    dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
+  };
+  if (willRunEsv9) {
+    log.info(`Detected ES version ${esVersion}; not loading data archive`);
+    esTestCluster = undefined;
+  }
 
   return {
     testFiles: [require.resolve('./upgrade_assistant')],
@@ -36,9 +48,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${path.resolve(__dirname, '../../../examples/developer_examples')}`,
       ],
     },
-    esTestCluster: {
-      ...xPackFunctionalTestsConfig.get('esTestCluster'),
-      dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
-    },
+    esTestCluster,
   };
 }

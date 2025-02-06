@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 export enum INSTRUCTION_VARIANT {
   NODE = 'node',

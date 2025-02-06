@@ -20,8 +20,8 @@ import { listCustomLinks } from './list_custom_links';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { CustomLink } from '../../../../common/custom_link/custom_link_types';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { CustomLink } from '../../../../common/custom_link/custom_link_types';
 
 const customLinkTransactionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/custom_links/transaction',

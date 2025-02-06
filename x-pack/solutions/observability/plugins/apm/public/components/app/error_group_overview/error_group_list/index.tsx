@@ -8,9 +8,10 @@
 import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
-import { isPending } from '../../../../hooks/use_fetcher';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -19,15 +20,12 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import {
-  ITableColumn,
-  ManagedTable,
-  TableOptions,
-  TableSearchBar,
-} from '../../../shared/managed_table';
+import type { ITableColumn, TableOptions, TableSearchBar } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { ErrorGroupItem, useErrorGroupListData } from './use_error_group_list_data';
+import type { ErrorGroupItem } from './use_error_group_list_data';
+import { useErrorGroupListData } from './use_error_group_list_data';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
@@ -58,6 +56,7 @@ interface Props {
   comparisonEnabled?: boolean;
   saveTableOptionsToUrl?: boolean;
   showPerPageOptions?: boolean;
+  onLoadTable?: () => void;
 }
 
 const defaultSorting = {
@@ -72,6 +71,7 @@ export function ErrorGroupList({
   comparisonEnabled,
   saveTableOptionsToUrl,
   showPerPageOptions = true,
+  onLoadTable,
 }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -82,10 +82,10 @@ export function ErrorGroupList({
 
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
 
-  const { offset } = query;
+  const { offset, rangeFrom, rangeTo } = query;
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
-
+  const hasTableLoaded = useRef(false);
   const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
 
   const {
@@ -98,6 +98,36 @@ export function ErrorGroupList({
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
   const isDetailedStatsLoading = isPending(detailedStatisticsStatus);
+  const { onPageReady } = usePerformanceContext();
+
+  useEffect(() => {
+    // this component is used both for the service overview tab and the errors tab,
+    // onLoadTable will be defined if it's the service overview tab
+    if (
+      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      !hasTableLoaded.current
+    ) {
+      if (onLoadTable) {
+        onLoadTable();
+      } else {
+        onPageReady({
+          meta: {
+            rangeFrom,
+            rangeTo,
+          },
+        });
+      }
+      hasTableLoaded.current = true;
+    }
+  }, [
+    mainStatisticsStatus,
+    detailedStatisticsStatus,
+    onLoadTable,
+    rangeFrom,
+    rangeTo,
+    onPageReady,
+  ]);
 
   const columns = useMemo(() => {
     const groupIdColumn: ITableColumn<ErrorGroupItem> = {

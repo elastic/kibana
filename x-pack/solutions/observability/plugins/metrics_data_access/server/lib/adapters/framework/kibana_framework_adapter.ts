@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportRequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { TransportRequestParams } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   CoreSetup,
   IRouter,
   RequestHandler,
@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type { MetricsDataPluginStartDeps } from '../../../types';
-import {
+import type {
   CallWithRequestParams,
   InfraDatabaseGetIndicesAliasResponse,
   InfraDatabaseGetIndicesResponse,
@@ -76,15 +76,14 @@ export class KibanaFramework {
   public registerVersionedRoute<Method extends RouteMethod = any>(
     config: InfraVersionedRouteConfig<Method>
   ) {
-    const defaultOptions = {
-      tags: ['access:infra'],
-    };
     const routeConfig = {
       access: config.access,
       path: config.path,
-      // Currently we have no use of custom options beyond tags, this can be extended
-      // beyond defaultOptions if it's needed.
-      options: defaultOptions,
+      security: {
+        authz: {
+          requiredPrivileges: ['infra'],
+        },
+      },
     };
     switch (config.method) {
       case 'get':

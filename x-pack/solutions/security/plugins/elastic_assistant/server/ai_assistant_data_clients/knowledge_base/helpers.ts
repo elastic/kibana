@@ -6,12 +6,16 @@
  */
 
 import { z } from '@kbn/zod';
-import { get } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AuthenticatedUser } from '@kbn/core-security-common';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import {
+  contentReferenceBlock,
+  ContentReferencesStore,
+  esqlQueryReference,
+  IndexEntry,
+} from '@kbn/elastic-assistant-common';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export const isModelAlreadyExistsError = (error: Error) => {
@@ -139,13 +143,13 @@ export const getKBVectorSearchQuery = ({
 export const getStructuredToolForIndexEntry = ({
   indexEntry,
   esClient,
+  contentReferencesStore,
   logger,
-  elserId,
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
+  contentReferencesStore: ContentReferencesStore | false;
   logger: Logger;
-  elserId: string;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
     const fieldType =
@@ -160,7 +164,11 @@ export const getStructuredToolForIndexEntry = ({
   }, {});
 
   return new DynamicStructuredTool({
-    name: indexEntry.name.replace(/[^a-zA-Z0-9-]/g, ''), // // Tool names expects a string that matches the pattern '^[a-zA-Z0-9-]+$'
+    name: indexEntry.name
+      // Replace invalid characters with an empty string
+      .replace(/[^a-zA-Z0-9_]/g, '')
+      // Ensure it starts with a letter. If not, prepend 'a'
+      .replace(/^[^a-zA-Z]/, 'a'),
     description: indexEntry.description,
     schema: z.object({
       query: z.string().describe(indexEntry.queryDescription),
@@ -182,26 +190,25 @@ export const getStructuredToolForIndexEntry = ({
       const params: SearchRequest = {
         index: indexEntry.index,
         size: 10,
-        retriever: {
-          standard: {
-            query: {
-              nested: {
-                path: `${indexEntry.field}.inference.chunks`,
-                query: {
-                  sparse_vector: {
-                    inference_id: elserId,
-                    field: `${indexEntry.field}.inference.chunks.embeddings`,
-                    query: input.query,
-                  },
-                },
-                inner_hits: {
-                  size: 2,
-                  name: `${indexEntry.name}.${indexEntry.field}`,
-                  _source: [`${indexEntry.field}.inference.chunks.text`],
+        query: {
+          bool: {
+            must: [
+              {
+                semantic: {
+                  field: indexEntry.field,
+                  query: input.query,
                 },
               },
-            },
+            ],
             filter,
+          },
+        },
+        highlight: {
+          fields: {
+            [indexEntry.field]: {
+              type: 'semantic',
+              number_of_fragments: 2,
+            },
           },
         },
       };
@@ -210,25 +217,27 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
-          if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
-            return indexEntry.outputFields.reduce((prev, field) => {
-              // @ts-expect-error
-              return { ...prev, [field]: hit._source[field] };
-            }, {});
-          }
+          const esqlQuery = `FROM ${hit._index} ${
+            hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''
+          }`;
 
-          // We want to send relevant inner hits (chunks) to the LLM as a context
-          const innerHitPath = `${indexEntry.name}.${indexEntry.field}`;
-          if (hit.inner_hits?.[innerHitPath]) {
-            return {
-              text: hit.inner_hits[innerHitPath].hits.hits
-                .map((innerHit) => innerHit._source.text)
-                .join('\n --- \n'),
-            };
+          const reference =
+            contentReferencesStore &&
+            contentReferencesStore.add((p) => esqlQueryReference(p.id, esqlQuery, hit._index));
+
+          if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
+            return indexEntry.outputFields.reduce(
+              (prev, field) => {
+                // @ts-expect-error
+                return { ...prev, [field]: hit._source[field] };
+              },
+              reference ? { citation: contentReferenceBlock(reference) } : {}
+            );
           }
 
           return {
-            text: get(hit._source, `${indexEntry.field}.inference.chunks[0].text`),
+            text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
+            ...(reference ? { citation: contentReferenceBlock(reference) } : {}),
           };
         });
 
@@ -238,7 +247,7 @@ export const getStructuredToolForIndexEntry = ({
 
         return `###\nBelow are all relevant documents in JSON format:\n${JSON.stringify(
           kbDocs
-        )}\n###`;
+        )}###`;
       } catch (e) {
         logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
         return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;

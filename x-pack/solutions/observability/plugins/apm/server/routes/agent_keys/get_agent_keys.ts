@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApiKey } from '@kbn/security-plugin-types-common';
-import { ApmPluginRequestHandlerContext } from '../typings';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 
 export interface AgentKeysResponse {
   agentKeys: ApiKey[];

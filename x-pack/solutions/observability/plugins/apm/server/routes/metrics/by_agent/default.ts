@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APMConfig } from '../../..';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../..';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';

@@ -9,7 +9,7 @@
 
 import { isPlainObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import type { MappingProperty as EsMappingProperty } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingProperty as EsMappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsFieldMapping,

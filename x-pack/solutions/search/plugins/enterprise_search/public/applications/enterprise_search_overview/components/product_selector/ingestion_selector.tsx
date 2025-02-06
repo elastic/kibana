@@ -13,6 +13,7 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -46,9 +47,19 @@ export const IngestionSelector: React.FC = () => {
     application: { navigateToApp },
     config,
     productFeatures,
+    uiActions,
   } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const crawlerDisabled = Boolean(errorConnectingMessage || !config.host);
+
+  const showFileUploadFlyout = React.useCallback(() => {
+    if (uiActions !== null) {
+      uiActions.getTrigger(OPEN_FILE_UPLOAD_LITE_TRIGGER).exec({
+        autoAddInference: '.elser-2-elasticsearch',
+      });
+    }
+  }, [uiActions]);
+
   return (
     <>
       <EuiFlexGroup>
@@ -187,7 +198,7 @@ export const IngestionSelector: React.FC = () => {
                 defaultMessage: 'Choose a file',
               }
             )}
-            onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
+            onClick={() => showFileUploadFlyout()}
           />
         </EuiFlexItem>
         <EuiFlexItem>

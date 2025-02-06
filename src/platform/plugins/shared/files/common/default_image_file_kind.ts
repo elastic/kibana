@@ -12,6 +12,7 @@ import { FileKindBase } from '@kbn/shared-ux-file-types';
 export const id = 'defaultImage' as const;
 export const tag = 'files:defaultImage' as const;
 export const tags = [`access:${tag}`];
+export const requiredPrivileges = [tag];
 export const maxSize = 1024 * 1024 * 10;
 
 export const kind: FileKindBase = {

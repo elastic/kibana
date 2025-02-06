@@ -455,7 +455,7 @@ describe('Index Templates tab', () => {
           `${API_BASE_PATH}/delete_index_templates`,
           expect.objectContaining({
             body: JSON.stringify({
-              templates: [{ name: templates[0].name, isLegacy }],
+              templates: [{ name: templates[0].name, isLegacy, type: 'default' }],
             }),
           })
         );
@@ -518,7 +518,7 @@ describe('Index Templates tab', () => {
           `${API_BASE_PATH}/delete_index_templates`,
           expect.objectContaining({
             body: JSON.stringify({
-              templates: [{ name: templates[0].name, isLegacy: false }],
+              templates: [{ name: templates[0].name, isLegacy: false, type: 'default' }],
             }),
           })
         );

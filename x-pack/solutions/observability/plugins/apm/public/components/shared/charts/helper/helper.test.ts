@@ -6,8 +6,8 @@
  */
 
 import { onBrushEnd, isTimeseriesEmpty } from './helper';
-import { History } from 'history';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import type { History } from 'history';
+import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 
 describe('Chart helper', () => {
   describe('onBrushEnd', () => {

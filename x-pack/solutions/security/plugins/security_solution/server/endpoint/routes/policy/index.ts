@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
@@ -22,7 +24,8 @@ export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
 export function registerPolicyRoutes(
   router: SecuritySolutionPluginRouter,
-  endpointAppContext: EndpointAppContext
+  endpointAppContext: EndpointAppContext,
+  docLinks: DocLinksServiceSetup
 ) {
   const logger = endpointAppContext.logFactory.get('endpointPolicy');
 
@@ -67,6 +70,24 @@ export function registerPolicyRoutes(
         version: '2023-10-31',
         validate: {
           request: GetAgentPolicySummaryRequestSchema,
+        },
+        options: {
+          deprecated: {
+            documentationUrl:
+              docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
+            severity: 'critical',
+            message: i18n.translate(
+              'xpack.securitySolution.deprecations.endpoint.agent_policy_summary',
+              {
+                defaultMessage:
+                  'The "{path}" URL is deprecated and will be removed in the next major version.',
+                values: { path: AGENT_POLICY_SUMMARY_ROUTE },
+              }
+            ),
+            reason: {
+              type: 'remove',
+            },
+          },
         },
       },
       withEndpointAuthz(

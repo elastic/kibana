@@ -8,7 +8,7 @@
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
+import type { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { Documentation } from './documentation';
 
 interface InputField {

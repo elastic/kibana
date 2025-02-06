@@ -23,14 +23,26 @@ interface MessageBase<TRole extends MessageRole> {
   role: TRole;
 }
 
+export interface MessageContentText {
+  type: 'text';
+  text: string;
+}
+
+export interface MessageContentImage {
+  type: 'image';
+  source: { data: string; mimeType: string };
+}
+
+export type MessageContent = string | Array<MessageContentText | MessageContentImage>;
+
 /**
  * Represents a message from the user.
  */
 export type UserMessage = MessageBase<MessageRole.User> & {
   /**
-   * The text content of the user message
+   * The text or image content of the user message
    */
-  content: string;
+  content: MessageContent;
 };
 
 /**
@@ -57,7 +69,7 @@ export type ToolMessage<
   TToolResponse extends Record<string, any> | unknown = Record<string, any> | unknown,
   TToolData extends Record<string, any> | undefined = Record<string, any> | undefined
 > = MessageBase<MessageRole.Tool> & {
-  /*
+  /**
    * The name of the tool called. Used for refining the type of the response.
    */
   name: TName;

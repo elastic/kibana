@@ -6,8 +6,8 @@
  */
 
 import { mergeEntities } from './merge_entities';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { EntityLatestServiceRaw } from '../types';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { EntityLatestServiceRaw } from '../types';
 
 describe('mergeEntities', () => {
   it('modifies one service', () => {
@@ -297,6 +297,29 @@ describe('mergeEntities', () => {
         agentName: 'nodejs' as AgentName,
         dataStreamTypes: ['metrics', 'logs'],
         environments: ['test'],
+        lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
+        serviceName: 'service-1',
+      },
+    ]);
+  });
+  it('has a single data stream type and no environment', () => {
+    const entities: EntityLatestServiceRaw[] = [
+      {
+        'data_stream.type': 'logs',
+        'agent.name': ['nodejs', 'nodejs'],
+        'entity.last_seen_timestamp': '2024-12-13T14:52:35.461Z',
+        'service.name': 'service-1',
+        'entity.type': 'built_in_services_from_ecs_data',
+        'entity.id': 'service-1:test',
+        'entity.display_name': 'service-1',
+      },
+    ];
+    const result = mergeEntities({ entities });
+    expect(result).toEqual([
+      {
+        agentName: 'nodejs' as AgentName,
+        dataStreamTypes: ['logs'],
+        environments: [],
         lastSeenTimestamp: '2024-12-13T14:52:35.461Z',
         serviceName: 'service-1',
       },

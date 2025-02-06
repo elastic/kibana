@@ -6,7 +6,8 @@
  */
 import React from 'react';
 
-import { Chart, Partition, PartitionLayout, Datum, PartialTheme, Settings } from '@elastic/charts';
+import type { Datum, PartialTheme } from '@elastic/charts';
+import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 
 import {
   EuiFlexItem,

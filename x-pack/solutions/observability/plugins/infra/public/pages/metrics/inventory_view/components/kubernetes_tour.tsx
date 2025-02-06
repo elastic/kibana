@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTourStep, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
-import { TimeUnitChar } from '@kbn/observability-plugin/common';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../../common/alerting/metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
+import type { CustomEquationEditorProps } from './custom_equation_editor';
+import { CustomEquationEditor } from './custom_equation_editor';
 import { aggregationType } from '../expression_row';
-import { MetricExpression } from '../../types';
+import type { MetricExpression } from '../../types';
 import { validateMetricThreshold } from '../validation';
 
 export default {

@@ -7,13 +7,13 @@
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
-import { IdFormatByJobType } from '../../../../common/http_api/latest';
+import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { IdFormatByJobType } from '../../../../common/http_api/latest';
 import { useTrackedPromise, CanceledPromiseError } from '../../../hooks/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
-import { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api';
-import {
+import type { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api';
+import type {
   AnomaliesSort,
   Pagination,
   PaginationCursor,

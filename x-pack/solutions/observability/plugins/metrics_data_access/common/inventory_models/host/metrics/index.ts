@@ -6,7 +6,7 @@
  */
 import { snapshot } from './snapshot';
 import { tsvb } from './tsvb';
-import { InventoryMetricsWithCharts } from '../../types';
+import type { InventoryMetricsWithCharts } from '../../types';
 import type { HostFormulas } from './formulas';
 import type { HostCharts } from './charts';
 

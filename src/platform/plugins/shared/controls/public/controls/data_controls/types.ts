@@ -12,7 +12,7 @@ import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import {
   HasEditCapabilities,
   PublishesDataViews,
-  PublishesPanelTitle,
+  PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
@@ -29,7 +29,7 @@ export interface PublishesField {
 }
 
 export type DataControlApi = DefaultControlApi &
-  Omit<PublishesPanelTitle, 'hidePanelTitle'> & // control titles cannot be hidden
+  Omit<PublishesTitle, 'hideTitle$'> & // control titles cannot be hidden
   HasEditCapabilities &
   PublishesDataViews &
   PublishesField &

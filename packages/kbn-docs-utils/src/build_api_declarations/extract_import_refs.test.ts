@@ -109,14 +109,14 @@ it('test extractImportReference with unknown imports', () => {
 
 it('test full file imports with no matching plugin', () => {
   const refs = extractImportReferences(
-    `typeof import("${REPO_ROOT}/src/plugins/data/common/es_query/kuery/node_types/function")`,
+    `typeof import("${REPO_ROOT}/src/platform/plugins/shared/data/common/es_query/kuery/node_types/function")`,
     plugins,
     log
   );
   expect(refs).toMatchInlineSnapshot(`
     Array [
       "typeof ",
-      "src/plugins/data/common/es_query/kuery/node_types/function",
+      "src/platform/plugins/shared/data/common/es_query/kuery/node_types/function",
     ]
   `);
   expect(refs.length).toBe(2);

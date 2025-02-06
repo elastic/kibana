@@ -9,101 +9,54 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { RequestStatus } from '@kbn/inspector-plugin/public';
-import type { Observable } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import {
+import type {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
-  UnifiedHistogramFetchStatus,
-  UnifiedHistogramHitsContext,
-  UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
-  UnifiedHistogramInputMessage,
   UnifiedHistogramVisContext,
 } from '../types';
-import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';
-import { useStableCallback } from '../hooks/use_stable_callback';
-import { useLensProps } from './hooks/use_lens_props';
+import type { LensProps } from './hooks/use_lens_props';
 
 export interface HistogramProps {
   abortController?: AbortController;
   services: UnifiedHistogramServices;
   dataView: DataView;
-  request?: UnifiedHistogramRequestContext;
-  hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
+  bucketInterval?: UnifiedHistogramBucketInterval;
   isPlainRecord?: boolean;
-  hasLensSuggestions: boolean;
   getTimeRange: () => TimeRange;
-  refetch$: Observable<UnifiedHistogramInputMessage>;
+  requestData: string;
+  lensProps: LensProps;
   visContext: UnifiedHistogramVisContext;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
-  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
-  onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
 
-const computeTotalHits = (
-  hasLensSuggestions: boolean,
-  adapterTables:
-    | {
-        [key: string]: Datatable;
-      }
-    | undefined,
-  isPlainRecord?: boolean
-) => {
-  if (isPlainRecord && hasLensSuggestions) {
-    return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
-  } else if (isPlainRecord && !hasLensSuggestions) {
-    // ES|QL histogram case
-    const rows = Object.values(adapterTables ?? {})?.[0]?.rows;
-    if (!rows) {
-      return undefined;
-    }
-    let rowsCount = 0;
-    rows.forEach((r) => {
-      rowsCount += r.results;
-    });
-    return rowsCount;
-  } else {
-    return adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
-  }
-};
-
 export function Histogram({
-  services: { data, lens, uiSettings },
+  services: { lens, uiSettings },
   dataView,
-  request,
-  hits,
   chart: { timeInterval },
+  bucketInterval,
   isPlainRecord,
-  hasLensSuggestions,
   getTimeRange,
-  refetch$,
+  requestData,
+  lensProps,
   visContext,
   disableTriggers,
   disabledActions,
-  onTotalHitsChange,
-  onChartLoad,
   onFilter,
   onBrushEnd,
   withDefaultActions,
   abortController,
 }: HistogramProps) {
-  const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
@@ -113,63 +66,8 @@ export function Histogram({
     timeField: dataView.timeFieldName,
   });
   const { attributes } = visContext;
-
-  const onLoad = useStableCallback(
-    (
-      isLoading: boolean,
-      adapters: Partial<DefaultInspectorAdapters> | undefined,
-      dataLoading$?: PublishingSubject<boolean | undefined>
-    ) => {
-      const lensRequest = adapters?.requests?.getRequests()[0];
-      const requestFailed = lensRequest?.status === RequestStatus.ERROR;
-      const json = lensRequest?.response?.json as
-        | IKibanaSearchResponse<estypes.SearchResponse>
-        | undefined;
-      const response = json?.rawResponse;
-
-      if (requestFailed) {
-        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
-        onChartLoad?.({ adapters: adapters ?? {} });
-        return;
-      }
-
-      const adapterTables = adapters?.tables?.tables;
-      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
-
-      if (response?._shards?.failed || response?.timed_out) {
-        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
-      } else {
-        onTotalHitsChange?.(
-          isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-          totalHits ?? hits?.total
-        );
-      }
-
-      if (response) {
-        const newBucketInterval = buildBucketInterval({
-          data,
-          dataView,
-          timeInterval,
-          timeRange: getTimeRange(),
-          response,
-        });
-
-        setBucketInterval(newBucketInterval);
-      }
-
-      onChartLoad?.({ adapters: adapters ?? {}, dataLoading$ });
-    }
-  );
-
-  const { lensProps, requestData } = useLensProps({
-    request,
-    getTimeRange,
-    refetch$,
-    visContext,
-    onLoad,
-  });
-
   const { euiTheme } = useEuiTheme();
+
   const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
   0 1px 5px -2px ${euiTheme.colors.mediumShade}`;
   const chartCss = css`

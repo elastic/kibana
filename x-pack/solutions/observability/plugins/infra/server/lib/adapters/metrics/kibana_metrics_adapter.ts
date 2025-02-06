@@ -6,22 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { flatten, get } from 'lodash';
 import { isVisSeriesData } from '@kbn/vis-type-timeseries-plugin/server';
 import { metrics, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import {
+import type {
   TSVBMetricModelCreator,
   InventoryMetric,
-  InventoryMetricRT,
 } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryMetricRT } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
-import { KibanaFramework } from '../framework/kibana_framework_adapter';
-import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
+import type { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
+import type { KibanaFramework } from '../framework/kibana_framework_adapter';
+import type { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
-import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
+import type { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {

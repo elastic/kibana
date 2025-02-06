@@ -15,7 +15,8 @@ import {
 import type { APMServerRouteRepository } from '../../server';
 
 import type { APMClient, APMClientOptions } from '../services/rest/create_call_apm_api';
-import { FetcherResult, FETCH_STATUS, useFetcher } from './use_fetcher';
+import type { FetcherResult } from './use_fetcher';
+import { FETCH_STATUS, useFetcher } from './use_fetcher';
 
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<
   {
@@ -96,6 +97,7 @@ export function useProgressiveFetcher<TReturn>(
       return callback(clientWithProbability(regularCallApmApi, sampledProbability));
     },
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies,
     options
   );
@@ -105,6 +107,7 @@ export function useProgressiveFetcher<TReturn>(
       return callback(clientWithProbability(regularCallApmApi, 1));
     },
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies
   );
 

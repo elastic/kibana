@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { useTheme } from '../../../../hooks/use_theme';
-import { Mark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks';
-import { PlotValues } from './plot_utils';
+import type { Mark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks';
+import type { PlotValues } from './plot_utils';
 
 interface VerticalLinesProps {
   marks?: Mark[];

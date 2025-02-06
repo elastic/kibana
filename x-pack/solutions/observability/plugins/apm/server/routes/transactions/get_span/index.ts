@@ -8,15 +8,15 @@
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
 import { merge, omit } from 'lodash';
 import { maybe } from '../../../../common/utils/maybe';
 import { SPAN_ID, SPAN_STACKTRACE, TRACE_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../get_transaction';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 
 export async function getSpan({
   spanId,

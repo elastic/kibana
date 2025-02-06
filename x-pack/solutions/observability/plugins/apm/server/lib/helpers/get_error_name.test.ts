@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
+import type { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { getErrorName } from './get_error_name';
 

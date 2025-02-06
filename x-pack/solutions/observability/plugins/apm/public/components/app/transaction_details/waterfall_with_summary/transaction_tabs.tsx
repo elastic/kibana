@@ -9,10 +9,10 @@ import { EuiSpacer, EuiTab, EuiTabs, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
-import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export enum TransactionTab {
   timeline = 'timeline',

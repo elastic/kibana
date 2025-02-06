@@ -12,7 +12,7 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { CriticalPathFlamegraph } from '../../shared/critical_path_flamegraph';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
-import { TabContentProps } from './transaction_details_tabs';
+import type { TabContentProps } from './transaction_details_tabs';
 
 function TransactionDetailAggregatedCriticalPath({ traceSamplesFetchResult }: TabContentProps) {
   const {

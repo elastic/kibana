@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ConnectionStatsItemWithImpact } from '../../../common/connections';
+import type { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 interface Options {
   apmEventClient: APMEventClient;

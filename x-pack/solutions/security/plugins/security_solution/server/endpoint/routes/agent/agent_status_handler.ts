@@ -74,7 +74,10 @@ export const getAgentStatusRouteHandler = (
       (agentType === 'sentinel_one' &&
         !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
       (agentType === 'crowdstrike' &&
-        !endpointContext.experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
+        !endpointContext.experimentalFeatures
+          .responseActionsCrowdstrikeManualHostIsolationEnabled) ||
+      (agentType === 'microsoft_defender_endpoint' &&
+        !endpointContext.experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
     ) {
       return errorHandler(
         logger,

@@ -13,7 +13,7 @@ import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import type { ContainerMetricsTableProps } from './container_metrics_table';
 import { ContainerMetricsTable } from './container_metrics_table';
-import { ContainerNodeMetricsRow } from './use_container_metrics_table';
+import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 const mockServices = {
   application: {

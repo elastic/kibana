@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Environment } from '../../common/environment_rt';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { Environment } from '../../common/environment_rt';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { APMServiceDetailLocator, APM_APP_LOCATOR_ID } from './service_detail_locator';
 import {
   enableComparisonByDefault,

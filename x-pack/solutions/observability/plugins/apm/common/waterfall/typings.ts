@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Exception } from '../../typings/es_schemas/raw/error_raw';
-import { EventOutcome } from '../../typings/es_schemas/raw/fields/event_outcome';
-import { SpanLink } from '../../typings/es_schemas/raw/fields/span_links';
-import { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
-import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
+import type { Exception } from '../../typings/es_schemas/raw/error_raw';
+import type { EventOutcome } from '../../typings/es_schemas/raw/fields/event_outcome';
+import type { SpanLink } from '../../typings/es_schemas/raw/fields/span_links';
+import type { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
+import type { AgentName } from '../../typings/es_schemas/ui/fields/agent';
 
 export interface WaterfallTransaction {
   timestamp: TimestampUs;

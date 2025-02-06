@@ -6,11 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ReservedPrivilegesSet, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import { RouteOptions } from '.';
-import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { CloudDataAttributes } from './types';
+import { persistTokenCloudData } from '../cloud_data';
 
 const createBodySchemaV1 = schema.object({
   onboardingData: schema.object({
@@ -50,40 +49,15 @@ export const setPostCloudSolutionDataRoute = ({ router }: RouteOptions) => {
         const savedObjectsClient = coreContext.savedObjects.getClient({
           includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
         });
-        let cloudDataSo = null;
-        try {
-          cloudDataSo = await savedObjectsClient.get<CloudDataAttributes>(
-            CLOUD_DATA_SAVED_OBJECT_TYPE,
-            CLOUD_DATA_SAVED_OBJECT_ID
-          );
-        } catch (error) {
-          if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            cloudDataSo = null;
-          } else {
-            return response.customError(error);
-          }
-        }
 
         try {
-          if (cloudDataSo === null) {
-            await savedObjectsClient.create<CloudDataAttributes>(
-              CLOUD_DATA_SAVED_OBJECT_TYPE,
-              {
-                onboardingData: request.body.onboardingData,
-              },
-              { id: CLOUD_DATA_SAVED_OBJECT_ID }
-            );
-          } else {
-            await savedObjectsClient.update<CloudDataAttributes>(
-              CLOUD_DATA_SAVED_OBJECT_TYPE,
-              CLOUD_DATA_SAVED_OBJECT_ID,
-              {
-                onboardingData: request.body.onboardingData,
-              }
-            );
-          }
+          await persistTokenCloudData(savedObjectsClient, {
+            returnError: true,
+            solutionType: request.body.onboardingData.solutionType,
+            onboardingToken: request.body.onboardingData.token,
+          });
         } catch (error) {
-          return response.badRequest(error);
+          return response.customError(error);
         }
 
         return response.ok();

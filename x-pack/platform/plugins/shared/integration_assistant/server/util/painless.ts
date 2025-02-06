@@ -45,7 +45,7 @@ const INGEST_PIPELINE_PAINLESS_CONTEXT = 'ctx' as const as SafePainlessExpressio
  * - Subsequent characters can be underscores, letters, or digits.
  *
  * This is the ID and DOTID regexp in the Painless grammar under the following link:
- * @link packages/kbn-monaco/src/painless/antlr/painless_parser.g4
+ * @link src/platform/packages/shared/kbn-monaco/src/painless/antlr/painless_parser.g4
  */
 const PAINLESS_IDENTIFIER_REGEXP = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
 

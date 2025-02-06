@@ -6,8 +6,8 @@
     - 'x-pack/plugins/drilldowns/**/*.*'
     - 'x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/**/*.*'
 - 'Feature:ExpressionLanguage':
-    - 'src/plugins/expressions/**/*.*'
-    - 'src/plugins/bfetch/**/*.*'
+    - 'src/platform/plugins/shared/expressions/**/*.*'
+    - 'src/platform/plugins/shared/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
@@ -24,7 +24,7 @@
     - 'x-pack/solutions/observability/plugins/synthetics/**/*.*'
     - 'x-pack/solutions/observability/plugins/exploratory_view/**/*.*'
 - 'Team:Obs AI Assistant':
-    - 'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/**/*.*'
+    - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
     - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
     - 'x-pack/test/observability_ai_assistant_api_integration/**/*.*'
     - 'x-pack/test/observability_ai_assistant_functional/**/*.*'

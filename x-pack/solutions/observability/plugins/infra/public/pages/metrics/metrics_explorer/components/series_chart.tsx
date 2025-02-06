@@ -6,21 +6,13 @@
  */
 
 import React from 'react';
-import {
-  ScaleType,
-  AreaSeries,
-  BarSeries,
-  RecursivePartial,
-  AreaSeriesStyle,
-  BarSeriesStyle,
-} from '@elastic/charts';
-import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
+import type { RecursivePartial, AreaSeriesStyle, BarSeriesStyle } from '@elastic/charts';
+import { ScaleType, AreaSeries, BarSeries } from '@elastic/charts';
+import type { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import { colorTransformer, Color } from '../../../../../common/color_palette';
 import { createMetricLabel } from './helpers/create_metric_label';
-import {
-  MetricsExplorerOptionsMetric,
-  MetricsExplorerChartType,
-} from '../hooks/use_metrics_explorer_options';
+import type { MetricsExplorerOptionsMetric } from '../hooks/use_metrics_explorer_options';
+import { MetricsExplorerChartType } from '../hooks/use_metrics_explorer_options';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 import { getMetricId } from './helpers/get_metric_id';
 

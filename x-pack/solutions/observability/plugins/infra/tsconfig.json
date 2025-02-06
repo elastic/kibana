@@ -114,12 +114,13 @@
     "@kbn/management-settings-ids",
     "@kbn/core-ui-settings-common",
     "@kbn/entityManager-plugin",
-    "@kbn/entities-schema",
     "@kbn/zod",
     "@kbn/observability-utils-server",
     "@kbn/observability-utils-common",
     "@kbn/core-plugins-server",
     "@kbn/config",
+    "@kbn/response-ops-rule-params",
+    "@kbn/charts-theme"
   ],
   "exclude": ["target/**/*"]
 }

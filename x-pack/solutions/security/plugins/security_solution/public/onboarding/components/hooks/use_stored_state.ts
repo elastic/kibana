@@ -8,6 +8,7 @@
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { OnboardingCardId } from '../../constants';
 import type { IntegrationTabId } from '../onboarding_body/cards/integrations/types';
+import type { CardSelectorListItem } from '../onboarding_body/cards/common/card_selector_list';
 
 const LocalStorageKey = {
   avcBannerDismissed: 'securitySolution.onboarding.avcBannerDismissed',
@@ -16,7 +17,9 @@ const LocalStorageKey = {
   expandedCard: 'securitySolution.onboarding.expandedCard',
   urlDetails: 'securitySolution.onboarding.urlDetails',
   selectedIntegrationTabId: 'securitySolution.onboarding.selectedIntegrationTabId',
+  selectedCardItemId: 'securitySolution.onboarding.selectedCardItem',
   integrationSearchTerm: 'securitySolution.onboarding.integrationSearchTerm',
+  assistantConnectorId: 'securitySolution.onboarding.assistantCard.connectorId',
 } as const;
 
 /**
@@ -46,6 +49,19 @@ export const useStoredUrlDetails = (spaceId: string) =>
   useDefinedLocalStorage<string | null>(`${LocalStorageKey.urlDetails}.${spaceId}`, null);
 
 /**
+ * Stores the selected selectable card ID per space
+ */
+export const useStoredSelectedCardItemId = (
+  cardType: 'alerts' | 'dashboards' | 'rules',
+  spaceId: string,
+  defaultSelectedCardItemId: CardSelectorListItem['id']
+) =>
+  useDefinedLocalStorage<CardSelectorListItem['id']>(
+    `${LocalStorageKey.selectedCardItemId}.${cardType}.${spaceId}`,
+    defaultSelectedCardItemId
+  );
+
+/**
  * Stores the selected integration tab ID per space
  */
 export const useStoredIntegrationTabId = (
@@ -65,3 +81,9 @@ export const useStoredIntegrationSearchTerm = (spaceId: string) =>
     `${LocalStorageKey.integrationSearchTerm}.${spaceId}`,
     null
   );
+
+/**
+ * Stores the integration search term per space
+ */
+export const useStoredAssistantConnectorId = (spaceId: string) =>
+  useDefinedLocalStorage<string | null>(`${LocalStorageKey.assistantConnectorId}.${spaceId}`, null);

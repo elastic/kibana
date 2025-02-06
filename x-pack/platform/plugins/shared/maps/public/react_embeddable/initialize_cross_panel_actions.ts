@@ -10,7 +10,7 @@ import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { getPanelTitle, StateComparators } from '@kbn/presentation-publishing';
+import { getTitle, StateComparators } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import { SavedMap } from '../routes/map_page';
 import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
@@ -104,7 +104,7 @@ export function initializeCrossPanelActions({
   }
 
   // debounce to fix timing issue for dashboard with multiple maps with synchronized movement and filter by map extent enabled
-  const setMapExtentFilter = _.debounce(() => {
+  const setMapExtentFilter = _.debounce(async () => {
     const mapExtent = getMapExtent(savedMap.getStore().getState());
     const geoFieldNames = mapEmbeddablesSingleton.getGeoFieldNames();
 
@@ -126,21 +126,21 @@ export function initializeCrossPanelActions({
       filters: [mapExtentFilter],
       controlledBy,
     };
-    const action = getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
+    const action = await getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
     if (!action) {
       throw new Error('Unable to apply map extent filter, could not locate action');
     }
     action.execute(executeContext);
   }, 100);
 
-  function clearMapExtentFilter() {
+  async function clearMapExtentFilter() {
     prevMapExtent = undefined;
     const executeContext = {
       ...getActionContext(),
       filters: [],
       controlledBy,
     };
-    const action = getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
+    const action = await getUiActions().getAction(ACTION_GLOBAL_APPLY_FILTER);
     if (!action) {
       throw new Error('Unable to apply map extent filter, could not locate action');
     }
@@ -150,7 +150,7 @@ export function initializeCrossPanelActions({
   mapEmbeddablesSingleton.register(uuid, {
     getTitle: () => {
       const mapApi = getApi();
-      const title = mapApi ? getPanelTitle(mapApi) : undefined;
+      const title = mapApi ? getTitle(mapApi) : undefined;
       return title
         ? title
         : i18n.translate('xpack.maps.embeddable.untitleMap', {

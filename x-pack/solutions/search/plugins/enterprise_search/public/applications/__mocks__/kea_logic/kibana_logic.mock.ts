@@ -19,6 +19,8 @@ import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
+import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
+
 import { mockHistory } from '../react_router/state.mock';
 
 export const mockKibanaValues = {
@@ -71,6 +73,7 @@ export const mockKibanaValues = {
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
   ml: mlPluginMock.createStartContract(),
+  uiActions: uiActionsEnhancedPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   updateSideNavDefinition: jest.fn(),
   user: null,

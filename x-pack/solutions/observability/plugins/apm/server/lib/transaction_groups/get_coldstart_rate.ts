@@ -15,7 +15,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Coordinate } from '../../../typings/timeseries';
+import type { Coordinate } from '../../../typings/timeseries';
 import {
   getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
@@ -27,7 +27,7 @@ import {
   getTransactionColdstartRateTimeSeries,
 } from '../helpers/transaction_coldstart_rate';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 
 export async function getColdstartRate({
   environment,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PathsOf, TypeOf, TypeAsArgs } from '@kbn/typed-react-router-config';
+import type { PathsOf, TypeOf, TypeAsArgs } from '@kbn/typed-react-router-config';
 import { useHistory } from 'react-router-dom';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { ProfilingRouter, profilingRouter, ProfilingRoutes } from '../routing';
+import type { ProfilingRouter, ProfilingRoutes } from '../routing';
+import { profilingRouter } from '../routing';
 
 export interface StatefulProfilingRouter extends ProfilingRouter {
   push<T extends PathsOf<ProfilingRoutes>>(

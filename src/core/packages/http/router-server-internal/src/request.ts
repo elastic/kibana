@@ -13,6 +13,7 @@ import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs';
+import { isNil, omitBy } from 'lodash';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 import {
@@ -191,7 +192,7 @@ export class CoreKibanaRequest<
       enumerable: false,
     });
 
-    this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
+    this.httpVersion = isRealReq ? getHttpVersionFromRequest(request) : '1.0';
     this.apiVersion = undefined;
     this.protocol = getProtocolFromHttpVersion(this.httpVersion);
 
@@ -270,6 +271,7 @@ export class CoreKibanaRequest<
     }
 
     const options = {
+      ...omitBy({ excludeFromRateLimiter: this.isExcludedFromRateLimiter(request) }, isNil),
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
@@ -354,6 +356,11 @@ export class CoreKibanaRequest<
       }${this.url.search}`
     );
   }
+
+  private isExcludedFromRateLimiter(request: RawRequest): boolean | undefined {
+    return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+      ?.excludeFromRateLimiter;
+  }
 }
 
 /**
@@ -417,4 +424,12 @@ function sanitizeRequest(req: Request): { query: unknown; params: unknown; body:
 
 function getProtocolFromHttpVersion(httpVersion: string): HttpProtocol {
   return httpVersion.split('.')[0] === '2' ? 'http2' : 'http1';
+}
+
+function getHttpVersionFromRequest(request: Request) {
+  return request.raw.req.httpVersion;
+}
+
+export function getProtocolFromRequest(request: Request) {
+  return getProtocolFromHttpVersion(getHttpVersionFromRequest(request));
 }

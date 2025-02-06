@@ -20,7 +20,7 @@ import {
   enableInfrastructureAssetCustomDashboards,
 } from '@kbn/observability-plugin/common';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import {
   AlertConsumers,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,

@@ -19,6 +19,7 @@ import { MONITOR_UPDATE_CHANNEL } from './constants';
 
 import { TelemetryEventsSender } from './sender';
 import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Observable } from 'rxjs';
 
 jest.mock('axios', () => {
   return {
@@ -87,6 +88,7 @@ describe('TelemetryEventsSender', () => {
     it('should send events when due', async () => {
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
+        isOptedIn$: new Observable<boolean>(),
       };
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(
@@ -108,6 +110,7 @@ describe('TelemetryEventsSender', () => {
     it("shouldn't send when telemetry is disabled", async () => {
       const telemetryStart = {
         getIsOptedIn: jest.fn(async () => false),
+        isOptedIn$: new Observable<boolean>(),
       };
       sender['telemetryStart'] = telemetryStart;
 
@@ -122,6 +125,7 @@ describe('TelemetryEventsSender', () => {
     it('should send events to separate channels', async () => {
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
+        isOptedIn$: new Observable<boolean>(),
       };
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(

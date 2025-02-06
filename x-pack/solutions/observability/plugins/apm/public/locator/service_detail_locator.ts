@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IUiSettingsClient } from '@kbn/core/public';
-import { LocatorDefinition } from '@kbn/share-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   defaultApmServiceEnvironment,

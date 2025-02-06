@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { HostMetricTypes } from '../charts/types';
+import type { HostMetricTypes } from '../charts/types';
 import { useChartSeriesColor } from './use_chart_series_color';
 
 export const useHostCharts = ({

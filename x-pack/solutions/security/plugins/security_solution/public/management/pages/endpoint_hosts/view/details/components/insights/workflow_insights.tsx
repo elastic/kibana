@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiSpacer,
+  EuiText,
+  EuiBetaBadge,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
+import {
+  TECHNICAL_PREVIEW_TOOLTIP,
+  TECHNICAL_PREVIEW,
+} from '../../../../../../../common/translations';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
 import { useFetchOngoingScans } from '../../../hooks/insights/use_fetch_ongoing_tasks';
@@ -90,9 +101,23 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         data-test-subj={'endpointDetailsInsightsWrapper'}
         id={'workflow-insights-wrapper'}
         buttonContent={
-          <EuiText size={'m'}>
-            <h4>{WORKFLOW_INSIGHTS.title}</h4>
-          </EuiText>
+          <EuiFlexGroup gutterSize={'s'}>
+            <EuiFlexItem grow={false}>
+              <EuiText size={'m'}>
+                <h4>{WORKFLOW_INSIGHTS.title}</h4>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                alignment={'middle'}
+                label={TECHNICAL_PREVIEW}
+                tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
+                size="s"
+                iconType={'beaker'}
+                data-test-subj={'workflow-insights-tech-preview-badge'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         initialIsOpen
         extraAction={lastResultCaption}
@@ -109,7 +134,6 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
           scanCompleted={scanCompleted && userTriggeredScan}
           endpointId={endpointId}
         />
-        <EuiHorizontalRule />
       </EuiAccordion>
       <EuiSpacer size="l" />
     </>

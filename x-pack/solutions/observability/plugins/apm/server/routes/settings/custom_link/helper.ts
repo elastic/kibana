@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import {
+import type {
   CustomLinkES,
   CustomLink,
   Filter,

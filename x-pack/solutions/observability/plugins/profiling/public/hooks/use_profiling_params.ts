@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PathsOf, TypeOf, useParams } from '@kbn/typed-react-router-config';
-import { ValuesType } from 'utility-types';
-import { ProfilingRoutes } from '../routing';
+import type { PathsOf, TypeOf } from '@kbn/typed-react-router-config';
+import { useParams } from '@kbn/typed-react-router-config';
+import type { ValuesType } from 'utility-types';
+import type { ProfilingRoutes } from '../routing';
 
 export function useProfilingParams<T extends PathsOf<ProfilingRoutes>>(
   path: T,

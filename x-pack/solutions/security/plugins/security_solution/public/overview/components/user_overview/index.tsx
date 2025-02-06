@@ -10,11 +10,12 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
@@ -31,9 +32,7 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
-
 import * as i18n from './translations';
-
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
@@ -101,7 +100,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     } = useRiskScore({
       filterQuery,
       skip: userName == null,
-      riskEntity: RiskScoreEntity.user,
+      riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
@@ -133,10 +132,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       return [
         {
           title: (
-            <RiskScoreHeaderTitle
-              title={i18n.USER_RISK_SCORE}
-              riskScoreEntity={RiskScoreEntity.user}
-            />
+            <RiskScoreHeaderTitle title={i18n.USER_RISK_SCORE} riskScoreEntity={EntityType.user} />
           ),
           description: (
             <>
@@ -152,7 +148,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
               <EuiFlexItem grow={false}>
                 <RiskScoreHeaderTitle
                   title={i18n.USER_RISK_LEVEL}
-                  riskScoreEntity={RiskScoreEntity.user}
+                  riskScoreEntity={EntityType.user}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

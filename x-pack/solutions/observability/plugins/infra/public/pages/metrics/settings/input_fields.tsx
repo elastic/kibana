@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactText } from 'react';
+import type { ReactText } from 'react';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 

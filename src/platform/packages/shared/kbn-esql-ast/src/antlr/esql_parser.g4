@@ -53,10 +53,10 @@ processingCommand
     | grokCommand
     | enrichCommand
     | mvExpandCommand
+    | joinCommand
     // in development
     | {this.isDevVersion()}? inlinestatsCommand
     | {this.isDevVersion()}? lookupCommand
-    | {this.isDevVersion()}? joinCommand
     ;
 
 whereCommand
@@ -104,11 +104,19 @@ primaryExpression
     ;
 
 functionExpression
-    : functionName LP (ASTERISK | (booleanExpression (COMMA booleanExpression)*))? RP
+    : functionName LP (ASTERISK | (booleanExpression (COMMA booleanExpression)* (COMMA mapExpression)?))? RP
     ;
 
 functionName
     : identifierOrParameter
+    ;
+
+mapExpression
+    : LEFT_BRACES entryExpression (COMMA entryExpression)* RIGHT_BRACES
+    ;
+
+entryExpression
+    : key=string COLON value=constant
     ;
 
 dataType
@@ -145,16 +153,7 @@ indexString
     ;
 
 metadata
-    : metadataOption
-    | deprecated_metadata
-    ;
-
-metadataOption
     : METADATA UNQUOTED_SOURCE (COMMA UNQUOTED_SOURCE)*
-    ;
-
-deprecated_metadata
-    : OPENING_BRACKET metadataOption CLOSING_BRACKET
     ;
 
 metricsCommand
@@ -327,11 +326,11 @@ inlinestatsCommand
     ;
 
 joinCommand
-    : type=(DEV_JOIN_LOOKUP | DEV_JOIN_LEFT | DEV_JOIN_RIGHT)? DEV_JOIN joinTarget joinCondition
+    : type=(JOIN_LOOKUP | DEV_JOIN_LEFT | DEV_JOIN_RIGHT) JOIN joinTarget joinCondition
     ;
 
 joinTarget
-    : index=identifier (AS alias=identifier)?
+    : index=indexPattern
     ;
 
 joinCondition

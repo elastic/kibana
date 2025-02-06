@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ValuesType } from 'utility-types';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { ValuesType } from 'utility-types';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';

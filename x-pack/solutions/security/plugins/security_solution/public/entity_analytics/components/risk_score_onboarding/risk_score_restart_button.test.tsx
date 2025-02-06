@@ -7,7 +7,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
 
@@ -49,7 +49,7 @@ describe('RiskScoreRestartButton', () => {
     jest.clearAllMocks();
     jest.useRealTimers();
   });
-  describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('%s', (riskScoreEntity) => {
+  describe.each([[EntityType.host], [EntityType.user]])('%s', (riskScoreEntity) => {
     it('Renders expected children', () => {
       render(
         <TestProviders>

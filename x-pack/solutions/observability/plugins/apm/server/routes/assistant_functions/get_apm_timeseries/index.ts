@@ -14,7 +14,7 @@ import { LatencyAggregationType } from '../../../../common/latency_aggregation_t
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { termQuery } from '../../../../common/utils/term_query';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getErrorEventRate } from './get_error_event_rate';
 import { getExitSpanFailureRate } from './get_exit_span_failure_rate';
 import { getExitSpanLatency } from './get_exit_span_latency';

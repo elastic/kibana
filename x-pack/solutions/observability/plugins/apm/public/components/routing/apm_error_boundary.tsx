@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { useLocation } from 'react-router-dom';
-import { ApmPluginStartDeps } from '../../plugin';
+import type { ApmPluginStartDeps } from '../../plugin';
 
 export function ApmErrorBoundary({ children }: { children?: React.ReactNode }) {
   const location = useLocation();

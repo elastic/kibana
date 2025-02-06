@@ -19,15 +19,31 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
   const { router } = setupDeps;
 
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
-  const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
+  const kibanaAccessControlTags = useKibanaAccessControl ? ['generateReport'] : [];
 
   const registerInternalPostGenerationEndpoint = () => {
     const path = `${GENERATE_PREFIX}/{exportType}`;
     router.post(
       {
         path,
+        security: {
+          authz: {
+            ...(kibanaAccessControlTags.length
+              ? {
+                  requiredPrivileges: kibanaAccessControlTags,
+                }
+              : {
+                  enabled: false,
+                  reason:
+                    'This route is opted out from authorization because of the kibana access control flag',
+                }),
+          },
+        },
         validate: RequestHandler.getValidation(),
-        options: { tags: kibanaAccessControlTags, access: 'internal' },
+        options: {
+          tags: kibanaAccessControlTags.map((accessControlTag) => `access:${accessControlTag}`),
+          access: 'internal',
+        },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {

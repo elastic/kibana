@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@ela
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { InfraMetadata } from '../../../../../common/http_api';
+import type { InfraMetadata } from '../../../../../common/http_api';
 import { MetadataContext } from '../containers/metadata_context';
 
 interface FieldDef {

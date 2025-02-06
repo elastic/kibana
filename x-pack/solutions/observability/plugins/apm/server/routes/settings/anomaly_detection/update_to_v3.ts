@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { uniq } from 'lodash';
 import pLimit from 'p-limit';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
-import { MlClient } from '../../../lib/helpers/get_ml_client';
+import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function updateToV3({

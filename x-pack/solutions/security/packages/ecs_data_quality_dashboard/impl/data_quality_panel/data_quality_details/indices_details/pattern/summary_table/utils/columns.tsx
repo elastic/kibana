@@ -15,9 +15,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { getDocsCountPercent } from '../../../../../utils/stats';
 import { IndexSummaryTableItem } from '../../../../../types';
 import { EMPTY_STAT } from '../../../../../constants';
@@ -39,9 +38,11 @@ import { getIndexResultToolTip } from '../../utils/get_index_result_tooltip';
 import { CHECK_NOW } from '../../translations';
 import { HISTORICAL_RESULTS_TOUR_SELECTOR_KEY } from '../../constants';
 
-const ProgressContainer = styled.div`
-  width: 150px;
-`;
+const styles = {
+  progressContainer: css({
+    width: '150px',
+  }),
+};
 
 export const getSummaryTableILMPhaseColumn = (
   isILMAvailable: boolean
@@ -93,8 +94,10 @@ export const getSummaryTableSizeInBytesColumn = ({
       ]
     : [];
 
-export const getIncompatibleStatColor = (incompatible: number | undefined): string | undefined =>
-  incompatible != null && incompatible > 0 ? euiThemeVars.euiColorDanger : undefined;
+export const getIncompatibleStatColor = (
+  incompatible: number | undefined,
+  dangerColor: string
+): string | undefined => (incompatible != null && incompatible > 0 ? dangerColor : undefined);
 
 export const getSummaryTableColumns = ({
   formatBytes,
@@ -104,6 +107,7 @@ export const getSummaryTableColumns = ({
   onCheckNowAction,
   onViewHistoryAction,
   firstIndexName,
+  dangerColor,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
@@ -112,6 +116,7 @@ export const getSummaryTableColumns = ({
   onCheckNowAction: (indexName: string) => void;
   onViewHistoryAction: (indexName: string) => void;
   firstIndexName?: string;
+  dangerColor: string;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
   {
     name: i18n.ACTIONS,
@@ -186,7 +191,7 @@ export const getSummaryTableColumns = ({
     field: 'docsCount',
     name: DOCS,
     render: (_, { docsCount, patternDocsCount }) => (
-      <ProgressContainer>
+      <div css={styles.progressContainer}>
         <EuiProgress
           data-test-subj="docsCount"
           label={formatNumber(docsCount)}
@@ -195,7 +200,7 @@ export const getSummaryTableColumns = ({
           value={docsCount}
           valueText={getDocsCountPercent({ docsCount, patternDocsCount })}
         />
-      </ProgressContainer>
+      </div>
     ),
     sortable: true,
     truncateText: false,
@@ -209,7 +214,7 @@ export const getSummaryTableColumns = ({
         <EuiText
           size="xs"
           data-test-subj="incompatibleStat"
-          color={getIncompatibleStatColor(incompatible)}
+          color={getIncompatibleStatColor(incompatible, dangerColor)}
         >
           {incompatible ?? EMPTY_STAT}
         </EuiText>

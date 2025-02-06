@@ -116,6 +116,42 @@ describe('literal expression', () => {
           ],
         });
       });
+
+      it('escape double-quote before backslash', () => {
+        const text = `ROW "a\\"\\\\b", 1`;
+        const { root } = parse(text);
+
+        expect(root.commands[0]).toMatchObject({
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"a\\"\\\\b"',
+              valueUnquoted: 'a"\\b',
+            },
+            {},
+          ],
+        });
+      });
+
+      it('escape backslash before double-quote', () => {
+        const text = `ROW "a\\\\\\"b", 1`;
+        const { root } = parse(text);
+
+        expect(root.commands[0]).toMatchObject({
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"a\\\\\\"b"',
+              valueUnquoted: 'a\\"b',
+            },
+            {},
+          ],
+        });
+      });
     });
 
     describe('triple quoted', () => {

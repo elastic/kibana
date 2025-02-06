@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/search_strategy';
 import type { SavedObjectTemplate } from '../types';
 
 export const HOST_RISK_SCORE = 'Host Risk Score';
@@ -14,9 +14,9 @@ export const USER_RISK_SCORE = 'User Risk Score';
 export const RISK_SCORE_TAG_DESCRIPTION =
   'Security Solution Risk Score auto-generated tag' as const;
 
-const getRiskScore = (riskScoreEntity: RiskScoreEntity) =>
-  riskScoreEntity === RiskScoreEntity.user ? USER_RISK_SCORE : HOST_RISK_SCORE;
-export const getRiskScoreTagName = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+const getRiskScore = (riskScoreEntity: EntityType) =>
+  riskScoreEntity === EntityType.user ? USER_RISK_SCORE : HOST_RISK_SCORE;
+export const getRiskScoreTagName = (riskScoreEntity: EntityType, spaceId = 'default') =>
   `${getRiskScore(riskScoreEntity)} - ${spaceId}`;
 
 /**

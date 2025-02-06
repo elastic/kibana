@@ -16,7 +16,7 @@ import { awsDiskioOps } from './tsvb/aws_diskio_ops';
 import { awsNetworkBytes } from './tsvb/aws_network_bytes';
 import { awsNetworkPackets } from './tsvb/aws_network_packets';
 import { awsOverview } from './tsvb/aws_overview';
-import { InventoryMetrics } from '../../types';
+import type { InventoryMetrics } from '../../types';
 import { count } from './snapshot/count';
 
 export const metrics: InventoryMetrics = {

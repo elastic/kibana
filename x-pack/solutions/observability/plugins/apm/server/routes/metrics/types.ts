@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChartType, YUnit } from '../../../typings/timeseries';
+import type { ChartType, YUnit } from '../../../typings/timeseries';
 
 export interface ChartBase {
   title: string;

@@ -43,7 +43,7 @@ export function createEMSClient(
     tileApiUrl: emsSettings!.getEMSTileApiUrl(),
     fileApiUrl: emsSettings!.getEMSFileApiUrl(),
     landingPageUrl,
-    fetchFunction(url: string) {
+    fetchFunction(url: RequestInfo) {
       return fetch(url, { headers });
     },
     proxyPath: '',

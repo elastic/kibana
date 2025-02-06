@@ -10,10 +10,10 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { SERVICE_NAME, SESSION_ID, TRANSACTION_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
-import { Coordinate } from '../../../typings/timeseries';
-import { Maybe } from '../../../typings/common';
+import type { Coordinate } from '../../../typings/timeseries';
+import type { Maybe } from '../../../typings/common';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 

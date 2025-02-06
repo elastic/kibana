@@ -8,14 +8,14 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { AlertTlsComponent } from './alert_tls';
 import { getDynamicSettingsAction, selectDynamicSettings } from '../../state/settings';
-import { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 
 export const TLSRuleComponent: React.FC<{
-  ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
-  setRuleParams: RuleTypeParamsExpressionProps<TLSParams>['setRuleParams'];
+  ruleParams: RuleTypeParamsExpressionProps<TLSRuleParams>['ruleParams'];
+  setRuleParams: RuleTypeParamsExpressionProps<TLSRuleParams>['setRuleParams'];
 }> = ({ ruleParams, setRuleParams }) => {
   const dispatch = useDispatch();
 

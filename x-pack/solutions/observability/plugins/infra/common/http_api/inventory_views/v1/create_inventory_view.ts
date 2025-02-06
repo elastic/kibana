@@ -6,7 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { inventoryViewAttributesRT, inventoryViewRT } from '../../../inventory_views';
+import type { inventoryViewRT } from '../../../inventory_views';
+import { inventoryViewAttributesRT } from '../../../inventory_views';
 
 export const createInventoryViewAttributesRequestPayloadRT = rt.exact(
   rt.intersection([

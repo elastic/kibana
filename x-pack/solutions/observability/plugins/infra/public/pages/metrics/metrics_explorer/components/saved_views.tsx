@@ -8,7 +8,7 @@
 import React from 'react';
 import { useMetricsExplorerViews } from '../../../../hooks/use_metrics_explorer_views';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
-import { MetricsExplorerViewState } from '../hooks/use_metric_explorer_state';
+import type { MetricsExplorerViewState } from '../hooks/use_metric_explorer_state';
 
 interface Props {
   viewState: MetricsExplorerViewState;

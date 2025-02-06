@@ -10,7 +10,7 @@ import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../../../../plugin';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 
 interface EntitiesInventoryCalloutProps {
   onDismiss: () => void;

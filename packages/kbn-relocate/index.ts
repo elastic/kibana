@@ -9,6 +9,8 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { findAndRelocateModules, findAndMoveModule } from './relocate';
+import { listModules } from './list';
+import { findBrokenLinks, findBrokenReferences } from './healthcheck';
 
 const toStringArray = (flag: string | boolean | string[] | undefined): string[] => {
   if (typeof flag === 'string') {
@@ -41,7 +43,17 @@ const toOptString = (
 export const runKbnRelocateCli = () => {
   run(
     async ({ log, flags }) => {
-      if (typeof flags.moveOnly === 'string' && flags.moveOnly.length > 0) {
+      if (typeof flags.list === 'string' && flags.list.length > 0) {
+        await listModules(flags.list, log);
+      } else if (typeof flags.healthcheck === 'string' && flags.healthcheck.length > 0) {
+        if (flags.healthcheck === 'references') {
+          await findBrokenReferences(log);
+        } else if (flags.healthcheck === 'links') {
+          await findBrokenLinks(log);
+        } else {
+          log.error(`Unknown --healthcheck option: ${flags.healthcheck}`);
+        }
+      } else if (typeof flags.moveOnly === 'string' && flags.moveOnly.length > 0) {
         log.info('When using --moveOnly flag, the rest of flags are ignored.');
         await findAndMoveModule(flags.moveOnly, log);
       } else {
@@ -64,10 +76,25 @@ export const runKbnRelocateCli = () => {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['pr', 'team', 'path', 'include', 'exclude', 'baseBranch', 'moveOnly'],
+        string: [
+          'healthcheck',
+          'pr',
+          'team',
+          'path',
+          'include',
+          'exclude',
+          'baseBranch',
+          'moveOnly',
+          'list',
+        ],
         help: `
           Usage: node scripts/relocate [options]
 
+          --list "all" List all Kibana modules
+          --list "uncategorised" List Kibana modules that are lacking 'group' or 'visibility' information
+          --list "incorrect" List Kibana modules that are not in the correct folder (aka folder does not match group/visibility in the manifest)
+          --healthcheck "references" Find broken references in Kibana codebase (Beta)
+          --healthcheck "links" Find broken links in Kibana codebase (Beta)
           --moveOnly <moduleId> Only move the specified module in the current branch (no cleanup, no branching, no commit)
           --pr <number> Use the given PR number instead of creating a new one
           --team <owner> Include all modules (packages and plugins) belonging to the specified owner (can specify multiple teams)

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
@@ -34,7 +35,7 @@ export const TIEBREAKER_FIELD = '_doc';
 export const HOST_NAME_FIELD = 'host.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
-export const SYSTEM_PROCESS_CMDLINE_FIELD = 'system.process.cmdline';
+export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
 export const EVENT_MODULE = 'event.module';
 export const METRICSET_MODULE = 'metricset.module';
 export const METRICSET_NAME = 'metricset.name';

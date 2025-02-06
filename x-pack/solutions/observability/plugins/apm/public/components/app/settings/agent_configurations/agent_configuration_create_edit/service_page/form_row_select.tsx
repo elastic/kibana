@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiDescribedFormGroup,
-  EuiFormRow,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 interface Props {

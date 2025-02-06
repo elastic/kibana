@@ -22,7 +22,7 @@ import {
 import { assertNever } from '@kbn/std';
 import * as t from 'io-ts';
 import moment from 'moment';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import {
   DateRange,
   GroupBy,
@@ -33,7 +33,7 @@ import {
   toCalendarAlignedTimeWindowMomentUnit,
 } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
-import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
+import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
 interface DailyAggBucket {
   key_as_string: string;
@@ -74,8 +74,8 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
       ({ sloId, revision, budgetingMethod, instanceId, groupBy, timeWindow, remoteName }) => [
         {
           index: remoteName
-            ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
-            : SLO_DESTINATION_INDEX_PATTERN,
+            ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+            : SLI_DESTINATION_INDEX_PATTERN,
         },
         generateSearchQuery({
           groupBy,
@@ -194,7 +194,7 @@ function handleResultForCalendarAlignedAndTimeslices(
   dateRange: { range: DateRange; queryRange: DateRange }
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - objective.target;
-  const totalSlices = computeTotalSlicesFromDateRange(dateRange.range, objective.timesliceWindow!);
+  const totalSlices = getSlicesFromDateRange(dateRange.range, objective.timesliceWindow!);
 
   return buckets.map((bucket: DailyAggBucket): HistoricalSummary => {
     const good = bucket.cumulative_good?.value ?? 0;

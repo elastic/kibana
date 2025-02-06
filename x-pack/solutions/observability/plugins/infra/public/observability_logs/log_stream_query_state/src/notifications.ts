@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RefreshInterval } from '@kbn/data-plugin/public';
-import { ExtendedTimeRange, LogStreamQueryContext, ParsedQuery, Timestamps } from './types';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { ExtendedTimeRange, LogStreamQueryContext, ParsedQuery, Timestamps } from './types';
 
 export interface TimeChangedEvent {
   type: 'TIME_CHANGED';

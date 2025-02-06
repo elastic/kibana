@@ -11,9 +11,9 @@ import type { ValuesType } from 'utility-types';
 import { unflattenObject } from '@kbn/observability-utils-common/object/unflatten_object';
 import { mergePlainObjects } from '@kbn/observability-utils-common/object/merge_plain_objects';
 import { castArray, isArray } from 'lodash';
-import { AgentName } from '@kbn/elastic-agent-utils';
-import { EventOutcome } from '@kbn/apm-types/src/es_schemas/raw/fields';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { EventOutcome } from '@kbn/apm-types/src/es_schemas/raw/fields';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 
 const {
   CLOUD,

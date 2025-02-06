@@ -12,11 +12,11 @@ import {
   METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
   AGENT_NAME,
 } from '../../../../../../common/es_fields/apm';
-import { ChartBase } from '../../../types';
+import type { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
-import { APMConfig } from '../../../../..';
-import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../../../..';
+import type { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   threadCount: {

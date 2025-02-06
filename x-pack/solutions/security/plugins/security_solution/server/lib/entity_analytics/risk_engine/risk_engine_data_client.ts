@@ -8,11 +8,9 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { LegacyEntityType } from '../../../../common/entity_analytics/types';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
-import {
-  RiskScoreEntity,
-  type InitRiskEngineResult,
-} from '../../../../common/entity_analytics/risk_engine';
+import { type InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
 import {
   updateSavedObjectAttribute,
@@ -283,7 +281,7 @@ export class RiskEngineDataClient {
       namespace,
     });
 
-    const deleteDashboardsPromises = [RiskScoreEntity.host, RiskScoreEntity.user].map((entity) =>
+    const deleteDashboardsPromises = [LegacyEntityType.host, LegacyEntityType.user].map((entity) =>
       bulkDeleteSavedObjects({
         deleteAll: true,
         savedObjectsClient: this.options.soClient,

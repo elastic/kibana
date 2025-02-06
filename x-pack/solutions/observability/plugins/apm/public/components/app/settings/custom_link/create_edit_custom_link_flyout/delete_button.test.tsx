@@ -6,7 +6,8 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';

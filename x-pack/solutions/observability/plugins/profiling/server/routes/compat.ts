@@ -11,7 +11,7 @@
 // to address the incompatibilities between those two versions.
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ProfilingRequestHandlerContext } from '../types';
+import type { ProfilingRequestHandlerContext } from '../types';
 
 export async function getClient(
   context: ProfilingRequestHandlerContext

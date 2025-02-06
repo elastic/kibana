@@ -6,8 +6,11 @@
  */
 
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SavedObject } from '@kbn/core/types';
+import type { DataStreamsAction } from './data_stream_types';
+
+export * from './data_stream_types';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 
@@ -28,6 +31,7 @@ export enum ReindexStep {
   newIndexCreated = 30,
   reindexStarted = 40,
   reindexCompleted = 50,
+  indexSettingsRestored = 55,
   aliasCreated = 60,
   originalIndexDeleted = 70,
   existingAliasesUpdated = 80,
@@ -108,6 +112,16 @@ export interface ReindexOperation {
   errorMessage: string | null;
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;
+
+  /**
+   * The original index settings to set after reindex is completed.
+   * The target index is created with other defaults to improve reindexing performance.
+   * https://github.com/elastic/kibana/issues/201605
+   */
+  backupSettings?: {
+    'index.number_of_replicas'?: number;
+    'index.refresh_interval'?: number;
+  };
 
   /**
    * Options for the reindexing strategy.
@@ -212,9 +226,18 @@ export interface HealthIndicatorAction {
 }
 
 export interface EnrichedDeprecationInfo
-  extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
-  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator' | 'data_streams';
+  extends Omit<
+    estypes.MigrationDeprecationsDeprecation,
+    'level' | 'resolve_during_rolling_upgrade'
+  > {
+  type:
+    | keyof estypes.MigrationDeprecationsResponse
+    | 'data_streams'
+    | 'health_indicator'
+    | 'ilm_policies'
+    | 'templates';
   isCritical: boolean;
+  frozen?: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?:
@@ -222,6 +245,7 @@ export interface EnrichedDeprecationInfo
     | MlAction
     | IndexSettingAction
     | ClusterSettingAction
+    | DataStreamsAction
     | HealthIndicatorAction;
   resolveDuringUpgrade: boolean;
 }
@@ -233,7 +257,9 @@ export interface CloudBackupStatus {
 
 export interface ESUpgradeStatus {
   totalCriticalDeprecations: number;
-  deprecations: EnrichedDeprecationInfo[];
+  migrationsDeprecations: EnrichedDeprecationInfo[];
+  totalCriticalHealthIssues: number;
+  enrichedHealthIndicators: EnrichedDeprecationInfo[];
 }
 
 export interface ResolveIndexResponseFromES {

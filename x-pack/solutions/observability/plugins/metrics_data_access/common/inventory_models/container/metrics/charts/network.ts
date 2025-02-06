@@ -13,7 +13,7 @@ import {
   RX_LABEL,
   TX_LABEL,
 } from '../../../shared/charts/constants';
-import { LensConfigWithId } from '../../../types';
+import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 
 const dockerContainerRxTx: LensConfigWithId = {

@@ -20,7 +20,7 @@ export type UpsertResources = (
   migrationId: string,
   data: UpsertRuleMigrationResourcesRequestBody
 ) => void;
-export type OnSuccess = () => void;
+export type OnSuccess = (data: UpsertRuleMigrationResourcesRequestBody) => void;
 
 export const useUpsertResources = (onSuccess: OnSuccess) => {
   const { siemMigrations, notifications } = useKibana().services;
@@ -33,7 +33,7 @@ export const useUpsertResources = (onSuccess: OnSuccess) => {
           dispatch({ type: 'start' });
           await siemMigrations.rules.upsertMigrationResources(migrationId, data);
 
-          onSuccess();
+          onSuccess(data);
           dispatch({ type: 'success' });
         } catch (err) {
           const apiError = err.body ?? err;

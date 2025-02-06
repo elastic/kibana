@@ -25,6 +25,7 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -95,7 +96,7 @@ export const MisconfigurationsPreview = ({
   openDetailsPanel,
 }: {
   value: string;
-  field: 'host.name' | 'user.name';
+  field: CloudPostureEntityIdentifier;
   isPreviewMode?: boolean;
   isLinkEnabled: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;

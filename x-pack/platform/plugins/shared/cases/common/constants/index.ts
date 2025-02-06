@@ -92,6 +92,8 @@ export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 
 /**
  * Action routes
@@ -184,6 +186,7 @@ export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
+export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
 
 /**
  * Cases API Tags

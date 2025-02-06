@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { Environment } from '../../../common/environment_rt';
+import type { Environment } from '../../../common/environment_rt';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useEnvironmentsFetcher } from '../../hooks/use_environments_fetcher';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';

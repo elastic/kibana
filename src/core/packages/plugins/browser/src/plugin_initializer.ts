@@ -19,10 +19,10 @@ import type { Plugin } from './plugin';
  * @public
  */
 export type PluginInitializer<
-  TSetup,
-  TStart,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends Record<string, any> = never,
+  TPluginsStart extends Record<string, any> = never
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**

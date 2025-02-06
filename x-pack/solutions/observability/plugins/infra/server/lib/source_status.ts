@@ -6,7 +6,7 @@
  */
 
 import type { InfraPluginRequestHandlerContext } from '../types';
-import { InfraSources } from './sources';
+import type { InfraSources } from './sources';
 
 export class InfraSourceStatus {
   constructor(

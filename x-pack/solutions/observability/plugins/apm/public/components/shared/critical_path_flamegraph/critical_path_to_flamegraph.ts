@@ -10,10 +10,8 @@ import { memoize, sumBy } from 'lodash';
 import { lighten, parseToRgb } from 'polished';
 import seedrandom from 'seedrandom';
 import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
-import {
-  CriticalPathTreeNode,
-  getAggregatedCriticalPathRootNodes,
-} from '../../../../common/critical_path/get_aggregated_critical_path_root_nodes';
+import type { CriticalPathTreeNode } from '../../../../common/critical_path/get_aggregated_critical_path_root_nodes';
+import { getAggregatedCriticalPathRootNodes } from '../../../../common/critical_path/get_aggregated_critical_path_root_nodes';
 
 const lightenColor = lighten(0.2);
 

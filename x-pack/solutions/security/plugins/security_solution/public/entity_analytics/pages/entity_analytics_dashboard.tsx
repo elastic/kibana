@@ -6,8 +6,6 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-
-import { RiskScoreEntity } from '../../../common/search_strategy';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -27,12 +25,14 @@ import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomali
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
+  const entityTypes = useStoreEntityTypes();
 
   return (
     <>
@@ -65,13 +65,11 @@ const EntityAnalyticsComponent = () => {
                   </EuiFlexItem>
                 ) : (
                   <>
-                    <EuiFlexItem>
-                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem>
-                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
-                    </EuiFlexItem>
+                    {entityTypes.map((entityType) => (
+                      <EuiFlexItem key={entityType}>
+                        <EntityAnalyticsRiskScores riskEntity={entityType} />
+                      </EuiFlexItem>
+                    ))}
                   </>
                 )}
 

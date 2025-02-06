@@ -51,8 +51,6 @@ export async function fetchFieldExistence({
   dataViewsService: DataViewsContract;
 }) {
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
-    // filled in by data views service
-    pattern: '',
     indexFilter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
     includeEmptyFields: false,
   });

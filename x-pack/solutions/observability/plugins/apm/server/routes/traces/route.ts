@@ -16,18 +16,19 @@ import {
   type TransactionDetailRedirectInfo,
   getRootTransactionByTraceId,
 } from '../transactions/get_transaction_by_trace';
-import {
-  getTopTracesPrimaryStats,
-  TopTracesPrimaryStatsResponse,
-} from './get_top_traces_primary_stats';
-import { getTraceItems, TraceItems } from './get_trace_items';
-import { getTraceSamplesByQuery, TraceSamplesResponse } from './get_trace_samples_by_query';
+import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
+import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
+import type { TraceItems } from './get_trace_items';
+import { getTraceItems } from './get_trace_items';
+import type { TraceSamplesResponse } from './get_trace_samples_by_query';
+import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { CriticalPathResponse, getAggregatedCriticalPath } from './get_aggregated_critical_path';
+import type { CriticalPathResponse } from './get_aggregated_critical_path';
+import { getAggregatedCriticalPath } from './get_aggregated_critical_path';
 import { getSpan } from '../transactions/get_span';
-import { Transaction } from '../../../typings/es_schemas/ui/transaction';
-import { Span } from '../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import type { Span } from '../../../typings/es_schemas/ui/span';
 import { getTransactionByName } from '../transactions/get_transaction_by_name';
 
 const tracesRoute = createApmServerRoute({

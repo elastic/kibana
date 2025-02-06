@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { getUnsupportedApmServerSchema } from './get_unsupported_apm_server_schema';
 
 const apmServerSchema = {

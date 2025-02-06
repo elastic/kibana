@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
@@ -25,7 +25,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getErrorName } from '../../../../lib/helpers/get_error_name';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type MobileCrashGroupMainStatisticsResponse = Array<{
   groupId: string;
@@ -142,7 +142,7 @@ export async function getMobileCrashGroupMainStatistics({
         error: {
           ...(event.error ?? {}),
           exception:
-            (errorSource?.error.exception?.length ?? 0) > 1
+            (errorSource?.error.exception?.length ?? 0) > 0
               ? errorSource?.error.exception
               : event?.error.exception && [event.error.exception],
         },

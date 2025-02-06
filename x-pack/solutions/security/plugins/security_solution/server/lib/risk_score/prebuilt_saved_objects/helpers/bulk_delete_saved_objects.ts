@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/search_strategy';
 import { findTagsByName } from '../../../tags/saved_objects';
 import * as savedObjectsToCreate from '../saved_object';
 import type { SavedObjectTemplate } from '../types';
@@ -97,7 +97,7 @@ export const bulkDeleteSavedObjects = async ({
   const savedObjects = savedObjectsToCreate[savedObjectTemplate];
   const idReplaceMappings = RISK_SCORE_REPLACE_ID_MAPPINGS[savedObjectTemplate];
   const riskScoreEntity =
-    savedObjectTemplate === 'userRiskScoreDashboards' ? RiskScoreEntity.user : RiskScoreEntity.host;
+    savedObjectTemplate === 'userRiskScoreDashboards' ? EntityType.user : EntityType.host;
 
   if (savedObjects == null) {
     return new Error('Template not found.');

@@ -24,6 +24,7 @@ describe('buildQuery()', () => {
     const rule = createBurnRateRule(slo);
     expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
   });
+
   it('should return a valid query with afterKey', () => {
     const slo = createSLO({
       id: 'test-slo',
@@ -32,6 +33,7 @@ describe('buildQuery()', () => {
     const rule = createBurnRateRule(slo);
     expect(buildQuery(STARTED_AT, slo, rule, { instanceId: 'example' })).toMatchSnapshot();
   });
+
   it('should return a valid query for timeslices', () => {
     const slo = createSLOWithTimeslicesBudgetingMethod({
       id: 'test-slo',

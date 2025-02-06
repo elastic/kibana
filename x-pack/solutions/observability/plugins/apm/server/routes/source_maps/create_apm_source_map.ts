@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/core/server';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
-import { ApmSourceMap } from './create_apm_source_map_index_template';
-import { SourceMap } from './route';
+import type { ApmSourceMap } from './create_apm_source_map_index_template';
+import type { SourceMap } from './route';
 import { getEncodedContent, getSourceMapId } from './sourcemap_utils';
 
 export async function createApmSourceMap({

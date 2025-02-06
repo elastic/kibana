@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
+import type { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
 import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 import { SuggestionsSelect } from '../../../../shared/suggestions_select';
 

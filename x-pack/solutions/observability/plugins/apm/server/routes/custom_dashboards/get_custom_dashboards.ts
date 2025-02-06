@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   SavedApmCustomDashboard,
   ApmCustomDashboard,
 } from '../../../common/custom_dashboards';
+import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../common/custom_dashboards';
 
 interface Props {
   savedObjectsClient: SavedObjectsClientContract;

@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiHeaderLink,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { ApmRuleType } from '@kbn/rule-data-utils';

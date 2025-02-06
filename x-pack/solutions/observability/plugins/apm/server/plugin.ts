@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
-import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
+import type { APMConfig } from '.';
+import { APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import {
   registerApmRuleTypes,
@@ -28,11 +35,13 @@ import {
   apmServiceGroups,
   apmCustomDashboards,
 } from './saved_objects';
-import { APMPluginSetup, APMPluginSetupDependencies, APMPluginStartDependencies } from './types';
-import {
-  APMRouteHandlerResources,
-  registerRoutes,
-} from './routes/apm_routes/register_apm_server_routes';
+import type {
+  APMPluginSetup,
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from './types';
+import type { APMRouteHandlerResources } from './routes/apm_routes/register_apm_server_routes';
+import { registerRoutes } from './routes/apm_routes/register_apm_server_routes';
 import { getGlobalApmServerRouteRepository } from './routes/apm_routes/get_global_apm_server_route_repository';
 import { tutorialProvider } from './tutorial';
 import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
@@ -190,6 +199,7 @@ export class APMPlugin
     // This will add an API key to all existing APM package policies
     addApiKeysToEveryPackagePolicyIfMissing({
       coreStartPromise: getCoreStart(),
+      licensing: plugins.licensing,
       pluginStartPromise: getPluginStart(),
       logger: this.logger,
     }).catch((e) => {

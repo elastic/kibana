@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 
 export async function checkCustomDashboardsEnabled(uiSettingsClient: IUiSettingsClient) {

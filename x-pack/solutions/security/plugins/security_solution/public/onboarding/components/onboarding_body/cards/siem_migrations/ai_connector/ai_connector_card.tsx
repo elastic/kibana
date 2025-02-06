@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { useDefinedLocalStorage } from '../../../../hooks/use_stored_state';
 import type { OnboardingCardComponent } from '../../../../../types';
@@ -16,6 +17,7 @@ import { ConnectorCards } from '../../common/connectors/connector_cards';
 import { CardSubduedText } from '../../common/card_subdued_text';
 import type { AIConnectorCardMetadata } from './types';
 import { MissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
+import type { AIConnector } from '../../common/connectors/types';
 
 export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> = ({
   checkCompleteMetadata,
@@ -23,21 +25,27 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
   setComplete,
 }) => {
   const { siemMigrations } = useKibana().services;
-  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | null>(
+  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string>(
     siemMigrations.rules.connectorIdStorage.key,
-    null
+    ''
   );
-  const setSelectedConnectorId = useCallback(
-    (connectorId: string) => {
-      setStoredConnectorId(connectorId);
+  const setSelectedConnector = useCallback(
+    (connector: AIConnector) => {
+      setStoredConnectorId(connector.id);
       setComplete(true);
     },
     [setComplete, setStoredConnectorId]
   );
 
-  const connectors = checkCompleteMetadata?.connectors;
-  const canExecuteConnectors = checkCompleteMetadata?.canExecuteConnectors;
-  const canCreateConnectors = checkCompleteMetadata?.canCreateConnectors;
+  if (!checkCompleteMetadata) {
+    return (
+      <OnboardingCardContentPanel>
+        <CenteredLoadingSpinner />
+      </OnboardingCardContentPanel>
+    );
+  }
+
+  const { connectors, canExecuteConnectors, canCreateConnectors } = checkCompleteMetadata;
 
   return (
     <OnboardingCardContentPanel>
@@ -50,9 +58,9 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
             <ConnectorCards
               canCreateConnectors={canCreateConnectors}
               connectors={connectors}
-              onConnectorSaved={checkComplete}
+              onNewConnectorSaved={checkComplete}
               selectedConnectorId={storedConnectorId}
-              setSelectedConnectorId={setSelectedConnectorId}
+              onConnectorSelected={setSelectedConnector}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useSearchServiceDestinationMetrics } from '../../../../context/time_range_metadata/use_search_service_destination_metrics';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import {
-  getSpanMetricColumns,
-  SpanMetricGroup,
-} from '../../../shared/dependencies_table/get_span_metric_columns';
+import type { SpanMetricGroup } from '../../../shared/dependencies_table/get_span_metric_columns';
+import { getSpanMetricColumns } from '../../../shared/dependencies_table/get_span_metric_columns';
 import { EmptyMessage } from '../../../shared/empty_message';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import type { ITableColumn } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { DependencyOperationDetailLink } from '../../dependency_operation_detail_view/dependency_operation_detail_link';
@@ -60,7 +60,7 @@ export function DependencyDetailOperationsList() {
       offset,
     },
   } = useApmParams('/dependencies/operations');
-
+  const { onPageReady } = usePerformanceContext();
   const { core } = useApmPluginContext();
 
   const { isLarge } = useBreakpoints();
@@ -132,6 +132,20 @@ export function DependencyDetailOperationsList() {
       searchServiceDestinationMetrics,
     ]
   );
+
+  useEffect(() => {
+    if (
+      comparisonStatsFetch.status === FETCH_STATUS.SUCCESS &&
+      primaryStatsFetch.status === FETCH_STATUS.SUCCESS
+    ) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [onPageReady, primaryStatsFetch, comparisonStatsFetch, rangeFrom, rangeTo]);
 
   const columns: Array<ITableColumn<OperationStatisticsItem>> = [
     {

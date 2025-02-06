@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import type { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 

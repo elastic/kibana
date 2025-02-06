@@ -12,7 +12,7 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { DependencyFailedTransactionRateChart } from './dependency_failed_transaction_rate_chart';
 import { DependencyLatencyChart } from './dependency_latency_chart';
-import { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
+import type { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
 import { DependencyThroughputChart } from './dependency_throughput_chart';
 
 export function DependencyMetricCharts() {

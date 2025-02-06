@@ -217,6 +217,7 @@ export const AgentPolicyActionMenu = memo<{
                 }}
                 key="upgradeAgents"
                 data-test-subj="agentPolicyActionMenuUpgradeAgentsButton"
+                disabled={(agentPolicy.agents || 0) === 0}
               >
                 <FormattedMessage
                   id="xpack.fleet.agentPolicyActionMenu.upgradeAgentsActionText"
@@ -241,6 +242,7 @@ export const AgentPolicyActionMenu = memo<{
                 }}
                 key="getUninstallCommand"
                 data-test-subj="uninstall-agents-command-menu-item"
+                disabled={(agentPolicy.agents || 0) === 0}
               >
                 <FormattedMessage
                   id="xpack.fleet.agentPolicyActionMenu.getUninstallCommand"

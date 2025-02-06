@@ -6,7 +6,7 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { ContainerMetricTypes } from '../charts/types';
+import type { ContainerMetricTypes } from '../charts/types';
 import {
   useK8sContainerPageViewMetricsCharts,
   useDockerContainerPageViewMetricsCharts,

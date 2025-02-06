@@ -8,10 +8,11 @@
 import { EuiTitle, EuiText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import React, { useMemo, useState } from 'react';
 import { FixedDatePicker } from '../../../fixed_datepicker';
-import { TimeRangeValidationError } from './validation';
+import type { TimeRangeValidationError } from './validation';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',

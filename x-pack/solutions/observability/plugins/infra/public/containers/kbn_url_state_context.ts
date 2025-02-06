@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import createContainer from 'constate';
-import { History } from 'history';
+import type { History } from 'history';
 import { useState } from 'react';
 
 const useKbnUrlStateStorageFromRouter = ({

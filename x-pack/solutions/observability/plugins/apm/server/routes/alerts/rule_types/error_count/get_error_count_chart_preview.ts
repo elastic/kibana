@@ -9,15 +9,13 @@ import { getParsedFilterQuery, rangeQuery, termQuery } from '@kbn/observability-
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ERROR_GROUP_ID, PROCESSOR_EVENT, SERVICE_NAME } from '../../../../../common/es_fields/apm';
-import { AlertParams, PreviewChartResponse } from '../../route';
+import type { AlertParams, PreviewChartResponse } from '../../route';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import {
-  BarSeriesDataMap,
-  getFilteredBarSeries,
-} from '../utils/get_filtered_series_for_preview_chart';
+import type { BarSeriesDataMap } from '../utils/get_filtered_series_for_preview_chart';
+import { getFilteredBarSeries } from '../utils/get_filtered_series_for_preview_chart';
 
 export async function getTransactionErrorCountChartPreview({
   apmEventClient,

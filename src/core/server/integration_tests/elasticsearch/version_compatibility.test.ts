@@ -12,7 +12,7 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { esTestConfig } from '@kbn/test';
+import { esTestConfig, EsVersion } from '@kbn/test';
 import { firstValueFrom, Subject } from 'rxjs';
 import { CliArgs } from '@kbn/config';
 import Semver from 'semver';
@@ -93,25 +93,30 @@ describe('Version Compatibility', () => {
     await expect(startServers({ customKibanaVersion: previousMinor() })).resolves.toBeUndefined();
   });
 
-  it('should flag the incompatibility on version mismatch (ES is previous minor)', async () => {
-    const found$ = new Subject<void>();
-    consoleSpy.mockImplementation((str) => {
-      if (str.includes('is incompatible')) {
-        found$.next();
-      }
-    });
-    await Promise.race([
-      firstValueFrom(found$),
-      startServers({ customKibanaVersion: nextMinor() }).then(() => {
-        throw new Error(
-          'Kibana completed the bootstrap without finding the incompatibility message'
-        );
-      }),
-      new Promise((resolve, reject) =>
-        setTimeout(() => reject(new Error('Test timedout')), 5 * 60 * 1000)
-      ),
-    ]).finally(() => found$.complete());
-  });
+  const willRunESv9 = EsVersion.getDefault({ integrationTest: true }).matchRange('9');
+
+  (willRunESv9 ? it.skip : it)(
+    'should flag the incompatibility on version mismatch (ES is previous minor)',
+    async () => {
+      const found$ = new Subject<void>();
+      consoleSpy.mockImplementation((str) => {
+        if (str.includes('is incompatible')) {
+          found$.next();
+        }
+      });
+      await Promise.race([
+        firstValueFrom(found$),
+        startServers({ customKibanaVersion: nextMinor() }).then(() => {
+          throw new Error(
+            'Kibana completed the bootstrap without finding the incompatibility message'
+          );
+        }),
+        new Promise((resolve, reject) =>
+          setTimeout(() => reject(new Error('Test timedout')), 5 * 60 * 1000)
+        ),
+      ]).finally(() => found$.complete());
+    }
+  );
 
   it('should ignore the version mismatch when option is set', async () => {
     await expect(

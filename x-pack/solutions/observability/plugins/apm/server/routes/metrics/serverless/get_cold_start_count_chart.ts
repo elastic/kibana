@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { APMConfig } from '../../..';
+import type { APMConfig } from '../../..';
 import { FAAS_COLDSTART, FAAS_ID, METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
-import { ChartBase } from '../types';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { ChartBase } from '../types';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart.title', {

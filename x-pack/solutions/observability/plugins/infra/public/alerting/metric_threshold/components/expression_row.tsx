@@ -17,11 +17,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
-import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  AggregationType,
-  IErrorObject,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
@@ -32,7 +32,8 @@ import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { Aggregators } from '../../../../common/alerting/metrics';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
-import { AGGREGATION_TYPES, MetricExpression } from '../types';
+import type { MetricExpression } from '../types';
+import { AGGREGATION_TYPES } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION } from '../i18n_strings';
 

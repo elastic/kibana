@@ -73,3 +73,7 @@ export const INFO_BUTTON_TEXT = i18n.translate(
     defaultMessage: 'How is risk score calculated?',
   }
 );
+
+export const BETA = i18n.translate('xpack.securitySolution.riskScore.technicalPreviewLabel', {
+  defaultMessage: 'Beta',
+});

@@ -10,22 +10,20 @@ import { get, getOr } from 'lodash/fp';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
+import type { EntityRiskQueries } from '../../../../../../common/api/search_strategy';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
-  RiskQueries,
   BucketItem,
   HostRiskScore,
   UserRiskScore,
 } from '../../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildRiskScoreQuery } from './query.risk_score.dsl';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { getTotalCount } from '../../cti/event_enrichment/helpers';
 
-export const riskScore: SecuritySolutionFactory<
-  RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore
-> = {
+export const riskScore: SecuritySolutionFactory<EntityRiskQueries.list> = {
   buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
@@ -49,7 +47,7 @@ export const riskScore: SecuritySolutionFactory<
     const totalCount = getTotalCount(response.rawResponse.hits.total);
     const hits = response?.rawResponse?.hits?.hits;
     const data = hits?.map((hit) => hit._source) ?? [];
-    const nameField = options.riskScoreEntity === RiskScoreEntity.host ? 'host.name' : 'user.name';
+    const nameField = EntityTypeToIdentifierField[options.riskScoreEntity];
     const names = data.map((risk) => get(nameField, risk) ?? '');
 
     const enhancedData =

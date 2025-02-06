@@ -6,7 +6,8 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { RecreateJobButton } from '../log_analysis_setup/create_job_button';
 
 export const RecreateJobCallout: FC<

@@ -39,6 +39,7 @@ import { SeverityBadge } from '../../../common/components/severity_badge';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 enum KIBANA_ALERTS {
   SEVERITY = 'kibana.alert.severity',
@@ -76,7 +77,7 @@ interface AlertsDetailsFields {
 }
 
 export const AlertsDetailsTable = memo(
-  ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
+  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,

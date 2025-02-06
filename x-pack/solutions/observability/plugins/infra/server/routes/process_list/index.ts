@@ -11,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import { throwErrors } from '@kbn/io-ts-utils';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { createSearchClient } from '../../lib/create_search_client';
 import { getProcessList } from '../../lib/host_details/process_list';
 import { getProcessListChart } from '../../lib/host_details/process_list_chart';

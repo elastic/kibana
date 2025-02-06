@@ -23,6 +23,7 @@ const DefaultParams: Writable<Partial<CoreQueryParams>> = {
 };
 
 export function runTests(schema: ObjectType, defaultTypeParams: Record<string, unknown>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
 
   describe('coreQueryTypes', () => {

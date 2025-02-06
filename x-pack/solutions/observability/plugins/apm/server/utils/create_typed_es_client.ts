@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 
 type RequiredParams = ESSearchRequest & {
   size: number;

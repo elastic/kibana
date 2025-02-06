@@ -26,7 +26,7 @@ import { fromQuery, toQuery } from '../links/url_helpers';
 import { filterSectionsByTerm } from './helper';
 import { Section } from './section';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { SectionDescriptor } from './types';
+import type { SectionDescriptor } from './types';
 
 interface Props {
   sections: SectionDescriptor[];

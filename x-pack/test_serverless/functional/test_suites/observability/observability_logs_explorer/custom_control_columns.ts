@@ -159,10 +159,20 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
       Array(count)
         .fill(0)
         .map(() => {
-          return log.create().logLevel('info').timestamp(timestamp).defaults({
-            'error.exception.stacktrace': 'Error message in error.exception.stacktrace',
-            'service.name': 'node-service',
-          });
+          return log
+            .create()
+            .logLevel('info')
+            .timestamp(timestamp)
+            .defaults({
+              'error.exception': {
+                stacktrace: [
+                  {
+                    abs_path: 'abs_path',
+                  },
+                ],
+              },
+              'service.name': 'node-service',
+            });
         })
     );
 
@@ -176,10 +186,20 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
       Array(count)
         .fill(0)
         .map(() => {
-          return log.create().logLevel('info').timestamp(timestamp).defaults({
-            'error.log.stacktrace': 'Error message in error.log.stacktrace',
-            'service.name': 'node-service',
-          });
+          return log
+            .create()
+            .logLevel('info')
+            .timestamp(timestamp)
+            .defaults({
+              'error.log': {
+                stacktrace: [
+                  {
+                    abs_path: 'abs_path',
+                  },
+                ],
+              },
+              'service.name': 'node-service',
+            });
         })
     );
 

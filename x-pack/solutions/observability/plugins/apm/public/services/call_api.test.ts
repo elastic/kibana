@@ -7,7 +7,7 @@
 
 import { mockNow } from '../utils/test_helpers';
 import { clearCache, callApi } from './rest/call_api';
-import { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
 
 type CoreMock = CoreStart & {
   http: {

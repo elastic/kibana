@@ -6,12 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import {
-  createKibanaReactContext,
-  KibanaReactContextValue,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export type PluginKibanaContextValue = CoreStart & { share?: SharePluginStart };

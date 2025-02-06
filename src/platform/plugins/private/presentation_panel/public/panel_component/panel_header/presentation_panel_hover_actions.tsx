@@ -29,6 +29,7 @@ import {
   EuiPopover,
   EuiToolTip,
   IconType,
+  useEuiTheme,
 } from '@elastic/eui';
 import { ActionExecutionContext, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
@@ -40,7 +41,6 @@ import {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { Subscription } from 'rxjs';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { uiActions } from '../../kibana_services';
@@ -50,12 +50,26 @@ import {
   panelNotificationTrigger,
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../panel_actions';
-import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
 
-const DASHED_OUTLINE = `1px dashed ${euiThemeVars.euiColorMediumShade}`;
-const SOLID_OUTLINE = `1px solid ${euiThemeVars.euiBorderColor}`;
+const getContextMenuAriaLabel = (title?: string, index?: number) => {
+  if (title) {
+    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithTitle', {
+      defaultMessage: 'Panel options for {title}',
+      values: { title },
+    });
+  }
+  if (index) {
+    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithIndex', {
+      defaultMessage: 'Options for panel {index}',
+      values: { index },
+    });
+  }
+  return i18n.translate('presentationPanel.contextMenu.ariaLabel', {
+    defaultMessage: 'Panel options',
+  });
+};
 
 const QUICK_ACTION_IDS = {
   edit: [
@@ -69,15 +83,6 @@ const QUICK_ACTION_IDS = {
 } as const;
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
-
-const ALL_ROUNDED_CORNERS = `
-  border-radius: ${euiThemeVars.euiBorderRadius};
-`;
-const TOP_ROUNDED_CORNERS = `
-  border-top-left-radius: ${euiThemeVars.euiBorderRadius};
-  border-top-right-radius: ${euiThemeVars.euiBorderRadius};
-  border-bottom: 0px;
-`;
 
 const createClickHandler =
   (action: AnyApiAction, context: ActionExecutionContext<EmbeddableApiContext>) =>
@@ -131,6 +136,21 @@ export const PresentationPanelHoverActions = ({
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
 
   const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
+
+  const { euiTheme } = useEuiTheme();
+
+  const EDIT_MODE_OUTLINE = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
+  const VIEW_MODE_OUTLINE = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
+
+  const ALL_ROUNDED_CORNERS = `
+  border-radius: ${euiTheme.border.radius.medium};
+`;
+  const TOP_ROUNDED_CORNERS = `
+  border-top-left-radius: ${euiTheme.border.radius.medium};
+  border-top-right-radius: ${euiTheme.border.radius.medium};
+  border-bottom: 0px;
+`;
+
   const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
 
   const updateCombineHoverActions = () => {
@@ -142,11 +162,11 @@ export const PresentationPanelHoverActions = ({
     const hoverActionsWidth =
       (rightHoverActionsRef.current?.offsetWidth ?? 0) +
       (dragHandleRef.current?.offsetWidth ?? 0) +
-      parseInt(euiThemeVars.euiSize, 10) * 2;
+      parseInt(euiTheme.size.base, 10) * 2;
     const hoverActionsHeight = rightHoverActionsRef.current?.offsetHeight ?? 0;
 
     // Left align hover actions when they would get cut off by the right edge of the window
-    if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiThemeVars.euiSize, 10)) {
+    if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiTheme.size.base, 10)) {
       dragHandleRef.current?.style.removeProperty('right');
       dragHandleRef.current?.style.setProperty('left', '0');
     } else {
@@ -164,9 +184,9 @@ export const PresentationPanelHoverActions = ({
 
       if (willGetCutOff) {
         hoverActionsRef.current.style.setProperty('position', 'absolute');
-        hoverActionsRef.current.style.setProperty('top', `-${euiThemeVars.euiSizeS}`);
+        hoverActionsRef.current.style.setProperty('top', `-${euiTheme.size.s}`);
       } else if (shouldCombine) {
-        hoverActionsRef.current.style.setProperty('top', `-${euiThemeVars.euiSizeL}`);
+        hoverActionsRef.current.style.setProperty('top', `-${euiTheme.size.l}`);
       } else {
         hoverActionsRef.current.style.removeProperty('position');
         hoverActionsRef.current.style.removeProperty('top');
@@ -189,12 +209,12 @@ export const PresentationPanelHoverActions = ({
     parentHideTitle,
     parentViewMode,
   ] = useBatchedOptionalPublishingSubjects(
-    api?.defaultPanelTitle,
-    api?.panelTitle,
-    api?.panelDescription,
-    api?.hidePanelTitle,
+    api?.defaultTitle$,
+    api?.title$,
+    api?.description$,
+    api?.hideTitle$,
     api?.hasLockedHoverActions$,
-    api?.parentApi?.hidePanelTitle,
+    api?.parentApi?.hideTitle$,
     /**
      * View mode changes often have the biggest influence over which actions will be compatible,
      * so we build and update all actions when the view mode changes. This is temporary, as these
@@ -240,10 +260,11 @@ export const PresentationPanelHoverActions = ({
 
     (async () => {
       // subscribe to any frequently changing context menu actions
-      const frequentlyChangingActions = uiActions.getFrequentlyChangingActionsForTrigger(
+      const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
         CONTEXT_MENU_TRIGGER,
         apiContext
       );
+      if (canceled) return;
 
       for (const frequentlyChangingAction of frequentlyChangingActions) {
         if ((quickActionIds as readonly string[]).includes(frequentlyChangingAction.id)) {
@@ -262,10 +283,12 @@ export const PresentationPanelHoverActions = ({
       }
 
       // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications = uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_NOTIFICATION_TRIGGER,
-        apiContext
-      );
+      const frequentlyChangingNotifications =
+        await uiActions.getFrequentlyChangingActionsForTrigger(
+          PANEL_NOTIFICATION_TRIGGER,
+          apiContext
+        );
+      if (canceled) return;
 
       for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
         if (
@@ -309,7 +332,7 @@ export const PresentationPanelHoverActions = ({
       })()) as AnyApiAction[];
       if (canceled) return;
 
-      const disabledActions = api.disabledActionIds?.value;
+      const disabledActions = api.disabledActionIds$?.value;
       if (disabledActions) {
         compatibleActions = compatibleActions.filter(
           (action) => disabledActions.indexOf(action.id) === -1
@@ -396,7 +419,7 @@ export const PresentationPanelHoverActions = ({
         <EuiNotificationBadge
           data-test-subj={`embeddablePanelNotification-${notification.id}`}
           key={notification.id}
-          css={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
+          css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
           onClick={() =>
             notification.execute({ embeddable: api, trigger: panelNotificationTrigger })
           }
@@ -422,7 +445,7 @@ export const PresentationPanelHoverActions = ({
 
       return notificationComponent;
     });
-  }, [api, notifications, showNotifications]);
+  }, [api, euiTheme.size.xs, notifications, showNotifications]);
 
   const contextMenuClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -463,12 +486,12 @@ export const PresentationPanelHoverActions = ({
           })}
           data-test-subj="embeddablePanelDragHandle"
           css={css`
-            margin: ${euiThemeVars.euiSizeXS};
+            margin: ${euiTheme.size.xs};
           `}
         />
       </button>
     ),
-    [setDragHandle]
+    [setDragHandle, euiTheme.size.xs]
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
@@ -487,26 +510,26 @@ export const PresentationPanelHoverActions = ({
         ''
       )}`}
       css={css`
-        border-radius: ${euiThemeVars.euiBorderRadius};
+        border-radius: ${euiTheme.border.radius.medium};
         position: relative;
         height: 100%;
 
         .embPanel {
           ${showBorder
             ? `
-              outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+              outline: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
             `
             : ''}
         }
 
         .embPanel__hoverActions {
           opacity: 0;
-          padding: calc(${euiThemeVars.euiSizeXS} - 1px);
+          padding: calc(${euiTheme.size.xs} - 1px);
           display: flex;
           flex-wrap: nowrap;
 
-          background-color: ${euiThemeVars.euiColorEmptyShade};
-          height: ${euiThemeVars.euiSizeXL};
+          background-color: ${euiTheme.colors.backgroundBasePlain};
+          height: ${euiTheme.size.xl};
 
           pointer-events: all; // Re-enable pointer-events for hover actions
         }
@@ -515,12 +538,12 @@ export const PresentationPanelHoverActions = ({
         &:focus-within,
         &.embPanel__hoverActionsAnchor--lockHoverActions {
           .embPanel {
-            outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
-            z-index: ${euiThemeVars.euiZLevel2};
+            outline: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
+            z-index: ${euiTheme.levels.menu};
           }
           .embPanel__hoverActionsWrapper {
-            z-index: ${euiThemeVars.euiZLevel9};
-            top: -${euiThemeVars.euiSizeXL};
+            z-index: ${euiTheme.levels.toast};
+            top: -${euiTheme.size.xl};
 
             .embPanel__hoverActions {
               opacity: 1;
@@ -535,12 +558,12 @@ export const PresentationPanelHoverActions = ({
           ref={hoverActionsRef}
           className="embPanel__hoverActionsWrapper"
           css={css`
-            height: ${euiThemeVars.euiSizeXL};
+            height: ${euiTheme.size.xl};
             position: absolute;
             top: 0;
             display: flex;
             justify-content: space-between;
-            padding: 0 ${euiThemeVars.euiSize};
+            padding: 0 ${euiTheme.size.base};
             flex-wrap: nowrap;
             min-width: 100%;
             z-index: -1;
@@ -556,7 +579,7 @@ export const PresentationPanelHoverActions = ({
                 className
               )}
               css={css`
-                border: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+                border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
                 ${borderStyles}
               `}
             >
@@ -575,7 +598,7 @@ export const PresentationPanelHoverActions = ({
                 className
               )}
               css={css`
-                border: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+                border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
                 ${borderStyles}
               `}
             >

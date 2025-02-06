@@ -10,7 +10,9 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.17.1>>
 * <<release-notes-8.17.0>>
+* <<release-notes-8.16.3>>
 * <<release-notes-8.16.2>>
 * <<release-notes-8.16.1>>
 * <<release-notes-8.16.0>>
@@ -84,12 +86,62 @@ Review important information about the {kib} 8.x releases.
 include::upgrade-notes.asciidoc[]
 
 
+[[release-notes-8.17.1]]
+== {kib} 8.17.1
+
+The 8.17.1 release includes the following known issues, enhancements, and bug fixes.
+
+[float]
+[[known-issues-8.17.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-206400]
+
+[float]
+[[enhancement-v8.17.1]]
+=== Enhancements
+Management::
+* Supports wildcards for transforms in the alerting rule flyout ({kibana-pull}204226[#204226]).
+
+[float]
+[[fixes-v8.17.1]]
+=== Bug fixes
+Discover::
+* Fixes a bug with adding comments in multiple lines ({kibana-pull}203966[#203966]).
+Elastic Observability solution::
+* Uses architecture-specific ELSER models ({kibana-pull}205851[#205851]).
+* Stringifies ignored values before rendering ({kibana-pull}203312[#203312]).
+* Fixes an issue with the `ViewInAppUrl` Custom Threshold Rule routing to the default space instead of the space where it was created ({kibana-pull}201793[#201793]).
+Elastic Search solution::
+* Align native box connector configs ({kibana-pull}203241[#203241]).
+Kibana platform::
+* Fixes an issue with short URLs not working for dashboards ({kibana-pull}197484[#197484]).
+
 [[release-notes-8.17.0]]
 == {kib} 8.17.0
 
 coming::[8.17.0]
 
 For information about the {kib} 8.17.0 release, review the following information.
+
+The 8.17.0 release includes the following known issues.
+
+[float]
+[[known-issues-8.17.0]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
+// tag::known-issue-206400[]
+.Upgrade Assistant displays configured source mode in mappings as critical deprecation issue.
+[%collapsible]
+====
+*Details* +
+When upgrading to a newer version, the Upgrade Assistant displays critical warnings for the deprecation of configuring source mode in mappings. These warnings can safely be ignored.
+
+For more information, refer to https://github.com/elastic/kibana/issues/206400[#206400].
+====
+// end::known-issue-206400[]
 
 [float]
 [[deprecations-8.17.0]]
@@ -222,6 +274,31 @@ Machine Learning::
 Kibana platform::
 * Fixes an issue with the global search field that could open the wrong page when pressing "Enter" while results were not yet fully loaded ({kibana-pull}197750[#197750]).
 
+[[release-notes-8.16.3]]
+== {kib} 8.16.3
+
+The 8.16.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.16.3]]
+=== Bug fixes
+Alerting::
+* Updates handling of invalid RRule params and prevents infinite looping ({kibana-pull}205650[#205650]).
+* Fixes an issue with saving ECS group by fields at the root level for query DSL rules ({kibana-pull}203769[#203769]).
+* Fixes race condition in alerting rules data view selector ({kibana-pull}203654[#203654]).
+Data ingestion and Fleet::
+* Fixes an issue with showing all agent tags when agent list is filtered ({kibana-pull}205163[#205163]).
+Elastic Observability solution::
+* Preserves `kuery` filters when switching between Universal Profiling pages in new solution navigation ({kibana-pull}203545[#203545]).
+Elastic Search solution::
+* Adds ML as required plugin to Search Assistant ({kibana-pull}204009[#204009]).
+* Fixes web crawler name inconsistencies ({kibana-pull}202738[#202738]).
+Elastic Security solution::
+For the Elastic Security 8.16.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes Integration and Datastream name validation ({kibana-pull}204943[#204943]).
+* Adds RBAC to the Automatic Import APIs ({kibana-pull}203882[#203882]).
+
 [[release-notes-8.16.2]]
 == {kib} 8.16.2
 
@@ -299,6 +376,8 @@ The 8.16.0 release includes the following known issues.
 [float]
 [[known-issues-8.16.0]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 [discrete]
 [[known-199902]]
@@ -892,6 +971,8 @@ The 8.15.0 release includes the following known issues.
 [[known-issues-8.15.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-178114]]
 .Kibana fails to start when processing YAML configuration keys that contain dotted notation in objects in arrays
@@ -1335,6 +1416,8 @@ For information about the {kib} 8.14.0 release, review the following information
 [float]
 [[known-issues-8.14.0]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 // tag::known-issue-186969[]
 .Creating or editing APM, {observability} and {stack-monitor-app} rules fails
@@ -1809,6 +1892,8 @@ For information about the {kib} 8.13.0 release, review the following information
 [[known-issues-8.13.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-179457]]
 .In Canvas, an empty text element incorrectly triggers a toast notification
@@ -2216,6 +2301,8 @@ For information about the {kib} 8.12.0 release, review the following information
 [[known-issues-8.12.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-177938-8.12]]
 .Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
@@ -2614,6 +2701,8 @@ For information about the {kib} 8.11.0 release, review the following information
 [[known-issues-8.11.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 // tag::known-issue-169170[]
 [discrete]
 .Gatekeeper error on macOS
@@ -2958,6 +3047,35 @@ Presentation::
 IMPORTANT: {kib} 8.10.0 has been withdrawn.
 
 For information about the {kib} 8.10.0 release, review the following information.
+[float]
+[[known-issues-8.10.0]]
+=== Known issues
+
+// tag::known-issue-187254[]
+.Errors appear when loading Observability Infrastructure inventory views after upgrading to version 8.10.0 or higher.
+[%collapsible]
+====
+*Details* +
+After upgrading to version 8.10.0 or higher, you may encounter errors when loading inventory views. 
+
+For more information, refer to https://github.com/elastic/kibana/issues/187254[#187254].
+
+*Workaround* +
+You can mitigate the issue by completing the following steps:
+
+. Search the `.kibana_*` index for `type: inventory_view`.
+
+. Copy the `_id` field, which will be formatted as `inventory-view:<id>`. For example, `inventory-view:3d3d06b0-f873-4373-8446-f6a8341cd8b1`. Omit the `inventory-view:` portion and copy only the string of `_id` characters.
+
+. The offending documents are those with fields `inventory-view.legend.steps` > 18. Delete these documents by running the following in *Console*:
+
+[source,js]
+----------------------------------
+DELETE kbn:/api/infra/inventory-views/<id> 
+----------------------------------
+====
+// end::known-issue-187254[]
+
 
 [float]
 [[security-updates-v8.10.0]]

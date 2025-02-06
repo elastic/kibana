@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
+import type { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 
 export const DatasetsList: React.FunctionComponent<{

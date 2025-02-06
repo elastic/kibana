@@ -114,7 +114,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
     const historicalSummary =
       historicalSummaries.find(
-        (hist) => hist.sloId === slo.id && hist.instanceId === (slo.instanceId ?? ALL_VALUE)
+        (hist) => hist.sloId === slo.id && hist.instanceId === slo.instanceId
       )?.data ?? [];
 
     const lastArray = chartsData[chartsData.length - 1];
@@ -125,7 +125,6 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
     const rules = rulesBySlo?.[slo?.id];
     const activeAlerts = activeAlertsBySlo.get(slo);
-    const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
 
     const data = getSloChartData({
       slo,
@@ -141,7 +140,6 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
         rules={rules}
         activeAlerts={activeAlerts}
         handleCreateRule={() => {}}
-        hasGroupBy={hasGroupBy}
       />
     );
     chartsData[chartsData.length - 1].push(data);

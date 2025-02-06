@@ -98,7 +98,7 @@ export class PluginWrapper<
    * is the contract returned by the dependency's `setup` function.
    */
   public setup(
-    setupContext: CoreSetup<TPluginsStart> | CorePreboot,
+    setupContext: CoreSetup<TPluginsStart, TStart> | CorePreboot,
     plugins: TPluginsSetup
   ): TSetup | Promise<TSetup> {
     if (!this.instance) {
@@ -109,7 +109,7 @@ export class PluginWrapper<
       return this.instance.setup(setupContext as CorePreboot, plugins);
     }
 
-    return this.instance.setup(setupContext as CoreSetup, plugins);
+    return this.instance.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins);
   }
 
   /**

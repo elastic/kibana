@@ -88,7 +88,15 @@ export const resolveCaseRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
   },
-  params,
+  params: {
+    ...params,
+    query: schema.object({
+      /**
+       * @deprecated since version 8.1.0
+       */
+      includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
+    }),
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

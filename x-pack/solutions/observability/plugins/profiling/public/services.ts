@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpFetchQuery } from '@kbn/core/public';
+import type { HttpFetchQuery } from '@kbn/core/public';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import {
   createFlameGraph,
-  TopNFunctions,
   type BaseFlameGraph,
   type ElasticFlameGraph,
 } from '@kbn/profiling-utils';
@@ -19,9 +19,9 @@ import type {
   StorageExplorerSummaryAPIResponse,
   StorageHostDetailsAPIResponse,
 } from '../common/storage_explorer';
-import { TopNResponse } from '../common/topn';
+import type { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
-import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
+import type { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface APMTransactionsPerService {
   [serviceName: string]: {

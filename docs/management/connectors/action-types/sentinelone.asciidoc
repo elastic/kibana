@@ -12,6 +12,8 @@ preview::[]
 
 The SentinelOne connector communicates with SentinelOne Management Console via REST API.
 
+To use this connector, you must have authority to run {endpoint-sec} connectors, which is an *{connectors-feature}* sub-feature privilege. Refer to <<kibana-privileges>>.
+
 [float]
 [[define-sentinelone-ui]]
 === Create connectors in {kib}

@@ -8,7 +8,11 @@
 import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+  UsageCounter,
+} from '@kbn/usage-collection-plugin/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -18,7 +22,7 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -31,7 +35,6 @@ import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
-import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
@@ -45,6 +48,7 @@ import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
+import { calculateStartingCapacity } from './lib/create_managed_configuration';
 import {
   registerMarkRemovedTasksAsUnrecognizedDefinition,
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
@@ -82,14 +86,26 @@ export type TaskManagerStartContract = Pick<
     getRegisteredTypes: () => string[];
   };
 
-export interface TaskManagerPluginStart {
+export interface TaskManagerPluginsStart {
   cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
+}
+
+export interface TaskManagerPluginsSetup {
+  cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
 
 export class TaskManagerPlugin
-  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
+  implements
+    Plugin<
+      TaskManagerSetupContract,
+      TaskManagerStartContract,
+      TaskManagerPluginsSetup,
+      TaskManagerPluginsStart
+    >
 {
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
@@ -129,8 +145,8 @@ export class TaskManagerPlugin
   }
 
   public setup(
-    core: CoreSetup<TaskManagerStartContract, unknown>,
-    plugins: { usageCollection?: UsageCollectionSetup }
+    core: CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>,
+    plugins: TaskManagerPluginsSetup
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
@@ -259,7 +275,7 @@ export class TaskManagerPlugin
 
   public start(
     { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
-    { cloud }: TaskManagerPluginStart
+    { cloud }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -315,12 +331,7 @@ export class TaskManagerPlugin
       }`
     );
 
-    const managedConfiguration = createManagedConfiguration({
-      config: this.config!,
-      errors$: taskStore.errors$,
-      defaultCapacity,
-      logger: this.logger,
-    });
+    const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
@@ -347,8 +358,8 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-        ...managedConfiguration,
         taskPartitioner,
+        startingCapacity,
       });
 
       this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
@@ -367,12 +378,12 @@ export class TaskManagerPlugin
       taskStore,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       config: this.config!,
-      managedConfig: managedConfiguration,
       logger: this.logger,
       adHocTaskCounter: this.adHocTaskCounter,
       taskDefinitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
       ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
+      startingCapacity,
     }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({

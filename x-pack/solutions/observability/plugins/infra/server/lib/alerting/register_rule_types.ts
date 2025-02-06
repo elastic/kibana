@@ -6,14 +6,15 @@
  */
 
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { type IRuleTypeAlerts, AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import { type IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { registerMetricThresholdRuleType } from './metric_threshold/register_metric_threshold_rule_type';
 import { registerInventoryThresholdRuleType } from './inventory_metric_threshold/register_inventory_metric_threshold_rule_type';
 import { registerLogThresholdRuleType } from './log_threshold/register_log_threshold_rule_type';
-import { InfraBackendLibs, InfraLocators } from '../infra_types';
+import type { InfraBackendLibs, InfraLocators } from '../infra_types';
 import type { InfraConfig } from '../../types';
-import { MetricThresholdAlert } from './metric_threshold/metric_threshold_executor';
-import { LogThresholdAlert } from './log_threshold/log_threshold_executor';
+import type { MetricThresholdAlert } from './metric_threshold/metric_threshold_executor';
+import type { LogThresholdAlert } from './log_threshold/log_threshold_executor';
 
 export const LOGS_RULES_ALERT_CONTEXT = 'observability.logs';
 // Defines which alerts-as-data index logs rules will use

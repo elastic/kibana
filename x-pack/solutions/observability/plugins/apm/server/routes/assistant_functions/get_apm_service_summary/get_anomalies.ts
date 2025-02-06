@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { compact, keyBy } from 'lodash';
 import {
@@ -22,7 +22,7 @@ import { anomalySearch } from '../../../lib/anomaly_detection/anomaly_search';
 import { apmMlAnomalyQuery } from '../../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { apmMlJobsQuery } from '../../../lib/anomaly_detection/apm_ml_jobs_query';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
-import { MlClient } from '../../../lib/helpers/get_ml_client';
+import type { MlClient } from '../../../lib/helpers/get_ml_client';
 
 export type ApmAnomalies = Awaited<ReturnType<typeof getAnomalies>>;
 

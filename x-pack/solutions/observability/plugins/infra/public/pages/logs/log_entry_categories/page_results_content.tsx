@@ -17,7 +17,7 @@ import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/p
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
-import { TimeRange } from '../../../../common/time/time_range';
+import type { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
@@ -30,11 +30,9 @@ import { LogsPageTemplate } from '../shared/page_template';
 import { PageViewLogInContext } from '../stream/page_view_log_in_context';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
-import {
-  StringTimeRange,
-  useLogEntryCategoriesResultsUrlState,
-} from './use_log_entry_categories_results_url_state';
-import { IdFormat } from '../../../../common/http_api/latest';
+import type { StringTimeRange } from './use_log_entry_categories_results_url_state';
+import { useLogEntryCategoriesResultsUrlState } from './use_log_entry_categories_results_url_state';
+import type { IdFormat } from '../../../../common/http_api/latest';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 

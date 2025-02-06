@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
-import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import {
+import type { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';

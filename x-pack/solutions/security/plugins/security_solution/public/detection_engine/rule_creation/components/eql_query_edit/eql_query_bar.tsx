@@ -190,6 +190,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           isInvalid={!isValid && !isValidating}
           value={fieldValue.query.query as string}
           onChange={handleChange}
+          aria-label={field.label}
         />
         <EqlQueryBarFooter
           errors={errorMessages}

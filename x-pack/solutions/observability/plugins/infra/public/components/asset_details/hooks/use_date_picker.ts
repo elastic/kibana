@@ -12,7 +12,7 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { BehaviorSubject } from 'rxjs';
 import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 import { parseDateRange } from '../../../utils/datemath';
-import { AssetDetailsProps } from '../types';
+import type { AssetDetailsProps } from '../types';
 import { getDefaultDateRange, toTimestampRange } from '../utils';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 

@@ -36,7 +36,9 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type VulnerabilitySortFieldType =
   | 'score'
@@ -123,7 +125,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
 
   const getNavUrlParams = useGetNavigationUrlParams();
 
-  const getVulnerabilityUrl = (name: string, queryField: 'host.name' | 'user.name') => {
+  const getVulnerabilityUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
     return getNavUrlParams({ [queryField]: name }, 'vulnerabilities');
   };
 
@@ -237,7 +239,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       <EuiPanel hasShadow={false}>
         <SecuritySolutionLinkAnchor
           deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-          path={`${getVulnerabilityUrl(value, 'host.name')}`}
+          path={`${getVulnerabilityUrl(value, EntityIdentifierFields.hostName)}`}
           target={'_blank'}
           external={false}
           onClick={() => {

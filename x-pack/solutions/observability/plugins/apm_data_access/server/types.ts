@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { APMIndices } from '.';
-import { getServices } from './services/get_services';
+import type { getServices } from './services/get_services';
 import type { ApmDataAccessPrivilegesCheck } from './lib/check_privileges';
 
 export interface ApmDataAccessPluginSetup {

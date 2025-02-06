@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Location } from 'history';
+import type { Location } from 'history';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { toQuery } from '../../components/shared/links/url_helpers';
 import { getDateRange, removeUndefinedProps, toBoolean, toNumber, toString } from './helpers';
-import { UrlParams } from './types';
+import type { UrlParams } from './types';
 
 type TimeUrlParams = Pick<UrlParams, 'start' | 'end' | 'rangeFrom' | 'rangeTo'>;
 

@@ -6,7 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
 import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

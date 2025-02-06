@@ -57,6 +57,7 @@ export const LogRateAnalysisPage: FC = () => {
               'theme',
               'uiActions',
               'uiSettings',
+              'userProfile',
               'unifiedSearch',
               'observabilityAIAssistant',
               'embeddable',

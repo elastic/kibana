@@ -127,6 +127,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'screenshots',
   'icons',
   'policy_templates',
+  'policy_templates_behavior',
   'release',
   'agent',
   'elasticsearch',
@@ -161,12 +162,17 @@ export async function generatePackageInfoFromArchiveBuffer(
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
   const assetsMap: AssetsBufferMap = {};
   const paths: string[] = [];
-  await traverseArchiveEntries(archiveBuffer, contentType, async ({ path: bufferPath, buffer }) => {
-    paths.push(bufferPath);
-    if (buffer && filterAssetPathForParseAndVerifyArchive(bufferPath)) {
-      assetsMap[bufferPath] = buffer;
-    }
-  });
+  await traverseArchiveEntries(
+    archiveBuffer,
+    contentType,
+    async ({ path: bufferPath, buffer }) => {
+      paths.push(bufferPath);
+      if (buffer) {
+        assetsMap[bufferPath] = buffer;
+      }
+    },
+    (entryPath: string) => filterAssetPathForParseAndVerifyArchive(entryPath)
+  );
 
   return {
     packageInfo: parseAndVerifyArchive(paths, assetsMap),

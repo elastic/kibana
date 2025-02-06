@@ -7,8 +7,8 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/test_helpers';
 import { CustomLinkList } from './custom_link_list';
 

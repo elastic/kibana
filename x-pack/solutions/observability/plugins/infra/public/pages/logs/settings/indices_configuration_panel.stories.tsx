@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPanel, PropsOf } from '@elastic/eui';
+import type { PropsOf } from '@elastic/eui';
+import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import {
-  MockIndexPatternsKibanaContextProvider,
-  MockIndexPatternSpec,
-} from '../../../hooks/use_kibana_index_patterns.mock';
+import type { MockIndexPatternSpec } from '../../../hooks/use_kibana_index_patterns.mock';
+import { MockIndexPatternsKibanaContextProvider } from '../../../hooks/use_kibana_index_patterns.mock';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
-import { LogIndicesFormState, useLogIndicesFormElement } from './indices_configuration_form_state';
+import type { LogIndicesFormState } from './indices_configuration_form_state';
+import { useLogIndicesFormElement } from './indices_configuration_form_state';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 
 export default {

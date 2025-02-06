@@ -72,6 +72,7 @@ describe('test fetchAll', () => {
         isDataViewLoading: false,
         savedDataViews: [],
         adHocDataViews: [],
+        defaultProfileAdHocDataViewIds: [],
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
@@ -81,6 +82,7 @@ describe('test fetchAll', () => {
           rowHeight: false,
           breakdownField: false,
         },
+        dataRequestParams: {},
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -266,6 +268,7 @@ describe('test fetchAll', () => {
         isDataViewLoading: false,
         savedDataViews: [],
         adHocDataViews: [],
+        defaultProfileAdHocDataViewIds: [],
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
@@ -275,6 +278,7 @@ describe('test fetchAll', () => {
           rowHeight: false,
           breakdownField: false,
         },
+        dataRequestParams: {},
       }),
     };
     fetchAll(subjects, false, deps);
@@ -390,6 +394,7 @@ describe('test fetchAll', () => {
           isDataViewLoading: false,
           savedDataViews: [],
           adHocDataViews: [],
+          defaultProfileAdHocDataViewIds: [],
           expandedDoc: undefined,
           customFilters: [],
           overriddenVisContextAfterInvalidation: undefined,
@@ -399,6 +404,7 @@ describe('test fetchAll', () => {
             rowHeight: false,
             breakdownField: false,
           },
+          dataRequestParams: {},
         }),
       };
       fetchAll(subjects, false, deps);

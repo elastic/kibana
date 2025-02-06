@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 
 export const buildLogsExplorerLocatorConfig = ({
   locator,

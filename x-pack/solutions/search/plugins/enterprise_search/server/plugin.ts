@@ -19,6 +19,7 @@ import {
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
+
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
@@ -72,6 +73,7 @@ import {
   WS_TELEMETRY_NAME,
   registerTelemetryUsageCollector as registerWSTelemetryUsageCollector,
 } from './collectors/workplace_search/telemetry';
+import { getRegisteredDeprecations } from './deprecations';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { checkAccess } from './lib/check_access';
@@ -88,6 +90,7 @@ import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
+import { registerDeprecationRoutes } from './routes/enterprise_search/deprecations';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
@@ -134,7 +137,7 @@ export interface RouteDependencies {
   router: IRouter;
 }
 
-export class EnterpriseSearchPlugin implements Plugin {
+export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
   private readonly config: ConfigType;
   private readonly logger: Logger;
   private readonly globalConfigService: GlobalConfigService;
@@ -152,11 +155,13 @@ export class EnterpriseSearchPlugin implements Plugin {
   public setup(
     {
       capabilities,
+      deprecations,
       elasticsearch,
       http,
       savedObjects,
       getStartServices,
       uiSettings,
+      docLinks,
     }: CoreSetup<PluginsStart>,
     {
       usageCollection,
@@ -387,7 +392,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     /*
      * Register logs source configuration, used by LogStream components
-     * @see https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/observability_solution/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
+     * @see https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/logs_shared/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
     logsShared.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
@@ -440,6 +445,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
     }
+
+    /**
+     * Register deprecations
+     */
+    registerDeprecationRoutes(dependencies);
+    deprecations.registerDeprecations(
+      getRegisteredDeprecations(config, cloud, docLinks.links.enterpriseSearch.upgrade9x)
+    );
   }
 
   public start() {}

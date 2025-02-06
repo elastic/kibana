@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
-  Criteria,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,20 +19,20 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import useSet from 'react-use/lib/useSet';
+import type { AnomalyType } from '../../../../../../common/log_analysis';
 import {
   anomaliesSortRT,
-  AnomalyType,
   formatOneDecimalPlace,
   getFriendlyNameForPartitionId,
   isCategoryAnomaly,
 } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time/time_range';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
 import { useKibanaUiSetting } from '../../../../../hooks/use_kibana_ui_setting';
-import {
+import type {
   ChangePaginationOptions,
   ChangeSortOptions,
   FetchNextPage,

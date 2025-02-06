@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
+import type * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import { useHostCount } from './use_host_count';
 

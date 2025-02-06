@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexGroupProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { TimeComparison } from '../../shared/time_comparison';

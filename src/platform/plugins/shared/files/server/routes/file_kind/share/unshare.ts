@@ -54,8 +54,10 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
       {
         path: FILES_API_ROUTES.fileKind.getUnshareRoute(fileKind.id),
         validate: { ...rt },
-        options: {
-          tags: fileKind.http.share.tags,
+        security: {
+          authz: {
+            requiredPrivileges: fileKind.http.share.requiredPrivileges,
+          },
         },
       },
       handler

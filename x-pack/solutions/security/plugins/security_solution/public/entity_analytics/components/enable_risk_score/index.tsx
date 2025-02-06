@@ -6,7 +6,7 @@
  */
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/search_strategy';
 import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { inputsModel } from '../../../common/store';
 import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
@@ -24,7 +24,7 @@ const EnableRiskScoreComponent = ({
 }: {
   isDeprecated: boolean;
   isDisabled: boolean;
-  entityType: RiskScoreEntity;
+  entityType: EntityType;
   refetch: inputsModel.Refetch;
   timerange: {
     from: string;

@@ -85,8 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.clickCopyAsButton();
 
-        let resultToast = await toasts.getElementByIndex(1);
-        let toastText = await resultToast.getVisibleText();
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
 
         expect(toastText).to.be('Requests copied to clipboard as curl');
 
@@ -102,21 +102,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Focus editor once again
         await PageObjects.console.focusInputEditor();
 
-        // Try to copy as javascript
+        // Verify that the Change language button is not displayed for kbn request
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.changeLanguageAndCopy('javascript');
-
-        resultToast = await toasts.getElementByIndex(2);
-        toastText = await resultToast.getVisibleText();
-
-        expect(toastText).to.be('Kibana requests can only be copied as curl');
-
-        // Since we tried to copy as javascript, the clipboard should still have
-        // the curl request
-        if (canReadClipboard) {
-          const clipboardText = await browser.getClipboardValue();
-          expect(clipboardText).to.contain('curl -X GET');
-        }
+        expect(await testSubjects.exists('changeLanguageButton')).to.be(false);
       });
 
       it.skip('allows to change default language', async () => {

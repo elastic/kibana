@@ -38,7 +38,7 @@ interface Props {
   }) => Geometry | null;
   location: [number, number];
   mbMap: MbMap;
-  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
   renderTooltipContent?: RenderToolTipContent;
   executionContext: KibanaExecutionContext;
 }

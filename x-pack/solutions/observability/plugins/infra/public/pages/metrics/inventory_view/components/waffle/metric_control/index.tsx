@@ -8,19 +8,19 @@
 import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SNAPSHOT_API_MAX_METRICS } from '../../../../../../../common/constants';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
-import {
+import type {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
 } from '../../../../../../../common/http_api/snapshot_api';
+import { SnapshotCustomMetricInputRT } from '../../../../../../../common/http_api/snapshot_api';
 import { CustomMetricForm } from './custom_metric_form';
 import { MetricsContextMenu } from './metrics_context_menu';
 import { ModeSwitcher } from './mode_switcher';
 import { MetricsEditMode } from './metrics_edit_mode';
-import { CustomMetricMode } from './types';
+import type { CustomMetricMode } from './types';
 import { DropdownButton } from '../../dropdown_button';
 
 interface Props {

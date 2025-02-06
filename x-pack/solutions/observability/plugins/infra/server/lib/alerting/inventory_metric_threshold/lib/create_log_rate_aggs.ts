@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraTimerangeInput } from '../../../../../common/http_api';
+import type { InfraTimerangeInput } from '../../../../../common/http_api';
 
 export const createLogRateAggs = (timerange: InfraTimerangeInput, id: string) => {
   const intervalInSeconds = (timerange.to - timerange.from) / 1000;

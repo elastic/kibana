@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
-import React, { ComponentProps, ComponentType } from 'react';
+import type { Story } from '@storybook/react';
+import type { ComponentProps, ComponentType } from 'react';
+import React from 'react';
 import { ServiceLink } from '.';
 import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 

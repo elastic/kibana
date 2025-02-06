@@ -73,6 +73,25 @@
         "resolve_during_rolling_upgrade": false
       }
     ],
+    "frozen_index": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0",
+        "details": "This index has version: 7.17.28-8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": { "reindex_required": true }
+      },
+      {
+          "level": "critical",
+          "message":
+            "Index [frozen_index] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html",
+          "details":
+            "Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)",
+          "resolve_during_rolling_upgrade": false
+      }
+    ],
     "closed_index": [
       {
         "level": "critical",
@@ -183,5 +202,26 @@
         }
       }
     }]
+  },
+  "ilm_policies": {
+    "myfreezepolicy": [
+      {
+        "level": "warning",
+        "message": "ILM policy [myfreezepolicy] contains the action 'freeze' that is deprecated and will be removed in a future version.",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html",
+        "details": "This action is already a noop so it can be safely removed, because frozen indices no longer offer any advantages. Consider cold or frozen tiers in place of frozen indices.",
+        "resolve_during_rolling_upgrade": false
+      }
+    ]
+  },
+  "templates": {
+    "mytemplate": [
+      {
+        "level": "critical",
+        "message": "Configuring source mode in mappings is deprecated and will be removed in future versions. Use [index.mapping.source.mode] index setting instead.",
+        "url": "https://github.com/elastic/elasticsearch/pull/117172",
+        "resolve_during_rolling_upgrade": false
+      }
+    ]
   }
 }

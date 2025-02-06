@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertMetricValue } from './convert_metric_value';
 

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { mergeCountWithOther } from './merge_other_count';
-import { MobileProperty, MobilePropertyType } from '../../../../common/mobile_types';
+import type { MobilePropertyType } from '../../../../common/mobile_types';
+import { MobileProperty } from '../../../../common/mobile_types';
 import { getDeviceOSApp } from '../get_device_os_app';
 import { getNCT } from '../get_nct';
 

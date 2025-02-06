@@ -92,7 +92,6 @@ export class UnifiedDocViewerPublicPlugin
             id={hit.raw._id ?? hit.id}
             dataView={dataView}
             textBasedHits={textBasedHits}
-            hasLineNumbers
             decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
           />

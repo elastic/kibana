@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiBadge, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 
@@ -35,6 +34,8 @@ export const usePresentationPanelHeaderActions = <
   const [badges, setBadges] = useState<AnyApiAction[]>([]);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
 
+  const { euiTheme } = useEuiTheme();
+
   /**
    * Get all actions once on mount of the panel. Any actions that are Frequent Compatibility
    * Change Actions need to be subscribed to so they can change over the lifetime of this panel.
@@ -49,7 +50,7 @@ export const usePresentationPanelHeaderActions = <
           embeddable: api,
         })) as AnyApiAction[]) ?? [];
 
-      const disabledActions = (api.disabledActionIds?.value ?? []).concat(disabledNotifications);
+      const disabledActions = (api.disabledActionIds$?.value ?? []).concat(disabledNotifications);
       nextActions = nextActions.filter((badge) => disabledActions.indexOf(badge.id) === -1);
       return nextActions;
     };
@@ -79,10 +80,11 @@ export const usePresentationPanelHeaderActions = <
       const apiContext = { embeddable: api };
 
       // subscribe to any frequently changing badge actions
-      const frequentlyChangingBadges = uiActions.getFrequentlyChangingActionsForTrigger(
+      const frequentlyChangingBadges = await uiActions.getFrequentlyChangingActionsForTrigger(
         PANEL_BADGE_TRIGGER,
         apiContext
       );
+      if (canceled) return;
       for (const badge of frequentlyChangingBadges) {
         subscriptions.add(
           badge.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
@@ -92,10 +94,12 @@ export const usePresentationPanelHeaderActions = <
       }
 
       // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications = uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_NOTIFICATION_TRIGGER,
-        apiContext
-      );
+      const frequentlyChangingNotifications =
+        await uiActions.getFrequentlyChangingActionsForTrigger(
+          PANEL_NOTIFICATION_TRIGGER,
+          apiContext
+        );
+      if (canceled) return;
       for (const notification of frequentlyChangingNotifications) {
         if (!disabledNotifications.includes(notification.id))
           subscriptions.add(
@@ -167,7 +171,7 @@ export const usePresentationPanelHeaderActions = <
         <EuiNotificationBadge
           data-test-subj={`embeddablePanelNotification-${notification.id}`}
           key={notification.id}
-          css={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
+          css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
           onClick={() =>
             notification.execute({ embeddable: api, trigger: panelNotificationTrigger })
           }
@@ -193,7 +197,7 @@ export const usePresentationPanelHeaderActions = <
 
       return notificationComponent;
     });
-  }, [api, notifications, showNotifications]);
+  }, [api, euiTheme.size.xs, notifications, showNotifications]);
 
   return { badgeElements, notificationElements };
 };

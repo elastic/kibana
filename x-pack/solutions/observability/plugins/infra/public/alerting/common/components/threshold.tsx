@@ -10,7 +10,7 @@ import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 
 export interface ChartProps {
   theme?: PartialTheme;
@@ -30,6 +30,14 @@ export interface Props {
     comparator: COMPARATORS;
   };
 }
+
+const NO_DATA_VALUE = i18n.translate('xpack.infra.alerting.noDataValue', {
+  defaultMessage: 'No Data',
+});
+
+const THRESHOLD_NO_DATA_TITLE = i18n.translate('xpack.infra.alerting.thresholdNoDataTitle', {
+  defaultMessage: 'Alert when',
+});
 
 export const Threshold = ({
   chartProps: { theme, baseTheme },
@@ -63,7 +71,7 @@ export const Threshold = ({
             [
               {
                 title,
-                extra: (
+                extra: value ? (
                   <>
                     {i18n.translate('xpack.infra.alerting.thresholdExtraTitle', {
                       values: {
@@ -82,9 +90,11 @@ export const Threshold = ({
                         defaultMessage: `Warn when {comparator} {threshold}`,
                       })}
                   </>
+                ) : (
+                  <>{THRESHOLD_NO_DATA_TITLE}</>
                 ),
                 color,
-                value,
+                value: value ?? NO_DATA_VALUE,
                 valueFormatter,
                 icon: ({ width, height, color: iconColor }) => (
                   <EuiIcon width={width} height={height} color={iconColor} type="alert" />

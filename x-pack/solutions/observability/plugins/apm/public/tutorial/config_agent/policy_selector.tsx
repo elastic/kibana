@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
 import React from 'react';
-import { PolicyOption } from './get_policy_options';
+import type { PolicyOption } from './get_policy_options';
 
 interface Props {
   options: PolicyOption[];

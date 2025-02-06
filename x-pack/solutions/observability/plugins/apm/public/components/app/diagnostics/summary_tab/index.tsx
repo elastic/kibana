@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
 import { FieldMappingStatus } from './indicies_status';

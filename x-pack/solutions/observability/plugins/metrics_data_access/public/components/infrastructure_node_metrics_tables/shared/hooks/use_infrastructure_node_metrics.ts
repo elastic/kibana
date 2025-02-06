@@ -17,8 +17,8 @@ import type {
   MetricsExplorerTimeOptions,
 } from '../../../../../common/metrics_explorer_views/types';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
-import { NodeMetricsTableData } from '../types';
-import { MetricsDataClient } from '../../../../lib/metrics_client';
+import type { NodeMetricsTableData } from '../types';
+import type { MetricsDataClient } from '../../../../lib/metrics_client';
 
 export interface SortState<T> {
   field: keyof T;

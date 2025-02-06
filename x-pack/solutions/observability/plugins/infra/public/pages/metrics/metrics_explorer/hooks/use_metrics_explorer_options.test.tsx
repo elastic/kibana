@@ -6,10 +6,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import {
-  useMetricsExplorerOptions,
+import type {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+} from './use_metrics_explorer_options';
+import {
+  useMetricsExplorerOptions,
   DEFAULT_OPTIONS,
   DEFAULT_TIMERANGE,
 } from './use_metrics_explorer_options';

@@ -28,6 +28,7 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -70,7 +71,7 @@ export const VulnerabilitiesPreview = ({
   openDetailsPanel,
 }: {
   value: string;
-  field: 'host.name' | 'user.name';
+  field: CloudPostureEntityIdentifier;
   isPreviewMode?: boolean;
   isLinkEnabled: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiCardProps } from '@elastic/eui';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
-import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
   type ObservabilityOnboardingLocatorParams,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fetchLogRateAnalysisForAlert } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { PROCESSOR_EVENT } from '../../../../common/es_fields/apm';
 import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
 

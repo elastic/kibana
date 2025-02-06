@@ -7,17 +7,15 @@
 
 import { useMemo, useState } from 'react';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import {
+import type {
   CategoryQualityWarningReason,
   QualityWarning,
 } from '../../../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../../../hooks/use_tracked_promise';
-import {
-  callGetLatestCategoriesDatasetsStatsAPI,
-  LogEntryCategoriesDatasetStats,
-} from '../../api/get_latest_categories_datasets_stats';
-import { JobModelSizeStats, JobSummary } from '../../log_analysis_module_types';
+import type { LogEntryCategoriesDatasetStats } from '../../api/get_latest_categories_datasets_stats';
+import { callGetLatestCategoriesDatasetsStatsAPI } from '../../api/get_latest_categories_datasets_stats';
+import type { JobModelSizeStats, JobSummary } from '../../log_analysis_module_types';
 
 export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: JobSummary[] }) => {
   const {

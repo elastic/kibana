@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverErrorLink } from './discover_error_link';
 
 describe('DiscoverErrorLink without kuery', () => {

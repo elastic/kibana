@@ -6,7 +6,7 @@
  */
 
 import d3 from 'd3';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
 

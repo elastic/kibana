@@ -9,9 +9,9 @@ import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
-import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
+import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';

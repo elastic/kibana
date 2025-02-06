@@ -11,27 +11,29 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { first, last } from 'lodash';
 import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import type {
+  ElementClickListener,
+  RectAnnotationDatum,
+  XYChartElementEvent,
+  TooltipProps,
+} from '@elastic/charts';
 import {
   Axis,
   Chart,
   Settings,
   Position,
   niceTimeFormatter,
-  ElementClickListener,
   RectAnnotation,
-  RectAnnotationDatum,
-  XYChartElementEvent,
-  TooltipProps,
   Tooltip,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { Metric } from '../../../../../../common/http_api/infra_ml';
+import type { Metric } from '../../../../../../common/http_api/infra_ml';
 import { useTimelineChartTheme } from '../../../../../hooks/use_timeline_chart_theme';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
-import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
+import type { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useTimeline } from '../../hooks/use_timeline';
@@ -41,7 +43,7 @@ import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
-import { InfraFormatter } from '../../../../../common/inventory/types';
+import type { InfraFormatter } from '../../../../../common/inventory/types';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
 

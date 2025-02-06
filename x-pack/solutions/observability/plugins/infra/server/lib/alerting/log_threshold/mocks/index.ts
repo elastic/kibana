@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraBackendLibs } from '../../../infra_types';
+import type { InfraBackendLibs } from '../../../infra_types';
 
 export const libsMock = {
   sources: {

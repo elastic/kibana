@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  MappingProperty,
-  MappingPropertyBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingProperty, MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
 import type { Mappings } from '../../types';
 
 interface VectorFieldTypes {

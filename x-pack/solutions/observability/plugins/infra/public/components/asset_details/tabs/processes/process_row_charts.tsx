@@ -30,11 +30,9 @@ import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_them
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import { Color } from '../../../../../common/color_palette';
 import { createFormatter } from '../../../../../common/formatters';
-import {
-  MetricsExplorerAggregation,
-  ProcessListAPIChartResponseRT,
-} from '../../../../../common/http_api';
-import { Process } from './types';
+import type { MetricsExplorerAggregation } from '../../../../../common/http_api';
+import { ProcessListAPIChartResponseRT } from '../../../../../common/http_api';
+import type { Process } from './types';
 import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
 import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
 import { useProcessListContext } from '../../hooks/use_process_list';
@@ -168,44 +166,40 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
     : { max: 0, min: 0 };
 
   return (
-    <div
-      css={css`
-         {
-          width: 100%;
-          height: 140px;
-        }
-      `}
+    <Chart
+      size={{
+        height: '140px',
+        width: '100%',
+      }}
     >
-      <Chart>
-        <MetricExplorerSeriesChart
-          type={MetricsExplorerChartType.area}
-          metric={chartMetric}
-          id="0"
-          series={timeseries}
-          stack={false}
-        />
-        <Axis
-          id={'timestamp'}
-          position={Position.Bottom}
-          showOverlappingTicks={true}
-          tickFormat={dateFormatter}
-        />
-        <Axis
-          id={'values'}
-          position={Position.Left}
-          tickFormat={yAxisFormatter}
-          domain={domain}
-          ticks={6}
-          gridLine={{ visible: true }}
-        />
-        <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
-        <Settings
-          baseTheme={chartTheme.baseTheme}
-          theme={chartTheme.theme}
-          locale={i18n.getLocale()}
-        />
-      </Chart>
-    </div>
+      <MetricExplorerSeriesChart
+        type={MetricsExplorerChartType.area}
+        metric={chartMetric}
+        id="0"
+        series={timeseries}
+        stack={false}
+      />
+      <Axis
+        id={'timestamp'}
+        position={Position.Bottom}
+        showOverlappingTicks={true}
+        tickFormat={dateFormatter}
+      />
+      <Axis
+        id={'values'}
+        position={Position.Left}
+        tickFormat={yAxisFormatter}
+        domain={domain}
+        ticks={6}
+        gridLine={{ visible: true }}
+      />
+      <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
+      <Settings
+        baseTheme={chartTheme.baseTheme}
+        theme={chartTheme.theme}
+        locale={i18n.getLocale()}
+      />
+    </Chart>
   );
 };
 

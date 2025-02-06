@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetMetricsHostsAnomaliesSuccessResponsePayload } from '../../../../../../common/http_api/infra_ml';
+import type { GetMetricsHostsAnomaliesSuccessResponsePayload } from '../../../../../../common/http_api/infra_ml';
 
 const anomalies: GetMetricsHostsAnomaliesSuccessResponsePayload = {
   data: {

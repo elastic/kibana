@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn } from '@kbn/core/server';
-import { InfraSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import type { InfraSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 import { LOGS_INDEX_PATTERN } from '../../../../common/constants';
 
 type SevenTwelveZeroSourceConfig = Omit<InfraSourceConfiguration, 'logIndices'> & {

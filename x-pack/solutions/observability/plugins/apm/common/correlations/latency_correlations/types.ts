@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldValuePair, HistogramItem } from '../types';
+import type { FieldValuePair, HistogramItem } from '../types';
 
 export interface LatencyCorrelation extends FieldValuePair {
   correlation: number;

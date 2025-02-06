@@ -10,9 +10,13 @@
 import semver from 'semver';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
+interface GetDefaultArgs {
+  integrationTest: boolean;
+}
+
 export class EsVersion {
-  static getDefault() {
-    if (typeof jest === 'object' && jest) {
+  static getDefault(args?: GetDefaultArgs) {
+    if (!args?.integrationTest && typeof jest === 'object' && jest) {
       return new EsVersion('9.9.9');
     }
 

@@ -28,7 +28,7 @@ export const getTimelineRoute = (router: SecuritySolutionPluginRouter) => {
       path: TIMELINE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['timeline_read'],
         },
       },
       access: 'public',

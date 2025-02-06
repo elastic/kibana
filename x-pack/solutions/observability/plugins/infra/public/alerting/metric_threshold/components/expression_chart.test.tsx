@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { LineAnnotation, RectAnnotation } from '@elastic/charts';
+import type { LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { Aggregators } from '../../../../common/alerting/metrics';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { MetricExpression } from '../types';
+import type { MetricExpression } from '../types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { ExpressionChart } from './expression_chart';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { ResolvedDataView } from '../../../utils/data_view';
+import type { ResolvedDataView } from '../../../utils/data_view';
 
 const mockDataView = {
   id: 'mock-id',

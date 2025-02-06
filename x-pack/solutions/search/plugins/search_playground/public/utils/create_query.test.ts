@@ -516,20 +516,9 @@ describe('create_query', () => {
                   {
                     standard: {
                       query: {
-                        nested: {
-                          inner_hits: {
-                            _source: ['field2.inference.chunks.text'],
-                            name: 'index1.field2',
-                            size: 2,
-                          },
-                          path: 'field2.inference.chunks',
-                          query: {
-                            sparse_vector: {
-                              field: 'field2.inference.chunks.embeddings',
-                              inference_id: 'model2',
-                              query: '{query}',
-                            },
-                          },
+                        semantic: {
+                          field: 'field2',
+                          query: '{query}',
                         },
                       },
                     },
@@ -540,6 +529,15 @@ describe('create_query', () => {
                     },
                   },
                 ],
+              },
+            },
+            highlight: {
+              fields: {
+                field2: {
+                  number_of_fragments: 2,
+                  order: 'score',
+                  type: 'semantic',
+                },
               },
             },
           });
@@ -638,24 +636,9 @@ describe('create_query', () => {
                   {
                     standard: {
                       query: {
-                        nested: {
-                          inner_hits: {
-                            _source: ['field2.inference.chunks.text'],
-                            name: 'index1.field2',
-                            size: 2,
-                          },
-                          path: 'field2.inference.chunks',
-                          query: {
-                            knn: {
-                              field: 'field2.inference.chunks.embeddings',
-                              query_vector_builder: {
-                                text_embedding: {
-                                  model_id: 'model2',
-                                  model_text: '{query}',
-                                },
-                              },
-                            },
-                          },
+                        semantic: {
+                          field: 'field2',
+                          query: '{query}',
                         },
                       },
                     },
@@ -666,6 +649,15 @@ describe('create_query', () => {
                     },
                   },
                 ],
+              },
+            },
+            highlight: {
+              fields: {
+                field2: {
+                  number_of_fragments: 2,
+                  order: 'score',
+                  type: 'semantic',
+                },
               },
             },
           });

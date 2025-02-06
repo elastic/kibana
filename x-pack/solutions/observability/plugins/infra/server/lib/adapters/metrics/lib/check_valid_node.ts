@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraDatabaseSearchResponse } from '../../framework';
+import type { InfraDatabaseSearchResponse } from '../../framework';
 
 export const checkValidNode = async (
   search: <Aggregation>(options: object) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,

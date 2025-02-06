@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiSkeletonText, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React from 'react';
-import { PopoverItem } from '.';
+import type { PopoverItem } from '.';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 interface IconPopoverProps {

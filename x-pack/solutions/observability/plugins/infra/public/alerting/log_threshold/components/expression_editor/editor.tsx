@@ -7,27 +7,31 @@
 
 import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import {
-  ForLastExpression,
-  RuleTypeParamsExpressionProps,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { LogViewProvider, useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import { PersistedLogViewReference, ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
+import type {
+  PersistedLogViewReference,
+  ResolvedLogViewField,
+} from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import {
-  Comparator,
-  isOptimizableGroupedThreshold,
-  isRatioRule,
+import type {
   PartialCountRuleParams,
   PartialCriteria as PartialCriteriaType,
   PartialRatioRuleParams,
   PartialRuleParams,
   ThresholdType,
+} from '../../../../../common/alerting/logs/log_threshold/types';
+import {
+  Comparator,
+  isOptimizableGroupedThreshold,
+  isRatioRule,
   timeUnitRT,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { ObjectEntries } from '../../../../../common/utility_types';
+import type { ObjectEntries } from '../../../../../common/utility_types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import { errorsRT } from '../../validation';

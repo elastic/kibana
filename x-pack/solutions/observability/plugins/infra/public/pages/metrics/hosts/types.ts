@@ -4,6 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HOST_LIMIT_OPTIONS } from './constants';
+import type { HOST_LIMIT_OPTIONS } from './constants';
 
 export type HostLimitOptions = (typeof HOST_LIMIT_OPTIONS)[number];

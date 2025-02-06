@@ -6,11 +6,12 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { DataTier } from '@kbn/observability-shared-plugin/common';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { InferSearchResponseOf } from '@kbn/es-types';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
 import { APM_ALERTING_RULE_TYPE_IDS } from '../../../common/alerting/config/apm_alerting_feature_ids';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public';
-import { PartialRuleParams } from '../../../../../common/alerting/logs/log_threshold';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { TopAlert } from '@kbn/observability-plugin/public';
+import type { PartialRuleParams } from '../../../../../common/alerting/logs/log_threshold';
 
 export interface AlertDetailsAppSectionProps {
   rule: Rule<PartialRuleParams>;

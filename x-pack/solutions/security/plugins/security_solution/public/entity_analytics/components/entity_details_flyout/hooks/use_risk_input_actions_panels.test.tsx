@@ -8,12 +8,12 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { alertInputDataMock } from '../mocks';
 import { useRiskInputActionsPanels } from './use_risk_input_actions_panels';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const casesServiceMock = casesPluginMock.createStartContract();
 const mockCanUseCases = jest.fn().mockReturnValue({
@@ -41,6 +41,13 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
       },
     }),
   };
+});
+
+jest.mock('../../../../common/components/user_privileges');
+(useUserPrivileges as jest.Mock).mockReturnValue({
+  timelinePrivileges: {
+    read: false,
+  },
 });
 
 const TestMenu = ({ panels }: { panels: EuiContextMenuPanelDescriptor[] }) => (
@@ -89,5 +96,23 @@ describe('useRiskInputActionsPanels', () => {
 
     expect(container).not.toHaveTextContent('Add to existing case');
     expect(container).not.toHaveTextContent('Add to new case');
+  });
+
+  it('displays the timeline action when user has sufficient privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
+    });
+    const { container } = customRender();
+
+    expect(container).toHaveTextContent('Add to new timeline');
+  });
+
+  it('does NOT display the timeline action when user has NO insufficient privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: false },
+    });
+    const { container } = customRender();
+
+    expect(container).not.toHaveTextContent('Add to new timeline');
   });
 });

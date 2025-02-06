@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostLimitOptions } from './types';
+import type { HostLimitOptions } from './types';
 
 export const DEFAULT_HOST_LIMIT: HostLimitOptions = 100;
 export const DEFAULT_PAGE_SIZE = 10;

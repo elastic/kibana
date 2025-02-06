@@ -19,9 +19,10 @@ ROW a="foo;bar;baz"
 | EVAL first_a = MV_FIRST(SPLIT(a, ";"))
 ```
 
+**Retrieving the first element from a multivalued field**
 ```esql
-ROW b="apple;banana;cherry"
-| EVAL first_b = MV_FIRST(SPLIT(b, ";"))
+FROM bag_of_numbers
+| EVAL first = MV_FIRST(numbers)
 ```
 
 ## Notes

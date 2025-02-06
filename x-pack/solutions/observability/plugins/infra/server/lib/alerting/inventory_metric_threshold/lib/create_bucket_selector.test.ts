@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { createBucketSelector } from './create_bucket_selector';
 
 describe('createBucketSelector', () => {

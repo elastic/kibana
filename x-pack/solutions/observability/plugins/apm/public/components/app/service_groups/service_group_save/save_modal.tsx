@@ -12,7 +12,7 @@ import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { GroupDetails } from './group_details';
 import { SelectServices } from './select_services';
-import { ServiceGroup, SavedServiceGroup } from '../../../../../common/service_groups';
+import type { ServiceGroup, SavedServiceGroup } from '../../../../../common/service_groups';
 import { refreshServiceGroups } from '../refresh_service_groups_subscriber';
 
 interface Props {

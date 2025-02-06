@@ -22,7 +22,7 @@ import {
 import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calculators';
-import { DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW } from '../config';
+import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from '../config';
 
 export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
   load: number;
@@ -53,8 +53,12 @@ export function createBackgroundTaskUtilizationAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
   adHocTaskCounter: AdHocTaskCounter,
   pollInterval: number,
-  workerUtilizationRunningAverageWindowSize: number = DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW
+  workerUtilizationRunningAverageWindowSize?: number
 ): AggregatedStatProvider<BackgroundTaskUtilizationStat> {
+  const workerUtilizationWindowSize =
+    workerUtilizationRunningAverageWindowSize ??
+    WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / pollInterval;
+
   const taskRunEventToAdhocStat = createTaskRunEventToAdhocStat();
   const taskRunAdhocEvents$: Observable<Pick<BackgroundTaskUtilizationStat, 'adhoc'>> =
     taskPollingLifecycle.events.pipe(
@@ -84,7 +88,7 @@ export function createBackgroundTaskUtilizationAggregator(
     );
 
   const taskManagerUtilizationEventToLoadStat = createTaskRunEventToLoadStat(
-    workerUtilizationRunningAverageWindowSize
+    workerUtilizationWindowSize
   );
 
   const taskManagerWorkerUtilizationEvent$: Observable<

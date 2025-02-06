@@ -8,16 +8,16 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
-import { AlertStatus } from '@kbn/observability-plugin/common/typings';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   APM_ALERTING_CONSUMERS,
   APM_ALERTING_RULE_TYPE_IDS,
 } from '../../../../common/alerting/config/apm_alerting_feature_ids';
-import { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStartDeps } from '../../../plugin';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { getEnvironmentKuery } from '../../../../common/environment_filter_values';

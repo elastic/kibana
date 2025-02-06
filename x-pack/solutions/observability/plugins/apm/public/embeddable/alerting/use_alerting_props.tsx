@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useState, useEffect } from 'react';
-import { Rule } from '@kbn/alerting-plugin/common';
+import type { Rule } from '@kbn/alerting-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getTransactionType } from '../../context/apm_service/apm_service_context';
 import { useServiceTransactionTypesFetcher } from '../../context/apm_service/use_service_transaction_types_fetcher';

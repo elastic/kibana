@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import {
+import type {
   AppMountParameters,
-  AppStatus,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { from, map, mergeMap, of } from 'rxjs';
 import { createCallInventoryAPI } from './api';
 import { TelemetryService } from './services/telemetry/telemetry_service';
-import { InventoryServices } from './services/types';
+import type { InventoryServices } from './services/types';
 import type {
   ConfigSchema,
   InventoryPublicSetup,

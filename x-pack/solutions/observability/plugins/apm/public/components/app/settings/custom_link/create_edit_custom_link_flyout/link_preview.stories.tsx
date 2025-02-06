@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { ComponentProps } from 'react';
+import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import { createCallApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { LinkPreview } from './link_preview';
 

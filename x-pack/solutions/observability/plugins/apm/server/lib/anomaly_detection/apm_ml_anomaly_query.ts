@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import {
-  AnomalyDetectorType,
-  getAnomalyDetectorIndex,
-} from '../../../common/anomaly_detection/apm_ml_detectors';
+import type { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
+import { getAnomalyDetectorIndex } from '../../../common/anomaly_detection/apm_ml_detectors';
 
 export function apmMlAnomalyQuery({
   serviceName,

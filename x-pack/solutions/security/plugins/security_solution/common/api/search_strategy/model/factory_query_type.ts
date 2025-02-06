@@ -19,6 +19,10 @@ export enum UsersQueries {
   authentications = 'authentications',
 }
 
+export enum ServicesQueries {
+  observedDetails = 'observedServiceDetails',
+}
+
 export enum NetworkQueries {
   details = 'networkDetails',
   dns = 'dns',
@@ -31,10 +35,9 @@ export enum NetworkQueries {
   users = 'users',
 }
 
-export enum RiskQueries {
-  hostsRiskScore = 'hostsRiskScore',
-  usersRiskScore = 'usersRiskScore',
-  kpiRiskScore = 'kpiRiskScore',
+export enum EntityRiskQueries {
+  list = 'listEntitiesRiskScore',
+  kpi = 'kpiRiskScore',
 }
 
 export enum CtiQueries {
@@ -52,8 +55,9 @@ export enum RelatedEntitiesQueries {
 export type FactoryQueryTypes =
   | HostsQueries
   | UsersQueries
+  | ServicesQueries
   | NetworkQueries
-  | RiskQueries
+  | EntityRiskQueries
   | CtiQueries
   | typeof FirstLastSeenQuery
   | RelatedEntitiesQueries;

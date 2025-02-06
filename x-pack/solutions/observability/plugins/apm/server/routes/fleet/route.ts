@@ -8,25 +8,25 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
-import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
+import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { createInternalESClientWithResources } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createCloudApmPackgePolicy } from './create_cloud_apm_package_policy';
-import { FleetAgentResponse, getFleetAgents } from './get_agents';
+import type { FleetAgentResponse } from './get_agents';
+import { getFleetAgents } from './get_agents';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
-import {
-  getUnsupportedApmServerSchema,
-  UnsupportedApmServerSchema,
-} from './get_unsupported_apm_server_schema';
+import type { UnsupportedApmServerSchema } from './get_unsupported_apm_server_schema';
+import { getUnsupportedApmServerSchema } from './get_unsupported_apm_server_schema';
 import { isSuperuser } from './is_superuser';
-import { runMigrationCheck, RunMigrationCheckResponse } from './run_migration_check';
+import type { RunMigrationCheckResponse } from './run_migration_check';
+import { runMigrationCheck } from './run_migration_check';
 
 function throwNotFoundIfFleetMigrationNotAvailable(featureFlags: ApmFeatureFlags): void {
   if (!featureFlags.migrationToFleetAvailable) {
@@ -36,7 +36,13 @@ function throwNotFoundIfFleetMigrationNotAvailable(featureFlags: ApmFeatureFlags
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_apm_policies',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        "It's being used in the tutorial page, so it needs to be available for users even if they don't have APM permissions.",
+    },
+  },
   handler: async ({ core, plugins }): Promise<{ hasApmPolicies: boolean }> => {
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
@@ -53,7 +59,13 @@ const hasFleetDataRoute = createApmServerRoute({
 
 const fleetAgentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/agents',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        "It's being used in the tutorial page, so it needs to be available for users even if they don't have APM permissions.",
+    },
+  },
   handler: async ({ core, plugins }): Promise<FleetAgentResponse> => {
     return getFleetAgents({
       coreStart: await core.start(),
@@ -182,7 +194,13 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
 
 const javaAgentVersions = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/java_agent_versions',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'It returns static information stored in a public file in https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/maven-metadata.xml',
+    },
+  },
   handler: async (): Promise<{ versions: string[] | undefined }> => {
     const versions = await getJavaAgentVersionsFromRegistry();
     return {

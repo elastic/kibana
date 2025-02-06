@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import createContainer from 'constate';
-import { LogEntry, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { LogEntry, LogViewReference } from '@kbn/logs-shared-plugin/common';
 
 interface ViewLogInContextProps {
   logViewReference: LogViewReference;

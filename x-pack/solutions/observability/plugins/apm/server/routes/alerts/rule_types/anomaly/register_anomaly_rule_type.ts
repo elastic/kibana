@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   GetViewInAppRelativeUrlFnOpts,
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RuleTypeState,
   RuleExecutorOptions,
-  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
@@ -31,10 +32,11 @@ import {
   ALERT_SEVERITY,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
-import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
+import { anomalyParamsSchema } from '@kbn/response-ops-rule-params/apm_anomaly';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   PROCESSOR_EVENT,
@@ -46,23 +48,23 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
+import type {
+  THRESHOLD_MET_GROUP,
+  ApmRuleParamsType,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
   APM_SERVER_FEATURE_ID,
   formatAnomalyReason,
   RULE_TYPES_CONFIG,
-  THRESHOLD_MET_GROUP,
 } from '../../../../../common/rules/apm_rule_types';
 import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
-import {
-  ApmRuleTypeAlertDefinition,
-  RegisterRuleDependencies,
-} from '../../register_apm_rule_types';
+import type { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { ApmRuleTypeAlertDefinition } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-import { anomalyParamsSchema, ApmRuleParamsType } from '../../../../../common/rules/schema';
 import {
   getAnomalyDetectorIndex,
   getAnomalyDetectorType,

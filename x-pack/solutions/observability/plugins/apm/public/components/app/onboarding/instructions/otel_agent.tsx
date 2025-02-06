@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   copyToClipboard,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiLink,
@@ -17,11 +17,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AgentApiDetails, AgentInstructions } from '../instruction_variants';
+import type { AgentApiDetails, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { APMPluginStartDependencies } from '../../types';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { APMPluginStartDependencies } from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
 export async function getLatestApmPackage({

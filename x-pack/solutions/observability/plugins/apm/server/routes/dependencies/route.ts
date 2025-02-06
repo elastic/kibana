@@ -12,30 +12,23 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import {
-  DependencyLatencyDistributionResponse,
-  getDependencyLatencyDistribution,
-} from './get_dependency_latency_distribution';
+import type { DependencyLatencyDistributionResponse } from './get_dependency_latency_distribution';
+import { getDependencyLatencyDistribution } from './get_dependency_latency_distribution';
 import { getErrorRateChartsForDependency } from './get_error_rate_charts_for_dependency';
-import {
-  getLatencyChartsForDependency,
-  LatencyChartsDependencyResponse,
-} from './get_latency_charts_for_dependency';
-import {
-  getMetadataForDependency,
-  MetadataForDependencyResponse,
-} from './get_metadata_for_dependency';
-import {
-  getThroughputChartsForDependency,
-  ThroughputChartsForDependencyResponse,
-} from './get_throughput_charts_for_dependency';
-import { getTopDependencies, TopDependenciesResponse } from './get_top_dependencies';
-import { DependencyOperation, getTopDependencyOperations } from './get_top_dependency_operations';
-import { DependencySpan, getTopDependencySpans } from './get_top_dependency_spans';
-import {
-  getUpstreamServicesForDependency,
-  UpstreamServicesForDependencyResponse,
-} from './get_upstream_services_for_dependency';
+import type { LatencyChartsDependencyResponse } from './get_latency_charts_for_dependency';
+import { getLatencyChartsForDependency } from './get_latency_charts_for_dependency';
+import type { MetadataForDependencyResponse } from './get_metadata_for_dependency';
+import { getMetadataForDependency } from './get_metadata_for_dependency';
+import type { ThroughputChartsForDependencyResponse } from './get_throughput_charts_for_dependency';
+import { getThroughputChartsForDependency } from './get_throughput_charts_for_dependency';
+import type { TopDependenciesResponse } from './get_top_dependencies';
+import { getTopDependencies } from './get_top_dependencies';
+import type { DependencyOperation } from './get_top_dependency_operations';
+import { getTopDependencyOperations } from './get_top_dependency_operations';
+import type { DependencySpan } from './get_top_dependency_spans';
+import { getTopDependencySpans } from './get_top_dependency_spans';
+import type { UpstreamServicesForDependencyResponse } from './get_upstream_services_for_dependency';
+import { getUpstreamServicesForDependency } from './get_upstream_services_for_dependency';
 
 const topDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/top_dependencies',

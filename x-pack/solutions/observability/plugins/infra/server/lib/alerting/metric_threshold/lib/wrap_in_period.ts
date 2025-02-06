@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 export const createLastPeriod = (

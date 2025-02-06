@@ -18,18 +18,15 @@ import {
 } from '@elastic/eui';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardRenderer,
-} from '@kbn/dashboard-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
+import type { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
 import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
 import { EditDashboard } from './actions/edit_dashboard';

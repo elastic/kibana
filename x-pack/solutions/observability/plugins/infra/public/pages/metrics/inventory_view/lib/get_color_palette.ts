@@ -13,7 +13,7 @@ import {
   euiPaletteGreen,
   euiPaletteWarm,
 } from '@elastic/eui';
-import { InventoryColorPalette } from '../../../../common/inventory/types';
+import type { InventoryColorPalette } from '../../../../common/inventory/types';
 
 const createColorPalette = (name: InventoryColorPalette = 'cool', steps: number = 10) => {
   switch (name) {

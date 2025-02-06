@@ -18,12 +18,8 @@ import type {
 import type { LogQueryFields } from '../../../metrics/types';
 import type { InfraSource } from '../../../sources';
 import { createRequest } from './create_request';
-import {
-  AdditionalContext,
-  doFieldsExist,
-  KUBERNETES_POD_UID,
-  termsAggField,
-} from '../../common/utils';
+import type { AdditionalContext } from '../../common/utils';
+import { doFieldsExist, KUBERNETES_POD_UID, termsAggField } from '../../common/utils';
 
 interface BucketKey {
   node: string;

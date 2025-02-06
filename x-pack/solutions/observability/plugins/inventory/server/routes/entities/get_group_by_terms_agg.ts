@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
+import type { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const getGroupByTermsAgg = (fields: IdentityFieldsPerEntityType, maxSize = 500) => {
-  return Array.from(fields).reduce((acc, [entityType, identityFields]) => {
-    acc[entityType] = {
+export const getGroupByTermsAgg = (fields: { [key: string]: string[] }, maxSize = 500) => {
+  return Object.entries(fields).reduce((acc, [sourceId, identityFields]) => {
+    acc[sourceId] = {
       composite: {
         size: maxSize,
         sources: identityFields.map((field) => ({
@@ -22,5 +22,5 @@ export const getGroupByTermsAgg = (fields: IdentityFieldsPerEntityType, maxSize 
       },
     };
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, { composite: AggregationsCompositeAggregation }>);
 };

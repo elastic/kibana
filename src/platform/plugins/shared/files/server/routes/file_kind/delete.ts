@@ -56,8 +56,10 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
       {
         path: FILES_API_ROUTES.fileKind.getDeleteRoute(fileKind.id),
         validate: { ...rt },
-        options: {
-          tags: fileKind.http.delete.tags,
+        security: {
+          authz: {
+            requiredPrivileges: fileKind.http.delete.requiredPrivileges,
+          },
         },
       },
       handler

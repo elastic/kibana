@@ -6,14 +6,11 @@
  */
 
 import React from 'react';
-import {
-  withKibana,
-  KibanaReactContextValue,
-  KibanaServices,
-} from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { InfraClientStartDeps } from '../types';
+import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { InfraClientStartDeps } from '../types';
 
 interface WithKueryAutocompletionLifecycleProps {
   kibana: KibanaReactContextValue<InfraClientStartDeps & KibanaServices>;

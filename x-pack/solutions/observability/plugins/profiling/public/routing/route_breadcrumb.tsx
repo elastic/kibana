@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import type React from 'react';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useRouteBreadcrumb } from '../components/contexts/route_breadcrumbs_context/use_route_breadcrumb';
 

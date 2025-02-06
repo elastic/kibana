@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { initCreateInventoryViewRoute } from './create_inventory_view';
 import { initDeleteInventoryViewRoute } from './delete_inventory_view';
 import { initFindInventoryViewRoute } from './find_inventory_view';

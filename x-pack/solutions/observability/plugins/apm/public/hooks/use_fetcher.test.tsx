@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, act, renderHook, type RenderHookResult } from '@testing-library/react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
 import { useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
@@ -143,6 +143,7 @@ describe('useFetcher', () => {
     });
 
     it('should show "first response" while loading "second response"', async () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const hook = renderHook(({ callback, args }) => useFetcher(callback, args), {
         initialProps: {
           callback: () => Promise.resolve('first response'),
@@ -211,6 +212,7 @@ describe('useFetcher', () => {
         args: ['a'],
       };
 
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const hook = renderHook(({ callback, args }) => useFetcher(callback, args), {
         initialProps,
         wrapper,

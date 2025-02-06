@@ -95,14 +95,12 @@ describe('Router', () => {
     it('can exclude versioned routes', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       const validation = schema.object({ foo: schema.string() });
-      router.post(
-        {
+      router.versioned
+        .post({
           path: '/versioned',
-          validate: { body: validation, query: validation, params: validation },
-        },
-        (context, req, res) => res.ok(),
-        { isVersioned: true, events: false }
-      );
+          access: 'internal',
+        })
+        .addVersion({ version: '999', validate: false }, async (ctx, req, res) => res.ok());
       router.get(
         {
           path: '/unversioned',

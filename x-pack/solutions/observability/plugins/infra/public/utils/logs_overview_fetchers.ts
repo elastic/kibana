@@ -6,14 +6,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   FetchData,
   FetchDataParams,
   LogsFetchDataResponse,
 } from '@kbn/observability-plugin/public';
 import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { TIMESTAMP_FIELD } from '../../common/constants';
-import { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
+import type { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
 
 interface StatsAggregation {
   buckets: Array<{

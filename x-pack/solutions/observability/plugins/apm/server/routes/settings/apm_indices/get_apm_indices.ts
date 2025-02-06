@@ -6,7 +6,7 @@
  */
 
 import { getApmIndicesSavedObject } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
-import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
+import type { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
 
 export type ApmIndexSettingsResponse = Array<{
   configurationName: 'transaction' | 'span' | 'error' | 'metric' | 'onboarding' | 'sourcemap';

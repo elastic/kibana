@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { Maybe } from '../../../../typings/common';
+import type { Maybe } from '../../../../typings/common';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 interface Props {

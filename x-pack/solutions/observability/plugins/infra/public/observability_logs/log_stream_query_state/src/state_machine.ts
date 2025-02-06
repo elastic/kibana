@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import type {
   FilterManager,
   QueryStringContract,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
-import { EsQueryConfig } from '@kbn/es-query';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { actions, ActorRefFrom, createMachine, SpecialTargets, send } from 'xstate';
+import type { EsQueryConfig } from '@kbn/es-query';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { ActorRefFrom } from 'xstate';
+import { actions, createMachine, SpecialTargets, send } from 'xstate';
 import { DEFAULT_REFRESH_INTERVAL } from '@kbn/logs-shared-plugin/common';
-import { OmitDeprecatedState, sendIfDefined } from '@kbn/xstate-utils';
+import type { OmitDeprecatedState } from '@kbn/xstate-utils';
+import { sendIfDefined } from '@kbn/xstate-utils';
 import { logStreamQueryNotificationEventSelectors } from './notifications';
 import {
   subscribeToFilterSearchBarChanges,

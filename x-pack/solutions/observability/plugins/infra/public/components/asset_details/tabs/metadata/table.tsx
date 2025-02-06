@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiText,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiSearchBarProps,
-  type HorizontalAlignment,
-} from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
+import { EuiText, EuiIcon, EuiInMemoryTable, type HorizontalAlignment } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';

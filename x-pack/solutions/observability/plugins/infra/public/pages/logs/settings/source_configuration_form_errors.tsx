@@ -9,7 +9,7 @@ import { EuiCallOut, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 
 export const LogSourceConfigurationFormErrors: React.FC<{ errors: FormValidationError[] }> = ({
   errors,

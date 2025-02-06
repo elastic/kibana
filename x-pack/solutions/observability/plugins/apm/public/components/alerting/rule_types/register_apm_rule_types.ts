@@ -16,7 +16,7 @@ import {
   transactionDurationMessage,
   transactionErrorRateMessage,
 } from '../../../../common/rules/default_action_message';
-import { AlertParams } from './anomaly_rule_type';
+import type { AlertParams } from './anomaly_rule_type';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';

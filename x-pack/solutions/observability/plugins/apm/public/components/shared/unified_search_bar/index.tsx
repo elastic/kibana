@@ -6,24 +6,23 @@
  */
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
-  Filter,
   fromKueryExpression,
   getKqlFieldNamesFromExpression,
-  Query,
-  TimeRange,
   toElasticsearchQuery,
 } from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import qs from 'query-string';
-import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
-import { UIProcessorEvent } from '../../../../common/processor_event';
-import { TimePickerTimeDefaults } from '../date_picker/typings';
-import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import type { DataView } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import type { UIProcessorEvent } from '../../../../common/processor_event';
+import type { TimePickerTimeDefaults } from '../date_picker/typings';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useProcessorEvent } from '../../../hooks/use_processor_event';

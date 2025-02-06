@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraTimerangeInput } from '../../../../../common/http_api';
+import type { InfraTimerangeInput } from '../../../../../common/http_api';
 import { calculateRateTimeranges } from './calculate_rate_timeranges';
 
 export const createRateAggs = (timerange: InfraTimerangeInput, id: string, field: string) => {

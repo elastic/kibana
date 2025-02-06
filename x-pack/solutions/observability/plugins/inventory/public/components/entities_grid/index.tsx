@@ -4,19 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiDataGrid,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridSorting,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGrid, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { last } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { EntityColumnIds, InventoryEntity } from '../../../common/entities';
+import type { EntityColumnIds, InventoryEntity } from '../../../common/entities';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
@@ -80,7 +75,7 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
-      const entityType = entity.entityType;
+      const { entityType } = entity;
 
       switch (columnEntityTableId) {
         case 'alertsCount':

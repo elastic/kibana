@@ -25,6 +25,7 @@ const DefaultParams: Writable<Partial<Params>> = {
 describe('ruleType Params validate()', () => {
   runTests(ParamsSchema, DefaultParams);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
   beforeEach(() => {
     params = { ...DefaultParams };
@@ -80,6 +81,7 @@ describe('ruleType Params validate()', () => {
 });
 
 export function runTests(schema: ObjectType, defaultTypeParams: Record<string, unknown>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
 
   const CoreDefaultParams: Writable<Partial<CoreQueryParams>> = {

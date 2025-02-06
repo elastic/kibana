@@ -6,12 +6,12 @@
  */
 
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
+import type { Logger } from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
-import { APMCore } from '../typings';
+import type { APMCore } from '../typings';
 import { createOrUpdateStaticDataView } from './create_static_data_view';
 
 function getMockedDataViewService(existingDataViewTitle: string) {

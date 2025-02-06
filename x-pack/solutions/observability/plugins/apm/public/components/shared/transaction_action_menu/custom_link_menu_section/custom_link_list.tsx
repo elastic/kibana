@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { SectionLink, SectionLinks } from '@kbn/observability-shared-plugin/public';
-import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { unit } from '../../../../utils/style';
 import { getEncodedCustomLinkUrl } from '../../../../../common/custom_link';
 

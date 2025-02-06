@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryMetrics } from '../../types';
+import type { InventoryMetrics } from '../../types';
 
 import { sqsMessagesVisible } from './snapshot/sqs_messages_visible';
 import { sqsMessagesDelayed } from './snapshot/sqs_messages_delayed';

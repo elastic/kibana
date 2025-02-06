@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
 
 import { act, waitFor, renderHook } from '@testing-library/react';
 
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,

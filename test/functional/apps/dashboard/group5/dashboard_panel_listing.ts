@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('renders a panel with predefined order of panel groups', async () => {
+    it('renders a panel with predefined order of panel groups and panels', async () => {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.switchToEditMode();
@@ -48,6 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '[data-test-subj*="dashboardEditorMenu-"]'
       );
 
+      const panelTypes = await panelSelectionList.findAllByCssSelector('li');
+
       for (let i = 0; i < panelGroups.length; i++) {
         const panelGroup = panelGroups[i];
         const order = await panelGroup.getAttribute('data-group-sort-order');
@@ -59,14 +61,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         panelGroupByOrder.set(order, panelGroupTitle);
       }
 
-      expect(panelGroupByOrder.size).to.eql(4);
+      expect(panelGroupByOrder.size).to.eql(3);
 
       expect([...panelGroupByOrder.values()]).to.eql([
         'visualizationsGroup',
         'annotation-and-navigationGroup',
         'observabilityGroup',
-        'legacyGroup',
       ]);
+
+      // Any changes to the number of panels needs to be audited by @elastic/kibana-presentation
+      expect(panelTypes.length).to.eql(9);
     });
   });
 }

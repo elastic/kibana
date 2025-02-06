@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { APMConfig } from '../../../../..';
-import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
-import { ChartBase } from '../../../types';
+import type { APMConfig } from '../../../../..';
+import type { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { ChartBase } from '../../../types';
 
 import { fetchAndTransformGcMetrics, TIME, RATE } from './fetch_and_transform_gc_metrics';
 

@@ -55,12 +55,18 @@ describe(`Console's send request`, () => {
       destroy: sinon.stub(),
       on() {},
       once() {},
+      protocol: 'http:',
+      host: 'nowhere.none',
+      method: 'POST',
+      path: '/_bulk',
     } as any;
     try {
       await sendProxyRequest({ timeout: 0 }); // immediately timeout
       fail('Should not reach here!');
     } catch (e) {
-      expect(e.message).toEqual('Client request timeout');
+      expect(e.message).toEqual(
+        'Client request timeout for: http://nowhere.none with request POST /_bulk'
+      );
       expect((fakeRequest.destroy as sinon.SinonStub).calledOnce).toBe(true);
     }
   });

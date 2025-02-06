@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.selectTextBaseLang();
 
-        const testQuery = `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500`;
+        const testQuery = `from logstash-* METADATA _index, _id | sort @timestamp desc | limit 500`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListExistsFilter('@timestamp');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`@timestamp\` is not null`
+          `from logstash-* METADATA _index, _id | sort @timestamp desc | limit 500\n| WHERE \`@timestamp\` is not null`
         );
         await testSubjects.missingOrFail('dscFieldStats-statsFooter');
         await unifiedFieldList.closeFieldPopover();

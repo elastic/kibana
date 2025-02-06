@@ -7,13 +7,13 @@
 
 import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
-import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type {
-  ElasticRule,
+  ElasticRulePartial,
   OriginalRule,
   RuleMigration,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { Integration } from '../../../../types';
+import type { RuleMigrationIntegration } from '../../../../types';
 import type { TranslateRuleValidationErrors } from './types';
 
 export const translateRuleState = Annotation.Root({
@@ -22,9 +22,9 @@ export const translateRuleState = Annotation.Root({
     default: () => [],
   }),
   original_rule: Annotation<OriginalRule>(),
-  integration: Annotation<Integration>({
+  integration: Annotation<RuleMigrationIntegration>({
     reducer: (current, value) => value ?? current,
-    default: () => ({} as Integration),
+    default: () => ({} as RuleMigrationIntegration),
   }),
   translation_finalized: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
@@ -38,17 +38,17 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  elastic_rule: Annotation<ElasticRule>({
+  elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
-    default: () => ({} as ElasticRule),
+    default: () => ({}),
   }),
   validation_errors: Annotation<TranslateRuleValidationErrors>({
     reducer: (current, value) => value ?? current,
     default: () => ({ iterations: 0 } as TranslateRuleValidationErrors),
   }),
-  translation_result: Annotation<SiemMigrationRuleTranslationResult>({
+  translation_result: Annotation<RuleTranslationResult>({
     reducer: (current, value) => value ?? current,
-    default: () => SiemMigrationRuleTranslationResult.UNTRANSLATABLE,
+    default: () => RuleTranslationResult.UNTRANSLATABLE,
   }),
   comments: Annotation<RuleMigration['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),

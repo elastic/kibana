@@ -14,5 +14,7 @@ module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/custom_integrations',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/data/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/data/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

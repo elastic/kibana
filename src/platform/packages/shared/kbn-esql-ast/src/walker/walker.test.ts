@@ -84,19 +84,22 @@ describe('structurally can walk all nodes', () => {
     });
 
     test('can traverse JOIN command', () => {
-      const { ast } = parse('FROM index | LEFT JOIN a AS b ON c, d');
+      const { ast } = parse('FROM index | LEFT JOIN a ON c, d');
       const commands: ESQLCommand[] = [];
+      const sources: ESQLSource[] = [];
       const identifiers: ESQLIdentifier[] = [];
       const columns: ESQLColumn[] = [];
 
       walk(ast, {
         visitCommand: (cmd) => commands.push(cmd),
+        visitSource: (id) => sources.push(id),
         visitIdentifier: (id) => identifiers.push(id),
         visitColumn: (col) => columns.push(col),
       });
 
       expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'join']);
-      expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['a', 'as', 'b', 'c', 'd']);
+      expect(sources.map(({ name }) => name).sort()).toStrictEqual(['a', 'index']);
+      expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
       expect(columns.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
     });
 
@@ -217,6 +220,37 @@ describe('structurally can walk all nodes', () => {
             'index3',
             'index4',
           ]);
+        });
+
+        test('can walk through "WHERE" binary expression', () => {
+          const query = 'FROM index | STATS a = 123 WHERE c == d';
+          const { root } = parse(query);
+          const expressions: ESQLFunction[] = [];
+
+          walk(root, {
+            visitFunction: (node) => {
+              if (node.name === 'where') {
+                expressions.push(node);
+              }
+            },
+          });
+
+          expect(expressions.length).toBe(1);
+          expect(expressions[0]).toMatchObject({
+            type: 'function',
+            subtype: 'binary-expression',
+            name: 'where',
+            args: [
+              {
+                type: 'function',
+                name: '=',
+              },
+              {
+                type: 'function',
+                name: '==',
+              },
+            ],
+          });
         });
       });
 
@@ -1078,8 +1112,8 @@ describe('Walker.match()', () => {
       name: 'join',
       commandType: 'left',
     })!;
-    const identifier1 = Walker.match(join1, {
-      type: 'identifier',
+    const source1 = Walker.match(join1, {
+      type: 'source',
       name: 'a',
     })!;
     const join2 = Walker.match(root, {
@@ -1087,15 +1121,15 @@ describe('Walker.match()', () => {
       name: 'join',
       commandType: 'right',
     })!;
-    const identifier2 = Walker.match(join2, {
-      type: 'identifier',
+    const source2 = Walker.match(join2, {
+      type: 'source',
       name: 'b',
     })!;
 
-    expect(identifier1).toMatchObject({
+    expect(source1).toMatchObject({
       name: 'a',
     });
-    expect(identifier2).toMatchObject({
+    expect(source2).toMatchObject({
       name: 'b',
     });
   });
@@ -1189,11 +1223,11 @@ describe('Walker.matchAll()', () => {
 });
 
 describe('Walker.hasFunction()', () => {
-  test('can find assignment expression', () => {
+  test('can find binary expression expression', () => {
     const query1 = 'FROM a | STATS bucket(bytes, 1 hour)';
-    const query2 = 'FROM b | STATS var0 = bucket(bytes, 1 hour)';
-    const has1 = Walker.hasFunction(parse(query1).ast!, '=');
-    const has2 = Walker.hasFunction(parse(query2).ast!, '=');
+    const query2 = 'FROM b | STATS var0 == bucket(bytes, 1 hour)';
+    const has1 = Walker.hasFunction(parse(query1).ast!, '==');
+    const has2 = Walker.hasFunction(parse(query2).ast!, '==');
 
     expect(has1).toBe(false);
     expect(has2).toBe(true);

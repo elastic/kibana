@@ -6,13 +6,13 @@
  */
 
 import yaml from 'js-yaml';
-import { KibanaRequest } from '@kbn/core/server';
-import { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import {
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   INPUT_VAR_NAME_TO_SCHEMA_PATH,
 } from '../../../common/fleet';
-import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
+import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getLatestApmPackage } from './get_latest_apm_package';
 import { translateLegacySchemaPaths } from './translate_legacy_schema_paths';
 

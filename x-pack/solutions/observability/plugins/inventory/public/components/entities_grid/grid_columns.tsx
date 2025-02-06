@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiDataGridColumn, EuiToolTip } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
