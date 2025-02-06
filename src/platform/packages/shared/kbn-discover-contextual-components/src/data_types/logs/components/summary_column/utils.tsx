@@ -18,6 +18,7 @@ import {
   CLOUD_INSTANCE_ID_FIELD,
   CONTAINER_ID_FIELD,
   CONTAINER_NAME_FIELD,
+  DURATION_FIELDS,
   EVENT_OUTCOME_FIELD,
   FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT,
   HOST_NAME_FIELD,
@@ -89,8 +90,6 @@ export const getUnformattedTraceBadgeFields = (doc: TraceDocument): Readonly<Tra
     [SPAN_DURATION_FIELD]: spanDuration,
   };
 };
-
-const DURATION_FIELDS: Readonly<string[]> = [SPAN_DURATION_FIELD, TRANSACTION_DURATION_FIELD];
 
 const DurationIcon = () => {
   const { euiTheme } = useEuiTheme();

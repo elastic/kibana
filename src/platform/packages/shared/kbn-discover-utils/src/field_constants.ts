@@ -22,6 +22,7 @@ export const TRANSACTION_NAME_FIELD = 'transaction.name';
 export const TRANSACTION_DURATION_FIELD = 'transaction.duration.us';
 export const SPAN_NAME_FIELD = 'span.name';
 export const SPAN_DURATION_FIELD = 'span.duration.us';
+export const DURATION_FIELDS: readonly string[] = [SPAN_DURATION_FIELD, TRANSACTION_DURATION_FIELD];
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';
