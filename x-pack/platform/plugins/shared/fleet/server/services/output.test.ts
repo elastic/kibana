@@ -2183,6 +2183,7 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'remote_elasticsearch',
+        kibana_api_key: null,
         service_token: null,
       });
     });
