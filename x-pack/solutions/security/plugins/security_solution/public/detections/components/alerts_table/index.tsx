@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo, type FC } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, memo, type FC } from 'react';
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
@@ -152,7 +152,7 @@ const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
 const casesConfiguration = { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true };
 const emptyInputFilters: Filter[] = [];
 
-export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'services'>> = ({
+const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'services'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
   sourcererScope = SourcererScopeName.detections,
@@ -412,6 +412,19 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
     [isEventRenderedView]
   );
 
+  const services = useMemo(
+    () => ({
+      data,
+      http,
+      notifications,
+      fieldFormats,
+      application,
+      licensing,
+      settings,
+    }),
+    [application, data, fieldFormats, http, licensing, notifications, settings]
+  );
+
   if (isLoading) {
     return null;
   }
@@ -445,7 +458,6 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
               initialPageSize={50}
               runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
               toolbarVisibility={toolbarVisibility}
-              dynamicRowHeight={isEventRenderedView}
               renderCellValue={CellValue}
               renderActionsCell={ActionsCell}
               renderAdditionalToolbarControls={
@@ -461,15 +473,7 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton
-              services={{
-                data,
-                http,
-                notifications,
-                fieldFormats,
-                application,
-                licensing,
-                settings,
-              }}
+              services={services}
               {...tablePropsOverrides}
             />
           </EuiDataGridContainer>
@@ -478,3 +482,5 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
     </div>
   );
 };
+
+export const DetectionEngineAlertsTable = memo(DetectionEngineAlertsTableComponent);

@@ -6,9 +6,11 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import React, { memo, useContext } from 'react';
+import React, { memo, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { noop } from 'lodash';
+import type { SetEventsLoading } from '../../../../common/types';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -44,12 +46,26 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   } = useSelector((state: State) => eventsViewerSelector(state, tableType));
   const eventContext = useContext(StatefulEventContext);
 
-  const timelineItem: TimelineItem = {
-    _id: (alert as Ecs)._id,
-    _index: (alert as Ecs)._index,
-    ecs: alert as Ecs,
-    data: legacyAlert as TimelineItem['data'],
-  };
+  const timelineItem = useMemo<TimelineItem>(
+    () => ({
+      _id: (alert as Ecs)._id,
+      _index: (alert as Ecs)._index,
+      ecs: alert as Ecs,
+      data: legacyAlert as TimelineItem['data'],
+    }),
+    [alert, legacyAlert]
+  );
+
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ isLoading }) => {
+      if (!isLoading) {
+        clearSelection();
+        return;
+      }
+      if (setIsActionLoading) setIsActionLoading(isLoading);
+    },
+    [clearSelection, setIsActionLoading]
+  );
 
   return (
     <RowAction
@@ -75,14 +91,8 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       tabType={'query'}
       tableId={tableType}
       width={0}
-      setEventsLoading={({ isLoading }) => {
-        if (!isLoading) {
-          clearSelection();
-          return;
-        }
-        if (setIsActionLoading) setIsActionLoading(isLoading);
-      }}
-      setEventsDeleted={() => {}}
+      setEventsLoading={setEventsLoading}
+      setEventsDeleted={noop}
       refetch={alertsTableRefresh}
     />
   );

@@ -11,7 +11,7 @@ import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { AlertsTableComponent } from '../../../../../../detections/components/alerts_table';
+import { DetectionEngineAlertsTable } from '../../../../../../detections/components/alerts_table';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -38,7 +38,7 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
 
   return (
     <div data-test-subj="alertsTab">
-      <AlertsTableComponent
+      <DetectionEngineAlertsTable
         id={`attack-discovery-alerts-${attackDiscovery.id}`}
         tableType={TableId.alertsOnCasePage}
         ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}

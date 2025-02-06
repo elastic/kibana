@@ -83,7 +83,7 @@ import { HeaderPage } from '../../../common/components/header_page';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { Status } from '../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
-import { AlertsTableComponent } from '../../components/alerts_table';
+import { DetectionEngineAlertsTable } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
 
 /**
@@ -320,7 +320,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const renderAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <AlertsTableComponent
+        <DetectionEngineAlertsTable
           tableType={TableId.alertsOnAlertsPage}
           inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
           isLoading={isAlertTableLoading}

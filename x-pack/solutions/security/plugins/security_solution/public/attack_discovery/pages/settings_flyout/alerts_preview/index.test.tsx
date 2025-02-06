@@ -11,11 +11,11 @@ import * as uuid from 'uuid';
 
 import { AlertsPreview } from '.';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
+import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 
 jest.mock('../../../../detections/components/alerts_table');
 
-jest.mocked(AlertsTableComponent).mockReturnValue(<div>{'Mocked Alerts Table'}</div>);
+jest.mocked(DetectionEngineAlertsTable).mockReturnValue(<div>{'Mocked Alerts Table'}</div>);
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
@@ -58,7 +58,7 @@ describe('AlertsPreview', () => {
 
     render(<AlertsPreview query={query} size={size} />);
 
-    expect(AlertsTableComponent).toHaveBeenCalledWith(
+    expect(DetectionEngineAlertsTable).toHaveBeenCalledWith(
       {
         id: `attack-discovery-alerts-preview-${uuid.v4()}`,
         tableType: TableId.alertsOnRuleDetailsPage,

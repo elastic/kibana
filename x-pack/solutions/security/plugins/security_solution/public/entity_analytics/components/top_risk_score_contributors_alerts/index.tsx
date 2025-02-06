@@ -21,7 +21,7 @@ import {
   type HostRiskScore,
   type UserRiskScore,
 } from '../../../../common/search_strategy';
-import { AlertsTableComponent } from '../../../detections/components/alerts_table';
+import { DetectionEngineAlertsTable } from '../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -86,7 +86,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <AlertsTableComponent
+        <DetectionEngineAlertsTable
           tableType={TableId.alertsRiskInputs}
           inputFilters={[...inputFilters, ...filters, ...groupingFilters]}
         />
