@@ -40,12 +40,11 @@ interface GroupObjectGetResponse {
   group: GroupBase;
 }
 
-const groupObjectGetResponseSchema = z.object({
+type GroupObjectUpsertRequest = GroupObjectGetResponse;
+
+const groupObjectUpsertRequestSchema = z.object({
   group: groupBaseSchema,
 });
-
-type GroupObjectUpsertRequest = GroupObjectGetResponse;
-const groupObjectUpsertRequestSchema = groupObjectGetResponseSchema;
 
 /**
  * Group upsert request
@@ -68,6 +67,5 @@ export {
   type GroupObjectUpsertRequest,
   groupStreamGetResponseSchema,
   groupStreamUpsertRequestSchema,
-  groupObjectGetResponseSchema,
   groupObjectUpsertRequestSchema,
 };
