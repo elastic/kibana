@@ -24,7 +24,7 @@ import { TS_PROJECTS, type TsProject } from '@kbn/ts-projects';
 import { eslintBinPath } from './eslint_bin_path';
 
 export function runEslintWithTypes() {
-  run(
+  return run(
     async ({ log, flags }) => {
       const ignoreFilePath = Path.resolve(REPO_ROOT, '.eslintignore');
       const configTemplate = Fs.readFileSync(
@@ -62,7 +62,12 @@ export function runEslintWithTypes() {
       }
 
       const concurrency = Math.max(1, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
-      log.info(`Linting ${projects.length} projects, ${concurrency} at a time`);
+
+      if (projects.length > 1) {
+        log.info(`Linting ${projects.length} projects, ${concurrency} at a time`);
+      } else {
+        log.info(`Linting ${projects[0].name}`);
+      }
 
       const failures = await Rx.lastValueFrom(
         Rx.from(projects).pipe(
