@@ -65,7 +65,7 @@ export const AssistantTitle: React.FC<{
           value={newTitle ?? NEW_CHAT}
           size="xs"
           isInvalid={!!newTitleError}
-          isReadOnly={isDisabled || selectedConversation?.isDefault}
+          isReadOnly={isDisabled}
           onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
           onCancel={() => setNewTitle(title)}
           onSave={handleUpdateTitle}

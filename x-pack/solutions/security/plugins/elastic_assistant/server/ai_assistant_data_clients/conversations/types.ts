@@ -48,7 +48,6 @@ export interface EsConversationSchema {
     provider?: Provider;
     model?: string;
   };
-  is_default?: boolean;
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
   users?: Array<{
@@ -83,7 +82,6 @@ export interface CreateMessageSchema {
     provider?: Provider;
     model?: string;
   };
-  is_default?: boolean;
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
   users: Array<{

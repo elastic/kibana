@@ -40,7 +40,6 @@ export interface Conversation {
   updatedAt?: Date;
   createdAt?: Date;
   replacements: Replacements;
-  isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
 

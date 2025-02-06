@@ -12,7 +12,6 @@ export const alertConvo: Conversation = {
   id: '',
   title: 'Alert summary',
   category: 'assistant',
-  isDefault: true,
   messages: [
     {
       content:
@@ -51,7 +50,6 @@ export const emptyWelcomeConvo: Conversation = {
   id: '',
   title: 'Welcome',
   category: 'assistant',
-  isDefault: true,
   messages: [],
   replacements: {},
   apiConfig: {
@@ -88,7 +86,6 @@ export const customConvo: Conversation = {
   id: '',
   category: 'assistant',
   title: 'Custom option',
-  isDefault: false,
   messages: [],
   replacements: {},
   apiConfig: {

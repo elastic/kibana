@@ -60,7 +60,6 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   replacements: {},
   createdAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
-  isDefault: false,
   updatedAt: '2020-04-20T15:25:31.830Z',
   timestamp: '2020-04-20T15:25:31.830Z',
   users: [

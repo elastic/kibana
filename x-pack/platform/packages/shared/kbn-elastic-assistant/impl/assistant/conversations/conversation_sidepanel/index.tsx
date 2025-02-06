@@ -208,7 +208,6 @@ export const ConversationSidePanel = React.memo<Props>(
                       onClick: () => setDeleteConversationItem(conversation),
                       iconType: 'trash',
                       iconSize: 's',
-                      disabled: conversation.isDefault,
                       'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
                       'data-test-subj': 'delete-option',
                     }}

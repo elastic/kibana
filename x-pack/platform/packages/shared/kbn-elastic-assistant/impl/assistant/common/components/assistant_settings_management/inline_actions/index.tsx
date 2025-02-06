@@ -16,7 +16,7 @@ interface Props<T> {
   onEdit?: (rowItem: T) => void;
 }
 
-export const useInlineActions = <T extends { isDefault?: boolean | undefined }>() => {
+export const useInlineActions = <T extends {}>() => {
   const getInlineActions = useCallback(
     ({
       isEditEnabled = () => false,

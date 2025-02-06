@@ -7,20 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAssistantTelemetry } from '.';
-import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { createTelemetryServiceMock } from '../../common/lib/telemetry/telemetry_service.mock';
 import { AssistantEventTypes } from '../../common/lib/telemetry';
 
 const customId = `My Convo`;
-const mockedConversations = {
-  ...BASE_SECURITY_CONVERSATIONS,
-  [customId]: {
-    id: customId,
-    apiConfig: {},
-    replacements: {},
-    messages: [],
-  },
-};
 
 const mockedTelemetry = {
   ...createTelemetryServiceMock(),

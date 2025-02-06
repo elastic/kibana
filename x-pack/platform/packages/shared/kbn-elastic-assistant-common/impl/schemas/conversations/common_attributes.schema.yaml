@@ -321,9 +321,6 @@ components:
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
@@ -382,9 +379,6 @@ components:
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean

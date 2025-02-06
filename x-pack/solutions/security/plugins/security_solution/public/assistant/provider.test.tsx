@@ -53,7 +53,6 @@ export const mockConnectors = [
 const conversations = {
   'Alert summary': {
     id: 'Alert summary',
-    isDefault: true,
     apiConfig: {
       connectorId: 'my-bedrock',
       defaultSystemPromptId: 'default-system-prompt',
@@ -83,7 +82,6 @@ const conversations = {
   },
   'Data Quality dashboard': {
     id: 'Data Quality dashboard',
-    isDefault: true,
     apiConfig: {
       connectorId: 'my-gen-ai',
       defaultSystemPromptId: 'default-system-prompt',
@@ -107,26 +105,22 @@ const conversations = {
   },
   'Detection Rules': {
     id: 'Detection Rules',
-    isDefault: true,
     messages: [],
     apiConfig: {},
   },
   'Event summary': {
     id: 'Event summary',
-    isDefault: true,
     messages: [],
     apiConfig: {},
   },
   Timeline: {
     excludeFromLastConversationStorage: true,
     id: 'Timeline',
-    isDefault: true,
     messages: [],
     apiConfig: {},
   },
   Welcome: {
     id: 'Welcome',
-    isDefault: true,
     theme: {
       title: 'Elastic AI Assistant',
       titleIcon: 'logoSecurity',

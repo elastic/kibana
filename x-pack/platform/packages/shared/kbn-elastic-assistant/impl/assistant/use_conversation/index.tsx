@@ -175,7 +175,6 @@ export const useConversation = (): UseConversation => {
             title: conversation.title,
             replacements: conversation.replacements,
             excludeFromLastConversationStorage: conversation.excludeFromLastConversationStorage,
-            isDefault: conversation.isDefault,
             id: '',
             messages: conversation.messages ?? [],
           },

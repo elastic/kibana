@@ -332,10 +332,6 @@ export const ConversationResponse = z.object({
    */
   apiConfig: ApiConfig.optional(),
   /**
-   * Is default conversation.
-   */
-  isDefault: z.boolean().optional(),
-  /**
    * excludeFromLastConversationStorage.
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
@@ -394,10 +390,6 @@ export const ConversationCreateProps = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig.optional(),
-  /**
-   * Is default conversation.
-   */
-  isDefault: z.boolean().optional(),
   /**
    * excludeFromLastConversationStorage.
    */

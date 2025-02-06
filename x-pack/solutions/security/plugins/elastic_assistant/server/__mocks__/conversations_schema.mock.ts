@@ -44,7 +44,6 @@ export const getConversationSearchEsMock = () => {
             id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             title: 'test',
             exclude_from_last_conversation_storage: true,
-            is_default: false,
             messages: [],
             replacements: [],
             users: [
@@ -71,7 +70,6 @@ export const getCreateConversationSchemaMock = (
     model: 'model',
   },
   excludeFromLastConversationStorage: false,
-  isDefault: true,
   messages: [
     {
       content: 'test content',
@@ -186,7 +184,6 @@ export const getQueryConversationParams = (
           model: 'model',
         },
         excludeFromLastConversationStorage: false,
-        isDefault: true,
         messages: [
           {
             content: 'test content',
