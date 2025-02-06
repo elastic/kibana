@@ -20,8 +20,8 @@ export const fetchAlertDeletionSettings = async ({ http }: { http: HttpSetup }) 
   // );
 
   const res = {
-    is_active_alert_deletion_enabled: true,
-    is_inactive_alert_deletion_enabled: true,
+    is_active_alert_deletion_enabled: false,
+    is_inactive_alert_deletion_enabled: false,
     active_alert_deletion_threshold: 0,
     inactive_alert_deletion_threshold: 90,
     created_at: String(new Date().valueOf),

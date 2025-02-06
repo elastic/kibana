@@ -36,6 +36,8 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
       updates.push(updateQueryDelaySettings({ http, queryDelaySettings: settings.queryDelay }));
     }
 
+    // TODO: https://github.com/elastic/kibana/issues/209258
+
     return await Promise.all(updates);
   };
 

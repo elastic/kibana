@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -25,7 +24,6 @@ import {
   ALERT_DELETION_DESCRIPTION,
   ALERT_DELETION_ERROR_PROMPT_BODY,
   ALERT_DELETION_ERROR_PROMPT_TITLE,
-  ALERT_DELETION_LAST_RUN,
   ALERT_DELETION_TITLE,
   DAYS_LABEL,
   INACTIVE_ALERT_DELETION_LABEL,
@@ -135,11 +133,12 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
 
+        {/* // TODO: https://github.com/elastic/kibana/issues/209266
+        <EuiSpacer size="m" />
         <EuiPanel borderRadius="none" color="subdued">
           {ALERT_DELETION_LAST_RUN}
-        </EuiPanel>
+        </EuiPanel> */}
       </EuiDescribedFormGroup>
     </EuiForm>
   );
