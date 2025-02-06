@@ -48,6 +48,7 @@ import { useFetchInvestigationsByAlert } from '../hooks/use_fetch_investigations
 import { useAddInvestigationItem } from '../hooks/use_add_investigation_item';
 import { AlertParams } from '../../../components/custom_threshold/types';
 import { generateInvestigationItem } from '../../../utils/investigation_item_helper';
+import { useInvestigateFeatureFlag } from '../hooks/use_investigate_feature_flag';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -71,6 +72,8 @@ export function HeaderActions({
     application: { navigateToApp },
     investigate: investigatePlugin,
   } = useKibana().services;
+
+  const isInvestigateEnabled = useInvestigateFeatureFlag();
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
@@ -232,6 +235,7 @@ export function HeaderActions({
           )}
         </EuiFlexItem>
         {Boolean(investigatePlugin) &&
+          isInvestigateEnabled &&
           alert?.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID && (
             <EuiFlexItem grow={false}>
               <EuiButton
