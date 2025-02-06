@@ -15,6 +15,10 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
+import {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -54,6 +58,7 @@ export interface ReportingSetupDeps {
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface ReportingStartDeps {
@@ -63,6 +68,7 @@ export interface ReportingStartDeps {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{

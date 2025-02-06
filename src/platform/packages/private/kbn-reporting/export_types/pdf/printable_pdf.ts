@@ -29,6 +29,7 @@ import {
 } from '@kbn/reporting-export-types-pdf-common';
 import { ExportType, REPORTING_TRANSACTION_TYPE, decryptJobHeaders } from '@kbn/reporting-server';
 
+import { KibanaRequest } from '@kbn/core/server';
 import { getCustomLogo } from './get_custom_logo';
 import { getFullUrls } from './get_full_urls';
 import { getTracker } from './pdf_tracker';
@@ -74,6 +75,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
     jobId: string,
     job: TaskPayloadPDF,
     taskInstanceFields: TaskInstanceFields,
+    fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
@@ -83,13 +85,11 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
     let apmGeneratePdf: { end: () => void } | null | undefined;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(this.config.encryptionKey, job.headers, logger)),
-      mergeMap(async (headers) => {
-        const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
+      mergeMap(async () => {
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-        return getCustomLogo(uiSettingsClient, headers);
+        return getCustomLogo(uiSettingsClient);
       }),
-      mergeMap(({ headers, logo }) => {
+      mergeMap(({ logo }) => {
         const urls = getFullUrls(this.getServerInfo(), this.config, job);
 
         const { browserTimezone, layout, title } = job;
@@ -107,7 +107,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             logo,
             urls,
             browserTimezone,
-            headers,
+            request: fakeRequest,
             layout,
             taskInstanceFields,
             logger,

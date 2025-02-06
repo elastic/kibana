@@ -79,7 +79,6 @@ export type BaseParamsV2 = BaseParams & {
 };
 
 export interface BasePayload extends BaseParams {
-  headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
 }

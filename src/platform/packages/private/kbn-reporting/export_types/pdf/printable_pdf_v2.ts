@@ -12,7 +12,7 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
 import { Writable } from 'stream';
 
-import { Headers } from '@kbn/core/server';
+import { Headers, KibanaRequest } from '@kbn/core/server';
 import {
   CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -80,6 +80,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     jobId: string,
     payload: TaskPayloadPDFV2,
     taskInstanceFields: TaskInstanceFields,
+    fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
@@ -90,13 +91,11 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     const { encryptionKey } = this.config;
 
     const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, logger)),
-      mergeMap(async (headers: Headers) => {
-        const fakeRequest = this.getFakeRequest(headers, payload.spaceId, logger);
+      mergeMap(async () => {
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-        return await getCustomLogo(uiSettingsClient, headers);
+        return await getCustomLogo(uiSettingsClient);
       }),
-      mergeMap(({ logo, headers }) => {
+      mergeMap(({ logo }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
 
         apmGetAssets?.end();
@@ -125,7 +124,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
             title,
             logo,
             browserTimezone,
-            headers,
+            request: fakeRequest,
             layout,
             urls: urls.map((url) =>
               typeof url === 'string'

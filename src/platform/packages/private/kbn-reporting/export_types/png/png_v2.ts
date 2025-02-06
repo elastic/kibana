@@ -44,6 +44,7 @@ import {
   getFullRedirectAppUrl,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-server';
+import { KibanaRequest } from '@kbn/core/server';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;
@@ -90,6 +91,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     jobId: string,
     payload: TaskPayloadPNGV2,
     taskInstanceFields: TaskInstanceFields,
+    fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
@@ -97,11 +99,9 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
-    const { encryptionKey } = this.config;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, logger)),
-      mergeMap((headers) => {
+      mergeMap(() => {
         const url = getFullRedirectAppUrl(
           this.config,
           this.getServerInfo(),
@@ -126,7 +126,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           .screenshotting!.getScreenshots({
             format: 'png',
             browserTimezone: payload.browserTimezone,
-            headers,
+            request: fakeRequest,
             layout,
             urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
             taskInstanceFields,

@@ -35,6 +35,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly created_at: ReportSource['created_at'];
   public readonly created_by: ReportSource['created_by'];
   public readonly payload: ReportSource['payload'];
+  public readonly api_key: string;
 
   public readonly meta: ReportSource['meta'];
 
@@ -62,7 +63,10 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
    * Create an unsaved report
    * Index string is required
    */
-  constructor(opts: Partial<ReportSource> & Partial<ReportDocumentHead>, fields?: ReportFields) {
+  constructor(
+    opts: Partial<ReportSource> & Partial<ReportDocumentHead> & { api_key: string },
+    fields?: ReportFields
+  ) {
     this._id = opts._id != null ? opts._id : uuidv4();
     this._index = opts._index ?? REPORTING_DATA_STREAM_ALIAS; // Sets the value to the data stream, unless it's a stored report and we know the name of the backing index
     this._primary_term = opts._primary_term;
@@ -85,6 +89,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.max_attempts = opts.max_attempts;
     this.attempts = opts.attempts || 0;
     this.timeout = opts.timeout;
+    this.api_key = opts.api_key;
 
     this.process_expiration = opts.process_expiration;
     this.started_at = opts.started_at;

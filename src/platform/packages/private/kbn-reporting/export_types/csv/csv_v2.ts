@@ -104,16 +104,15 @@ export class CsvV2ExportType extends ExportType<
     jobId: string,
     job: TaskPayloadCsvFromSavedObject,
     taskInstanceFields: TaskInstanceFields,
+    fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
     const logger = this.logger.get(`execute:${jobId}`);
 
     const config = this.config;
-    const { encryptionKey, csv: csvConfig } = config;
+    const { csv: csvConfig } = config;
 
-    const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
-    const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
     const { data: dataPluginStart, discover: discoverPluginStart } = this.startDeps;

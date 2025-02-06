@@ -110,6 +110,7 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        basePathService: core.http.basePath,
         analytics: core.analytics,
         savedObjects,
         uiSettings,

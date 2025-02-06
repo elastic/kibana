@@ -12,6 +12,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/screenshot-mode-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
     "@kbn/share-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/usage-collection-plugin",

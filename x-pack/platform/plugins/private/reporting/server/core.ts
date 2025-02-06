@@ -46,6 +46,10 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -59,6 +63,7 @@ export interface ReportingInternalSetup {
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCounter?: UsageCounter;
   taskManager: TaskManagerSetupContract;
@@ -69,12 +74,14 @@ export interface ReportingInternalSetup {
 
 export interface ReportingInternalStart {
   store: ReportingStore;
+  basePathService: IBasePath;
   analytics: AnalyticsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
@@ -140,13 +147,15 @@ export class ReportingCore {
       et.setup(setupDeps);
     });
 
+    // setupDeps.taskManager.registerEncryptedSavedObjects(setupDeps.encryptedSavedObjects);
+
     const { executeTask, runScheduledReportTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
     });
-    setupDeps.taskManager.registerTaskDefinitions({
-      [runScheduledReportTask.TYPE]: runScheduledReportTask.getTaskDefinition(),
-    });
+    // setupDeps.taskManager.registerTaskDefinitions({
+    //   [runScheduledReportTask.TYPE]: runScheduledReportTask.getTaskDefinition(),
+    // });
   }
 
   /*
@@ -156,14 +165,18 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
+    // startDeps.taskManager.registerEncryptedSavedObjectsPlugin(startDeps.encryptedSavedObjects);
     this.exportTypesRegistry.getAll().forEach((et) => {
       et.start({ ...startDeps });
     });
 
-    const { taskManager } = startDeps;
+    const { basePathService, taskManager } = startDeps;
     const { executeTask, runScheduledReportTask } = this;
     // enable this instance to generate reports
-    await Promise.all([executeTask.init(taskManager), runScheduledReportTask.init(taskManager)]);
+    await Promise.all([
+      executeTask.init(taskManager, basePathService),
+      // runScheduledReportTask.init(taskManager),
+    ]);
 
     await this.runScheduledReportTask.scheduleTask();
   }
@@ -297,8 +310,8 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async scheduleTask(report: ReportTaskParams) {
-    return await this.executeTask.scheduleTask(report);
+  public async scheduleTask(report: ReportTaskParams, apiKey: string) {
+    return await this.executeTask.scheduleTask(report, apiKey);
   }
 
   public async getStore() {
