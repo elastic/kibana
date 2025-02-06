@@ -741,6 +741,50 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getChatModel",
+          "type": "Function",
+          "tags": [],
+          "label": "getChatModel",
+          "description": [
+            "\nCreates a langchain {@link InferenceChatModel} that will be using the inference framework\nunder the hood.\n"
+          ],
+          "signature": [
+            "(options: ",
+            "CreateChatModelOptions",
+            ") => Promise<",
+            {
+              "pluginId": "@kbn/inference-langchain",
+              "scope": "common",
+              "docId": "kibKbnInferenceLangchainPluginApi",
+              "section": "def-common.InferenceChatModel",
+              "text": "InferenceChatModel"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getChatModel.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "CreateChatModelOptions"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

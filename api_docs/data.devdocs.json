@@ -4281,6 +4281,40 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.convertIntervalToEsInterval",
+        "type": "Function",
+        "tags": [],
+        "label": "convertIntervalToEsInterval",
+        "description": [],
+        "signature": [
+          "(interval: string) => ",
+          "EsInterval"
+        ],
+        "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/lib/time_buckets/calc_es_interval.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.convertIntervalToEsInterval.$1",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/lib/time_buckets/calc_es_interval.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.extractReferences",
         "type": "Function",
         "tags": [],
