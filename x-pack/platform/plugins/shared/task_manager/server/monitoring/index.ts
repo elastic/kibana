@@ -15,7 +15,6 @@ import {
 } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 
@@ -31,10 +30,10 @@ export interface CreateMonitoringStatsOpts {
   taskStore: TaskStore;
   elasticsearchAndSOAvailability$: Observable<boolean>;
   config: TaskManagerConfig;
-  managedConfig: ManagedConfiguration;
   logger: Logger;
   adHocTaskCounter: AdHocTaskCounter;
   taskDefinitions: TaskTypeDictionary;
+  startingCapacity: number;
   taskPollingLifecycle?: TaskPollingLifecycle;
 }
 

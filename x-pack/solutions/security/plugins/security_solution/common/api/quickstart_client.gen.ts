@@ -1912,7 +1912,7 @@ finalize it.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'POST',
+        method: 'GET',
 
         query: props.query,
       })
