@@ -402,6 +402,10 @@ export const expectModifiedBadgeToBeDisplayed = () => {
   cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('exist');
 };
 
+export const expectModifiedBadgeToNotBeDisplayed = () => {
+  cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('not.exist');
+};
+
 const selectOverwriteRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).should('be.checked');
