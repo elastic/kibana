@@ -178,6 +178,6 @@ const getElasticAgentDockerArgs = ({
     '--env',
     'FLEET_INSECURE=true',
     '--rm',
-    `docker.elastic.co/beats/elastic-agent/elastic-agent:${agentVersion}`,
+    `docker.elastic.co/beats/elastic-agent:${agentVersion}`,
   ];
 };
