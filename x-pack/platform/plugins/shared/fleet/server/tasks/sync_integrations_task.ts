@@ -22,10 +22,10 @@ import { appContextService, outputService } from '../services';
 import { getInstalledPackageSavedObjects } from '../services/epm/packages/get';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '0.0.2';
+export const VERSION = '1.0.0';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '1m'; // 5m
+const INTERVAL = '5m';
 const TIMEOUT = '1m';
 export const FLEET_SYNCED_INTEGRATIONS_INDEX_NAME = 'fleet-synced-integrations';
 
@@ -134,6 +134,17 @@ export class SyncIntegrationsTask {
     const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
 
     if (!enableSyncIntegrationsOnRemote) {
+      return;
+    }
+
+    const indexExists = await esClient.indices.exists({
+      index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+    });
+
+    if (!indexExists) {
+      this.logger.info(
+        `[SyncIntegrationsTask] index ${FLEET_SYNCED_INTEGRATIONS_INDEX_NAME} does not exist`
+      );
       return;
     }
 

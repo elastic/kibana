@@ -19,7 +19,7 @@ export const FLEET_SYNCED_INTEGRATIONS_INDEX_CONFIG = {
   mappings: {
     dynamic: false,
     _meta: {
-      version: '0.9',
+      version: '1.0',
     },
     properties: {
       remote_es_hosts: {
@@ -99,7 +99,7 @@ async function updateIndex(esClient: ElasticsearchClient, indexName: string, ind
       });
     }
   } catch (err) {
-    throw new FleetSetupError(`update of index [${indexName}] failed`, err);
+    throw new FleetSetupError(`update of index [${indexName}] failed ${err}`);
   }
 }
 
@@ -111,7 +111,7 @@ async function createIndex(esClient: ElasticsearchClient, indexName: string, ind
     });
   } catch (err) {
     if (err?.body?.error?.type !== 'resource_already_exists_exception') {
-      throw new FleetSetupError(`create of index [${indexName}] Failed`, err);
+      throw new FleetSetupError(`create of index [${indexName}] failed ${err}`);
     }
   }
 }
