@@ -36,7 +36,7 @@ export const useFetchAlertDeletionSettings = (props: UseFetchAlertDeletionSettin
 
   return {
     isInitialLoading,
-    isLoading: isLoading || isFetching,
+    isLoading: (isLoading || isFetching) && enabled,
     isError: isError || isLoadingError,
     data,
   };
