@@ -13,11 +13,11 @@ import {
   ConverseStreamCommand,
   ConverseStreamResponse,
 } from '@aws-sdk/client-bedrock-runtime';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { constructStack } from '@smithy/middleware-stack';
 import { HttpHandlerOptions } from '@smithy/types';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { prepareMessages } from '../../utils/bedrock';
 
 export interface CustomChatModelInput extends BedrockRuntimeClientConfig {

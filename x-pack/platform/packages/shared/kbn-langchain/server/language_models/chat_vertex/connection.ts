@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { EnhancedGenerateContentResponse } from '@google/generative-ai';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { AsyncCaller } from '@langchain/core/utils/async_caller';
 import {
   ChatConnection,
   GeminiContent,
@@ -17,6 +12,11 @@ import {
   GoogleAIBaseLLMInput,
   GoogleLLMResponse,
 } from '@langchain/google-common';
+import { EnhancedGenerateContentResponse } from '@google/generative-ai';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { AsyncCaller } from '@langchain/core/utils/async_caller';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { convertResponseBadFinishReasonToErrorMsg } from '../../utils/gemini';
 
 // only implements non-streaming requests

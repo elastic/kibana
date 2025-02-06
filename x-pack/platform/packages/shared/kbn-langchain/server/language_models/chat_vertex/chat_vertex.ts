@@ -8,20 +8,22 @@
 import { EnhancedGenerateContentResponse } from '@google/generative-ai';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { Logger } from '@kbn/logging';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
-import { BaseMessage, UsageMetadata } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
-import { GeminiPartText } from '@langchain/google-common/dist/types';
+import { BaseMessage, UsageMetadata } from '@langchain/core/messages';
 import { ChatVertexAI } from '@langchain/google-vertexai';
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
+
+import { Logger } from '@kbn/logging';
+import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { GeminiPartText } from '@langchain/google-common/dist/types';
 import {
   convertResponseBadFinishReasonToErrorMsg,
   convertResponseContentToChatGenerationChunk,
 } from '../../utils/gemini';
+
 import { ActionsClientChatConnection } from './connection';
 
 const DEFAULT_GEMINI_TEMPERATURE = 0;

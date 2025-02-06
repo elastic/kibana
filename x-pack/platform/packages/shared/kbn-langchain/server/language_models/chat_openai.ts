@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { Logger } from '@kbn/core/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ChatOpenAI } from '@langchain/openai';
-import { get } from 'lodash/fp';
-import type OpenAI from 'openai';
-import { Stream } from 'openai/streaming';
 import { v4 as uuidv4 } from 'uuid';
+import { Logger } from '@kbn/core/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { get } from 'lodash/fp';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
+import { ChatOpenAI } from '@langchain/openai';
+import { Stream } from 'openai/streaming';
+import type OpenAI from 'openai';
+import { PublicMethodsOf } from '@kbn/utility-types';
+
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import {
   InferenceChatCompleteParamsSchema,

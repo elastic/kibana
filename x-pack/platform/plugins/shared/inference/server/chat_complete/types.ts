@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
@@ -13,8 +15,6 @@ import type {
   ToolOptions,
   ChatCompleteMetadata,
 } from '@kbn/inference-common';
-import type { Logger } from '@kbn/logging';
-import type { Observable } from 'rxjs';
 import type { InferenceExecutor } from './utils';
 
 /**

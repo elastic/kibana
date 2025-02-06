@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { Logger } from '@kbn/logging';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { Readable } from 'stream';
 import {
   SimpleChatModel,
   type BaseChatModelParams,
 } from '@langchain/core/language_models/chat_models';
 import { AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
-import { ChatGenerationChunk } from '@langchain/core/outputs';
-import { get } from 'lodash/fp';
-import { Readable } from 'stream';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
+import { get } from 'lodash/fp';
+import { ChatGenerationChunk } from '@langchain/core/outputs';
+import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { parseBedrockStream, parseBedrockStreamAsAsyncIterator } from '../utils/bedrock';
 import { parseGeminiStream, parseGeminiStreamAsAsyncIterator } from '../utils/gemini';
 import { getDefaultArguments } from './constants';

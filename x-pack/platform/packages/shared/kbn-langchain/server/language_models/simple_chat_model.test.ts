@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import { PassThrough } from 'stream';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { ActionsClientSimpleChatModel } from './simple_chat_model';
+import { mockActionResponse } from './mocks';
 import { BaseMessage } from '@langchain/core/messages';
+import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { parseBedrockStream, parseBedrockStreamAsAsyncIterator } from '../utils/bedrock';
 import { parseGeminiStream, parseGeminiStreamAsAsyncIterator } from '../utils/gemini';
-import { mockActionResponse } from './mocks';
-import { ActionsClientSimpleChatModel } from './simple_chat_model';
 
 const connectorId = 'mock-connector-id';
 

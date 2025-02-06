@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { ChatCompletionChunk } from 'openai/resources/chat/completions';
-import { Stream } from 'openai/streaming';
 import { PassThrough, Readable } from 'stream';
-import { ActionTypeExecutorRawResult } from '../../common';
+import { Logger } from '@kbn/logging';
+import { Stream } from 'openai/streaming';
+import { ChatCompletionChunk } from 'openai/resources/chat/completions';
 import {
-  SmithyStream,
   getTokensFromBedrockConverseStream,
+  SmithyStream,
 } from './get_token_count_from_bedrock_converse';
-import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import {
   InvokeAsyncIteratorBody,
   getTokenCountFromInvokeAsyncIterator,
 } from './get_token_count_from_invoke_async_iterator';
+import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
+import { ActionTypeExecutorRawResult } from '../../common';
+import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 import {
-  InvokeBody,
   getTokenCountFromInvokeStream,
+  InvokeBody,
   parseGeminiStreamForUsageMetadata,
 } from './get_token_count_from_invoke_stream';
-import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 
 export interface TelemetryMetadata {
   pluginId?: string;
