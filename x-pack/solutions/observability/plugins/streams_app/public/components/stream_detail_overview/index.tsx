@@ -21,6 +21,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import {
   IngestStreamGetResponse,
+  isDescendantOf,
   isUnwiredStreamGetResponse,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -311,7 +312,7 @@ function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse 
       return [];
     }
     return streamsListFetch.value?.streams.filter(
-      (d) => isWiredStreamDefinition(d) && d.name.startsWith(definition.stream.name)
+      (d) => isWiredStreamDefinition(d) && isDescendantOf(definition.stream.name, d.name)
     );
   }, [definition, streamsListFetch.value?.streams]);
 
