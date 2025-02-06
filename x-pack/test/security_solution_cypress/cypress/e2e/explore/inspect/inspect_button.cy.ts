@@ -26,6 +26,7 @@ import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 const DATA_VIEW = 'auditbeat-*';
 
 // Failing: See https://github.com/elastic/kibana/issues/199563
+// Failing: See https://github.com/elastic/kibana/issues/199583
 describe.skip('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     // illegal_argument_exception: unknown setting [index.lifecycle.name]
