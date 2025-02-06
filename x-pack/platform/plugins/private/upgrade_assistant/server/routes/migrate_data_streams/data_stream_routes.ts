@@ -58,13 +58,13 @@ export function registerMigrateDataStreamRoutes({
 
         // If the user doesn't have privileges than querying for warnings is going to fail.
         const warnings = hasRequiredPrivileges
-          ? await migrationService.detectReindexWarnings(dataStreamName)
+          ? await migrationService.detectMigrationWarnings(dataStreamName)
           : [];
 
-        const reindexOp = await migrationService.fetchReindexStatus(dataStreamName);
+        const migrationOp = await migrationService.fetchMigrationStatus(dataStreamName);
 
         const body: DataStreamReindexStatusResponse = {
-          reindexOp,
+          migrationOp,
           warnings,
           hasRequiredPrivileges,
         };
@@ -139,7 +139,7 @@ export function registerMigrateDataStreamRoutes({
       path: `${BASE_PATH}/{dataStreamName}/metadata`,
       options: {
         access: 'public',
-        summary: `Get data stream reindexing metadata`,
+        summary: `Get data stream metadata`,
       },
       validate: {
         params: schema.object({

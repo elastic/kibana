@@ -16,12 +16,15 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { DataStreamReindexStatus } from '../../../../../../common/types';
+import {
+  DataStreamMigrationStatus,
+  DataStreamResolutionType,
+} from '../../../../../../common/types';
 import { getDataStreamReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
-import { useDataStreamReindexContext } from './context';
+import { useDataStreamMigrationContext } from './context';
 
-const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
+const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
   return {
     reindexLoadingStatusText: i18n.translate(
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexLoadingStatusText',
@@ -33,7 +36,7 @@ const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexInProgressText',
       {
         defaultMessage:
-          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} in progress…',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} in progress…',
         values: { resolutionType },
       }
     ),
@@ -41,7 +44,7 @@ const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCompleteText',
       {
         defaultMessage:
-          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} complete',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} complete',
         values: { resolutionType },
       }
     ),
@@ -49,7 +52,7 @@ const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFailedText',
       {
         defaultMessage:
-          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} failed',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} failed',
         values: { resolutionType },
       }
     ),
@@ -57,7 +60,7 @@ const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFetchFailedText',
       {
         defaultMessage:
-          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} status not available',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} status not available',
         values: { resolutionType },
       }
     ),
@@ -65,7 +68,7 @@ const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCanceledText',
       {
         defaultMessage:
-          '{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Migration}} cancelled',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} cancelled',
         values: { resolutionType },
       }
     ),
@@ -87,7 +90,7 @@ const getI18nTexts = (resolutionType?: 'readonly' | 'reindex') => {
 };
 
 export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
-  const { migrationState } = useDataStreamReindexContext();
+  const { migrationState } = useDataStreamMigrationContext();
 
   if (migrationState.loadingState === LoadingState.Loading) {
     return (
@@ -105,7 +108,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
   }
 
   switch (migrationState.status) {
-    case DataStreamReindexStatus.inProgress:
+    case DataStreamMigrationStatus.inProgress:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -116,13 +119,13 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
               {getI18nTexts(migrationState.resolutionType).reindexInProgressText}{' '}
               {getDataStreamReindexProgressLabel(
                 migrationState.status,
-                migrationState.reindexTaskPercComplete
+                migrationState.taskPercComplete
               )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case DataStreamReindexStatus.completed:
+    case DataStreamMigrationStatus.completed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -135,7 +138,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case DataStreamReindexStatus.failed:
+    case DataStreamMigrationStatus.failed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -148,7 +151,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case DataStreamReindexStatus.fetchFailed:
+    case DataStreamMigrationStatus.fetchFailed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>

@@ -20,11 +20,11 @@ import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
-  DataStreamReindexStatus,
+  DataStreamMigrationStatus,
   EnrichedDeprecationInfo,
 } from '../../../../../../../common/types';
 
-import { ReindexStateContext } from '../context';
+import { MigrationStateContext } from '../context';
 
 import { DeprecationBadge } from '../../../../shared';
 import {
@@ -38,12 +38,12 @@ import {
 import { containerMessages } from './messages';
 import type { FlyoutStep } from './steps/types';
 import { InitializingFlyoutStep } from './steps/initializing';
-import { ConfirmReindexingFlyoutStep } from './steps/confirm';
+import { ConfirmMigrationFlyoutStep } from './steps/confirm';
 import { DataStreamDetailsFlyoutStep } from './steps/details';
 import { ChecklistFlyoutStep } from './steps/checklist';
 import { MigrationCompletedFlyoutStep } from './steps/completed';
 
-interface Props extends ReindexStateContext {
+interface Props extends MigrationStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
 }
@@ -61,7 +61,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   closeFlyout,
   deprecation,
 }) => {
-  const { status, reindexWarnings, errorMessage, meta } = migrationState;
+  const { status, migrationWarnings, errorMessage, meta } = migrationState;
   const resolutionType = 'readonly' as const;
   const { index } = deprecation;
 
@@ -69,18 +69,18 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
 
   const switchFlyoutStep = useCallback(() => {
     switch (status) {
-      case DataStreamReindexStatus.notStarted: {
+      case DataStreamMigrationStatus.notStarted: {
         setFlyoutStep('notStarted');
         return;
       }
-      case DataStreamReindexStatus.failed:
-      case DataStreamReindexStatus.fetchFailed:
-      case DataStreamReindexStatus.cancelled:
-      case DataStreamReindexStatus.inProgress: {
+      case DataStreamMigrationStatus.failed:
+      case DataStreamMigrationStatus.fetchFailed:
+      case DataStreamMigrationStatus.cancelled:
+      case DataStreamMigrationStatus.inProgress: {
         setFlyoutStep('inProgress');
         return;
       }
-      case DataStreamReindexStatus.completed: {
+      case DataStreamMigrationStatus.completed: {
         setTimeout(() => {
           // wait for 1.5 more seconds fur the UI to visually get to 100%
           setFlyoutStep('completed');
@@ -179,8 +179,8 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         }
 
         return (
-          <ConfirmReindexingFlyoutStep
-            warnings={reindexWarnings ?? []}
+          <ConfirmMigrationFlyoutStep
+            warnings={migrationWarnings ?? []}
             meta={meta}
             resolutionType={resolutionType}
             hideWarningsStep={() => {
@@ -241,7 +241,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     onStartReindex,
     onStopReindex,
     lastIndexCreationDateFormatted,
-    reindexWarnings,
+    migrationWarnings,
     meta,
     errorMessage,
     onStartReadonly,
@@ -255,7 +255,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         <EuiFlyoutHeader hasBorder>
           <DeprecationBadge
             isCritical={deprecation.isCritical}
-            isResolved={status === DataStreamReindexStatus.completed}
+            isResolved={status === DataStreamMigrationStatus.completed}
           />
           <EuiSpacer size="s" />
           <EuiTitle size="s" data-test-subj="flyoutTitle">

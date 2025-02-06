@@ -35,14 +35,14 @@ export interface DataStreamMetadata {
 }
 
 export interface DataStreamReindexStatusResponse {
-  warnings?: DataStreamReindexWarning[];
-  reindexOp?: DataStreamReindexOperation;
+  warnings?: DataStreamMigrationWarning[];
+  migrationOp?: DataStreamMigrationOperation;
   hasRequiredPrivileges?: boolean;
 }
 
 export type DataStreamWarningTypes = 'incompatibleDataStream' | 'affectExistingSetups';
 
-export interface DataStreamReindexWarning {
+export interface DataStreamMigrationWarning {
   warningType: DataStreamWarningTypes;
   resolutionType: DataStreamResolutionType;
   meta?: {
@@ -50,7 +50,7 @@ export interface DataStreamReindexWarning {
   };
 }
 
-export enum DataStreamReindexStatus {
+export enum DataStreamMigrationStatus {
   notStarted,
   inProgress,
   completed,
@@ -68,31 +68,31 @@ export interface DataStreamProgressDetails {
 }
 
 export interface DataStreamReindexStatusNotStarted {
-  status: DataStreamReindexStatus.notStarted;
+  status: DataStreamMigrationStatus.notStarted;
 }
 
 export interface DataStreamReindexStatusInProgress {
-  status: DataStreamReindexStatus.inProgress;
-  reindexTaskPercComplete: number;
+  status: DataStreamMigrationStatus.inProgress;
+  taskPercComplete: number;
   progressDetails: DataStreamProgressDetails;
 }
 
 export interface DataStreamReindexStatusCompleted {
-  status: DataStreamReindexStatus.completed;
-  reindexTaskPercComplete: number;
+  status: DataStreamMigrationStatus.completed;
+  taskPercComplete: number;
   progressDetails: DataStreamProgressDetails;
 }
 
 export interface DataStreamReindexStatusFailed {
-  status: DataStreamReindexStatus.failed;
+  status: DataStreamMigrationStatus.failed;
   errorMessage: string;
 }
 
 export interface DataStreamReindexStatusCancelled {
-  status: DataStreamReindexStatus.cancelled;
+  status: DataStreamMigrationStatus.cancelled;
 }
 
-export type DataStreamReindexOperation =
+export type DataStreamMigrationOperation =
   | DataStreamReindexStatusNotStarted
   | DataStreamReindexStatusInProgress
   | DataStreamReindexStatusCompleted

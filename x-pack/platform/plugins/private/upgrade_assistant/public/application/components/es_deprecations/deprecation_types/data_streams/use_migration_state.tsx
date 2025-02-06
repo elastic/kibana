@@ -8,8 +8,8 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 
 import {
-  DataStreamReindexStatus,
-  DataStreamReindexWarning,
+  DataStreamMigrationStatus,
+  DataStreamMigrationWarning,
   DataStreamMetadata,
   DataStreamReindexStatusResponse,
   DataStreamProgressDetails,
@@ -26,10 +26,10 @@ export interface MigrationState {
   cancelLoadingState?: CancelLoadingState;
 
   resolutionType?: DataStreamResolutionType;
-  status?: DataStreamReindexStatus;
-  reindexTaskPercComplete: number | null;
+  status?: DataStreamMigrationStatus;
+  taskPercComplete: number | null;
   errorMessage: string | null;
-  reindexWarnings?: DataStreamReindexWarning[];
+  migrationWarnings?: DataStreamMigrationWarning[];
   hasRequiredPrivileges?: boolean;
   taskStatus?: DataStreamProgressDetails;
 
@@ -39,7 +39,7 @@ export interface MigrationState {
 const getReindexState = (
   migrationState: MigrationState,
   {
-    reindexOp,
+    migrationOp,
     warnings,
     hasRequiredPrivileges,
     meta: updatedMeta,
@@ -47,42 +47,42 @@ const getReindexState = (
 ) => {
   const newReindexState: MigrationState = {
     ...migrationState,
-    reindexWarnings: warnings,
+    migrationWarnings: warnings,
     meta: updatedMeta || migrationState.meta,
     loadingState: LoadingState.Success,
   };
 
   if (warnings) {
-    newReindexState.reindexWarnings = warnings;
+    newReindexState.migrationWarnings = warnings;
   }
 
   if (hasRequiredPrivileges !== undefined) {
     newReindexState.hasRequiredPrivileges = hasRequiredPrivileges;
   }
 
-  if (reindexOp) {
-    newReindexState.status = reindexOp.status;
+  if (migrationOp) {
+    newReindexState.status = migrationOp.status;
 
-    if (reindexOp.status === DataStreamReindexStatus.notStarted) {
+    if (migrationOp.status === DataStreamMigrationStatus.notStarted) {
       return newReindexState;
     }
 
-    if (reindexOp.status === DataStreamReindexStatus.failed) {
-      newReindexState.errorMessage = reindexOp.errorMessage;
+    if (migrationOp.status === DataStreamMigrationStatus.failed) {
+      newReindexState.errorMessage = migrationOp.errorMessage;
       return newReindexState;
     }
 
     if (
-      reindexOp.status === DataStreamReindexStatus.inProgress ||
-      reindexOp.status === DataStreamReindexStatus.completed
+      migrationOp.status === DataStreamMigrationStatus.inProgress ||
+      migrationOp.status === DataStreamMigrationStatus.completed
     ) {
-      newReindexState.taskStatus = reindexOp.progressDetails;
-      newReindexState.reindexTaskPercComplete = reindexOp.reindexTaskPercComplete;
+      newReindexState.taskStatus = migrationOp.progressDetails;
+      newReindexState.taskPercComplete = migrationOp.taskPercComplete;
     }
 
     if (
       migrationState.cancelLoadingState === CancelLoadingState.Requested &&
-      reindexOp.status === DataStreamReindexStatus.inProgress
+      migrationOp.status === DataStreamMigrationStatus.inProgress
     ) {
       newReindexState.cancelLoadingState = CancelLoadingState.Loading;
     }
@@ -91,7 +91,7 @@ const getReindexState = (
   return newReindexState;
 };
 
-export const useReindexStatus = ({
+export const useMigrationStatus = ({
   dataStreamName,
   api,
 }: {
@@ -101,7 +101,7 @@ export const useReindexStatus = ({
   const [migrationState, setMigrationState] = useState<MigrationState>({
     loadingState: LoadingState.Loading,
     errorMessage: null,
-    reindexTaskPercComplete: null,
+    taskPercComplete: null,
     taskStatus: undefined,
     meta: null,
   });
@@ -118,7 +118,7 @@ export const useReindexStatus = ({
   }, []);
 
   const pollingFunction = useCallback(
-    async (resolutionType?: 'readonly' | 'reindex') => {
+    async (resolutionType?: DataStreamResolutionType) => {
       clearPollInterval();
       try {
         if (resolutionType === 'readonly' && !readonlyState.current) {
@@ -144,7 +144,7 @@ export const useReindexStatus = ({
               ...prevValue,
               loadingState: LoadingState.Error,
               errorMessage: error.message.toString(),
-              status: DataStreamReindexStatus.fetchFailed,
+              status: DataStreamMigrationStatus.fetchFailed,
             };
           });
           return;
@@ -158,7 +158,7 @@ export const useReindexStatus = ({
           return getReindexState(prevValue, data);
         });
 
-        if (data.reindexOp && data.reindexOp.status === DataStreamReindexStatus.inProgress) {
+        if (data.migrationOp && data.migrationOp.status === DataStreamMigrationStatus.inProgress) {
           // Only keep polling if it exists and is in progress.
           pollIntervalIdRef.current = setTimeout(
             () => pollingFunction(migrationState.resolutionType),
@@ -171,7 +171,7 @@ export const useReindexStatus = ({
             ...prevValue,
             loadingState: LoadingState.Error,
             errorMessage: error.message.toString(),
-            status: DataStreamReindexStatus.fetchFailed,
+            status: DataStreamMigrationStatus.fetchFailed,
           };
         });
       }
@@ -187,14 +187,14 @@ export const useReindexStatus = ({
     setMigrationState((prevValue: MigrationState) => {
       return {
         ...prevValue,
-        status: DataStreamReindexStatus.inProgress,
-        reindexTaskPercComplete: null,
+        status: DataStreamMigrationStatus.inProgress,
+        taskPercComplete: null,
         errorMessage: null,
         cancelLoadingState: undefined,
       };
     });
 
-    if (migrationState.status === DataStreamReindexStatus.failed) {
+    if (migrationState.status === DataStreamMigrationStatus.failed) {
       try {
         await api.cancelDataStreamReindexTask(dataStreamName);
       } catch (_) {
@@ -203,7 +203,7 @@ export const useReindexStatus = ({
       }
     }
 
-    const { data: reindexOp, error } = await api.startDataStreamReindexTask(dataStreamName);
+    const { data: migrationOp, error } = await api.startDataStreamReindexTask(dataStreamName);
 
     if (error) {
       setMigrationState((prevValue: MigrationState) => {
@@ -211,14 +211,14 @@ export const useReindexStatus = ({
           ...prevValue,
           loadingState: LoadingState.Error,
           errorMessage: error.message.toString(),
-          status: DataStreamReindexStatus.failed,
+          status: DataStreamMigrationStatus.failed,
         };
       });
       return;
     }
 
     setMigrationState((prevValue: MigrationState) => {
-      return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
+      return getReindexState(prevValue, { migrationOp, meta: prevValue.meta });
     });
     updateStatus();
   }, [api, dataStreamName, updateStatus, migrationState.status]);
@@ -241,7 +241,7 @@ export const useReindexStatus = ({
     } catch (error) {
       setMigrationState((prevValue: MigrationState) => {
         // if state is completed, we don't need to update the meta
-        if (prevValue.status === DataStreamReindexStatus.completed) {
+        if (prevValue.status === DataStreamMigrationStatus.completed) {
           return prevValue;
         }
 
@@ -249,7 +249,7 @@ export const useReindexStatus = ({
           ...prevValue,
           loadingState: LoadingState.Error,
           errorMessage: error.message.toString(),
-          status: DataStreamReindexStatus.failed,
+          status: DataStreamMigrationStatus.failed,
         };
       });
     }
@@ -273,7 +273,7 @@ export const useReindexStatus = ({
         return {
           ...prevValue,
           cancelLoadingState: CancelLoadingState.Success,
-          status: DataStreamReindexStatus.cancelled,
+          status: DataStreamMigrationStatus.cancelled,
         };
       });
     } catch (error) {
@@ -295,8 +295,8 @@ export const useReindexStatus = ({
       return {
         ...prevValue,
         resolutionType: 'readonly',
-        status: DataStreamReindexStatus.inProgress,
-        reindexTaskPercComplete: null,
+        status: DataStreamMigrationStatus.inProgress,
+        taskPercComplete: null,
       };
     });
 
@@ -312,7 +312,7 @@ export const useReindexStatus = ({
         ...prevValue,
         resolutionType: undefined,
         cancelLoadingState: CancelLoadingState.Success,
-        status: DataStreamReindexStatus.cancelled,
+        status: DataStreamMigrationStatus.cancelled,
       };
     });
   }, []);

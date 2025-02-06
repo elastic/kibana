@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
-  DataStreamReindexWarning,
+  DataStreamMigrationWarning,
   DataStreamWarningTypes,
   DataStreamMetadata,
   DataStreamResolutionType,
@@ -44,17 +44,17 @@ const warningToComponentMap: Record<
   affectExistingSetups: AffectExistingSetupsWarningCheckbox,
 };
 
-export const idForWarning = (id: number) => `reindexWarning-${id}`;
+export const idForWarning = (id: number) => `migrationWarning-${id}`;
 
 /**
- * Displays warning text about destructive changes required to reindex this index. The user
+ * Displays warning text about changes required to migrate this data stream. The user
  * must acknowledge each change before being allowed to proceed.
  */
-export const ConfirmReindexingFlyoutStep: React.FunctionComponent<{
+export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
   hideWarningsStep: () => void;
   startAction: () => void;
   resolutionType: DataStreamResolutionType;
-  warnings: DataStreamReindexWarning[];
+  warnings: DataStreamMigrationWarning[];
   meta: DataStreamMetadata;
 }> = ({ warnings, hideWarningsStep, startAction, resolutionType, meta }) => {
   const {

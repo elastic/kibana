@@ -71,22 +71,3 @@ export interface WarningCheckboxProps {
   docLinks: DocLinksStart['links'];
   id: string;
 }
-
-export const IncompatibleDataInDataStreamWarningCheckbox: React.FunctionComponent<
-  WarningCheckboxProps
-> = ({ isChecked, onChange, id }) => {
-  return (
-    <WarningCheckbox
-      isChecked={isChecked}
-      onChange={onChange}
-      warningId={id}
-      label={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.incompatibleDataWarningTitle"
-          defaultMessage="Reindex all incompatible data for this data stream"
-        />
-      }
-      description={null}
-    />
-  );
-};

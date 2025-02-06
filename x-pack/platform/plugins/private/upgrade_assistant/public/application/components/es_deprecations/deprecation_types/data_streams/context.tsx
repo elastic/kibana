@@ -8,9 +8,9 @@
 import React, { createContext, useContext } from 'react';
 
 import { ApiService } from '../../../../lib/api';
-import { useReindexStatus, MigrationState } from './use_reindex_state';
+import { useMigrationStatus, MigrationState } from './use_migration_state';
 
-export interface ReindexStateContext {
+export interface MigrationStateContext {
   loadDataStreamMetadata: () => Promise<void>;
   migrationState: MigrationState;
 
@@ -23,13 +23,13 @@ export interface ReindexStateContext {
   cancelReadonly: () => Promise<void>;
 }
 
-const DataStreamReindexContext = createContext<ReindexStateContext | undefined>(undefined);
+const DataStreamMigrationContext = createContext<MigrationStateContext | undefined>(undefined);
 
-export const useDataStreamReindexContext = () => {
-  const context = useContext(DataStreamReindexContext);
+export const useDataStreamMigrationContext = () => {
+  const context = useContext(DataStreamMigrationContext);
   if (context === undefined) {
     throw new Error(
-      'useDataStreamReindexContext must be used within a <DataStreamReindexStatusProvider />'
+      'useDataStreamMigrationContext must be used within a <DataStreamMigrationStatusProvider />'
     );
   }
   return context;
@@ -41,7 +41,7 @@ interface Props {
   dataStreamName: string;
 }
 
-export const DataStreamReindexStatusProvider: React.FunctionComponent<Props> = ({
+export const DataStreamMigrationStatusProvider: React.FunctionComponent<Props> = ({
   api,
   dataStreamName,
   children,
@@ -53,13 +53,13 @@ export const DataStreamReindexStatusProvider: React.FunctionComponent<Props> = (
     loadDataStreamMetadata,
     cancelReindex,
     startReadonly,
-  } = useReindexStatus({
+  } = useMigrationStatus({
     dataStreamName,
     api,
   });
 
   return (
-    <DataStreamReindexContext.Provider
+    <DataStreamMigrationContext.Provider
       value={{
         migrationState,
         startReindex,
@@ -70,6 +70,6 @@ export const DataStreamReindexStatusProvider: React.FunctionComponent<Props> = (
       }}
     >
       {children}
-    </DataStreamReindexContext.Provider>
+    </DataStreamMigrationContext.Provider>
   );
 };

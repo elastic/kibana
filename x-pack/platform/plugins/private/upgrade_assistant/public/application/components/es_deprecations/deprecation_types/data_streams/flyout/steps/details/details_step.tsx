@@ -21,13 +21,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type {
+import {
   DataStreamMetadata,
-  DataStreamReindexStatus,
+  DataStreamMigrationStatus,
   DataStreamResolutionType,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
-import type { MigrationState } from '../../../use_reindex_state';
+import type { MigrationState } from '../../../use_migration_state';
 import { useAppContext } from '../../../../../../../app_context';
 import { DurationClarificationCallOut } from './warnings_callout';
 import { getPrimaryButtonLabel } from '../../messages';
@@ -52,10 +52,10 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
 
   const { loadingState, status, hasRequiredPrivileges } = migrationState;
   const loading =
-    loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
-  const isCompleted = status === DataStreamReindexStatus.completed;
-  const hasFetchFailed = status === DataStreamReindexStatus.fetchFailed;
-  const hasReindexingFailed = status === DataStreamReindexStatus.failed;
+    loadingState === LoadingState.Loading || status === DataStreamMigrationStatus.inProgress;
+  const isCompleted = status === DataStreamMigrationStatus.completed;
+  const hasFetchFailed = status === DataStreamMigrationStatus.fetchFailed;
+  const hasMigrationFailed = status === DataStreamMigrationStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
@@ -75,7 +75,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.insufficientPrivilegeCallout.calloutTitle"
-                  defaultMessage="You do not have sufficient privileges to reindex this data stream."
+                  defaultMessage="You do not have sufficient privileges to migrate this data stream."
                 />
               }
               color="danger"
@@ -100,7 +100,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               <>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutDescription"
-                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
+                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
                 />
 
                 <EuiSpacer size="s" />
@@ -125,22 +125,22 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
           </>
         )}
 
-        {(hasFetchFailed || hasReindexingFailed) && (
+        {(hasFetchFailed || hasMigrationFailed) && (
           <>
             <EuiCallOut
               color="danger"
               iconType="warning"
-              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
+              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'migrationFailedCallout'}
               title={
                 hasFetchFailed ? (
                   <FormattedMessage
                     id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.fetchFailedCalloutTitle"
-                    defaultMessage="Data stream reindex status not available"
+                    defaultMessage="Data stream migration status not available"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexingFailedCalloutTitle"
-                    defaultMessage="Data stream reindexing error"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.migrationFailedCalloutTitle"
+                    defaultMessage="Data stream migration error"
                   />
                 )
               }
@@ -198,7 +198,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
           </ul>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexDescription"
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.migrationDescription"
               defaultMessage="If you no longer need this data, you can also proceed by deleting these indices. {indexManagementLinkHtml}"
               values={{
                 indexManagementLinkHtml: (
@@ -234,12 +234,12 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color={status === DataStreamReindexStatus.cancelled ? 'warning' : 'accent'}
-                    iconType={status === DataStreamReindexStatus.cancelled ? 'play' : undefined}
+                    color={status === DataStreamMigrationStatus.cancelled ? 'warning' : 'accent'}
+                    iconType={status === DataStreamMigrationStatus.cancelled ? 'play' : undefined}
                     onClick={() => startAction('reindex')}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}
-                    data-test-subj="startReindexingButton"
+                    data-test-subj="startDataStreamReindexingButton"
                   >
                     {getPrimaryButtonLabel(status)}
                   </EuiButton>
@@ -254,7 +254,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                   data-test-subj="startDataStreamReadonlyButton"
                 >
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelReindexButtonLabel"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.markReadOnlyButtonLabel"
                     defaultMessage="Mark all read only"
                   />
                 </EuiButton>

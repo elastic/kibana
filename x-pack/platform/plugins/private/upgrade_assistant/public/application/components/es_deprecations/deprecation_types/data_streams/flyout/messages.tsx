@@ -8,26 +8,26 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DataStreamReindexStatus } from '../../../../../../../common/types';
+import { DataStreamMigrationStatus } from '../../../../../../../common/types';
 
-export const getPrimaryButtonLabel = (status?: DataStreamReindexStatus) => {
+export const getPrimaryButtonLabel = (status?: DataStreamMigrationStatus) => {
   switch (status) {
-    case DataStreamReindexStatus.fetchFailed:
-    case DataStreamReindexStatus.failed:
+    case DataStreamMigrationStatus.fetchFailed:
+    case DataStreamMigrationStatus.failed:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.tryAgainLabel"
           defaultMessage="Try again"
         />
       );
-    case DataStreamReindexStatus.inProgress:
+    case DataStreamMigrationStatus.inProgress:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.reindexingLabel"
           defaultMessage="Reindexing…"
         />
       );
-    case DataStreamReindexStatus.cancelled:
+    case DataStreamMigrationStatus.cancelled:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.restartLabel"

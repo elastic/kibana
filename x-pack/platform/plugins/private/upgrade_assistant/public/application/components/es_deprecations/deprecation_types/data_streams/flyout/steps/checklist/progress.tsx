@@ -12,11 +12,11 @@ import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
-import type { MigrationState } from '../../../use_reindex_state';
+import { DataStreamMigrationStatus } from '../../../../../../../../../common/types';
+import type { MigrationState } from '../../../use_migration_state';
 import { StepProgress, StepProgressStep } from '../../../../reindex/flyout/step_progress';
 import { getDataStreamReindexProgress } from '../../../../../../../lib/utils';
-import { ReindexingDocumentsStepTitle } from './progress_title';
+import { MigrateDocumentsStepTitle } from './progress_title';
 import { CancelLoadingState } from '../../../../../../types';
 
 interface Props {
@@ -27,8 +27,8 @@ interface Props {
  * Displays a list of steps in the reindex operation, the current status, a progress bar,
  * and any error messages that are encountered.
  */
-export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
-  const { status, reindexTaskPercComplete, cancelLoadingState, taskStatus, resolutionType } =
+export const MigrationProgress: React.FunctionComponent<Props> = (props) => {
+  const { status, taskPercComplete, cancelLoadingState, taskStatus, resolutionType } =
     props.migrationState;
 
   // The reindexing step is special because it generally lasts longer and can be cancelled mid-flight
@@ -36,14 +36,15 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
     title: (
       <EuiFlexGroup component="span">
         <EuiFlexItem grow={false}>
-          <ReindexingDocumentsStepTitle {...props} />
+          <MigrateDocumentsStepTitle {...props} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
   } as StepProgressStep;
 
   const inProgress =
-    status === DataStreamReindexStatus.inProgress || status === DataStreamReindexStatus.completed;
+    status === DataStreamMigrationStatus.inProgress ||
+    status === DataStreamMigrationStatus.completed;
 
   let euiProgressColor = 'subdued';
 
@@ -56,21 +57,21 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
   ) {
     reindexingDocsStep.status = 'inProgress';
     euiProgressColor = 'subdued';
-  } else if (status === DataStreamReindexStatus.failed) {
+  } else if (status === DataStreamMigrationStatus.failed) {
     reindexingDocsStep.status = 'failed';
     euiProgressColor = 'danger';
   } else if (
-    status === DataStreamReindexStatus.cancelled ||
+    status === DataStreamMigrationStatus.cancelled ||
     cancelLoadingState === CancelLoadingState.Success
   ) {
     reindexingDocsStep.status = 'cancelled';
   } else if (status === undefined) {
     reindexingDocsStep.status = 'incomplete';
     euiProgressColor = 'subdued';
-  } else if (status === DataStreamReindexStatus.inProgress) {
+  } else if (status === DataStreamMigrationStatus.inProgress) {
     reindexingDocsStep.status = 'inProgress';
     euiProgressColor = 'primary';
-  } else if (status === DataStreamReindexStatus.completed) {
+  } else if (status === DataStreamMigrationStatus.completed) {
     reindexingDocsStep.status = 'complete';
     euiProgressColor = 'success';
   } else {
@@ -80,7 +81,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
   }
 
   const progressPercentage = inProgress
-    ? getDataStreamReindexProgress(status, reindexTaskPercComplete)
+    ? getDataStreamReindexProgress(status, taskPercComplete)
     : undefined;
   const showProgressValueText = inProgress;
   const progressMaxValue = inProgress ? 100 : undefined;
@@ -90,16 +91,16 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
       <EuiFlexItem>
         <EuiTitle size="xs" data-test-subj="reindexChecklistTitle">
           <h3>
-            {status === DataStreamReindexStatus.inProgress ? (
+            {status === DataStreamMigrationStatus.inProgress ? (
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingInProgressTitle"
-                defaultMessage="{resolutionType, select, reindexing {Reindexing} readonly {Marking as readonly} other {Unknown action}} in progress…"
+                defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Unknown action}} in progress…"
                 values={{ resolutionType }}
               />
             ) : (
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklistTitle"
-                defaultMessage="{resolutionType, select, reindexing {Reindex data stream} readonly {Mark data stream as readonly} other {Unknown action}}"
+                defaultMessage="{resolutionType, select, reindex {Reindex data stream} readonly {Mark data stream as readonly} other {Unknown action}}"
                 values={{ resolutionType }}
               />
             )}
@@ -157,7 +158,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                         'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.progressStep.failedTitle',
                         {
                           defaultMessage:
-                            '{count, plural, =1 {# Index} other {# Indices}} failed to get {resolutionType, select, reindexing {reindexed} readonly {marked as readonly} other {execute}}.',
+                            '{count, plural, =1 {# Index} other {# Indices}} failed to get {resolutionType, select, reindex {reindexed} readonly {marked as readonly} other {execute}}.',
                           values: { count: taskStatus.errorsCount, resolutionType },
                         }
                       )}
@@ -172,7 +173,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                       'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.progressStep.completeTitle',
                       {
                         defaultMessage:
-                          '{count, plural, =1 {# Index} other {# Indices}} successfully {resolutionType, select, reindexing {rein dexed} readonly {marked as readonly} other {executed}}.',
+                          '{count, plural, =1 {# Index} other {# Indices}} successfully {resolutionType, select, reindex {rein dexed} readonly {marked as readonly} other {executed}}.',
                         values: { count: taskStatus.successCount, resolutionType },
                       }
                     )}
@@ -186,7 +187,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                       'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.progressStep.inProgressTitle',
                       {
                         defaultMessage:
-                          '{count, plural, =1 {# Index} other {# Indices}} currently getting {resolutionType, select, reindexing {reindexed} readonly {marked as readonly} other {executed}}.',
+                          '{count, plural, =1 {# Index} other {# Indices}} currently getting {resolutionType, select, reindex {reindexed} readonly {marked as readonly} other {executed}}.',
                         values: { count: taskStatus.inProgressCount, resolutionType },
                       }
                     )}

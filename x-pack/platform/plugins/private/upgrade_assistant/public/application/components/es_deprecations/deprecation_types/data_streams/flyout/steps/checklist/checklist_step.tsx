@@ -21,12 +21,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  DataStreamReindexStatus,
+  DataStreamMigrationStatus,
   DataStreamResolutionType,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
-import type { MigrationState } from '../../../use_reindex_state';
-import { ReindexProgress } from './progress';
+import type { MigrationState } from '../../../use_migration_state';
+import { MigrationProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
 import { getPrimaryButtonLabel } from '../../messages';
 
@@ -46,15 +46,15 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 
   const { loadingState, status, hasRequiredPrivileges } = migrationState;
   const loading =
-    loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
-  const isCompleted = status === DataStreamReindexStatus.completed;
-  const hasFetchFailed = status === DataStreamReindexStatus.fetchFailed;
-  const hasReindexingFailed = status === DataStreamReindexStatus.failed;
+    loadingState === LoadingState.Loading || status === DataStreamMigrationStatus.inProgress;
+  const isCompleted = status === DataStreamMigrationStatus.completed;
+  const hasFetchFailed = status === DataStreamMigrationStatus.fetchFailed;
+  const hasReindexingFailed = status === DataStreamMigrationStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
   const showMainButton = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
-  const shouldShowCancelButton = showMainButton && status === DataStreamReindexStatus.inProgress;
+  const shouldShowCancelButton = showMainButton && status === DataStreamMigrationStatus.inProgress;
 
   return (
     <Fragment>
@@ -66,7 +66,10 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
-                  defaultMessage="You do not have sufficient privileges to reindex this index"
+                  defaultMessage="You do not have sufficient privileges to migrate this data stream"
+                  values={{
+                    resolutionType,
+                  }}
                 />
               }
               color="danger"
@@ -151,7 +154,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </p>
         </EuiText>
         <EuiSpacer />
-        <ReindexProgress migrationState={migrationState} />
+        <MigrationProgress migrationState={migrationState} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -187,8 +190,10 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    color={status === DataStreamReindexStatus.inProgress ? 'primary' : 'warning'}
-                    iconType={status === DataStreamReindexStatus.inProgress ? undefined : 'refresh'}
+                    color={status === DataStreamMigrationStatus.inProgress ? 'primary' : 'warning'}
+                    iconType={
+                      status === DataStreamMigrationStatus.inProgress ? undefined : 'refresh'
+                    }
                     onClick={executeAction}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}

@@ -8,14 +8,14 @@
 import { chunk } from 'lodash';
 import {
   DataStreamMetadata,
-  DataStreamReindexStatus,
-  DataStreamReindexOperation,
+  DataStreamMigrationStatus,
+  DataStreamMigrationOperation,
 } from '../../../../../../common/types';
 import { ApiService } from '../../../../lib/api';
 
 interface ReadOnlyExecuteResponse {
   data: {
-    reindexOp: DataStreamReindexOperation;
+    migrationOp: DataStreamMigrationOperation;
   };
   error?: null;
 }
@@ -34,9 +34,9 @@ export async function* readOnlyExecute(
   if (!indicesRequiringUpgrade || !indicesRequiringUpgrade.length) {
     return {
       data: {
-        reindexOp: {
-          status: DataStreamReindexStatus.completed,
-          reindexTaskPercComplete: 1,
+        migrationOp: {
+          status: DataStreamMigrationStatus.completed,
+          taskPercComplete: 1,
           progressDetails: {
             startTimeMs,
             successCount: 0,
@@ -63,15 +63,15 @@ export async function* readOnlyExecute(
 
       const status =
         processedCount >= indicesRequiringUpgrade.length
-          ? DataStreamReindexStatus.completed
-          : DataStreamReindexStatus.inProgress;
-      const reindexTaskPercComplete = processedCount / indicesRequiringUpgrade.length;
+          ? DataStreamMigrationStatus.completed
+          : DataStreamMigrationStatus.inProgress;
+      const taskPercComplete = processedCount / indicesRequiringUpgrade.length;
 
       yield {
         data: {
-          reindexOp: {
+          migrationOp: {
             status,
-            reindexTaskPercComplete,
+            taskPercComplete,
             progressDetails: {
               startTimeMs,
               successCount: processedCount,
@@ -86,8 +86,8 @@ export async function* readOnlyExecute(
   } catch (error) {
     return {
       data: {
-        reindexOp: {
-          status: DataStreamReindexStatus.failed,
+        migrationOp: {
+          status: DataStreamMigrationStatus.failed,
           errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
         },
       },
@@ -96,9 +96,9 @@ export async function* readOnlyExecute(
 
   return {
     data: {
-      reindexOp: {
-        status: DataStreamReindexStatus.completed,
-        reindexTaskPercComplete: 1,
+      migrationOp: {
+        status: DataStreamMigrationStatus.completed,
+        taskPercComplete: 1,
         progressDetails: {
           startTimeMs,
           successCount: indicesRequiringUpgrade.length,
@@ -110,7 +110,3 @@ export async function* readOnlyExecute(
     },
   };
 }
-
-export const readOnlyCancel = async () => {
-  return false;
-};
