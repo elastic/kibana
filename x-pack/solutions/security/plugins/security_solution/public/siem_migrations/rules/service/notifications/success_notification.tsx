@@ -17,7 +17,7 @@ import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RuleMigrationStats } from '../types';
+import type { RuleMigrationStats } from '../../types';
 
 export const getSuccessToast = (migration: RuleMigrationStats, core: CoreStart): ToastInput => ({
   color: 'success',
