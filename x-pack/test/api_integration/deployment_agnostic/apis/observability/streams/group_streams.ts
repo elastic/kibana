@@ -40,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   group: {
-                    members: ['logs', 'logs.test2'],
+                    members: ['logs', 'logs.test2', 'logs'],
                   },
                 },
                 dashboards: [],
