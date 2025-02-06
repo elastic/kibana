@@ -298,3 +298,18 @@ export const getPoliciesToDelete = (
 
   return results;
 };
+
+export const getConnectorPolicyId = (
+  packagePolicies: PackagePolicyMetadata[],
+  connectorId: string
+): string[] => {
+  const results: string[] = [];
+
+  for (const packagePolicy of packagePolicies) {
+    if (packagePolicy.connector_settings.id === connectorId) {
+      results.push(packagePolicy.package_policy_id);
+    }
+  }
+
+  return results;
+};
