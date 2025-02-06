@@ -293,7 +293,7 @@ Discover::
 Osquery::
 * Increases maximum Osquery timeout to 24 hours ({kibana-pull}207276[#207276]).
 Elastic Observability solution::
-* Displays `No Data` in *Threshold breached* component ({kibana-pull}209561[#209561]).
+* Displays `No Data` in Threshold breached component ({kibana-pull}209561[#209561]).
 * Fixes the preview chart in the Custom threshold rule creation form when the field name has slashes ({kibana-pull}209263[#209263]).
 * Fixes multiple AI assistant flyouts ({kibana-pull}209158[#209158]).
 * Fixes using data view runtime fields during rule execution for the custom threshold rule ({kibana-pull}209133[#209133]).
