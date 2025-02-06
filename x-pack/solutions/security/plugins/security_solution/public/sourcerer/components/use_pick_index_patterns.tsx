@@ -72,9 +72,11 @@ export const usePickIndexPatterns = ({
   const signalPatternListToOptions = useMemo(() => {
     return signalIndexName ? patternListToOptions([signalIndexName]) : [];
   }, [signalIndexName]);
+
   const selectedPatternsAsOptions = useMemo(() => {
     return patternListToOptions(selectedPatterns);
   }, [selectedPatterns]);
+
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     isOnlyDetectionAlerts ? signalPatternListToOptions : selectedPatternsAsOptions
   );

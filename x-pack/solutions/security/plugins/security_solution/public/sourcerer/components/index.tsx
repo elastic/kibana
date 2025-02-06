@@ -132,6 +132,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
+
   const selectedDataViewId = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId);
   });
@@ -207,8 +208,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     missingPatterns,
     scopeId,
     selectedDataViewId,
-    selectedPatterns,
     signalIndexName,
+    selectedPatterns,
   });
 
   const onCheckboxChanged: ChangeEventHandler<HTMLInputElement> = useCallback(
