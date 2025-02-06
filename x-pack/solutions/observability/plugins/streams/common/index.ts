@@ -6,3 +6,4 @@
  */
 
 export type { Asset, AssetType } from './assets';
+export * from './helpers/lifecycle';
