@@ -50,7 +50,7 @@ export const useLayoutStyles = () => {
       }
 
       .kbnGridPanel--resizeHandle {
-        z-index: ${euiTheme.levels.mask};
+        z-index: 2000; // ensures the drag handle renders below sticky nav but abover panel contents on hover
 
         // applying mask via ::after allows for focus borders to show
         &:after {
