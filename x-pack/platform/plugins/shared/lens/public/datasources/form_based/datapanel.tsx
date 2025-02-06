@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './datapanel.scss';
 import { uniq } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -41,6 +40,7 @@ import type {
 import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
+import { DataPanelStyles } from '../common/datapanel.styles';
 
 export type FormBasedDataPanelProps = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState, Query>,
@@ -116,12 +116,7 @@ export function FormBasedDataPanel({
   return (
     <>
       {Object.keys(indexPatterns).length === 0 && indexPatternRefs.length === 0 ? (
-        <EuiFlexGroup
-          gutterSize="m"
-          className="lnsInnerIndexPatternDataPanel"
-          direction="column"
-          responsive={false}
-        >
+        <EuiFlexGroup gutterSize="m" css={DataPanelStyles} direction="column" responsive={false}>
           <EuiFlexItem grow={null}>
             <EuiCallOut
               data-test-subj="indexPattern-no-indexpatterns"
@@ -400,7 +395,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
 
   return (
     <FieldList
-      className="lnsInnerIndexPatternDataPanel"
+      css={DataPanelStyles}
       isProcessing={isProcessing}
       prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
     >

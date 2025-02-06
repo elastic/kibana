@@ -106,7 +106,12 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                 <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
                   <h3>{shortMessage}</h3>
                 </EuiTitle>
-                <ul className="eui-yScroll" css={css`max-height: 320px;`}>
+                <ul
+                  className="eui-yScroll"
+                  css={css`
+                    max-height: 320px;
+                  `}
+                >
                   {messageGroup.map((message, i) => (
                     <Fragment key={`${uniqueId}-${i}`}>{getLongMessage(message)}</Fragment>
                   ))}
