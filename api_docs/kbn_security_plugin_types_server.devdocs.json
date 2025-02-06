@@ -530,10 +530,10 @@
             "signature": [
               "{ (operation: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.ApiOperation",
                 "text": "ApiOperation"
               },
               ", subject: string): string; (subject: string): string; }"
@@ -551,10 +551,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.ApiOperation",
+                    "pluginId": "@kbn/security-plugin-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                    "section": "def-common.ApiOperation",
                     "text": "ApiOperation"
                   }
                 ],
@@ -593,10 +593,10 @@
             "signature": [
               "{ (operation: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.ApiOperation",
                 "text": "ApiOperation"
               },
               ", subject: string): string; (subject: string): string; }"
@@ -5200,20 +5200,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "@kbn/security-plugin-types-server",
-        "id": "def-server.ApiOperation",
-        "type": "Enum",
-        "tags": [],
-        "label": "ApiOperation",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/security-plugin-types-server",
