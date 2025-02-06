@@ -31,33 +31,18 @@ export const useFilterPrebuiltRulesToUpgrade = ({
         return false;
       }
 
-      let tagsFilteringResult = true;
-      let ruleSourceFilteringResult = true;
-
-      if (tags && tags.length > 0) {
-        tagsFilteringResult = tags.every((tag) => ruleInfo.current_rule.tags.includes(tag));
+      if (tags?.length && !tags.every((tag) => ruleInfo.current_rule.tags.includes(tag))) {
+        return false;
       }
 
-      if (ruleSource && ruleSource.length > 0) {
-        if (
-          ruleSource.includes(RuleCustomizationEnum.customized) &&
-          ruleSource.includes(RuleCustomizationEnum.not_customized)
-        ) {
-          ruleSourceFilteringResult = true;
-        } else if (
-          ruleSource.includes(RuleCustomizationEnum.customized) &&
-          ruleInfo.current_rule.rule_source.type === 'external'
-        ) {
-          ruleSourceFilteringResult = ruleInfo.current_rule.rule_source.is_customized;
-        } else if (
-          ruleSource.includes(RuleCustomizationEnum.not_customized) &&
-          ruleInfo.current_rule.rule_source.type === 'external'
-        ) {
-          ruleSourceFilteringResult = ruleInfo.current_rule.rule_source.is_customized === false;
+      if (ruleSource?.length === 1 && ruleInfo.current_rule.rule_source.type === 'external') {
+        if (ruleSource.includes(RuleCustomizationEnum.customized)) {
+          return ruleInfo.current_rule.rule_source.is_customized;
         }
+        return ruleInfo.current_rule.rule_source.is_customized === false;
       }
 
-      return tagsFilteringResult && ruleSourceFilteringResult;
+      return true;
     });
   }, [filterOptions, data]);
 };
