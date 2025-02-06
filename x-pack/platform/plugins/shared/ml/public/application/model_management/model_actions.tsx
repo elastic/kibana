@@ -336,7 +336,8 @@ export function useModelActions({
                 Array.isArray(item.inference_apis) &&
                 !item.inference_apis.some((inference) => inference.inference_id === dId)
             )),
-        enabled: (item) => !isLoading,
+        enabled: (item) =>
+          !isLoading && !scheduledDeployments.some((d) => d.modelId === item.model_id),
         onClick: async (item) => {
           if (!isNLPModelItem(item)) return;
 
