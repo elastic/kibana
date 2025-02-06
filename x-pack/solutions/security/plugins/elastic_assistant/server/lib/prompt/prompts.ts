@@ -102,25 +102,35 @@ const BAD_SYNTAX_EXAMPLES =
   'Examples of INCORRECT syntax (bad, because the field names are not included): {{ hostNameValue }} {{ userNameValue }} {{ sourceIpValue }}';
 
 const RECONNAISSANCE = 'Reconnaissance';
+const RESOURCE_DEVELOPMENT = 'Resource Development';
 const INITIAL_ACCESS = 'Initial Access';
 const EXECUTION = 'Execution';
 const PERSISTENCE = 'Persistence';
 const PRIVILEGE_ESCALATION = 'Privilege Escalation';
+const DEFENSE_EVASION = 'Defense Evasion';
+const CREDENTIAL_ACCESS = 'Credential Access';
 const DISCOVERY = 'Discovery';
 const LATERAL_MOVEMENT = 'Lateral Movement';
+const COLLECTION = 'Collection';
 const COMMAND_AND_CONTROL = 'Command and Control';
 const EXFILTRATION = 'Exfiltration';
+const IMPACT = 'Impact';
 
 const MITRE_ATTACK_TACTICS = [
   RECONNAISSANCE,
+  RESOURCE_DEVELOPMENT,
   INITIAL_ACCESS,
   EXECUTION,
   PERSISTENCE,
   PRIVILEGE_ESCALATION,
+  DEFENSE_EVASION,
+  CREDENTIAL_ACCESS,
   DISCOVERY,
   LATERAL_MOVEMENT,
+  COLLECTION,
   COMMAND_AND_CONTROL,
   EXFILTRATION,
+  IMPACT,
 ] as const;
 export const ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN = `A detailed insight with markdown, where each markdown bullet contains a description of what happened that reads like a story of the attack as it played out and always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
 export const ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN = `A short (no more than a sentence) summary of the insight featuring only the host.name and user.name fields (when they are applicable), using the same ${SYNTAX} syntax`;
