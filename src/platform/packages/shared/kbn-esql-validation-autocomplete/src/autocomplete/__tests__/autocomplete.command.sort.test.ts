@@ -15,7 +15,7 @@ import {
 } from './helpers';
 
 describe('autocomplete.suggest', () => {
-  describe('SORT ( <column> [ ASC / DESC ] [ NULLS FIST / NULLS LAST ] )+', () => {
+  describe('SORT ( <column> [ ASC / DESC ] [ NULLS FIRST / NULLS LAST ] )+', () => {
     describe('SORT <column> ...', () => {
       const expectedFieldSuggestions = getFieldNamesByType('any').map(attachTriggerCommand);
       const expectedFunctionSuggestions = getFunctionSignaturesByReturnType('sort', 'any', {

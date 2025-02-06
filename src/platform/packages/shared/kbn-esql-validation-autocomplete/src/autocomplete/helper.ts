@@ -60,7 +60,55 @@ import { ESQLVariableType } from '../shared/types';
  *
  * See https://github.com/elastic/kibana/issues/209905 for more info.
  */
-export const KEYWORDS_WITH_SPACES = ['IS NULL', 'IS NOT NULL', 'NULLS FIRST', 'NULLS LAST'];
+export const MULTIWORD_KEYWORDS = [
+  'IS NULL',
+  'IS NOT NULL',
+  'NULLS FIRST',
+  'NULLS LAST',
+  'LOOKUP JOIN',
+];
+
+/**
+ * This method returns a prefix range for multi-word keywords if
+ * it detects a good match.
+ *
+ * Here we have special handling for the case where the user has started typing
+ * a multi-word keyword. Something like "IS NOT NULL" or "NULLS FIRST".
+ *
+ * @param innerText the query text before the current cursor position
+ */
+export function getMultiWordKeywordMatchRange(
+  innerText: string
+): { start: number; end: number } | undefined {
+  /**
+   * First we generate overlap ranges for each keyword in the list of multi-word keywords.
+   */
+  const multiWordKeywordsWithOverlap = MULTIWORD_KEYWORDS.map((word) => ({
+    word,
+    range: getOverlapRange(innerText, word),
+  }))
+    /**
+     * Test that the range contains at least one space
+     *
+     * This is important to prevent false matches such as
+     * `FROM index | EVAL field IN/` matching "NULLS FIRST" and
+     * forcing Monaco to us "N" instead of "IN" as the prefix.
+     *
+     * Making sure the user has at least the first word of the keyword
+     * increases our confidence in the match.
+     */
+    .filter(({ range, word }) =>
+      new RegExp(word.split(' ')[0], 'i').test(innerText.substring(range.start - 1, range.end - 1))
+    )
+    /**
+     * Then, sort by the largest match
+     */
+    .sort((a, b) => a.range.start - b.range.start);
+
+  if (multiWordKeywordsWithOverlap.length) {
+    return multiWordKeywordsWithOverlap[0].range;
+  }
+}
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
