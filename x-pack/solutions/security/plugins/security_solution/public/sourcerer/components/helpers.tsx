@@ -104,7 +104,7 @@ export const getDataViewSelectOptions = ({
               </span>
             ) : (
               <span data-test-subj="dataView-option-super">
-                <EuiIcon type="logoKibana" size="s" /> {title} {`(${dataView?.name})`}
+                <EuiIcon type="logoKibana" size="s" /> {dataView?.name ?? title}
                 {isModified && id === dataViewId && (
                   <StyledBadge data-test-subj="security-modified-option-badge">
                     {i18n.MODIFIED_BADGE_TITLE}
