@@ -1503,7 +1503,7 @@ describe('runs with default preResponse handlers', () => {
       `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
     );
     expect(response.header['content-security-policy-report-only']).toBe(
-      `form-action 'report-sample' 'self'`
+      `form-action 'report-sample' 'self'; object-src 'report-sample' 'none'`
     );
   });
 });
