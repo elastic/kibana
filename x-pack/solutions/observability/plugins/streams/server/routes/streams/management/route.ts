@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { conditionSchema, conditionToQueryDsl, getFields } from '@kbn/streams-schema';
+import {
+  RecursiveRecord,
+  conditionSchema,
+  conditionToQueryDsl,
+  getFields,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { checkAccess } from '../../../lib/streams/stream_crud';
@@ -103,7 +108,7 @@ export const sampleStreamRoute = createServerRoute({
       size: z.optional(z.number()),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<{ documents: unknown[] }> => {
+  handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
     const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
@@ -160,7 +165,7 @@ export const sampleStreamRoute = createServerRoute({
       ...searchBody,
     });
 
-    return { documents: results.hits.hits.map((hit) => hit._source) };
+    return { documents: results.hits.hits.map((hit) => hit._source) as RecursiveRecord[] };
   },
 });
 

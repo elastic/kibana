@@ -35,7 +35,6 @@ BUNDLER_DEPS = [
   "@npm//chalk",
   "@npm//pirates",
   "@npm//lmdb",
-  "@npm//date-fns",
   "@npm//source-map-support",
   "//src/platform/packages/private/kbn-repo-packages",
   "//src/platform/packages/shared/kbn-repo-info",
