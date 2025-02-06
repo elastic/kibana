@@ -11,9 +11,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
-  EuiFormRow,
   EuiFieldNumber,
   EuiFlexGroup,
+  EuiFormRow,
   htmlIdGenerator,
 } from '@elastic/eui';
 

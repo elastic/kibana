@@ -41,7 +41,7 @@ describe('SaveTimelineCallout', () => {
     );
 
     expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveStyle('background-color: #BD271E');
+    expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID).className).toContain('danger');
     expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveTextContent('Save Timeline');
     expect(getByTestId(SAVE_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
     expect(getAllByText('Save Timeline')).toHaveLength(2);

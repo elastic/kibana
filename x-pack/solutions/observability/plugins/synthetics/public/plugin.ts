@@ -57,7 +57,7 @@ import {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
@@ -67,6 +67,11 @@ import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
+import {
+  SYNTHETICS_MONITORS_EMBEDDABLE,
+  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+} from './apps/embeddables/constants';
+import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -114,6 +119,7 @@ export interface ClientPluginsStart {
   slo?: SLOPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
+  uiActions: UiActionsStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {
@@ -215,6 +221,21 @@ export class SyntheticsPlugin
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
+
+    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+      SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+      () => {
+        return { width: 10, height: 8 };
+      }
+    );
+    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+      SYNTHETICS_MONITORS_EMBEDDABLE,
+      () => {
+        return { width: 30, height: 12 };
+      }
+    );
+
+    registerSyntheticsUiActions(coreStart, pluginsStart);
 
     syntheticsAlertTypeInitializers.forEach((init) => {
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;
