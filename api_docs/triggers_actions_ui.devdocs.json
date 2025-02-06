@@ -49,7 +49,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly isUsingRuleCreateFlyout: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly isUsingRuleCreateFlyout: boolean; readonly alertDeletionSettingsEnabled: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -9961,9 +9961,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/observability-alerting-rule-utils",
+                "pluginId": "@kbn/alerting-rule-utils",
                 "scope": "common",
-                "docId": "kibKbnObservabilityAlertingRuleUtilsPluginApi",
+                "docId": "kibKbnAlertingRuleUtilsPluginApi",
                 "section": "def-common.Group",
                 "text": "Group"
               },
@@ -10196,7 +10196,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly isUsingRuleCreateFlyout: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly isUsingRuleCreateFlyout: boolean; readonly alertDeletionSettingsEnabled: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -10275,7 +10275,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: true; readonly stackAlertsPage: true; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; readonly isUsingRuleCreateFlyout: false; }"
+          "{ readonly rulesListDatagrid: true; readonly stackAlertsPage: true; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; readonly isUsingRuleCreateFlyout: false; readonly alertDeletionSettingsEnabled: false; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,

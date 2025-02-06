@@ -1,10 +1,5 @@
 .lnsDataTableContainer {
   height: 100%;
-
-  // EUI issue to make background transparent https://github.com/elastic/eui/issues/8136
-  .euiDataGrid__content {
-    background: transparent;
-  }
 }
 
 .lnsTableCell--multiline {

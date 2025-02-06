@@ -16,15 +16,8 @@
 .dshDashboardGrid__item--expanded,
 .dshDashboardGrid__item--blurred,
 .dshDashboardGrid__item--focused {
-  .embPanel--dragHandle:hover {
-    background-color: unset;
-    cursor: default;
-  }
-
-  .embPanel__hoverActions {
-    .embPanel--dragHandle {
-      visibility: hidden;
-    }
+  .embPanel--dragHandle {
+    visibility: hidden;
   }
 }
 
@@ -32,7 +25,7 @@
 .dshDashboardGrid__item--blurred,
 .dshDashboardGrid__item--focused {
   .embPanel__hoverActions {
-    visibility: hidden;
+    visibility: hidden !important;
   }
 }
 
