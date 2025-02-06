@@ -13,6 +13,7 @@ import {
   FieldDefinitionConfig,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
+  recursiveRecord,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
@@ -28,7 +29,7 @@ const paramsSchema = z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
     processing: z.array(processorDefinitionSchema),
-    documents: z.array(z.record(z.unknown())),
+    documents: z.array(recursiveRecord),
     detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
 });
@@ -139,6 +140,7 @@ const assertSimulationResult = (
   }
   // Assert that the processors are purely additive to the documents
   const updatedFields = computeUpdatedFields(simulationDiffs);
+
   if (!isEmpty(updatedFields)) {
     throw new NonAdditiveProcessorError(
       `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`

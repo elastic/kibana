@@ -14,6 +14,7 @@ import {
   Condition,
   processorDefinitionSchema,
   isSchema,
+  RecursiveRecord,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
@@ -141,7 +142,7 @@ export const useProcessingSimulator = ({
     { disableToastOnError: true }
   );
 
-  const sampleDocs = samples?.documents as Array<Record<PropertyKey, unknown>>;
+  const sampleDocs = samples?.documents;
 
   const {
     loading: isLoadingSimulation,
@@ -149,7 +150,7 @@ export const useProcessingSimulator = ({
     error: simulationError,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition || isEmpty(sampleDocs) || isEmpty(liveDraftProcessors)) {
+      if (!definition || isEmpty<RecursiveRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
         return Promise.resolve(null);
       }
 
