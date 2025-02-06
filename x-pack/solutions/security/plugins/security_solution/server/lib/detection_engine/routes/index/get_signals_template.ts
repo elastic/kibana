@@ -6,18 +6,13 @@
  */
 
 import { merge } from 'lodash';
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_TYPE,
-  ALERT_RULE_TYPE_ID,
-  SPACE_IDS,
-} from '@kbn/rule-data-utils';
-import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { SPACE_IDS } from '@kbn/rule-data-utils';
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
 import aadFieldConversion from './signal_aad_mapping.json';
 import signalExtraFields from './signal_extra_fields.json';
+import { createMappingsFor818Compatibility } from './8_18_alerts_compatibility_mappings';
 
 /**
   @constant
@@ -178,18 +173,7 @@ export const backwardsCompatibilityMappings = (spaceId: string) => [
   {
     minVersion: 0,
     maxVersion: 77,
-    mapping: {
-      runtime: {
-        [ALERT_RULE_CONSUMER]: {
-          type: 'keyword',
-          script: { source: "emit('siem')" },
-        },
-        [ALERT_RULE_TYPE_ID]: {
-          type: 'keyword',
-          script: { source: mapRuleTypeToRuleTypeIdScript(ruleTypeMappings) },
-        },
-      },
-    },
+    mapping: createMappingsFor818Compatibility(),
   },
 ];
 
@@ -207,12 +191,3 @@ export const createBackwardsCompatibilityMapping = (version: number, spaceId: st
 
   return merge({ properties }, ...mappings, meta);
 };
-
-const mapRuleTypeToRuleTypeIdScript = (ruleTypeToRuleTypeIdMap: Record<string, string>): string => `
-  String rule_type = doc['${ALERT_RULE_TYPE}'].value;
-  ${Object.entries(ruleTypeToRuleTypeIdMap)
-    .map(
-      ([ruleType, ruleTypeId]) => `if (rule_type == '${ruleType}') return emit('${ruleTypeId}');`
-    )
-    .join('')}
-`;
