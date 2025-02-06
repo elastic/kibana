@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
-import type { ReindexState } from '../../../use_reindex_state';
+import type { MigrationState } from '../../../use_reindex_state';
 import { ReindexProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
 import { getPrimaryButtonLabel } from '../../messages';
@@ -32,7 +32,7 @@ import { getPrimaryButtonLabel } from '../../messages';
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
-  reindexState: ReindexState;
+  reindexState: MigrationState;
   resolutionType: 'reindex' | 'readonly';
   executeAction: () => void;
   cancelAction: () => void;

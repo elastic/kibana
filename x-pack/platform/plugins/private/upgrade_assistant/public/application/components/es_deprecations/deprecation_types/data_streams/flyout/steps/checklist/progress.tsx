@@ -13,14 +13,14 @@ import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
-import type { ReindexState } from '../../../use_reindex_state';
+import type { MigrationState } from '../../../use_reindex_state';
 import { StepProgress, StepProgressStep } from '../../../../reindex/flyout/step_progress';
 import { getDataStreamReindexProgress } from '../../../../../../../lib/utils';
 import { ReindexingDocumentsStepTitle } from './progress_title';
 import { CancelLoadingState } from '../../../../../../types';
 
 interface Props {
-  reindexState: ReindexState;
+  reindexState: MigrationState;
 }
 
 /**

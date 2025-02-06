@@ -26,7 +26,7 @@ import {
   DataStreamReindexStatus,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
-import type { ReindexState } from '../../../use_reindex_state';
+import type { MigrationState } from '../../../use_reindex_state';
 import { useAppContext } from '../../../../../../../app_context';
 import { DurationClarificationCallOut } from './warnings_callout';
 import { getPrimaryButtonLabel } from '../../messages';
@@ -37,19 +37,11 @@ import { getPrimaryButtonLabel } from '../../messages';
 
 export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
-  reindexState: ReindexState;
-  startReindex: () => void;
-  startReadonly: () => void;
+  reindexState: MigrationState;
+  startAction: (resolutionType: 'reindex' | 'readonly') => void;
   lastIndexCreationDateFormatted: string;
   meta: DataStreamMetadata;
-}> = ({
-  closeFlyout,
-  reindexState,
-  startReindex,
-  startReadonly,
-  lastIndexCreationDateFormatted,
-  meta,
-}) => {
+}> = ({ closeFlyout, reindexState, startAction, lastIndexCreationDateFormatted, meta }) => {
   const {
     services: {
       api,
@@ -243,7 +235,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                   <EuiButton
                     color={status === DataStreamReindexStatus.cancelled ? 'warning' : 'accent'}
                     iconType={status === DataStreamReindexStatus.cancelled ? 'play' : undefined}
-                    onClick={startReindex}
+                    onClick={() => startAction('reindex')}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}
                     data-test-subj="startReindexingButton"
@@ -256,7 +248,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                 <EuiButton
                   fill
                   color={'primary'}
-                  onClick={startReadonly}
+                  onClick={() => startAction('readonly')}
                   disabled={!hasRequiredPrivileges}
                   data-test-subj="startDataStreamReadonlyButton"
                 >

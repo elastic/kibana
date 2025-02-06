@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import {
   DataStreamMetadata,
   DataStreamReindexStatus,
@@ -18,11 +19,13 @@ interface ReadOnlyExecuteResponse {
   };
   error?: null;
 }
+const DEFAULT_BATCH_SIZE = 1;
 
 export async function* readOnlyExecute(
   dataStreamName: string,
   meta: DataStreamMetadata | null,
-  api: ApiService
+  api: ApiService,
+  batchSize: number = DEFAULT_BATCH_SIZE
 ): AsyncGenerator<ReadOnlyExecuteResponse, ReadOnlyExecuteResponse, unknown> {
   const { indicesRequiringUpgrade } = meta || {};
 
@@ -46,28 +49,46 @@ export async function* readOnlyExecute(
     };
   }
 
-  let i = 0;
-  for (const index of indicesRequiringUpgrade) {
-    // const { data, error } = await api.markIndicesAsReadOnly(dataStreamName, [index]);
-    i++;
-    const status =
-      i >= indicesRequiringUpgrade.length
-        ? DataStreamReindexStatus.completed
-        : DataStreamReindexStatus.inProgress;
-    const reindexTaskPercComplete = i / indicesRequiringUpgrade.length;
+  let processedCount = 0;
+  const batches = chunk(indicesRequiringUpgrade, batchSize);
 
-    yield {
+  try {
+    for (const batch of batches) {
+      const { error } = await api.markIndicesAsReadOnly(dataStreamName, batch);
+      if (error) {
+        throw error;
+      }
+
+      processedCount += batch.length;
+
+      const status =
+        processedCount >= indicesRequiringUpgrade.length
+          ? DataStreamReindexStatus.completed
+          : DataStreamReindexStatus.inProgress;
+      const reindexTaskPercComplete = processedCount / indicesRequiringUpgrade.length;
+
+      yield {
+        data: {
+          reindexOp: {
+            status,
+            reindexTaskPercComplete,
+            progressDetails: {
+              startTimeMs,
+              successCount: processedCount,
+              pendingCount: indicesRequiringUpgrade.length - processedCount,
+              inProgressCount: batch.length,
+              errorsCount: 0,
+            },
+          },
+        },
+      };
+    }
+  } catch (error) {
+    return {
       data: {
         reindexOp: {
-          status,
-          reindexTaskPercComplete,
-          progressDetails: {
-            startTimeMs,
-            successCount: i,
-            pendingCount: indicesRequiringUpgrade.length - i,
-            inProgressCount: 1,
-            errorsCount: 0,
-          },
+          status: DataStreamReindexStatus.failed,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
         },
       },
     };

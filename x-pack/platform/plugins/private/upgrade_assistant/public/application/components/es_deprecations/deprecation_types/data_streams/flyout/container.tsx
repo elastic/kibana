@@ -41,7 +41,7 @@ import { InitializingFlyoutStep } from './steps/initializing';
 import { ConfirmReindexingFlyoutStep } from './steps/confirm';
 import { DataStreamDetailsFlyoutStep } from './steps/details';
 import { ChecklistFlyoutStep } from './steps/checklist';
-import { ReindexingCompletedFlyoutStep } from './steps/completed';
+import { MigrationCompletedFlyoutStep } from './steps/completed';
 
 interface Props extends ReindexStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -158,14 +158,11 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         return (
           <DataStreamDetailsFlyoutStep
             closeFlyout={closeFlyout}
-            startReadonly={() => {
+            startAction={() => {
               setFlyoutStep('confirm');
             }}
             lastIndexCreationDateFormatted={lastIndexCreationDateFormatted}
             meta={meta}
-            startReindex={() => {
-              setFlyoutStep('confirm');
-            }}
             reindexState={reindexState}
           />
         );
@@ -232,7 +229,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             />
           );
         }
-        return <ReindexingCompletedFlyoutStep meta={meta} resolutionType={resolutionType} />;
+        return <MigrationCompletedFlyoutStep meta={meta} resolutionType={resolutionType} />;
       }
     }
   }, [

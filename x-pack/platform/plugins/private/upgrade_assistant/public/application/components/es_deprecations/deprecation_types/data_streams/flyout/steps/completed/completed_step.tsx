@@ -16,7 +16,7 @@ interface Props {
   resolutionType?: 'reindex' | 'readonly';
 }
 
-export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({
+export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
   meta,
   resolutionType,
 }: Props) => {

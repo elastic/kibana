@@ -43,6 +43,7 @@ export type DataStreamWarningTypes = 'incompatibleDataStream' | 'affectExistingS
 
 export interface DataStreamReindexWarning {
   warningType: DataStreamWarningTypes;
+  resolutionType: 'readonly' | 'reindex';
   meta?: {
     [key: string]: string | string[];
   };

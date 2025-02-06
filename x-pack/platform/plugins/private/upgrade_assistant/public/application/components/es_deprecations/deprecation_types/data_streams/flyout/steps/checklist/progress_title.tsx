@@ -10,11 +10,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CancelLoadingState } from '../../../../../../types';
 import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
-import type { ReindexState } from '../../../use_reindex_state';
+import type { MigrationState } from '../../../use_reindex_state';
 
 export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
-  reindexState: ReindexState;
-}> = ({ reindexState: { status, cancelLoadingState, resolutionType } }) => {
+  migrationState: MigrationState;
+}> = ({ migrationState: { status, cancelLoadingState, resolutionType } }) => {
   switch (cancelLoadingState) {
     case CancelLoadingState.Requested:
     case CancelLoadingState.Loading: {

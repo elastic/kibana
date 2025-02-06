@@ -13,23 +13,77 @@ import { error } from '../../lib/data_streams/error';
 import { API_BASE_PATH } from '../../../common/constants';
 import { DataStreamReindexStatusResponse } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
-import { dataStreamReindexServiceFactory } from '../../lib/data_streams';
+import { dataStreamMigrationServiceFactory } from '../../lib/data_streams';
 
 import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
-export function registerReindexDataStreamRoutes({
+export function registerMigrateDataStreamRoutes({
   router,
   licensing,
   log,
   getSecurityPlugin,
   lib: { handleEsError },
 }: RouteDependencies) {
-  const BASE_PATH = `${API_BASE_PATH}/reindex_data_streams`;
+  const BASE_PATH = `${API_BASE_PATH}/migrate_data_stream`;
+
+  router.get(
+    {
+      path: `${BASE_PATH}/{dataStreamName}`,
+      options: {
+        access: 'public',
+        summary: `Get data stream status`,
+      },
+      validate: {
+        params: schema.object({
+          dataStreamName: schema.string(),
+        }),
+      },
+    },
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { dataStreamName } = request.params;
+      const asCurrentUser = esClient.asCurrentUser;
+
+      const migrationService = dataStreamMigrationServiceFactory({
+        esClient: asCurrentUser,
+        log,
+        licensing,
+      });
+
+      try {
+        const hasRequiredPrivileges = await migrationService.hasRequiredPrivileges(dataStreamName);
+
+        // If the user doesn't have privileges than querying for warnings is going to fail.
+        const warnings = hasRequiredPrivileges
+          ? await migrationService.detectReindexWarnings(dataStreamName)
+          : [];
+
+        const reindexOp = await migrationService.fetchReindexStatus(dataStreamName);
+
+        const body: DataStreamReindexStatusResponse = {
+          reindexOp,
+          warnings,
+          hasRequiredPrivileges,
+        };
+
+        return response.ok({
+          body,
+        });
+      } catch (err) {
+        if (err instanceof errors.ResponseError) {
+          return handleEsError({ error: err, response });
+        }
+        return mapAnyErrorToKibanaHttpResponse(error);
+      }
+    })
+  );
 
   router.post(
     {
-      path: `${BASE_PATH}/{dataStreamName}`,
+      path: `${BASE_PATH}/{dataStreamName}/reindex`,
       security: {
         authz: {
           enabled: false,
@@ -53,25 +107,22 @@ export function registerReindexDataStreamRoutes({
       const { dataStreamName } = request.params;
       try {
         const callAsCurrentUser = esClient.asCurrentUser;
-        const reindexService = dataStreamReindexServiceFactory({
+        const migrationService = dataStreamMigrationServiceFactory({
           esClient: callAsCurrentUser,
           log,
           licensing,
         });
 
-        if (!(await reindexService.hasRequiredPrivileges(dataStreamName))) {
+        if (!(await migrationService.hasRequiredPrivileges(dataStreamName))) {
           throw error.accessForbidden(
-            i18n.translate(
-              'xpack.upgradeAssistant.datastream.reindex.reindexPrivilegesErrorBatch',
-              {
-                defaultMessage: `You do not have adequate privileges to reindex "{dataStreamName}".`,
-                values: { dataStreamName },
-              }
-            )
+            i18n.translate('xpack.upgradeAssistant.datastream.reindexPrivilegesErrorBatch', {
+              defaultMessage: `You do not have adequate privileges to reindex "{dataStreamName}".`,
+              values: { dataStreamName },
+            })
           );
         }
 
-        await reindexService.createReindexOperation(dataStreamName);
+        await migrationService.createReindexOperation(dataStreamName);
 
         return response.ok();
       } catch (err) {
@@ -79,60 +130,6 @@ export function registerReindexDataStreamRoutes({
           return handleEsError({ error: err, response });
         }
         return mapAnyErrorToKibanaHttpResponse(err);
-      }
-    })
-  );
-
-  router.get(
-    {
-      path: `${BASE_PATH}/{dataStreamName}`,
-      options: {
-        access: 'public',
-        summary: `Get data stream status`,
-      },
-      validate: {
-        params: schema.object({
-          dataStreamName: schema.string(),
-        }),
-      },
-    },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
-      const {
-        elasticsearch: { client: esClient },
-      } = await core;
-      const { dataStreamName } = request.params;
-      const asCurrentUser = esClient.asCurrentUser;
-
-      const reindexService = dataStreamReindexServiceFactory({
-        esClient: asCurrentUser,
-        log,
-        licensing,
-      });
-
-      try {
-        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(dataStreamName);
-
-        // If the user doesn't have privileges than querying for warnings is going to fail.
-        const warnings = hasRequiredPrivileges
-          ? await reindexService.detectReindexWarnings(dataStreamName)
-          : [];
-
-        const reindexOp = await reindexService.fetchReindexStatus(dataStreamName);
-
-        const body: DataStreamReindexStatusResponse = {
-          reindexOp,
-          warnings,
-          hasRequiredPrivileges,
-        };
-
-        return response.ok({
-          body,
-        });
-      } catch (err) {
-        if (err instanceof errors.ResponseError) {
-          return handleEsError({ error: err, response });
-        }
-        return mapAnyErrorToKibanaHttpResponse(error);
       }
     })
   );
@@ -157,14 +154,14 @@ export function registerReindexDataStreamRoutes({
       const { dataStreamName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
 
-      const reindexService = dataStreamReindexServiceFactory({
+      const migrationService = dataStreamMigrationServiceFactory({
         esClient: asCurrentUser,
         log,
         licensing,
       });
 
       try {
-        const dataStreamMetadata = await reindexService.getDataStreamMetadata(dataStreamName);
+        const dataStreamMetadata = await migrationService.getDataStreamMetadata(dataStreamName);
 
         return response.ok({
           body: dataStreamMetadata || undefined,
@@ -180,7 +177,7 @@ export function registerReindexDataStreamRoutes({
 
   router.post(
     {
-      path: `${BASE_PATH}/{dataStreamName}/cancel`,
+      path: `${BASE_PATH}/{dataStreamName}/reindex/cancel`,
       security: {
         authz: {
           enabled: false,
@@ -204,26 +201,23 @@ export function registerReindexDataStreamRoutes({
       const { dataStreamName } = request.params;
       const callAsCurrentUser = esClient.asCurrentUser;
 
-      const reindexService = dataStreamReindexServiceFactory({
+      const migrationService = dataStreamMigrationServiceFactory({
         esClient: callAsCurrentUser,
         log,
         licensing,
       });
 
       try {
-        if (!(await reindexService.hasRequiredPrivileges(dataStreamName))) {
+        if (!(await migrationService.hasRequiredPrivileges(dataStreamName))) {
           throw error.accessForbidden(
-            i18n.translate(
-              'xpack.upgradeAssistant.datastream.reindex.reindexPrivilegesErrorBatch',
-              {
-                defaultMessage: `You do not have adequate privileges to cancel reindexing "{dataStreamName}".`,
-                values: { dataStreamName },
-              }
-            )
+            i18n.translate('xpack.upgradeAssistant.datastream.reindexPrivilegesErrorBatch', {
+              defaultMessage: `You do not have adequate privileges to cancel reindexing "{dataStreamName}".`,
+              values: { dataStreamName },
+            })
           );
         }
 
-        await reindexService.cancelReindexing(dataStreamName);
+        await migrationService.cancelReindexing(dataStreamName);
 
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
@@ -233,6 +227,65 @@ export function registerReindexDataStreamRoutes({
 
         return mapAnyErrorToKibanaHttpResponse(error);
       }
+    })
+  );
+
+  router.post(
+    {
+      path: `${BASE_PATH}/{dataStreamName}/readonly`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on elasticsearch for authorization',
+        },
+      },
+      options: {
+        access: 'public',
+        summary: `Mark Data Stream indices as read only`,
+      },
+      validate: {
+        body: schema.object({
+          indices: schema.arrayOf(schema.string()),
+        }),
+        params: schema.object({
+          dataStreamName: schema.string(),
+        }),
+      },
+    },
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { dataStreamName } = request.params;
+      const { indices } = request.body;
+      const callAsCurrentUser = esClient.asCurrentUser;
+
+      const migrationService = dataStreamMigrationServiceFactory({
+        esClient: callAsCurrentUser,
+        log,
+        licensing,
+      });
+
+      try {
+        if (!(await migrationService.hasRequiredPrivileges(dataStreamName))) {
+          throw error.accessForbidden(
+            i18n.translate('xpack.upgradeAssistant.datastream.readonlyPrivilegesErrorBatch', {
+              defaultMessage: `You do not have adequate privileges to mark indices inside data stream as readonly "{dataStreamName}".`,
+              values: { dataStreamName },
+            })
+          );
+        }
+
+        await migrationService.readonlyIndices(indices);
+      } catch (err) {
+        if (err instanceof errors.ResponseError) {
+          return handleEsError({ error: err, response });
+        }
+
+        return mapAnyErrorToKibanaHttpResponse(error);
+      }
+
+      return response.ok({ body: { acknowledged: true } });
     })
   );
 }

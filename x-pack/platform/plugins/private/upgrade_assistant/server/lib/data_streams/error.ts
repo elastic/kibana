@@ -12,6 +12,7 @@ import {
   ReindexAlreadyInProgress,
   ReindexCannotBeCancelled,
   MetadataCannotBeGrabbed,
+  ReadonlyIndicesFailed,
 } from './error_symbols';
 
 export class ReindexError extends Error {
@@ -31,4 +32,5 @@ export const error = {
   reindexTaskFailed: createErrorFactory(ReindexTaskFailed),
   reindexAlreadyInProgress: createErrorFactory(ReindexAlreadyInProgress),
   reindexCannotBeCancelled: createErrorFactory(ReindexCannotBeCancelled),
+  readonlyIndicesFailed: createErrorFactory(ReadonlyIndicesFailed),
 };

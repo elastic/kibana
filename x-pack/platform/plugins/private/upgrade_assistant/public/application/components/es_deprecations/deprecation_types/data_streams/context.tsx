@@ -8,11 +8,11 @@
 import React, { createContext, useContext } from 'react';
 
 import { ApiService } from '../../../../lib/api';
-import { useReindexStatus, ReindexState } from './use_reindex_state';
+import { useReindexStatus, MigrationState } from './use_reindex_state';
 
 export interface ReindexStateContext {
   loadDataStreamMetadata: () => Promise<void>;
-  reindexState: ReindexState;
+  reindexState: MigrationState;
 
   // reindex resolution actions
   startReindex: () => Promise<void>;

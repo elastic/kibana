@@ -23,7 +23,7 @@ import {
 
 import { error } from './error';
 
-interface DataStreamReindexService {
+interface DataStreamMigrationService {
   /**
    * Checks whether or not the user has proper privileges required to reindex this index.
    * @param dataStreamName
@@ -62,18 +62,20 @@ interface DataStreamReindexService {
    * @param dataStreamName
    */
   getDataStreamMetadata: (dataStreamName: string) => Promise<DataStreamMetadata | null>;
+
+  readonlyIndices: (indices: string[]) => Promise<void>;
 }
 
-export interface DataStreamReindexServiceFactoryParams {
+export interface DataStreamMigrationServiceFactoryParams {
   esClient: ElasticsearchClient;
   log: Logger;
   licensing: LicensingPluginSetup;
 }
 
-export const dataStreamReindexServiceFactory = ({
+export const dataStreamMigrationServiceFactory = ({
   esClient,
   licensing,
-}: DataStreamReindexServiceFactoryParams): DataStreamReindexService => {
+}: DataStreamMigrationServiceFactoryParams): DataStreamMigrationService => {
   return {
     hasRequiredPrivileges: async (dataStreamName: string): Promise<boolean> => {
       /**
@@ -111,7 +113,11 @@ export const dataStreamReindexServiceFactory = ({
       return [
         {
           warningType: 'affectExistingSetups',
-          // warningType: 'incompatibleDataStream',
+          resolutionType: 'readonly',
+        },
+        {
+          warningType: 'incompatibleDataStream',
+          resolutionType: 'reindex',
         },
       ];
     },
@@ -320,6 +326,18 @@ export const dataStreamReindexServiceFactory = ({
         throw error.cannotGrabMetadata(
           `Could not grab metadata for ${dataStreamName}. ${err.message.toString()}`
         );
+      }
+    },
+
+    async readonlyIndices(indices: string[]) {
+      for (const index of indices) {
+        await new Promise((resolve) => setTimeout(resolve, 4000));
+        const unfreeze = await esClient.indices.unfreeze({ index });
+        const addBlock = await esClient.indices.addBlock({ index, block: 'read_only' });
+
+        if (!unfreeze.acknowledged || !addBlock.acknowledged) {
+          throw error.readonlyIndicesFailed(`Could not set index ${index} to readonly.`);
+        }
       }
     },
   };
