@@ -32,7 +32,7 @@ export const FindExceptionListItemsFilter = NonEmptyString;
 export type FindExceptionListItemsRequestQuery = z.infer<typeof FindExceptionListItemsRequestQuery>;
 export const FindExceptionListItemsRequestQuery = z.object({
   /**
-   * List's id
+   * The `list_id`s of the items to fetch.
    */
   list_id: ArrayFromString(ExceptionListHumanId),
   /** 
@@ -57,11 +57,11 @@ or available in all spaces (`agnostic` or `single`)
    */
   per_page: z.coerce.number().int().min(0).optional(),
   /**
-   * Determines which field is used to sort the results
+   * Determines which field is used to sort the results.
    */
   sort_field: NonEmptyString.optional(),
   /**
-   * Determines the sort order, which can be `desc` or `asc`
+   * Determines the sort order, which can be `desc` or `asc`.
    */
   sort_order: z.enum(['desc', 'asc']).optional(),
 });
