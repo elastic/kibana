@@ -103,7 +103,7 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
   const actionClarification =
     resolutionType === 'reindex'
       ? i18n.translate(
-          'upgradeAssistant.dataStream.flyout.warningsStep.reindex.acceptChangesTitle',
+          'xpack.upgradeAssistant.dataStream.flyout.warningsStep.reindex.acceptChangesTitle',
           {
             defaultMessage:
               '{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first.',
@@ -111,7 +111,7 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
           }
         )
       : i18n.translate(
-          'upgradeAssistant.dataStream.flyout.warningsStep.readonly.acceptChangesTitle',
+          'xpack.upgradeAssistant.dataStream.flyout.warningsStep.readonly.acceptChangesTitle',
           {
             defaultMessage:
               '{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be marked as read only.',

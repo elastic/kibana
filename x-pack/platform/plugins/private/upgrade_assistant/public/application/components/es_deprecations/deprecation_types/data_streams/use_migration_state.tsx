@@ -14,6 +14,7 @@ import {
   DataStreamReindexStatusResponse,
   DataStreamProgressDetails,
   DataStreamResolutionType,
+  ResponseError,
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
@@ -36,7 +37,7 @@ export interface MigrationState {
   meta: DataStreamMetadata | null;
 }
 
-const getReindexState = (
+const getMigrationState = (
   migrationState: MigrationState,
   {
     migrationOp,
@@ -125,13 +126,16 @@ export const useMigrationStatus = ({
           readonlyState.current = readOnlyExecute(dataStreamName, migrationState.meta, api);
         }
 
-        let data: DataStreamReindexStatusResponse | undefined | null = null;
-        let error: Error | null | undefined = null;
+        let data: DataStreamReindexStatusResponse | null = null;
+        let error: ResponseError | null = null;
         if (resolutionType === 'readonly') {
-          const results = await readonlyState.current?.next();
+          if (!readonlyState.current) {
+            throw new Error('Readonly state not initialized');
+          }
 
-          data = results?.value.data;
-          error = results?.value.error;
+          const { value } = await readonlyState.current.next();
+
+          data = value;
         } else {
           const results = await api.getDataStreamReindexStatus(dataStreamName);
           data = results.data;
@@ -143,10 +147,11 @@ export const useMigrationStatus = ({
             return {
               ...prevValue,
               loadingState: LoadingState.Error,
-              errorMessage: error.message.toString(),
+              errorMessage: error!.message.toString(),
               status: DataStreamMigrationStatus.fetchFailed,
             };
           });
+
           return;
         }
 
@@ -155,7 +160,11 @@ export const useMigrationStatus = ({
         }
 
         setMigrationState((prevValue: MigrationState) => {
-          return getReindexState(prevValue, data);
+          if (!data) {
+            return prevValue;
+          }
+
+          return getMigrationState(prevValue, data);
         });
 
         if (data.migrationOp && data.migrationOp.status === DataStreamMigrationStatus.inProgress) {
@@ -218,7 +227,7 @@ export const useMigrationStatus = ({
     }
 
     setMigrationState((prevValue: MigrationState) => {
-      return getReindexState(prevValue, { migrationOp, meta: prevValue.meta });
+      return getMigrationState(prevValue, { migrationOp, meta: prevValue.meta });
     });
     updateStatus();
   }, [api, dataStreamName, updateStatus, migrationState.status]);

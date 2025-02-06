@@ -14,11 +14,9 @@ import {
 import { ApiService } from '../../../../lib/api';
 
 interface ReadOnlyExecuteResponse {
-  data: {
-    migrationOp: DataStreamMigrationOperation;
-  };
-  error?: null;
+  migrationOp: DataStreamMigrationOperation;
 }
+
 const DEFAULT_BATCH_SIZE = 1;
 
 export async function* readOnlyExecute(
@@ -26,24 +24,22 @@ export async function* readOnlyExecute(
   meta: DataStreamMetadata | null,
   api: ApiService,
   batchSize: number = DEFAULT_BATCH_SIZE
-): AsyncGenerator<ReadOnlyExecuteResponse, ReadOnlyExecuteResponse, unknown> {
+): AsyncGenerator<ReadOnlyExecuteResponse, ReadOnlyExecuteResponse, ReadOnlyExecuteResponse> {
   const { indicesRequiringUpgrade } = meta || {};
 
   const startTimeMs = +Date.now();
 
   if (!indicesRequiringUpgrade || !indicesRequiringUpgrade.length) {
     return {
-      data: {
-        migrationOp: {
-          status: DataStreamMigrationStatus.completed,
-          taskPercComplete: 1,
-          progressDetails: {
-            startTimeMs,
-            successCount: 0,
-            pendingCount: 0,
-            inProgressCount: 0,
-            errorsCount: 0,
-          },
+      migrationOp: {
+        status: DataStreamMigrationStatus.completed,
+        taskPercComplete: 1,
+        progressDetails: {
+          startTimeMs,
+          successCount: 0,
+          pendingCount: 0,
+          inProgressCount: 0,
+          errorsCount: 0,
         },
       },
     };
@@ -68,44 +64,38 @@ export async function* readOnlyExecute(
       const taskPercComplete = processedCount / indicesRequiringUpgrade.length;
 
       yield {
-        data: {
-          migrationOp: {
-            status,
-            taskPercComplete,
-            progressDetails: {
-              startTimeMs,
-              successCount: processedCount,
-              pendingCount: indicesRequiringUpgrade.length - processedCount,
-              inProgressCount: batch.length,
-              errorsCount: 0,
-            },
+        migrationOp: {
+          status,
+          taskPercComplete,
+          progressDetails: {
+            startTimeMs,
+            successCount: processedCount,
+            pendingCount: indicesRequiringUpgrade.length - processedCount,
+            inProgressCount: batch.length,
+            errorsCount: 0,
           },
         },
       };
     }
   } catch (error) {
     return {
-      data: {
-        migrationOp: {
-          status: DataStreamMigrationStatus.failed,
-          errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
-        },
+      migrationOp: {
+        status: DataStreamMigrationStatus.failed,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
       },
     };
   }
 
   return {
-    data: {
-      migrationOp: {
-        status: DataStreamMigrationStatus.completed,
-        taskPercComplete: 1,
-        progressDetails: {
-          startTimeMs,
-          successCount: indicesRequiringUpgrade.length,
-          pendingCount: 0,
-          inProgressCount: 0,
-          errorsCount: 0,
-        },
+    migrationOp: {
+      status: DataStreamMigrationStatus.completed,
+      taskPercComplete: 1,
+      progressDetails: {
+        startTimeMs,
+        successCount: indicesRequiringUpgrade.length,
+        pendingCount: 0,
+        inProgressCount: 0,
+        errorsCount: 0,
       },
     },
   };

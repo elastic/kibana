@@ -82,8 +82,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipLabel',
       {
         defaultMessage:
-          'Resolve this issue by reindexing this data stream. This issue can be resolved automatically.',
-        values: { resolutionType },
+          'Resolve this issue by reindexing this data stream or marking its indices as readonly. This issue can be resolved automatically.',
       }
     ),
   };

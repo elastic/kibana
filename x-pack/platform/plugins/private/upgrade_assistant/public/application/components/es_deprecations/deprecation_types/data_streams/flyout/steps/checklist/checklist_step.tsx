@@ -67,9 +67,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 <FormattedMessage
                   id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
                   defaultMessage="You do not have sufficient privileges to migrate this data stream"
-                  values={{
-                    resolutionType,
-                  }}
                 />
               }
               color="danger"
