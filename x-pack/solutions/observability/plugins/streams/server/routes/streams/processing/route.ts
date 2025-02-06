@@ -351,11 +351,16 @@ export const processingSuggestionRoute = createServerRoute({
     const sortedStats = Object.entries(leftPatternStats)
       .sort(([, a], [, b]) => b.total_count - a.total_count)
       .slice(0, NUMBER_PATTERN_CATEGORIES)
-      .map(([leftPattern, { total_count, format, total_examples }]) => ({
-        leftPattern,
-        total_count,
-        total_examples: Array.from(total_examples).slice(0, NUMBER_SAMPLES_PER_PATTERN),
-      }));
+      .map(([leftPattern, { total_count, format, total_examples }]) => {
+        const examplesArray = Array.from(total_examples);
+        // shuffle so we don't only get examples from the first pattern
+        examplesArray.sort(() => Math.random() - 0.5);
+        return {
+          leftPattern,
+          total_count,
+          total_examples: examplesArray.slice(0, NUMBER_SAMPLES_PER_PATTERN),
+        };
+      });
 
     const chatResponses = await Promise.all(
       sortedStats.map((sample) =>
