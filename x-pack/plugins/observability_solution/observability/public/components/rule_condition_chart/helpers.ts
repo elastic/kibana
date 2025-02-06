@@ -9,13 +9,13 @@ import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { GenericMetric } from './rule_condition_chart';
 
 export const getLensOperationFromRuleMetric = (metric: GenericMetric): string => {
-  const { aggType, field, filter } = metric;
+  const { aggType, field, filter = '' } = metric;
   let operation: string = aggType;
   const operationArgs: string[] = [];
-  const aggFilter = JSON.stringify(filter || '').replace(/"|\\/g, '');
+  const escapedFilter = filter.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   if (aggType === Aggregators.RATE) {
-    return `counter_rate(max(${field}), kql='${aggFilter}')`;
+    return `counter_rate(max("${field}"), kql='${escapedFilter}')`;
   }
 
   if (aggType === Aggregators.AVERAGE) operation = 'average';
@@ -23,13 +23,11 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): string =>
   if (aggType === Aggregators.P95 || aggType === Aggregators.P99) operation = 'percentile';
   if (aggType === Aggregators.COUNT) operation = 'count';
 
-  let sourceField = field;
-
   if (aggType === Aggregators.COUNT) {
-    sourceField = '___records___';
+    operationArgs.push('___records___');
+  } else {
+    operationArgs.push(`"${field}"` || '');
   }
-
-  operationArgs.push(sourceField || '');
 
   if (aggType === Aggregators.P95) {
     operationArgs.push('percentile=95');
@@ -39,7 +37,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): string =>
     operationArgs.push('percentile=99');
   }
 
-  if (aggFilter) operationArgs.push(`kql='${aggFilter}'`);
+  if (escapedFilter) operationArgs.push(`kql='${escapedFilter}'`);
 
   return operation + '(' + operationArgs.join(', ') + ')';
 };

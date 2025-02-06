@@ -17,7 +17,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'sum(system.cpu.user.pct)',
+    'sum("system.cpu.user.pct")',
   ],
   [
     {
@@ -26,7 +26,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'max(system.cpu.user.pct)',
+    'max("system.cpu.user.pct")',
   ],
   [
     {
@@ -35,7 +35,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'min(system.cpu.user.pct)',
+    'min("system.cpu.user.pct")',
   ],
   [
     {
@@ -44,7 +44,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'average(system.cpu.user.pct)',
+    'average("system.cpu.user.pct")',
   ],
   [
     {
@@ -57,12 +57,31 @@ const useCases = [
   ],
   [
     {
+      aggType: Aggregators.COUNT,
+      field: '',
+      filter: `container.name:container's name-1`,
+      name: '',
+    },
+    `count(___records___, kql='container.name:container\\'s name-1')`,
+    ,
+  ],
+  [
+    {
       aggType: Aggregators.CARDINALITY,
       field: 'system.cpu.user.pct',
       filter: '',
       name: '',
     },
-    'unique_count(system.cpu.user.pct)',
+    'unique_count("system.cpu.user.pct")',
+  ],
+  [
+    {
+      aggType: Aggregators.CARDINALITY,
+      field: 'field.name/with/slashes',
+      filter: '',
+      name: '',
+    },
+    'unique_count("field.name/with/slashes")',
   ],
   [
     {
@@ -71,7 +90,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'percentile(system.cpu.user.pct, percentile=95)',
+    'percentile("system.cpu.user.pct", percentile=95)',
   ],
   [
     {
@@ -80,7 +99,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'percentile(system.cpu.user.pct, percentile=99)',
+    'percentile("system.cpu.user.pct", percentile=99)',
   ],
   [
     {
@@ -89,7 +108,7 @@ const useCases = [
       filter: '',
       name: '',
     },
-    `counter_rate(max(system.network.in.bytes), kql='')`,
+    `counter_rate(max("system.network.in.bytes"), kql='')`,
   ],
   [
     {
@@ -98,7 +117,7 @@ const useCases = [
       filter: 'host.name : "foo"',
       name: '',
     },
-    `counter_rate(max(system.network.in.bytes), kql='host.name : foo')`,
+    `counter_rate(max("system.network.in.bytes"), kql='host.name : "foo"')`,
   ],
 ];
 
