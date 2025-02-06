@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
@@ -47,6 +47,17 @@ const RESET_FILTERS_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Reset filters',
   }
 );
+
+const FilterControlsErrorView = memo(({ resetFilters }: { resetFilters: () => void }) => {
+  return (
+    <EuiCallOut title={FILTER_CONTROLS_ERROR_VIEW_TITLE} color="danger" iconType="error">
+      <p>{FILTER_CONTROLS_ERROR_VIEW_DESCRIPTION}</p>
+      <EuiButton onClick={resetFilters} color="danger" fill>
+        {RESET_FILTERS_BUTTON_LABEL}
+      </EuiButton>
+    </EuiCallOut>
+  );
+});
 
 export interface UrlSyncedAlertsSearchBarProps
   extends Omit<
@@ -179,16 +190,7 @@ export const UrlSyncedAlertsSearchBar = ({
         {...rest}
       />
       {showFilterControls && (
-        <ErrorBoundary
-          fallback={() => (
-            <EuiCallOut title={FILTER_CONTROLS_ERROR_VIEW_TITLE} color="danger" iconType="error">
-              <p>{FILTER_CONTROLS_ERROR_VIEW_DESCRIPTION}</p>
-              <EuiButton onClick={resetFilters} color="danger" fill>
-                {RESET_FILTERS_BUTTON_LABEL}
-              </EuiButton>
-            </EuiCallOut>
-          )}
-        >
+        <ErrorBoundary fallback={() => <FilterControlsErrorView resetFilters={resetFilters} />}>
           <AlertFilterControls
             dataViewSpec={{
               id: 'unified-alerts-dv',
@@ -200,13 +202,13 @@ export const UrlSyncedAlertsSearchBar = ({
             filters={controlFilters}
             onFiltersChange={onControlFiltersChange}
             storageKey={filterControlsStorageKey}
+            ControlGroupRenderer={ControlGroupRenderer}
             services={{
               http,
               notifications,
               dataViews,
               storage: Storage,
             }}
-            ControlGroupRenderer={ControlGroupRenderer}
           />
         </ErrorBoundary>
       )}
