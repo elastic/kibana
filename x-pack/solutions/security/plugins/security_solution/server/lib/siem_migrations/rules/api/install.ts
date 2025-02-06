@@ -14,7 +14,7 @@ import {
   InstallMigrationRulesRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
+import { SiemMigrationAuditLogger } from './util/audit';
 import { installTranslated } from './util/installation';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
@@ -52,10 +52,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
 
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULES,
-              id: migrationId,
-            });
+            await siemMigrationAuditLogger.logInstallRules({ ids, migrationId });
 
             const installed = await installTranslated({
               migrationId,
@@ -67,14 +64,10 @@ export const registerSiemRuleMigrationsInstallRoute = (
             });
 
             return res.ok({ body: { installed } });
-          } catch (err) {
-            logger.error(err);
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULES,
-              id: migrationId,
-              error: err,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logInstallRules({ ids, migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

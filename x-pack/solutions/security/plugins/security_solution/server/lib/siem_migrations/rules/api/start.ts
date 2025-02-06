@@ -18,7 +18,7 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
+import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
 import { getRetryFilter } from './util/retry';
 import { withLicense } from './util/with_license';
@@ -85,20 +85,13 @@ export const registerSiemRuleMigrationsStartRoute = (
               return res.noContent();
             }
 
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED,
-              id: migrationId,
-            });
+            await siemMigrationAuditLogger.logStart({ migrationId });
 
             return res.ok({ body: { started } });
-          } catch (err) {
-            logger.error(err);
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED,
-              id: migrationId,
-              error: err,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logStart({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

@@ -14,7 +14,7 @@ import {
   type GetRuleMigrationResourcesResponse,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from '../util/audit';
+import { SiemMigrationAuditLogger } from '../util/audit';
 import { authz } from '../util/authz';
 import { withLicense } from '../util/with_license';
 
@@ -50,20 +50,13 @@ export const registerSiemRuleMigrationsResourceGetRoute = (
             const options = { filters: { type, names }, from, size };
             const resources = await ruleMigrationsClient.data.resources.get(migrationId, options);
 
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RESOURCES,
-              id: migrationId,
-            });
+            await siemMigrationAuditLogger.logGetResources({ migrationId });
 
             return res.ok({ body: resources });
-          } catch (err) {
-            logger.error(err);
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RESOURCES,
-              id: migrationId,
-              error: err,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logGetResources({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

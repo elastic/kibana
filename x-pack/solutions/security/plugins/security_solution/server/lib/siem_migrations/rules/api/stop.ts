@@ -13,7 +13,7 @@ import {
   type StopRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
+import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
@@ -47,20 +47,13 @@ export const registerSiemRuleMigrationsStopRoute = (
             if (!exists) {
               return res.noContent();
             }
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STOPPED,
-              id: migrationId,
-            });
+            await siemMigrationAuditLogger.logStop({ migrationId });
 
             return res.ok({ body: { stopped } });
-          } catch (err) {
-            logger.error(err);
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STOPPED,
-              id: migrationId,
-              error: err,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logStop({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

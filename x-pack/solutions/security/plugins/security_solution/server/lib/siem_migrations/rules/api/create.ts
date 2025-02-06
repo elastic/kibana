@@ -17,7 +17,7 @@ import {
 import { ResourceIdentifier } from '../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_rules_client';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
+import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
@@ -54,10 +54,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
-              id: migrationId,
-            });
+            await siemMigrationAuditLogger.logCreateMigration({ migrationId });
 
             const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({
               migration_id: migrationId,
@@ -77,14 +74,10 @@ export const registerSiemRuleMigrationsCreateRoute = (
             }
 
             return res.ok({ body: { migration_id: migrationId } });
-          } catch (err) {
-            logger.error(err);
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
-              id: migrationId,
-              error: err,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logCreateMigration({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
+import { SiemMigrationAuditLogger } from './util/audit';
 import { transformToInternalUpdateRuleMigrationData } from './util/update_rules';
 import { withLicense } from './util/with_license';
 
@@ -44,28 +44,25 @@ export const registerSiemRuleMigrationsUpdateRoute = (
           const { migration_id: migrationId } = req.params;
           const rulesToUpdate = req.body;
 
+          const ids = rulesToUpdate.map((rule) => rule.id);
+
           const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULES,
-              id: migrationId,
-            });
+
+            await siemMigrationAuditLogger.logUpdateRules({ migrationId, ids });
+
             const transformedRuleToUpdate = rulesToUpdate.map(
               transformToInternalUpdateRuleMigrationData
             );
             await ruleMigrationsClient.data.rules.update(transformedRuleToUpdate);
 
             return res.ok({ body: { updated: true } });
-          } catch (err) {
-            logger.error(err);
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULES,
-              id: migrationId,
-              error: err,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logUpdateRules({ migrationId, ids, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

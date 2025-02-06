@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { RuleMigrationGetOptions } from '../data/rule_migrations_data_rules_client';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
+import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
@@ -66,19 +66,12 @@ export const registerSiemRuleMigrationsGetRoute = (
 
           const result = await ruleMigrationsClient.data.rules.get(migrationId, options);
 
-          await siemMigrationAuditLogger.log({
-            action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED,
-            id: migrationId,
-          });
+          await siemMigrationAuditLogger.logGetMigration({ migrationId });
           return res.ok({ body: result });
-        } catch (err) {
-          logger.error(err);
-          await siemMigrationAuditLogger.log({
-            action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED,
-            id: migrationId,
-            error: err,
-          });
-          return res.badRequest({ body: err.message });
+        } catch (error) {
+          logger.error(error);
+          await siemMigrationAuditLogger.logGetMigration({ migrationId, error });
+          return res.badRequest({ body: error.message });
         }
       })
     );

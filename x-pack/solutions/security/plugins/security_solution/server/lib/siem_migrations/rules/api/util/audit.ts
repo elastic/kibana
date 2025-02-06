@@ -10,15 +10,14 @@ import type { ArrayElement } from '@kbn/utility-types';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 
 export enum SiemMigrationsAuditActions {
-  SIEM_MIGRATION_STARTED = 'siem_migration_started',
-  SIEM_MIGRATION_STOPPED = 'siem_migration_stopped',
   SIEM_MIGRATION_CREATED = 'siem_migration_created',
-  SIEM_MIGRATION_UPDATED = 'siem_migration_updated',
   SIEM_MIGRATION_RETRIEVED = 'siem_migration_retrieved',
-  SIEM_MIGRATION_INSTALLED_RULES = 'siem_migration_installed_rules',
-  SIEM_MIGRATION_UPDATED_RULES = 'siem_migration_updated_rules',
   SIEM_MIGRATION_UPLOADED_RESOURCES = 'siem_migration_uploaded_resources',
   SIEM_MIGRATION_RETRIEVED_RESOURCES = 'siem_migration_retrieved_resources',
+  SIEM_MIGRATION_STARTED = 'siem_migration_started',
+  SIEM_MIGRATION_STOPPED = 'siem_migration_stopped',
+  SIEM_MIGRATION_UPDATED_RULE = 'siem_migration_updated_rule',
+  SIEM_MIGRATION_INSTALLED_RULES = 'siem_migration_installed_rules',
 }
 
 export enum AUDIT_TYPE {
@@ -46,33 +45,20 @@ export const siemMigrationAuditEventType: Record<
   SiemMigrationsAuditActions,
   ArrayElement<EcsEvent['type']>
 > = {
-  siem_migration_started: AUDIT_TYPE.START,
-  siem_migration_stopped: AUDIT_TYPE.END,
-  siem_migration_created: AUDIT_TYPE.CREATION,
-  siem_migration_updated: AUDIT_TYPE.CHANGE,
-  siem_migration_retrieved: AUDIT_TYPE.ACCESS,
-  siem_migration_installed_rules: AUDIT_TYPE.CREATION,
-  siem_migration_updated_rules: AUDIT_TYPE.CHANGE,
-  siem_migration_uploaded_resources: AUDIT_TYPE.CREATION,
-  siem_migration_retrieved_resources: AUDIT_TYPE.ACCESS,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED]: AUDIT_TYPE.ACCESS,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RESOURCES]: AUDIT_TYPE.ACCESS,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED]: AUDIT_TYPE.START,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_STOPPED]: AUDIT_TYPE.END,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE]: AUDIT_TYPE.CHANGE,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULES]: AUDIT_TYPE.CREATION,
 };
 
-export const siemMigrationAuditEventMessage: Record<SiemMigrationsAuditActions, string> = {
-  siem_migration_started: 'User started an existing SIEM migration',
-  siem_migration_stopped: 'User stopped an existing SIEM migration',
-  siem_migration_created: 'User created a new SIEM migration',
-  siem_migration_updated: 'User updated an existing SIEM migration',
-  siem_migration_retrieved: 'User retrieved rules from an existing SIEM migration',
-  siem_migration_installed_rules: 'User installed detection rules through SIEM migration',
-  siem_migration_updated_rules: 'User updated translated detection rules',
-  siem_migration_uploaded_resources: 'User uploaded resources through SIEM migration',
-  siem_migration_retrieved_resources: 'User retrieved SIEM migration resources',
-};
-
-export interface SiemMigrationAuditEvent {
+interface SiemMigrationAuditEvent {
   action: SiemMigrationsAuditActions;
+  message: string;
   error?: Error;
-  id?: string;
 }
 
 export class SiemMigrationAuditLogger {
@@ -81,27 +67,17 @@ export class SiemMigrationAuditLogger {
     private readonly securitySolutionContextPromise: Promise<SecuritySolutionApiRequestHandlerContext>
   ) {}
 
-  private getAuditLogger = async (): Promise<AuditLogger | undefined> => {
+  private setAuditLogger = async (): Promise<boolean> => {
     if (this.auditLogger === null) {
       const securitySolutionContext = await this.securitySolutionContextPromise;
       this.auditLogger = securitySolutionContext.getAuditLogger();
     }
-    return this.auditLogger;
+    return !!this.auditLogger;
   };
 
-  public async log({ action, error, id }: SiemMigrationAuditEvent): Promise<void> {
-    const auditLogger = await this.getAuditLogger();
-    if (!auditLogger) {
-      return;
-    }
+  private logEvent = ({ action, message, error }: SiemMigrationAuditEvent): void => {
     const type = siemMigrationAuditEventType[action];
-    let message = siemMigrationAuditEventMessage[action];
-
-    if (id) {
-      message += ` with [id=${id}]`;
-    }
-
-    auditLogger.log({
+    this.auditLogger?.log({
       message,
       event: {
         action,
@@ -114,5 +90,104 @@ export class SiemMigrationAuditLogger {
         message: error.message,
       },
     });
+  };
+
+  private async log(event: SiemMigrationAuditEvent | SiemMigrationAuditEvent[]): Promise<void> {
+    const auditLoggerSet = await this.setAuditLogger();
+    if (!auditLoggerSet) {
+      // Audit logger is not available
+      return;
+    }
+
+    if (Array.isArray(event)) {
+      event.forEach((e) => this.logEvent(e));
+    } else {
+      this.logEvent(event);
+    }
+  }
+
+  public async logCreateMigration(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User created a new SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
+      message,
+      error,
+    });
+  }
+
+  public async logGetMigration(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User retrieved the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED,
+      message,
+      error,
+    });
+  }
+
+  public async logUploadResources(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User uploaded resources to the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES,
+      message,
+      error,
+    });
+  }
+
+  public async logGetResources(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User retrieved resources from the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RESOURCES,
+      message,
+      error,
+    });
+  }
+
+  public async logStart(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User stopped the SIEM rules migration with [id=${migrationId}]`;
+    return this.log({ action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED, message, error });
+  }
+
+  public async logStop(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User stopped the SIEM rules migration with [id=${migrationId}]`;
+    return this.log({ action: SiemMigrationsAuditActions.SIEM_MIGRATION_STOPPED, message, error });
+  }
+
+  public async logUpdateRules(params: {
+    migrationId: string;
+    ids: string[];
+    error?: Error;
+  }): Promise<void> {
+    const { ids, migrationId, error } = params;
+    const events = ids.map<SiemMigrationAuditEvent>((id) => {
+      const message = `User updated a translated rule through SIEM migration with [id=${id}, migration_id=${migrationId}]`;
+      return { action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE, message, error };
+    });
+    return this.log(events);
+  }
+
+  public async logInstallRules(params: {
+    migrationId: string;
+    ids?: string[];
+    error?: Error;
+  }): Promise<void> {
+    const { ids, migrationId, error } = params;
+    const action = SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULES;
+    const events: SiemMigrationAuditEvent[] = [];
+    if (ids) {
+      ids.forEach((id) => {
+        const message = `User installed a translated rule through SIEM migration with [id=${id}, migration_id=${migrationId}]`;
+        events.push({ action, message, error });
+      });
+    } else {
+      const message = `User installed all installable translated rules through SIEM migration with [migration_id=${migrationId}]`;
+      events.push({ action, message, error });
+    }
+    return this.log(events);
   }
 }

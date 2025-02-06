@@ -17,7 +17,7 @@ import {
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from '../util/audit';
+import { SiemMigrationAuditLogger } from '../util/audit';
 import { authz } from '../util/authz';
 import { processLookups } from '../util/lookups';
 import { withLicense } from '../util/with_license';
@@ -56,10 +56,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES,
-              id: migrationId,
-            });
+            await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
             // Check if the migration exists
             const { data } = await ruleMigrationsClient.data.rules.get(migrationId, { size: 1 });
@@ -89,14 +86,10 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             await ruleMigrationsClient.data.resources.create(resourcesToCreate);
 
             return res.ok({ body: { acknowledged: true } });
-          } catch (err) {
-            logger.error(err);
-            await siemMigrationAuditLogger.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES,
-              error: err,
-              id: migrationId,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logUploadResources({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )
