@@ -46,6 +46,7 @@ export const command = {
                           passing this flag.
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
+    --no-cache           Prevents Moon's cache activating on the core build jobs
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --quiet              Prevent logging more than basic success/error messages
   `,
@@ -57,6 +58,8 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
+    const noCache = !(args.getBooleanValue('cache') ?? true);
+
     const reactVersion = process.env.REACT_18 ? '18' : '17';
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
@@ -94,17 +97,9 @@ export const command = {
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      // const packageNames = [
-      //   'src/platform/packages/private/kbn-ui-shared-deps-npm',
-      //   'src/platform/packages/private/kbn-ui-shared-deps-src',
-      //   'src/platform/packages/shared/kbn-monaco',
-      // ];
-      // for (const pkg of packageNames) {
-      //   await buildPackage(pkg, { quiet, reactVersion });
-      // }
       await buildPackagesWithMoon(
         ['@kbn/ui-shared-deps-npm', '@kbn/ui-shared-deps-src', '@kbn/monaco'],
-        { quiet, reactVersion }
+        { quiet, reactVersion, noCache }
       );
       log.success('build required webpack bundles for packages');
     });

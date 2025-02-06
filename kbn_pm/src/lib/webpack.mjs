@@ -32,11 +32,15 @@ export async function buildPackage(packageName, { quiet, reactVersion }) {
 /**
  * Builds a single package using its npm build script
  * @param {string[]} packageNames
- * @param {{quiet: boolean, reactVersion: string}} options
+ * @param {{quiet: boolean, reactVersion: string, noCache?: boolean}} options
  * @returns {Promise<void>}
  */
-export async function buildPackagesWithMoon(packageNames, { quiet, reactVersion }) {
+export async function buildPackagesWithMoon(packageNames, { quiet, reactVersion, noCache }) {
   const moonTargets = packageNames.map((n) => `${n}:build`);
+  if (noCache) {
+    moonTargets.push('-u');
+  }
+
   await run('moon', moonTargets, {
     cwd: REPO_ROOT,
     env: {
@@ -44,7 +48,7 @@ export async function buildPackagesWithMoon(packageNames, { quiet, reactVersion 
       REPO_ROOT,
       REACT_VERSION: reactVersion,
     },
-    pipe: !quiet
+    pipe: !quiet,
   });
 }
 
