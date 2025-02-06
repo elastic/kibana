@@ -137,9 +137,12 @@ export class SyncIntegrationsTask {
       return;
     }
 
-    const indexExists = await esClient.indices.exists({
-      index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-    });
+    const indexExists = await esClient.indices.exists(
+      {
+        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+      },
+      { signal: this.abortController.signal }
+    );
 
     if (!indexExists) {
       this.logger.info(
@@ -149,7 +152,7 @@ export class SyncIntegrationsTask {
     }
 
     try {
-      await updateSyncedIntegrationsData(esClient, soClient);
+      await this.updateSyncedIntegrationsData(esClient, soClient);
 
       this.endRun('success');
     } catch (err) {
@@ -162,54 +165,57 @@ export class SyncIntegrationsTask {
       this.endRun('error');
     }
   };
-}
 
-async function updateSyncedIntegrationsData(
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient
-) {
-  const outputs = await outputService.list(soClient);
-  const remoteESOutputs = outputs.items.filter(
-    (output) => output.type === outputType.RemoteElasticsearch
-  );
-  const isSyncEnabled = remoteESOutputs.some(
-    (output) => (output as NewRemoteElasticsearchOutput).sync_integrations
-  );
+  private updateSyncedIntegrationsData = async (
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClient
+  ) => {
+    const outputs = await outputService.list(soClient);
+    const remoteESOutputs = outputs.items.filter(
+      (output) => output.type === outputType.RemoteElasticsearch
+    );
+    const isSyncEnabled = remoteESOutputs.some(
+      (output) => (output as NewRemoteElasticsearchOutput).sync_integrations
+    );
 
-  if (!isSyncEnabled) {
-    return;
-  }
+    if (!isSyncEnabled) {
+      return;
+    }
 
-  const newDoc: SyncIntegrationsData = {
-    remote_es_hosts: remoteESOutputs.map((output) => {
-      const remoteOutput = output as NewRemoteElasticsearchOutput;
-      return {
-        name: remoteOutput.name,
-        hosts: remoteOutput.hosts ?? [],
-        sync_integrations: remoteOutput.sync_integrations ?? false,
-      };
-    }),
-    integrations: [],
-  };
-
-  const packageSavedObjects = await getInstalledPackageSavedObjects(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-    sortOrder: 'asc',
-  });
-  newDoc.integrations = packageSavedObjects.saved_objects.map((item) => {
-    return {
-      package_name: item.attributes.name,
-      package_version: item.attributes.version,
-      updated_at: item.updated_at ?? new Date().toISOString(),
+    const newDoc: SyncIntegrationsData = {
+      remote_es_hosts: remoteESOutputs.map((output) => {
+        const remoteOutput = output as NewRemoteElasticsearchOutput;
+        return {
+          name: remoteOutput.name,
+          hosts: remoteOutput.hosts ?? [],
+          sync_integrations: remoteOutput.sync_integrations ?? false,
+        };
+      }),
+      integrations: [],
     };
-  });
 
-  await esClient.update({
-    id: 'fleet-synced-integrations',
-    index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-    body: {
-      doc: newDoc,
-      doc_as_upsert: true,
-    },
-  });
+    const packageSavedObjects = await getInstalledPackageSavedObjects(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+      sortOrder: 'asc',
+    });
+    newDoc.integrations = packageSavedObjects.saved_objects.map((item) => {
+      return {
+        package_name: item.attributes.name,
+        package_version: item.attributes.version,
+        updated_at: item.updated_at ?? new Date().toISOString(),
+      };
+    });
+
+    await esClient.update(
+      {
+        id: 'fleet-synced-integrations',
+        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+        body: {
+          doc: newDoc,
+          doc_as_upsert: true,
+        },
+      },
+      { signal: this.abortController.signal }
+    );
+  };
 }
