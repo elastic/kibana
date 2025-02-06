@@ -44,7 +44,7 @@ export interface SummaryColumnFactoryDeps {
 
 export type SummaryColumnProps = DataGridCellValueElementProps;
 export type AllSummaryColumnProps = SummaryColumnProps &
-  SummaryColumnFactoryDeps & { isTracesSummary: boolean };
+  SummaryColumnFactoryDeps & { isTracesSummary?: boolean };
 
 export const SummaryColumn = (props: AllSummaryColumnProps) => {
   const { isDetails } = props;
