@@ -60,7 +60,7 @@ export function Instruction({
   // Memoize the custom component so it wont rerender everytime
   const LazyCustomComponent = useMemo(() => {
     if (customComponent) {
-      return React.lazy(() => customComponent()); // need to fix. can't figure out how... the code is working with this error
+      return React.lazy(() => customComponent());
     }
   }, [customComponent]);
 
