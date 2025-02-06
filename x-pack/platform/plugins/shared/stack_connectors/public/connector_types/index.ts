@@ -82,7 +82,7 @@ export function registerConnectorTypes({
   if (ExperimentalFeaturesService.get().crowdstrikeConnectorOn) {
     connectorTypeRegistry.register(getCrowdStrikeConnectorType());
   }
-  if (ExperimentalFeaturesService.get().inferenceConnectorOn) {
+  if (!ExperimentalFeaturesService.get().inferenceConnectorOff) {
     connectorTypeRegistry.register(getInferenceConnectorType());
   }
   if (ExperimentalFeaturesService.get().microsoftDefenderEndpointOn) {
