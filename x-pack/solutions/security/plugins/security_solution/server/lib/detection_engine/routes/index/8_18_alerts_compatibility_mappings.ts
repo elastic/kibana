@@ -27,5 +27,4 @@ const mapRuleTypeToRuleTypeIdScript = (ruleTypeToRuleTypeIdMap: Record<string, s
     .map(
       ([ruleType, ruleTypeId]) => `if (rule_type == '${ruleType}') return emit('${ruleTypeId}');`
     )
-    .join('')}
-`;
+    .join('')}`;
