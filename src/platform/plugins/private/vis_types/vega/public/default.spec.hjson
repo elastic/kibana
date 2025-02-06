@@ -49,9 +49,9 @@ See .search() documentation for :  https://www.elastic.co/guide/en/elasticsearch
             }
           }
         }
+        // Speed up the response by only including aggregation results
+        size: 0
       }
-      // Speed up the response by only including aggregation results
-      size: 0
     }
 /*
 Elasticsearch will return results in this format:

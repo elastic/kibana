@@ -861,7 +861,7 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
 
   while (true) {
     const queryWithAfterKey: any = { ...query };
-    queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
+    queryWithAfterKey.aggregations.groups.composite.after = lastAfterKey;
     const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
       await esClient.search(queryWithAfterKey)
     );

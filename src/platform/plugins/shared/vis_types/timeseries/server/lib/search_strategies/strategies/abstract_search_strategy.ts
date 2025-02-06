@@ -47,12 +47,15 @@ export abstract class AbstractSearchStrategy {
 
     const searchContext = await requestContext.search;
 
-    esRequests.forEach(({ body = {}, index, trackingEsSearchMeta }) => {
+    esRequests.forEach(({ body = {}, index, trackingEsSearchMeta, ...rest }) => {
       // User may abort the request without waiting for the results
       // we need to handle this scenario by aborting underlying server requests
       const abortSignal = getRequestAbortedSignal(req.events.aborted$);
       const startTime = Date.now();
-      const searchBody = typeof body === 'string' ? { body } : body;
+      const searchBody = {
+        ...rest,
+        ...(typeof body === 'string' ? { body } : body),
+      };
       requests.push(
         searchContext
           .search(

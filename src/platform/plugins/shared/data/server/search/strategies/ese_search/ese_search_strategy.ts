@@ -13,8 +13,9 @@ import { catchError, tap } from 'rxjs';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { omit } from 'lodash';
 import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError } from '../../report_search_error';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
@@ -161,12 +162,17 @@ export const enhancedEsSearchStrategyProvider = (
       ...(await getDefaultSearchParams(uiSettingsClient)),
     };
 
+    // Custom 400 error here because the client tries to run `index.toString()` and we no-longer can rely on ES 400
+    if (!request.params?.index) {
+      throw new KbnSearchError(`"params.index" is required when performing a rollup search`, 400);
+    }
+
     try {
       const esResponse = await client.rollup.rollupSearch(
         {
           ...querystring,
-          ...request.params,
-          index: request.params!.index!,
+          ...omit(request.params, ['indexType']),
+          index: request.params.index,
         },
         {
           signal: options?.abortSignal,

@@ -205,8 +205,8 @@ In the *Vega-Lite* spec, enter the aggregations, then click *Update*:
             }
           }
         }
+        size: 0
       }
-      size: 0
     }
     format: {property: "aggregations.categories.buckets" }
   }
@@ -447,8 +447,8 @@ The selection is controlled by a signal. To view the signal, click *Inspect* in 
             }
           }
         }
+        size: 0
       }
-      size: 0
     }
     format: {property: "aggregations.categories.buckets" }
   }
@@ -599,8 +599,8 @@ Add the {es} search query with the `data` block, then click *Update*:
               }
             }
           }
+          size: 0
         }
-        size: 0
       }
       format: { property: "aggregations.time_buckets.buckets" }
     }
@@ -913,8 +913,8 @@ dragging:
               }
             }
           }
+          size: 0
         }
-        size: 0
       }
       format: { property: "aggregations.time_buckets.buckets" }
     }
