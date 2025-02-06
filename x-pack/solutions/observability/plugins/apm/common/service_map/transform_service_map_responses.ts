@@ -6,6 +6,7 @@
  */
 
 import { sortBy, pickBy, identity } from 'lodash';
+import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import {
   SERVICE_NAME,
@@ -23,11 +24,25 @@ import type {
   ConnectionElement,
   DiscoveredService,
   ServicesResponse,
-  NodeItem,
 } from './typings';
 
 import type { GroupResourceNodesResponse } from './group_resource_nodes';
 import { groupResourceNodes } from './group_resource_nodes';
+
+export interface ServiceMapReponse {
+  spanId: string;
+  spanType: string;
+  spanSubtype: string;
+  spanDestinationServiceResource: string;
+  serviceName: string;
+  serviceEnvironment?: string;
+  agentName: AgentName;
+  downstreamService?: {
+    agentName: AgentName;
+    serviceEnvironment?: string;
+    serviceName: string;
+  };
+}
 
 export const isSpan = (node: ConnectionNode): node is ExternalConnectionNode => {
   return !!(node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE];
@@ -40,19 +55,19 @@ export function getConnectionNodeId(node: ConnectionNode): string {
   return node[SERVICE_NAME];
 }
 
-export const getServiceConnectionNode = (event: NodeItem): ServiceConnectionNode => {
+export const getServiceConnectionNode = (event: ServiceMapReponse): ServiceConnectionNode => {
   return {
-    [SERVICE_NAME]: event[SERVICE_NAME],
-    [SERVICE_ENVIRONMENT]: event[SERVICE_ENVIRONMENT],
-    [AGENT_NAME]: event[AGENT_NAME],
+    [SERVICE_NAME]: event.serviceName,
+    [SERVICE_ENVIRONMENT]: event.serviceEnvironment ?? null,
+    [AGENT_NAME]: event.agentName,
   };
 };
 
-export const getExternalConnectionNode = (event: NodeItem): ExternalConnectionNode => {
+export const getExternalConnectionNode = (event: ServiceMapReponse): ExternalConnectionNode => {
   return {
-    [SPAN_DESTINATION_SERVICE_RESOURCE]: event[SPAN_DESTINATION_SERVICE_RESOURCE],
-    [SPAN_TYPE]: event[SPAN_TYPE],
-    [SPAN_SUBTYPE]: event[SPAN_SUBTYPE],
+    [SPAN_DESTINATION_SERVICE_RESOURCE]: event.spanDestinationServiceResource,
+    [SPAN_TYPE]: event.spanType,
+    [SPAN_SUBTYPE]: event.spanSubtype,
   };
 };
 

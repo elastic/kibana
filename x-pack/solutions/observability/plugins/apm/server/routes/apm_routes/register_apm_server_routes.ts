@@ -184,12 +184,12 @@ export function registerRoutes({
               signal: controller.signal,
             }),
           });
-        } else if (options.arrowStream) {
+        } else if (options.stream) {
           const body = data || {};
           return response.custom({
             statusCode: 200,
             headers: {
-              'content-type': 'application/vnd.apache.arrow.stream',
+              'content-type': 'application/octet-stream',
               'transfer-encoding': 'chunked',
             },
             body,

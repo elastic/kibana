@@ -49,8 +49,6 @@ export interface ConnectionEdge {
 
 export type NodeItem = {
   id: string;
-  parentId?: string;
-  children: NodeItem[];
 } & ConnectionNode;
 
 export interface ConnectionElement {

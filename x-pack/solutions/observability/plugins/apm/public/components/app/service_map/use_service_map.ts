@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import {
   from,
   scan,
@@ -19,27 +18,17 @@ import {
   defer,
   switchMap,
 } from 'rxjs';
-import * as arrow from 'apache-arrow';
 import { chunk } from 'lodash';
 
 import type { Readable } from 'stream';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
+import type { ServiceMapReponse } from '../../../../common/service_map/transform_service_map_responses';
 import type { Environment } from '../../../../common/environment_rt';
-import { PARENT_ID, SPAN_TYPE } from '../../../../common/es_fields/apm';
-import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_ID,
-  SPAN_SUBTYPE,
-} from '../../../../common/es_fields/apm';
 import {
   getConnectionNodeId,
   getExternalConnectionNode,
   getServiceConnectionNode,
-  isSpan,
   transformServiceMapResponses,
   getConnections,
 } from '../../../../common/service_map';
@@ -47,19 +36,9 @@ import type {
   ConnectionNode,
   DiscoveredService,
   GroupResourceNodesResponse,
-  NodeItem,
 } from '../../../../common/service_map';
-
 import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-
-type QueryResult = {
-  'span.id': string;
-  'processor.event': ProcessorEvent;
-  'transaction.id': string;
-  'transaction.parent.id'?: string;
-  [PARENT_ID]?: string;
-} & ConnectionNode;
 
 export const useServiceMap = ({
   start,
@@ -120,7 +99,7 @@ export const useServiceMap = ({
             method: 'GET',
             rawResponse: true,
             headers: {
-              Accept: 'application/vnd.apache.arrow.stream',
+              Accept: 'application/octet-stream',
               'Transfer-Encoding': 'chunked',
             },
             query: {
@@ -213,45 +192,14 @@ function streamIntoObservable(readable?: Readable): Observable<Uint8Array> {
   });
 }
 
-const isVector = (value: any): value is arrow.Vector => {
-  return value instanceof arrow.Vector;
-};
-
-function processTable(table: arrow.RecordBatch): QueryResult[] {
-  const response: QueryResult[] = [];
-
-  for (let i = 0; i < table.numRows; i++) {
-    const row = table.schema.fields.reduce((acc, field) => {
-      const child = table.getChild(field.name);
-      if (!child) {
-        return acc;
-      }
-      const value = child.get(i);
-
-      acc[field.name as string] = value;
-
-      return acc;
-    }, {} as QueryResult);
-
-    response.push(row);
-  }
-
-  return response;
+function parseConcatenatedJson(data: string): ServiceMapReponse[] {
+  return JSON.parse(data);
 }
 
-async function processStream(readableStream: Uint8Array) {
-  const reader = await arrow.RecordBatchStreamReader.from(readableStream);
+function processStream(readableStream: Uint8Array) {
+  const jsonString = Buffer.from(readableStream).toString('utf-8');
 
-  const response: QueryResult[] = [];
-
-  while (true) {
-    const batch = await reader.next();
-    if (batch.done) break;
-
-    response.push(...processTable(batch.value));
-  }
-
-  return response;
+  return [parseConcatenatedJson(jsonString)];
 }
 
 export function serviceMapBuilder$(result: Observable<Uint8Array>) {
@@ -259,11 +207,7 @@ export function serviceMapBuilder$(result: Observable<Uint8Array>) {
     .pipe(
       concatMap((hits) => processStream(hits)),
       concatMap((table) => {
-        const eventsById = getEventsById({ response: table });
-        const entryIds = getEntryIds({ eventsById });
-        const eventTrees = getEventTrees({ eventsById, entryIds });
-
-        return buildMapPaths$({ eventTrees });
+        return of(processList({ list: table }));
       }),
       scan(
         (acc, { paths, discoveredServices }) => {
@@ -300,211 +244,33 @@ export function serviceMapBuilder$(result: Observable<Uint8Array>) {
     );
 }
 
-function getEventTrees({
-  eventsById,
-  entryIds,
-}: {
-  eventsById: Map<string, NodeItem>;
-  entryIds: Set<string>;
-}) {
-  const eventTrees = new Map<string, NodeItem>();
-  const events = Array.from(eventsById.values());
+const processList = ({ list }: { list: ServiceMapReponse[] }) => {
+  const paths = new Map<string, ConnectionNode[]>();
+  const discoveredServices = new Map<string, DiscoveredService>();
 
-  const visited = new Set<string>();
+  for (const currentNode of list) {
+    const serviceConnectionNode = getServiceConnectionNode(currentNode);
+    const externalConnectionNode = getExternalConnectionNode(currentNode);
 
-  const childrenByParentId = new Map<string, NodeItem[]>();
-  for (const event of events) {
-    if (event.parentId) {
-      const currentChildren = childrenByParentId.get(event.parentId) || [];
-      currentChildren.push(event);
-      childrenByParentId.set(event.parentId, currentChildren);
-    }
-  }
+    const pathKey = `${getConnectionNodeId(serviceConnectionNode)}|${getConnectionNodeId(
+      externalConnectionNode
+    )}`;
 
-  for (const entry of entryIds) {
-    const treeRoot = eventsById.get(entry);
-    if (!treeRoot || !childrenByParentId.get(entry)) {
-      continue;
+    if (currentNode.downstreamService && !discoveredServices.has(pathKey)) {
+      discoveredServices.set(pathKey, {
+        from: externalConnectionNode,
+        to: {
+          [SERVICE_NAME]: currentNode.downstreamService.serviceName,
+          [SERVICE_ENVIRONMENT]: currentNode.downstreamService.serviceEnvironment ?? null,
+          [AGENT_NAME]: currentNode.downstreamService.agentName,
+        },
+      });
     }
 
-    const stack: NodeItem[] = [treeRoot];
-
-    while (stack.length > 0) {
-      const node = stack.pop()!;
-      visited.add(node.id);
-
-      const children = childrenByParentId.get(node.id) || [];
-      for (const child of children) {
-        if (!visited.has(child.id)) {
-          stack.push(child);
-          node.children.push(child);
-        }
-      }
-    }
-
-    if (treeRoot.children.length > 0) {
-      eventTrees.set(treeRoot.id, treeRoot);
-    }
-  }
-
-  return Array.from(eventTrees.values());
-}
-
-const buildMapPaths$ = ({ eventTrees }: { eventTrees: NodeItem[] }) => {
-  const initialState = {
-    paths: new Map<string, ConnectionNode[]>(),
-    discoveredServices: new Map<string, DiscoveredService>(),
-  };
-
-  return from(eventTrees).pipe(
-    concatMap((treeRoot) => {
-      // Process the tree and mutate the state
-      return from(
-        new Promise<ReturnType<typeof processTree>>((resolve) => {
-          const result = processTree({ treeRoot, state: initialState });
-          return resolve(result);
-        })
-      );
-    }),
-    scan((state, { paths, discoveredServices }) => {
-      state.paths = paths;
-      state.discoveredServices = discoveredServices;
-
-      return state;
-    }, initialState)
-  );
-};
-
-const processTree = ({
-  treeRoot,
-  state,
-}: {
-  treeRoot: NodeItem;
-  state: {
-    paths: Map<string, ConnectionNode[]>;
-    discoveredServices: Map<string, DiscoveredService>;
-  };
-}) => {
-  const visited = new Set<string>();
-  const stack: Array<{
-    currentNode: NodeItem;
-    parentPath: ConnectionNode[];
-    currentPathId: string;
-    parentNode?: NodeItem;
-  }> = [];
-
-  stack.push({
-    currentNode: treeRoot,
-    parentPath: [],
-    currentPathId: '',
-  });
-
-  const { paths, discoveredServices } = state;
-
-  while (stack.length > 0) {
-    const { currentNode, parentPath, parentNode, currentPathId } = stack.pop()!;
-    visited.add(currentNode.id);
-
-    if (
-      parentNode &&
-      isSpan(parentNode) &&
-      (parentNode[SERVICE_NAME] !== currentNode[SERVICE_NAME] ||
-        parentNode[SERVICE_ENVIRONMENT] !== currentNode[SERVICE_ENVIRONMENT])
-    ) {
-      const pathKey = `${getConnectionNodeId(parentNode)}|${getConnectionNodeId(currentNode)}`;
-      if (!discoveredServices.has(pathKey)) {
-        discoveredServices.set(pathKey, {
-          from: getExternalConnectionNode(parentNode),
-          to: getServiceConnectionNode(currentNode),
-        });
-      }
-    }
-
-    const currentPath = parentPath.slice();
-    const lastEdge = parentPath.length > 0 ? currentPath[currentPath.length - 1] : undefined;
-
-    let servicePathId = currentPathId;
-    if (
-      !lastEdge ||
-      !(
-        lastEdge[SERVICE_NAME] === currentNode[SERVICE_NAME] &&
-        lastEdge[SERVICE_ENVIRONMENT] === currentNode[SERVICE_ENVIRONMENT]
-      )
-    ) {
-      const serviceConnectionNode = getServiceConnectionNode(currentNode);
-      servicePathId = `${servicePathId}|${getConnectionNodeId(serviceConnectionNode)}`;
-      currentPath.push(serviceConnectionNode);
-    }
-
-    if (isSpan(currentNode)) {
-      const externalNode = getExternalConnectionNode(currentNode);
-      const newPath = [...currentPath, externalNode];
-      const pathKey = `${servicePathId}|${getConnectionNodeId(externalNode)}`;
-
-      if (!paths.has(pathKey)) {
-        paths.set(pathKey, newPath);
-      }
-    }
-
-    for (const child of currentNode.children) {
-      if (!visited.has(child.id)) {
-        stack.push({
-          currentNode: child,
-          currentPathId: servicePathId,
-          parentPath: currentPath,
-          parentNode: currentNode,
-        });
-      }
+    if (!paths.has(pathKey)) {
+      paths.set(pathKey, [serviceConnectionNode, externalConnectionNode]);
     }
   }
 
   return { paths, discoveredServices };
 };
-
-function getEventsById({ response }: { response: QueryResult[] }) {
-  return response.reduce((acc, hit) => {
-    const transactionId = hit['transaction.id'];
-    const transactionParentId = hit['transaction.parent.id'];
-    const spanId = hit[SPAN_ID];
-
-    if (!acc.has(spanId)) {
-      acc.set(spanId, {
-        id: spanId,
-        parentId: hit[PARENT_ID],
-        [AGENT_NAME]: hit[AGENT_NAME],
-        [SERVICE_NAME]: hit[SERVICE_NAME],
-        [SERVICE_ENVIRONMENT]: hit[SERVICE_ENVIRONMENT],
-        [SPAN_DESTINATION_SERVICE_RESOURCE]: hit[SPAN_DESTINATION_SERVICE_RESOURCE],
-        [SPAN_ID]: hit[SPAN_ID],
-        [SPAN_SUBTYPE]: hit[SPAN_SUBTYPE],
-        [SPAN_TYPE]: hit[SPAN_TYPE],
-        children: [],
-      });
-    }
-
-    if (!acc.has(transactionId)) {
-      acc.set(transactionId, {
-        id: transactionId,
-        parentId: transactionParentId,
-        [AGENT_NAME]: hit[AGENT_NAME],
-        [SERVICE_NAME]: hit[SERVICE_NAME],
-        [SERVICE_ENVIRONMENT]: hit[SERVICE_ENVIRONMENT],
-        children: [],
-      });
-    }
-
-    return acc;
-  }, new Map<string, NodeItem>());
-}
-
-function getEntryIds({ eventsById }: { eventsById: Map<string, NodeItem> }) {
-  const entryIds = new Set<string>();
-
-  for (const [eventId, event] of eventsById) {
-    if (!event.parentId) {
-      entryIds.add(eventId);
-    }
-  }
-
-  return entryIds;
-}
