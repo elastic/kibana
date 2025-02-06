@@ -13,9 +13,9 @@ import { AlertsPreview } from '.';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 
-jest.mock('../../../../detections/components/alerts_table');
-
-jest.mocked(DetectionEngineAlertsTable).mockReturnValue(<div>{'Mocked Alerts Table'}</div>);
+jest.mock('../../../../detections/components/alerts_table', () => ({
+  DetectionEngineAlertsTable: jest.fn().mockReturnValue(<div>{'Mocked Alerts Table'}</div>),
+}));
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
