@@ -452,29 +452,22 @@ describe('rules_settings_modal', () => {
   });
 
   describe('alert deletion settings', () => {
-    test.todo('should render alert deletion settings correctly', async () => {});
+    test.todo('should render alert deletion settings correctly');
 
-    test.todo('should save its settings when clicking on save button', async () => {});
+    test.todo('should save its settings when clicking on save button');
 
-    test.todo(
-      'should reset the settings to its initial state when modal closed without saving',
-      async () => {}
-    );
+    test.todo('should reset the settings to its initial state when modal closed without saving');
 
-    test.todo('should show error message if it fails', async () => {});
+    test.todo('should show error message if it fails');
 
-    test.todo('should show the settings when no error', async () => {});
+    test.todo('should show the settings when no error');
 
     // TODO: https://github.com/elastic/kibana/issues/210014
     test.todo(
-      'should render settings as disabled when provided with insufficient write permissions',
-      async () => {}
+      'should render settings as disabled when provided with insufficient write permissions'
     );
 
     // TODO: https://github.com/elastic/kibana/issues/210014
-    test.todo(
-      'should not render settings when provided with insufficient read permissions',
-      async () => {}
-    );
+    test.todo('should not render settings when provided with insufficient read permissions');
   });
 });

@@ -6,26 +6,22 @@
  */
 
 describe('RulesSettingsAlertDeletionSection', () => {
-  test.todo('should render', async () => {});
+  test.todo('should render');
 
-  test.todo('should update settings', async () => {});
+  test.todo('should update settings');
 
   // TODO: is this needed? shouldn't it be handled from outside
-  test.todo('should not render anything when turned off', async () => {});
+  test.todo('should not render anything when turned off');
 
-  test.todo('should show error message when error', async () => {});
+  test.todo('should show error message when error');
 
-  test.todo('should disabled everything when disabled', async () => {});
+  test.todo('should disabled everything when disabled');
 
   test.todo(
-    'should toggle the activate alert threshold on when toggling on the active alert setting',
-    async () => {}
+    'should toggle the activate alert threshold on when toggling on the active alert setting'
   );
 
   test.todo(
-    'should toggle the inactivate alert threshold on when toggling on the inactive alert setting',
-    async () => {}
+    'should toggle the inactivate alert threshold on when toggling on the inactive alert setting'
   );
-
-  test.todo('', async () => {});
 });
