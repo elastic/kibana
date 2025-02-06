@@ -19,14 +19,14 @@ export const IgnoreFailureToggle = () => {
     <ToggleField
       name="ignore_failure"
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreFailuresLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreFailuresLabel',
         { defaultMessage: 'Ignore failures for this processor' }
       )}
       helpText={
         !value ? (
           <EuiText component="span" size="relative" color="warning">
             <FormattedMessage
-              id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreFailuresWarning"
+              id="xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreFailuresWarning"
               defaultMessage="Disabling the {ignoreField} option could lead to unexpected pipeline failures."
               values={{
                 ignoreField: <EuiCode>ignore_failure</EuiCode>,
@@ -44,11 +44,11 @@ export const IgnoreMissingToggle = () => {
     <ToggleField
       name="ignore_missing"
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreMissingLabel',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingLabel',
         { defaultMessage: 'Ignore missing' }
       )}
       helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.ignoreMissingHelpText',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingHelpText',
         { defaultMessage: 'Ignore documents with a missing field.' }
       )}
     />
