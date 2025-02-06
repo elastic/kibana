@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiBadge, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 
@@ -34,6 +33,8 @@ export const usePresentationPanelHeaderActions = <
 ) => {
   const [badges, setBadges] = useState<AnyApiAction[]>([]);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
+
+  const { euiTheme } = useEuiTheme();
 
   /**
    * Get all actions once on mount of the panel. Any actions that are Frequent Compatibility
@@ -170,7 +171,7 @@ export const usePresentationPanelHeaderActions = <
         <EuiNotificationBadge
           data-test-subj={`embeddablePanelNotification-${notification.id}`}
           key={notification.id}
-          css={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
+          css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
           onClick={() =>
             notification.execute({ embeddable: api, trigger: panelNotificationTrigger })
           }
@@ -196,7 +197,7 @@ export const usePresentationPanelHeaderActions = <
 
       return notificationComponent;
     });
-  }, [api, notifications, showNotifications]);
+  }, [api, euiTheme.size.xs, notifications, showNotifications]);
 
   return { badgeElements, notificationElements };
 };

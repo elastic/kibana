@@ -19,7 +19,7 @@ export const OptionalFieldsAccordion = ({ children }: PropsWithChildren) => {
       id="optionalFieldsAccordion"
       paddingSize="none"
       buttonContent={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.optionalFields',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.optionalFields',
         { defaultMessage: 'Optional fields' }
       )}
     >
