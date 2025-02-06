@@ -264,6 +264,7 @@ const suggestionsParamsSchema = z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
     field: z.string(),
+    connectorId: z.string(),
     samples: z.array(z.record(z.unknown())),
   }),
 });
@@ -357,7 +358,7 @@ export const processingSuggestionRoute = createServerRoute({
       sortedStats.map((sample) =>
         inferenceClient.output({
           id: 'get_pattern_suggestions',
-          connectorId: 'azure-open-ai',
+          connectorId: params.body.connectorId,
           system: `Instructions:
         - You are an assistant for observability tasks with a strong knowledge of logs and log parsing.
         - Use JSON format.
@@ -461,7 +462,7 @@ export const processingSuggestionRoute = createServerRoute({
     return {
       patterns: deduplicatedSimulations.map((simulation) => simulation!.pattern),
       chatResponses,
-      simuations: deduplicatedSimulations as Array<ReturnType<typeof prepareSimulationResponse>>,
+      simulations: deduplicatedSimulations as Array<ReturnType<typeof prepareSimulationResponse>>,
     };
   },
 });
