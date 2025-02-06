@@ -14,7 +14,7 @@ import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { typedSearch } from '../utils/queries';
-import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
+import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 
 export class GetSLOStatsOverview {
@@ -29,7 +29,7 @@ export class GetSLOStatsOverview {
 
   public async execute(params: GetSLOStatsOverviewParams): Promise<GetSLOStatsOverviewResponse> {
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.esClient, settings);
 
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
