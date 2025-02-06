@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, throwError, of } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import type {
   StartAllocationParams,
@@ -178,7 +179,9 @@ describe('TrainedModelsService', () => {
       } as unknown as TrainedModelUIItem,
     ]);
 
-    mockTrainedModelsApiService.startModelAllocation.mockResolvedValueOnce({ acknowledge: true });
+    jest.spyOn(trainedModelsService as any, 'waitForModelReady').mockReturnValue(of(true));
+
+    mockTrainedModelsApiService.startModelAllocation.mockReturnValueOnce(of({ acknowledge: true }));
 
     trainedModelsService.fetchModels();
     await flushPromises();
@@ -190,11 +193,15 @@ describe('TrainedModelsService', () => {
     });
     await flushPromises();
 
-    expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledWith(
-      'deploy-model',
-      { priority: 'low', threads_per_allocation: 1, deployment_id: 'my-deployment-id' },
-      undefined
-    );
+    expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledWith({
+      modelId: 'deploy-model',
+      deploymentParams: {
+        priority: 'low',
+        threads_per_allocation: 1,
+        deployment_id: 'my-deployment-id',
+      },
+      adaptiveAllocationsParams: undefined,
+    });
     expect(mockDisplaySuccessToast).toHaveBeenCalledWith({
       title: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
         defaultMessage: 'Deployment started',
@@ -215,8 +222,12 @@ describe('TrainedModelsService', () => {
       } as unknown as TrainedModelUIItem,
     ]);
 
+    jest.spyOn(trainedModelsService as any, 'waitForModelReady').mockReturnValue(of(true));
+
     const deploymentError = new Error('Deployment error');
-    mockTrainedModelsApiService.startModelAllocation.mockRejectedValueOnce(deploymentError);
+    mockTrainedModelsApiService.startModelAllocation.mockReturnValueOnce(
+      throwError(() => deploymentError) as unknown as Observable<{ acknowledge: boolean }>
+    );
 
     trainedModelsService.fetchModels();
     await flushPromises();
