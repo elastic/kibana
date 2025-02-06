@@ -319,10 +319,11 @@ export const getGenAiTokenTracking = async ({
       usage?: { input_tokens: number; output_tokens: number };
     };
     if (results?.usage) {
+      const { input_tokens: inputTokens = 0, output_tokens: outputTokens = 0 } = results.usage;
       return {
-        total_tokens: results.usage.input_tokens + results.usage.output_tokens,
-        prompt_tokens: results.usage.input_tokens,
-        completion_tokens: results.usage.output_tokens,
+        total_tokens: inputTokens + outputTokens,
+        prompt_tokens: inputTokens,
+        completion_tokens: outputTokens,
         telemetry_metadata: telemetryMetadata,
       };
     } else {
