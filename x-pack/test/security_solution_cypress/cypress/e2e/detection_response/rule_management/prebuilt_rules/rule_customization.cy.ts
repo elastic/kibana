@@ -13,6 +13,7 @@ import {
   openBulkEditAddTagsForm,
   openBulkEditDeleteIndexPatternsForm,
   openBulkEditDeleteInvestigationFieldsForm,
+  openBulkEditDeleteTagsForm,
   setScheduleIntervalTimeUnit,
   setScheduleLookbackTimeUnit,
   submitBulkEditForm,
@@ -205,7 +206,7 @@ describe(
           filterByElasticRules();
           selectAllRules();
 
-          openBulkEditAddTagsForm();
+          openBulkEditDeleteTagsForm();
           typeTags([testTags[0]]);
           submitBulkEditForm();
 
