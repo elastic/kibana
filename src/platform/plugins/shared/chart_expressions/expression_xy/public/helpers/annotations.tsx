@@ -183,7 +183,7 @@ const isNumericalString = (value: string) => !isNaN(Number(value));
 export const AnnotationIcon = ({
   type,
   rotateClassName = '',
-  isHorizontal,
+  isHorizontal = true,
   renderedInChart,
   ...rest
 }: {
