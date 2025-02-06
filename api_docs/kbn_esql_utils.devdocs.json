@@ -21,6 +21,54 @@
     "functions": [
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.appendStatsByToQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "appendStatsByToQuery",
+        "description": [],
+        "signature": [
+          "(queryString: string, column: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendStatsByToQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendStatsByToQuery.$2",
+            "type": "string",
+            "tags": [],
+            "label": "column",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.appendToESQLQuery",
         "type": "Function",
         "tags": [],
@@ -694,13 +742,46 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getESQLQueryVariables",
+        "type": "Function",
+        "tags": [],
+        "label": "getESQLQueryVariables",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLQueryVariables.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getESQLResults",
         "type": "Function",
         "tags": [],
         "label": "getESQLResults",
         "description": [],
         "signature": [
-          "({\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n}: { esqlQuery: string; search: ",
+          "({\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n}: { esqlQuery: string; search: ",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -716,7 +797,15 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; }) => Promise<{ response: ",
+          " | undefined; variables?: ",
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; }) => Promise<{ response: ",
           {
             "pluginId": "@kbn/es-types",
             "scope": "common",
@@ -743,7 +832,7 @@
             "id": "def-common.getESQLResults.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n}",
+            "label": "{\n  esqlQuery,\n  search,\n  signal,\n  filter,\n  dropNullColumns,\n  timeRange,\n  variables,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
             "deprecated": false,
@@ -920,6 +1009,27 @@
                     "text": "TimeRange"
                   },
                   " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLResults.$1.variables",
+                "type": "Array",
+                "tags": [],
+                "label": "variables",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-validation-autocomplete",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                    "section": "def-common.ESQLControlVariable",
+                    "text": "ESQLControlVariable"
+                  },
+                  "[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
                 "deprecated": false,
@@ -1189,6 +1299,99 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getNamedParams",
+        "type": "Function",
+        "tags": [],
+        "label": "getNamedParams",
+        "description": [],
+        "signature": [
+          "(query: string, timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined, variables?: ",
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined) => Record<string, string | number | Record<string, string | number> | undefined>[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getNamedParams.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getNamedParams.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getNamedParams.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "variables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getQueryColumnsFromESQLQuery",
         "type": "Function",
         "tags": [],
@@ -1320,6 +1523,39 @@
         "returnComment": [
           "string"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getValuesFromQueryField",
+        "type": "Function",
+        "tags": [],
+        "label": "getValuesFromQueryField",
+        "description": [],
+        "signature": [
+          "(queryString: string) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getValuesFromQueryField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1572,6 +1808,117 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.mapVariableToColumn",
+        "type": "Function",
+        "tags": [],
+        "label": "mapVariableToColumn",
+        "description": [
+          "\nThis function is used to map the variables to the columns in the datatable"
+        ],
+        "signature": [
+          "(esql: string, variables: ",
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[], columns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.mapVariableToColumn.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              ":string"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.mapVariableToColumn.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "variables",
+            "description": [
+              ":ESQLControlVariable[]"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.mapVariableToColumn.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [
+              ":DatatableColumn[]"
+            ],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "DatatableColumn[]"
+        ],
         "initialIsOpen": false
       },
       {

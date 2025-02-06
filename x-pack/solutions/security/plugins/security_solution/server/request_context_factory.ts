@@ -7,13 +7,27 @@
 
 import { memoize } from 'lodash';
 
-import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
 
 import type { BuildFlavor } from '@kbn/config';
+import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
 import { DEFAULT_SPACE_ID } from '../common/constants';
+import type { Immutable } from '../common/endpoint/types';
+import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
+import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
+import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
+import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
+import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
+import { getApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
+import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
+import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
+import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
+import { buildMlAuthz } from './lib/machine_learning/authz';
+import type { ProductFeaturesService } from './lib/product_features_service';
+import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -23,17 +37,6 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
-import type { Immutable } from '../common/endpoint/types';
-import type { EndpointAuthz } from '../common/endpoint/types/authz';
-import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
-import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
-import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
-import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
-import { buildMlAuthz } from './lib/machine_learning/authz';
-import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
-import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
-import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -53,6 +56,7 @@ interface ConstructorOptions {
   kibanaVersion: string;
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
+  productFeaturesService: ProductFeaturesService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -74,11 +78,12 @@ export class RequestContextFactory implements IRequestContextFactory {
       endpointAppContextService,
       ruleMonitoringService,
       siemMigrationsService,
+      productFeaturesService,
     } = options;
 
     const { lists, ruleRegistry, security } = plugins;
 
-    const [_, startPlugins] = await core.getStartServices();
+    const [coreStart, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
@@ -153,7 +158,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
-          isRuleCustomizationEnabled: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
+          experimentalFeatures: config.experimentalFeatures,
+          productFeaturesService,
+          license: licensing.license,
         });
       }),
 
@@ -183,6 +190,7 @@ export class RequestContextFactory implements IRequestContextFactory {
             actionsClient,
             savedObjectsClient: coreContext.savedObjects.client,
             packageService: startPlugins.fleet?.packageService,
+            telemetry: core.analytics,
           },
         })
       ),
@@ -233,7 +241,11 @@ export class RequestContextFactory implements IRequestContextFactory {
       getEntityStoreDataClient: memoize(() => {
         const clusterClient = coreContext.elasticsearch.client;
         const logger = options.logger;
-        const soClient = coreContext.savedObjects.client;
+
+        const soClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+        });
+
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
           clusterClient,
@@ -247,6 +259,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           config: config.entityAnalytics.entityStore,
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
+          apiKeyManager: getApiKeyManager({
+            core: coreStart,
+            logger,
+            security: startPlugins.security,
+            encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+            request,
+            namespace: getSpaceId(),
+          }),
         });
       }),
       getAssetInventoryClient: memoize(() => {

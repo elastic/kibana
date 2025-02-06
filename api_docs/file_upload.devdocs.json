@@ -464,7 +464,15 @@
                 "section": "def-common.IngestPipeline",
                 "text": "IngestPipeline"
               },
-              " | undefined) => Promise<",
+              " | undefined, createPipelines?: ",
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              },
+              "[] | undefined) => Promise<",
               "ImportResponse",
               ">"
             ],
@@ -520,6 +528,107 @@
               {
                 "parentPluginId": "fileUpload",
                 "id": "def-public.IImporter.initializeImport.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "pipeline",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fileUpload",
+                    "scope": "common",
+                    "docId": "kibFileUploadPluginApi",
+                    "section": "def-common.IngestPipeline",
+                    "text": "IngestPipeline"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeImport.$5",
+                "type": "Array",
+                "tags": [],
+                "label": "createPipelines",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fileUpload",
+                    "scope": "common",
+                    "docId": "kibFileUploadPluginApi",
+                    "section": "def-common.IngestPipeline",
+                    "text": "IngestPipeline"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-public.IImporter.initializeWithoutCreate",
+            "type": "Function",
+            "tags": [],
+            "label": "initializeWithoutCreate",
+            "description": [],
+            "signature": [
+              "(index: string, mappings: ",
+              "MappingTypeMapping",
+              ", pipeline: ",
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              },
+              " | undefined) => void"
+            ],
+            "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeWithoutCreate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeWithoutCreate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "mappings",
+                "description": [],
+                "signature": [
+                  "MappingTypeMapping"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeWithoutCreate.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "pipeline",
@@ -683,6 +792,40 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-public.IImporter.deletePipelines",
+            "type": "Function",
+            "tags": [],
+            "label": "deletePipelines",
+            "description": [],
+            "signature": [
+              "(pipelineIds: string[]) => Promise<",
+              "AcknowledgedResponseBase",
+              "[]>"
+            ],
+            "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.deletePipelines.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "pipelineIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

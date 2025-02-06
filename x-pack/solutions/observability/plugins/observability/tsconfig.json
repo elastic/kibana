@@ -76,7 +76,7 @@
     "@kbn/navigation-plugin",
     "@kbn/observability-alert-details",
     "@kbn/investigation-shared",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/ui-theme",
     "@kbn/core-application-common",
     "@kbn/securitysolution-ecs",
@@ -113,7 +113,9 @@
     "@kbn/logging-mocks",
     "@kbn/response-ops-rule-form",
     "@kbn/streams-plugin",
-    "@kbn/data-service"
+    "@kbn/data-service",
+    "@kbn/ebt-tools",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }

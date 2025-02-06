@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/automatic-import-plugin",
+  "owner": "@elastic/security-scalability",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Plugin implementing the Automatic Import API and UI",
+  "plugin": {
+    "id": "automaticImport",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "automatic_import"
+    ],
+    "requiredPlugins": [
+      "kibanaReact",
+      "licensing",
+      "triggersActionsUi",
+      "actions",
+      "stackConnectors",
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "esUiShared",
+    ]
+  }
+}
