@@ -22,8 +22,21 @@ import {
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
+import {
+  getESQLAdHocDataview,
+  getESQLQueryColumns,
+  getIndexForESQLQuery,
+  getInitialESQLQuery,
+} from '@kbn/esql-utils';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { getEditPath } from '../../common/constants';
-import type { GetStateType, LensApi, LensInternalApi, LensPublicCallbacks } from './types';
+import type {
+  GetStateType,
+  LensApi,
+  LensInternalApi,
+  LensPublicCallbacks,
+  LensRuntimeState,
+} from './types';
 import { getExpressionRendererParams } from './expressions/expression_params';
 import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
@@ -35,6 +48,8 @@ import { getRenderMode, getParentContext } from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getMergedSearchContext } from './expressions/merged_search_context';
+import { isESQLModeEnabled } from './initializers/utils';
+import { suggestionsApi } from '../lens_suggestions_api';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
@@ -69,12 +84,82 @@ function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable
   };
 }
 
+async function loadESQLAttributes(
+  { dataViews, data, visualizationMap, datasourceMap, ...rest }: LensEmbeddableStartServices,
+  updateAttributes: (attributes: LensRuntimeState['attributes']) => void
+) {
+  console.log('init');
+  // Early exit if ESQL is not supported
+  if (!isESQLModeEnabled(rest)) {
+    return;
+  }
+  console.log('has esql');
+  const indexName = await getIndexForESQLQuery({ dataViews });
+  // Early exit if there's no data view to use
+  if (!indexName) {
+    return;
+  }
+  console.log('has index');
+
+  const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+
+  console.log('has dataView');
+
+  const esqlQuery = getInitialESQLQuery(dataView);
+
+  const defaultEsqlQuery = {
+    esql: esqlQuery,
+  };
+
+  // For the suggestions api we need only the columns
+  // so we are requesting them with limit 0
+  // this is much more performant than requesting
+  // all the table
+  const abortController = new AbortController();
+  const columns = await getESQLQueryColumns({
+    esqlQuery,
+    search: data.search.search,
+    signal: abortController.signal,
+    timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
+  });
+
+  const context = {
+    dataViewSpec: dataView.toSpec(false),
+    fieldName: '',
+    textBasedColumns: columns,
+    query: defaultEsqlQuery,
+  };
+
+  // get the initial attributes from the suggestions api
+  const allSuggestions =
+    suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+
+  console.log({ allSuggestions });
+  // Lens might not return suggestions for some cases, i.e. in case of errors
+  if (!allSuggestions.length) {
+    return;
+  }
+  const [firstSuggestion] = allSuggestions;
+  const newAttributes = getLensAttributesFromSuggestion({
+    filters: [],
+    query: defaultEsqlQuery,
+    suggestion: {
+      ...firstSuggestion,
+      title: '', // when creating a new panel, we don't want to use the title from the suggestion
+    },
+    dataView,
+  });
+
+  // time to update the existing attributes$
+  updateAttributes(newAttributes);
+}
+
 /**
  * The function computes the expression used to render the panel and produces the necessary props
  * for the ExpressionWrapper component, binding any outer context to them.
  * @returns
  */
-export function loadEmbeddableData(
+export async function loadEmbeddableData(
   uuid: string,
   getState: GetStateType,
   api: LensApi,
@@ -302,6 +387,13 @@ export function loadEmbeddableData(
       }
     }),
   ];
+
+  // At this point everything has been checked, so load the editor frame
+  // and update the attributes if it's a creation flow
+  if (internalApi.isNewlyCreated$.getValue()) {
+    await loadESQLAttributes(services, internalApi.updateAttributes);
+  }
+
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation
   // * at runtime => when the expression is running and ES/Kibana server could emit errors)

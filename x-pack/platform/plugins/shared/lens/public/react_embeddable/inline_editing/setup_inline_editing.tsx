@@ -40,11 +40,10 @@ export function prepareInlineEditPanel(
     | 'expressionRenderer'
     | 'documentToExpression'
     | 'injectFilterReferences'
-    | 'visualizationMap'
-    | 'datasourceMap'
     | 'theme'
     | 'uiSettings'
     | 'attributeService'
+    | 'loadEditorFrame'
   >,
   navigateToLensEditor?: (
     stateTransfer: EmbeddableStateTransfer,
@@ -58,12 +57,6 @@ export function prepareInlineEditPanel(
     onCancel,
     hideTimeFilterInfo,
   }: Partial<Pick<EditConfigPanelProps, 'onApply' | 'onCancel' | 'hideTimeFilterInfo'>> = {}) {
-    const { getEditLensConfiguration, getVisualizationMap, getDatasourceMap } = await import(
-      '../../async_services'
-    );
-    const visualizationMap = getVisualizationMap();
-    const datasourceMap = getDatasourceMap();
-
     const currentState = getState();
     const attributes = currentState.attributes as TypedLensSerializedState['attributes'];
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
@@ -78,19 +71,20 @@ export function prepareInlineEditPanel(
           savedObjectId: resetId ? undefined : currentState.savedObjectId,
         });
       },
-      visualizationMap,
-      datasourceMap,
+      startDependencies.visualizationMap,
+      startDependencies.datasourceMap,
       startDependencies.data.query.filterManager.extract
     );
 
     const updateByRefInput = (savedObjectId: LensRuntimeState['savedObjectId']) => {
       updateState({ attributes, savedObjectId });
     };
+    const { getEditLensConfiguration } = await import('../../async_services');
     const Component = await getEditLensConfiguration(
       coreStart,
       startDependencies,
-      visualizationMap,
-      datasourceMap
+      startDependencies.visualizationMap,
+      startDependencies.datasourceMap
     );
 
     if (attributes?.visualizationType == null) {

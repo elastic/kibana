@@ -6,11 +6,25 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import type { LensPluginStartDependencies } from '../../../plugin';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type {
+  LensEmbeddableStartServices,
+  TypedLensByValueInput,
+} from '../../../react_embeddable/types';
 import type { InlineEditLensEmbeddableContext } from './types';
 
 const ACTION_EDIT_LENS_EMBEDDABLE = 'ACTION_EDIT_LENS_EMBEDDABLE';
+
+export function isEmbeddableEditActionCompatible(
+  core: CoreStart,
+  attributes: TypedLensByValueInput['attributes']
+) {
+  // for ES|QL is compatible only when advanced setting is enabled
+  const query = attributes.state.query;
+  return isOfAggregateQueryType(query) ? core.uiSettings.get(ENABLE_ESQL) : true;
+}
 
 export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddableContext> {
   public type = ACTION_EDIT_LENS_EMBEDDABLE;
@@ -18,8 +32,8 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
   public order = 50;
 
   constructor(
-    protected readonly startDependencies: LensPluginStartDependencies,
-    protected readonly core: CoreStart
+    protected readonly core: CoreStart,
+    protected readonly loadEmbeddableServices: () => Promise<LensEmbeddableStartServices>
   ) {}
 
   public getDisplayName(): string {
@@ -33,7 +47,6 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
   }
 
   public async isCompatible({ attributes }: InlineEditLensEmbeddableContext) {
-    const { isEmbeddableEditActionCompatible } = await import('../../../async_services');
     return isEmbeddableEditActionCompatible(this.core, attributes);
   }
 
@@ -45,10 +58,17 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     onApply,
     onCancel,
   }: InlineEditLensEmbeddableContext) {
-    const { executeEditEmbeddableAction } = await import('../../../async_services');
+    const isCompatibleAction = isEmbeddableEditActionCompatible(this.core, attributes);
+    if (!isCompatibleAction) {
+      throw new IncompatibleActionError();
+    }
+    const [{ executeEditEmbeddableAction }, services] = await Promise.all([
+      import('../../../async_services'),
+      this.loadEmbeddableServices(),
+    ]);
     if (attributes) {
       executeEditEmbeddableAction({
-        deps: this.startDependencies,
+        deps: services,
         core: this.core,
         attributes,
         lensEvent,

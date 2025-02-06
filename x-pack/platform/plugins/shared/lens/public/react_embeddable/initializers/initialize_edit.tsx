@@ -14,7 +14,6 @@ import {
   apiHasAppContext,
   apiPublishesDisabledActionIds,
 } from '@kbn/presentation-publishing';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
@@ -39,6 +38,7 @@ import { mountInlineEditPanel } from '../inline_editing/mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
+import { isESQLModeEnabled } from './utils';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -77,8 +77,6 @@ export function initializeEditApi(
   cleanup: () => void;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
-
-  const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
   const [viewMode$] = buildObservableVariable<ViewMode>(
     extractInheritedViewModeObservable(parentApi)
@@ -170,14 +168,14 @@ export function initializeEditApi(
   /**
    * The rest of the edit stuff
    */
-  const { uiSettings, capabilities, data } = startDependencies;
+  const { capabilities, data } = startDependencies;
 
   const canEdit = () => {
     if (viewMode$.getValue() !== 'edit') {
       return false;
     }
     // check if it's in ES|QL mode
-    if (isTextBasedLanguage(getState()) && !isESQLModeEnabled()) {
+    if (isTextBasedLanguage(getState()) && !isESQLModeEnabled(startDependencies)) {
       return false;
     }
     return (

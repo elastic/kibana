@@ -35,6 +35,15 @@ import {
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { isObject } from 'lodash';
 import { createMockDatasource, defaultDoc } from '../mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import * as suggestionModule from '../lens_suggestions_api';
+// Need to do this magic in order to spy on specific functions
+import * as esqlUtils from '@kbn/esql-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+jest.mock('@kbn/esql-utils', () => ({
+  __esModule: true,
+  ...jest.requireActual('@kbn/esql-utils'),
+}));
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
@@ -65,6 +74,11 @@ jest.mock('@kbn/presentation-publishing', () => {
   };
 });
 
+function getUiSettingsOverrides() {
+  const core = coreMock.createStart({ basePath: '/testbasepath' });
+  return core.uiSettings;
+}
+
 // In order to listen the reload function, we need to
 // monitor the internalApi dispatchRenderStart spy
 type ChangeFnType = ({
@@ -84,7 +98,7 @@ type ChangeFnType = ({
   services: LensEmbeddableStartServices;
 }) => Promise<void | boolean>;
 
-async function expectRerenderOnDataLoder(
+async function expectRerenderOnDataLoader(
   changeFn: ChangeFnType,
   runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() },
   {
@@ -133,7 +147,7 @@ async function expectRerenderOnDataLoder(
     documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
     ...servicesOverrides,
   };
-  const { cleanup } = loadEmbeddableData(
+  const { cleanup } = await loadEmbeddableData(
     faker.string.uuid(),
     getState,
     api,
@@ -182,7 +196,7 @@ describe('Data Loader', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('should re-render once on filter change', async () => {
-    await expectRerenderOnDataLoder(async ({ api }) => {
+    await expectRerenderOnDataLoader(async ({ api }) => {
       (api.filters$ as BehaviorSubject<Filter[]>).next([
         { meta: { alias: 'test', negate: false, disabled: false } },
       ]);
@@ -190,7 +204,7 @@ describe('Data Loader', () => {
   });
 
   it('should re-render once on search session change', async () => {
-    await expectRerenderOnDataLoder(async ({ api }) => {
+    await expectRerenderOnDataLoader(async ({ api }) => {
       // dispatch a new searchSessionId
 
       (
@@ -200,7 +214,7 @@ describe('Data Loader', () => {
   });
 
   it('should re-render once on attributes change', async () => {
-    await expectRerenderOnDataLoder(async ({ internalApi }) => {
+    await expectRerenderOnDataLoader(async ({ internalApi }) => {
       // trigger a change by changing the title in the attributes
       (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
         ...internalApi.attributes$.getValue(),
@@ -210,7 +224,7 @@ describe('Data Loader', () => {
   });
 
   it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
-    await expectRerenderOnDataLoder(async ({ api, getState }) => {
+    await expectRerenderOnDataLoader(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
         enhancements: {
@@ -225,7 +239,7 @@ describe('Data Loader', () => {
   });
 
   it('should not re-render when dashboard view/edit mode changes if dynamic actions are not set', async () => {
-    await expectRerenderOnDataLoder(async ({ api }) => {
+    await expectRerenderOnDataLoader(async ({ api }) => {
       // the default get state does not have dynamic actions
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
@@ -238,7 +252,7 @@ describe('Data Loader', () => {
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
@@ -258,7 +272,7 @@ describe('Data Loader', () => {
   });
 
   it('should pass render mode to expression', async () => {
-    await expectRerenderOnDataLoder(async ({ internalApi }) => {
+    await expectRerenderOnDataLoader(async ({ internalApi }) => {
       await waitForValue(
         internalApi.expressionParams$,
         (v: unknown) => isObject(v) && 'renderMode' in v
@@ -295,7 +309,7 @@ describe('Data Loader', () => {
       ],
     };
 
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
@@ -327,7 +341,7 @@ describe('Data Loader', () => {
   });
 
   it('should call onload after rerender and onData$ call', async () => {
-    await expectRerenderOnDataLoder(async ({ parentApi, internalApi, api }) => {
+    await expectRerenderOnDataLoader(async ({ parentApi, internalApi, api }) => {
       expect(parentApi.onLoad).toHaveBeenLastCalledWith(true);
 
       await waitForValue(
@@ -347,7 +361,7 @@ describe('Data Loader', () => {
   });
 
   it('should initialize dateViews api with deduped list of index patterns', async () => {
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.dataViews$,
@@ -374,7 +388,7 @@ describe('Data Loader', () => {
   });
 
   it('should override noPadding in the display options if noPadding is set in the embeddable input', async () => {
-    await expectRerenderOnDataLoder(async ({ internalApi }) => {
+    await expectRerenderOnDataLoader(async ({ internalApi }) => {
       await waitForValue(
         internalApi.expressionParams$,
         (v: unknown) => isObject(v) && 'expression' in v && typeof v.expression != null
@@ -387,7 +401,7 @@ describe('Data Loader', () => {
   });
 
   it('should reload only once when the attributes or savedObjectId and the search context change at the same time', async () => {
-    await expectRerenderOnDataLoder(async ({ internalApi, api }) => {
+    await expectRerenderOnDataLoader(async ({ internalApi, api }) => {
       // trigger a change by changing the title in the attributes
       (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
         ...internalApi.attributes$.getValue(),
@@ -398,7 +412,7 @@ describe('Data Loader', () => {
   });
 
   it('should pass over the overrides as variables', async () => {
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         await waitForValue(
           internalApi.expressionParams$,
@@ -430,7 +444,7 @@ describe('Data Loader', () => {
   });
 
   it('should catch missing dataView errors correctly', async () => {
-    await expectRerenderOnDataLoder(
+    await expectRerenderOnDataLoader(
       async ({ internalApi }) => {
         // wait for the error to appear
         await waitForValue(internalApi.blockingError$);
@@ -477,5 +491,75 @@ describe('Data Loader', () => {
         },
       }
     );
+  });
+
+  describe('ES|QL creation flow', () => {
+    function getTestBaseOverrides() {
+      return {
+        servicesOverrides: {
+          uiSettings: { ...getUiSettingsOverrides(), get: jest.fn().mockReturnValue(true) },
+        },
+        internalApiOverrides: {
+          isNewlyCreated$: new BehaviorSubject(true),
+        },
+      };
+    }
+    it('should not update the attributes if no index is available', async () => {
+      jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce(null);
+
+      await expectRerenderOnDataLoader(
+        async ({ internalApi }) => {
+          expect(internalApi.updateAttributes).not.toHaveBeenCalled();
+          return false;
+        },
+        undefined,
+        getTestBaseOverrides()
+      );
+    });
+
+    it('should not update the attributes if no suggestion is generated', async () => {
+      jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
+      jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
+      jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
+      jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
+
+      await expectRerenderOnDataLoader(
+        async ({ internalApi }) => {
+          expect(internalApi.updateAttributes).not.toHaveBeenCalled();
+          return false;
+        },
+        undefined,
+        getTestBaseOverrides()
+      );
+    });
+
+    it('should update the attributes if there is a valid suggestion', async () => {
+      jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
+      jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
+      jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
+      jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
+        {
+          title: 'MyTitle',
+          visualizationId: 'lnsXY',
+          datasourceId: 'form_based',
+          datasourceState: {},
+          visualizationState: {},
+          columns: 1,
+          score: 1,
+          previewIcon: 'icon',
+          changeType: 'initial',
+          keptLayerIds: [],
+        },
+      ]);
+
+      await expectRerenderOnDataLoader(
+        async ({ internalApi }) => {
+          expect(internalApi.updateAttributes).toHaveBeenCalled();
+          return false;
+        },
+        undefined,
+        getTestBaseOverrides()
+      );
+    });
   });
 });

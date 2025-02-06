@@ -73,7 +73,7 @@ export function initializeInternalApi(
     apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
   );
 
-  const query = initialState.attributes.state.query;
+  const query = initialState.attributes?.state?.query;
 
   const panelEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
   esqlVariables$.subscribe((newVariables) => {

@@ -167,7 +167,7 @@ export const createLensEmbeddableFactory = (
       // Compute the expression using the provided parameters
       // Inside a subscription will be updated based on each unifiedSearch change
       // and as side effect update few observables as  expressionParams$, expressionAbortController$ and renderCount$ with the new values upon updates
-      const expressionConfig = loadEmbeddableData(
+      const expressionConfig = await loadEmbeddableData(
         uuid,
         getState,
         api,

@@ -322,6 +322,54 @@ export class LensPlugin {
     visualizationMap: VisualizationMap;
   }> => ({ datasourceMap: {}, visualizationMap: {} });
 
+  private getStartServicesForEmbeddable = async (
+    getStartServices: () => { core: CoreStart; plugins: LensPluginStartDependencies }
+  ): Promise<LensEmbeddableStartServices> => {
+    const { core: coreStart, plugins } = getStartServices();
+    const [
+      { setUsageCollectionStart, initMemoizedErrorNotification, getLensAttributeService },
+      eventAnnotationService,
+      { visualizationMap, datasourceMap },
+    ] = await Promise.all([
+      import('./async_services'),
+      plugins.eventAnnotation.getService(),
+      this.initEditorFrameService(),
+    ]);
+
+    if (plugins.usageCollection) {
+      setUsageCollectionStart(plugins.usageCollection);
+    }
+
+    initMemoizedErrorNotification(coreStart);
+
+    return {
+      ...plugins,
+      attributeService: getLensAttributeService(coreStart, plugins),
+      capabilities: coreStart.application.capabilities,
+      coreHttp: coreStart.http,
+      coreStart,
+      timefilter: plugins.data.query.timefilter.timefilter,
+      expressionRenderer: plugins.expressions.ReactExpressionRenderer,
+      documentToExpression: (doc: LensDocument, forceDSL?: boolean) =>
+        this.editorFrameService!.documentToExpression(doc, {
+          dataViews: plugins.dataViews,
+          storage: new Storage(localStorage),
+          uiSettings: coreStart.uiSettings,
+          timefilter: plugins.data.query.timefilter.timefilter,
+          nowProvider: plugins.data.nowProvider,
+          forceDSL,
+          eventAnnotationService,
+        }),
+      injectFilterReferences: plugins.data.query.filterManager.inject.bind(
+        plugins.data.query.filterManager
+      ),
+      visualizationMap,
+      datasourceMap,
+      theme: coreStart.theme,
+      uiSettings: coreStart.uiSettings,
+    };
+  };
+
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
     {
@@ -341,55 +389,11 @@ export class LensPlugin {
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    const getStartServicesForEmbeddable = async (): Promise<LensEmbeddableStartServices> => {
-      const { setUsageCollectionStart, initMemoizedErrorNotification } = await import(
-        './async_services'
-      );
-      const { core: coreStart, plugins } = startServices();
-
-      const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
-      const [{ getLensAttributeService }, eventAnnotationService] = await Promise.all([
-        import('./async_services'),
-        plugins.eventAnnotation.getService(),
-      ]);
-
-      if (plugins.usageCollection) {
-        setUsageCollectionStart(plugins.usageCollection);
-      }
-
-      initMemoizedErrorNotification(coreStart);
-
-      return {
-        ...plugins,
-        attributeService: getLensAttributeService(coreStart, plugins),
-        capabilities: coreStart.application.capabilities,
-        coreHttp: coreStart.http,
-        coreStart,
-        timefilter: plugins.data.query.timefilter.timefilter,
-        expressionRenderer: plugins.expressions.ReactExpressionRenderer,
-        documentToExpression: (doc: LensDocument, forceDSL?: boolean) =>
-          this.editorFrameService!.documentToExpression(doc, {
-            dataViews: plugins.dataViews,
-            storage: new Storage(localStorage),
-            uiSettings: core.uiSettings,
-            timefilter: plugins.data.query.timefilter.timefilter,
-            nowProvider: plugins.data.nowProvider,
-            forceDSL,
-            eventAnnotationService,
-          }),
-        injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
-        visualizationMap,
-        datasourceMap,
-        theme: core.theme,
-        uiSettings: core.uiSettings,
-      };
-    };
-
     if (embeddable) {
       // Let Kibana know about the Lens embeddable
       embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
         const [deps, { createLensEmbeddableFactory }] = await Promise.all([
-          getStartServicesForEmbeddable(),
+          this.getStartServicesForEmbeddable(startServices),
           import('./react_embeddable/lens_embeddable'),
         ]);
         return createLensEmbeddableFactory(deps);
@@ -398,7 +402,7 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
-          const { attributeService } = await getStartServicesForEmbeddable();
+          const { attributeService } = await this.getStartServicesForEmbeddable(startServices);
           // deserialize the saved object from visualize library
           // this make sure to fit into the new embeddable model, where the following build()
           // function expects a fully loaded runtime state
@@ -542,9 +546,6 @@ export class LensPlugin {
         this.editorFrameService!.loadVisualizations(),
         this.editorFrameService!.loadDatasources(),
       ]);
-      const { setVisualizationMap, setDatasourceMap } = await import('./async_services');
-      setDatasourceMap(datasourceMap);
-      setVisualizationMap(visualizationMap);
       return { datasourceMap, visualizationMap };
     };
 
@@ -675,7 +676,10 @@ export class LensPlugin {
     );
 
     // Allows the Lens embeddable to easily open the inline editing flyout
-    const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);
+    const editLensEmbeddableAction = new EditLensEmbeddableAction(core, () =>
+      this.getStartServicesForEmbeddable(() => ({ core, plugins: startDependencies }))
+    );
+
     // embeddable inline edit panel action
     startDependencies.uiActions.addTriggerAction(
       IN_APP_EMBEDDABLE_EDIT_TRIGGER,
@@ -683,13 +687,7 @@ export class LensPlugin {
     );
 
     // Displays the add ESQL panel in the dashboard add Panel menu
-    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core, async () => {
-      if (!this.editorFrameService) {
-        await this.initEditorFrameService();
-      }
-
-      return this.editorFrameService!;
-    });
+    const createESQLPanelAction = new CreateESQLPanelAction(core);
     startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
@@ -739,11 +737,11 @@ export class LensPlugin {
       },
 
       stateHelperApi: async () => {
-        const { createFormulaPublicApi, createChartInfoApi, suggestionsApi } = await import(
-          './async_services'
-        );
+        const [
+          { createFormulaPublicApi, createChartInfoApi, suggestionsApi },
+          { visualizationMap, datasourceMap },
+        ] = await Promise.all([import('./async_services'), this.initEditorFrameService()]);
 
-        const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(
@@ -773,8 +771,8 @@ export class LensPlugin {
       // TODO: remove this in faviour of the custom action thing
       // This is currently used in Discover by the unified histogram plugin
       EditLensConfigPanelApi: async () => {
-        const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
-        const { getEditLensConfiguration } = await import('./async_services');
+        const [{ visualizationMap, datasourceMap }, { getEditLensConfiguration }] =
+          await Promise.all([this.initEditorFrameService(), import('./async_services')]);
         const Component = await getEditLensConfiguration(
           core,
           startDependencies,

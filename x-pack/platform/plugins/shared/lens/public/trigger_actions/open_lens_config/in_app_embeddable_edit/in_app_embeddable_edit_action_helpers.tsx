@@ -5,9 +5,6 @@
  * 2.0.
  */
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import '../helpers.scss';
 import { PublishingSubject } from '@kbn/presentation-publishing';
@@ -15,20 +12,14 @@ import { generateId } from '../../../id_generator';
 import { setupPanelManagement } from '../../../react_embeddable/inline_editing/panel_management';
 import { prepareInlineEditPanel } from '../../../react_embeddable/inline_editing/setup_inline_editing';
 import { mountInlineEditPanel } from '../../../react_embeddable/inline_editing/mount';
-import type { TypedLensByValueInput, LensRuntimeState } from '../../../react_embeddable/types';
-import type { LensPluginStartDependencies } from '../../../plugin';
+import type {
+  TypedLensByValueInput,
+  LensRuntimeState,
+  LensEmbeddableStartServices,
+} from '../../../react_embeddable/types';
 import type { LensChartLoadEvent } from './types';
 
 const asyncNoop = async () => {};
-
-export function isEmbeddableEditActionCompatible(
-  core: CoreStart,
-  attributes: TypedLensByValueInput['attributes']
-) {
-  // for ES|QL is compatible only when advanced setting is enabled
-  const query = attributes.state.query;
-  return isOfAggregateQueryType(query) ? core.uiSettings.get(ENABLE_ESQL) : true;
-}
 
 export async function executeEditEmbeddableAction({
   deps,
@@ -40,7 +31,7 @@ export async function executeEditEmbeddableAction({
   onApply,
   onCancel,
 }: {
-  deps: LensPluginStartDependencies;
+  deps: LensEmbeddableStartServices;
   core: CoreStart;
   attributes: TypedLensByValueInput['attributes'];
   lensEvent: LensChartLoadEvent;
@@ -49,11 +40,6 @@ export async function executeEditEmbeddableAction({
   onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
   onCancel?: () => void;
 }) {
-  const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
-  if (!isCompatibleAction) {
-    throw new IncompatibleActionError();
-  }
-
   const uuid = generateId();
   const isNewlyCreated$ = new BehaviorSubject<boolean>(false);
   const panelManagementApi = setupPanelManagement(uuid, container, {
@@ -80,7 +66,7 @@ export async function executeEditEmbeddableAction({
       closeInspector: asyncNoop,
       adapters$: new BehaviorSubject(lensEvent?.adapters),
     },
-    { coreStart: core, ...deps }
+    deps
   );
 
   const ConfigPanel = await openInlineEditor({

@@ -6,16 +6,19 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { LensPluginStartDependencies } from '../../../plugin';
-import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import { EditLensEmbeddableAction } from './in_app_embeddable_edit_action';
 import { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { BehaviorSubject } from 'rxjs';
+import { makeEmbeddableServices } from '../../../react_embeddable/mocks';
 
 describe('inapp editing of Lens embeddable', () => {
   const core = coreMock.createStart();
-  const mockStartDependencies =
-    createMockStartDependencies() as unknown as LensPluginStartDependencies;
+  const mockStartDependencies = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+    visOverrides: { id: 'lnsXY' },
+    dataOverrides: { id: 'form_based' },
+  });
+
+  const lazyLoadServices = jest.fn().mockResolvedValue(mockStartDependencies);
 
   const renderComplete$ = new BehaviorSubject(false);
 
@@ -35,7 +38,7 @@ describe('inapp editing of Lens embeddable', () => {
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
     } as TypedLensSerializedState['attributes'];
     it('is incompatible for ESQL charts and if ui setting for ES|QL is off', async () => {
-      const inAppEditAction = new EditLensEmbeddableAction(mockStartDependencies, core);
+      const inAppEditAction = new EditLensEmbeddableAction(core, lazyLoadServices);
       const context = {
         attributes,
         lensEvent: {
@@ -60,7 +63,7 @@ describe('inapp editing of Lens embeddable', () => {
           },
         },
       } as CoreStart;
-      const inAppEditAction = new EditLensEmbeddableAction(mockStartDependencies, updatedCore);
+      const inAppEditAction = new EditLensEmbeddableAction(updatedCore, lazyLoadServices);
       const context = {
         attributes,
         lensEvent: {
@@ -76,7 +79,7 @@ describe('inapp editing of Lens embeddable', () => {
     });
 
     it('is compatible for dataview charts', async () => {
-      const inAppEditAction = new EditLensEmbeddableAction(mockStartDependencies, core);
+      const inAppEditAction = new EditLensEmbeddableAction(core, lazyLoadServices);
       const newAttributes = {
         ...attributes,
         state: {
