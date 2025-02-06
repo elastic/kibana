@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { Asset, AssetType } from './assets';
 export { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
