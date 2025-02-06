@@ -11,12 +11,21 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
   FieldDefinitionConfig,
+  ProcessorDefinition,
+  RecursiveRecord,
+  getProcessorConfig,
+  getProcessorType,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
   recursiveRecord,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
+import {
+  IngestProcessorContainer,
+  IngestSimulateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import { conditionToPainless } from '../../../lib/streams/helpers/condition_to_painless';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -57,33 +66,86 @@ export const simulateProcessorRoute = createServerRoute({
       throw new DefinitionNotFoundError(`Stream definition for ${params.path.id} not found.`);
     }
 
-    const simulationBody = prepareSimulationBody(params);
+    const simulationData = prepareSimulationData(params);
 
-    const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
+    const ingestSimulationBody = prepareIngestSimulationBody(simulationData, params);
 
-    const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
+    const simulationResult = await executeIngestSimulation(
+      scopedClusterClient,
+      ingestSimulationBody
+    );
+
+    const simulationDiffs = prepareSimulationDiffs(simulationResult, ingestSimulationBody.docs);
 
     assertSimulationResult(simulationResult, simulationDiffs);
 
     return prepareSimulationResponse(
       simulationResult,
-      simulationBody.docs,
+      ingestSimulationBody.docs,
       simulationDiffs,
       params.body.detected_fields
     );
   },
 });
 
-const prepareSimulationBody = (params: ProcessingSimulateParams) => {
-  const { path, body } = params;
-  const { processing, documents, detected_fields } = body;
-
-  const processors = formatToIngestProcessors(processing);
-  const docs = documents.map((doc, id) => ({
-    _index: path.id,
+const prepareSimulationDocs = (documents: RecursiveRecord[], streamId: string) => {
+  return documents.map((doc, id) => ({
+    _index: streamId,
     _id: id.toString(),
     _source: doc,
   }));
+};
+
+const prepareSimulationProcessors = (
+  processing: ProcessorDefinition[]
+): IngestProcessorContainer[] => {
+  // Force each processor to not ignore failures to collect all errors
+  const processors = processing.map((processor) => {
+    const type = getProcessorType(processor);
+    return {
+      [type]: {
+        ...(processor as any)[type], // Safe to use any here due to type structure
+        ignore_failure: false,
+      },
+    } as ProcessorDefinition;
+  });
+
+  return formatToIngestProcessors(processors);
+};
+
+const prepareSimulationData = (params: ProcessingSimulateParams) => {
+  const { path, body } = params;
+  const { processing, documents } = body;
+
+  return {
+    docs: prepareSimulationDocs(documents, path.id),
+    processors: prepareSimulationProcessors(processing),
+  };
+};
+
+const preparePipelineSimulationBody = (
+  simulationData: ReturnType<typeof prepareSimulationData>
+) => {
+  const { docs, processors } = simulationData;
+
+  const simulationBody: IngestSimulateRequest = {
+    docs,
+    pipeline: { processors },
+    verbose: true,
+  };
+
+  return simulationBody;
+};
+
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
+const prepareIngestSimulationBody = (
+  simulationData: ReturnType<typeof prepareSimulationData>,
+  params: ProcessingSimulateParams
+) => {
+  const { path, body } = params;
+  const { detected_fields } = body;
+
+  const { docs, processors } = simulationData;
 
   const simulationBody: any = {
     docs,
@@ -110,10 +172,21 @@ const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   return simulationBody;
 };
 
-// TODO: update type once Kibana updates to elasticsearch-js 8.17
-const executeSimulation = async (
+const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
-  simulationBody: ReturnType<typeof prepareSimulationBody>
+  simulationBody: IngestSimulateRequest
+): Promise<any> => {
+  try {
+    return await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
+  } catch (error) {
+    throw new SimulationFailedError(error);
+  }
+};
+
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
+const executeIngestSimulation = async (
+  scopedClusterClient: IScopedClusterClient,
+  simulationBody: ReturnType<typeof prepareIngestSimulationBody>
 ): Promise<any> => {
   try {
     // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() once Kibana updates to elasticsearch-js 8.17
@@ -140,7 +213,6 @@ const assertSimulationResult = (
   }
   // Assert that the processors are purely additive to the documents
   const updatedFields = computeUpdatedFields(simulationDiffs);
-
   if (!isEmpty(updatedFields)) {
     throw new NonAdditiveProcessorError(
       `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
