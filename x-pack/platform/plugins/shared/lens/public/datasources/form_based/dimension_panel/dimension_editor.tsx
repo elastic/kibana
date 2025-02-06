@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './dimension_editor.scss';
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -25,6 +24,7 @@ import {
   EuiPanel,
   EuiBasicTable,
   EuiButtonIcon,
+  UseEuiTheme,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
@@ -534,7 +534,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isActive,
         size: 's',
         isDisabled: !!disabledStatus,
-        className: 'lnsIndexPatternDimensionEditor__operation',
+        css: OperationsButtonStyles,
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
@@ -811,7 +811,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         fullWidth
       >
         <EuiListGroup
-          className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
+          css={sideNavItems.length > 3 ? OperationsTwoColumnsStyles : undefined}
           gutterSize="none"
           color="primary"
           listItems={
@@ -1290,3 +1290,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
     </div>
   );
 }
+
+const OperationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
+  return `
+    display: block;
+    column-count: 2;
+    column-gap: ${euiTheme.size.m};
+  `;
+};
+
+export const OperationsButtonStyles = ({ euiTheme }: UseEuiTheme) => {
+  return `
+    > button {
+      padding-top: 0;
+      padding-bottom: 0;
+      min-block-size: ${euiTheme.size.l};
+    }
+  `;
+};
