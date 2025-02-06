@@ -26,5 +26,7 @@ export const scoutPlaywrightReporter = (
 export const scoutFailedTestsReporter = (
   options?: ScoutPlaywrightReporterOptions
 ): ReporterDescription => {
-  return ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options];
+  return SCOUT_REPORTER_ENABLED
+    ? ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options]
+    : ['null'];
 };

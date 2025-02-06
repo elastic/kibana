@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 
 const StreamDetailEnrichmentContent = dynamic(() =>
   import(/* webpackChunkName: "management_enrichment" */ './page_content').then((mod) => ({
@@ -15,7 +15,7 @@ const StreamDetailEnrichmentContent = dynamic(() =>
 );
 
 interface StreamDetailEnrichmentProps {
-  definition?: ReadStreamDefinition;
+  definition?: IngestStreamGetResponse;
   refreshDefinition: () => void;
 }
 
