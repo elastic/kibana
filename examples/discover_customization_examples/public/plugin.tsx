@@ -241,9 +241,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           >();
           const stateStorage = stateContainer.stateStorage;
           const dataView = useObservable(
-            stateContainer.internalState.state$,
-            stateContainer.internalState.getState()
-          ).dataView;
+            stateContainer.runtimeStateManager.currentDataView$,
+            stateContainer.runtimeStateManager.currentDataView$.getValue()
+          );
 
           useEffect(() => {
             if (!controlGroupAPI) {

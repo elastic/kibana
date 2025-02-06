@@ -136,6 +136,7 @@ export interface DiscoverStateContainer {
    */
   internalState: DiscoverInternalStateContainer;
   internalState2: InternalStateStore;
+  runtimeStateManager: RuntimeStateManager;
   /**
    * State of saved search, the saved object of Discover
    */
@@ -622,6 +623,7 @@ export function getDiscoverStateContainer({
     appState: appStateContainer,
     internalState: internalStateContainer,
     internalState2: internalStateStore,
+    runtimeStateManager,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
     stateStorage,
