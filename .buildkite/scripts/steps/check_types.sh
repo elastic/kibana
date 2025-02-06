@@ -7,4 +7,4 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-moon run :typecheck --no-bail
+moon run :typecheck --no-bail -c 3
