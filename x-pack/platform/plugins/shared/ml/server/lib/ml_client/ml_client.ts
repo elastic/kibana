@@ -776,7 +776,7 @@ export function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string
 
 export function getJobIdFromBody(p: any): string | undefined {
   const [params] = p;
-  return params?.body?.job_id;
+  return params?.body?.job_id || params.job_id;
 }
 
 function filterAll(ids: string[]) {

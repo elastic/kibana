@@ -67,8 +67,9 @@ export class SearchAPI {
 
     return combineLatest(
       searchRequests.map((request) => {
-        const requestId = request.name;
-        const requestParams = getSearchParamsFromRequest(request, {
+        const { name: requestId, ...restRequest } = request;
+
+        const requestParams = getSearchParamsFromRequest(restRequest, {
           getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
 

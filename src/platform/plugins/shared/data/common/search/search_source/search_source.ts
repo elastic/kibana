@@ -71,6 +71,7 @@ import {
   concat,
   omitBy,
   isNil,
+  omit,
 } from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
@@ -795,10 +796,15 @@ export class SearchSource {
     const metaFields = getConfig<string[]>(UI_SETTINGS.META_FIELDS) ?? [];
 
     const searchRequest = this.mergeProps();
-    const { index, filters, highlightAll, ...restAsBody } = searchRequest;
-    const body = { ...restAsBody, ...searchRequest.body };
-    delete body.body;
-    const dataView = this.getDataView(index);
+    const bodyParams = omit(searchRequest, [
+      'index',
+      'filters',
+      'highlightAll',
+      'fieldsFromSource',
+      'body',
+    ]);
+    const body = { ...bodyParams, ...searchRequest.body };
+    const dataView = this.getDataView(searchRequest.index);
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, runtimeFields } = dataView?.getComputedFields() ?? {
@@ -810,7 +816,9 @@ export class SearchSource {
 
     // set defaults
     const _source =
-      index && !Object.hasOwn(body, '_source') ? dataView?.getSourceFiltering() : body._source;
+      searchRequest.index && !Object.hasOwn(body, '_source')
+        ? dataView?.getSourceFiltering()
+        : body._source;
 
     // get filter if data view specified, otherwise null filter
     const filter = this.getFieldFilter({ bodySourceExcludes: _source?.excludes, metaFields });
@@ -880,7 +888,7 @@ export class SearchSource {
     }
 
     const builtQuery = this.getBuiltEsQuery({
-      index,
+      index: searchRequest.index,
       query: searchRequest.query,
       filters: searchRequest.filters,
       getConfig,
@@ -913,12 +921,10 @@ export class SearchSource {
       }),
     };
 
-    const { query, filters: _filters, ...rest } = searchRequest;
-
     return omitByIsNil({
-      ...rest,
+      ...omit(searchRequest, ['query', 'filters', 'fieldsFromSource']),
       body: omitByIsNil(bodyToReturn),
-      indexType: this.getIndexType(index),
+      indexType: this.getIndexType(searchRequest.index),
       highlightAll:
         searchRequest.highlightAll && builtQuery ? undefined : searchRequest.highlightAll,
     });
@@ -1095,7 +1101,7 @@ export class SearchSource {
       filter: originalFilters,
       aggs: searchSourceAggs,
       parent,
-      size: omit,
+      size: _size, // omit it
       sort,
       index,
       ...searchSourceFields
