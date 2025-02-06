@@ -22,6 +22,9 @@ import {
 } from '../../customizations/customization_service';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { MainHistoryLocationState } from '../../../common';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -43,6 +46,7 @@ jest.mock('./discover_main_app', () => {
 });
 
 let mockRootProfileLoading = false;
+let mockDefaultAdHocDataViews: DataViewSpec[] = [];
 
 jest.mock('../../context_awareness', () => {
   const originalModule = jest.requireActual('../../context_awareness');
@@ -51,6 +55,7 @@ jest.mock('../../context_awareness', () => {
     useRootProfile: () => ({
       rootProfileLoading: mockRootProfileLoading,
       AppWrapper: ({ children }: { children: ReactNode }) => <>{children}</>,
+      getDefaultAdHocDataViews: () => mockDefaultAdHocDataViews,
     }),
   };
 });
@@ -59,10 +64,30 @@ describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = createCustomizationService();
     mockRootProfileLoading = false;
+    mockDefaultAdHocDataViews = [];
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
     const component = mountComponent(true, true);
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+    });
+  });
+
+  test('renders the main app when ad hoc data views exist', async () => {
+    mockDefaultAdHocDataViews = [{ id: 'test', title: 'test' }];
+    const component = mountComponent(true, false);
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+    });
+  });
+
+  test('renders the main app when a data view spec is passed through location state', async () => {
+    const component = mountComponent(true, false, { dataViewSpec: { id: 'test', title: 'test' } });
 
     await waitFor(() => {
       component.update();
@@ -136,7 +161,11 @@ describe('DiscoverMainRoute', () => {
   });
 });
 
-const mountComponent = (hasESData = true, hasUserDataView = true) => {
+const mountComponent = (
+  hasESData = true,
+  hasUserDataView = true,
+  locationState?: MainHistoryLocationState
+) => {
   const props: MainRouteProps = {
     customizationCallbacks: [],
     customizationContext: mockCustomizationContext,
@@ -144,20 +173,30 @@ const mountComponent = (hasESData = true, hasUserDataView = true) => {
 
   return mountWithIntl(
     <MemoryRouter>
-      <KibanaContextProvider services={getServicesMock(hasESData, hasUserDataView)}>
+      <KibanaContextProvider services={getServicesMock(hasESData, hasUserDataView, locationState)}>
         <DiscoverMainRoute {...props} />
       </KibanaContextProvider>
     </MemoryRouter>
   );
 };
 
-function getServicesMock(hasESData = true, hasUserDataView = true) {
+function getServicesMock(
+  hasESData = true,
+  hasUserDataView = true,
+  locationState?: MainHistoryLocationState
+) {
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
     hasESData: jest.fn(() => Promise.resolve(hasESData)),
     hasUserDataView: jest.fn(() => Promise.resolve(hasUserDataView)),
     hasDataView: jest.fn(() => Promise.resolve(true)),
   };
+  dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
   discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
+  discoverServiceMock.getScopedHistory = jest.fn().mockReturnValue({
+    location: {
+      state: locationState,
+    },
+  });
   return discoverServiceMock;
 }

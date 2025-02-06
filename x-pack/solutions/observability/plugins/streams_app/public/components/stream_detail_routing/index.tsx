@@ -42,6 +42,7 @@ import {
   RoutingDefinition,
   IngestUpsertRequest,
   getAncestorsAndSelf,
+  WiredStreamGetResponse,
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
@@ -74,7 +75,7 @@ function useRoutingState({
   definition,
   toasts,
 }: {
-  definition?: ReadStreamDefinition;
+  definition?: WiredStreamGetResponse;
   toasts: IToasts;
 }) {
   const [lastDisplayedToast, setLastDisplayedToast] = React.useState<Toast | undefined>();
@@ -157,7 +158,7 @@ export function StreamDetailRouting({
   definition,
   refreshDefinition,
 }: {
-  definition?: ReadStreamDefinition;
+  definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const { appParams, core } = useKibana();
@@ -287,7 +288,7 @@ function ControlBar({
   routingAppState,
   refreshDefinition,
 }: {
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
   refreshDefinition: () => void;
 }) {
@@ -326,7 +327,7 @@ function ControlBar({
       signal,
       params: {
         path: {
-          id: definition.name,
+          id: definition.stream.name,
         },
         body: {
           if: emptyEqualsToAlways(routingAppState.childUnderEdit.child.if),
@@ -345,7 +346,7 @@ function ControlBar({
     }
 
     const childUnderEdit = routingAppState.childUnderEdit?.child;
-    const { name, stream } = definition;
+    const { stream } = definition;
 
     const routing = routingAppState.childStreams.map((child) =>
       child.destination === childUnderEdit?.destination ? childUnderEdit : child
@@ -362,7 +363,7 @@ function ControlBar({
       signal,
       params: {
         path: {
-          id: name,
+          id: stream.name,
         },
         body: request,
       },
@@ -395,6 +396,7 @@ function ControlBar({
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
                 size="s"
                 target="_blank"
                 href={router.link('/{key}/{tab}/{subtab}', {
@@ -482,7 +484,7 @@ function PreviewPanel({
   definition,
   routingAppState,
 }: {
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
 }) {
   const {
@@ -512,7 +514,7 @@ function PreviewPanel({
         signal,
         params: {
           path: {
-            id: definition.name,
+            id: definition.stream.name,
           },
           body: {
             if: emptyEqualsToAlways(debouncedChildUnderEdit.child.if),
@@ -523,6 +525,7 @@ function PreviewPanel({
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, routingAppState.debouncedChildUnderEdit, streamsRepositoryClient, start, end],
     {
       disableToastOnError: true,
@@ -686,7 +689,7 @@ function ChildStreamList({
     draggingChildStream,
   },
 }: {
-  definition: ReadStreamDefinition;
+  definition: WiredStreamGetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
   availableStreams: string[];
 }) {
@@ -799,7 +802,7 @@ function ChildStreamList({
                   selectChildUnderEdit({
                     isNew: true,
                     child: {
-                      destination: `${definition.name}.child`,
+                      destination: `${definition.stream.name}.child`,
                       if: cloneDeep(EMPTY_EQUALS_CONDITION),
                     },
                   });
@@ -817,31 +820,35 @@ function ChildStreamList({
   );
 }
 
-function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
+function CurrentStreamEntry({ definition }: { definition: WiredStreamGetResponse }) {
   const router = useStreamsAppRouter();
-  const breadcrumbs: EuiBreadcrumb[] = getAncestorsAndSelf(definition.name).map((parentId) => {
-    const isBreadcrumbsTail = parentId === definition.name;
+  const breadcrumbs: EuiBreadcrumb[] = getAncestorsAndSelf(definition.stream.name).map(
+    (parentId) => {
+      const isBreadcrumbsTail = parentId === definition.stream.name;
 
-    return {
-      text: parentId,
-      href: isBreadcrumbsTail
-        ? undefined
-        : router.link('/{key}/{tab}/{subtab}', {
-            path: {
-              key: parentId,
-              tab: 'management',
-              subtab: 'route',
-            },
-          }),
-    };
-  });
+      return {
+        text: parentId,
+        href: isBreadcrumbsTail
+          ? undefined
+          : router.link('/{key}/{tab}/{subtab}', {
+              path: {
+                key: parentId,
+                tab: 'management',
+                subtab: 'route',
+              },
+            }),
+      };
+    }
+  );
 
   return (
     <>
-      {!isRoot(definition.name) && <EuiBreadcrumbs breadcrumbs={breadcrumbs} truncate={false} />}
+      {!isRoot(definition.stream.name) && (
+        <EuiBreadcrumbs breadcrumbs={breadcrumbs} truncate={false} />
+      )}
       <EuiFlexItem grow={false}>
         <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-          <EuiText size="s">{definition.name}</EuiText>
+          <EuiText size="s">{definition.stream.name}</EuiText>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.streams.streamDetailRouting.currentStream', {
               defaultMessage: 'Current stream',

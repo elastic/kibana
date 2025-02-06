@@ -145,9 +145,6 @@ export const GridLayout = ({
           rowIndex={rowIndex}
           renderPanelContents={renderPanelContents}
           gridLayoutStateManager={gridLayoutStateManager}
-          ref={(element: HTMLDivElement | null) =>
-            (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
-          }
         />
       );
     });
@@ -163,6 +160,12 @@ export const GridLayout = ({
         className={classNames('kbnGrid', className)}
         css={css`
           padding: calc(var(--kbnGridGutterSize) * 1px);
+
+          // disable pointer events and user select on drag + resize
+          &:has(.kbnGridPanel--active) {
+            user-select: none;
+            pointer-events: none;
+          }
 
           &:has(.kbnGridPanel--expanded) {
             ${expandedPanelStyles}

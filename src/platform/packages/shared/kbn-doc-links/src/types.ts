@@ -325,6 +325,7 @@ export interface DocLinks {
     readonly overview: string;
     readonly batchReindex: string;
     readonly remoteReindex: string;
+    readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
   };
   readonly rollupJobs: string;
@@ -340,6 +341,9 @@ export interface DocLinks {
     readonly troubleshootGaps: string;
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
+  };
+  readonly logging: {
+    readonly enableDeprecationHttpDebugLogs: string;
   };
   readonly securitySolution: {
     readonly aiAssistant: string;

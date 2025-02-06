@@ -18,6 +18,7 @@ export {
   getESQLWithSafeLimit,
   appendToESQLQuery,
   appendWhereClauseToESQLQuery,
+  appendStatsByToQuery,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
@@ -34,8 +35,11 @@ export {
   isESQLColumnGroupable,
   isESQLFieldGroupable,
   TextBasedLanguages,
+  sanitazeESQLInput,
   queryCannotBeSampled,
   mapVariableToColumn,
+  getValuesFromQueryField,
+  getESQLQueryVariables,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

@@ -55,5 +55,7 @@
     "@kbn/spaces-plugin",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/deeplinks-management",
   ]
 }

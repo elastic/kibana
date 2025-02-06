@@ -32,7 +32,6 @@ import { TroubleshootingLink } from '../shared/troubleshooting_link';
 import { WindowsInstallStep } from '../shared/windows_install_step';
 import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { SystemIntegrationBanner, SystemIntegrationBannerState } from './system_integration_banner';
-import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 
 export function InstallElasticAgent() {
   const {
@@ -122,6 +121,7 @@ export function InstallElasticAgent() {
     },
     // FIXME: Dario could not find a reasonable fix for successfullyInstalledShipperSetup
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [apiKeyEncoded, onboardingId, successfullyInstalledShipperSetup]
   );
 
@@ -154,8 +154,6 @@ export function InstallElasticAgent() {
       }, 2000);
     }
   }, [progressSucceded, refetchProgress]);
-
-  useFlowProgressTelemetry(progressData?.progress, 'system_logs');
 
   const getCheckLogsStep = useCallback(() => {
     const progress = progressData?.progress;

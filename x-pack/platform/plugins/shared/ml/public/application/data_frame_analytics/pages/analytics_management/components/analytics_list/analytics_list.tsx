@@ -41,6 +41,7 @@ import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
+import { SpaceManagementContextWrapper } from '../../../../../components/space_management_context_wrapper';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -259,43 +260,45 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   return (
-    <div data-test-subj="mlAnalyticsJobList">
-      {modals}
-      <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        {stats}
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <CreateAnalyticsButton
-                isDisabled={disabled}
-                navigateToSourceSelection={navigateToSourceSelection}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <div data-test-subj="mlAnalyticsTableContainer">
-        <EuiInMemoryTable<DataFrameAnalyticsListRow>
-          rowHeader={DataFrameAnalyticsListColumn.id}
-          allowNeutralSort={false}
-          columns={columns}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          items={analytics}
-          itemId={DataFrameAnalyticsListColumn.id}
-          loading={isLoading}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
-          search={search}
-          data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
-          rowProps={(item) => ({
-            'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
-          })}
-          error={searchError}
-        />
+    <SpaceManagementContextWrapper>
+      <div data-test-subj="mlAnalyticsJobList">
+        {modals}
+        <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          {stats}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <CreateAnalyticsButton
+                  isDisabled={disabled}
+                  navigateToSourceSelection={navigateToSourceSelection}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <div data-test-subj="mlAnalyticsTableContainer">
+          <EuiInMemoryTable<DataFrameAnalyticsListRow>
+            rowHeader={DataFrameAnalyticsListColumn.id}
+            allowNeutralSort={false}
+            columns={columns}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            items={analytics}
+            itemId={DataFrameAnalyticsListColumn.id}
+            loading={isLoading}
+            onTableChange={onTableChange}
+            pagination={pagination}
+            sorting={sorting}
+            search={search}
+            data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
+            rowProps={(item) => ({
+              'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
+            })}
+            error={searchError}
+          />
+        </div>
       </div>
-    </div>
+    </SpaceManagementContextWrapper>
   );
 };

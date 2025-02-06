@@ -54,6 +54,7 @@ import { UserProfilePageProvider } from './user_profile_page';
 import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
+import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
 
 // just like services, PageObjects are defined as a map of
@@ -97,6 +98,7 @@ export const pageObjects = {
   searchClassicNavigation: SearchClassicNavigationProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
+  searchSynonyms: SearchSynonymsPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,

@@ -43,7 +43,40 @@ export {
   ResolveLogViewError,
 } from './log_views/errors';
 
-export * from './log_entry';
+export type {
+  LogEntryTime,
+  LogMessageConstantPart,
+  LogMessageFieldPart,
+  LogMessagePart,
+  LogTimestampColumn,
+  LogFieldColumn,
+  LogMessageColumn,
+  LogColumn,
+  LogEntryContext,
+  LogEntryField,
+  LogEntry,
+  LogEntryCursor,
+  LogEntryBeforeCursor,
+  LogEntryAfterCursor,
+  LogEntryAroundCursor,
+} from './log_entry';
+export {
+  logMessageConstantPartRT,
+  logMessageFieldPartRT,
+  logMessagePartRT,
+  logTimestampColumnRT,
+  logFieldColumnRT,
+  logMessageColumnRT,
+  logColumnRT,
+  logEntryContextRT,
+  logEntryFieldRT,
+  logEntryRT,
+  logEntryCursorRT,
+  logEntryBeforeCursorRT,
+  logEntryAfterCursorRT,
+  logEntryAroundCursorRT,
+  getLogEntryCursorFromHit,
+} from './log_entry';
 
 export { convertISODateToNanoPrecision } from './utils';
 
@@ -66,6 +99,13 @@ export {
   TRACE_LOGS_LOCATOR_ID,
   NODE_LOGS_LOCATOR_ID,
   getLogsLocatorsFromUrlService,
+  getTimeRangeEndFromTime,
+  getTimeRangeStartFromTime,
 } from './locators';
-export type { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './locators';
+export type {
+  DiscoverLogsLocatorParams,
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+  TraceLogsLocatorParams,
+} from './locators';
 export { createNodeLogsQuery } from './locators/helpers';

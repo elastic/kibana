@@ -17,10 +17,16 @@ import {
   GEMINI_CONNECTOR_ID,
   INFERENCE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
-import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { isSupportedConnector } from '@kbn/inference-common';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { useKibana } from './use_kibana';
-import { LLMs, type ActionConnector, type PlaygroundConnector } from '../types';
+import {
+  LLMs,
+  type ActionConnector,
+  type UserConfiguredActionConnector,
+  type PlaygroundConnector,
+  InferenceActionConnector,
+} from '../types';
 
 const QUERY_KEY = ['search-playground, load-connectors'];
 
@@ -123,15 +129,24 @@ export const useLoadConnectors = (): UseQueryResult<PlaygroundConnector[], IHttp
     async () => {
       const queryResult = await loadConnectors({ http });
 
-      return queryResult.reduce<PlaygroundConnector[]>((result, connector) => {
+      return queryResult.reduce<Promise<PlaygroundConnector[]>>(async (result, connector) => {
         const { transform } = connectorTypeToLLM.find(({ match }) => match(connector)) || {};
 
-        if (!connector.isMissingSecrets && !!transform) {
-          return [...result, transform(connector)];
+        if (
+          !connector.isMissingSecrets &&
+          !!transform &&
+          (connector.actionTypeId !== '.inference' ||
+            (connector.actionTypeId === '.inference' &&
+              (await isInferenceEndpointExists(
+                http,
+                (connector as InferenceActionConnector)?.config?.inferenceId
+              ))))
+        ) {
+          return [...(await result), transform(connector)];
         }
 
         return result;
-      }, []);
+      }, Promise.resolve([]));
     },
     {
       retry: false,

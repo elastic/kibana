@@ -9,6 +9,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
+  DiscoverLogsLocatorParams,
   LogsLocatorParams,
   NodeLogsLocatorParams,
   TraceLogsLocatorParams,
@@ -163,6 +164,7 @@ export const observabilityLogsExplorerLocatorsMock = {
 };
 
 export const logsLocatorsMock = {
+  discoverLogsLocator: sharePluginMock.createLocator<DiscoverLogsLocatorParams>(),
   logsLocator: sharePluginMock.createLocator<LogsLocatorParams>(),
   nodeLogsLocator: sharePluginMock.createLocator<NodeLogsLocatorParams>(),
   traceLogsLocator: sharePluginMock.createLocator<TraceLogsLocatorParams>(),
