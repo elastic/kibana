@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncComponent } from '../../../components/async_component';
@@ -58,19 +58,20 @@ export function FlameGraphView() {
   }
 
   const { onPageReady } = usePerformanceContext();
-
-  if (state.status === AsyncStatus.Settled) {
-    onPageReady({
-      meta: {
-        rangeFrom,
-        rangeTo,
-      },
-      customMetrics: {
-        key1: 'totalSamples',
-        value1: state.data?.TotalSamples ?? 0,
-      },
-    });
-  }
+  useEffect(() => {
+    if (state.status === AsyncStatus.Settled) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'totalSamples',
+          value1: state.data?.TotalSamples ?? 0,
+        },
+      });
+    }
+  }, [onPageReady, state, rangeFrom, rangeTo]);
 
   return (
     <EuiFlexGroup direction="column">

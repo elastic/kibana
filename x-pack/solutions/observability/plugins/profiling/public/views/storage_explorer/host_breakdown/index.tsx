@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { AsyncComponent } from '../../../components/async_component';
@@ -62,17 +62,25 @@ export function HostBreakdown({
     ]
   );
   const { onPageReady } = usePerformanceContext();
-  if (
-    storageExplorerSummaryStateStatus === AsyncStatus.Settled &&
-    storageExplorerHostDetailsState.status === AsyncStatus.Settled
-  ) {
-    onPageReady({
-      meta: {
-        rangeFrom,
-        rangeTo,
-      },
-    });
-  }
+  useEffect(() => {
+    if (
+      storageExplorerSummaryStateStatus === AsyncStatus.Settled &&
+      storageExplorerHostDetailsState.status === AsyncStatus.Settled
+    ) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [
+    storageExplorerSummaryStateStatus,
+    storageExplorerHostDetailsState,
+    onPageReady,
+    rangeFrom,
+    rangeTo,
+  ]);
 
   return (
     <>

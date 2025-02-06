@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { groupSamplesByCategory } from '../../../common/topn';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -75,19 +75,20 @@ export function StackTracesView() {
 
   const { onPageReady } = usePerformanceContext();
 
-  if (state.status === AsyncStatus.Settled) {
-    onPageReady({
-      meta: {
-        rangeFrom,
-        rangeTo,
-      },
-      customMetrics: {
-        key1: 'totalCount',
-        value1: state.data?.charts.length ?? 0,
-      },
-    });
-  }
-
+  useEffect(() => {
+    if (state.status === AsyncStatus.Settled) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'totalCount',
+          value1: state.data?.charts.length ?? 0,
+        },
+      });
+    }
+  }, [state, onPageReady, rangeFrom, rangeTo]);
   return (
     <RouteBreadcrumb title={selectedTab?.label || ''} href={selectedTab?.href || ''}>
       <ProfilingAppPageTemplate tabs={tabs}>

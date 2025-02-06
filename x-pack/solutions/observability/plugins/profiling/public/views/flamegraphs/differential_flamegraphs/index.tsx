@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
@@ -123,18 +123,20 @@ export function DifferentialFlameGraphsView() {
 
   const { onPageReady } = usePerformanceContext();
 
-  if (state.status === AsyncStatus.Settled) {
-    onPageReady({
-      meta: {
-        rangeFrom,
-        rangeTo,
-      },
-      customMetrics: {
-        key1: 'totalSamples',
-        value1: state.data?.primaryFlamegraph.TotalSamples ?? 0,
-      },
-    });
-  }
+  useEffect(() => {
+    if (state.status === AsyncStatus.Settled) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'totalSamples',
+          value1: state.data?.primaryFlamegraph.TotalSamples ?? 0,
+        },
+      });
+    }
+  }, [onPageReady, state, rangeFrom, rangeTo]);
 
   return (
     <EuiFlexGroup direction="column">

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -149,18 +149,20 @@ export function DifferentialTopNFunctionsView() {
     });
   }
 
-  if (state.status === AsyncStatus.Settled || comparisonState.status === AsyncStatus.Settled) {
-    onPageReady({
-      meta: {
-        rangeFrom,
-        rangeTo,
-      },
-      customMetrics: {
-        key1: 'totalCount',
-        value1: state.data?.TotalCount ?? 0,
-      },
-    });
-  }
+  useEffect(() => {
+    if (state.status === AsyncStatus.Settled || comparisonState.status === AsyncStatus.Settled) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'totalCount',
+          value1: state.data?.TotalCount ?? 0,
+        },
+      });
+    }
+  }, [state, comparisonState, onPageReady, rangeTo, rangeFrom]);
 
   return (
     <>

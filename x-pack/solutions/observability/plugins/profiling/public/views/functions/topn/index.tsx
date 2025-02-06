@@ -6,7 +6,7 @@
  */
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
@@ -69,20 +69,20 @@ export function TopNFunctionsView() {
       },
     });
   }
-
-  if (state.status === AsyncStatus.Settled) {
-    onPageReady({
-      meta: {
-        rangeFrom,
-        rangeTo,
-      },
-      customMetrics: {
-        key1: 'totalCount',
-        value1: state.data?.TotalCount ?? 0,
-      },
-    });
-  }
-
+  useEffect(() => {
+    if (state.status === AsyncStatus.Settled) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'totalCount',
+          value1: state.data?.TotalCount ?? 0,
+        },
+      });
+    }
+  }, [state, onPageReady, rangeFrom, rangeTo]);
   return (
     <>
       <EuiFlexGroup direction="column">
