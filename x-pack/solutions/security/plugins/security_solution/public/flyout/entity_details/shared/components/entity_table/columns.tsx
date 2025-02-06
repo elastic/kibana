@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/default_renderer';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { BasicEntityData, EntityTableColumns } from './types';
+import { hasPreview, PreviewLink } from '../../../../shared/components/preview_link';
 
 export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
@@ -51,6 +52,10 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
       const values = getValues && getValues(data);
 
       if (field) {
+        const showPreviewLink = values && hasPreview(field);
+        const renderPreviewLink = (value: string) => (
+          <PreviewLink field={field} value={value} scopeId={scopeId} />
+        );
         return (
           <DefaultFieldRenderer
             rowItems={values}
@@ -58,7 +63,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
             idPrefix={contextID ? `entityTable-${contextID}` : 'entityTable'}
             isDraggable={isDraggable}
             scopeId={scopeId}
-            render={renderField}
+            render={showPreviewLink ? renderPreviewLink : renderField}
             data-test-subj="entity-table-value"
           />
         );
