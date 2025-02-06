@@ -16,7 +16,7 @@ import {
   EuiSkeletonText,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
@@ -53,9 +53,12 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
   const [pageIndex, setPageIndex] = useState(0);
-  const onTableChange = ({ page: { index } }: CriteriaWithPagination<RuleUpgradeState>) => {
-    setPageIndex(index);
-  };
+  const handleTableChange = useCallback(
+    ({ page: { index } }: CriteriaWithPagination<RuleUpgradeState>) => {
+      setPageIndex(index);
+    },
+    [setPageIndex]
+  );
 
   return (
     <>
@@ -117,7 +120,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 itemId="rule_id"
                 data-test-subj="rules-upgrades-table"
                 columns={rulesColumns}
-                onTableChange={onTableChange}
+                onTableChange={handleTableChange}
               />
             </>
           )
