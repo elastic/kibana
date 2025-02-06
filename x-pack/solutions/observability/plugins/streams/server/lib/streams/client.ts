@@ -35,6 +35,9 @@ import {
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
   streamDefinitionSchema,
+  groupStreamDefinitionSchema,
+  wiredStreamDefinitionSchema,
+  unwiredStreamDefinitionSchema,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
@@ -227,6 +230,28 @@ export class StreamsClient {
   }
 
   /**
+   * Parse the stream definition to ensure it matches the runtime schema.
+   */
+  private parseDefinition(definition: StreamDefinition) {
+    if (isGroupStreamDefinition(definition)) {
+      return groupStreamDefinitionSchema.parse({
+        ...definition,
+        group: { ...definition.group, members: Array.from(new Set(definition.group.members)) },
+      });
+    }
+
+    if (isWiredStreamDefinition(definition)) {
+      return wiredStreamDefinitionSchema.parse(definition);
+    }
+
+    if (isUnwiredStreamDefinition(definition)) {
+      return unwiredStreamDefinitionSchema.parse(definition);
+    }
+
+    throw new MalformedStreamError('Unknown stream definition.');
+  }
+
+  /**
    * Creates or updates a stream. The routing of the parent is
    * also updated (including syncing to Elasticsearch).
    */
@@ -237,7 +262,7 @@ export class StreamsClient {
     name: string;
     request: StreamUpsertRequest;
   }): Promise<UpsertStreamResponse> {
-    const stream: StreamDefinition = { ...request.stream, name };
+    const stream: StreamDefinition = this.parseDefinition({ ...request.stream, name });
     const { dashboards } = request;
     const { result, parentDefinition } = await this.validateAndUpsertStream({
       definition: stream,
