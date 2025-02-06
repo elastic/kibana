@@ -28,7 +28,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsPage.functionCallingModeDescription',
       {
         defaultMessage:
-          '<em>[technical preview]</em> Select the function calling mode. Auto will choose the best mode based on the connector. Native requires API support for function calling. Simulated function calling does not need API support for functions or tools, but it may decrease performance.',
+          '<em>[technical preview]</em> Select a mode: Auto chooses the best option based on the connector, Native requires API support, and Simulated does not need API support for functions or tools, but it may impact performance.',
         values: {
           em: (chunks) => `<em>${chunks}</em>`,
         },
