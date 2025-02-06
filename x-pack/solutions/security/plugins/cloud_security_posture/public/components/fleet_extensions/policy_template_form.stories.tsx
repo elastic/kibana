@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Meta, Story } from '@storybook/react';
-import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import {
+  NewPackagePolicy,
+  PackagePolicyReplaceDefineStepExtensionComponentProps,
+  SetupTechnology,
+} from '@kbn/fleet-plugin/public/types';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from '@emotion/react';
@@ -45,6 +49,8 @@ const defaultProps: PackagePolicyReplaceDefineStepExtensionComponentProps = {
   setIsValid: () => {},
   disabled: false,
   hasInvalidRequiredVars: false,
+  isAgentlessEnabled: false,
+  defaultSetupTechnology: SetupTechnology.AGENT_BASED,
 };
 
 export default {
@@ -70,9 +76,35 @@ export default {
   ],
 } as Meta;
 
-const Template: Story<PackagePolicyReplaceDefineStepExtensionComponentProps> = (args) => (
-  <CspPolicyTemplateForm {...args} />
-);
+const Template: Story<PackagePolicyReplaceDefineStepExtensionComponentProps> = (args) => {
+  const [packagePolicy, setPackagePolicy] = useState<Partial<NewPackagePolicy>>(args.newPolicy);
+  const [integrationToEnable, setIntegrationToEnable] = useState('cloudbeat/cis_aws');
+
+  const onChange = (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
+    console.log('updatePackagePolicy', opts);
+    setPackagePolicy(opts.updatedPolicy);
+  };
+
+  console.log('packagePolicy', packagePolicy);
+  return (
+    <CspPolicyTemplateForm
+      newPolicy={packagePolicy}
+      isEditPage={false}
+      onChange={onChange}
+      integrationToEnable={integrationToEnable}
+      setIntegrationToEnable={setIntegrationToEnable}
+      packageInfo={mockPackageInfo}
+      isAgentlessEnabled={args.isAgentlessEnabled}
+      defaultSetupTechnology={args.defaultSetupTechnology}
+    />
+  );
+};
 
 export const Default = Template.bind({});
 Default.args = defaultProps;
+export const Agentless = Template.bind({});
+Agentless.args = {
+  ...defaultProps,
+  isAgentlessEnabled: true,
+  defaultSetupTechnology: SetupTechnology.AGENTLESS,
+};

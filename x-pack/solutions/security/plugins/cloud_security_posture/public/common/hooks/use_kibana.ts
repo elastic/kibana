@@ -9,6 +9,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 
-type CspKibanaContext = CoreStart & CspClientPluginStartDeps;
+export type CspKibanaContext = CoreStart & CspClientPluginStartDeps;
 
 export const useKibana = () => useKibanaBase<CspKibanaContext>();

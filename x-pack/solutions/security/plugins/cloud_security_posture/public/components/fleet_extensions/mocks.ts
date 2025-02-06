@@ -17,6 +17,7 @@ import {
   CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../../common/constants';
 import type { PostureInput } from '../../../common/types_old';
+import { CspKibanaContext } from '../../common/hooks/use_kibana';
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws', vars);
@@ -30,6 +31,22 @@ export const getMockPolicyEKS = (vars?: PackagePolicyConfigRecord) =>
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
 export const getMockPackageInfo = () => getPackageInfoMock();
+
+export const useKibana = (): CspKibanaContext => {
+  return {
+    services: {
+      cloud: {
+        serverless: {},
+        cloudId: 'fakeCloudId',
+        onboarding: {},
+      },
+    },
+  };
+};
+
+export const useIsSubscriptionStatusValid = () => {
+  return { data: true, isLoading: false };
+};
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
   return {

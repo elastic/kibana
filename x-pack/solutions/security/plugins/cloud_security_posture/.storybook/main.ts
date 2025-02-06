@@ -7,17 +7,65 @@
 
 import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
 import type { Configuration } from 'webpack';
-// import { resolve } from 'path';
+import { resolve } from 'path';
 
 const cspmWebpack: Configuration = {
-  // resolve: {
-  //   alias: {
-  //     '../../hooks/use_fetch_graph_data': resolve(
-  //       __dirname,
-  //       '../src/components/mock/use_fetch_graph_data.mock.ts'
-  //     ),
-  //   },
-  // },
+  resolve: {
+    alias: {
+      '../../common/hooks/use_kibana': resolve(
+        __dirname,
+        '../public/components/fleet_extensions/mocks.ts'
+      ),
+      '../../common/hooks/use_is_subscription_status_valid': resolve(
+        __dirname,
+        '../public/components/fleet_extensions/mocks.ts'
+      ),
+    },
+  },
+  module: {
+    rules: [
+      {
+        test: /node_modules[\/\\]@?stream[\/\\].*.js$/,
+        include: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+      },
+      // {
+      //   test: /node_modules[\/\\]@?@hapi[\/\\].*.js$/,
+      //   include: /node_modules/,
+      //   use: {
+      //     loader: 'babel-loader',
+      //     options: {
+      //       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+      //     },
+      //   },
+      // },
+      // {
+      //   test: /node_modules[\/\\]@?zod-to-json-schema[\/\\].*.js$/,
+      //   include: /node_modules/,
+      //   use: {
+      //     loader: 'babel-loader',
+      //     options: {
+      //       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+      //     },
+      //   },
+      // },
+      // {
+      //   test: /node_modules[\/\\]@?@testing-library[\/\\].*.js$/,
+      //   include: /node_modules/,
+      //   use: {
+      //     loader: 'babel-loader',
+      //     options: {
+      //       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+      //     },
+      //   },
+      // },
+    ],
+  },
   node: {
     fs: 'empty',
     stream: false,
