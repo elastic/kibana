@@ -1729,6 +1729,35 @@
       },
       "proxy_id": {
         "type": "keyword"
+      },
+      "secrets": {
+        "dynamic": false,
+        "properties": {
+          "ssl": {
+            "dynamic": false,
+            "properties": {
+              "es_key": {
+                "dynamic": false,
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "key": {
+                "dynamic": false,
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ssl": {
+        "type": "binary"
       }
     }
   },

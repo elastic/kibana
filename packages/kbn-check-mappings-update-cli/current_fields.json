@@ -520,7 +520,14 @@
     "is_internal",
     "is_preconfigured",
     "name",
-    "proxy_id"
+    "proxy_id",
+    "secrets",
+    "secrets.ssl",
+    "secrets.ssl.es_key",
+    "secrets.ssl.es_key.id",
+    "secrets.ssl.key",
+    "secrets.ssl.key.id",
+    "ssl"
   ],
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [
