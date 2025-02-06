@@ -82,7 +82,6 @@
     "@kbn/product-doc-common",
     "@kbn/charts-theme",
     "@kbn/ai-assistant-icon",
-    "@kbn/product-doc-base-plugin",
     "@kbn/rule-data-utils",
     "@kbn/utility-types",
   ],
