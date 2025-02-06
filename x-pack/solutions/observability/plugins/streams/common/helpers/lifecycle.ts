@@ -13,17 +13,14 @@ import {
   isDescendantOf,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
-import orderBy from 'lodash/orderBy';
 
 export function findInheritedLifecycle(
   definition: WiredStreamDefinition,
   ancestors: WiredStreamDefinition[]
 ): WiredIngestStreamEffectiveLifecycle {
-  const originDefinition = orderBy(
-    [...ancestors, definition],
-    (parent) => getSegments(parent.name).length,
-    'asc'
-  ).findLast(({ ingest }) => !isInheritLifecycle(ingest.lifecycle));
+  const originDefinition = [...ancestors, definition]
+    .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length)
+    .findLast(({ ingest }) => !isInheritLifecycle(ingest.lifecycle));
 
   if (!originDefinition) {
     throw new Error('Unable to find inherited lifecycle');
