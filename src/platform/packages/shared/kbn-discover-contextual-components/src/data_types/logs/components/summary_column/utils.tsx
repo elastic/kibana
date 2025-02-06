@@ -25,6 +25,8 @@ import {
   ORCHESTRATOR_NAMESPACE_FIELD,
   ORCHESTRATOR_RESOURCE_ID_FIELD,
   SERVICE_NAME_FIELD,
+  SPAN_DURATION_FIELD,
+  SPAN_NAME_FIELD,
   TRANSACTION_DURATION_FIELD,
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
@@ -44,7 +46,7 @@ import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions'
 /**
  * getUnformattedResourceFields definitions
  */
-export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields => {
+export const getUnformattedResourceFields = (doc: LogDocument): Readonly<ResourceFields> => {
   const serviceName = getFieldValue(doc, SERVICE_NAME_FIELD);
   const hostName = getFieldValue(doc, HOST_NAME_FIELD);
   const agentName = getFieldValue(doc, AGENT_NAME_FIELD);
@@ -68,12 +70,14 @@ export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields =
   };
 };
 
-export const getUnformattedTraceBadgeFields = (doc: TraceDocument): TraceFields => {
+export const getUnformattedTraceBadgeFields = (doc: TraceDocument): Readonly<TraceFields> => {
   const serviceName = getFieldValue(doc, SERVICE_NAME_FIELD);
   const eventOutcome = getFieldValue(doc, EVENT_OUTCOME_FIELD);
   const agentName = getFieldValue(doc, AGENT_NAME_FIELD);
   const transactionName = getFieldValue(doc, TRANSACTION_NAME_FIELD);
   const transactionDuration = getFieldValue(doc, TRANSACTION_DURATION_FIELD);
+  const spanName = getFieldValue(doc, SPAN_NAME_FIELD);
+  const spanDuration = getFieldValue(doc, SPAN_DURATION_FIELD);
 
   return {
     [SERVICE_NAME_FIELD]: serviceName,
@@ -81,10 +85,14 @@ export const getUnformattedTraceBadgeFields = (doc: TraceDocument): TraceFields 
     [AGENT_NAME_FIELD]: agentName,
     [TRANSACTION_NAME_FIELD]: transactionName,
     [TRANSACTION_DURATION_FIELD]: transactionDuration,
+    [SPAN_NAME_FIELD]: spanName,
+    [SPAN_DURATION_FIELD]: spanDuration,
   };
 };
 
-const TransactionDurationIcon = () => {
+const DURATION_FIELDS: Readonly<string[]> = [SPAN_DURATION_FIELD, TRANSACTION_DURATION_FIELD];
+
+const DurationIcon = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -129,7 +137,7 @@ const getResourceBadgeComponent = (
 
 const getResourceBadgeIcon = (
   name: keyof ResourceFields | keyof TraceFields,
-  fields: ResourceFields | TraceFields
+  fields: Readonly<ResourceFields> | Readonly<TraceFields>
 ): (() => React.JSX.Element) | undefined => {
   switch (name) {
     case SERVICE_NAME_FIELD:
@@ -149,7 +157,7 @@ const getResourceBadgeIcon = (
       return () => {
         const { euiTheme } = useEuiTheme();
 
-        const value = (fields as TraceFields)[name as keyof TraceFields];
+        const value = (fields as Readonly<TraceFields>)[name as keyof TraceFields];
 
         const color = value === 'failure' ? 'danger' : value === 'success' ? 'success' : 'subdued';
 
@@ -165,7 +173,8 @@ const getResourceBadgeIcon = (
         );
       };
     case TRANSACTION_DURATION_FIELD:
-      return TransactionDurationIcon;
+    case SPAN_DURATION_FIELD:
+      return DurationIcon;
   }
 };
 
@@ -181,12 +190,12 @@ export const createTraceBadgeFields = (
   return availableFields.map((name) => {
     const field = dataView.getFieldByName(name);
     const formatter = field && dataView.getFormatterForField(field);
-    const rawValue = traceBadgeFields[name] as string;
-    const formattedField = formatter ? formatter.convert(rawValue) : rawValue;
+    const rawValue = traceBadgeFields[name];
+    const formattedField = formatter ? formatter.convert(rawValue) : `${rawValue}`;
 
     return {
       name,
-      value: name === TRANSACTION_DURATION_FIELD ? `${formattedField}µs` : formattedField,
+      value: DURATION_FIELDS.includes(name) ? `${formattedField}µs` : formattedField,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, traceBadgeFields),
     };

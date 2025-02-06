@@ -20,6 +20,8 @@ export const EVENT_OUTCOME_FIELD = 'event.outcome';
 export const TRACE_ID_FIELD = 'trace.id';
 export const TRANSACTION_NAME_FIELD = 'transaction.name';
 export const TRANSACTION_DURATION_FIELD = 'transaction.duration.us';
+export const SPAN_NAME_FIELD = 'span.name';
+export const SPAN_DURATION_FIELD = 'span.duration.us';
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';

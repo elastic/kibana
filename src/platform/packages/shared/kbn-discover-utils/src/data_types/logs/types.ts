@@ -74,6 +74,8 @@ export interface TraceDocument extends DataTableRecord {
     'event.outcome'?: string;
     'transaction.name'?: string;
     'transaction.duration.us'?: string;
+    'span.name'?: string;
+    'span.duration.us'?: string;
   };
 }
 
@@ -121,6 +123,8 @@ export interface TraceFields {
   'event.outcome'?: string;
   'transaction.name'?: string;
   'transaction.duration.us'?: string;
+  'span.name'?: string;
+  'span.duration.us'?: string;
   'agent.name'?: string;
 }
 

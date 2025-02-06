@@ -16,6 +16,8 @@ export const getAvailableTraceBadgeFields = (traceDoc: TraceFields) => {
     constants.EVENT_OUTCOME_FIELD,
     constants.TRANSACTION_NAME_FIELD,
     constants.TRANSACTION_DURATION_FIELD,
+    constants.SPAN_NAME_FIELD,
+    constants.SPAN_DURATION_FIELD,
   ] as const;
 
   return availableTraceFields.filter((fieldName) => Boolean(traceDoc[fieldName]));
