@@ -105,7 +105,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     CASES_TOAST_MESSAGES_TITLES.ANOMALY_CHARTS(maxSeriesToPlot)
   );
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
   const casesPrivileges = cases?.helpers.canUseCases();
 
   const { anomalyExplorerCommonStateService, chartsStateService } = useAnomalyExplorerContext();

@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { serviceLoadedMsg, isValidUTCDate, formatTime, getPlaywrightGrepTag } from './runner_utils';
-export { measurePerformance } from './performance';
+export { isValidUTCDate, formatTime, getPlaywrightGrepTag } from './runner_utils';
