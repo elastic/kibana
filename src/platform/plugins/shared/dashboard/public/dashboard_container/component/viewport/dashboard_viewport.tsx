@@ -123,7 +123,10 @@ export const DashboardViewport = ({
                 getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
               };
             }}
-            onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
+            onApiAvailable={(api) => {
+              console.log('control group api available');
+              dashboardInternalApi.setControlGroupApi(api);
+            }}
           />
         </div>
       ) : null}

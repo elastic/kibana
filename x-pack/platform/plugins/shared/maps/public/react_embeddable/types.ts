@@ -14,6 +14,7 @@ import {
   apiPublishesUnifiedSearch,
   HasEditCapabilities,
   HasLibraryTransforms,
+  HasSerializedStateComparator,
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
@@ -54,6 +55,7 @@ export type MapSerializedState = SerializedTitles &
 export type MapRuntimeState = MapSerializedState;
 
 export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
+  HasSerializedStateComparator<MapSerializedState> &
   HasDynamicActions &
   Partial<HasEditCapabilities> &
   HasInspectorAdapters &

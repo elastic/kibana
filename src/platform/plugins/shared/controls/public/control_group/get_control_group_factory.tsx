@@ -57,14 +57,7 @@ export const getControlGroupEmbeddableFactory = () => {
   > = {
     type: CONTROL_GROUP_TYPE,
     deserializeState: (state) => deserializeControlGroup(state),
-    buildEmbeddable: async (
-      initialRuntimeState,
-      buildApi,
-      uuid,
-      parentApi,
-      setApi,
-      lastSavedRuntimeState
-    ) => {
+    buildEmbeddable: async (initialRuntimeState, buildApi, uuid, parentApi, setApi) => {
       const {
         labelPosition: initialLabelPosition,
         chainingSystem,
@@ -125,8 +118,7 @@ export const getControlGroupEmbeddableFactory = () => {
         },
         controlsManager.snapshotControlsRuntimeState,
         controlsManager.resetControlsUnsavedChanges,
-        parentApi,
-        lastSavedRuntimeState
+        parentApi
       );
 
       const api = setApi({

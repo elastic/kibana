@@ -17,7 +17,6 @@ export {
   type HasSerializedChildState,
 } from './interfaces/child_state';
 export { childrenUnsavedChanges$ } from './interfaces/unsaved_changes/children_unsaved_changes';
-export { initializeHasUnsavedChanges } from './interfaces/unsaved_changes/initialize_has_unsaved_changes';
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,

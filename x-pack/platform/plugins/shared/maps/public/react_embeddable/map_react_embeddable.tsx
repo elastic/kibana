@@ -6,7 +6,9 @@
  */
 
 import React, { useEffect } from 'react';
+import { omit } from 'lodash';
 import { Provider } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
@@ -164,6 +166,12 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
         ...initializeLibraryTransforms(savedMap, serializeState),
         ...initializeDataViews(savedMap.getStore()),
         serializeState,
+        isSerializedStateEqual: (a, b) => {
+          // when comparing serialized Maps state, we should ignore the map buffer.
+          const aState = omit(a, ['mapBuffer', 'id']);
+          const bState = omit(b, ['mapBuffer', 'id']);
+          return deepEqual(aState, bState);
+        },
         supportedTriggers: () => {
           return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
         },

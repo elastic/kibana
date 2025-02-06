@@ -8,26 +8,40 @@
  */
 
 import {
+  apiHasLastSavedChildState,
+  type HasLastSavedChildState,
+} from '@kbn/presentation-containers';
+import {
   apiHasSerializableState,
   apiHasSerializedStateComparator,
   HasSnapshottableState,
+  latestComparatorValues$,
   PublishesUnsavedChanges,
-  PublishingSubject,
   SerializedPanelState,
   StateComparators,
 } from '@kbn/presentation-publishing';
+import { MaybePromise } from '@kbn/utility-types';
 import deepEqual from 'fast-deep-equal';
-import {
-  BehaviorSubject,
-  combineLatest,
-  combineLatestWith,
-  debounceTime,
-  Subscription,
-} from 'rxjs';
-import { apiHasLastSavedChildState, HasLastSavedChildState } from '../child_state';
-import { apiIsPresentationContainer } from '../presentation_container';
+import { BehaviorSubject, combineLatestWith, debounceTime, Subscription } from 'rxjs';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
+
+const serializedStateComparator = <SerializedState extends object = object>(
+  api: unknown,
+  a?: SerializedState,
+  b?: SerializedState
+) => {
+  if (Boolean(a) !== Boolean(b)) return false;
+
+  // clone via serialization to deeply remove undefined values
+  const stateA = JSON.parse(JSON.stringify(a ?? {})) as SerializedState;
+  const stateB = JSON.parse(JSON.stringify(b ?? {})) as SerializedState;
+
+  const comparatorFunction = apiHasSerializedStateComparator<SerializedState>(api)
+    ? api.isSerializedStateEqual
+    : deepEqual;
+  return comparatorFunction(stateA, stateB);
+};
 
 export const initializeHasUnsavedChanges = <
   SerializedState extends object = object,
@@ -37,7 +51,8 @@ export const initializeHasUnsavedChanges = <
   type: string,
   comparators: StateComparators<RuntimeState>,
   api: unknown,
-  parentApi: unknown
+  parentApi: unknown,
+  deserializeState: (state: SerializedPanelState<SerializedState>) => MaybePromise<RuntimeState>
 ) => {
   const snapshotRuntimeState = () => {
     const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;
@@ -86,14 +101,15 @@ export const initializeHasUnsavedChanges = <
    * set up hasUnsavedChanges$. It should recalculate whether this API has unsaved changes any time the
    * last saved state or the runtime state changes.
    */
-  const comparatorFunction = apiHasSerializedStateComparator<SerializedState>(api)
-    ? api.isSerializedStateEqual
-    : deepEqual;
-  const compareState = () => comparatorFunction(lastSavedState$.getValue(), api.serializeState());
+  const compareState = () =>
+    serializedStateComparator(
+      api,
+      lastSavedState$.getValue()?.rawState,
+      api.serializeState().rawState
+    );
   const hasUnsavedChanges$ = new BehaviorSubject<boolean>(!compareState());
-  const comparatorSubjects$: Array<PublishingSubject<unknown>> = Object.values(comparators);
   subscriptions.push(
-    combineLatest(comparatorSubjects$)
+    latestComparatorValues$(comparators)
       .pipe(debounceTime(COMPARATOR_SUBJECTS_DEBOUNCE), combineLatestWith(lastSavedState$))
       .subscribe(() => hasUnsavedChanges$.next(!compareState()))
   );
@@ -102,11 +118,14 @@ export const initializeHasUnsavedChanges = <
     api: {
       hasUnsavedChanges$,
       resetUnsavedChanges: () => {
-        if (!apiIsPresentationContainer(parentApi)) return;
-        parentApi.replacePanel(uuid, {
-          panelType: type,
-          serializedState: lastSavedState$.getValue(),
-        });
+        const lastSavedState = lastSavedState$.getValue();
+        if (!lastSavedState) return; // early return because if the parent does not have last saved state for this panel it will be removed.
+        (async () => {
+          const resetRuntimeState = await deserializeState(lastSavedState);
+          for (const key of Object.keys(comparators) as Array<keyof RuntimeState>) {
+            comparators[key][1](resetRuntimeState[key]);
+          }
+        })();
       },
       snapshotRuntimeState,
     } as PublishesUnsavedChanges & HasSnapshottableState<RuntimeState>,

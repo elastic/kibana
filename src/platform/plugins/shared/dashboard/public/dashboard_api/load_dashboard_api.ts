@@ -8,19 +8,20 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { cloneDeep } from 'lodash';
 import { DashboardPanelMap } from '../../common';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { DashboardCreationOptions, DashboardState } from './types';
-import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from '../dashboard_container/embeddable/create/performance/query_performance_tracking';
-import { coreServices } from '../services/kibana_services';
-import { logger } from '../services/logger';
+import { UnsavedPanelState } from '../dashboard_container/types';
 import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { UnsavedPanelState } from '../dashboard_container/types';
+import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
+import { coreServices } from '../services/kibana_services';
+import { logger } from '../services/logger';
 import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
+import { getDashboardApi } from './get_dashboard_api';
+import { DashboardCreationOptions, DashboardState } from './types';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -61,11 +62,11 @@ export async function loadDashboardApi({
     return dashboardBackupState;
   })();
 
-  const lastSavedDashboardState: DashboardState = {
+  const lastSavedDashboardState: DashboardState = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
     ...(savedObjectResult?.dashboardInput ?? {}),
     references: savedObjectResult?.references,
-  };
+  });
 
   const combinedSessionState: DashboardState = {
     ...lastSavedDashboardState,

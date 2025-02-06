@@ -18,7 +18,7 @@ import {
   diffComparators$,
   getUnchangingComparator,
 } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import {
   BehaviorSubject,
   Subject,
@@ -82,6 +82,7 @@ export function initializeUnsavedChangesManager({
         if (!childApi) continue;
         changedPanelStates[uuid] = childApi.serializeState();
       }
+      if (Object.keys(changedPanelStates).length === 0) return undefined;
       return changedPanelStates;
     })
   );
@@ -96,13 +97,10 @@ export function initializeUnsavedChangesManager({
     })
   );
 
-  const unsavedChangesSubscription = combineLatest([
-    dashboardChangesSource$,
-    panelsChangesSource$,
-    controlGroupChangesSource$,
-  ])
+  const unsavedChangesSubscription = combineLatest([dashboardChangesSource$, panelsChangesSource$])
     .pipe(debounceTime(0))
-    .subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
+    .subscribe(([dashboardChanges, unsavedPanelState]) => {
+      const controlGroupChanges = undefined;
       /**
        * viewMode needs to be stored in session state because its used to exclude 'view' dashboards on the listing page
        * However, viewMode differences should not trigger unsaved changes notification otherwise, opening a dashboard in
@@ -126,10 +124,10 @@ export function initializeUnsavedChangesManager({
           'refreshInterval',
         ]);
         // apply control group changes.
-        if (controlGroupChanges) {
-          allReferences.concat(controlGroupChanges.references ?? []);
-          dashboardStateToBackup.controlGroupInput = controlGroupChanges.rawState;
-        }
+        // if (controlGroupChanges) {
+        //   allReferences.concat(controlGroupChanges.references ?? []);
+        //   dashboardStateToBackup.controlGroupInput = controlGroupChanges.rawState;
+        // }
 
         // apply panels changes
         if (unsavedPanelState) {
@@ -153,8 +151,17 @@ export function initializeUnsavedChangesManager({
     saveNotification$,
     getLastSavedStateForChild: (uuid: string) => {
       if (!lastSavedState$.value?.panels[uuid]) return;
+      const rawState = omit(
+        lastSavedState$.value?.panels[uuid]?.explicitInput,
+        'id' // omit Dashboard injected id copy.
+      );
+
+      // Dashboard injects enhancements key even when no enhancements are present.
+      if (Object.keys(rawState.enhancements ?? {}).length === 0) {
+        delete rawState.enhancements;
+      }
       return {
-        rawState: lastSavedState$.value?.panels[uuid]?.explicitInput,
+        rawState,
         references: getPanelReferences(uuid),
       };
     },
@@ -178,7 +185,7 @@ export function initializeUnsavedChangesManager({
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
       onSave: (savedState: DashboardState) => {
-        lastSavedState$.next(savedState);
+        lastSavedState$.next(cloneDeep(savedState));
         saveNotification$.next();
       },
     },

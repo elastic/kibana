@@ -10,10 +10,14 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { noop } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { noop, omit } from 'lodash';
+import deepEqual from 'fast-deep-equal';
+import type {
+  HasSerializableState,
+  HasSerializedStateComparator,
+} from '@kbn/presentation-publishing';
 import { emptySerializer, isTextBasedLanguage } from '../helper';
-import type { GetStateType, LensEmbeddableStartServices } from '../types';
+import type { GetStateType, LensEmbeddableStartServices, LensSerializedState } from '../types';
 import type { IntegrationCallbacks } from '../types';
 
 export function initializeIntegrations(
@@ -30,7 +34,8 @@ export function initializeIntegrations(
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState;
+    HasSerializableState &
+    HasSerializedStateComparator<LensSerializedState>;
   cleanup: () => void;
   serialize: () => {};
   comparators: {};
@@ -48,6 +53,10 @@ export function initializeIntegrations(
           return { ...cleanedState, rawState: { ...cleanedState.rawState, attributes: undefined } };
         }
         return cleanedState;
+      },
+      isSerializedStateEqual: (a, b) => {
+        // when comparing serialized Lens state, we should ignore search sessions because they are ephemeral.
+        return deepEqual(omit(a, 'searchSessionId'), omit(b, 'searchSessionId'));
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

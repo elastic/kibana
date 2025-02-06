@@ -38,9 +38,6 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  */
 export interface EmbeddablePackageState {
   type: string;
-  /**
-   * For react embeddables, this input must be runtime state.
-   */
   input: object;
   embeddableId?: string;
   size?: {

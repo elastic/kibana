@@ -86,9 +86,6 @@ export function initializePanelsManager(
         // maintain hide panel titles setting.
         hidePanelTitles: incomingEmbeddablePanelState.explicitInput.hidePanelTitles,
       });
-      incomingEmbeddablePanelState.explicitInput = {
-        id: incomingEmbeddablePanelState.explicitInput.id,
-      };
     } else {
       // otherwise this incoming embeddable is brand new.
       const embeddableId = incomingEmbeddable.embeddableId ?? v4();

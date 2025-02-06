@@ -11,6 +11,7 @@ export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_
 
 export {
   diffComparators$,
+  latestComparatorValues$,
   getUnchangingComparator,
   type ComparatorDefinition,
   type ComparatorFunction,

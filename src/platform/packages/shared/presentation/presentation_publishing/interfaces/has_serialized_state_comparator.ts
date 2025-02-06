@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from './has_serializable_state';
-
 export interface HasSerializedStateComparator<SerializedState extends object = object> {
   /**
    * Compares two versions of the serialized state of this API and returns whether they are equal.
    */
-  isSerializedStateEqual: (
-    a?: SerializedPanelState<SerializedState>,
-    b?: SerializedPanelState<SerializedState>
-  ) => boolean;
+  isSerializedStateEqual: (a?: SerializedState, b?: SerializedState) => boolean;
 }
 
 export const apiHasSerializedStateComparator = <SerializedState extends object = object>(

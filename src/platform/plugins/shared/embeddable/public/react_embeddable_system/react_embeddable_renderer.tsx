@@ -11,7 +11,6 @@ import {
   apiHasRuntimeChildState,
   apiIsPresentationContainer,
   HasSerializedChildState,
-  initializeHasUnsavedChanges,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
@@ -30,6 +29,7 @@ import {
   SetReactEmbeddableApiRegistration,
 } from './types';
 import { PhaseTracker } from './phase_tracker';
+import { initializeHasUnsavedChanges } from './initialize_has_unsaved_changes';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -159,7 +159,8 @@ export const ReactEmbeddableRenderer = <
               type,
               comparators,
               apiRegistration,
-              parentApi
+              parentApi,
+              factory.deserializeState
             );
 
             const fullApi = setApi({
