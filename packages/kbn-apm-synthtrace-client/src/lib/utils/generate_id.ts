@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHash } from 'node:crypto';
+import { createHash } from 'crypto';
 
 let seq = 0;
 const pid = String(process.pid);
