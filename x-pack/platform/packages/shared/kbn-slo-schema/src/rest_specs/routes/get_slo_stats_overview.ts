@@ -6,14 +6,14 @@
  */
 import * as t from 'io-ts';
 
-const getOverviewParamsSchema = t.partial({
+const getSLOStatsOverviewParamsSchema = t.partial({
   query: t.partial({
     kqlQuery: t.string,
     filters: t.string,
   }),
 });
 
-const getOverviewResponseSchema = t.type({
+const getSLOStatsOverviewResponseSchema = t.type({
   violated: t.number,
   degrading: t.number,
   stale: t.number,
@@ -24,8 +24,8 @@ const getOverviewResponseSchema = t.type({
   burnRateRecoveredAlerts: t.number,
 });
 
-type GetOverviewParams = t.TypeOf<typeof getOverviewParamsSchema.props.query>;
-type GetOverviewResponse = t.OutputOf<typeof getOverviewResponseSchema>;
+type GetSLOStatsOverviewParams = t.TypeOf<typeof getSLOStatsOverviewParamsSchema.props.query>;
+type GetSLOStatsOverviewResponse = t.OutputOf<typeof getSLOStatsOverviewResponseSchema>;
 
-export { getOverviewParamsSchema, getOverviewResponseSchema };
-export type { GetOverviewParams, GetOverviewResponse };
+export { getSLOStatsOverviewParamsSchema, getSLOStatsOverviewResponseSchema };
+export type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse };
