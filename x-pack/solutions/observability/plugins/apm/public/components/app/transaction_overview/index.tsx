@@ -6,8 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isServerlessAgentName } from '../../../../common/agent_name';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -36,9 +37,21 @@ export function TransactionOverview() {
   } = useApmParams('/services/{serviceName}/transactions');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
+  const [hasLoadedTable, setHasLoadedTable] = useState(false);
+  const { onPageReady } = usePerformanceContext();
   const { transactionType, fallbackToTransactions, serverlessType, serviceName } =
     useApmServiceContext();
+
+  useEffect(() => {
+    if (hasLoadedTable) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [hasLoadedTable, onPageReady, rangeFrom, rangeTo]);
 
   const history = useHistory();
 
@@ -109,6 +122,7 @@ export function TransactionOverview() {
           hideViewTransactionsLink
           numberOfTransactionsPerPage={10}
           showMaxTransactionGroupsExceededWarning
+          onLoadTable={() => setHasLoadedTable(true)}
           environment={environment}
           kuery={kuery}
           start={start}
