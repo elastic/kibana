@@ -90,6 +90,44 @@ const mockKibana = () => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
+// eslint-disable-next-line prefer-object-spread
+const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+const restoreGetComputedStyle = () => {
+  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+};
+
+const patchGetComputedStyle = () => {
+  // The JSDOM implementation is too slow
+  // Especially for dropdowns that try to position themselves
+  // perf issue - https://github.com/jsdom/jsdom/issues/3234
+  Object.defineProperty(window, 'getComputedStyle', {
+    value: (el: HTMLElement) => {
+      /**
+       * This is based on the jsdom implementation of getComputedStyle
+       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+       *
+       * It is missing global style parsing and will only return styles applied directly to an element.
+       * Will not return styles that are global or from emotion
+       */
+      const declaration = new CSSStyleDeclaration();
+      const { style } = el;
+
+      Array.prototype.forEach.call(style, (property: string) => {
+        declaration.setProperty(
+          property,
+          style.getPropertyValue(property),
+          style.getPropertyPriority(property)
+        );
+      });
+
+      return declaration;
+    },
+    configurable: true,
+    writable: true,
+  });
+};
+
 // FLAKY: https://github.com/elastic/kibana/issues/192739
 describe.skip('AllCasesListGeneric', () => {
   const onRowClick = jest.fn();
@@ -113,48 +151,18 @@ describe.skip('AllCasesListGeneric', () => {
   };
 
   const removeMsFromDate = (value: string) => moment(value).format('YYYY-MM-DDTHH:mm:ss[Z]');
-  // eslint-disable-next-line prefer-object-spread
-  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   let appMockRenderer: AppMockRenderer;
 
   beforeAll(() => {
-    // The JSDOM implementation is too slow
-    // Especially for dropdowns that try to position themselves
-    // perf issue - https://github.com/jsdom/jsdom/issues/3234
-    Object.defineProperty(window, 'getComputedStyle', {
-      value: (el: HTMLElement) => {
-        /**
-         * This is based on the jsdom implementation of getComputedStyle
-         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
-         *
-         * It is missing global style parsing and will only return styles applied directly to an element.
-         * Will not return styles that are global or from emotion
-         */
-        const declaration = new CSSStyleDeclaration();
-        const { style } = el;
-
-        Array.prototype.forEach.call(style, (property: string) => {
-          declaration.setProperty(
-            property,
-            style.getPropertyValue(property),
-            style.getPropertyPriority(property)
-          );
-        });
-
-        return declaration;
-      },
-      configurable: true,
-      writable: true,
-    });
-
+    patchGetComputedStyle();
     mockKibana();
     const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
   afterAll(() => {
-    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+    restoreGetComputedStyle();
   });
 
   beforeEach(() => {
@@ -995,5 +1003,62 @@ describe.skip('AllCasesListGeneric', () => {
 
       expect(screen.queryByTestId('column-selection-popover-button')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('Cases list', () => {
+  let appMockRenderer: AppMockRenderer;
+  const defaultGetCases = {
+    ...useGetCasesMockState,
+  };
+  const updateCaseProperty = jest.fn();
+
+  beforeAll(() => {
+    patchGetComputedStyle();
+  });
+
+  afterAll(() => {
+    restoreGetComputedStyle();
+  });
+
+  beforeEach(() => {
+    appMockRenderer = createAppMockRenderer();
+    useGetCasesMock.mockReturnValue(defaultGetCases);
+    useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
+    useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], isLoading: false });
+    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
+    useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
+    mockKibana();
+    moment.tz.setDefault('UTC');
+    window.localStorage.clear();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    appMockRenderer.clearQueryCache();
+  });
+
+  it('should ignore empty case assignees when fetching the user profiles', async () => {
+    const caseWithEmptyAssignee = {
+      ...useGetCasesMockState.data.cases[0],
+      id: 'case-with-empty-assignee',
+      assignees: [{ uid: '' }],
+    };
+    useGetCasesMock.mockReturnValue({
+      ...useGetCasesMockState,
+      data: {
+        ...useGetCasesMockState.data,
+        cases: [...useGetCasesMockState.data.cases, caseWithEmptyAssignee],
+      },
+    });
+
+    appMockRenderer.render(<AllCasesList />);
+
+    expect(useBulkGetUserProfilesMock.mock.calls[0][0].uids.includes('')).toBe(false);
   });
 });

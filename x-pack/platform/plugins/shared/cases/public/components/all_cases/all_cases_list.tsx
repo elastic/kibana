@@ -11,6 +11,7 @@ import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import deepEqual from 'react-fast-compare';
 
+import { isEmpty } from 'lodash';
 import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
 import type { EuiBasicTableOnChange } from './types';
 
@@ -71,7 +72,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         }
 
         for (const assignee of caseInfo.assignees) {
-          acc.add(assignee.uid);
+          if (!isEmpty(assignee.uid)) {
+            acc.add(assignee.uid);
+          }
         }
         return acc;
       }, new Set());
