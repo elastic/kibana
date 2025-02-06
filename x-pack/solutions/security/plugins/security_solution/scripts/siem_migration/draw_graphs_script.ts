@@ -17,6 +17,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
+import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -36,12 +37,14 @@ const createLlmInstance = () => {
 
 async function getAgentGraph(logger: Logger): Promise<Drawable> {
   const model = createLlmInstance();
+  const telemetryClient = {} as SiemMigrationTelemetryClient;
   const graph = getRuleMigrationAgent({
     model,
     inferenceClient,
     ruleMigrationsRetriever,
     connectorId,
     logger,
+    telemetryClient,
   });
   return graph.getGraphAsync({ xray: true });
 }
