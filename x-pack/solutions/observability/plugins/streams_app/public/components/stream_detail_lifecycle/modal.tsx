@@ -30,7 +30,7 @@ import {
   EuiCallOut,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
@@ -86,6 +86,11 @@ export function EditLifecycleModal({
   return <InheritModal {...options} />;
 }
 
+const isInvalidRetention = (value: string) => {
+  const num = Number(value);
+  return isNaN(num) || num < 1 || num % 1 > 0;
+};
+
 function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }: ModalOptions) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
@@ -95,9 +100,13 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
   ];
 
   const [selectedUnit, setSelectedUnit] = useState(timeUnits[0]);
-  const [retentionValue, setRetentionValue] = useState(1);
+  const [retentionValue, setRetentionValue] = useState('1');
   const [noRetention, toggleNoRetention] = useToggle(false);
   const [showUnitMenu, { on: openUnitMenu, off: closeUnitMenu }] = useBoolean(false);
+  const invalidRetention = useMemo(
+    () => isInvalidRetention(retentionValue) && !noRetention,
+    [retentionValue, noRetention]
+  );
 
   return (
     <EuiModal onClose={closeModal}>
@@ -114,20 +123,13 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
           defaultMessage: 'Specify a custom data retention period for this stream.',
         })}
         <EuiSpacer />
-        <EuiFieldNumber
-          data-test-subj="streamsAppDslModalFieldNumber"
+        <EuiFieldText
+          data-test-subj="streamsAppDslModalDaysField"
           value={retentionValue}
-          onChange={(e) => {
-            const valueAsNumber = e.target.valueAsNumber;
-            if (isNaN(valueAsNumber) || valueAsNumber < 1) {
-              setRetentionValue(1);
-            } else {
-              setRetentionValue(valueAsNumber);
-            }
-          }}
-          min={1}
+          onChange={(e) => setRetentionValue(e.target.value)}
           disabled={noRetention}
           fullWidth
+          isInvalid={invalidRetention}
           append={
             <EuiPopover
               isOpen={showUnitMenu}
@@ -164,6 +166,16 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
             </EuiPopover>
           }
         />
+        {invalidRetention ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText color="danger" size="xs">
+              {i18n.translate('xpack.streams.streamDetailLifecycle.invalidRetentionValue', {
+                defaultMessage: 'A positive integer is required',
+              })}
+            </EuiText>
+          </>
+        ) : null}
         <EuiSpacer />
         <EuiSwitch
           label={i18n.translate('xpack.streams.streamDetailLifecycle.keepDataIndefinitely', {
@@ -179,10 +191,13 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
         definition={definition}
         confirmationLabel="Save"
         closeModal={closeModal}
+        confirmationIsDisabled={invalidRetention}
         onConfirm={() => {
           updateLifecycle({
             dsl: {
-              data_retention: noRetention ? undefined : `${retentionValue}${selectedUnit.value}`,
+              data_retention: noRetention
+                ? undefined
+                : `${Number(retentionValue)}${selectedUnit.value}`,
             },
           });
         }}
