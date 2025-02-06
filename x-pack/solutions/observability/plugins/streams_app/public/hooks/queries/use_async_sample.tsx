@@ -8,16 +8,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Condition,
+  RecursiveRecord,
   WiredStreamGetResponse,
   conditionToQueryDsl,
   getFields,
 } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
-import {
-  MappingRuntimeField,
-  MappingRuntimeFields,
-  SearchHit,
-} from '@elastic/elasticsearch/lib/api/types';
+import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { filter, switchMap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../use_kibana';
@@ -41,7 +38,7 @@ export const useAsyncSample = (options: Options) => {
   // Documents
   const [isLoadingDocuments, toggleIsLoadingDocuments] = useToggle(false);
   const [documentsError, setDocumentsError] = useState();
-  const [documents, setDocuments] = useState<Array<SearchHit<any>>>([]);
+  const [documents, setDocuments] = useState<RecursiveRecord[]>([]);
 
   // Document counts / percentage
   const [isLoadingDocumentCounts, toggleIsLoadingDocumentCounts] = useToggle(false);
@@ -135,11 +132,14 @@ export const useAsyncSample = (options: Options) => {
           if (result.rawResponse?.aggregations) {
             // We need to divide this by the sampling / probability factor:
             // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html#random-sampler-special-cases
-            const randomSampleDocCount =
-              result.rawResponse.aggregations.sample.doc_count /
-              result.rawResponse.aggregations.sample.probability;
+            const sampleAgg = result.rawResponse.aggregations.sample as {
+              doc_count: number;
+              probability: number;
+              matching_docs: { doc_count: number };
+            };
+            const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
 
-            const matchingDocCount = result.rawResponse.aggregations.sample.matching_docs.doc_count;
+            const matchingDocCount = sampleAgg.matching_docs.doc_count;
 
             const percentage = (100 * matchingDocCount) / randomSampleDocCount;
 

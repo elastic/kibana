@@ -7,11 +7,7 @@
 
 import { DragStart, DropResult, euiDragDropReorder } from '@elastic/eui';
 import { IToasts, Toast } from '@kbn/core/public';
-import {
-  RoutingDefinition,
-  ReadStreamDefinition,
-  WiredStreamGetResponse,
-} from '@kbn/streams-schema';
+import { RoutingDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
 import React, { useCallback, useEffect } from 'react';
 import { useDebounced } from '../../../util/use_debounce';
 
@@ -43,7 +39,7 @@ export function useRoutingState({
 
   // Child streams: either represents the child streams as they are, or the new order from drag and drop.
   const [childStreams, setChildStreams] = React.useState<
-    ReadStreamDefinition['stream']['ingest']['routing']
+    WiredStreamGetResponse['stream']['ingest']['routing']
   >(definition?.stream.ingest.routing ?? []);
 
   useEffect(() => {
