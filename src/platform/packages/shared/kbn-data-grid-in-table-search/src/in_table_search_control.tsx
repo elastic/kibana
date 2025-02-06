@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import useEvent from 'react-use/lib/useEvent';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
 import { useFindMatches } from './matches/use_find_matches';
 import { InTableSearchInput } from './in_table_search_input';
 import { UseFindMatchesProps } from './types';
 import {
-  ACTIVE_HIGHLIGHT_COLOR,
   CELL_MATCH_INDEX_ATTRIBUTE,
   HIGHLIGHT_CLASS_NAME,
   BUTTON_TEST_SUBJ,
   INPUT_TEST_SUBJ,
 } from './constants';
+import { getHighlightColors } from './get_highlight_colors';
 
 const innerCss = css`
   .dataGridInTableSearch__matchesCounter {
@@ -33,7 +34,7 @@ const innerCss = css`
   }
 
   .euiFormControlLayout__append {
-    padding-inline-end: 0 !important;
+    padding-inline: 0 !important;
     background: none;
   }
 
@@ -68,9 +69,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   ...props
 }) => {
   const { euiTheme } = useEuiTheme();
+  const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
-  const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
+  const [isInputVisible, setIsInputVisible] = useState<boolean>(Boolean(props.inTableSearchTerm));
 
   const onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'] = useCallback(
     ({ rowIndex, columnId, matchIndexWithinCell }) => {
@@ -79,7 +82,8 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         onChangeToExpectedPage(expectedPageIndex);
       }
 
-      // The cell border is useful when the active match is not visible due to the limited cell height.
+      // Defines highlight styles for the active match.
+      // The cell border is useful when the active match is not visible due to the limited cell boundaries.
       onChangeCss(css`
         .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
           &:after {
@@ -88,11 +92,12 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             pointer-events: none;
             position: absolute;
             inset: 0;
-            border: 2px solid ${ACTIVE_HIGHLIGHT_COLOR} !important;
+            border: 2px solid ${colors.activeHighlightBorderColor} !important;
             border-radius: 3px;
           }
           .${HIGHLIGHT_CLASS_NAME}[${CELL_MATCH_INDEX_ATTRIBUTE}='${matchIndexWithinCell}'] {
-            background-color: ${ACTIVE_HIGHLIGHT_COLOR} !important;
+            color: ${colors.activeHighlightColor} !important;
+            background-color: ${colors.activeHighlightBackgroundColor} !important;
           }
         }
       `);
@@ -106,7 +111,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         align: 'center',
       });
     },
-    [getColumnIndexFromId, scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize]
+    [getColumnIndexFromId, scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize, colors]
   );
 
   const {
@@ -133,8 +138,8 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   );
 
   // listens for the cmd+f or ctrl+f keydown event to open the input
-  useEffect(() => {
-    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+  const handleGlobalKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       if (
         (event.metaKey || event.ctrlKey) &&
         event.key === 'f' &&
@@ -150,24 +155,17 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           ) as HTMLInputElement
         )?.focus();
       }
-    };
+    },
+    [showInput, shouldOverrideCmdF]
+  );
 
-    document.addEventListener('keydown', handleGlobalKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleGlobalKeyDown);
-    };
-  }, [showInput, shouldOverrideCmdF]);
+  useEvent('keydown', handleGlobalKeyDown);
 
   // returns focus to the button when the input was cancelled by pressing the escape key
   useEffect(() => {
     if (shouldReturnFocusToButtonRef.current && !isInputVisible) {
       shouldReturnFocusToButtonRef.current = false;
-      (
-        containerRef.current?.querySelector(
-          `[data-test-subj="${BUTTON_TEST_SUBJ}"]`
-        ) as HTMLButtonElement
-      )?.focus();
+      buttonRef.current?.focus();
     }
   }, [isInputVisible]);
 
@@ -197,6 +195,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         >
           <EuiButtonIcon
             data-test-subj={BUTTON_TEST_SUBJ}
+            buttonRef={buttonRef}
             iconType="search"
             size="xs"
             color="text"

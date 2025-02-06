@@ -8,7 +8,7 @@
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { InvokeCreator } from 'xstate';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
+import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS } from '@kbn/discover-utils';
 import { LogsExplorerCustomizations } from '../../../../controller';
 import { Dataset } from '../../../../../common/datasets';
 import {
@@ -68,7 +68,7 @@ export const initializeSelection =
        */
       if (
         !dataViewSelection.selection.dataView.testAgainstAllowedList(
-          uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+          DEFAULT_ALLOWED_LOGS_BASE_PATTERNS
         ) &&
         events?.onUknownDataViewSelection
       ) {
