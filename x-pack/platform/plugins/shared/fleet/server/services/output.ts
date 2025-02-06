@@ -1129,7 +1129,7 @@ class OutputService {
         }
       }
     }
-    
+
     patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
 
     auditLoggingService.writeCustomSoAuditLog({
