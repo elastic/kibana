@@ -12,14 +12,9 @@ import { resolve } from 'path';
 const cspmWebpack: Configuration = {
   resolve: {
     alias: {
-      '../../common/hooks/use_kibana': resolve(
-        __dirname,
-        '../public/components/fleet_extensions/mocks.ts'
-      ),
-      '../../common/hooks/use_is_subscription_status_valid': resolve(
-        __dirname,
-        '../public/components/fleet_extensions/mocks.ts'
-      ),
+      '../../common/hooks/use_kibana': resolve(__dirname, './mocks.ts'),
+      '../../common/hooks/use_is_subscription_status_valid': resolve(__dirname, './mocks.ts'),
+      '../../../../../../../../hooks': resolve(__dirname, './mocks.ts'),
     },
   },
   module: {
@@ -34,36 +29,6 @@ const cspmWebpack: Configuration = {
           },
         },
       },
-      // {
-      //   test: /node_modules[\/\\]@?@hapi[\/\\].*.js$/,
-      //   include: /node_modules/,
-      //   use: {
-      //     loader: 'babel-loader',
-      //     options: {
-      //       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-      //     },
-      //   },
-      // },
-      // {
-      //   test: /node_modules[\/\\]@?zod-to-json-schema[\/\\].*.js$/,
-      //   include: /node_modules/,
-      //   use: {
-      //     loader: 'babel-loader',
-      //     options: {
-      //       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-      //     },
-      //   },
-      // },
-      // {
-      //   test: /node_modules[\/\\]@?@testing-library[\/\\].*.js$/,
-      //   include: /node_modules/,
-      //   use: {
-      //     loader: 'babel-loader',
-      //     options: {
-      //       presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-      //     },
-      //   },
-      // },
     ],
   },
   node: {

@@ -20,17 +20,9 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { NewPackagePolicyPostureInput } from './utils';
 import { getMockPolicyAWS, getMockPackageInfo } from './mocks';
 import { CspPolicyTemplateForm } from './policy_template_form';
+import { action } from '@storybook/addon-actions';
 
-const mockNewPolicy = getMockPolicyAWS({
-  access_key_id: {
-    type: 'text',
-    value: 'access-key-id',
-  },
-  secret_access_key: {
-    type: 'text',
-    value: 'secret-access-key',
-  },
-});
+const mockNewPolicy = getMockPolicyAWS();
 
 const mockInput = {
   ...mockNewPolicy.inputs[0],
@@ -43,8 +35,10 @@ const mockPackageInfo = getMockPackageInfo();
 const defaultProps: PackagePolicyReplaceDefineStepExtensionComponentProps = {
   newPolicy: mockNewPolicy,
   input: mockInput,
-  updatePolicy: () => {},
-  onChange: () => {},
+  updatePolicy: action('updatePolicy'),
+  onChange: (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
+    action('onChange')(opts);
+  },
   packageInfo: mockPackageInfo,
   setIsValid: () => {},
   disabled: false,
@@ -81,11 +75,10 @@ const Template: Story<PackagePolicyReplaceDefineStepExtensionComponentProps> = (
   const [integrationToEnable, setIntegrationToEnable] = useState('cloudbeat/cis_aws');
 
   const onChange = (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
-    console.log('updatePackagePolicy', opts);
+    args.onChange(opts);
     setPackagePolicy(opts.updatedPolicy);
   };
 
-  console.log('packagePolicy', packagePolicy);
   return (
     <CspPolicyTemplateForm
       newPolicy={packagePolicy}
@@ -100,8 +93,14 @@ const Template: Story<PackagePolicyReplaceDefineStepExtensionComponentProps> = (
   );
 };
 
-export const Default = Template.bind({});
-Default.args = defaultProps;
+export const AgentBased = Template.bind({});
+AgentBased.args = defaultProps;
+// AgentBased.play = async ({ canvasElement }) => {
+//   const canvas = within(canvasElement);
+//   await userEvent.type(canvas.getByLabelText('Name'), 'AWS Package Policy');
+//   expect(canvas.getByLabelText('Name')).toHaveValue('AWS Package Policy');
+// };
+
 export const Agentless = Template.bind({});
 Agentless.args = {
   ...defaultProps,
