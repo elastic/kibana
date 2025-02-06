@@ -10,3 +10,4 @@
 export { generateMockData } from './data';
 export { getRenderCellValueMock } from './render_cell_value_mock';
 export { DataGridWithInTableSearchExample } from './data_grid_example';
+export { MockContext, useMockContextValue } from './mock_context';
