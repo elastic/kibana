@@ -162,6 +162,15 @@ export async function loadEmbeddableData(
   services: LensEmbeddableStartServices,
   metaInfo?: SharingSavedObjectProps
 ) {
+  // if it's a new ES|QL panel, async load the correct attributes
+  // before subscribe to the apis
+  if (internalApi.isNewlyCreated$.getValue()) {
+    await loadESQLAttributes(services, (attributes: LensRuntimeState['attributes']) => {
+      // TODO: merge these two calls
+      internalApi.updateAttributes(attributes);
+      internalApi.updateVisualizationContext({ activeAttributes: attributes });
+    });
+  }
   const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
     ? parentApi
     : ({} as LensPublicCallbacks);
@@ -381,12 +390,6 @@ export async function loadEmbeddableData(
       }
     }),
   ];
-
-  // At this point everything has been checked, so load the editor frame
-  // and update the attributes if it's a creation flow
-  if (internalApi.isNewlyCreated$.getValue()) {
-    await loadESQLAttributes(services, internalApi.updateAttributes);
-  }
 
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation
