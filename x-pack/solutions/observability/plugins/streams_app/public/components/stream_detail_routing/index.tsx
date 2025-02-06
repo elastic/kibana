@@ -42,6 +42,7 @@ import {
   IngestUpsertRequest,
   getAncestorsAndSelf,
   WiredStreamGetResponse,
+  RecursiveRecord,
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
@@ -617,7 +618,7 @@ function PreviewPanelIllustration({
 }: {
   routingAppState: ReturnType<typeof useRoutingState>;
   previewSampleFetch: AbortableAsyncState<{
-    documents: unknown[];
+    documents: RecursiveRecord[];
   }>;
 }) {
   return (
