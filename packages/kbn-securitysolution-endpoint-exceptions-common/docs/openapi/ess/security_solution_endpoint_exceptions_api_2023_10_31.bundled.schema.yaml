@@ -891,8 +891,23 @@ components:
     FindEndpointListItemsFilter:
       $ref: '#/components/schemas/NonEmptyString'
     ListId:
-      $ref: '#/components/schemas/NonEmptyString'
+      description: Value list's identifier.
+      example: 21b01cfb-058d-44b9-838c-282be16c91cd
+      format: nonempty
+      minLength: 1
+      type: string
     ListType:
+      description: >
+        Specifies the Elasticsearch data type of excludes the list container
+        holds. Some common examples:
+
+
+        - `keyword`: Many ECS fields are Elasticsearch keywords
+
+        - `ip`: IP addresses
+
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR
+        notation)
       enum:
         - binary
         - boolean
