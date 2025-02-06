@@ -9,12 +9,13 @@
 
 import { useState, useEffect } from 'react';
 import { SolutionView } from '@kbn/spaces-plugin/common';
-import { Space } from '@kbn/spaces-plugin/common';
+import { useServices } from '../services';
 
 /**
  * React hook which returns the solution view of the current active space.
  */
-export function useSolutionView(getActiveSpace: () => Promise<Pick<Space, 'solution'>>) {
+export function useSolutionView() {
+  const { getActiveSpace } = useServices();
   const [solutionView, setSolutionView] = useState<SolutionView>();
 
   useEffect(() => {
