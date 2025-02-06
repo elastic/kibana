@@ -28,9 +28,6 @@ export interface BaseResultActionParams {
   result: 'success' | 'failed';
   errorMessage?: string;
 }
-export interface BaseTranslatedRuleActionParams extends BaseResultActionParams {
-  migrationId: string;
-}
 
 // Setup actions
 

@@ -42,7 +42,7 @@ export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadM
 
     const onOpenFlyout = useCallback(() => {
       openFlyout(migrationStats);
-      telemetry.reportSetupMigrationOpenUpload({
+      telemetry.reportSetupMigrationOpenResources({
         migrationId: migrationStats.id,
         missingResourcesCount: missingResources.length,
       });

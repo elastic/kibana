@@ -36,7 +36,7 @@ export class SiemRulesMigrationsTelemetry {
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationOpenNew, params);
   };
 
-  reportSetupMigrationOpenUpload = (params: {
+  reportSetupMigrationOpenResources = (params: {
     migrationId: string;
     missingResourcesCount: number;
   }) => {

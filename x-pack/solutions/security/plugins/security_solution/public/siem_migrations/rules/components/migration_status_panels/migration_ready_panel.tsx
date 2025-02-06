@@ -32,7 +32,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout(migrationStats);
-    telemetry.reportSetupMigrationOpenUpload({
+    telemetry.reportSetupMigrationOpenResources({
       migrationId: migrationStats.id,
       missingResourcesCount: missingResources.length,
     });
