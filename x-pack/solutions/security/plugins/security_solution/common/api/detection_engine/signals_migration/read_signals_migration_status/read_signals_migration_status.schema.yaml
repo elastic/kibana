@@ -4,7 +4,7 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/signals/migration_status:
-    post:
+    get:
       x-labels: [ess]
       operationId: ReadAlertsMigrationStatus
       x-codegen-enabled: true
@@ -24,6 +24,7 @@ paths:
               Time from which data is analyzed. For example, now-4200s means the rule analyzes data from 70 minutes
               before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
             format: date-math
+            example: now-30d
       responses:
         200:
           description: Successful response
@@ -37,6 +38,30 @@ paths:
                     items:
                       $ref: '#/components/schemas/IndexMigrationStatus'
                 required: [indices]
+              examples:
+                success:
+                  value:
+                    indices:
+                      - index: .siem-signals-default-000002
+                        version: 15
+                        signal_versions:
+                          - version: 15
+                            count: 100
+                          - version: 16
+                            count: 87
+                        migrations:
+                          - id: 924f7c50-505f-11eb-ae0a-3fa2e626a51d
+                            status: pending
+                            version: 16
+                            updated: 2021-01-06T20:41:37.173Z
+                        is_outdated: true
+                      - index: .siem-signals-default-000003
+                        version: 16
+                        signal_versions:
+                          - version: 16
+                            count: 54
+                        migrations: []
+                        is_outdated: false
         400:
           description: Invalid input data response
           content:
