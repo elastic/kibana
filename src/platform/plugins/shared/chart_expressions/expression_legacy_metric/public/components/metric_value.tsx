@@ -78,8 +78,8 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
         metric.lightText && legacyMtrVisContainerLightCss,
         onFilter && legacyMtrVisContainerIsFilterableCss,
         !autoScale && colorFullBackground && legacyMtrVisContainerIsFullCss,
+        css({ backgroundColor: !autoScale && colorFullBackground ? metric.bgColor : undefined }),
       ]}
-      style={autoScale && colorFullBackground ? {} : { backgroundColor: metric.bgColor }}
     >
       <div
         data-test-subj="metric_value"
