@@ -161,7 +161,6 @@ describe('contentReferenceComponentFactory', () => {
   it('renders nothing if contentReferenceId is empty string', async () => {
     const Component = contentReferenceComponentFactory({
       contentReferences: {
-
         '1': {
           id: '1',
           type: 'SecurityAlertsPage',

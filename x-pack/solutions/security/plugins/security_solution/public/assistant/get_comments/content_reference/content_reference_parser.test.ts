@@ -39,7 +39,11 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     expect(file.children[0].children).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ type: 'text', value: 'There is an empty content reference.' }),
-        expect.objectContaining({ type: 'contentReference', contentReferenceCount: -1, contentReferenceId: "" }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: -1,
+          contentReferenceId: '',
+        }),
       ])
     );
   });

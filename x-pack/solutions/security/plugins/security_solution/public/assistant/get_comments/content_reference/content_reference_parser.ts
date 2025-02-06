@@ -63,7 +63,7 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
         body += char;
       }
 
-      return "";
+      return '';
     }
 
     const contentReferenceId = readArg('(', ')');
@@ -91,7 +91,7 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
 
     const getContentReferenceCount = (id: string) => {
       if (!id) {
-        return -1
+        return -1;
       }
       if (id in contentReferenceCounts) {
         return contentReferenceCounts[id];
@@ -104,10 +104,10 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
 
     const contentReferenceNode: ContentReferenceNode = {
       type: 'contentReference',
-      contentReferenceId: contentReferenceId,
+      contentReferenceId,
       contentReferenceCount: getContentReferenceCount(contentReferenceId),
       contentReferenceBlock,
-    }
+    };
 
     return eat(toEat)(contentReferenceNode);
   };
