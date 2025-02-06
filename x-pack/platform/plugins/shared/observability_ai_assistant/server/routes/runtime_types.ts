@@ -22,6 +22,7 @@ export const messageRt: t.Type<Message> = t.type({
   message: t.intersection([
     t.type({
       role: t.union([
+        t.literal(MessageRole.System),
         t.literal(MessageRole.Assistant),
         t.literal(MessageRole.Function),
         t.literal(MessageRole.User),
@@ -56,22 +57,26 @@ const tokenCountRt = t.type({
   total: t.number,
 });
 
-export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
-  '@timestamp': t.string,
-  conversation: t.intersection([
-    t.type({
-      title: t.string,
-    }),
-    t.partial({
-      token_count: tokenCountRt,
-    }),
-  ]),
-  systemMessage: t.string,
-  messages: t.array(messageRt),
-  labels: t.record(t.string, t.string),
-  numeric_labels: t.record(t.string, t.number),
-  public: toBooleanRt,
-});
+export const baseConversationRt: t.Type<ConversationRequestBase> = t.intersection([
+  t.type({
+    '@timestamp': t.string,
+    conversation: t.intersection([
+      t.type({
+        title: t.string,
+      }),
+      t.partial({
+        token_count: tokenCountRt,
+      }),
+    ]),
+    messages: t.array(messageRt),
+    labels: t.record(t.string, t.string),
+    numeric_labels: t.record(t.string, t.number),
+    public: toBooleanRt,
+  }),
+  t.partial({
+    systemMessage: t.string,
+  }),
+]);
 
 export const assistantScopeType = t.union([
   t.literal('observability'),

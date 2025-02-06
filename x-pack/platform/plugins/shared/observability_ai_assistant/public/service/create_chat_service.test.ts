@@ -83,6 +83,7 @@ describe('createChatService', () => {
     function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
       return service.chat('my_test', {
         signal,
+        system: 'system',
         messages: [],
         connectorId: '',
         scopes: ['observability'],

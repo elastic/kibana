@@ -73,7 +73,7 @@ type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
 }>;
 
 export interface ChatClient {
-  chat: (message: StringOrMessageList) => Promise<InnerMessage>;
+  chat: (message: StringOrMessageList, system: string) => Promise<InnerMessage>;
   complete: CompleteFunction;
   evaluate: (
     {}: { conversationId?: string; messages: InnerMessage[]; errors: ChatCompletionErrorEvent[] },
@@ -349,11 +349,13 @@ export class KibanaClient {
     async function chat(
       name: string,
       {
+        system,
         messages,
         functions,
         functionCall,
         connectorIdOverride,
       }: {
+        system: string;
         messages: Message[];
         functions: FunctionDefinition[];
         functionCall?: string;
@@ -367,6 +369,7 @@ export class KibanaClient {
         const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
           {
             name,
+            system,
             messages,
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
@@ -403,14 +406,14 @@ export class KibanaClient {
     const results: EvaluationResult[] = [];
 
     return {
-      chat: async (message) => {
+      chat: async (message, system) => {
         const messages = [
           ...this.getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat('chat', { messages, functions: [] });
+        return chat('chat', { system, messages, functions: [] });
       },
       complete: async ({
         messages: messagesArg,

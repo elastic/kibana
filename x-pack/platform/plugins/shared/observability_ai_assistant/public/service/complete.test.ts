@@ -91,6 +91,7 @@ describe('complete', () => {
         client,
         connectorId,
         getScreenContexts: () => [],
+        systemMessage,
         messages,
         persist: false,
         disableFunctions: false,
