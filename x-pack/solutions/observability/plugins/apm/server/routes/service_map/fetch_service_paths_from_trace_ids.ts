@@ -126,26 +126,47 @@ async function fetchSpanIdsFromTraceIds({
                   terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
                 },
               },
-              { eventOutcome: { terms: { field: EVENT_OUTCOME } } },
             ] as const),
             size: terminateAfter,
           },
           aggs: {
-            sample: {
-              top_metrics: {
-                size: 1,
-                sort: {
-                  '@timestamp': 'asc' as const,
+            eventOutcomeGroup: {
+              filters: {
+                filters: {
+                  success: {
+                    term: {
+                      [EVENT_OUTCOME]: 'success' as const,
+                    },
+                  },
+                  others: {
+                    bool: {
+                      must_not: {
+                        term: {
+                          [EVENT_OUTCOME]: 'success' as const,
+                        },
+                      },
+                    },
+                  },
                 },
-                metrics: asMutableArray([
-                  { field: SPAN_ID },
-                  { field: SPAN_TYPE },
-                  { field: SPAN_SUBTYPE },
-                  { field: SPAN_DESTINATION_SERVICE_RESOURCE },
-                  { field: SERVICE_NAME },
-                  { field: SERVICE_ENVIRONMENT },
-                  { field: AGENT_NAME },
-                ] as const),
+              },
+              aggs: {
+                sample: {
+                  top_metrics: {
+                    size: 1,
+                    sort: {
+                      '@timestamp': 'asc',
+                    },
+                    metrics: asMutableArray([
+                      { field: SPAN_ID },
+                      { field: SPAN_TYPE },
+                      { field: SPAN_SUBTYPE },
+                      { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                      { field: SERVICE_NAME },
+                      { field: SERVICE_ENVIRONMENT },
+                      { field: AGENT_NAME },
+                    ] as const),
+                  },
+                },
               },
             },
           },
@@ -157,7 +178,18 @@ async function fetchSpanIdsFromTraceIds({
   const destinationsBySpanId = new Map<string, Destination>();
 
   sampleExitSpans.aggregations?.exitSpans.buckets.forEach((bucket) => {
-    const sample = bucket.sample.top[0].metrics;
+    const eventOutcomeGroup =
+      bucket.eventOutcomeGroup.buckets.success.sample.top.length > 0
+        ? bucket.eventOutcomeGroup.buckets.success
+        : bucket.eventOutcomeGroup.buckets.others.sample.top.length > 0
+        ? bucket.eventOutcomeGroup.buckets.others
+        : undefined;
+
+    const sample = eventOutcomeGroup?.sample.top[0].metrics;
+    if (!sample) {
+      return;
+    }
+
     const spanId = sample[SPAN_ID] as string;
     if (!sample || !spanId) {
       return;
