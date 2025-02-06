@@ -11,7 +11,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
@@ -20,6 +19,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import { RuleMonitorsTable } from '../rule_monitors_table';
 import { apiService } from '../../../../utils/api_service';
 import { inspectStatusRuleAction } from '../../state/alert_rules';
 import { selectInspectStatusRule } from '../../state/alert_rules/selectors';
@@ -34,7 +34,7 @@ export const StatusRuleViz = ({
   const { data } = useSelector(selectInspectStatusRule);
   const dispatch = useDispatch();
   const {
-    services: { inspector, http },
+    services: { inspector },
   } = useKibana<ClientPluginsStart>();
 
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
@@ -76,7 +76,7 @@ export const StatusRuleViz = ({
                 {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
                   defaultMessage:
                     '{total} existing {total, plural, one {monitor} other {monitors}}',
-                  values: { total: data?.enabledMonitorQueryIds.length },
+                  values: { total: data?.monitors.length },
                 })}
               </EuiButtonEmpty>
             }
@@ -87,20 +87,10 @@ export const StatusRuleViz = ({
               })}
             </EuiPopoverTitle>
             {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFollowingPopoverLabel', {
-              defaultMessage: 'Rule applies to following existing monitors, showing first 100:',
+              defaultMessage: 'Rule applies to following existing monitors.',
             })}
             <EuiSpacer size="s" />
-            <EuiListGroup
-              css={{ maxHeight: '300px', overflowY: 'auto' }}
-              listItems={data?.monitors.slice(0, 100).map((mon) => ({
-                label: mon.name,
-                href: http.basePath.prepend(`/app/synthetics/monitors/${mon.id}`),
-                target: '_blank',
-                iconType: 'dot',
-              }))}
-              color="primary"
-              size="s"
-            />
+            <RuleMonitorsTable />
           </EuiPopover>
         </EuiFlexItem>
         {/* to push detail button to end*/}

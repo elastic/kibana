@@ -81,6 +81,7 @@ export type StatusRuleInspect = AlertOverviewStatus & {
   monitors: Array<{
     id: string;
     name: string;
+    type: string;
   }>;
 };
 export type AlertStatusConfigs = Record<string, AlertStatusMetaData>;
