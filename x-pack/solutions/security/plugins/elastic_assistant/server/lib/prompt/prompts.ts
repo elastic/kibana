@@ -23,7 +23,7 @@ export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} ${KB_CATCH} {include_
 export const BEDROCK_SYSTEM_PROMPT = `Use tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
-export const STRUCTURED_SYSTEM_PROMPT = `Respond to the human as helpfully and accurately as possible. ${KNOWLEDGE_HISTORY} You have access to the following tools:
+export const STRUCTURED_SYSTEM_PROMPT = `Respond to the human as helpfully and accurately as possible. ${KNOWLEDGE_HISTORY} {include_citations_prompt_placeholder} You have access to the following tools:
 
 {tools}
 
@@ -102,25 +102,35 @@ const BAD_SYNTAX_EXAMPLES =
   'Examples of INCORRECT syntax (bad, because the field names are not included): {{ hostNameValue }} {{ userNameValue }} {{ sourceIpValue }}';
 
 const RECONNAISSANCE = 'Reconnaissance';
+const RESOURCE_DEVELOPMENT = 'Resource Development';
 const INITIAL_ACCESS = 'Initial Access';
 const EXECUTION = 'Execution';
 const PERSISTENCE = 'Persistence';
 const PRIVILEGE_ESCALATION = 'Privilege Escalation';
+const DEFENSE_EVASION = 'Defense Evasion';
+const CREDENTIAL_ACCESS = 'Credential Access';
 const DISCOVERY = 'Discovery';
 const LATERAL_MOVEMENT = 'Lateral Movement';
+const COLLECTION = 'Collection';
 const COMMAND_AND_CONTROL = 'Command and Control';
 const EXFILTRATION = 'Exfiltration';
+const IMPACT = 'Impact';
 
 const MITRE_ATTACK_TACTICS = [
   RECONNAISSANCE,
+  RESOURCE_DEVELOPMENT,
   INITIAL_ACCESS,
   EXECUTION,
   PERSISTENCE,
   PRIVILEGE_ESCALATION,
+  DEFENSE_EVASION,
+  CREDENTIAL_ACCESS,
   DISCOVERY,
   LATERAL_MOVEMENT,
+  COLLECTION,
   COMMAND_AND_CONTROL,
   EXFILTRATION,
+  IMPACT,
 ] as const;
 export const ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN = `A detailed insight with markdown, where each markdown bullet contains a description of what happened that reads like a story of the attack as it played out and always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
 export const ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN = `A short (no more than a sentence) summary of the insight featuring only the host.name and user.name fields (when they are applicable), using the same ${SYNTAX} syntax`;
@@ -131,3 +141,21 @@ export const ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN = `A markdown summary 
 export const ATTACK_DISCOVERY_GENERATION_TITLE =
   'A short, no more than 7 words, title for the insight, NOT formatted with special syntax or markdown. This must be as brief as possible.';
 export const ATTACK_DISCOVERY_GENERATION_INSIGHTS = `Insights with markdown that always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
+
+export const BEDROCK_CHAT_TITLE = `You are a helpful assistant for Elastic Security. Assume the following user message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Respond with the title only with no other text explaining your response. As an example, for the given MESSAGE, this is the TITLE:
+
+MESSAGE: I am having trouble with the Elastic Security app.
+TITLE: Troubleshooting Elastic Security app issues
+`;
+
+export const GEMINI_CHAT_TITLE = `You are a title generator for a helpful assistant for Elastic Security. Assume the following human message is the start of a conversation between you and a human. Generate a relevant conversation title for the human's message in plain text. Make sure the title is formatted for the user, without using quotes or markdown. The title should clearly reflect the content of the message and be appropriate for a list of conversations. Respond only with the title. As an example, for the given MESSAGE, this is the TITLE:
+
+MESSAGE: I am having trouble with the Elastic Security app.
+TITLE: Troubleshooting Elastic Security app issues
+`;
+
+export const DEFAULT_CHAT_TITLE = `You are a helpful assistant for Elastic Security. Assume the following user message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. As an example, for the given MESSAGE, this is the TITLE:
+
+MESSAGE: I am having trouble with the Elastic Security app.
+TITLE: Troubleshooting Elastic Security app issues
+`;

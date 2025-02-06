@@ -3283,9 +3283,9 @@
           "QueryDslQueryContainer",
           "[] | undefined; logsSource?: ",
           {
-            "pluginId": "@kbn/observability-logs-overview",
+            "pluginId": "@kbn/logs-overview",
             "scope": "public",
-            "docId": "kibKbnObservabilityLogsOverviewPluginApi",
+            "docId": "kibKbnLogsOverviewPluginApi",
             "section": "def-public.LogsSourceConfiguration",
             "text": "LogsSourceConfiguration"
           },
