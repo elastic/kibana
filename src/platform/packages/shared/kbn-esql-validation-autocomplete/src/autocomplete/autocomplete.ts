@@ -107,6 +107,8 @@ import {
   extractTypeFromASTArg,
   getSuggestionsToRightOfOperatorExpression,
   checkFunctionInvocationComplete,
+  getOverlapRange,
+  KEYWORDS_WITH_SPACES,
 } from './helper';
 import { FunctionParameter, isParameterType } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
@@ -185,10 +187,11 @@ export async function suggest(
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
+  let suggestionsPromise: Promise<SuggestionRawDefinition[]> = Promise.resolve([]);
   if (astContext.type === 'newCommand') {
     // propose main commands here
     // filter source commands if already defined
-    const suggestions = getCommandAutocompleteDefinitions(getAllCommands());
+    const _suggestions = getCommandAutocompleteDefinitions(getAllCommands());
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
@@ -208,18 +211,18 @@ export async function suggest(
           ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
         );
       }
-      const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
+      const sourceCommandsSuggestions = _suggestions.filter(isSourceCommand);
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
     }
 
-    return suggestions.filter((def) => !isSourceCommand(def));
+    suggestionsPromise = Promise.resolve(_suggestions.filter((def) => !isSourceCommand(def)));
   }
 
   if (
     astContext.type === 'expression' ||
     (astContext.type === 'option' && astContext.command?.name === 'join')
   ) {
-    return getSuggestionsWithinCommandExpression(
+    suggestionsPromise = getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -234,7 +237,7 @@ export async function suggest(
     );
   }
   if (astContext.type === 'setting') {
-    return getSettingArgsSuggestions(
+    suggestionsPromise = getSettingArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -247,7 +250,7 @@ export async function suggest(
     // need this wrap/unwrap thing to make TS happy
     const { option, ...rest } = astContext;
     if (option && isOptionItem(option)) {
-      return getOptionArgsSuggestions(
+      suggestionsPromise = getOptionArgsSuggestions(
         innerText,
         ast,
         { option, ...rest },
@@ -258,7 +261,7 @@ export async function suggest(
     }
   }
   if (astContext.type === 'function') {
-    return getFunctionArgsSuggestions(
+    suggestionsPromise = getFunctionArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -271,7 +274,7 @@ export async function suggest(
     );
   }
   if (astContext.type === 'list') {
-    return getListArgsSuggestions(
+    suggestionsPromise = getListArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -280,7 +283,21 @@ export async function suggest(
       getPolicyMetadata
     );
   }
-  return [];
+
+  for (const word of KEYWORDS_WITH_SPACES) {
+    const overlap = getOverlapRange(innerText.toLowerCase(), word.toLowerCase());
+    if (overlap.start < overlap.end) {
+      // there's an overlap so use that
+      return suggestionsPromise.then((suggestions) =>
+        suggestions.map<SuggestionRawDefinition>((s) => {
+          const suggestionWithRange: SuggestionRawDefinition = { ...s, rangeToReplace: overlap };
+          return suggestionWithRange;
+        })
+      );
+    }
+  }
+
+  return suggestionsPromise;
 }
 
 export function getFieldsByTypeRetriever(
