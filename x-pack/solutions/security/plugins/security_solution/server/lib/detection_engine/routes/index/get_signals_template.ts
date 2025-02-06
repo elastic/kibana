@@ -78,20 +78,25 @@ export const getSignalsTemplate = (index: string, aadIndexAliasName: string, spa
         },
       },
       mappings: {
-        dynamic: false,
-        properties: merge(
-          ecsMapping.mappings.properties,
-          otherMapping.mappings.properties,
-          fieldAliases,
-          signalsMapping.mappings.properties,
+        ...merge(
           {
-            [SPACE_IDS]: {
-              type: 'constant_keyword',
-              value: spaceId,
-            },
+            properties: merge(
+              ecsMapping.mappings.properties,
+              otherMapping.mappings.properties,
+              fieldAliases,
+              signalsMapping.mappings.properties,
+              {
+                [SPACE_IDS]: {
+                  type: 'constant_keyword',
+                  value: spaceId,
+                },
+              }
+            ),
           },
-          createMappingsFor818Compatibility()
+          createMappingsFor818Compatibility(),
+          { dynamic: false }
         ),
+
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
           [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
