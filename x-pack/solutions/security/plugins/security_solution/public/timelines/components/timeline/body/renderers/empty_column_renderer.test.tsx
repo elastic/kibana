@@ -8,8 +8,6 @@
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-
-import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../../../../../common/components/drag_and_drop/translations';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
@@ -75,8 +73,6 @@ describe('empty_column_renderer', () => {
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual(
-      `source.ip${getEmptyValue()}${DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}`
-    );
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });
