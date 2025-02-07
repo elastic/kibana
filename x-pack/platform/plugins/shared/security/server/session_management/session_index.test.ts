@@ -1124,7 +1124,7 @@ describe('Session index', () => {
       );
     });
 
-    it.only('should correctly attach alias to reindexed index', async () => {
+    it('should correctly attach alias to reindexed index', async () => {
       const REINDEXED_INDEX_NAME = `${indexName}_reindexed-for-N`;
 
       mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
