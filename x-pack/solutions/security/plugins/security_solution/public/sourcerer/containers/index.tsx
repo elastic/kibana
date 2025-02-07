@@ -52,7 +52,7 @@ export const useSourcererDataView = (
         title: selectedPatterns.join(','),
         name: selectedDataView?.dataView?.name ?? selectedPatterns.join(','),
         id: selectedDataViewId ?? undefined,
-        fields: optionalSelectedDataViewSpec?.fields,
+        fields: optionalSelectedDataViewSpec?.fields ?? selectedDataView?.dataView?.fields,
       },
     };
   }, [
