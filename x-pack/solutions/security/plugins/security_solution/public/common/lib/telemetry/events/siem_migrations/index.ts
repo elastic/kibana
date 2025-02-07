@@ -22,7 +22,7 @@ const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
     },
   },
   errorMessage: {
-    type: 'keyword',
+    type: 'text',
     _meta: {
       description: 'The error message if action has failed',
       optional: true,

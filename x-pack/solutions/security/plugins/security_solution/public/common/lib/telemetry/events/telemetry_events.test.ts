@@ -19,7 +19,12 @@ describe('telemetry events', () => {
         if (!propertyTypes[item]) {
           propertyTypes[item] = eventType;
         } else {
-          expect(propertyTypes[item]).toEqual(eventType);
+          try {
+            expect(propertyTypes[item]).toEqual(eventType);
+          } catch (e) {
+            // Show a descriptive error message
+            throw new Error(`Property "${item}" has inconsistent types.\n${e}`);
+          }
         }
       });
     });
