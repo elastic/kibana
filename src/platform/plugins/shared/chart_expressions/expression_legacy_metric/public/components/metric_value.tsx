@@ -110,6 +110,15 @@ const styles = {
       '&.legacyMtrVis__container--light': {
         color: euiTheme.colors.emptyShade,
       },
+      '&.legacyMtrVis__container-isfull': {
+        minHeight: '100%',
+        minWidth: 'max-content',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flex: '1 0 100%',
+      },
       '&.legacyMtrVis__container-isfilterable': {
         cursor: 'pointer',
         transition: `transform ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
@@ -119,15 +128,6 @@ const styles = {
           boxShadow: 'none',
           transform: 'translate(0, -2px)',
         },
-      },
-      '&.legacyMtrVis__container-isfull': {
-        minHeight: '100%',
-        minWidth: 'max-content',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flex: '1 0 100%',
       },
     }),
 };

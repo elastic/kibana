@@ -31,17 +31,6 @@ import { css } from '@emotion/react';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
-const legacyMtrVisCss = css({
-  height: '100%',
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'center',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  overflow: 'auto',
-});
-
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
 
@@ -143,4 +132,15 @@ export const getMetricVisRenderer: (
       domNode
     );
   },
+});
+
+const legacyMtrVisCss = css({
+  height: '100%',
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  overflow: 'auto',
 });
