@@ -20,6 +20,9 @@ jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connect
 jest.mock('./use_stream');
 
 jest.mock('../../../common/lib/kibana', () => ({
+  useNavigation: jest.fn().mockReturnValue({
+    navigateTo: jest.fn(),
+  }),
   useKibana: jest.fn().mockReturnValue({
     services: {
       discover: {
