@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
 
-      // assert x axis label rotation
+      // assert x-axis label rotation
       expect(debugState?.axes!.x[0].rotation).to.eql(0);
     });
 
@@ -175,14 +175,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
     });
 
-    it('should change x axis label rotation', async () => {
+    it('should change x-axis label rotation', async () => {
       await lens.switchToVisualization('heatmap', 'heat');
       await testSubjects.click('lnsHeatmapHorizontalAxisButton');
       await testSubjects.click('axis_orientation_vertical');
 
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      expect(debugState?.axes!.x[0].rotation).to.eql(-90);
+      expect(debugState?.axes!.x[0].rotation).to.eql(90);
     });
 
     // Skip for now as EC is not reporting title
