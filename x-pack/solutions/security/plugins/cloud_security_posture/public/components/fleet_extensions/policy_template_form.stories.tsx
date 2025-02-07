@@ -90,6 +90,10 @@ const Template: Story<PackagePolicyReplaceDefineStepExtensionComponentProps> = (
 export const AgentBased = Template.bind({});
 AgentBased.args = defaultProps;
 AgentBased.play = async ({ canvasElement }) => {
+  changePolicyName({ canvasElement });
+};
+
+export const changePolicyName = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
   await waitFor(() => {
     expect(canvas.getByLabelText('Name')).toBeInTheDocument;
