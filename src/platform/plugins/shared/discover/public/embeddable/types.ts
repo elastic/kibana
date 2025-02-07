@@ -106,6 +106,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesWritableUnifiedSearch &
   HasLibraryTransforms &
   HasTimeRange &
+  EmbeddableTitle &
   HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
@@ -122,4 +123,8 @@ export const apiPublishesSavedSearch = (
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;
+}
+
+export interface EmbeddableTitle {
+  title$: PublishingSubject<string | undefined>;
 }

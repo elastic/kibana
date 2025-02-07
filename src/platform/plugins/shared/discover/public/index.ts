@@ -38,6 +38,7 @@ export {
   type SearchEmbeddableRuntimeState,
   type SearchEmbeddableApi,
   type NonPersistedDisplayOptions,
+  type EmbeddableTitle,
 } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
 export type { DiscoverServices } from './build_services';

@@ -23,6 +23,7 @@ import {
   apiPublishesSavedSearch,
   PublishesSavedSearch,
   HasTimeRange,
+  EmbeddableTitle,
 } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -43,7 +44,6 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
-
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {
@@ -82,7 +82,11 @@ interface ExecutionParams {
   i18nStart: I18nStart;
 }
 
-type GetCsvActionApi = HasType & PublishesSavedSearch & CanAccessViewMode & HasTimeRange;
+type GetCsvActionApi = HasType &
+  PublishesSavedSearch &
+  CanAccessViewMode &
+  HasTimeRange &
+  EmbeddableTitle;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
   return (
@@ -90,7 +94,8 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is Get
     apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
     apiPublishesSavedSearch(api) &&
     apiCanAccessViewMode(api) &&
-    Boolean((api as unknown as HasTimeRange).hasTimeRange)
+    Boolean((api as unknown as HasTimeRange).hasTimeRange) &&
+    Boolean((api as unknown as EmbeddableTitle).title$)
   );
 };
 
@@ -196,7 +201,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       addGlobalTimeFilter: !embeddable.hasTimeRange(),
       absoluteTime: true,
     });
-    const title = savedSearch.title || '';
+    const title = embeddable.title$.getValue();
     const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
 
     return this.executeGenerate(executionParams);
