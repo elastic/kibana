@@ -45,7 +45,6 @@ interface HostSummaryProps {
   scopeId?: string;
   data: HostItem;
   id: string;
-  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -73,7 +72,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
     data,
     endDate,
     id,
-    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     isLoadingAnomaliesData,
     indexNames,
@@ -121,11 +119,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
-          isDraggable={isDraggable}
           scopeId={scopeId}
         />
       ),
-      [contextID, isDraggable, scopeId]
+      [contextID, scopeId]
     );
 
     const [hostRiskScore, hostRiskLevel] = useMemo(() => {
@@ -179,7 +176,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host
-              ? hostIdRenderer({ host: data.host, isDraggable, noLink: true })
+              ? hostIdRenderer({ host: data.host, noLink: true })
               : getEmptyTagValue(),
         },
         {
@@ -205,7 +202,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, indexNames, hostName, isDraggable]
+      [data, indexNames, hostName]
     );
     const firstColumn = useMemo(
       () =>
@@ -251,7 +248,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 scopeId={scopeId}
-                isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
             ),
@@ -287,7 +283,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isDraggable]
+      [contextID, scopeId, data, firstColumn, getDefaultRenderer]
     );
     return (
       <>
