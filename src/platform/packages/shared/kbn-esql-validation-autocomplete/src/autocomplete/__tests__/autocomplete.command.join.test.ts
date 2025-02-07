@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniq } from 'lodash';
 import { setup, getFieldNamesByType, lookupIndexFields } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -105,17 +106,13 @@ describe('autocomplete.suggest', () => {
         const { suggest } = await setup();
         const suggestions = await suggest('FROM index | LOOKUP JOIN join_index ON /');
         const labels = suggestions.map((s) => s.text.trim()).sort();
-        const expected = getFieldNamesByType('any')
-          .sort()
-          .map((field) => field.trim());
+        const expected = getFieldNamesByType('any').map((field) => field.trim());
 
         for (const { name } of lookupIndexFields) {
           expected.push(name.trim());
         }
 
-        expected.sort();
-
-        expect(labels).toEqual(expected);
+        expect(labels).toEqual(uniq(expected).sort());
       });
 
       test('more field suggestions after comma', async () => {
@@ -130,9 +127,7 @@ describe('autocomplete.suggest', () => {
           expected.push(name.trim());
         }
 
-        expected.sort();
-
-        expect(labels).toEqual(expected);
+        expect(labels).toEqual(uniq(expected).sort());
       });
 
       test('suggests pipe and comma after a field', async () => {

@@ -164,6 +164,7 @@ export async function suggest(
   const astContext = getAstContext(innerText, ast, offset);
 
   // But we also need the full ast for the full query
+  // FIXIT: can we avoid this double parse?
   const correctedFullQuery = correctQuerySyntax(fullText, context);
   const { ast: fullAst } = await astProvider(correctedFullQuery);
 
@@ -186,7 +187,7 @@ export async function suggest(
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
-  let suggestionsPromise: Promise<SuggestionRawDefinition[]> = Promise.resolve([]);
+  let suggestions: SuggestionRawDefinition[] = [];
   if (astContext.type === 'newCommand') {
     // propose main commands here
     // filter source commands if already defined
@@ -214,14 +215,14 @@ export async function suggest(
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
     }
 
-    suggestionsPromise = Promise.resolve(_suggestions.filter((def) => !isSourceCommand(def)));
+    suggestions = _suggestions.filter((def) => !isSourceCommand(def));
   }
 
   if (
     astContext.type === 'expression' ||
     (astContext.type === 'option' && astContext.command?.name === 'join')
   ) {
-    suggestionsPromise = getSuggestionsWithinCommandExpression(
+    suggestions = await getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -236,7 +237,7 @@ export async function suggest(
     );
   }
   if (astContext.type === 'setting') {
-    suggestionsPromise = getSettingArgsSuggestions(
+    suggestions = await getSettingArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -245,11 +246,11 @@ export async function suggest(
       getPolicyMetadata
     );
   }
-  if (astContext.type === 'option') {
+  if (astContext.type === 'option' && astContext.command?.name !== 'join') {
     // need this wrap/unwrap thing to make TS happy
     const { option, ...rest } = astContext;
     if (option && isOptionItem(option)) {
-      suggestionsPromise = getOptionArgsSuggestions(
+      suggestions = await getOptionArgsSuggestions(
         innerText,
         ast,
         { option, ...rest },
@@ -260,7 +261,7 @@ export async function suggest(
     }
   }
   if (astContext.type === 'function') {
-    suggestionsPromise = getFunctionArgsSuggestions(
+    suggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -273,7 +274,7 @@ export async function suggest(
     );
   }
   if (astContext.type === 'list') {
-    suggestionsPromise = getListArgsSuggestions(
+    suggestions = await getListArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -285,17 +286,13 @@ export async function suggest(
 
   const multiWordKeywordMatchRange = getMultiWordKeywordMatchRange(innerText);
 
-  return multiWordKeywordMatchRange
-    ? suggestionsPromise.then((suggestions) =>
-        suggestions.map<SuggestionRawDefinition>((s) => {
-          const suggestionWithRange: SuggestionRawDefinition = {
-            ...s,
-            rangeToReplace: multiWordKeywordMatchRange,
-          };
-          return suggestionWithRange;
-        })
-      )
-    : suggestionsPromise;
+  if (multiWordKeywordMatchRange) {
+    suggestions.forEach((s) => {
+      s.rangeToReplace = multiWordKeywordMatchRange;
+    });
+  }
+
+  return suggestions;
 }
 
 export function getFieldsByTypeRetriever(

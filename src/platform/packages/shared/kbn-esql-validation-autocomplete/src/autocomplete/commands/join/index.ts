@@ -42,6 +42,30 @@ const getFullCommandMnemonics = (
   ]);
 };
 
+const attachCommonFieldMetadata = (field: SuggestionRawDefinition) => {
+  field.sortText = '1';
+  field.documentation = {
+    value: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.join.sharedField', {
+      defaultMessage: 'Field shared between the source and the lookup index',
+    }),
+  };
+
+  let detail = field.detail || '';
+
+  if (detail) {
+    detail += ' ';
+  }
+
+  detail += i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.join.commonFieldNote',
+    {
+      defaultMessage: '(common field)',
+    }
+  );
+
+  field.detail = detail;
+};
+
 const suggestFields = async (
   command: ESQLCommand<'join'>,
   getColumnsByType: GetColumnsByTypeFn,
@@ -66,34 +90,14 @@ const suggestFields = async (
     getVariablesByType
   );
 
-  const intersection = suggestionIntersection(joinFields, sourceFields);
+  const commonFields = suggestionIntersection(joinFields, sourceFields);
   const union = suggestionUnion(sourceFields, joinFields);
 
-  for (const commonField of intersection) {
-    commonField.sortText = '1';
-    commonField.documentation = {
-      value: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.join.sharedField', {
-        defaultMessage: 'Field shared between the source and the lookup index',
-      }),
-    };
-
-    let detail = commonField.detail || '';
-
-    if (detail) {
-      detail += ' ';
-    }
-
-    detail += i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.autocomplete.join.commonFieldNote',
-      {
-        defaultMessage: '(common field)',
-      }
-    );
-
-    commonField.detail = detail;
+  for (const commonField of commonFields) {
+    attachCommonFieldMetadata(commonField);
   }
 
-  return [...intersection, ...union];
+  return suggestionUnion(commonFields, union);
 };
 
 export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (

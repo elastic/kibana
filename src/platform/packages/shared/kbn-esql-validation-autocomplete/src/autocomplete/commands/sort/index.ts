@@ -71,7 +71,7 @@ export async function suggest(
         innerText,
         (fragment) =>
           ['FIRST', 'LAST'].some((completeWord) => noCaseCompare(completeWord, fragment)),
-        (_fragment) => Object.values(sortModifierSuggestions),
+        (_fragment) => Object.values(sortModifierSuggestions).map((s) => ({ ...s })),
         (fragment) => {
           return [
             { ...pipeCompleteItem, text: ' | ' },
