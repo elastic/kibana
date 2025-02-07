@@ -26,7 +26,6 @@ import {
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { castArray } from 'lodash';
 import { ServiceNameLink } from '../sub_components/service_name_link';
 import { TraceIdLink } from '../sub_components/trace_id_link';
 import { TransactionNameLink } from '../sub_components/transaction_name_link';
@@ -60,7 +59,7 @@ export const getAttributeConfiguration = (
       content: (
         <ServiceNameLink
           serviceName={attributes[SERVICE_NAME_FIELD]}
-          agentName={castArray(attributes[AGENT_NAME_FIELD])[0]}
+          agentName={attributes[AGENT_NAME_FIELD]}
         />
       ),
     },
