@@ -201,7 +201,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       addGlobalTimeFilter: !embeddable.hasTimeRange(),
       absoluteTime: true,
     });
-    const title = embeddable.title$.getValue();
+    const title = embeddable.title$.getValue() ?? '';
     const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
 
     return this.executeGenerate(executionParams);
