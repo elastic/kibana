@@ -332,7 +332,7 @@ export const dataStreamMigrationServiceFactory = ({
     async readonlyIndices(indices: string[]) {
       for (const index of indices) {
         const unfreeze = await esClient.indices.unfreeze({ index });
-        const addBlock = await esClient.indices.addBlock({ index, block: 'read_only' });
+        const addBlock = await esClient.indices.addBlock({ index, block: 'write' });
 
         if (!unfreeze.acknowledged || !addBlock.acknowledged) {
           throw error.readonlyTaskFailed(`Could not set index ${index} to readonly.`);
