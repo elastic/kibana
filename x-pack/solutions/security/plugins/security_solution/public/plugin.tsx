@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Subject, combineLatestWith } from 'rxjs';
+import { Provider as ReduxStoreProvider } from 'react-redux';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -24,6 +25,9 @@ import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { WORKSPACE_TOOL_AI_ASSISTANT } from '@kbn/core-workspace-browser';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { Assistant } from '@kbn/elastic-assistant';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -61,6 +65,9 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { hasAccessToSecuritySolution } from './helpers_access';
+import { AssistantProvider } from './assistant/provider';
+import { KibanaContextProvider } from './common/lib/kibana/kibana_react';
+import { ReactQueryClientProvider } from './common/containers/query_client/query_client_provider';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -109,6 +116,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const store = await this.store(coreStart, startPlugins, subPlugins);
 
       const services = await this.services.generateServices(coreStart, startPlugins, params);
+
       return { renderApp, subPlugins, store, services };
     };
 
@@ -207,6 +215,38 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
 
     this.registerDiscoverSharedFeatures(core, plugins);
+
+    core.getStartServices().then(async ([coreStart]) => {
+      if (coreStart.chrome.workspace.isEnabled()) {
+        const { services, store } = await mountDependencies();
+        coreStart.chrome.workspace.toolbox.registerTool({
+          toolId: WORKSPACE_TOOL_AI_ASSISTANT,
+          size: 'wide',
+          button: {
+            iconType: AssistantIcon,
+            'aria-label': 'Elastic Assistant',
+          },
+          tool: {
+            title: 'Elastic Assistant',
+            color: 'plain',
+            isScrollable: false,
+            hasBorder: true,
+            containerPadding: 'none',
+            children: (
+              <KibanaContextProvider services={services}>
+                <ReduxStoreProvider store={store}>
+                  <ReactQueryClientProvider>
+                    <AssistantProvider>
+                      <Assistant />
+                    </AssistantProvider>
+                  </ReactQueryClientProvider>
+                </ReduxStoreProvider>
+              </KibanaContextProvider>
+            ),
+          },
+        });
+      }
+    });
 
     return this.contract.getSetupContract();
   }
