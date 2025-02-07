@@ -7,6 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SelectedDataView, SourcererDataView, SourcererScopeName } from './model';
 import type { SecurityDataView } from '../containers/create_sourcerer_data_view';
 
@@ -35,5 +36,6 @@ export interface SelectedDataViewPayload {
   selectedDataViewId: SelectedDataView['dataViewId'];
   selectedPatterns: SelectedDataView['selectedPatterns'];
   shouldValidateSelectedPatterns?: boolean;
+  dataView?: DataViewSpec;
 }
 export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');

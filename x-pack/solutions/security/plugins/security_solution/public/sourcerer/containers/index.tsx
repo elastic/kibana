@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import type { FieldSpec } from '@kbn/data-plugin/common';
 import { sourcererSelectors } from '../store';
-import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';
+import type { SelectedDataView } from '../store/model';
 import { SourcererScopeName } from '../store/model';
 import { checkIfIndicesExist } from '../store/helpers';
 import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
-import { useFetchIndex } from '../../common/containers/source';
 import type { State } from '../../common/store/types';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 
@@ -35,56 +33,22 @@ export const useSourcererDataView = (
   const scopeSelectedPatterns = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeSelectedPatterns(state, scopeId);
   });
-  const missingPatterns = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeMissingPatterns(state, scopeId);
-  });
 
   const selectedPatterns = useMemo(
     () => sortWithExcludesAtEnd(scopeSelectedPatterns),
     [scopeSelectedPatterns]
   );
 
-  const [legacyPatterns, setLegacyPatterns] = useState<string[]>([]);
-
-  const [indexPatternsLoading, fetchIndexReturn] = useFetchIndex(legacyPatterns);
-
-  const legacyDataView: Omit<SourcererDataView, 'id'> & { id: string | null } = useMemo(
-    () => ({
-      ...fetchIndexReturn,
-      dataView: fetchIndexReturn.dataView,
-      runtimeMappings: (fetchIndexReturn.dataView?.runtimeFieldMap as RunTimeMappings) ?? {},
-      title: fetchIndexReturn.dataView?.title ?? '',
-      id: fetchIndexReturn.dataView?.id ?? null,
-      loading: indexPatternsLoading,
-      patternList: fetchIndexReturn.indexes,
-      indexFields: fetchIndexReturn.indexPatterns.fields as FieldSpec[],
-      fields: fetchIndexReturn.dataView?.fields,
-    }),
-    [fetchIndexReturn, indexPatternsLoading]
-  );
-
-  useEffect(() => {
-    if (selectedDataView == null || missingPatterns.length > 0) {
-      // old way of fetching indices, legacy timeline
-      setLegacyPatterns(selectedPatterns);
-    } else {
-      setLegacyPatterns([]);
-    }
-  }, [missingPatterns, selectedDataView, selectedPatterns]);
-
   const sourcererDataView = useMemo(() => {
-    const _dv =
-      selectedDataView == null || missingPatterns.length > 0 ? legacyDataView : selectedDataView;
-    // Make sure the title is up to date, so that the correct index patterns are used everywhere
     return {
-      ..._dv,
+      ...selectedDataView,
       dataView: {
-        ..._dv.dataView,
+        ...selectedDataView?.dataView,
         title: selectedPatterns.join(','),
-        name: selectedPatterns.join(','),
+        name: selectedDataView?.dataView?.name ?? selectedPatterns.join(','),
       },
     };
-  }, [legacyDataView, missingPatterns.length, selectedDataView, selectedPatterns]);
+  }, [selectedDataView, selectedPatterns]);
 
   const indicesExist = useMemo(() => {
     if (loading || sourcererDataView.loading) {
@@ -93,7 +57,7 @@ export const useSourcererDataView = (
       return checkIfIndicesExist({
         scopeId,
         signalIndexName,
-        patternList: sourcererDataView.patternList,
+        patternList: sourcererDataView.patternList ?? [],
         isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
       });
     }
@@ -109,7 +73,7 @@ export const useSourcererDataView = (
 
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
-      sourcererDataView.patternList.join(','),
+      sourcererDataView?.patternList?.join(',') || '',
       sourcererDataView.fields
     );
     return dataViewBrowserFields;
@@ -118,9 +82,9 @@ export const useSourcererDataView = (
   return useMemo(
     () => ({
       browserFields: browserFields(),
-      dataViewId: sourcererDataView.id,
+      dataViewId: sourcererDataView.id ?? null,
       indicesExist,
-      loading: loading || sourcererDataView.loading,
+      loading: loading || !!sourcererDataView?.loading,
       // selected patterns in DATA_VIEW including filter
       selectedPatterns,
       sourcererDataView: sourcererDataView.dataView,

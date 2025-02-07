@@ -17,6 +17,7 @@ import type { ChangeEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import * as i18n from './translations';
 import type { sourcererModel } from '../store';
 import { sourcererActions, sourcererSelectors } from '../store';
@@ -52,12 +53,7 @@ interface SourcererPopoverProps {
   signalIndexName: string | null;
   handleClosePopOver: () => void;
   isTimelineSourcerer: boolean;
-  selectedDataViewId: string | null;
-  sourcererMissingPatterns: string[];
-  onUpdateDetectionAlertsChecked: () => void;
   handleOutsideClick: () => void;
-  setMissingPatterns: (missingPatterns: string[]) => void;
-  setDataViewId: (dataViewId: string | null) => void;
   scopeId: sourcererModel.SourcererScopeName;
   children: React.ReactNode;
 }
@@ -76,11 +72,6 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
     signalIndexName,
     handleClosePopOver,
     isTimelineSourcerer,
-    selectedDataViewId,
-    sourcererMissingPatterns,
-    onUpdateDetectionAlertsChecked,
-    setMissingPatterns,
-    setDataViewId,
     scopeId,
     children,
   }) => {
@@ -230,7 +221,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     (
       newSelectedDataView: string,
       newSelectedPatterns: string[],
-      shouldValidateSelectedPatterns?: boolean
+      shouldValidateSelectedPatterns?: boolean,
+      // Overrides data view entirely with a specified one. Only works with shouldValidateSelectedPatterns set to false.
+      dataView?: DataViewSpec
     ) => {
       dispatch(
         sourcererActions.setSelectedDataView({
@@ -238,6 +231,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           selectedDataViewId: newSelectedDataView,
           selectedPatterns: newSelectedPatterns,
           shouldValidateSelectedPatterns,
+          dataView,
         })
       );
 
@@ -296,9 +290,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, [resetDataSources]);
 
   const handleApplyFallbackDataView = useCallback(
-    (newSelectedDataViewId: string, patterns: string[], shouldValidate?: boolean) => {
-      dispatchChangeDataView(newSelectedDataViewId, patterns, false);
-      setDataViewId(newSelectedDataViewId);
+    (dataView: DataViewSpec) => {
+      if (!dataView.id) {
+        return;
+      }
+
+      dispatchChangeDataView(dataView.id, dataView.title?.split(',') || [], false, dataView);
+      setDataViewId(dataView.id);
     },
     [dispatchChangeDataView]
   );
@@ -318,7 +316,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     enableFallback:
       // NOTE: there are cases where sourcerer does not know the dataViewId to display and only knows required patterns.
       // In that case, we enable the fallback dataview creation that will try to create adhoc data view based on the patterns & will select it.
-      (dataViewId === null && isModified === 'deprecated') || isModified === 'missingPatterns',
+      (!loading && dataViewId === null && isModified === 'deprecated') ||
+      isModified === 'missingPatterns',
     missingPatterns,
     onResolveErrorManually: handleDataViewFallbackError,
   });
@@ -352,11 +351,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       selectedPatterns={selectedPatterns}
       signalIndexName={signalIndexName}
       handleClosePopOver={handleClosePopOver}
-      selectedDataViewId={selectedDataViewId}
-      sourcererMissingPatterns={sourcererMissingPatterns}
-      onUpdateDetectionAlertsChecked={onUpdateDetectionAlertsChecked}
-      setMissingPatterns={setMissingPatterns}
-      setDataViewId={setDataViewId}
       scopeId={scopeId}
     >
       <PopoverContent>

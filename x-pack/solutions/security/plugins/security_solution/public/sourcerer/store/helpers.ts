@@ -52,7 +52,7 @@ export const validateSelectedPatterns = (
   payload: SelectedDataViewPayload,
   shouldValidateSelectedPatterns: boolean
 ): Partial<SourcererScopeById> => {
-  const { id, ...rest } = payload;
+  const { id, dataView: dataViewOverride, ...rest } = payload;
   const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
   // dedupe because these could come from a silly url or pre 8.0 timeline
   const dedupePatterns = ensurePatternFormat(rest.selectedPatterns);
@@ -90,11 +90,19 @@ export const validateSelectedPatterns = (
   const signalIndexName = state.signalIndexName;
   selectedPatterns = getPatternListFromScope(id, selectedPatterns, signalIndexName);
 
+  let selectedDataViewId = dataView?.id ?? null;
+
+  if (dataViewOverride) {
+    selectedPatterns = payload.selectedPatterns;
+    missingPatterns = [];
+    selectedDataViewId = String(dataViewOverride.id);
+  }
+
   return {
     [id]: {
       ...state.sourcererScopes[id],
       ...rest,
-      selectedDataViewId: dataView?.id ?? null,
+      selectedDataViewId,
       selectedPatterns,
       missingPatterns,
       // if in timeline, allow for empty in case pattern was deleted

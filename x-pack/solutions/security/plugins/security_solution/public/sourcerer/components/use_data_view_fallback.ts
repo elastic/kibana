@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useCreateAdhocDataView } from './use_create_adhoc_data_view';
 
 interface UseDataViewFallbackConfig {
@@ -27,11 +28,7 @@ interface UseDataViewFallbackConfig {
   /**
    * Calls external function on dataview change
    */
-  onApplyFallbackDataView: (
-    newSelectedDataView: string,
-    newSelectedPatterns: string[],
-    shouldValidateSelectedPatterns?: boolean
-  ) => void;
+  onApplyFallbackDataView: (dataView: DataViewSpec) => void;
 }
 
 export const useDataViewFallback = ({
@@ -70,9 +67,7 @@ export const useDataViewFallback = ({
         return;
       }
 
-      const patterns = adhocDataView.getIndexPattern().split(',');
-
-      onApplyFallbackDataView(adhocDataView.id, patterns, false);
+      onApplyFallbackDataView(adhocDataView.toSpec());
     })();
 
     return () => {
