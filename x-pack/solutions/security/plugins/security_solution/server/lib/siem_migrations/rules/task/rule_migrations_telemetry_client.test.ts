@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 import type { MigrateRuleState } from './agent/types';
@@ -68,8 +69,10 @@ const preFilterIntegrationMocks: RuleMigrationIntegration[] = [
 ];
 
 const mockTelemetry = coreMock.createSetup().analytics;
+const mockLogger = loggerMock.create();
 const siemTelemetryClient = new SiemMigrationTelemetryClient(
   mockTelemetry,
+  mockLogger,
   'testmigration',
   'testModel'
 );
