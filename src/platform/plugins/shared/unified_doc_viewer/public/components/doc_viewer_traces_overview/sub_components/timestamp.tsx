@@ -12,7 +12,7 @@ import { EuiText } from '@elastic/eui';
 import moment from 'moment';
 
 interface TimestampProps {
-  timestamp: string;
+  timestamp: number;
 }
 
 export function Timestamp({ timestamp }: TimestampProps) {

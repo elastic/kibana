@@ -117,7 +117,7 @@ export interface TraceDocumentOverview
   extends TransactionTraceFields,
     SpanTraceFields,
     UserAgentTraceFields {
-  '@timestamp': string;
+  '@timestamp': number;
   'trace.id': string;
   'service.name': string;
   'agent.name': string;
