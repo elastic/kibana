@@ -11,14 +11,14 @@ import { TestProviders } from '../../../common/mock';
 import type { ServicePanelProps } from '.';
 import { ServicePanel } from '.';
 import type {
-  FlyoutPanelProps,
-  ExpandableFlyoutState,
   ExpandableFlyoutApi,
+  ExpandableFlyoutState,
+  FlyoutPanelProps,
 } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
-  useExpandableFlyoutState,
   useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 import { mockObservedService } from './mocks';
 import { mockServiceRiskScoreState } from '../mocks';
@@ -27,7 +27,6 @@ const mockProps: ServicePanelProps = {
   serviceName: 'test',
   contextID: 'test-service-panel',
   scopeId: 'test-scope-id',
-  isDraggable: false,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');

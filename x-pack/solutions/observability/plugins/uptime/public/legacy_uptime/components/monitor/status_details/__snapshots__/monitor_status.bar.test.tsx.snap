@@ -81,39 +81,41 @@ Array [
     >
       Enable status alerts
     </dt>
-    <div
-      class="euiPopover emotion-euiPopover-inline-block"
-    >
+    <dd>
       <div
-        class="euiFormRow emotion-euiFormRow"
-        id="generated-id-row"
+        class="euiPopover emotion-euiPopover-inline-block"
       >
         <div
-          class="euiFormRow__fieldWrapper"
+          class="euiFormRow emotion-euiFormRow"
+          id="generated-id-row"
         >
           <div
-            class="euiSwitch emotion-euiSwitch"
+            class="euiFormRow__fieldWrapper"
           >
-            <button
-              aria-checked="false"
-              aria-label="Enable status alerts"
-              class="euiSwitch__button emotion-euiSwitch__button-compressed"
-              data-test-subj="uptimeDisplayDefineConnector"
-              id="generated-id"
-              role="switch"
-              type="button"
+            <div
+              class="euiSwitch emotion-euiSwitch"
             >
-              <span
-                class="euiSwitch__body emotion-euiSwitch__body-off"
-              />
-              <span
-                class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
-              />
-            </button>
+              <button
+                aria-checked="false"
+                aria-label="Enable status alerts"
+                class="euiSwitch__button emotion-euiSwitch__button-compressed"
+                data-test-subj="uptimeDisplayDefineConnector"
+                id="generated-id"
+                role="switch"
+                type="button"
+              >
+                <span
+                  class="euiSwitch__body emotion-euiSwitch__body-off"
+                />
+                <span
+                  class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </dd>
   </dl>,
 ]
 `;
