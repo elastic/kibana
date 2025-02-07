@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import puppeteer, { type PuppeteerLaunchOptions } from 'puppeteer';
+import puppeteer, { type LaunchOptions as PuppeteerLaunchOptions } from 'puppeteer';
 
 import { CaptureConfig } from '../../../../server/types';
 
