@@ -165,6 +165,8 @@ export class TaskManagerPlugin
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
     }
 
+    this.logger.debug(`dummy change`);
+
     const startServicesPromise = core.getStartServices().then(([coreServices]) => ({
       elasticsearch: coreServices.elasticsearch,
     }));
