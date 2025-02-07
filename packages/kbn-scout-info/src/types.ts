@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/paths';
-export * from './src/reporting';
-export * from './src/types';
+export enum ScoutTestRunConfigCategory {
+  UI_TEST = 'ui-test',
+  API_TEST = 'api-test',
+  UNIT_TEST = 'unit-test',
+  UNIT_INTEGRATION_TEST = 'unit-integration-test',
+  UNKNOWN = 'unknown',
+}

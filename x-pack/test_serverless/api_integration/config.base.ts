@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
@@ -16,6 +17,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       services: {
         ...services,
         ...options.services,
