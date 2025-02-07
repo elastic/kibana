@@ -122,7 +122,7 @@ export const processDocumentCountStats = (
 ): DocumentCountStats | undefined => {
   if (!body) return undefined;
 
-  const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
+  const totalCount = (body.hits.total as estypes.SearchTotalHits)?.value ?? body.hits.total ?? 0;
 
   if (
     params.intervalMs === undefined ||

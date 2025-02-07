@@ -583,20 +583,9 @@ export function getMlClient(
         // but is added for type correctness below
         throw new Error('Incorrect arguments supplied');
       }
-      // @ts-expect-error body doesn't exist in the type
-      const { model_id: id, body, query: querystring } = p[0];
 
       return auditLogger.wrapTask(
-        () =>
-          client.asInternalUser.transport.request(
-            {
-              method: 'POST',
-              path: `/_ml/trained_models/${id}/_infer`,
-              body,
-              querystring,
-            },
-            p[1]
-          ),
+        () => client.asInternalUser.ml.inferTrainedModel(...p),
         'ml_infer_trained_model',
         p
       );

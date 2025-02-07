@@ -29,12 +29,12 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     space?: string
   ) {
-    const datafeedId = datafeedConfig.datafeed_id;
+    const { datafeed_id: datafeedId, ...requestBody } = datafeedConfig;
     const { body, status } = await supertest
       .post(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}/_update`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(getCommonRequestHeader('1'))
-      .send(datafeedConfig.body);
+      .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
