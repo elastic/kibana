@@ -6,4 +6,5 @@
  */
 
 export { MapRenderer } from './map_renderer/map_renderer';
+export { PassiveMap } from '../lens/passive_map';
 export { mapEmbeddableFactory } from './map_react_embeddable';
