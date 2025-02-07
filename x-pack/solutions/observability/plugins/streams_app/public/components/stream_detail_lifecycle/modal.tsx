@@ -399,7 +399,10 @@ function InheritModalWired({
   const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
 
   const parents = useMemo(() => {
-    if (wiredStreamsLoading || !wiredStreams) return [];
+    if (wiredStreamsLoading || !wiredStreams) {
+      return undefined;
+    }
+
     const ancestors = getAncestors(definition.stream.name);
     return wiredStreams.filter((stream) => ancestors.includes(stream.name));
   }, [definition, wiredStreams, wiredStreamsLoading]);
@@ -419,7 +422,7 @@ function InheritModalWired({
           defaultMessage:
             'All custom retention settings for this stream will be removed, resetting it to inherit data retention from',
         })}{' '}
-        {wiredStreamsLoading ? (
+        {wiredStreamsLoading || !parents ? (
           <EuiLoadingSpinner size="s" />
         ) : (
           <>

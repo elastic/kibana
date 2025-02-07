@@ -24,9 +24,7 @@ export const useWiredStreams = () => {
   );
 
   return {
-    wiredStreams: result.value?.streams
-      ? result.value.streams.filter(isWiredStreamDefinition)
-      : undefined,
+    wiredStreams: result.value?.streams.filter(isWiredStreamDefinition),
     isLoading: result.loading,
   };
 };
