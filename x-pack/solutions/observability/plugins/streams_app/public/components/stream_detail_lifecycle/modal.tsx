@@ -23,6 +23,8 @@ import {
   isUnwiredStreamGetResponse,
   isWiredStreamDefinition,
   isWiredStreamGetResponse,
+  findInheritedLifecycle,
+  findInheritingStreams,
 } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -52,7 +54,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
-import { findInheritedLifecycle, findInheritingStreams } from '@kbn/streams-plugin/common';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useWiredStreams } from './hooks/use_wired_streams';
 
