@@ -11,6 +11,7 @@ import { RulesSettingsProperties } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { updateFlappingSettings } from '../lib/rule_api/update_flapping_settings';
 import { updateQueryDelaySettings } from '../lib/rule_api/update_query_delay_settings';
+import { updateAlertDeletionSettings } from '../lib/rule_api/update_alert_deletion_settings';
 
 interface UseUpdateRuleSettingsProps {
   onClose: () => void;
@@ -36,7 +37,11 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
       updates.push(updateQueryDelaySettings({ http, queryDelaySettings: settings.queryDelay }));
     }
 
-    // TODO: https://github.com/elastic/kibana/issues/209258
+    if (settings.alertDeletion) {
+      updates.push(
+        updateAlertDeletionSettings({ http, alertDeletionSettings: settings.alertDeletion })
+      );
+    }
 
     return await Promise.all(updates);
   };

@@ -28,13 +28,6 @@ export const ACTIVE_ALERT_DELETION_LABEL = i18n.translate(
   }
 );
 
-export const ALERT_DELETION_ERROR_PROMPT_BODY = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.alertDeletionErrorPromptBody',
-  {
-    defaultMessage: 'Error body',
-  }
-);
-
 export const INACTIVE_ALERT_DELETION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.modal.inactiveAlertDeletionLabel',
   {
@@ -45,7 +38,15 @@ export const INACTIVE_ALERT_DELETION_LABEL = i18n.translate(
 export const ALERT_DELETION_ERROR_PROMPT_TITLE = i18n.translate(
   'xpack.triggersActionsUI.rulesSettings.modal.alertDeletionErrorPromptTitle',
   {
-    defaultMessage: 'Error title',
+    defaultMessage: 'Unable to load your query delay settings',
+  }
+);
+
+export const ALERT_DELETION_ERROR_PROMPT_BODY = i18n.translate(
+  'xpack.triggersActionsUI.rulesSettings.modal.alertDeletionErrorPromptBody',
+  {
+    defaultMessage:
+      'There was an error loading your alert deletion settings. Contact your administrator for help',
   }
 );
 

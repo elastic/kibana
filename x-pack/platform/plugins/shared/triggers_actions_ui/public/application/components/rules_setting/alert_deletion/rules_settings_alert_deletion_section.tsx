@@ -32,21 +32,17 @@ import {
 
 interface Props {
   onChange: (key: keyof RulesSettingsAlertDeletionProperties, value: number | boolean) => void;
-  settings: RulesSettingsAlertDeletionProperties;
-  canShow: boolean | Readonly<{ [x: string]: boolean }>;
+  settings?: RulesSettingsAlertDeletionProperties;
   canWrite: boolean;
   hasError: boolean;
 }
 export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
-  const { onChange, settings, hasError, canShow, canWrite } = props;
+  const { onChange, settings, hasError, canWrite } = props;
 
-  if (!canShow) {
-    return null;
-  }
-
-  if (hasError) {
+  if (hasError || !settings) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="rulesSettingsAlertDeletionErrorPrompt"
         color="danger"
         iconType="warning"
         title={<h4>{ALERT_DELETION_ERROR_PROMPT_TITLE}</h4>}
@@ -79,6 +75,7 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
           <EuiFlexItem grow={false}>
             <EuiFormRow label={ACTIVE_ALERT_DELETION_LABEL}>
               <EuiSwitch
+                data-test-subj="rulesSettingsActiveAlertDeletionSwitch"
                 label=""
                 checked={settings!.isActiveAlertDeletionEnabled}
                 disabled={!canWrite}
@@ -91,6 +88,7 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
           <EuiFlexItem grow={false}>
             <EuiFormRow label={THRESHOLD_LABEL}>
               <EuiFieldNumber
+                data-test-subj="rulesSettingsActiveAlertDeletionThreshold"
                 value={settings!.activeAlertDeletionThreshold}
                 onChange={(e) => {
                   onChange('activeAlertDeletionThreshold', parseInt(e.target.value, 10));
@@ -120,6 +118,7 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
           <EuiFlexItem grow={false}>
             <EuiFormRow label="Threshold">
               <EuiFieldNumber
+                data-test-subj="rulesSettingsInactiveAlertDeletionThreshold"
                 value={settings!.inactiveAlertDeletionThreshold}
                 onChange={(e) => {
                   onChange('inactiveAlertDeletionThreshold', parseInt(e.target.value, 10));

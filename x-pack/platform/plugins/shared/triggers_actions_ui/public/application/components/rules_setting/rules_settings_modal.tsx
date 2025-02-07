@@ -169,7 +169,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
               activeAlertDeletionThreshold: fetchedSettings.activeAlertDeletionThreshold,
               inactiveAlertDeletionThreshold: fetchedSettings.inactiveAlertDeletionThreshold,
             },
-            true // TODO: rethink. Update the initial value so we don't need to fetch it from the server again
+            true
           );
         }
       },
@@ -301,14 +301,13 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
             />
           </>
         )}
-        {alertDeletionSettings && (
+        {canShowAlertDeletionSettings && (
           <>
             <EuiSpacer />
             <RulesSettingsAlertDeletionSection
               onChange={(key, value) => handleSettingsChange('alertDeletion', key, value)}
               settings={alertDeletionSettings}
               canWrite={canWriteAlertDeletionSettings}
-              canShow={canShowAlertDeletionSettings}
               hasError={hasAlertDeletionError}
             />
           </>

@@ -9,16 +9,23 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IToasts } from '@kbn/core/public';
-import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
+import {
+  RulesSettingsAlertDeletion,
+  RulesSettingsFlapping,
+  RulesSettingsQueryDelay,
+} from '@kbn/alerting-plugin/common';
 import { RulesSettingsModal, RulesSettingsModalProps } from './rules_settings_modal';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
 import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
 import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settings';
 import { updateQueryDelaySettings } from '../../lib/rule_api/update_query_delay_settings';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
+import { updateAlertDeletionSettings } from '../../lib/rule_api/update_alert_deletion_settings';
+import { fetchAlertDeletionSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alert_deletion_settings';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
@@ -34,7 +41,14 @@ jest.mock('../../lib/rule_api/update_query_delay_settings', () => ({
   updateQueryDelaySettings: jest.fn(),
 }));
 jest.mock('../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+  getIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alert_deletion_settings', () => ({
+  fetchAlertDeletionSettings: jest.fn(),
+}));
+jest.mock('../../lib/rule_api/update_alert_deletion_settings', () => ({
+  updateAlertDeletionSettings: jest.fn(),
 }));
 
 const queryClient = new QueryClient({
@@ -62,6 +76,15 @@ const getQueryDelaySettingsMock = getQueryDelaySettings as unknown as jest.Mocke
 const updateQueryDelaySettingsMock = updateQueryDelaySettings as unknown as jest.MockedFunction<
   typeof updateQueryDelaySettings
 >;
+const getIsExperimentalFeatureEnabledMock = getIsExperimentalFeatureEnabled as jest.MockedFunction<
+  typeof getIsExperimentalFeatureEnabled
+>;
+const updateAlertDeletionSettingsMock =
+  updateAlertDeletionSettings as unknown as jest.MockedFunction<typeof updateAlertDeletionSettings>;
+
+const fetchAlertDeletionSettingsMock = fetchAlertDeletionSettings as unknown as jest.MockedFunction<
+  typeof fetchAlertDeletionSettings
+>;
 
 const mockFlappingSetting: RulesSettingsFlapping = {
   enabled: true,
@@ -76,6 +99,17 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
   delay: 10,
   createdBy: 'test user',
   updatedBy: 'test user',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+const mockAlertDeletionSetting: RulesSettingsAlertDeletion = {
+  isActiveAlertDeletionEnabled: true,
+  isInactiveAlertDeletionEnabled: true,
+  activeAlertDeletionThreshold: 80,
+  inactiveAlertDeletionThreshold: 30,
+  createdBy: null,
+  updatedBy: null,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
@@ -151,6 +185,8 @@ describe('rules_settings_modal', () => {
     updateFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     getQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
     updateQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
+    fetchAlertDeletionSettingsMock.mockResolvedValue(mockAlertDeletionSetting);
+    getIsExperimentalFeatureEnabledMock.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -211,30 +247,39 @@ describe('rules_settings_modal', () => {
     const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
+    expect(getIsExperimentalFeatureEnabledMock).toHaveBeenCalledTimes(1);
     await waitForModalLoad();
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
     const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
+    const activeAlertDeletionThreshold = result.getByTestId(
+      'rulesSettingsActiveAlertDeletionThreshold'
+    );
 
     fireEvent.change(lookBackWindowInput, { target: { value: 15 } });
     fireEvent.change(statusChangeThresholdInput, { target: { value: 3 } });
+    fireEvent.change(activeAlertDeletionThreshold, { target: { value: 5 } });
 
     expect(lookBackWindowInput.getAttribute('value')).toBe('15');
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('3');
+    expect(activeAlertDeletionThreshold.getAttribute('value')).toBe('5');
 
     // Try cancelling
     await userEvent.click(result.getByTestId('rulesSettingsModalCancelButton'));
 
     expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
+    expect(updateAlertDeletionSettingsMock).not.toHaveBeenCalled();
     expect(modalProps.onSave).not.toHaveBeenCalled();
 
     expect(screen.queryByTestId('centerJustifiedSpinner')).toBe(null);
     expect(lookBackWindowInput.getAttribute('value')).toBe('10');
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('10');
+    expect(activeAlertDeletionThreshold.getAttribute('value')).toBe('80');
 
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
+    expect(fetchAlertDeletionSettingsMock).toHaveBeenCalledTimes(1);
   });
 
   test('should prevent statusChangeThreshold from being greater than lookBackWindow', async () => {
@@ -452,15 +497,62 @@ describe('rules_settings_modal', () => {
   });
 
   describe('alert deletion settings', () => {
-    test.todo('should render alert deletion settings correctly');
+    let user: UserEvent;
 
-    test.todo('should save its settings when clicking on save button');
+    beforeEach(() => {
+      jest.clearAllMocks();
+      user = userEvent.setup();
+      getIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+      updateAlertDeletionSettingsMock.mockResolvedValue(mockAlertDeletionSetting);
+      getQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
+    });
 
-    test.todo('should reset the settings to its initial state when modal closed without saving');
+    test('should save its settings when clicking on save button', async () => {
+      render(<RulesSettingsModalWithProviders {...modalProps} />);
+      await waitForModalLoad();
 
-    test.todo('should show error message if it fails');
+      const activeAlertsThreshold = screen.getByTestId('rulesSettingsActiveAlertDeletionThreshold');
+      const inactiveAlertsThreshold = screen.getByTestId(
+        'rulesSettingsInactiveAlertDeletionThreshold'
+      );
 
-    test.todo('should show the settings when no error');
+      await user.clear(activeAlertsThreshold);
+      await user.type(activeAlertsThreshold, '5');
+      await user.clear(inactiveAlertsThreshold);
+      await user.type(inactiveAlertsThreshold, '92');
+
+      expect(activeAlertsThreshold).toHaveValue(5);
+      expect(inactiveAlertsThreshold).toHaveValue(92);
+
+      // Try saving
+      await userEvent.click(screen.getByTestId('rulesSettingsModalSaveButton'));
+
+      await waitFor(() => {
+        expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+      });
+      expect(modalProps.onClose).toHaveBeenCalledTimes(1);
+      expect(updateAlertDeletionSettingsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alertDeletionSettings: {
+            isActiveAlertDeletionEnabled: true,
+            isInactiveAlertDeletionEnabled: true,
+            activeAlertDeletionThreshold: 5,
+            inactiveAlertDeletionThreshold: 92,
+          },
+        })
+      );
+      expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
+      expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+      expect(modalProps.onSave).toHaveBeenCalledTimes(1);
+    });
+
+    test('should show error message if it fails', async () => {
+      fetchAlertDeletionSettingsMock.mockRejectedValue('failed!');
+      render(<RulesSettingsModalWithProviders {...modalProps} />);
+      await waitForModalLoad();
+
+      expect(screen.queryByTestId('rulesSettingsAlertDeletionErrorPrompt')).toBeInTheDocument();
+    });
 
     // TODO: https://github.com/elastic/kibana/issues/210014
     test.todo(

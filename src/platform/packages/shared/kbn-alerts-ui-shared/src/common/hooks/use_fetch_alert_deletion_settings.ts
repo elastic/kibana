@@ -12,13 +12,12 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { RulesSettingsAlertDeletion } from '@kbn/alerting-types/rule_settings';
 import { fetchAlertDeletionSettings } from '../apis/fetch_alert_deletion_settings';
 
-interface UseFetchAlertDeletionSettingsProps {
+interface Props {
   http: HttpStart;
   enabled: boolean;
   onSuccess?: (settings: RulesSettingsAlertDeletion) => void;
 }
-
-export const useFetchAlertDeletionSettings = (props: UseFetchAlertDeletionSettingsProps) => {
+export const useFetchAlertDeletionSettings = (props: Props) => {
   const { http, enabled, onSuccess } = props;
 
   const queryFn = () => {

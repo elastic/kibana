@@ -5,23 +5,96 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types';
+import { RulesSettingsAlertDeletionSection } from './rules_settings_alert_deletion_section';
+
+const initialSettings: RulesSettingsAlertDeletionProperties = {
+  activeAlertDeletionThreshold: 0,
+  isActiveAlertDeletionEnabled: true,
+  inactiveAlertDeletionThreshold: 0,
+  isInactiveAlertDeletionEnabled: true,
+};
+
 describe('RulesSettingsAlertDeletionSection', () => {
-  test.todo('should render');
+  const noop = () => {};
 
-  test.todo('should update settings');
+  test('should enable the active alert threshold input when the active alert switch is enabled', async () => {
+    render(
+      <RulesSettingsAlertDeletionSection
+        onChange={noop}
+        settings={initialSettings}
+        canWrite={true}
+        hasError={false}
+      />
+    );
 
-  // TODO: is this needed? shouldn't it be handled from outside
-  test.todo('should not render anything when turned off');
+    expect(await screen.findByTestId('rulesSettingsActiveAlertDeletionThreshold')).toBeEnabled();
+  });
 
-  test.todo('should show error message when error');
+  test('should disable the active alert threshold input when the active alert switch is disabled', async () => {
+    const settings = {
+      ...initialSettings,
+      isActiveAlertDeletionEnabled: false,
+    };
 
-  test.todo('should disabled everything when disabled');
+    render(
+      <RulesSettingsAlertDeletionSection
+        onChange={noop}
+        settings={settings}
+        canWrite={true}
+        hasError={false}
+      />
+    );
 
-  test.todo(
-    'should toggle the activate alert threshold on when toggling on the active alert setting'
-  );
+    const activeAlertThreshold = await screen.findByTestId(
+      'rulesSettingsActiveAlertDeletionThreshold'
+    );
+    expect(activeAlertThreshold).toBeDisabled();
+  });
 
-  test.todo(
-    'should toggle the inactivate alert threshold on when toggling on the inactive alert setting'
-  );
+  test('should enable the inactive alert threshold input when the inactive alert switch is enabled', async () => {
+    render(
+      <RulesSettingsAlertDeletionSection
+        onChange={noop}
+        settings={initialSettings}
+        canWrite={true}
+        hasError={false}
+      />
+    );
+
+    expect(await screen.findByTestId('rulesSettingsInactiveAlertDeletionThreshold')).toBeEnabled();
+  });
+
+  test('should disable the inactive alert threshold input when the inactive alert switch is disabled', async () => {
+    const settings = {
+      ...initialSettings,
+      isInactiveAlertDeletionEnabled: false,
+    };
+
+    render(
+      <RulesSettingsAlertDeletionSection
+        onChange={noop}
+        settings={settings}
+        canWrite={true}
+        hasError={false}
+      />
+    );
+
+    expect(await screen.findByTestId('rulesSettingsInactiveAlertDeletionThreshold')).toBeDisabled();
+  });
+
+  test('should show error message when error', () => {
+    render(
+      <RulesSettingsAlertDeletionSection
+        onChange={noop}
+        settings={initialSettings}
+        canWrite={true}
+        hasError={true}
+      />
+    );
+
+    expect(screen.getByTestId('rulesSettingsAlertDeletionErrorPrompt')).toBeInTheDocument();
+  });
 });
