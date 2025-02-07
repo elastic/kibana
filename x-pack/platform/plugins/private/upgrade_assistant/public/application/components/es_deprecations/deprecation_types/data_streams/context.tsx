@@ -9,10 +9,13 @@ import React, { createContext, useContext } from 'react';
 
 import { ApiService } from '../../../../lib/api';
 import { useMigrationStatus, MigrationState } from './use_migration_state';
+import type { DataStreamResolutionType } from '../../../../../../common/types';
 
 export interface MigrationStateContext {
   loadDataStreamMetadata: () => Promise<void>;
   migrationState: MigrationState;
+
+  initMigration: (resolutionType: DataStreamResolutionType) => void;
 
   // reindex resolution actions
   startReindex: () => Promise<void>;
@@ -53,6 +56,7 @@ export const DataStreamMigrationStatusProvider: React.FunctionComponent<Props> =
     loadDataStreamMetadata,
     cancelReindex,
     startReadonly,
+    initMigration,
   } = useMigrationStatus({
     dataStreamName,
     api,
@@ -66,6 +70,7 @@ export const DataStreamMigrationStatusProvider: React.FunctionComponent<Props> =
         cancelReindex,
         startReadonly,
         cancelReadonly,
+        initMigration,
         loadDataStreamMetadata,
       }}
     >

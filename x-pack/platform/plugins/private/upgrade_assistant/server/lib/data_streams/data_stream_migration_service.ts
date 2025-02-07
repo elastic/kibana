@@ -63,6 +63,10 @@ interface DataStreamMigrationService {
    */
   getDataStreamMetadata: (dataStreamName: string) => Promise<DataStreamMetadata | null>;
 
+  /**
+   * Marks the given indices as read-only.
+   * @param indices
+   */
   readonlyIndices: (indices: string[]) => Promise<void>;
 }
 
@@ -331,11 +335,19 @@ export const dataStreamMigrationServiceFactory = ({
 
     async readonlyIndices(indices: string[]) {
       for (const index of indices) {
-        const unfreeze = await esClient.indices.unfreeze({ index });
-        const addBlock = await esClient.indices.addBlock({ index, block: 'write' });
+        try {
+          const unfreeze = await esClient.indices.unfreeze({ index });
+          const addBlock = await esClient.indices.addBlock({ index, block: 'write' });
 
-        if (!unfreeze.acknowledged || !addBlock.acknowledged) {
-          throw error.readonlyTaskFailed(`Could not set index ${index} to readonly.`);
+          if (!unfreeze.acknowledged || !addBlock.acknowledged) {
+            throw error.readonlyTaskFailed(`Could not set index ${index} to readonly.`);
+          }
+        } catch (err) {
+          // ES errors are serializable, so we can just stringify the error and throw it.
+          const stringifiedErr = JSON.stringify(err, null, 2);
+          throw error.readonlyTaskFailed(
+            `Could not set migrate data stream index ${index} to readonly. ${stringifiedErr}`
+          );
         }
       }
     },

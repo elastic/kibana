@@ -16,10 +16,10 @@ import {
   MetadataCannotBeGrabbed,
   ReadonlyTaskFailed,
 } from '../../lib/data_streams/error_symbols';
-import { ReindexError } from '../../lib/data_streams/error';
+import { DataStreamMigrationError } from '../../lib/data_streams/error';
 
 export const mapAnyErrorToKibanaHttpResponse = (e: any) => {
-  if (e instanceof ReindexError) {
+  if (e instanceof DataStreamMigrationError) {
     switch (e.symbol) {
       case AccessForbidden:
         return kibanaResponseFactory.forbidden({ body: e.message });

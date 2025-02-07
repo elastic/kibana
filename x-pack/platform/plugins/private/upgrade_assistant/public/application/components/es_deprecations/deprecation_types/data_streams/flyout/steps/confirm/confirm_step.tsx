@@ -119,21 +119,17 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
           }
         );
 
-  const warningsForResolutionType = warnings.filter(
-    (warning) => warning.resolutionType === resolutionType
-  );
-
   return (
     <>
       <EuiFlyoutBody>
-        {warningsForResolutionType.length > 0 && (
+        {warnings.length > 0 && (
           <>
             {resolutionType === 'reindex' && <ReindexWarningCallout />}
             {resolutionType === 'readonly' && <ReadonlyWarningCallout />}
             <EuiSpacer />
             <p>{actionClarification}</p>
             <EuiSpacer size="m" />
-            {warningsForResolutionType.map((warning, index) => {
+            {warnings.map((warning, index) => {
               const WarningCheckbox = warningToComponentMap[warning.warningType];
               return (
                 <WarningCheckbox

@@ -57,14 +57,13 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   migrationState,
   startReindex,
   startReadonly,
+  initMigration,
   cancelReadonly,
   closeFlyout,
   deprecation,
 }) => {
-  const { status, migrationWarnings, errorMessage, meta } = migrationState;
-  const resolutionType = 'readonly' as const;
+  const { status, migrationWarnings, errorMessage, resolutionType, meta } = migrationState;
   const { index } = deprecation;
-
   const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
 
   const switchFlyoutStep = useCallback(() => {
@@ -160,7 +159,8 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         return (
           <DataStreamDetailsFlyoutStep
             closeFlyout={closeFlyout}
-            startAction={() => {
+            initAction={(selectedResolutionType) => {
+              initMigration(selectedResolutionType);
               setFlyoutStep('confirm');
             }}
             lastIndexCreationDateFormatted={lastIndexCreationDateFormatted}
@@ -170,7 +170,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         );
       }
       case 'confirm': {
-        if (!meta) {
+        if (!meta || !resolutionType) {
           return (
             <InitializingFlyoutStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
@@ -180,7 +180,9 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
 
         return (
           <ConfirmMigrationFlyoutStep
-            warnings={migrationWarnings ?? []}
+            warnings={(migrationWarnings ?? []).filter(
+              (warning) => warning.resolutionType === resolutionType
+            )}
             meta={meta}
             resolutionType={resolutionType}
             hideWarningsStep={() => {
@@ -197,7 +199,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         );
       }
       case 'inProgress': {
-        if (!meta) {
+        if (!meta || !resolutionType) {
           return (
             <InitializingFlyoutStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
@@ -224,7 +226,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         );
       }
       case 'completed': {
-        if (!meta) {
+        if (!meta || !resolutionType) {
           return (
             <InitializingFlyoutStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
@@ -247,6 +249,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     onStartReadonly,
     onStopReadonly,
     resolutionType,
+    initMigration,
   ]);
 
   return (

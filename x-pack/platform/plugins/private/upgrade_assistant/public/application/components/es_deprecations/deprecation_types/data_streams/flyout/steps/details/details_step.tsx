@@ -39,10 +39,10 @@ import { getPrimaryButtonLabel } from '../../messages';
 export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
   migrationState: MigrationState;
-  startAction: (resolutionType: DataStreamResolutionType) => void;
+  initAction: (resolutionType: DataStreamResolutionType) => void;
   lastIndexCreationDateFormatted: string;
   meta: DataStreamMetadata;
-}> = ({ closeFlyout, migrationState, startAction, lastIndexCreationDateFormatted, meta }) => {
+}> = ({ closeFlyout, migrationState, initAction, lastIndexCreationDateFormatted, meta }) => {
   const {
     services: {
       api,
@@ -236,7 +236,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                   <EuiButton
                     color={status === DataStreamMigrationStatus.cancelled ? 'warning' : 'accent'}
                     iconType={status === DataStreamMigrationStatus.cancelled ? 'play' : undefined}
-                    onClick={() => startAction('reindex')}
+                    onClick={() => initAction('reindex')}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}
                     data-test-subj="startDataStreamReindexingButton"
@@ -249,7 +249,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                 <EuiButton
                   fill
                   color={'primary'}
-                  onClick={() => startAction('readonly')}
+                  onClick={() => initAction('readonly')}
                   disabled={!hasRequiredPrivileges}
                   data-test-subj="startDataStreamReadonlyButton"
                 >

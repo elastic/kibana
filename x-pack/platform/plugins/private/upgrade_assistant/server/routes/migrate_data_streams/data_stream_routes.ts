@@ -22,7 +22,6 @@ export function registerMigrateDataStreamRoutes({
   router,
   licensing,
   log,
-  getSecurityPlugin,
   lib: { handleEsError },
 }: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/migrate_data_stream`;
@@ -55,12 +54,7 @@ export function registerMigrateDataStreamRoutes({
 
       try {
         const hasRequiredPrivileges = await migrationService.hasRequiredPrivileges(dataStreamName);
-
-        // If the user doesn't have privileges than querying for warnings is going to fail.
-        const warnings = hasRequiredPrivileges
-          ? await migrationService.detectMigrationWarnings(dataStreamName)
-          : [];
-
+        const warnings = await migrationService.detectMigrationWarnings(dataStreamName);
         const migrationOp = await migrationService.fetchMigrationStatus(dataStreamName);
 
         const body: DataStreamReindexStatusResponse = {
@@ -140,6 +134,12 @@ export function registerMigrateDataStreamRoutes({
       options: {
         access: 'public',
         summary: `Get data stream metadata`,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
       },
       validate: {
         params: schema.object({
@@ -277,15 +277,13 @@ export function registerMigrateDataStreamRoutes({
         }
 
         await migrationService.readonlyIndices(indices);
+        return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         if (err instanceof errors.ResponseError) {
           return handleEsError({ error: err, response });
         }
-
-        return mapAnyErrorToKibanaHttpResponse(error);
+        return mapAnyErrorToKibanaHttpResponse(err);
       }
-
-      return response.ok({ body: { acknowledged: true } });
     })
   );
 }

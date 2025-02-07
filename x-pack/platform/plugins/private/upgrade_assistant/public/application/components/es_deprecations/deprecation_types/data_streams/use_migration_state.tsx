@@ -123,7 +123,7 @@ export const useMigrationStatus = ({
       clearPollInterval();
       try {
         if (resolutionType === 'readonly' && !readonlyState.current) {
-          readonlyState.current = readOnlyExecute(dataStreamName, migrationState.meta, api);
+          return;
         }
 
         let data: DataStreamReindexStatusResponse | null = null;
@@ -137,7 +137,7 @@ export const useMigrationStatus = ({
 
           data = value;
         } else {
-          const results = await api.getDataStreamReindexStatus(dataStreamName);
+          const results = await api.getDataStreamMigrationStatus(dataStreamName);
           data = results.data;
           error = results.error;
         }
@@ -185,7 +185,7 @@ export const useMigrationStatus = ({
         });
       }
     },
-    [clearPollInterval, api, dataStreamName, migrationState.meta, migrationState.resolutionType]
+    [clearPollInterval, api, dataStreamName, migrationState.resolutionType]
   );
 
   const updateStatus = useCallback(async () => {
@@ -326,6 +326,16 @@ export const useMigrationStatus = ({
     });
   }, []);
 
+  const initMigration = useCallback((resolutionType: DataStreamResolutionType) => {
+    setMigrationState((prevValue: MigrationState) => {
+      return {
+        ...prevValue,
+        resolutionType,
+        status: DataStreamMigrationStatus.notStarted,
+      };
+    });
+  }, []);
+
   useEffect(() => {
     updateStatus();
   }, [updateStatus]);
@@ -344,11 +354,11 @@ export const useMigrationStatus = ({
   return {
     migrationState,
     loadDataStreamMetadata,
+    initMigration,
+    updateStatus,
 
     startReindex,
     cancelReindex,
-    updateStatus,
-
     startReadonly,
     cancelReadonly,
   };

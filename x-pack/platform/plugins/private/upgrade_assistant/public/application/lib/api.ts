@@ -216,7 +216,7 @@ export class ApiService {
    * Reindex and readonly operations
    */
 
-  public async getDataStreamReindexStatus(dataStreamName: string) {
+  public async getDataStreamMigrationStatus(dataStreamName: string) {
     return await this.sendRequest<DataStreamReindexStatusResponse>({
       path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}`,
       method: 'get',

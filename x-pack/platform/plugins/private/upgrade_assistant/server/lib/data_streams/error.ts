@@ -15,14 +15,14 @@ import {
   ReadonlyTaskFailed,
 } from './error_symbols';
 
-export class ReindexError extends Error {
+export class DataStreamMigrationError extends Error {
   constructor(message: string, public readonly symbol: symbol) {
     super(message);
   }
 }
 
 export const createErrorFactory = (symbol: symbol) => (message: string) => {
-  return new ReindexError(message, symbol);
+  return new DataStreamMigrationError(message, symbol);
 };
 
 export const error = {
