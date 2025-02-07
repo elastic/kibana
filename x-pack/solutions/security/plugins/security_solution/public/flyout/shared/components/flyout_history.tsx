@@ -8,21 +8,21 @@
 import type { FC } from 'react';
 import React, { memo, useMemo, useState } from 'react';
 import {
-  EuiFlexItem,
   EuiButtonEmpty,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiText,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexItem,
+  EuiPopover,
+  EuiText,
   EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import { FlyoutHistoryRow } from './flyout_history_row';
 import {
-  FLYOUT_HISTORY_TEST_ID,
   FLYOUT_HISTORY_BUTTON_TEST_ID,
   FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID,
+  FLYOUT_HISTORY_TEST_ID,
   NO_DATA_HISTORY_ROW_TEST_ID,
 } from './test_ids';
 
@@ -30,7 +30,7 @@ export interface HistoryProps {
   /**
    * A list of flyouts that have been opened
    */
-  history: FlyoutPanelProps[];
+  history: FlyoutPanelHistory[];
 }
 
 /**
