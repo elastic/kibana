@@ -859,6 +859,7 @@ components:
         - medium_impact
         - high_impact
         - extreme_impact
+        - unassigned
       type: string
     AssetCriticalityRecord:
       allOf:
