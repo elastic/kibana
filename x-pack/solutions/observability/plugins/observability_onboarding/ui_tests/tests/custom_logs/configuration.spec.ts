@@ -22,7 +22,7 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
     expect(page.url()).toContain('/app/observabilityOnboarding');
   });
 
-  test(`should allow addind multiple entries for Log File Path`, async ({
+  test(`should allow multiple entries for Log File Path`, async ({
     pageObjects: { customLogs },
   }) => {
     await expect(

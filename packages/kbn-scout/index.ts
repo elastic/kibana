@@ -39,3 +39,5 @@ export type {
 
 // re-export from Playwright
 export type { Locator } from 'playwright/test';
+
+export { measurePerformance, measurePerformanceAsync } from './src/common';

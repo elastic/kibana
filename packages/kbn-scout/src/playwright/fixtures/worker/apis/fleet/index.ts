@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { measurePerformanceAsync } from '../../../../../common';
 import { coreWorkerFixtures } from '../../core_fixtures';
 
 export interface FleetApiFixture {
@@ -25,27 +26,39 @@ export const fleetApiFixture = coreWorkerFixtures.extend<{}, { fleetApi: FleetAp
       const fleetApiHelper = {
         integration: {
           install: async (name: string) => {
-            await kbnClient.request({
-              method: 'POST',
-              path: `/api/fleet/epm/custom_integrations`,
-              body: {
-                force: true,
-                integrationName: name,
-                datasets: [
-                  { name: `${name}.access`, type: 'logs' },
-                  { name: `${name}.error`, type: 'metrics' },
-                  { name: `${name}.warning`, type: 'logs' },
-                ],
-              },
-            });
+            await measurePerformanceAsync(
+              log,
+              `fleetApi.integration.install [${name}]`,
+              async () => {
+                await kbnClient.request({
+                  method: 'POST',
+                  path: `/api/fleet/epm/custom_integrations`,
+                  body: {
+                    force: true,
+                    integrationName: name,
+                    datasets: [
+                      { name: `${name}.access`, type: 'logs' },
+                      { name: `${name}.error`, type: 'metrics' },
+                      { name: `${name}.warning`, type: 'logs' },
+                    ],
+                  },
+                });
+              }
+            );
           },
 
           delete: async (name: string) => {
-            await kbnClient.request({
-              method: 'DELETE',
-              path: `/api/fleet/epm/packages/${name}`,
-              ignoreErrors: [400],
-            });
+            await measurePerformanceAsync(
+              log,
+              `fleetApi.integration.delete [${name}]`,
+              async () => {
+                await kbnClient.request({
+                  method: 'DELETE',
+                  path: `/api/fleet/epm/packages/${name}`,
+                  ignoreErrors: [400],
+                });
+              }
+            );
           },
         },
       };
