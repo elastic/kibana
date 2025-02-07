@@ -634,14 +634,8 @@ describe('Observability AI Assistant client', () => {
           user: {
             name: 'johndoe',
           },
+          systemMessage: 'This is a system message',
           messages: [
-            {
-              '@timestamp': expect.any(String),
-              message: {
-                content: EXPECTED_STORED_SYSTEM_MESSAGE,
-                role: MessageRole.System,
-              },
-            },
             {
               '@timestamp': expect.any(String),
               message: {
@@ -839,13 +833,6 @@ describe('Observability AI Assistant client', () => {
             {
               '@timestamp': expect.any(String),
               message: {
-                role: MessageRole.System,
-                content: EXPECTED_STORED_SYSTEM_MESSAGE,
-              },
-            },
-            {
-              '@timestamp': expect.any(String),
-              message: {
                 role: MessageRole.User,
                 content: 'How many alerts do I have?',
               },
@@ -975,13 +962,6 @@ describe('Observability AI Assistant client', () => {
           expect(
             (internalUserEsClientMock.index.mock.lastCall![0] as any).document.messages
           ).toEqual([
-            {
-              '@timestamp': expect.any(String),
-              message: {
-                content: EXPECTED_STORED_SYSTEM_MESSAGE,
-                role: MessageRole.System,
-              },
-            },
             {
               '@timestamp': expect.any(String),
               message: {
@@ -1584,9 +1564,7 @@ describe('Observability AI Assistant client', () => {
       .subscribe(() => {}); // To trigger call to chat
     await nextTick();
 
-    expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
-      EXPECTED_STORED_SYSTEM_MESSAGE
-    );
+    expect(chatSpy.mock.calls[0][1].system).toEqual(EXPECTED_STORED_SYSTEM_MESSAGE);
   });
 
   describe('when executing an action', () => {
