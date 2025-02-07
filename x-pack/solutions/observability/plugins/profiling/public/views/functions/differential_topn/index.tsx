@@ -162,7 +162,14 @@ export function DifferentialTopNFunctionsView() {
         },
       });
     }
-  }, [state, comparisonState, onPageReady, rangeTo, rangeFrom]);
+  }, [
+    state.status,
+    state.data?.TotalCount,
+    comparisonState.status,
+    onPageReady,
+    rangeTo,
+    rangeFrom,
+  ]);
 
   return (
     <>

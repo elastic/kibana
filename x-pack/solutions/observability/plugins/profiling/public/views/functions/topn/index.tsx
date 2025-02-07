@@ -82,7 +82,7 @@ export function TopNFunctionsView() {
         },
       });
     }
-  }, [state, onPageReady, rangeFrom, rangeTo]);
+  }, [state.status, state.data, onPageReady, rangeFrom, rangeTo]);
   return (
     <>
       <EuiFlexGroup direction="column">

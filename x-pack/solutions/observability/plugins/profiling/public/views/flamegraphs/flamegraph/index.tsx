@@ -71,7 +71,7 @@ export function FlameGraphView() {
         },
       });
     }
-  }, [onPageReady, state, rangeFrom, rangeTo]);
+  }, [onPageReady, state.status, state.data?.TotalSamples, rangeFrom, rangeTo]);
 
   return (
     <EuiFlexGroup direction="column">

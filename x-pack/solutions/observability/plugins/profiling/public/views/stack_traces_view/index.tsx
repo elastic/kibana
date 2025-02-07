@@ -88,7 +88,7 @@ export function StackTracesView() {
         },
       });
     }
-  }, [state, onPageReady, rangeFrom, rangeTo]);
+  }, [state.status, state.data?.charts.length, onPageReady, rangeFrom, rangeTo]);
   return (
     <RouteBreadcrumb title={selectedTab?.label || ''} href={selectedTab?.href || ''}>
       <ProfilingAppPageTemplate tabs={tabs}>

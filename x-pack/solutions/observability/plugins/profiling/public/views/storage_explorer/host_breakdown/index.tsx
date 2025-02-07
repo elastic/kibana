@@ -58,13 +58,11 @@ export function HostBreakdown({ hasDistinctProbabilisticValues, onReady }: Props
     ]
   );
 
-  const status = storageExplorerHostDetailsState.status;
-
   useEffect(() => {
-    if (status === AsyncStatus.Settled) {
+    if (storageExplorerHostDetailsState.status === AsyncStatus.Settled) {
       onReady();
     }
-  }, [status, onReady]);
+  }, [storageExplorerHostDetailsState.status, onReady]);
 
   return (
     <>

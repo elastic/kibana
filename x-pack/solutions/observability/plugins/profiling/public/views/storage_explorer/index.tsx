@@ -64,9 +64,11 @@ export function StorageExplorerView() {
     ]
   );
 
-  if (!loadedState.summary && storageExplorerSummaryState.status === AsyncStatus.Settled) {
-    setLoadedState((prevState) => ({ ...prevState, summary: true }));
-  }
+  useEffect(() => {
+    if (!loadedState.summary && storageExplorerSummaryState.status === AsyncStatus.Settled) {
+      setLoadedState((prevState) => ({ ...prevState, summary: true }));
+    }
+  }, [loadedState.summary, storageExplorerSummaryState.status, setLoadedState]);
 
   const totalNumberOfDistinctProbabilisticValues =
     storageExplorerSummaryState.data?.totalNumberOfDistinctProbabilisticValues || 0;
