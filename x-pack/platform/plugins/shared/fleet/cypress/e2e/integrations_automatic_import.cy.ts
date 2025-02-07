@@ -23,6 +23,11 @@ import {
   VIEW_INTEGRATION_BUTTON,
   INTEGRATION_SUCCESS_SECTION,
   SAVE_ZIP_BUTTON,
+  CEL_GENERATION_FLYOUT_BUTTON,
+  API_DEFINITION_FILE_PICKER,
+  ANLAYZE_API_BUTTON,
+  GENERATE_CEL_BUTTON,
+  SAVE_CEL_CONFIG_BUTTON,
 } from '../screens/integrations_automatic_import';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { login, logout } from '../tasks/login';
@@ -31,6 +36,8 @@ import {
   ecsResultsForJson,
   categorizationResultsForJson,
   relatedResultsForJson,
+  analyzeApiResults,
+  celInputResults,
 } from '../tasks/api_calls/graph_results';
 
 describe('Add Integration - Automatic Import', () => {
@@ -44,6 +51,18 @@ describe('Add Integration - Automatic Import', () => {
     deleteConnectors();
     createBedrockConnector();
     // Mock API Responses
+    cy.intercept('POST', '/internal/automatic_import/analyzeapi', {
+      statusCode: 200,
+      body: {
+        results: analyzeApiResults,
+      },
+    });
+    cy.intercept('POST', '/internal/automatic_import/cel', {
+      statusCode: 200,
+      body: {
+        results: celInputResults,
+      },
+    });
     cy.intercept('POST', '/internal/automatic_import/ecs', {
       statusCode: 200,
       body: {
@@ -90,12 +109,20 @@ describe('Add Integration - Automatic Import', () => {
     cy.getBySel(DATASTREAM_TITLE_INPUT).type('Audit');
     cy.getBySel(DATASTREAM_DESCRIPTION_INPUT).type('Test Datastream Description');
     cy.getBySel(DATASTREAM_NAME_INPUT).type('audit');
-    cy.getBySel(DATA_COLLECTION_METHOD_INPUT).type('file stream');
+    cy.getBySel(DATA_COLLECTION_METHOD_INPUT).type('api (cel input)');
     cy.get('body').click(0, 0);
+    cy.getBySel(CEL_GENERATION_FLYOUT_BUTTON).click();
+
+    // CEL generation flyout
+    cy.fixture('openapi.yaml', null).as('myOpenApiFixture');
+    cy.getBySel(API_DEFINITION_FILE_PICKER).selectFile('@myOpenApiFixture');
+    cy.getBySel(ANLAYZE_API_BUTTON).click();
+    cy.getBySel(GENERATE_CEL_BUTTON).click();
+    cy.getBySel(SAVE_CEL_CONFIG_BUTTON).click();
 
     // Select sample logs file and Analyze logs
-    cy.fixture('teleport.ndjson', null).as('myFixture');
-    cy.getBySel(LOGS_SAMPLE_FILE_PICKER).selectFile('@myFixture');
+    cy.fixture('teleport.ndjson', null).as('myLogsFixture');
+    cy.getBySel(LOGS_SAMPLE_FILE_PICKER).selectFile('@myLogsFixture');
     cy.getBySel(BUTTON_FOOTER_NEXT).click();
 
     // Edit Pipeline
