@@ -36,4 +36,5 @@ export type {
   ScoutTestConfig,
   ScoutPlaywrightOptions,
   ScoutTestOptions,
+  Locator,
 } from '@kbn/scout';

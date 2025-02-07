@@ -36,3 +36,6 @@ export type {
   ScoutServerConfig,
   ScoutTestConfig,
 } from './src/types';
+
+// re-export from Playwright
+export type { Locator } from 'playwright/test';

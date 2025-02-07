@@ -41,18 +41,11 @@ export const fleetApiFixture = coreWorkerFixtures.extend<{}, { fleetApi: FleetAp
           },
 
           delete: async (name: string) => {
-            const packageInfo = await kbnClient.request<{ item: { status: string } }>({
-              method: 'GET',
+            await kbnClient.request({
+              method: 'DELETE',
               path: `/api/fleet/epm/packages/${name}`,
-              ignoreErrors: [404],
+              ignoreErrors: [400],
             });
-
-            if (packageInfo.data.item?.status === 'installed') {
-              await kbnClient.request({
-                method: 'DELETE',
-                path: `/api/fleet/epm/packages/${name}`,
-              });
-            }
           },
         },
       };
