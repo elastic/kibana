@@ -1273,6 +1273,10 @@ export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'password', dangerouslyExposeValue: true },
 ]);
 
+export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
+]);
+
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
@@ -1291,5 +1295,10 @@ export function registerEncryptedSavedObjects(
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
     attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
+  });
+  encryptedSavedObjects.registerType({
+    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: FLEET_SERVER_HOST_ENCRYPTED_FIELDS,
+    enforceRandomId: false,
   });
 }
