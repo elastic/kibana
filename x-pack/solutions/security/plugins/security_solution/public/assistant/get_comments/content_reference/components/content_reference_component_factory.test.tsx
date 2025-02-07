@@ -118,8 +118,6 @@ describe('contentReferenceComponentFactory', () => {
   });
 
   it('renders placeholder if contentReferenceNode is unresolved', () => {
-
-
     const unresolvedContentReferenceNode: UnresolvedContentReferenceNode = {
       contentReferenceId: '1',
       contentReferenceCount: 1,
