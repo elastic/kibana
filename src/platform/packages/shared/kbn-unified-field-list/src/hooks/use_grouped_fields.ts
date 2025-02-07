@@ -94,8 +94,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     ? fieldsExistenceReader.hasFieldData
     : hasFieldDataByDefault;
 
-  console.log('useGroupedFields', dataViewId, dataView, fieldsExistenceInfoUnavailable);
-
   useEffect(() => {
     const getDataView = async () => {
       if (dataViewId) {
