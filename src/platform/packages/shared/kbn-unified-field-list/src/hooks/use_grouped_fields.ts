@@ -85,6 +85,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
   const onFilterFieldList = fieldListFilters.onFilterField;
   const [dataView, setDataView] = useState<DataView | null>(null);
+
   const isAffectedByTimeFilter = Boolean(dataView?.timeFieldName);
   const fieldsExistenceInfoUnavailable: boolean = dataViewId
     ? fieldsExistenceReader.isFieldsExistenceInfoUnavailable(dataViewId)
@@ -92,6 +93,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   const hasFieldDataHandler = dataViewId
     ? fieldsExistenceReader.hasFieldData
     : hasFieldDataByDefault;
+
+  console.log('useGroupedFields', dataViewId, dataView, fieldsExistenceInfoUnavailable);
 
   useEffect(() => {
     const getDataView = async () => {

@@ -46,9 +46,10 @@ export const useSourcererDataView = (
         ...selectedDataView?.dataView,
         title: selectedPatterns.join(','),
         name: selectedDataView?.dataView?.name ?? selectedPatterns.join(','),
+        id: selectedDataViewId ?? undefined,
       },
     };
-  }, [selectedDataView, selectedPatterns]);
+  }, [selectedDataView, selectedDataViewId, selectedPatterns]);
 
   const indicesExist = useMemo(() => {
     if (loading || sourcererDataView.loading) {

@@ -31,10 +31,10 @@ export const useCreateAdhocDataView = (
   const { addError } = useAppToasts();
 
   const createAdhocDataView = useCallback(
-    async (missingPatterns: string[]): Promise<DataView | null> => {
+    async (patterns: string[]): Promise<DataView | null> => {
       const createDataView = async (): Promise<DataView> => {
         const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-        const combinedPatterns = [...defaultPatterns, ...missingPatterns];
+        const combinedPatterns = [...defaultPatterns, ...patterns];
         const validatedPatterns = ensurePatternFormat(combinedPatterns);
         const patternsString = validatedPatterns.join(',');
         const adHocDataView = await dataViews.create({
