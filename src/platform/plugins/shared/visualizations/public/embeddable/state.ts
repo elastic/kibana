@@ -46,23 +46,15 @@ export const deserializeState = async (
         data: {},
       },
     } as VisualizeRuntimeState;
-  let serializedState = cloneDeep(state.rawState);
-  if ((serializedState as VisualizeSavedObjectInputState).savedObjectId) {
-    serializedState = await deserializeSavedObjectState(
-      serializedState as VisualizeSavedObjectInputState
-    );
-  }
 
-  const references: Reference[] = state.references ?? [];
-
-  const deserializedSavedVis = deserializeSavedVisState(
-    serializedState as VisualizeSavedVisInputState,
-    references
-  );
+  const byValueState = (state.rawState as VisualizeSavedObjectInputState).savedObjectId
+    ? await deserializeSavedObjectState(state.rawState as VisualizeSavedObjectInputState)
+    : (cloneDeep(state.rawState) as VisualizeSavedVisInputState);
+  const serializedVis = deserializeSavedVisState(byValueState, state.references ?? []);
 
   return {
-    ...serializedState,
-    serializedVis: deserializedSavedVis,
+    ...byValueState,
+    serializedVis,
   } as VisualizeRuntimeState;
 };
 
