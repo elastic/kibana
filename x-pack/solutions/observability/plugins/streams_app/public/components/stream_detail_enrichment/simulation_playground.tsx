@@ -18,11 +18,22 @@ interface SimulationPlaygroundProps {
   isLoading: UseProcessingSimulatorReturn['isLoading'];
   simulation: UseProcessingSimulatorReturn['simulation'];
   samples: UseProcessingSimulatorReturn['samples'];
+  selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
+  setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
   onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
 }
 
 export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
-  const { definition, columns, isLoading, simulation, samples, onRefreshSamples } = props;
+  const {
+    definition,
+    columns,
+    isLoading,
+    simulation,
+    samples,
+    onRefreshSamples,
+    setSelectedDocsFilter,
+    selectedDocsFilter,
+  } = props;
 
   const tabs = {
     dataPreview: {
@@ -66,6 +77,8 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
           simulation={simulation}
           samples={samples}
           onRefreshSamples={onRefreshSamples}
+          selectedDocsFilter={selectedDocsFilter}
+          setSelectedDocsFilter={setSelectedDocsFilter}
         />
       )}
       {selectedTabId === 'detectedFields' &&

@@ -19,6 +19,7 @@ import {
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { i18n } from '@kbn/i18n';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
@@ -30,6 +31,32 @@ export interface TableColumn {
   name: string;
   origin: 'processor' | 'detected';
 }
+
+export const docsFilterOptions = {
+  outcome_filter_all: {
+    id: 'outcome_filter_all',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.all',
+      { defaultMessage: 'All samples' }
+    ),
+  },
+  outcome_filter_matched: {
+    id: 'outcome_filter_matched',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.matched',
+      { defaultMessage: 'Matched' }
+    ),
+  },
+  outcome_filter_unmatched: {
+    id: 'outcome_filter_unmatched',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.unmatched',
+      { defaultMessage: 'Unmatched' }
+    ),
+  },
+} as const;
+
+export type DocsFilterOption = keyof typeof docsFilterOptions;
 
 export interface UseProcessingSimulatorProps {
   definition: IngestStreamGetResponse;
@@ -48,6 +75,8 @@ export interface UseProcessingSimulatorReturn {
     processor: ProcessorDefinitionWithUIAttributes | { id: string; deleteIfExists: true }
   ) => void;
   refreshSimulation: () => void;
+  selectedDocsFilter: DocsFilterOption;
+  setSelectedDocsFilter: (filter: DocsFilterOption) => void;
 }
 
 export const useProcessingSimulator = ({
@@ -191,16 +220,41 @@ export const useProcessingSimulator = ({
 
   const hasLiveChanges = !isEmpty(liveDraftProcessors);
 
+  const [selectedDocsFilter, setSelectedDocsFilter] =
+    useState<DocsFilterOption>('outcome_filter_all');
+
+  const filteredSamples = useMemo(() => {
+    if (!simulation?.documents) {
+      return sampleDocs;
+    }
+
+    const filterDocuments = (filter: DocsFilterOption) => {
+      switch (filter) {
+        case 'outcome_filter_matched':
+          return simulation.documents.filter((doc) => doc.isMatch);
+        case 'outcome_filter_unmatched':
+          return simulation.documents.filter((doc) => !doc.isMatch);
+        case 'outcome_filter_all':
+        default:
+          return simulation.documents;
+      }
+    };
+
+    return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
+  }, [sampleDocs, simulation?.documents, selectedDocsFilter]);
+
   return {
     hasLiveChanges,
     isLoading: isLoadingSamples || isLoadingSimulation,
     error: simulationError as IHttpFetchError<ResponseErrorBody> | undefined,
     refreshSamples,
     simulation,
-    samples: sampleDocs ?? [],
+    samples: filteredSamples ?? [],
     tableColumns,
     watchProcessor,
     refreshSimulation,
+    selectedDocsFilter,
+    setSelectedDocsFilter,
   };
 };
 

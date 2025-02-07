@@ -69,6 +69,8 @@ export function StreamDetailEnrichmentContent({
     tableColumns,
     watchProcessor,
     refreshSimulation,
+    selectedDocsFilter,
+    setSelectedDocsFilter,
   } = useProcessingSimulator({ definition, processors });
 
   useUnsavedChangesPrompt({
@@ -131,6 +133,8 @@ export function StreamDetailEnrichmentContent({
                   samples={samples}
                   onRefreshSamples={refreshSamples}
                   isLoading={isLoading}
+                  selectedDocsFilter={selectedDocsFilter}
+                  setSelectedDocsFilter={setSelectedDocsFilter}
                 />
               </EuiResizablePanel>
             </>
