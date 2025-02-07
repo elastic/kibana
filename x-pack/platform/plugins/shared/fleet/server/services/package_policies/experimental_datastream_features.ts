@@ -155,11 +155,13 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     });
 
     if (isSyntheticSourceOptInChanged) {
-      sourceModeSettings = {
-        source: {
-          mode: 'synthetic',
-        },
-      };
+      sourceModeSettings = featureMapEntry.features.synthetic_source
+        ? {
+            source: {
+              mode: 'synthetic',
+            },
+          }
+        : {};
     }
 
     if (componentTemplateChanged) {
