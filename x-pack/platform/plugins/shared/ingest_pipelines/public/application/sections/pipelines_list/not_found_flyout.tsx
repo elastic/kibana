@@ -12,12 +12,7 @@ import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { Error, useKibana } from '../../../shared_imports';
 import { getCreatePath } from '../../services/navigation';
-import { getErrorText } from '../utils';
-
-// All pipleines for integrations end in @custom
-const isIntegrationsPipeline = (name: string) => {
-  return name.toLowerCase().endsWith('@custom');
-};
+import { getErrorText, isIntegrationsPipeline } from '../utils';
 
 interface Props {
   onClose: () => void;
@@ -32,7 +27,7 @@ export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({
 }) => {
   const { history } = useKibana().services;
   const renderErrorCallOut = () => {
-    if (error.error === 'Not Found' && isIntegrationsPipeline(pipelineName)) {
+    if (error.statusCode === 404 && isIntegrationsPipeline(pipelineName)) {
       return (
         <EuiCallOut
           title={
