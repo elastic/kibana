@@ -4,14 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
+import { chunk, get, invert, isArray, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
@@ -133,10 +136,7 @@ export const hasReadIndexPrivileges = async (args: {
 
 export const hasTimestampFields = async (args: {
   timestampField: string;
-  // any is derived from here
-  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
+  timestampFieldCapsResponse: TransportResult<FieldCapsResponse, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
@@ -191,6 +191,51 @@ export const hasTimestampFields = async (args: {
   }
 
   return { foundNoIndices: false, warningMessage: undefined };
+};
+
+export const checkForFrozenIndices = async ({
+  fieldCapsResponse,
+  inputIndices,
+  esClient,
+}: {
+  fieldCapsResponse: TransportResult<FieldCapsResponse, unknown>;
+  inputIndices: string[];
+  esClient: ElasticsearchClient;
+}): Promise<string | undefined> => {
+  const responseIndices = isArray(fieldCapsResponse.body.indices)
+    ? fieldCapsResponse.body.indices
+    : [fieldCapsResponse.body.indices];
+  // Cold and frozen indices start with `restored-` and `partial-`, respectively, but it's possible
+  // for some regular hot/warm index to start with those prefixes as well by coincidence. If we find indices with that naming pattern,
+  // we fetch the index settings to verify that they are actually cold/frozen indices.
+  const partialAndRestoredIndices = responseIndices.filter((index) => index.startsWith('partial-'));
+  if (partialAndRestoredIndices.length > 0) {
+    const frozenIndices = [];
+    // See https://www.elastic.co/guide/en/elasticsearch/reference/current/data-tiers.html#data-tier-allocation for
+    // details on _tier_preference
+    const tierPreferencesResp = await esClient.indices.getSettings({
+      // Use the original index patterns again instead of just the concrete names of the partial and restored indices:
+      // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
+      index: inputIndices,
+      filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+    });
+    const keys = Object.keys(tierPreferencesResp);
+    for (const key of keys) {
+      const tiers =
+        tierPreferencesResp[key].settings?.index?.routing?.allocation?.include?._tier_preference;
+      if (tiers) {
+        const preferredTier = tiers.split(',')[0];
+        if (preferredTier === 'data_frozen') {
+          frozenIndices.push(key);
+        }
+      }
+    }
+    if (frozenIndices.length > 0) {
+      return `This rule found frozen indices that could not be excluded by the time range filter: ${frozenIndices.join(
+        ','
+      )}`;
+    }
+  }
 };
 
 export const checkPrivileges = async (

@@ -27,6 +27,7 @@ import {
   isMachineLearningParams,
   isEsqlParams,
   getDisabledActionsWarningText,
+  checkForFrozenIndices,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -47,6 +48,7 @@ import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
+import { buildTimeRangeFilter } from './utils/build_events_query';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -284,6 +286,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     include_unmapped: true,
                     runtime_mappings: runtimeMappings,
                     ignore_unavailable: true,
+                    index_filter: buildTimeRangeFilter({
+                      to: params.to,
+                      from: params.from,
+                      primaryTimestamp,
+                      secondaryTimestamp,
+                    }),
                   },
                   { meta: true }
                 )
@@ -300,6 +308,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 wrapperWarnings.push(warningMissingTimestampFieldsMessage);
               }
               skipExecution = foundNoIndices;
+
+              const frozenWarning = await checkForFrozenIndices({
+                fieldCapsResponse: timestampFieldCaps,
+                inputIndices: inputIndex,
+                esClient: services.scopedClusterClient.asCurrentUser,
+              });
+              if (frozenWarning) {
+                wrapperWarnings.push(frozenWarning);
+              }
             }
           } catch (exc) {
             await ruleExecutionLogger.logStatusChange({
