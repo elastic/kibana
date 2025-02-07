@@ -23,6 +23,8 @@ import { isEmpty } from 'lodash';
 import {
   IngestProcessorContainer,
   IngestSimulateRequest,
+  IngestSimulateResponse,
+  IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
@@ -63,28 +65,34 @@ export const simulateProcessorRoute = createServerRoute({
     if (!read) {
       throw new DefinitionNotFoundError(`Stream definition for ${params.path.id} not found.`);
     }
-
+    // Prepare data for either simulation types (ingest, pipeline), used to compose both simulation bodies
     const simulationData = prepareSimulationData(params);
 
-    const ingestSimulationBody = prepareIngestSimulationBody(simulationData, params);
+    const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
 
-    const simulationResult = await executeIngestSimulation(
+    const pipelineSimulationResult = await executePipelineSimulation(
       scopedClusterClient,
-      ingestSimulationBody
+      pipelineSimulationBody
     );
 
-    const simulationDiffs = prepareSimulationDiffs(simulationResult, ingestSimulationBody.docs);
-
-    assertSimulationResult(simulationResult, simulationDiffs);
-
-    return prepareSimulationResponse(
-      simulationResult,
-      ingestSimulationBody.docs,
-      simulationDiffs,
-      params.body.detected_fields
+    const { normalizedDocs, processorsMetrics } = normalizePipelineSimulationResult(
+      pipelineSimulationResult,
+      simulationData.docs
     );
+
+    const simulationDiffs = prepareSimulationDiffs(normalizedDocs, pipelineSimulationBody.docs);
+
+    // console.log(JSON.stringify(normalizedPipelineSimulationResult[0], null, 2));
+
+    assertSimulationResult(simulationDiffs);
+
+    return prepareSimulationResponse(simulationResult, normalizedDocs, params.body.detected_fields);
   },
 });
+
+/* processing/_simulate API helpers */
+
+const getProcessorId = (id: number) => `processor-${id}`;
 
 const prepareSimulationDocs = (documents: RecursiveRecord[], streamId: string) => {
   return documents.map((doc, id) => ({
@@ -97,13 +105,30 @@ const prepareSimulationDocs = (documents: RecursiveRecord[], streamId: string) =
 const prepareSimulationProcessors = (
   processing: ProcessorDefinition[]
 ): IngestProcessorContainer[] => {
-  // Force each processor to not ignore failures to collect all errors
-  const processors = processing.map((processor) => {
+  //
+  /**
+   * We want to simulate processors logic and collect data indipendently from the user config for simulation purposes.
+   * 1. Force each processor to not ignore failures to collect all errors
+   * 2. Append the error message to the `_errors` field on failure
+   */
+  const processors = processing.map((processor, id) => {
     const type = getProcessorType(processor);
     return {
       [type]: {
         ...(processor as any)[type], // Safe to use any here due to type structure
         ignore_failure: false,
+        tag: getProcessorId(id),
+        on_failure: [
+          {
+            append: {
+              field: '_errors',
+              value: {
+                processor_id: '{{{ _ingest.on_failure_processor_tag }}}',
+                message: '{{{ _ingest.on_failure_message }}}',
+              },
+            },
+          },
+        ],
       },
     } as ProcessorDefinition;
   });
@@ -171,10 +196,11 @@ const prepareIngestSimulationBody = (
 const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
-): Promise<any> => {
+) => {
   try {
     return await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
   } catch (error) {
+    // This catch high level errors that might occur during the simulation, such invalid grok syntax
     throw new SimulationFailedError(error);
   }
 };
@@ -196,17 +222,85 @@ const executeIngestSimulation = async (
   }
 };
 
-const assertSimulationResult = (
-  simulationResult: Awaited<ReturnType<typeof executeSimulation>>,
-  simulationDiffs: ReturnType<typeof prepareSimulationDiffs>
+interface SimulatedDocError {
+  processor_id: string;
+  message: string;
+}
+
+interface NormalizedSimulationDoc {
+  value: RecursiveRecord;
+  status: 'parsed' | 'partially_parsed' | 'failed';
+  errors?: string[];
+}
+
+interface ProcessorMetrics {
+  success_rate: number;
+  failure_rate: number;
+  errors?: string[];
+}
+
+const normalizePipelineSimulationResult = (
+  simulationResult: IngestSimulateResponse,
+  sampleDocs: Array<{ _source: RecursiveRecord }>
 ) => {
+  const processorsMap = new Map<string, ProcessorMetrics>();
+
+  const normalizedDocs = simulationResult.docs.map((docResult, id) => {
+    const lastDocSource = docResult.processor_results?.at(-1)?.doc?._source;
+
+    const status = isSuccessfulPipelineSimulationDocument(docResult)
+      ? 'parsed'
+      : isPartiallySuccessfulPipelineSimulationDocument(docResult)
+      ? 'partially_parsed'
+      : 'failed';
+
+    if (lastDocSource) {
+      const { _errors, ...docSource } = lastDocSource;
+      const errors = _errors as SimulatedDocError[] | undefined;
+
+      if (errors) {
+        errors?.forEach((error) => {
+          const procId = error.processor_id;
+          const metrics = processorsMap.get(procId) ?? {
+            errors: [],
+            success_rate: 0,
+            failure_rate: 0,
+          };
+
+          metrics.errors?.push(error.message);
+          metrics.failure_rate++;
+
+          processorsMap.set(procId, metrics);
+        });
+      }
+
+      return {
+        value: flattenObject(docSource),
+        errors,
+        status,
+      };
+    } else {
+      return {
+        value: flattenObject(sampleDocs[id]._source),
+        errors: [{ processor_id: 'unknown', message: 'Unknown error' }],
+        status: 'failed',
+      };
+    }
+  });
+
+  const processorsMetrics = Object.fromEntries(processorsMap);
+
+  return { normalizedDocs, processorsMetrics };
+};
+
+const assertSimulationResult = (simulationDiffs: ReturnType<typeof prepareSimulationDiffs>) => {
   // Assert mappings are compatible with the documents
-  const entryWithError = simulationResult.docs.find(isMappingFailure);
-  if (entryWithError) {
-    throw new DetectedMappingFailureError(
-      `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
-    );
-  }
+  // const entryWithError = simulationResult.docs.find(isMappingFailure);
+  // if (entryWithError) {
+  //   throw new DetectedMappingFailureError(
+  //     `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
+  //   );
+  // }
   // Assert that the processors are purely additive to the documents
   const updatedFields = computeUpdatedFields(simulationDiffs);
 
@@ -219,18 +313,16 @@ const assertSimulationResult = (
 
 const prepareSimulationResponse = (
   simulationResult: any,
-  docs: Array<{ _source: RecursiveRecord }>,
-  simulationDiffs: ReturnType<typeof prepareSimulationDiffs>,
+  normalizedDocs: NormalizedSimulationDoc[],
   detectedFields?: ProcessingSimulateParams['body']['detected_fields']
 ) => {
-  const confirmedValidDetectedFields = computeMappingProperties(detectedFields ?? []);
-  const documents = computeSimulationDocuments(simulationResult, docs);
-  const detectedFieldsResult = computeDetectedFields(simulationDiffs, confirmedValidDetectedFields);
+  // const confirmedValidDetectedFields = computeMappingProperties(detectedFields ?? []);
+  // const detectedFieldsResult = computeDetectedFields(simulationDiffs, confirmedValidDetectedFields);
   const successRate = computeSuccessRate(simulationResult);
   const failureRate = 1 - successRate;
 
   return {
-    documents,
+    documents: normalizedDocs,
     success_rate: parseFloat(successRate.toFixed(2)),
     failure_rate: parseFloat(failureRate.toFixed(2)),
     detected_fields: detectedFieldsResult,
@@ -239,30 +331,63 @@ const prepareSimulationResponse = (
 
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 const prepareSimulationDiffs = (
-  simulation: any,
+  normalizedDocs: NormalizedSimulationDoc[],
   sampleDocs: Array<{ _source: RecursiveRecord }>
 ) => {
   // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
-  const samplesToSimulationMap = new Map<any, { _source: RecursiveRecord }>(
-    simulation.docs.map((entry: any, id: number) => [entry.doc, sampleDocs[id]])
+  const samplesToSimulationMap = new Map(
+    normalizedDocs.map((doc, id) => [doc.value, sampleDocs[id]])
   );
 
-  const diffs = simulation.docs.filter(isSuccessfulDocument).map((entry: any) => {
-    const sample = samplesToSimulationMap.get(entry.doc);
-    if (sample) {
-      return calculateObjectDiff(sample._source, entry.doc._source);
-    }
+  const diffs = normalizedDocs
+    .filter((doc) => doc.status !== 'failed') // Exclude completely failed documents, keep parsed and partially parsed
+    .map((doc) => {
+      const sample = samplesToSimulationMap.get(doc.value);
+      if (sample) {
+        return calculateObjectDiff(sample._source, doc.value);
+      }
 
-    return calculateObjectDiff({});
-  });
+      return calculateObjectDiff({});
+    });
 
   return diffs;
 };
 
-// TODO: update type once Kibana updates to elasticsearch-js 8.17
+const computeDetectedFields = (
+  simulation: IngestSimulateResponse,
+  sampleDocs: Array<{ _source: Record<string, unknown> }>
+): Array<{
+  name: string;
+  type: FieldDefinitionConfig['type'] | 'unmapped';
+}> => {
+  // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
+  const samplesToSimulationMap = new Map(simulation.docs.map((doc, id) => [doc, sampleDocs[id]]));
+
+  const diffs = simulation.docs
+    .filter(isSuccessfulDocument)
+    .map((doc) => {
+      const sample = samplesToSimulationMap.get(doc);
+      if (sample) {
+        const { added } = calculateObjectDiff(
+          sample._source,
+          doc.processor_results.at(-1)?.doc?._source
+        );
+        return flattenObject(added);
+      }
+
+      return {};
+    })
+    .map(Object.keys)
+    .flat();
+
+  const uniqueFields = [...new Set(diffs)];
+
+  return uniqueFields.map((name) => ({ name, type: 'unmapped' }));
+};
+
 const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulationDiffs>) => {
   const diffs = simulationDiff
-    .map((simulatedDoc: any) => flattenObject(simulatedDoc.updated))
+    .map((simulatedDoc) => flattenObject(simulatedDoc.updated))
     .flatMap(Object.keys);
 
   const uniqueFields = [...new Set(diffs)];
@@ -270,50 +395,38 @@ const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulatio
   return uniqueFields;
 };
 
-// TODO: update type once Kibana updates to elasticsearch-js 8.17
-const computeSimulationDocuments = (
-  simulation: any,
-  sampleDocs: Array<{ _source: RecursiveRecord }>
-): Array<{ isMatch: boolean; value: RecursiveRecord }> => {
-  return simulation.docs.map((entry: any, id: number) => {
-    // If every processor was successful, return and flatten the simulation doc from the last processor
-    if (isSuccessfulDocument(entry)) {
-      return {
-        value: flattenObject(entry.doc._source ?? sampleDocs[id]._source),
-        isMatch: true,
-      };
-    }
+interface ProcessorMetrics {
+  success_rate: number;
+  failure_rate: number;
+  errors?: string[];
+}
 
-    return {
-      value: flattenObject(sampleDocs[id]._source),
-      isMatch: false,
-    };
-  });
-};
+// const computeSimulationMetrics = (
+//   docs: NormalizedSimulationDoc[],
+//   processors: ProcessorDefinition[]
+// ): ProcessorMetrics[] => {
+//   const processorIds = processors.map((_, id) => getProcessorId(id));
+//   const processorsMap = new Map<string, ProcessorMetrics>(
+//     processorIds.map((id) => [id, { success_rate: 0, failure_rate: 0, errors: [] }])
+//   );
 
-const computeDetectedFields = (
-  simulationDiff: ReturnType<typeof prepareSimulationDiffs>,
-  confirmedValidDetectedFields: Record<string, { type: FieldDefinitionConfig['type'] | 'unmapped' }>
-): Array<{
-  name: string;
-  type: FieldDefinitionConfig['type'] | 'unmapped';
-}> => {
-  const diffs: string[] = simulationDiff
-    .map((simulatedDoc: any) => flattenObject(simulatedDoc.added))
-    .flatMap(Object.keys);
+//   processorIds.forEach((id) => {
+//     const metrics = processorsMap.get(id)!; // Safe to use ! here since we initialize the map with all processor ids
+//     docs.forEach((doc) => {
+//       if (doc.errors) {
+//         const processorErrors = doc.errors.filter((error) => error.processor_id === id);
+//         metrics.errors?.push(...processorErrors.map((error) => error.message));
+//       }
+//     });
 
-  const uniqueFields = [...new Set(diffs)];
-
-  return uniqueFields.map((name: string) => ({
-    name,
-    type: confirmedValidDetectedFields[name]?.type || 'unmapped',
-  }));
-};
+//     processorsMap.set(id, metrics);
+//   });
+// };
 
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
-const computeSuccessRate = (simulation: any) => {
-  const successfulCount = simulation.docs.reduce((rate: number, entry: any) => {
-    return (rate += isSuccessfulDocument(entry) ? 1 : 0);
+const computeSuccessRate = (docs: NormalizedSimulationDoc[]) => {
+  const successfulCount = docs.reduce((rate, entry) => {
+    return (rate += doc ? 1 : 0);
   }, 0);
 
   return successfulCount / simulation.docs.length;
@@ -330,6 +443,19 @@ const isSuccessfulDocument = (entry: any) => entry.doc.error === undefined;
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 const isMappingFailure = (entry: any) =>
   !isSuccessfulDocument(entry) && entry.doc.error.type === 'document_parsing_exception';
+
+const isSuccessfulPipelineSimulationDocument = (
+  doc: IngestSimulateSimulateDocumentResult
+): doc is Required<IngestSimulateSimulateDocumentResult> =>
+  doc.processor_results?.every((processorSimulation) => processorSimulation.status === 'success') ??
+  false;
+
+const isPartiallySuccessfulPipelineSimulationDocument = (
+  doc: IngestSimulateSimulateDocumentResult
+): doc is Required<IngestSimulateSimulateDocumentResult> =>
+  doc.processor_results?.some(
+    (processorSimulation) => processorSimulation.status === 'success' && processorSimulation.tag
+  ) ?? false;
 
 export const processingRoutes = {
   ...simulateProcessorRoute,

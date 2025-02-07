@@ -9,21 +9,28 @@
 
 import { isPlainObject } from 'lodash';
 
+type GetValuesTypes<T> = T extends Record<PropertyKey, any>
+  ? { [K in keyof T]: GetValuesTypes<T[K]> }[keyof T]
+  : T;
+
 /**
  * Returns a flattened version of the input object also accounting for nested properties.
  * @param obj - The input object.
  * @param parentKey - The initial key used for recursive flattening.
  * @returns An object containing all the flattened properties.
  */
-export function flattenObject(obj: Record<PropertyKey, unknown>, parentKey: string = '') {
-  const result: Record<PropertyKey, unknown> = {};
+export function flattenObject<TObj extends Record<PropertyKey, any>>(
+  obj: TObj,
+  parentKey: string = ''
+) {
+  const result: Record<PropertyKey, GetValuesTypes<TObj>> = {};
 
   for (const key in obj) {
     if (Object.hasOwn(obj, key)) {
       const value = obj[key];
       const newKey = parentKey ? `${parentKey}.${key}` : key;
       if (isPlainObject(value)) {
-        Object.assign(result, flattenObject(value as Record<PropertyKey, unknown>, newKey));
+        Object.assign(result, flattenObject(value, newKey));
       } else {
         result[newKey] = value;
       }
