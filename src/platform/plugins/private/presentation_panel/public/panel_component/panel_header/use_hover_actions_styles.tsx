@@ -27,10 +27,12 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         ${isEditMode ? editModeOutline : viewModeOutline}
       );
 
-      container: hoverActionsAnchor / inline-size;
+      container: hoverActionsAnchor / size;
       border-radius: ${euiTheme.border.radius.medium};
       position: relative;
-      display: inline;
+      display: block;
+      width: 100%;
+      height: 100%;
 
       ${showBorder
         ? css`
@@ -74,7 +76,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       .embPanel__hoverActions:has(:focus-visible) {
         z-index: ${euiTheme.levels.menu};
         opacity: 1;
-        visibility: visible !important;
+        visibility: visible;
         transition: none; // apply transition delay on hover out only
       }
     `;
