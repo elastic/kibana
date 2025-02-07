@@ -345,36 +345,21 @@ const getInsertText = (
   bodyContent: string,
   context: AutoCompleteContext
 ): string => {
-  if (name === undefined) {
-    return '';
-  }
-  let insertText = '';
-  if (typeof name === 'string') {
-    const bodyContentLines = bodyContent.split('\n');
-    const currentContentLine = bodyContentLines[bodyContentLines.length - 1];
-    const incompleteFieldRegex = /.*"[^"]*$/;
-    if (incompleteFieldRegex.test(currentContentLine)) {
-      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
-      insertText = '';
-    } else {
-      // The cursor is at the beginning of a field so the insert text should start with a quote
-      insertText = '"';
-    }
-    if (insertValue && insertValue !== '{' && insertValue !== '[') {
-      insertText += `${insertValue}"`;
-    } else {
-      insertText += `${name}"`;
-    }
-  } else {
-    insertText = name + '';
-  }
+  if (name == null) return '';
 
-  // check if there is template to add
+  // Always create the insert text with the name first, check the end of the body content
+  // to decide if we need to add a double quote after the name.
+  // This is done to avoid adding a double quote if the user is typing a value after the name.
+  let insertText = bodyContent.trim().endsWith('"') ? `${name}"` : `"${name}"`;
+
+  // Check if we have a conditional template
   const conditionalTemplate = getConditionalTemplate(name, bodyContent, context.endpoint);
   if (conditionalTemplate) {
     template = conditionalTemplate;
   }
-  if (template !== undefined && context.addTemplate) {
+
+  if (template) {
+    // Insert the entire template
     let templateLines;
     const { __raw, value: templateValue } = template;
     if (__raw && templateValue) {
@@ -384,10 +369,16 @@ const getInsertText = (
     }
     insertText += ': ' + templateLines.join('\n');
   } else if (value === '{') {
-    insertText += '{}';
+    insertText += ': {$0}';
   } else if (value === '[') {
-    insertText += '[]';
+    insertText += ': [$0]';
+  } else if (insertValue && insertValue !== '{' && insertValue !== '[') {
+    insertText = `"${insertValue}"`;
+    insertText += ': $0';
+  } else {
+    insertText += ': $0';
   }
+
   // the string $0 is used to move the cursor between empty curly/square brackets
   if (insertText.endsWith('{}')) {
     insertText = insertText.substring(0, insertText.length - 2) + '{$0}';
