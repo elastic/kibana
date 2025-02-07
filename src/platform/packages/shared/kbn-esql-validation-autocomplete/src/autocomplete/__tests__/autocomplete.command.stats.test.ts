@@ -378,7 +378,7 @@ describe('autocomplete.suggest', () => {
             kind: 'Issue',
             detail: 'Click to create',
             command: { id: 'esql.control.fields.create', title: 'Click to create' },
-            sortText: '11A',
+            sortText: '11',
           });
         });
 
