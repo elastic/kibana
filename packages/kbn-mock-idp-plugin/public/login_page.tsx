@@ -47,6 +47,7 @@ export const LoginPage = () => {
         full_name: values.full_name,
         email: sanitizeEmail(values.full_name),
         roles: [values.role],
+        urlWithSAMLRequest: location.href,
       });
     },
   });

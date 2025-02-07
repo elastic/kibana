@@ -33,7 +33,7 @@ interface ProviderState extends Partial<TokenPair> {
   /**
    * Unique identifier of the SAML request initiated the handshake.
    */
-  requestId?: string;
+  requestIds?: string[];
 
   /**
    * Stores path component of the URL only or in a combination with URL fragment that was used to
@@ -139,9 +139,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     state?: ProviderState | null
   ) {
     this.logger.debug('Trying to perform a login.');
+    console.log('KURT LOGIN VIA SAML PROVIDER');
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
-    // we should clear such session an log user out.
+    // we should clear such session and log user out.
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
@@ -203,6 +204,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+    console.log('KURT Authenticate');
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}`
     );
@@ -213,7 +215,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
-    // we should clear such session an log user out.
+    // we should clear such session and log user out.
     if (state && this.realm && state.realm !== this.realm) {
       const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
@@ -326,31 +328,39 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     relayState?: string,
     state?: ProviderState | null
   ) {
+    console.log('KURT LoginWithSAMLResponse');
     this.logger.debug('Trying to log in with SAML response payload.');
 
     // If we have a `SAMLResponse` and state, but state doesn't contain all the necessary information,
     // then something unexpected happened and we should fail.
     const {
-      requestId: stateRequestId,
+      requestIds: stateRequestIds,
       redirectURL: stateRedirectURL,
       realm: stateRealm,
     } = state || {
-      requestId: '',
+      requestId: [''],
       redirectURL: '',
       realm: '',
     };
-    if (state && !stateRequestId) {
+
+    if (state && !stateRequestIds) {
       const message = 'SAML response state does not have corresponding request id.';
       this.logger.warn(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
     // When we don't have state and hence request id we assume that SAMLResponse came from the IdP initiated login.
-    const isIdPInitiatedLogin = !stateRequestId;
+    const isIdPInitiatedLogin = !stateRequestIds;
     this.logger.debug(
       !isIdPInitiatedLogin
         ? 'Login has been previously initiated by Kibana.'
         : 'Login has been initiated by Identity Provider.'
+    );
+
+    this.logger.debug(
+      `SAML RESPONSE: ${samlResponse}:::${JSON.stringify(
+        !isIdPInitiatedLogin ? [stateRequestIds] : []
+      )}`
     );
 
     const providerRealm = this.realm || stateRealm;
@@ -440,6 +450,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     relayState: string | undefined,
     existingState: ProviderState
   ) {
+    console.log('KURT loginWithNewSAMLResponse');
     this.logger.info('Trying to log in with SAML response payload and existing valid session.');
 
     // First let's try to authenticate via SAML Response payload.
@@ -569,11 +580,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   private async authenticateViaHandshake(request: KibanaRequest, redirectURL: string) {
     this.logger.debug('Trying to initiate SAML handshake.');
 
+    console.log('Kurt authenticateViaHandshake');
     try {
       // Prefer realm name if it's specified, otherwise fallback to ACS.
       const preparePayload = this.realm ? { realm: this.realm } : { acs: this.getACS() };
 
-      // This operation should be performed on behalf of the user with a privilege that normal
+      // This operation should be performed on behalf of the user with a privilege that a normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
@@ -669,7 +681,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   private initiateAuthenticationHandshake(request: KibanaRequest) {
+    console.log('KURT initiateAuthenticationHandshake');
+
     const originalURLHash = request.url.searchParams.get(AUTH_URL_HASH_QUERY_STRING_PARAMETER);
+
     if (originalURLHash != null) {
       return this.authenticateViaHandshake(
         request,
