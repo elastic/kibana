@@ -15,9 +15,7 @@ interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<ProductDocumentationContentReference>;
 }
 
-export const ProductDocumentationReference: React.FC<Props> = ({
-  contentReferenceNode,
-}) => {
+export const ProductDocumentationReference: React.FC<Props> = ({ contentReferenceNode }) => {
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}

@@ -17,9 +17,7 @@ interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertContentReference>;
 }
 
-export const SecurityAlertReference: React.FC<Props> = ({
-  contentReferenceNode,
-}) => {
+export const SecurityAlertReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const { navigateToApp } = useKibana().services.application;
 
   const onClick = useCallback(

@@ -131,7 +131,7 @@ const getPluginDependencies = ({
                 contentReferencesVisible={contentReferencesVisible}
                 contentReferenceNode={contentReferenceNode}
               />
-            )
+            );
           },
         }
       : {}),

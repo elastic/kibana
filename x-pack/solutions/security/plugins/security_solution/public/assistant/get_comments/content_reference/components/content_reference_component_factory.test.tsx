@@ -9,7 +9,11 @@ import type { ContentReference } from '@kbn/elastic-assistant-common';
 import { ContentReferenceComponentFactory } from './content_reference_component_factory';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { InvalidContentReferenceNode, ResolvedContentReferenceNode, UnresolvedContentReferenceNode } from '../content_reference_parser';
+import type {
+  InvalidContentReferenceNode,
+  ResolvedContentReferenceNode,
+  UnresolvedContentReferenceNode,
+} from '../content_reference_parser';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useNavigation: jest.fn().mockReturnValue({
@@ -73,19 +77,21 @@ describe('contentReferenceComponentFactory', () => {
     ],
   ])(
     "Renders correct component for '%s'",
-    (
-      testId: string,
-      contentReference: ContentReference,
-    ) => {
+    async (testId: string, contentReference: ContentReference) => {
       const resolvedContentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
         contentReferenceId: '1',
         contentReferenceCount: 1,
         contentReferenceBlock: '{reference(123)}',
-        contentReference: contentReference,
+        contentReference,
         type: 'contentReference',
-      }
+      };
 
-      render(<ContentReferenceComponentFactory contentReferencesVisible contentReferenceNode={resolvedContentReferenceNode} />);
+      render(
+        <ContentReferenceComponentFactory
+          contentReferencesVisible
+          contentReferenceNode={resolvedContentReferenceNode}
+        />
+      );
 
       expect(screen.getByTestId(testId)).toBeInTheDocument();
     }
@@ -98,10 +104,14 @@ describe('contentReferenceComponentFactory', () => {
       contentReferenceBlock: '{reference(123)}',
       contentReference: undefined,
       type: 'contentReference',
-    }
+    };
 
-    const { container } = render(<ContentReferenceComponentFactory contentReferencesVisible contentReferenceNode={invalidContentReferenceNode} />);
-
+    const { container } = render(
+      <ContentReferenceComponentFactory
+        contentReferencesVisible
+        contentReferenceNode={invalidContentReferenceNode}
+      />
+    );
 
     expect(container).toBeEmptyDOMElement();
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
@@ -116,10 +126,11 @@ describe('contentReferenceComponentFactory', () => {
       contentReferenceBlock: '{reference(123)}',
       contentReference: undefined,
       type: 'contentReference',
-    }
+    };
 
     render(
-      <ContentReferenceComponentFactory contentReferencesVisible
+      <ContentReferenceComponentFactory
+        contentReferencesVisible
         contentReferenceNode={unresolvedContentReferenceNode}
       />
     );

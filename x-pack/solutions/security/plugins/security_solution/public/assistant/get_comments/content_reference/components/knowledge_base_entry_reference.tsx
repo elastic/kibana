@@ -17,9 +17,7 @@ interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>;
 }
 
-export const KnowledgeBaseEntryReference: React.FC<Props> = ({
-  contentReferenceNode
-}) => {
+export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const { navigateToApp } = useKibana().services.application;
 
   const onClick = useCallback(

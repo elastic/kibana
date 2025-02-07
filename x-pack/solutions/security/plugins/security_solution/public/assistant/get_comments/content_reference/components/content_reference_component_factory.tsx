@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import type { ContentReferences, EsqlContentReference, KnowledgeBaseEntryContentReference, ProductDocumentationContentReference, SecurityAlertContentReference, SecurityAlertsPageContentReference } from '@kbn/elastic-assistant-common';
+import type {
+  ContentReferences,
+  EsqlContentReference,
+  KnowledgeBaseEntryContentReference,
+  ProductDocumentationContentReference,
+  SecurityAlertContentReference,
+  SecurityAlertsPageContentReference,
+} from '@kbn/elastic-assistant-common';
 import React from 'react';
-import type { ContentReferenceNode, ResolvedContentReferenceNode } from '../content_reference_parser';
+import type {
+  ContentReferenceNode,
+  ResolvedContentReferenceNode,
+} from '../content_reference_parser';
 import { KnowledgeBaseEntryReference } from './knowledge_base_entry_reference';
 import { SecurityAlertReference } from './security_alert_reference';
 import { SecurityAlertsPageReference } from './security_alerts_page_reference';
@@ -25,7 +35,7 @@ export interface Props {
 
 export const ContentReferenceComponentFactory: React.FC<Props> = ({
   contentReferencesVisible,
-  contentReferenceNode
+  contentReferenceNode,
 }: Props) => {
   if (!contentReferencesVisible) return null;
 
@@ -38,42 +48,52 @@ export const ContentReferenceComponentFactory: React.FC<Props> = ({
         contentReferenceCount={contentReferenceNode.contentReferenceCount}
       />
     );
-    }
+  }
 
   switch (contentReferenceNode.contentReference.type) {
     case 'KnowledgeBaseEntry': {
-        return (
-          <KnowledgeBaseEntryReference
-            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>}
-          />
-        );
-      }
-      case 'SecurityAlert':
-        return (
-          <SecurityAlertReference
-            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<SecurityAlertContentReference>}
-          />
-        );
-      case 'SecurityAlertsPage':
-        return (
-          <SecurityAlertsPageReference
-            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<SecurityAlertsPageContentReference>}
-          />
-        );
-      case 'ProductDocumentation':
-        return (
-          <ProductDocumentationReference
-            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<ProductDocumentationContentReference>}
-          />
-        );
-      case 'EsqlQuery': {
-        return (
-          <EsqlQueryReference
-            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<EsqlContentReference>}
-          />
-        );
-      }
-      default:
-        return null;
+      return (
+        <KnowledgeBaseEntryReference
+          contentReferenceNode={
+            contentReferenceNode as ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>
+          }
+        />
+      );
     }
-  };
+    case 'SecurityAlert':
+      return (
+        <SecurityAlertReference
+          contentReferenceNode={
+            contentReferenceNode as ResolvedContentReferenceNode<SecurityAlertContentReference>
+          }
+        />
+      );
+    case 'SecurityAlertsPage':
+      return (
+        <SecurityAlertsPageReference
+          contentReferenceNode={
+            contentReferenceNode as ResolvedContentReferenceNode<SecurityAlertsPageContentReference>
+          }
+        />
+      );
+    case 'ProductDocumentation':
+      return (
+        <ProductDocumentationReference
+          contentReferenceNode={
+            contentReferenceNode as ResolvedContentReferenceNode<ProductDocumentationContentReference>
+          }
+        />
+      );
+    case 'EsqlQuery': {
+      return (
+        <EsqlQueryReference
+          contentReferenceNode={
+            contentReferenceNode as ResolvedContentReferenceNode<EsqlContentReference>
+          }
+        />
+      );
+    }
+    default:
+      return null;
+  }
+};
