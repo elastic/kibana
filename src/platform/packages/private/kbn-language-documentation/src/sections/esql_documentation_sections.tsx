@@ -401,6 +401,7 @@ FROM employees
       label: i18n.translate('languageDocumentation.documentationESQL.lookupJoin', {
         defaultMessage: 'LOOKUP JOIN',
       }),
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab={true}
@@ -451,6 +452,7 @@ In case of name collisions, the fields from the lookup index will override the e
       label: i18n.translate('languageDocumentation.documentationESQL.mvExpand', {
         defaultMessage: 'MV_EXPAND',
       }),
+      preview: true,
       description: (
         <Markdown
           markdownContent={i18n.translate(
