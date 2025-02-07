@@ -80,43 +80,39 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
     );
 
     return (
-      <>
-        <EuiResizableContainer
-          css={css`
-            height: 100%;
-          `}
-          onPanelWidthChange={onWidthChange}
-        >
-          {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
-            <>
-              <EuiResizablePanel
-                id={LEFT_PANEL_ID}
-                initialSize={initialLeftPercentage}
-                paddingSize="none"
-                minSize={MIN_SECTION_WIDTH}
-                data-test-subj={RESIZABLE_LEFT_SECTION_TEST_ID}
-              >
-                <LeftSection component={leftComponent} />
-              </EuiResizablePanel>
-
-              <EuiResizableButton
-                disabled={showPreview || !showLeft}
-                data-test-subj={RESIZABLE_BUTTON_TEST_ID}
-              />
-
-              <EuiResizablePanel
-                id={RIGHT_PANEL_ID}
-                initialSize={initialRightPercentage}
-                minSize={MIN_SECTION_WIDTH}
-                paddingSize="none"
-                data-test-subj={RESIZABLE_RIGHT_SECTION_TEST_ID}
-              >
-                <RightSection component={rightComponent} />
-              </EuiResizablePanel>
-            </>
-          )}
-        </EuiResizableContainer>
-      </>
+      <EuiResizableContainer
+        css={css`
+          height: 100%;
+        `}
+        onPanelWidthChange={onWidthChange}
+      >
+        {(EuiResizablePanel, EuiResizableButton) => (
+          <>
+            <EuiResizablePanel
+              id={LEFT_PANEL_ID}
+              initialSize={initialLeftPercentage}
+              paddingSize="none"
+              minSize={MIN_SECTION_WIDTH}
+              data-test-subj={RESIZABLE_LEFT_SECTION_TEST_ID}
+            >
+              <LeftSection component={leftComponent} />
+            </EuiResizablePanel>
+            <EuiResizableButton
+              disabled={showPreview || !showLeft}
+              data-test-subj={RESIZABLE_BUTTON_TEST_ID}
+            />
+            <EuiResizablePanel
+              id={RIGHT_PANEL_ID}
+              initialSize={initialRightPercentage}
+              minSize={MIN_SECTION_WIDTH}
+              paddingSize="none"
+              data-test-subj={RESIZABLE_RIGHT_SECTION_TEST_ID}
+            >
+              <RightSection component={rightComponent} />
+            </EuiResizablePanel>
+          </>
+        )}
+      </EuiResizableContainer>
     );
   }
 );
