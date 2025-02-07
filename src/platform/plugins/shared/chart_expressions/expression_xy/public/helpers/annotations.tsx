@@ -35,27 +35,6 @@ type PartialMergedAnnotation = Pick<
   'position' | 'icon' | 'textVisibility' | 'label' | 'isGrouped'
 >;
 
-const xyAnnotationNumberIconCss = {
-  self: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      borderRadius: euiTheme.size.base,
-      minWidth: euiTheme.size.base,
-      height: euiTheme.size.base,
-      backgroundColor: 'currentColor',
-    }),
-  text: css({
-    fontWeight: 500,
-    fontSize: '9px',
-    letterSpacing: '-.5px',
-    lineHeight: '11px',
-  }),
-};
-
-const xyAnnotationIconRotate90Css = css({
-  transform: 'rotate(90deg) !important',
-  transformOrigin: 'center',
-});
-
 const isExtendedDecorationConfig = (
   config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined
 ): config is PartialReferenceLineDecorationConfig =>
@@ -166,12 +145,12 @@ function NumberIcon({ number }: { number: number }) {
   return (
     <EuiFlexGroup
       justifyContent="spaceAround"
-      css={xyAnnotationNumberIconCss.self}
+      css={styles.xyAnnotationNumberIcon}
       data-test-subj="xyVisGroupedAnnotationIcon"
       gutterSize="none"
       alignItems="center"
     >
-      <EuiText color="ghost" css={xyAnnotationNumberIconCss.text}>
+      <EuiText color="ghost" css={styles.xyAnnotationNumberIconText}>
         {number < 10 ? number : `9+`}
       </EuiText>
     </EuiFlexGroup>
@@ -183,7 +162,7 @@ const isNumericalString = (value: string) => !isNaN(Number(value));
 export const AnnotationIcon = ({
   type,
   rotateClassName = '',
-  isHorizontal = true,
+  isHorizontal,
   renderedInChart,
   ...rest
 }: {
@@ -200,15 +179,13 @@ export const AnnotationIcon = ({
     return null;
   }
 
-  const rotationStyle =
-    iconConfig.shouldRotate && !isHorizontal ? xyAnnotationIconRotate90Css : undefined;
-
   return (
     <EuiIcon
       {...rest}
       data-test-subj="xyVisAnnotationIcon"
       type={iconConfig.icon || type}
-      css={rotationStyle}
+      className={iconConfig.shouldRotate ? rotateClassName : undefined}
+      css={styles.xyAnnotationIconRotate90}
     />
   );
 };
@@ -235,12 +212,7 @@ export function Marker({
 }) {
   if (hasIcon(config.icon)) {
     return (
-      <AnnotationIcon
-        type={config.icon}
-        rotateClassName={rotateClassName}
-        renderedInChart={true}
-        isHorizontal={isHorizontal}
-      />
+      <AnnotationIcon type={config.icon} rotateClassName={rotateClassName} renderedInChart={true} />
     );
   }
 
@@ -253,3 +225,25 @@ export function Marker({
   }
   return null;
 }
+
+const styles = {
+  xyAnnotationNumberIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderRadius: euiTheme.size.base,
+      minWidth: euiTheme.size.base,
+      height: euiTheme.size.base,
+      backgroundColor: 'currentColor',
+    }),
+  xyAnnotationNumberIconText: css({
+    fontWeight: 500,
+    fontSize: '9px',
+    letterSpacing: '-.5px',
+    lineHeight: '11px',
+  }),
+  xyAnnotationIconRotate90: css({
+    '&.xyAnnotationIcon_rotate90': {
+      transform: 'rotate(90deg) !important',
+      transformOrigin: 'center',
+    },
+  }),
+};
