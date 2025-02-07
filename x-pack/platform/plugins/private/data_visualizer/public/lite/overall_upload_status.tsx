@@ -104,9 +104,5 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
     },
   ];
 
-  return (
-    <>
-      <EuiSteps steps={steps} titleSize="xxs" css={css} />
-    </>
-  );
+  return <EuiSteps steps={steps} titleSize="xxs" css={css} />;
 };
