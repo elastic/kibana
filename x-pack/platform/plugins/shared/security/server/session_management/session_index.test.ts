@@ -89,6 +89,13 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
       mockElasticsearchClient.indices.exists.mockResponse(true);
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [indexName]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
+        },
+      });
 
       await sessionIndex.initialize();
 
@@ -109,6 +116,13 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.exists.mockImplementation(
         async ({ index }) => index === aliasName
       );
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [indexName]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
+        },
+      });
 
       await sessionIndex.initialize();
 
@@ -130,6 +144,13 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.exists.mockImplementation(
         async ({ index }) => index === indexName
       );
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [indexName]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
+        },
+      });
 
       await sessionIndex.initialize();
 
@@ -150,6 +171,13 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
       mockElasticsearchClient.indices.exists.mockResponse(false);
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [indexName]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
+        },
+      });
 
       await sessionIndex.initialize();
 
@@ -273,6 +301,13 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
       mockElasticsearchClient.indices.exists.mockResponse(true);
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [indexName]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
+        },
+      });
 
       await sessionIndex.initialize();
 
@@ -295,6 +330,13 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.getMapping.mockResolvedValue({
         [indexName]: {
           mappings: { _meta: {} },
+        },
+      });
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [indexName]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
         },
       });
 
@@ -329,6 +371,13 @@ describe('Session index', () => {
           mappings: { _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: '8.6.9' } },
         },
       });
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [indexName]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
+        },
+      });
 
       await sessionIndex.initialize();
 
@@ -359,6 +408,13 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.getMapping.mockResolvedValue({
         [indexName]: {
           mappings: { _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: '8.7.0' } },
+        },
+      });
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [indexName]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
         },
       });
 
@@ -1066,6 +1122,37 @@ describe('Session index', () => {
           event: { action: 'session_cleanup', category: ['authentication'], outcome: 'unknown' },
         })
       );
+    });
+
+    it.only('should correctly attach alias to reindexed index', async () => {
+      const REINDEXED_INDEX_NAME = `${indexName}_reindexed-for-N`;
+
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.exists.mockImplementation(
+        async ({ index }) => index === indexName
+      );
+      mockElasticsearchClient.indices.getAlias.mockResponse({
+        [REINDEXED_INDEX_NAME]: {
+          [aliasName]: {
+            is_hidden: true,
+          },
+        },
+      });
+
+      await sessionIndex.initialize();
+
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledWith({ index: aliasName });
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(2);
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: REINDEXED_INDEX_NAME,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
     });
 
     describe('concurrent session limit', () => {
