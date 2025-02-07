@@ -44,6 +44,7 @@ export function createOpenFileUploadLiteAction(
     async execute({
       onUploadComplete,
       autoAddInference,
+      autoCreateDataView,
       indexSettings,
     }: OpenFileUploadLiteContext) {
       try {
@@ -52,6 +53,7 @@ export function createOpenFileUploadLiteAction(
         createFlyout(coreStart, share, data, {
           onUploadComplete,
           autoAddInference,
+          autoCreateDataView,
           indexSettings,
         });
       } catch (e) {

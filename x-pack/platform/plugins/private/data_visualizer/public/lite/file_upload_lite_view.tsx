@@ -48,6 +48,7 @@ interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddInference?: string;
+  autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
   onClose?: () => void;
 }
@@ -58,6 +59,7 @@ export const FileUploadLiteView: FC<Props> = ({
   dataStart,
   setUploadResults,
   autoAddInference,
+  autoCreateDataView,
   indexSettings,
   onClose,
 }) => {
@@ -71,10 +73,11 @@ export const FileUploadLiteView: FC<Props> = ({
         http,
         dataStart.dataViews,
         autoAddInference ?? null,
+        autoCreateDataView,
         true,
         indexSettings
       ),
-    [autoAddInference, dataStart.dataViews, fileUpload, http, indexSettings]
+    [autoAddInference, autoCreateDataView, dataStart.dataViews, fileUpload, http, indexSettings]
   );
   const deleteFile = useCallback((i: number) => fm.removeFile(i), [fm]);
 

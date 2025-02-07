@@ -80,13 +80,21 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       ),
       status: generateStatus([uploadStatus.fileImport]),
     },
-    {
-      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.creatingDataView', {
-        defaultMessage: 'Creating data view',
-      }),
-      children: <></>,
-      status: generateStatus([uploadStatus.dataViewCreated]),
-    },
+    ...(uploadStatus.dataViewCreated === STATUS.NA
+      ? []
+      : [
+          {
+            title: i18n.translate(
+              'xpack.dataVisualizer.file.overallUploadStatus.creatingDataView',
+              {
+                defaultMessage: 'Creating data view',
+              }
+            ),
+            children: <></>,
+            status: generateStatus([uploadStatus.dataViewCreated]),
+          },
+        ]),
+
     {
       title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadComplete', {
         defaultMessage: 'Upload complete',

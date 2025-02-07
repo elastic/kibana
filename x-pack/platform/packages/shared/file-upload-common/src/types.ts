@@ -18,4 +18,5 @@ export interface OpenFileUploadLiteContext {
   onUploadComplete?: (results: FileUploadResults | null) => void;
   indexSettings?: IndicesIndexSettings;
   autoAddInference?: string;
+  autoCreateDataView?: boolean;
 }
