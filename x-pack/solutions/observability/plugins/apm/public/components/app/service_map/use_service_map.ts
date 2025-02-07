@@ -4,26 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Observable, of } from 'rxjs';
-import {
-  from,
-  scan,
-  map,
-  concatMap,
-  last,
-  Subscription,
-  lastValueFrom,
-  mergeMap,
-  defer,
-  switchMap,
-} from 'rxjs';
-import { chunk } from 'lodash';
-
-import type { Readable } from 'stream';
+import { useEffect, useRef, useState } from 'react';
+import { asyncScheduler, last, observeOn, of } from 'rxjs';
+import { scan, map, concatMap, Subscription } from 'rxjs';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { ServiceMapResponse, ServiceMapSpan } from '../../../../common/service_map/typings';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useLicenseContext } from '../../../context/license/use_license_context';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
-import type { ServiceMapReponse } from '../../../../common/service_map/transform_service_map_responses';
 import type { Environment } from '../../../../common/environment_rt';
 import {
   getConnectionNodeId,
@@ -37,7 +26,6 @@ import type {
   DiscoveredService,
   GroupResourceNodesResponse,
 } from '../../../../common/service_map';
-import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 export const useServiceMap = ({
@@ -55,12 +43,11 @@ export const useServiceMap = ({
   serviceGroupId?: string;
   serviceName?: string;
 }) => {
-  const {
-    services: { http },
-  } = useKibana();
+  const license = useLicenseContext();
+  const { config } = useApmPluginContext();
 
   const subscriptions = useRef<Subscription>(new Subscription());
-  const [data, setData] = useState<{
+  const [groupedNodes, setgGroupedNodes] = useState<{
     data: GroupResourceNodesResponse;
     error?: Error | IHttpFetchError<ResponseErrorBody>;
     status: FETCH_STATUS;
@@ -72,10 +59,14 @@ export const useServiceMap = ({
     status: FETCH_STATUS.LOADING,
   });
 
-  const traceIdsRequest = useFetcher(
+  const { data, status, error } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/service-map/trace-sample', {
-        isCachable: false,
+      // When we don't have a license or a valid license, don't make the request.
+      if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
+        return;
+      }
+
+      return callApmApi('GET /internal/apm/service-map', {
         params: {
           query: {
             start,
@@ -88,67 +79,26 @@ export const useServiceMap = ({
         },
       });
     },
-    [serviceName, environment, start, end, serviceGroupId, kuery]
-  );
-
-  const fetchServiceMap = useCallback(
-    async (traceIds: string[]) => {
-      return lastValueFrom(
-        defer(() => {
-          return http.fetch<any>('/internal/apm/service-map', {
-            method: 'GET',
-            rawResponse: true,
-            headers: {
-              Accept: 'application/octet-stream',
-              'Transfer-Encoding': 'chunked',
-            },
-            query: {
-              start,
-              end,
-              traceIds,
-            },
-            asResponse: true,
-          });
-        }).pipe(
-          switchMap((r) => streamIntoObservable(r.response?.body as any)),
-          scan((acc: Uint8Array, current: Uint8Array) => {
-            const concatenated = new Uint8Array(acc.length + current.length);
-            concatenated.set(acc, 0);
-            concatenated.set(current, acc.length);
-            return concatenated;
-          }, new Uint8Array())
-        )
-      );
-    },
-    [http, start, end]
+    [license, serviceName, environment, start, end, serviceGroupId, kuery, config.serviceMapEnabled]
   );
 
   useEffect(() => {
     subscriptions.current.unsubscribe();
 
-    if (traceIdsRequest.status === FETCH_STATUS.SUCCESS && traceIdsRequest.data?.traceIds) {
-      const traceIdChunks = chunk(traceIdsRequest.data?.traceIds ?? [], 50);
-      setData({
-        data: {
-          elements: [],
-          nodesCount: 0,
-        },
-        status: FETCH_STATUS.LOADING,
-      });
+    if (data) {
+      setgGroupedNodes((prevState) => ({ ...prevState, status: FETCH_STATUS.LOADING }));
 
-      const serviceMap$ = serviceMapBuilder$(
-        from(traceIdChunks).pipe(mergeMap((traceIds) => from(fetchServiceMap(traceIds)), 3))
-      );
+      const nodes$ = buildServiceMapNodes$(data);
 
-      subscriptions.current = serviceMap$.subscribe({
-        next: (svcMap) => {
-          setData({
-            data: svcMap,
-            status: FETCH_STATUS.SUCCESS,
+      subscriptions.current = nodes$.subscribe({
+        next: (nodes) => {
+          setgGroupedNodes({
+            data: nodes,
+            status,
           });
         },
         error: (err) => {
-          setData({
+          setgGroupedNodes({
             data: {
               elements: [],
               nodesCount: 0,
@@ -162,93 +112,48 @@ export const useServiceMap = ({
     return () => {
       subscriptions.current.unsubscribe();
     };
-  }, [traceIdsRequest.data, fetchServiceMap, traceIdsRequest.status]);
+  }, [data, status, error]);
 
-  return data;
+  return groupedNodes;
 };
 
-function streamIntoObservable(readable?: Readable): Observable<Uint8Array> {
-  if (!readable) {
-    return new Observable((subscriber) => {
-      subscriber.complete();
-    });
-  }
-  return new Observable<Uint8Array>((subscriber) => {
-    const decodedStream = readable;
-
-    async function process() {
-      for await (const item of decodedStream) {
-        subscriber.next(item);
-      }
-    }
-
-    process()
-      .then(() => {
-        subscriber.complete();
-      })
-      .catch((error) => {
-        subscriber.error(error);
-      });
-  });
-}
-
-function parseConcatenatedJson(data: string): ServiceMapReponse[] {
-  return JSON.parse(data);
-}
-
-function processStream(readableStream: Uint8Array) {
-  const jsonString = Buffer.from(readableStream).toString('utf-8');
-
-  return [parseConcatenatedJson(jsonString)];
-}
-
-export function serviceMapBuilder$(result: Observable<Uint8Array>) {
-  return result
-    .pipe(
-      concatMap((hits) => processStream(hits)),
-      concatMap((table) => {
-        return of(processList({ list: table }));
-      }),
-      scan(
-        (acc, { paths, discoveredServices }) => {
-          acc.paths = new Map([...acc.paths, ...paths]);
-          acc.discoveredServices = new Map([...acc.discoveredServices, ...discoveredServices]);
-
-          return acc;
-        },
-        {
-          paths: new Map<string, ConnectionNode[]>(),
-          discoveredServices: new Map<string, DiscoveredService>(),
-        }
-      ),
-      last(),
-      map(({ paths, discoveredServices }) => {
+export function buildServiceMapNodes$(response: ServiceMapResponse) {
+  return of(response).pipe(
+    observeOn(asyncScheduler),
+    concatMap(({ spans }) => {
+      return of(buildPaths({ spans }));
+    }),
+    scan(
+      (acc, { connections, discoveredServices }) => {
         return {
-          connections: getConnections(Array.from(paths.values())),
-          discoveredServices: Array.from(discoveredServices.values()),
+          connections: acc.connections.concat(Array.from(connections.values())),
+          discoveredServices: acc.discoveredServices.concat(
+            Array.from(discoveredServices.values())
+          ),
         };
-      })
-    )
-    .pipe(
-      map(({ connections, discoveredServices }) =>
-        transformServiceMapResponses({
-          connections,
-          discoveredServices,
-          services: [],
-          anomalies: {
-            mlJobIds: [],
-            serviceAnomalies: [],
-          },
-        })
-      )
-    );
+      },
+      { connections: [], discoveredServices: [] } as {
+        connections: ConnectionNode[][];
+        discoveredServices: DiscoveredService[];
+      }
+    ),
+    last(),
+    map(({ connections, discoveredServices }) => {
+      return transformServiceMapResponses({
+        connections: getConnections(connections),
+        discoveredServices,
+        services: response.servicesData,
+        anomalies: response.anomalies,
+      });
+    })
+  );
 }
 
-const processList = ({ list }: { list: ServiceMapReponse[] }) => {
-  const paths = new Map<string, ConnectionNode[]>();
+const buildPaths = ({ spans }: { spans: ServiceMapSpan[] }) => {
+  const connections = new Map<string, ConnectionNode[]>();
   const discoveredServices = new Map<string, DiscoveredService>();
 
-  for (const currentNode of list) {
+  for (const currentNode of spans) {
     const serviceConnectionNode = getServiceConnectionNode(currentNode);
     const externalConnectionNode = getExternalConnectionNode(currentNode);
 
@@ -256,21 +161,27 @@ const processList = ({ list }: { list: ServiceMapReponse[] }) => {
       externalConnectionNode
     )}`;
 
-    if (currentNode.downstreamService && !discoveredServices.has(pathKey)) {
-      discoveredServices.set(pathKey, {
-        from: externalConnectionNode,
-        to: {
-          [SERVICE_NAME]: currentNode.downstreamService.serviceName,
-          [SERVICE_ENVIRONMENT]: currentNode.downstreamService.serviceEnvironment ?? null,
-          [AGENT_NAME]: currentNode.downstreamService.agentName,
-        },
-      });
+    if (currentNode.downstreamService) {
+      const discoveredServiceKey = `${getConnectionNodeId(externalConnectionNode)}|${
+        currentNode.downstreamService.serviceName
+      }`;
+
+      if (!discoveredServices.has(discoveredServiceKey)) {
+        discoveredServices.set(pathKey, {
+          from: externalConnectionNode,
+          to: {
+            [SERVICE_NAME]: currentNode.downstreamService.serviceName,
+            [SERVICE_ENVIRONMENT]: currentNode.downstreamService.serviceEnvironment || null,
+            [AGENT_NAME]: currentNode.downstreamService.agentName,
+          },
+        });
+      }
     }
 
-    if (!paths.has(pathKey)) {
-      paths.set(pathKey, [serviceConnectionNode, externalConnectionNode]);
+    if (!connections.has(pathKey)) {
+      connections.set(pathKey, [serviceConnectionNode, externalConnectionNode]);
     }
   }
 
-  return { paths, discoveredServices };
+  return { connections, discoveredServices };
 };

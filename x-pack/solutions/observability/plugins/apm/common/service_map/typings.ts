@@ -6,16 +6,21 @@
  */
 
 import type cytoscape from 'cytoscape';
-import type { TransformServiceMapResponse } from './transform_service_map_responses';
+import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
+import type { DEFAULT_ANOMALIES } from '../../server/routes/service_map/get_service_anomalies';
 import type { Coordinate } from '../../typings/timeseries';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
-  nodesCount: number;
 }
 
-export type ServiceMapResponse = TransformServiceMapResponse & ServiceMapTelemetry;
+export type ServiceMapResponse = {
+  spans: ServiceMapSpan[];
+  servicesData: ServicesResponse[];
+  anomalies: typeof DEFAULT_ANOMALIES;
+} & ServiceMapTelemetry;
+
 export interface ServicesResponse {
   'service.name': string;
   'agent.name': string;
@@ -88,4 +93,19 @@ export interface NodeStats {
 export interface DiscoveredService {
   from: ExternalConnectionNode;
   to: ServiceConnectionNode;
+}
+
+export interface ServiceMapSpan {
+  spanId: string;
+  spanType: string;
+  spanSubtype: string;
+  spanDestinationServiceResource: string;
+  serviceName: string;
+  serviceEnvironment?: string;
+  agentName: AgentName;
+  downstreamService?: {
+    agentName: AgentName;
+    serviceEnvironment?: string;
+    serviceName: string;
+  };
 }

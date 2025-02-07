@@ -37,6 +37,7 @@ import type { Observable } from 'rxjs';
 import { isObservable } from 'rxjs';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
+import { Stream } from 'stream';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,
@@ -151,7 +152,7 @@ export function registerRoutes({
             ),
             ruleDataClient,
             kibanaVersion,
-          }).then((value: Record<string, any> | undefined | null) => {
+          }).then((value: Record<string, any> | ReadableStream | undefined | null) => {
             return {
               aborted: false,
               data: value,
@@ -184,7 +185,7 @@ export function registerRoutes({
               signal: controller.signal,
             }),
           });
-        } else if (options.stream) {
+        } else if (data instanceof Stream) {
           const body = data || {};
           return response.custom({
             statusCode: 200,

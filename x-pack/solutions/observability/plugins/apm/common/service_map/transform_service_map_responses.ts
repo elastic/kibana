@@ -6,7 +6,6 @@
  */
 
 import { sortBy, pickBy, identity } from 'lodash';
-import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import {
   SERVICE_NAME,
@@ -24,25 +23,11 @@ import type {
   ConnectionElement,
   DiscoveredService,
   ServicesResponse,
+  ServiceMapSpan,
 } from './typings';
 
 import type { GroupResourceNodesResponse } from './group_resource_nodes';
 import { groupResourceNodes } from './group_resource_nodes';
-
-export interface ServiceMapReponse {
-  spanId: string;
-  spanType: string;
-  spanSubtype: string;
-  spanDestinationServiceResource: string;
-  serviceName: string;
-  serviceEnvironment?: string;
-  agentName: AgentName;
-  downstreamService?: {
-    agentName: AgentName;
-    serviceEnvironment?: string;
-    serviceName: string;
-  };
-}
 
 export const isSpan = (node: ConnectionNode): node is ExternalConnectionNode => {
   return !!(node as ExternalConnectionNode)[SPAN_DESTINATION_SERVICE_RESOURCE];
@@ -55,15 +40,15 @@ export function getConnectionNodeId(node: ConnectionNode): string {
   return node[SERVICE_NAME];
 }
 
-export const getServiceConnectionNode = (event: ServiceMapReponse): ServiceConnectionNode => {
+export const getServiceConnectionNode = (event: ServiceMapSpan): ServiceConnectionNode => {
   return {
     [SERVICE_NAME]: event.serviceName,
-    [SERVICE_ENVIRONMENT]: event.serviceEnvironment ?? null,
+    [SERVICE_ENVIRONMENT]: event.serviceEnvironment || null,
     [AGENT_NAME]: event.agentName,
   };
 };
 
-export const getExternalConnectionNode = (event: ServiceMapReponse): ExternalConnectionNode => {
+export const getExternalConnectionNode = (event: ServiceMapSpan): ExternalConnectionNode => {
   return {
     [SPAN_DESTINATION_SERVICE_RESOURCE]: event.spanDestinationServiceResource,
     [SPAN_TYPE]: event.spanType,
@@ -108,51 +93,59 @@ export function getAllNodes(
   services: ServiceMapResponse['services'],
   connections: ServiceMapResponse['connections']
 ) {
-  const allNodes: ConnectionNode[] = [];
+  const allNodes = new Map<string, ConnectionNode>();
 
   // Process connections in one pass
-  for (const connection of connections) {
-    allNodes.push(
-      { ...connection.source, id: getConnectionNodeId(connection.source) },
-      { ...connection.destination, id: getConnectionNodeId(connection.destination) }
-    );
-  }
+  connections.forEach((connection) => {
+    const sourceId = getConnectionNodeId(connection.source);
+    const destinationId = getConnectionNodeId(connection.destination);
+    if (!allNodes.has(sourceId)) {
+      allNodes.set(sourceId, { ...connection.source, id: sourceId });
+    }
+    if (!allNodes.has(destinationId)) {
+      allNodes.set(destinationId, { ...connection.destination, id: destinationId });
+    }
+  });
 
   // Derive the rest of the map nodes from the connections and add the services
   // from the services data query
-  for (const service of services) {
-    allNodes.push({
-      ...service,
-      id: service[SERVICE_NAME],
-    });
-  }
+  services.forEach((service) => {
+    const id =
+      service[SERVICE_NAME] === 'constructor'
+        ? `${service[SERVICE_NAME]}-${service[AGENT_NAME]}`
+        : service[SERVICE_NAME];
+
+    if (!allNodes.has(id)) {
+      allNodes.set(id, { ...service, id });
+    }
+  });
 
   return allNodes;
 }
 
 export function getServiceNodes(
-  allNodes: ConnectionNode[],
+  allNodes: Map<string, ConnectionNode>,
   discoveredServices: Array<{
     from: ExternalConnectionNode;
     to: ServiceConnectionNode;
   }>
 ) {
-  const allNodeIds = new Set(allNodes.map((node) => node.id));
   const connectionFromDiscoveredServices: ServiceConnectionNode[] = [];
 
   for (const { from, to } of discoveredServices) {
     const fromId = getConnectionNodeId(from);
     const toServiceName = to[SERVICE_NAME];
 
-    if (allNodeIds.has(fromId) && !allNodeIds.has(toServiceName)) {
+    if (allNodes.has(fromId) && !allNodes.has(toServiceName)) {
       connectionFromDiscoveredServices.push({ ...to, id: getConnectionNodeId(to) });
     }
   }
 
   // List of nodes that are services
-  const serviceNodes = [...allNodes, ...connectionFromDiscoveredServices].filter(
-    (node) => SERVICE_NAME in node
-  ) as ServiceConnectionNode[];
+  const serviceNodes = [
+    ...Array.from(allNodes.values()),
+    ...connectionFromDiscoveredServices,
+  ].filter((node) => SERVICE_NAME in node) as ServiceConnectionNode[];
 
   return serviceNodes;
 }
@@ -218,8 +211,8 @@ export function transformServiceMapResponses({
   // 1. Map external nodes to internal services
   // 2. Collapse external nodes into one node based on span.destination.service.resource
   // 3. Pick the first available span.type/span.subtype in an alphabetically sorted list
-  const nodeMap = allNodes.reduce((map, node) => {
-    if (!node.id || map[node.id]) {
+  const nodeMap = Array.from(allNodes.entries()).reduce((map, [id, node]) => {
+    if (!id || map[id]) {
       return map;
     }
 
@@ -242,17 +235,17 @@ export function transformServiceMapResponses({
       const serviceAnomalyStats = serviceAnomalyMap.get(serviceName);
 
       if (matchedServiceNodes.length) {
-        map[node.id] = {
+        map[id] = {
           id: matchedServiceNodes[0][SERVICE_NAME],
           ...mergedServiceNode,
           ...(serviceAnomalyStats ? { serviceAnomalyStats } : {}),
         };
       }
     } else {
-      const allMatchedExternalNodes = externalNodesMap.get(node.id!) ?? [];
+      const allMatchedExternalNodes = externalNodesMap.get(id) ?? [];
       if (allMatchedExternalNodes.length > 0) {
         const firstMatchedNode = allMatchedExternalNodes[0];
-        map[node.id] = {
+        map[id] = {
           ...firstMatchedNode,
           label: firstMatchedNode[SPAN_DESTINATION_SERVICE_RESOURCE],
           [SPAN_TYPE]: allMatchedExternalNodes.map((n) => n[SPAN_TYPE]).sort()[0],
