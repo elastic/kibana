@@ -1563,6 +1563,29 @@ describe('secrets', () => {
 });
 
 describe('diffSOSecretPaths', () => {
+  const paths1 = [
+    {
+      path: 'somepath1',
+      value: {
+        id: 'secret-1',
+      },
+    },
+    {
+      path: 'somepath2',
+      value: {
+        id: 'secret-2',
+      },
+    },
+  ];
+
+  const paths2 = [
+    paths1[0],
+    {
+      path: 'somepath2',
+      value: 'newvalue',
+    },
+  ];
+
   it('should return empty array if no secrets', () => {
     expect(diffSOSecretPaths([], [])).toEqual({
       toCreate: [],
@@ -1614,29 +1637,6 @@ describe('diffSOSecretPaths', () => {
     });
   });
   it('single secret modified', () => {
-    const paths1 = [
-      {
-        path: 'somepath1',
-        value: {
-          id: 'secret-1',
-        },
-      },
-      {
-        path: 'somepath2',
-        value: {
-          id: 'secret-2',
-        },
-      },
-    ];
-
-    const paths2 = [
-      paths1[0],
-      {
-        path: 'somepath2',
-        value: 'newvalue',
-      },
-    ];
-
     expect(diffSOSecretPaths(paths1, paths2)).toEqual({
       toCreate: [
         {
@@ -1654,9 +1654,46 @@ describe('diffSOSecretPaths', () => {
       ],
       noChange: [paths1[0]],
     });
+  });
+  it('double secret modified', () => {
+    const pathsDouble1 = [
+      {
+        path: 'somepath1',
+        value: {
+          id: 'secret-1',
+        },
+      },
+      {
+        path: 'somepath2',
+        value: {
+          id: 'secret-2',
+        },
+      },
+    ];
 
-    it('double secret modified', () => {
-      const pathsDouble1 = [
+    const pathsDouble2 = [
+      {
+        path: 'somepath1',
+        value: 'newvalue1',
+      },
+      {
+        path: 'somepath2',
+        value: 'newvalue2',
+      },
+    ];
+
+    expect(diffSOSecretPaths(pathsDouble1, pathsDouble2)).toEqual({
+      toCreate: [
+        {
+          path: 'somepath1',
+          value: 'newvalue1',
+        },
+        {
+          path: 'somepath2',
+          value: 'newvalue2',
+        },
+      ],
+      toDelete: [
         {
           path: 'somepath1',
           value: {
@@ -1669,76 +1706,37 @@ describe('diffSOSecretPaths', () => {
             id: 'secret-2',
           },
         },
-      ];
-
-      const pathsDouble2 = [
-        {
-          path: 'somepath1',
-          value: 'newvalue1',
-        },
-        {
-          path: 'somepath2',
-          value: 'newvalue2',
-        },
-      ];
-
-      expect(diffSOSecretPaths(pathsDouble1, pathsDouble2)).toEqual({
-        toCreate: [
-          {
-            path: 'somepath1',
-            value: 'newvalue1',
-          },
-          {
-            path: 'somepath2',
-            value: 'newvalue2',
-          },
-        ],
-        toDelete: [
-          {
-            path: 'somepath1',
-            value: {
-              id: 'secret-1',
-            },
-          },
-          {
-            path: 'somepath2',
-            value: {
-              id: 'secret-2',
-            },
-          },
-        ],
-        noChange: [],
-      });
+      ],
+      noChange: [],
     });
-
-    it('single secret added', () => {
-      const pathsSingle1 = [
-        {
-          path: 'somepath1',
-          value: {
-            id: 'secret-1',
-          },
+  });
+  it('single secret added', () => {
+    const pathsSingle1 = [
+      {
+        path: 'somepath1',
+        value: {
+          id: 'secret-1',
         },
-      ];
+      },
+    ];
 
-      const pathsSingle2 = [
-        paths1[0],
+    const pathsSingle2 = [
+      paths1[0],
+      {
+        path: 'somepath2',
+        value: 'newvalue',
+      },
+    ];
+
+    expect(diffSOSecretPaths(pathsSingle1, pathsSingle2)).toEqual({
+      toCreate: [
         {
           path: 'somepath2',
           value: 'newvalue',
         },
-      ];
-
-      expect(diffSOSecretPaths(pathsSingle1, pathsSingle2)).toEqual({
-        toCreate: [
-          {
-            path: 'somepath2',
-            value: 'newvalue',
-          },
-        ],
-        toDelete: [],
-        noChange: [paths1[0]],
-      });
+      ],
+      toDelete: [],
+      noChange: [paths1[0]],
     });
   });
 });
