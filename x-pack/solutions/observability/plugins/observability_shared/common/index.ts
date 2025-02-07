@@ -195,6 +195,8 @@ export type {
 export {
   ServiceOverviewLocatorDefinition,
   SERVICE_OVERVIEW_LOCATOR_ID,
+  DependencyOverviewLocatorDefinition,
+  DEPENDENCY_OVERVIEW_LOCATOR_ID,
   TransactionDetailsByNameLocatorDefinition,
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
   AssetDetailsFlyoutLocatorDefinition,
