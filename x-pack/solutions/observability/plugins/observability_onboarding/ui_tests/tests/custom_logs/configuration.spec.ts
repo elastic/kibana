@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
-import { test } from '../../fixtures';
+import { expect } from '@kbn/scout-oblt';
+import { assertionMessages, test, testData } from '../../fixtures';
 
 test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { customLogs } }) => {
@@ -66,7 +66,7 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
   });
 
   test('should validate Integration Name field', async ({ pageObjects: { customLogs }, page }) => {
-    await customLogs.getLogFilePathInputField(0).fill('myLogs.log');
+    await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
 
     await customLogs.integrationNameInput.fill('');
     await expect(customLogs.continueButton).toBeDisabled();
@@ -75,11 +75,13 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
     await expect(customLogs.integrationNameInput).toHaveValue('hello_world');
 
     await customLogs.integrationNameInput.fill('H3llowOrld');
-    await expect(page.getByText('An integration name should be lowercase.')).toBeVisible();
+    await expect(
+      page.getByText(assertionMessages.FIELD_VALIDATION.INTEGRATION_NAME_LOWERCASE)
+    ).toBeVisible();
   });
 
   test('should validate DataSet Name field', async ({ pageObjects: { customLogs }, page }) => {
-    await customLogs.getLogFilePathInputField(0).fill('myLogs.log');
+    await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
     await customLogs.datasetNameInput.fill('');
     await expect(customLogs.continueButton).toBeDisabled();
 
@@ -90,6 +92,8 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
     ).toHaveValue('hello_world');
 
     await customLogs.datasetNameInput.fill('H3llowOrld');
-    await expect(page.getByText('A dataset name should be lowercase.')).toBeVisible();
+    await expect(
+      page.getByText(assertionMessages.FIELD_VALIDATION.DATASET_NAME_LOWERCASE)
+    ).toBeVisible();
   });
 });

@@ -6,17 +6,14 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
-
-const CUSTOM_INTEGRATION_NAME = 'mylogs';
-const LOG_FILE_PATH = 'mylogs.log';
+import { test, testData } from '../../fixtures';
 
 test.describe(
   'OBservability Onboarding - Custom Integration Error',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     test.afterEach(async ({ fleetApi }) => {
-      await fleetApi.integration.delete(CUSTOM_INTEGRATION_NAME);
+      await fleetApi.integration.delete(testData.CUSTOM_INTEGRATION_NAME);
     });
 
     test('should be displayed when user has no previleges', async ({
@@ -25,7 +22,7 @@ test.describe(
     }) => {
       await browserAuth.loginAsPrivilegedUser();
       await customLogs.goto();
-      await customLogs.getLogFilePathInputField(0).fill(LOG_FILE_PATH);
+      await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
       await customLogs.continueButton.click();
       await expect(
         customLogs.customIntegrationInstalledCallout,
@@ -53,7 +50,7 @@ test.describe(
       });
       await browserAuth.loginAsAdmin();
       await customLogs.goto();
-      await customLogs.getLogFilePathInputField(0).fill(LOG_FILE_PATH);
+      await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
       await customLogs.continueButton.click();
       await expect(
         customLogs.customIntegrationInstalledCallout,
@@ -83,7 +80,7 @@ test.describe(
 
       await browserAuth.loginAsAdmin();
       await customLogs.goto();
-      await customLogs.getLogFilePathInputField(0).fill(`${CUSTOM_INTEGRATION_NAME}.log`);
+      await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
       await customLogs.continueButton.click();
 
       await expect(customLogs.customIntegrationErrorCallout).toBeVisible();
@@ -95,14 +92,14 @@ test.describe(
       fleetApi,
       page,
     }) => {
-      await fleetApi.integration.install(CUSTOM_INTEGRATION_NAME);
+      await fleetApi.integration.install(testData.CUSTOM_INTEGRATION_NAME);
       await browserAuth.loginAsAdmin();
       await customLogs.goto();
 
-      await customLogs.getLogFilePathInputField(0).fill(`${CUSTOM_INTEGRATION_NAME}.log`);
+      await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
       await customLogs.continueButton.click();
 
-      const errorMessage = `Failed to create the integration as an installation with the name ${CUSTOM_INTEGRATION_NAME} already exists.`;
+      const errorMessage = `Failed to create the integration as an installation with the name ${testData.CUSTOM_INTEGRATION_NAME} already exists.`;
       await expect(page.getByText(errorMessage)).toBeVisible();
     });
   }

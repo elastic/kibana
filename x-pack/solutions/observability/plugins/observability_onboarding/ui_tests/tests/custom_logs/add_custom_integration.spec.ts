@@ -6,9 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
-
-const CUSTOM_INTEGRATION_NAME = 'mylogs';
+import { test, testData } from '../../fixtures';
 
 test.describe(
   'OBservability Onboarding - Custom Integration',
@@ -20,16 +18,16 @@ test.describe(
     });
 
     test.afterEach(async ({ fleetApi }) => {
-      await fleetApi.integration.delete(CUSTOM_INTEGRATION_NAME);
+      await fleetApi.integration.delete(testData.CUSTOM_INTEGRATION_NAME);
     });
 
     test('should be installed, show API Key and correct instructions', async ({
       pageObjects: { customLogs },
       page,
     }) => {
-      await customLogs.getLogFilePathInputField(0).fill('mylogs.log');
-      await expect(customLogs.integrationNameInput).toHaveValue(CUSTOM_INTEGRATION_NAME);
-      await expect(customLogs.datasetNameInput).toHaveValue(CUSTOM_INTEGRATION_NAME);
+      await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
+      await expect(customLogs.integrationNameInput).toHaveValue(testData.CUSTOM_INTEGRATION_NAME);
+      await expect(customLogs.datasetNameInput).toHaveValue(testData.CUSTOM_INTEGRATION_NAME);
       await expect(customLogs.serviceNameInput).toHaveValue('');
 
       await customLogs.continueButton.click();
@@ -58,7 +56,7 @@ test.describe(
     test('should update instructions when automatic Agent config toggled', async ({
       pageObjects: { customLogs },
     }) => {
-      await customLogs.getLogFilePathInputField(0).fill('mylogs.log');
+      await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
       await customLogs.continueButton.click();
 
       await customLogs.autoDownloadConfigurationToggle.click();

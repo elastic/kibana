@@ -6,10 +6,7 @@
  */
 
 import { expect, Locator } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
-
-const CUSTOM_INTEGRATION_NAME = 'mylogs';
-const LOG_FILE_PATH = 'mylogs.log';
+import { test, testData } from '../../fixtures';
 
 const checkAgentStatusUpdated = async (locator: Locator, status: string) =>
   expect(locator.getByText(status)).toBeVisible();
@@ -30,13 +27,13 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
     // login and create custom integration
     await browserAuth.loginAsAdmin();
     await pageObjects.customLogs.goto();
-    await pageObjects.customLogs.getLogFilePathInputField(0).fill(LOG_FILE_PATH);
+    await pageObjects.customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
     await pageObjects.customLogs.continueButton.click();
     await pageObjects.customLogs.apiKeyCreatedCallout.waitFor({ state: 'visible' });
   });
 
   test.afterEach(async ({ fleetApi }) => {
-    await fleetApi.integration.delete(CUSTOM_INTEGRATION_NAME);
+    await fleetApi.integration.delete(testData.CUSTOM_INTEGRATION_NAME);
   });
 
   test('should be installed sucessfully', async ({

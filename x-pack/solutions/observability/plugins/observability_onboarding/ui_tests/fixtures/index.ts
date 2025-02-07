@@ -32,3 +32,6 @@ export const test = testFixtures.extend<ExtendedScoutTestFixtures, ExtendedScout
     await use(extendedPageObjects);
   },
 });
+
+export * as testData from './constants';
+export * as assertionMessages from './assertion_messages';
