@@ -125,7 +125,7 @@ export const stubDefendInsightsApiResponse = (
     {
       method: 'GET',
       url: '**/internal/elastic_assistant/defend_insights?status=running**',
-      times: config.times,
+      ...(config.times ? { times: config.times } : {}),
     },
     (req) => {
       req.continue((res) => {
