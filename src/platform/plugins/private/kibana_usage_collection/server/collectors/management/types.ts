@@ -51,7 +51,7 @@ export interface UsageStats {
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;
-  'observability:aiAssistantFunctionCallingMode': string;
+  'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'visualization:heatmap:maxBuckets': number;
   'visualization:useLegacyTimeAxis': boolean;

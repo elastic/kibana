@@ -95,7 +95,7 @@ export type { UseChatResult } from './hooks/use_chat';
 
 export {
   aiAssistantLogsIndexPattern,
-  aiAssistantFunctionCallingMode,
+  aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
