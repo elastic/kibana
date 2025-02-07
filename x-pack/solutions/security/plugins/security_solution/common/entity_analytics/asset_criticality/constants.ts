@@ -33,7 +33,7 @@ export enum CriticalityLevels {
   HIGH_IMPACT = 'high_impact',
   MEDIUM_IMPACT = 'medium_impact',
   LOW_IMPACT = 'low_impact',
-  UNASSIGNED_IMPACT = 'unassigned_impact',
+  UNASSIGNED = 'unassigned',
 }
 
 export const ValidCriticalityLevels = Object.values(CriticalityLevels);
@@ -46,7 +46,7 @@ export const CriticalityModifiers: Record<CriticalityLevels, number> = {
   [CriticalityLevels.HIGH_IMPACT]: 1.5,
   [CriticalityLevels.MEDIUM_IMPACT]: 1,
   [CriticalityLevels.LOW_IMPACT]: 0.5,
-  [CriticalityLevels.UNASSIGNED_IMPACT]: 0,
+  [CriticalityLevels.UNASSIGNED]: 0,
 };
 
 export const CRITICALITY_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
