@@ -1062,7 +1062,6 @@ export const UnifiedDataTable = ({
       allowResetButton: false,
       additionalDisplaySettings: (
         <>
-          {onUpdateDataGridDensity ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
             onChangeRowHeight={onChangeRowHeight}

@@ -137,29 +137,29 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     }
 
     settings.push(
-      <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-        <EuiRange
-          compressed
-          fullWidth
-          min={minRangeSampleSize}
-          max={maxAllowedSampleSize}
-          step={step}
-          showInput
-          value={activeSampleSize}
-          onChange={onChangeActiveSampleSize}
-          data-test-subj="unifiedDataTableSampleSizeInput"
-        />
-      </EuiFormRow>
+      <>
+        <EuiHorizontalRule margin="xs" />
+        <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+          <EuiRange
+            compressed
+            fullWidth
+            min={minRangeSampleSize}
+            max={maxAllowedSampleSize}
+            step={step}
+            showInput
+            value={activeSampleSize}
+            onChange={onChangeActiveSampleSize}
+            data-test-subj="unifiedDataTableSampleSizeInput"
+          />
+        </EuiFormRow>
+      </>
     );
   }
 
   return (
     <>
       {settings.map((setting, index) => (
-        <React.Fragment key={`setting-${index}`}>
-          {index > 0 && <EuiHorizontalRule margin="s" />}
-          {setting}
-        </React.Fragment>
+        <React.Fragment key={`setting-${index}`}>{setting}</React.Fragment>
       ))}
     </>
   );
