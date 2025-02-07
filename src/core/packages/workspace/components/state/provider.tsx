@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { store } from './store';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
-  reactOptions: {
-    strictMode: true,
-  },
+export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) => {
+  return <Provider store={store}>{children}</Provider>;
 };

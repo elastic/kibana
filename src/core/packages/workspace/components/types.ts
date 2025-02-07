@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { EuiThemeComputed } from '@elastic/eui';
+import { SerializedStyles } from '@emotion/serialize';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
-  reactOptions: {
-    strictMode: true,
-  },
-};
+export type EmotionFn = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => SerializedStyles;

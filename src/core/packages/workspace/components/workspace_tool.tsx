@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React from 'react';
+import { useIsToolboxOpen } from './state';
+import { WorkspaceToolComponent, WorkspaceToolComponentProps } from './workspace_tool.component';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
-  reactOptions: {
-    strictMode: true,
-  },
+export type WorkspaceToolProps = Pick<WorkspaceToolComponentProps, 'children'>;
+
+export const WorkspaceTool = ({ children }: WorkspaceToolProps) => {
+  const isOpen = useIsToolboxOpen();
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return <WorkspaceToolComponent>{children}</WorkspaceToolComponent>;
 };

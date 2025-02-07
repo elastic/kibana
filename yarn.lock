@@ -5229,6 +5229,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-workspace-components@link:src/core/packages/workspace/components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core@link:src/core":
   version "0.0.0"
   uid ""

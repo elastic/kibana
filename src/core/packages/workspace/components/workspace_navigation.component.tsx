@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React, { ReactNode } from 'react';
+import { useWorkspaceStyles } from './workspace.styles';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
-  reactOptions: {
-    strictMode: true,
-  },
+export interface WorkspaceNavigationComponentProps {
+  children: ReactNode;
+}
+
+export const WorkspaceNavigationComponent = ({ children }: WorkspaceNavigationComponentProps) => {
+  const { navigation } = useWorkspaceStyles();
+  return <nav css={navigation}>{children}</nav>;
 };

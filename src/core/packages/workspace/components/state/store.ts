@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { configureStore } from '@reduxjs/toolkit';
+import { workspaceReducer } from './slice';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
-  reactOptions: {
-    strictMode: true,
+export const store = configureStore({
+  reducer: {
+    workspace: workspaceReducer,
   },
-};
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootWorkspaceState = ReturnType<typeof store.getState>;
+
+// Inferred type
+export type WorkspaceDispatch = typeof store.dispatch;
