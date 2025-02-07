@@ -47,7 +47,13 @@ describe('helpers', () => {
   });
 
   describe('getTacticMetadata', () => {
-    const expectedDetected = ['Initial Access', 'Execution', 'Persistence', 'Privilege Escalation'];
+    const expectedDetected = [
+      'Initial Access',
+      'Execution',
+      'Persistence',
+      'Privilege Escalation',
+      'Credential Access',
+    ];
 
     expectedDetected.forEach((tactic) => {
       it(`sets the detected property to true for the '${tactic}' tactic`, () => {

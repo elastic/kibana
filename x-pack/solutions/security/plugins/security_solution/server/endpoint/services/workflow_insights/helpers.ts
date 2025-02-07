@@ -31,6 +31,23 @@ import {
 } from './constants';
 import { securityWorkflowInsightsFieldMap } from './field_map_configurations';
 
+export interface FileEventDoc {
+  process: {
+    code_signature?: {
+      subject_name: string;
+      trusted: boolean;
+    };
+    Ext?: {
+      code_signature?:
+        | Array<{
+            subject_name: string;
+            trusted: boolean;
+          }>
+        | { subject_name: string; trusted: boolean };
+    };
+  };
+}
+
 export function createDatastream(kibanaVersion: string): DataStreamSpacesAdapter {
   const ds = new DataStreamSpacesAdapter(DATA_STREAM_PREFIX, {
     kibanaVersion,
@@ -163,45 +180,62 @@ export function getUniqueInsights(insights: SecurityWorkflowInsight[]): Security
   return Object.values(uniqueInsights);
 }
 
-export const generateTrustedAppsFilter = (insight: SecurityWorkflowInsight): string | undefined => {
-  return insight.remediation.exception_list_items
-    ?.flatMap((item) =>
-      item.entries.map((entry) => {
-        if (!('value' in entry)) return '';
+export const generateTrustedAppsFilter = (
+  insight: SecurityWorkflowInsight,
+  packagePolicyId: string
+): string | undefined => {
+  const filterParts =
+    insight.remediation.exception_list_items
+      ?.flatMap((item) =>
+        item.entries.map((entry) => {
+          if (!('value' in entry)) return '';
 
-        if (entry.field === 'process.executable.caseless') {
-          return `exception-list-agnostic.attributes.entries.value:"${entry.value}"`;
-        }
+          if (entry.field === 'process.executable.caseless') {
+            return `exception-list-agnostic.attributes.entries.value:"${entry.value}"`;
+          }
 
-        if (
-          entry.field === 'process.code_signature' ||
-          (entry.field === 'process.Ext.code_signature' && typeof entry.value === 'string')
-        ) {
-          const sanitizedValue = (entry.value as string)
-            .replace(/[)(<>}{":\\]/gm, '\\$&')
-            .replace(/\s/gm, '*');
-          return `exception-list-agnostic.attributes.entries.entries.value:(*${sanitizedValue}*)`;
-        }
+          if (
+            entry.field === 'process.code_signature' ||
+            (entry.field === 'process.Ext.code_signature' && typeof entry.value === 'string')
+          ) {
+            const sanitizedValue = (entry.value as string)
+              .replace(/[)(<>}{":\\]/gm, '\\$&')
+              .replace(/\s/gm, '*');
+            return `exception-list-agnostic.attributes.entries.entries.value:(*${sanitizedValue}*)`;
+          }
 
-        return '';
-      })
-    )
-    .filter(Boolean)
-    .join(' AND ');
+          return '';
+        })
+      )
+      .filter(Boolean) || [];
+
+  // Only create a filter if there are valid entries
+  if (filterParts.length) {
+    const combinedFilter = filterParts.join(' AND ');
+    const policyFilter = `(exception-list-agnostic.attributes.tags:"policy:${packagePolicyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`;
+    return `${policyFilter} AND ${combinedFilter}`;
+  }
+
+  return undefined;
 };
 
 export const checkIfRemediationExists = async ({
   insight,
   exceptionListsClient,
+  endpointMetadataClient,
 }: {
   insight: SecurityWorkflowInsight;
   exceptionListsClient: ExceptionListClient;
+  endpointMetadataClient: EndpointMetadataService;
 }): Promise<boolean> => {
   if (insight.type !== DefendInsightType.Enum.incompatible_antivirus) {
     return false;
   }
 
-  const filter = generateTrustedAppsFilter(insight);
+  // One endpoint only for incompatible antivirus insights
+  const hostMetadata = await endpointMetadataClient.getHostMetadata(insight.target.ids[0]);
+
+  const filter = generateTrustedAppsFilter(insight, hostMetadata.Endpoint.policy.applied.id);
 
   if (!filter) return false;
 
@@ -217,3 +251,51 @@ export const checkIfRemediationExists = async ({
 
   return !!response?.total && response.total > 0;
 };
+
+export function getValidCodeSignature(
+  os: string,
+  hit: FileEventDoc | undefined
+): { field: string; value: string } | null {
+  const WINDOWS_PUBLISHER = 'Microsoft Windows Hardware Compatibility Publisher';
+
+  if (os !== 'windows') {
+    const codeSignature = hit?.process?.code_signature;
+    if (codeSignature?.trusted) {
+      return {
+        field: 'process.code_signature',
+        value: codeSignature.subject_name,
+      };
+    }
+    return null;
+  }
+
+  // Windows specific code signature
+  const rawSignature = hit?.process?.Ext?.code_signature;
+  if (!rawSignature) return null;
+
+  // In serverless environment, a single item array is flattened to an object.
+  const codeSignatures = Array.isArray(rawSignature) ? rawSignature : [rawSignature];
+
+  // If there's a single trusted signature from Windows publisher, return it
+  if (
+    codeSignatures.length === 1 &&
+    codeSignatures[0].trusted &&
+    codeSignatures[0].subject_name === WINDOWS_PUBLISHER
+  ) {
+    return {
+      field: 'process.Ext.code_signature',
+      value: codeSignatures[0].subject_name,
+    };
+  }
+
+  // Otherwise, return the first trusted signature that is not from the Windows publisher
+  for (const codeSignature of codeSignatures) {
+    if (codeSignature.trusted && codeSignature.subject_name !== WINDOWS_PUBLISHER) {
+      return {
+        field: 'process.Ext.code_signature',
+        value: codeSignature.subject_name,
+      };
+    }
+  }
+  return null;
+}
