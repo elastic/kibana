@@ -415,12 +415,9 @@ export function reparentOrphanItems(
   waterfallItems: IWaterfallSpanOrTransaction[],
   newParentId?: string
 ) {
-  const orphanIdsMap = orphanItemsIds.reduce<Record<string, boolean>>(
-    (acc, curr) => ({ ...acc, [curr]: true }),
-    {}
-  );
+  const orphanIdsMap = new Set(orphanItemsIds);
   return waterfallItems.map((item) => {
-    if (orphanIdsMap[item.id]) {
+    if (orphanIdsMap.has(item.id)) {
       item.parentId = newParentId;
       item.isOrphan = true;
     }
