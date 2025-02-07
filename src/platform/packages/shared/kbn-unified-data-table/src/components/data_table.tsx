@@ -28,7 +28,6 @@ import {
   EuiDataGridCustomBodyProps,
   EuiDataGridStyle,
   EuiDataGridProps,
-  EuiHorizontalRule,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
