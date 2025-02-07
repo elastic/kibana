@@ -12,7 +12,6 @@ import expect from '@kbn/expect';
 import {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
-  ConversationUpdateEvent,
   MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
@@ -25,7 +24,7 @@ import {
   LlmResponseSimulator,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createOpenAiChunk } from '../../../../../../observability_ai_assistant_api_integration/common/create_openai_chunk';
-import { decodeEvents, getConversationCreatedEvent, getConversationUpdatedEvent } from '../helpers';
+import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 
@@ -111,7 +110,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         ],
       });
-      await titleSimulator.tokenCount({ completion: 5, prompt: 10, total: 15 });
       await titleSimulator.complete();
 
       await conversationSimulator.status(200);
@@ -177,7 +175,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
       await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
-      await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
       await simulator.complete();
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
@@ -260,7 +257,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         events = await getEvents({}, async (conversationSimulator) => {
           await conversationSimulator.next('Hello');
           await conversationSimulator.next(' again');
-          await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
           await conversationSimulator.complete();
         }).then((_events) => {
           return _events.filter(
@@ -303,26 +299,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        expect(
-          omit(
-            events[4],
-            'conversation.id',
-            'conversation.last_updated',
-            'conversation.token_count'
-          )
-        ).to.eql({
+        expect(omit(events[4], 'conversation.id', 'conversation.last_updated')).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
             title: 'My generated title',
           },
         });
-
-        const tokenCount = (events[4] as ConversationCreateEvent).conversation.token_count!;
-
-        expect(tokenCount.completion).to.be.greaterThan(0);
-        expect(tokenCount.prompt).to.be.greaterThan(0);
-
-        expect(tokenCount.total).to.eql(tokenCount.completion + tokenCount.prompt);
       });
 
       after(async () => {
@@ -382,7 +364,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 },
               ],
             });
-            await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
             await conversationSimulator.complete();
           }
         );
@@ -429,7 +410,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
-      let conversationUpdatedEvent: ConversationUpdateEvent;
 
       before(async () => {
         void proxy
@@ -506,8 +486,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(updatedResponse.status).to.be(200);
 
         await proxy.waitForAllInterceptorsSettled();
-
-        conversationUpdatedEvent = getConversationUpdatedEvent(updatedResponse.body);
       });
 
       after(async () => {
@@ -521,18 +499,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         expect(status).to.be(200);
-      });
-
-      it('has correct token count for a new conversation', async () => {
-        expect(conversationCreatedEvent.conversation.token_count?.completion).to.be.greaterThan(0);
-        expect(conversationCreatedEvent.conversation.token_count?.prompt).to.be.greaterThan(0);
-        expect(conversationCreatedEvent.conversation.token_count?.total).to.be.greaterThan(0);
-      });
-
-      it('has correct token count for the updated conversation', async () => {
-        expect(conversationUpdatedEvent.conversation.token_count!.total).to.be.greaterThan(
-          conversationCreatedEvent.conversation.token_count!.total
-        );
       });
     });
 

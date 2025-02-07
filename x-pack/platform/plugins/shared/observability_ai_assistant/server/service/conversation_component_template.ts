@@ -25,10 +25,6 @@ const dynamic = {
   dynamic: true,
 };
 
-const integer = {
-  type: 'integer' as const,
-};
-
 export const conversationComponentTemplate: ClusterComponentTemplate['component_template']['template'] =
   {
     mappings: {
@@ -59,13 +55,6 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
             id: keyword,
             title: text,
             last_updated: date,
-            token_count: {
-              properties: {
-                prompt: integer,
-                completion: integer,
-                total: integer,
-              },
-            },
           },
         },
         namespace: keyword,
