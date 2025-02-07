@@ -26,7 +26,8 @@ const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
 };
 
-export const ESQL_WORD_SEPARATORS = '`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?';
+// VSCODE DEFAULT FOUND HERE: https://github.com/microsoft/vscode/blob/1c931b181d6922ddc1eac2469117fba2c500da07/src/vs/editor/common/core/wordHelper.ts#L10
+export const ESQL_WORD_SEPARATORS = '`~!%^&*()-=+[{]}\\|;:",<>/';
 
 /**
  * COPIED FROM VSCODE CODEBASE at https://github.com/microsoft/vscode/blob/1c931b181d6922ddc1eac2469117fba2c500da07/src/vs/editor/common/core/wordHelper.ts#L30-L48
