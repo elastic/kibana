@@ -9,7 +9,9 @@ import React, { useCallback, useContext, useMemo } from 'react';
 
 import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { InfraClientStartDeps } from '../../../types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
@@ -24,7 +26,7 @@ interface Props {
 }
 
 export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
-  const { services } = useKibana();
+  const { services } = useKibana<CoreStart & InfraClientStartDeps>();
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const { inventoryPrefill } = useAlertPrefillContext();
