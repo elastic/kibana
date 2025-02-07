@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { castArray } from 'lodash';
 import { DataTableRecord, TraceDocumentOverview, fieldConstants } from '../..';
 
 export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {
   const formatField = <T extends keyof TraceDocumentOverview>(field: T) => {
-    return doc.flattened[field] as TraceDocumentOverview[T];
+    return castArray(doc.flattened[field])[0] as TraceDocumentOverview[T];
   };
 
   const timestamp = formatField(fieldConstants.TIMESTAMP_FIELD);
