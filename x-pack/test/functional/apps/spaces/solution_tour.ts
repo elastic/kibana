@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const spacesService = getService('spaces');
   const browser = getService('browser');
@@ -19,8 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/204082
-  describe.skip('space solution tour', () => {
+  describe('space solution tour', () => {
     let version: string | undefined;
 
     const getGlobalSettings = async () => {
@@ -137,13 +136,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await removeGlobalSettings(); // Make sure we start from a clean state
         await browser.refresh();
 
+        log.info('check if solution tour shows after first refresh');
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+        log.info('solution tour does not show after first refresh');
 
         await spacesService.delete('foo-space');
         await browser.refresh();
 
-        // The tour still does not appear after refresh, even with 1 space with a solution set
-        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+        // The tour still does not appear after refresh, even with 1 space with a solution set.
+        // Due to caching, sometimes the ui setting value is not reflected correctly.
+        await retry.tryForTime(
+          15000,
+          async () => {
+            log.info('check if solution tour shows after second refresh');
+            await testSubjects.missingOrFail('spaceSolutionTour');
+            log.info('solution tour does not show after second refresh');
+          },
+          async () => {
+            log.info('retrying check if solution tour shows after second refresh');
+          },
+          500
+        );
       });
     });
   });
