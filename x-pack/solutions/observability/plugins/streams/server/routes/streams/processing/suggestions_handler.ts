@@ -118,16 +118,12 @@ async function processPattern(
   field: string,
   samples: RecursiveRecord[]
 ) {
-  let attempts = 0;
-  let simulations: SimulationWithPattern[] = [];
-  const chatResponses: any[] = [];
-  let triedPatterns: string[] = [];
-
-  while (attempts < 2 && simulations.length === 0) {
-    const chatResponse = await inferenceClient.output({
-      id: 'get_pattern_suggestions',
-      connectorId: body.connectorId,
-      system: `Instructions:
+  const chatResponse = await inferenceClient.output({
+    id: 'get_pattern_suggestions',
+    connectorId: body.connectorId,
+    // necessary due to a bug in the inference client - TODO remove when fixed
+    functionCalling: 'native',
+    system: `Instructions:
         - You are an assistant for observability tasks with a strong knowledge of logs and log parsing.
         - Use JSON format.
         - For a single log source identified, provide the following information:
@@ -139,103 +135,92 @@ async function processPattern(
         - Use ECS (Elastic Common Schema) fields whenever possible.
         - You are correct, factual, precise, and reliable.
       `,
-      schema: {
-        type: 'object',
-        properties: {
-          rules: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                source_name: {
-                  type: 'string',
-                },
-                parsing_rule: {
-                  type: 'string',
-                },
+    schema: {
+      type: 'object',
+      properties: {
+        rules: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              source_name: {
+                type: 'string',
+              },
+              parsing_rule: {
+                type: 'string',
               },
             },
           },
         },
-      } as const,
-      input: `Logs:
+      },
+    } as const,
+    input: `Logs:
         ${sample.totalExamples.join('\n')}
         Given the raw messages coming from one data source, help us do the following: 
         1. Name the log source based on logs format.
         2. Write a parsing rule for Elastic ingest pipeline to extract structured fields from the raw message.
         Make sure that the parsing rule is unique per log source. When in doubt, suggest multiple patterns, one generic one matching the general case and more specific ones.
-        ${
-          triedPatterns.length
-            ? '- The following patterns were tried and did not work: ' + triedPatterns.join(', ')
-            : ''
-        }
             `,
-    });
+  });
 
-    const patterns = (
-      chatResponse.output.rules?.map((rule) => rule.parsing_rule).filter(Boolean) as string[]
-    ).map(sanitizePattern);
+  const patterns = (
+    chatResponse.output.rules?.map((rule) => rule.parsing_rule).filter(Boolean) as string[]
+  ).map(sanitizePattern);
 
-    triedPatterns = patterns;
-
-    simulations = (
-      await Promise.all(
-        patterns.map(async (pattern) => {
-          // Validate match on current sample
-          const simulationBody = prepareSimulationBody({
-            path: {
-              id,
-            },
-            body: {
-              processing: [
-                {
-                  grok: {
-                    field,
-                    if: { always: {} },
-                    patterns: [pattern],
-                  },
+  const simulations = (
+    await Promise.all(
+      patterns.map(async (pattern) => {
+        // Validate match on current sample
+        const simulationBody = prepareSimulationBody({
+          path: {
+            id,
+          },
+          body: {
+            processing: [
+              {
+                grok: {
+                  field,
+                  if: { always: {} },
+                  patterns: [pattern],
                 },
-              ],
-              documents: samples,
-            },
-          });
-          const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
-          const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
+              },
+            ],
+            documents: samples,
+          },
+        });
+        const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
+        const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
 
-          try {
-            assertSimulationResult(simulationResult, simulationDiffs);
-          } catch (e) {
-            return null;
-          }
+        try {
+          assertSimulationResult(simulationResult, simulationDiffs);
+        } catch (e) {
+          return null;
+        }
 
-          const simulationResponse = prepareSimulationResponse(
-            simulationResult,
-            simulationBody.docs,
-            simulationDiffs,
-            []
-          );
+        const simulationResponse = prepareSimulationResponse(
+          simulationResult,
+          simulationBody.docs,
+          simulationDiffs,
+          []
+        );
 
-          if (simulationResponse.success_rate === 0) {
-            return null;
-          }
+        if (simulationResponse.success_rate === 0) {
+          return null;
+        }
 
-          return {
-            ...simulationResponse,
-            pattern,
-          };
-        })
-      )
-    ).filter(Boolean) as SimulationWithPattern[];
+        // TODO if success rate is zero, try to strip out the date part and try again
 
-    chatResponses.push(chatResponse);
-
-    attempts++;
-  }
+        return {
+          ...simulationResponse,
+          pattern,
+        };
+      })
+    )
+  ).filter(Boolean) as SimulationWithPattern[];
 
   return {
-    chatResponses,
+    chatResponse,
     simulations,
-    triedPatterns,
   };
 }
 
