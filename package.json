@@ -416,6 +416,8 @@
     "@kbn/core-user-settings-server": "link:src/core/packages/user-settings/server",
     "@kbn/core-user-settings-server-internal": "link:src/core/packages/user-settings/server-internal",
     "@kbn/core-user-settings-server-mocks": "link:src/core/packages/user-settings/server-mocks",
+    "@kbn/core-workspace-components": "link:src/core/packages/workspace/components",
+    "@kbn/core-workspace-state": "link:src/core/packages/workspace/state",
     "@kbn/cross-cluster-replication-plugin": "link:x-pack/platform/plugins/private/cross_cluster_replication",
     "@kbn/crypto": "link:src/platform/packages/shared/kbn-crypto",
     "@kbn/crypto-browser": "link:src/platform/packages/shared/kbn-crypto-browser",

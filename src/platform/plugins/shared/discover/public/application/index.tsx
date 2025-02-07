@@ -29,6 +29,7 @@ export const renderApp = ({
   experimentalFeatures,
 }: RenderAppProps) => {
   const { history, capabilities, chrome, data, core } = services;
+  const WorkspaceStateProvider = services.core.chrome.workspace.getStateProvider();
 
   if (!capabilities.discover_v2.save) {
     chrome.setBadge({
@@ -41,13 +42,16 @@ export const renderApp = ({
       iconType: 'glasses',
     });
   }
+
   const unmount = toMountPoint(
-    <DiscoverRouter
-      services={services}
-      customizationContext={customizationContext}
-      experimentalFeatures={experimentalFeatures}
-      history={history}
-    />,
+    <WorkspaceStateProvider>
+      <DiscoverRouter
+        services={services}
+        customizationContext={customizationContext}
+        experimentalFeatures={experimentalFeatures}
+        history={history}
+      />
+    </WorkspaceStateProvider>,
     core
   )(element);
 

@@ -353,6 +353,8 @@ export class CoreSystem {
         curApp$: application.currentAppId$,
       });
 
+      const featureFlags = await this.featureFlags.start();
+
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -364,6 +366,7 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
+        featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
 
@@ -378,8 +381,6 @@ export class CoreSystem {
         theme,
         userProfile,
       });
-
-      const featureFlags = await this.featureFlags.start();
 
       const core: InternalCoreStart = {
         analytics,
@@ -428,6 +429,8 @@ export class CoreSystem {
         theme,
         targetDomElement: coreUiTargetDomElement,
         userProfile,
+        http,
+        customBranding,
       });
 
       performance.mark(KBN_LOAD_MARKS, {

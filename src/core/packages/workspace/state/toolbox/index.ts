@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export { closeToolbox, openToolbox, setToolboxSize, toolboxReducer } from './slice';
+export {
+  useCurrentTool,
+  useIsCurrentTool,
+  useIsToolboxOpen,
+  useToolboxSize,
+  useToolboxState,
+} from './hooks';
+export {
+  WORKSPACE_KNOWN_TOOLS,
+  WORKSPACE_TOOL_AI_ASSISTANT,
+  WORKSPACE_TOOL_FEEDBACK,
+  WORKSPACE_TOOL_HELP,
+  WORKSPACE_TOOL_NEWSFEED,
+  WORKSPACE_TOOL_PROFILE,
+  WORKSPACE_TOOL_RECENT,
+  type WorkspaceButtonProps,
+  type WorkspaceKnownTool,
+  type WorkspaceTool,
+  type WorkspaceToolProps,
+} from './tools';

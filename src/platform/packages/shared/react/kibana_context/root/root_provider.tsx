@@ -52,6 +52,13 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
+
+  // It would be trivial to add this here, once
+  // https://github.com/elastic/kibana-team/issues/1435 is resolved, which would
+  // make Workspace hooks function throughout Kibana.
+  //
+  // const WorkspaceStateProvider = core.chrome.workspace.getStateProvider();
+
   const rootContextProvider = (
     <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
       <i18n.Context>{children}</i18n.Context>

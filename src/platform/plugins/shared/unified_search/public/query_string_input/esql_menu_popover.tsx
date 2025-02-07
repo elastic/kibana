@@ -21,6 +21,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { getRecommendedQueries } from '@kbn/esql-validation-autocomplete';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
+import { WORKSPACE_TOOL_HELP, openToolbox, useWorkspaceDispatch } from '@kbn/core-workspace-state';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
@@ -35,15 +36,11 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const workspaceDispatch = useWorkspaceDispatch();
 
   const { docLinks } = kibana.services;
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
-
-  const toggleLanguageComponent = useCallback(async () => {
-    setIsLanguageComponentOpen(!isLanguageComponentOpen);
-    setIsESQLMenuPopoverOpen(false);
-  }, [isLanguageComponentOpen]);
 
   const onHelpMenuVisibilityChange = useCallback(
     (status: boolean) => {
@@ -81,7 +78,10 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                 key="quickReference"
                 icon="documentation"
                 data-test-subj="esql-quick-reference"
-                onClick={() => toggleLanguageComponent()}
+                onClick={() => {
+                  workspaceDispatch(openToolbox(WORKSPACE_TOOL_HELP));
+                  setIsESQLMenuPopoverOpen(false);
+                }}
               >
                 {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
                   defaultMessage: 'Quick Reference',
@@ -160,7 +160,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       },
     ];
     return panels as EuiContextMenuPanelDescriptor[];
-  }, [adHocDataview, docLinks.links.query.queryESQL, onESQLQuerySubmit, toggleLanguageComponent]);
+  }, [adHocDataview, docLinks.links.query.queryESQL, onESQLQuerySubmit, workspaceDispatch]);
 
   return (
     <>
