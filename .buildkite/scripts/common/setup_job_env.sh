@@ -185,6 +185,10 @@ EOF
   vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
 }
 
+# Remote cache for moonrepo through moonbase
+MOONBASE_SECRET_KEY=$(vault_get moonrepo moonbase_secret_key)
+export MOONBASE_SECRET_KEY
+
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
   source "$PIPELINE_PRE_COMMAND"
