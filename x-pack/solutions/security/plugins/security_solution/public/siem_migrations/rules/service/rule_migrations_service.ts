@@ -55,11 +55,11 @@ import { getMissingCapabilitiesToast } from './notifications/missing_capabilitie
 const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
   `${DEFAULT_ASSISTANT_NAMESPACE}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}` as const;
 
-const REQUEST_POLLING_INTERVAL_SECONDS = 10 as const;
+export const REQUEST_POLLING_INTERVAL_SECONDS = 10 as const;
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;
 
 export class SiemRulesMigrationsService {
-  private readonly latestStats$: BehaviorSubject<RuleMigrationStats[]>;
+  private readonly latestStats$: BehaviorSubject<RuleMigrationStats[] | null>;
   private isPolling = false;
   public connectorIdStorage = new RuleMigrationsStorage<string>('connectorId');
   public traceOptionsStorage = new RuleMigrationsStorage<TraceOptions>('traceOptions', {
@@ -71,7 +71,7 @@ export class SiemRulesMigrationsService {
     private readonly core: CoreStart,
     private readonly plugins: StartPluginsDependencies
   ) {
-    this.latestStats$ = new BehaviorSubject<RuleMigrationStats[]>([]);
+    this.latestStats$ = new BehaviorSubject<RuleMigrationStats[] | null>(null);
 
     this.plugins.spaces.getActiveSpace().then((space) => {
       this.connectorIdStorage.setSpaceId(space.id);
@@ -79,7 +79,7 @@ export class SiemRulesMigrationsService {
     });
   }
 
-  public getLatestStats$(): Observable<RuleMigrationStats[]> {
+  public getLatestStats$(): Observable<RuleMigrationStats[] | null> {
     return this.latestStats$.asObservable();
   }
 
