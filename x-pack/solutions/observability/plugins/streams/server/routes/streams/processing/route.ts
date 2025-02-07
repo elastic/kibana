@@ -13,7 +13,6 @@ import {
   FieldDefinitionConfig,
   ProcessorDefinition,
   RecursiveRecord,
-  getProcessorConfig,
   getProcessorType,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
@@ -25,7 +24,6 @@ import {
   IngestProcessorContainer,
   IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { conditionToPainless } from '../../../lib/streams/helpers/condition_to_painless';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -125,16 +123,14 @@ const prepareSimulationData = (params: ProcessingSimulateParams) => {
 
 const preparePipelineSimulationBody = (
   simulationData: ReturnType<typeof prepareSimulationData>
-) => {
+): IngestSimulateRequest => {
   const { docs, processors } = simulationData;
 
-  const simulationBody: IngestSimulateRequest = {
+  return {
     docs,
     pipeline: { processors },
     verbose: true,
   };
-
-  return simulationBody;
 };
 
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
