@@ -308,19 +308,14 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                 expect(response.body.conversations[0].conversation.title).to.be('My title');
 
-                const { messages } = response.body.conversations[0];
+                const { messages, systemMessage } = response.body.conversations[0];
 
-                expect(messages.length).to.eql(5);
+                expect(messages.length).to.eql(4);
 
-                const [
-                  systemMessage,
-                  firstUserMessage,
-                  contextRequest,
-                  contextResponse,
-                  assistantResponse,
-                ] = messages.map((msg) => msg.message);
+                const [firstUserMessage, contextRequest, contextResponse, assistantResponse] =
+                  messages.map((msg) => msg.message);
 
-                expect(systemMessage.role).to.eql('system');
+                expect(systemMessage).to.eql('');
 
                 expect(firstUserMessage.content).to.eql('hello');
 
@@ -380,7 +375,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     endpoint: 'POST /internal/observability_ai_assistant/conversations',
                   });
 
-                  const messages = response.body.conversations[0].messages.slice(5);
+                  const messages = response.body.conversations[0].messages.slice(4);
 
                   expect(messages.length).to.eql(4);
 
@@ -400,7 +395,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     content: 'My second response',
                   });
 
-                  expect(response.body.conversations[0].messages.length).to.eql(9);
+                  expect(response.body.conversations[0].messages.length).to.eql(8);
                 });
               });
 
