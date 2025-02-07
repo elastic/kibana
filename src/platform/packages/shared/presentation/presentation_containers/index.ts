@@ -40,3 +40,5 @@ export {
 } from './interfaces/presentation_container';
 export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
+
+export const SOMETHING_NEW = 'something new to increase plugin size';

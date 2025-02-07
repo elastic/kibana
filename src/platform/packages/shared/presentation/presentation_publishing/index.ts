@@ -153,3 +153,6 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
+
+
+export const SOMETHING_NEW = 'something new to increase plugin size';
