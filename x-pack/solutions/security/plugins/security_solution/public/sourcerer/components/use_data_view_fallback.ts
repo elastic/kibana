@@ -10,7 +10,7 @@ import { useCreateAdhocDataView } from './use_create_adhoc_data_view';
 
 interface UseDataViewFallbackConfig {
   /**
-   * Called when user interacts with the erorr notification
+   * Called when user interacts with the error notification
    */
   onResolveErrorManually: VoidFunction;
 
