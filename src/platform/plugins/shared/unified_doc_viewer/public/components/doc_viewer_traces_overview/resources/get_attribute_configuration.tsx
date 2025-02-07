@@ -34,6 +34,7 @@ import { TransactionNameLink } from '../sub_components/transaction_name_link';
 import { Timestamp } from '../sub_components/timestamp';
 import { Duration } from '../sub_components/duration';
 import { DependencyNameLink } from '../sub_components/dependency_name_link';
+import { HttpStatusCode } from '../sub_components/http_status_code';
 
 export const getAttributeConfiguration = (
   attributes: TraceDocumentOverview
@@ -124,7 +125,9 @@ export const getAttributeConfiguration = (
           defaultMessage: 'Status code',
         }
       ),
-      content: <p>{attributes[HTTP_RESPONSE_STATUS_CODE_FIELD]}</p>,
+      content: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD] ? (
+        <HttpStatusCode code={attributes[HTTP_RESPONSE_STATUS_CODE_FIELD]} />
+      ) : null,
     },
     ['user_agent_and_version']: {
       title: i18n.translate('discover.docViews.tracesOverview.details.userAgentAndVersion.title', {

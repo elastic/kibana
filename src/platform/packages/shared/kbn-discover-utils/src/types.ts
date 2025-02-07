@@ -121,7 +121,7 @@ export interface TraceDocumentOverview
   '@timestamp': number;
   'trace.id': string;
   'parent.id'?: string;
-  'http.response.status_code'?: string;
+  'http.response.status_code'?: number;
 }
 
 export interface ServiceFields {
