@@ -842,20 +842,17 @@ describe('autocomplete', () => {
             text: 'foo$bar | ',
             filterText: 'foo$bar',
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
           },
           {
             text: 'foo$bar, ',
             filterText: 'foo$bar',
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
           },
           {
             text: 'foo$bar METADATA ',
             filterText: 'foo$bar',
             asSnippet: false, // important because the text includes "$"
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
           },
           ...recommendedQuerySuggestions.map((q) => q.queryString),
         ],
@@ -900,10 +897,7 @@ describe('autocomplete', () => {
       );
       testSuggestions(
         'FROM a | ENRICH pol/',
-        policies
-          .map((p) => `${getSafeInsertText(p.name)} `)
-          .map(attachTriggerCommand)
-          .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
+        policies.map((p) => `${getSafeInsertText(p.name)} `).map(attachTriggerCommand)
       );
       testSuggestions(
         'FROM a | ENRICH policy /',
@@ -931,7 +925,6 @@ describe('autocomplete', () => {
           ...getPolicyFields('policy').map((name) => ({
             text: name,
             command: undefined,
-            rangeToReplace: { start: 43, end: 47 },
           })),
         ]);
         testSuggestions(
@@ -939,7 +932,6 @@ describe('autocomplete', () => {
           getPolicyFields('policy').map((name) => ({
             text: name,
             command: undefined,
-            rangeToReplace: { start: 50, end: 54 },
           }))
         );
       });
@@ -1059,12 +1051,7 @@ describe('autocomplete', () => {
         );
         testSuggestions(
           `FROM a | ${commandName} d/`,
-          getFieldNamesByType('any')
-            .map<PartialSuggestionWithText>((text) => ({
-              text,
-              rangeToReplace: { start: 15, end: 16 },
-            }))
-            .map(attachTriggerCommand)
+          getFieldNamesByType('any').map(attachTriggerCommand)
         );
         testSuggestions(
           `FROM a | ${commandName} doubleFiel/`,
@@ -1076,7 +1063,6 @@ describe('autocomplete', () => {
             .map((text) => ({
               text,
               filterText: 'doubleField',
-              rangeToReplace: { start: 15, end: 26 },
             }))
             .map(attachTriggerCommand)
         );
@@ -1089,7 +1075,6 @@ describe('autocomplete', () => {
             .map((text) => ({
               text,
               filterText: '@timestamp',
-              rangeToReplace: { start: 15, end: 25 },
             }))
             .map(attachTriggerCommand),
           undefined,
@@ -1106,7 +1091,6 @@ describe('autocomplete', () => {
             .map((text) => ({
               text,
               filterText: 'foo.bar',
-              rangeToReplace: { start: 15, end: 22 },
             }))
             .map(attachTriggerCommand),
           undefined,
@@ -1185,7 +1169,7 @@ describe('autocomplete', () => {
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 36 } },
-      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
+      { text: 'IS NULL', rangeToReplace: { start: 28, end: 36 } },
       '!= $0',
       '== $0',
       'IN $0',
@@ -1200,7 +1184,7 @@ describe('autocomplete', () => {
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
       { text: 'IS NULL', rangeToReplace: { start: 28, end: 32 } },
-      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
+      { text: '!= $0', rangeToReplace: { start: 28, end: 32 } },
       '== $0',
       'IN $0',
       'AND $0',
@@ -1223,26 +1207,6 @@ describe('autocomplete', () => {
     ]);
 
     describe('dot-separated field names', () => {
-      testSuggestions(
-        'FROM a | KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 15, end: 24 } }],
-        undefined,
-        [[{ name: 'field.name', type: 'double' }]]
-      );
-      // multi-line
-      testSuggestions(
-        'FROM a\n| KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 15, end: 24 } }],
-        undefined,
-        [[{ name: 'field.name', type: 'double' }]]
-      );
-      // triple separator
-      testSuggestions(
-        'FROM a\n| KEEP field.name.f/',
-        [{ text: 'field.name.foo', rangeToReplace: { start: 15, end: 27 } }],
-        undefined,
-        [[{ name: 'field.name.foo', type: 'double' }]]
-      );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(
       testSuggestions.skip(

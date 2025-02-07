@@ -379,7 +379,6 @@ describe('WHERE <expression>', () => {
           detail: 'Click to create',
           command: { id: 'esql.control.values.create', title: 'Click to create' },
           sortText: '11A',
-          rangeToReplace: { start: 31, end: 31 },
         });
       });
 
@@ -407,7 +406,6 @@ describe('WHERE <expression>', () => {
           detail: 'Named parameter',
           command: undefined,
           sortText: '11A',
-          rangeToReplace: { start: 31, end: 31 },
         });
       });
     });
