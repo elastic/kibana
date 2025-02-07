@@ -90,6 +90,12 @@ export function registerReindexDataStreamRoutes({
         access: 'public',
         summary: `Get data stream status`,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
@@ -143,6 +149,12 @@ export function registerReindexDataStreamRoutes({
       options: {
         access: 'public',
         summary: `Get data stream reindexing metadata`,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
       },
       validate: {
         params: schema.object({
