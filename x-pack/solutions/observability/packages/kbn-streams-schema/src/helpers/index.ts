@@ -7,3 +7,4 @@
 
 export * from './type_guards';
 export * from './hierarchy';
+export * from './lifecycle';

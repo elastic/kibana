@@ -24,9 +24,6 @@
       "serverless"
     ],
     "requiredBundles": [
-    ],
-    "extraPublicDirs": [
-      "common"
     ]
   }
 }

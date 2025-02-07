@@ -5,14 +5,12 @@
  * 2.0.
  */
 
+import { WiredStreamDefinition } from '../models/ingest/base';
 import {
-  WiredIngestStreamEffectiveLifecycle,
-  WiredStreamDefinition,
-  getSegments,
-  isChildOf,
-  isDescendantOf,
   isInheritLifecycle,
-} from '@kbn/streams-schema';
+  WiredIngestStreamEffectiveLifecycle,
+} from '../models/ingest/lifecycle';
+import { isDescendantOf, isChildOf, getSegments } from '../helpers/hierarchy';
 
 export function findInheritedLifecycle(
   definition: WiredStreamDefinition,
