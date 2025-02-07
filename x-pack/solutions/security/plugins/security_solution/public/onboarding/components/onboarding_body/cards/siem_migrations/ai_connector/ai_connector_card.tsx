@@ -15,9 +15,9 @@ import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
 import { ConnectorCards } from '../../common/connectors/connector_cards';
 import { CardSubduedText } from '../../common/card_subdued_text';
-import type { AIConnectorCardMetadata } from './types';
-import { MissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
+import { ConnectorsMissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
 import type { AIConnector } from '../../common/connectors/types';
+import type { AIConnectorCardMetadata } from './types';
 
 export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> = ({
   checkCompleteMetadata,
@@ -25,9 +25,9 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
   setComplete,
 }) => {
   const { siemMigrations } = useKibana().services;
-  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string>(
+  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | undefined>(
     siemMigrations.rules.connectorIdStorage.key,
-    ''
+    undefined
   );
   const setSelectedConnector = useCallback(
     (connector: AIConnector) => {
@@ -65,7 +65,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <MissingPrivilegesCallOut />
+        <ConnectorsMissingPrivilegesCallOut level="read" />
       )}
     </OnboardingCardContentPanel>
   );

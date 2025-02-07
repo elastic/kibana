@@ -13,7 +13,6 @@
     "requiredPlugins": [
       "data",
       "discover",
-      "logsExplorer",
       "logsShared",
       "observabilityShared",
       "slo",

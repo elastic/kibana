@@ -125,7 +125,15 @@
                   "section": "def-common.FunctionCallingMode",
                   "text": "FunctionCallingMode"
                 },
-                " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
+                " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+                {
+                  "pluginId": "@kbn/inference-common",
+                  "scope": "common",
+                  "docId": "kibKbnInferenceCommonPluginApi",
+                  "section": "def-common.ChatCompleteMetadata",
+                  "text": "ChatCompleteMetadata"
+                },
+                " | undefined; } & TToolOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
               "deprecated": false,
@@ -231,7 +239,7 @@
         "label": "naturalLanguageToEsql",
         "description": [],
         "signature": [
-          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  system,\n  ...rest\n}: ",
+          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  system,\n  metadata,\n  ...rest\n}: ",
           "NlToEsqlTaskParams",
           "<TToolOptions>) => ",
           "Observable",
@@ -248,7 +256,7 @@
             "id": "def-server.naturalLanguageToEsql.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  system,\n  ...rest\n}",
+            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  system,\n  metadata,\n  ...rest\n}",
             "description": [],
             "signature": [
               "NlToEsqlTaskParams",
@@ -335,7 +343,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ [P in \"abortSignal\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+                  "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -396,7 +404,15 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
+                  "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; metadata?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteMetadata",
+                    "text": "ChatCompleteMetadata"
+                  },
+                  " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -543,7 +559,15 @@
                     "section": "def-common.FunctionCallingMode",
                     "text": "FunctionCallingMode"
                   },
-                  " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
+                  " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteMetadata",
+                    "text": "ChatCompleteMetadata"
+                  },
+                  " | undefined; } & TToolOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
                 "deprecated": false,
@@ -741,6 +765,50 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "inference",
+          "id": "def-server.InferenceServerStart.getChatModel",
+          "type": "Function",
+          "tags": [],
+          "label": "getChatModel",
+          "description": [
+            "\nCreates a langchain {@link InferenceChatModel} that will be using the inference framework\nunder the hood.\n"
+          ],
+          "signature": [
+            "(options: ",
+            "CreateChatModelOptions",
+            ") => Promise<",
+            {
+              "pluginId": "@kbn/inference-langchain",
+              "scope": "common",
+              "docId": "kibKbnInferenceLangchainPluginApi",
+              "section": "def-common.InferenceChatModel",
+              "text": "InferenceChatModel"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inference",
+              "id": "def-server.InferenceServerStart.getChatModel.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "CreateChatModelOptions"
+              ],
+              "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -855,7 +923,7 @@
             "section": "def-common.ChatCompleteAPI",
             "text": "ChatCompleteAPI"
           },
-          ") => ({ id, connectorId, input, schema, system, previousMessages, modelName, functionCalling, stream, abortSignal, retry, }: DefaultOutputOptions) => Promise<",
+          ") => ({ id, connectorId, input, schema, system, previousMessages, modelName, functionCalling, stream, abortSignal, metadata, retry, }: DefaultOutputOptions) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

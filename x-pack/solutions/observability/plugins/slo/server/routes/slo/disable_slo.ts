@@ -6,7 +6,6 @@
  */
 
 import { manageSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import {
   DefaultSummaryTransformManager,
   DefaultTransformManager,
@@ -60,7 +59,7 @@ export const disableSLORoute = createSloServerRoute({
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    await executeWithErrorHandler(() => manageSLO.disable(params.path.id));
+    await manageSLO.disable(params.path.id);
     return response.noContent();
   },
 });
