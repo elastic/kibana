@@ -402,6 +402,7 @@ FROM employees
         defaultMessage: 'LOOKUP JOIN',
       }),
       preview: true,
+      ignoreTag: true,
       description: (
         <Markdown
           openLinksInNewTab={true}
