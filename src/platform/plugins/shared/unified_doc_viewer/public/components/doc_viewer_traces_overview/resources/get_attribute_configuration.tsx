@@ -23,6 +23,7 @@ import {
   SPAN_SUBTYPE_FIELD,
   USER_AGENT_VERSION_FIELD,
   AGENT_NAME_FIELD,
+  SERVICE_ENVIRONMENT_FIELD,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -31,6 +32,7 @@ import { TraceIdLink } from '../sub_components/trace_id_link';
 import { TransactionNameLink } from '../sub_components/transaction_name_link';
 import { Timestamp } from '../sub_components/timestamp';
 import { Duration } from '../sub_components/duration';
+import { DependencyNameLink } from '../sub_components/dependency_name_link';
 
 export const getAttributeConfiguration = (
   attributes: TraceDocumentOverview
@@ -77,7 +79,12 @@ export const getAttributeConfiguration = (
           defaultMessage: 'Dependency',
         }
       ),
-      content: <p>{attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]}</p>,
+      content: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD] ? (
+        <DependencyNameLink
+          dependencyName={attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]}
+          environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
+        />
+      ) : null,
     },
     [TIMESTAMP_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.timestamp.title', {
