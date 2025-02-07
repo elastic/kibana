@@ -18,7 +18,6 @@
     "@kbn/i18n",
     "@kbn/shared-ux-router",
     "@kbn/deeplinks-analytics",
-    "@kbn/response-ops-rule-form"
   ],
   "exclude": ["target/**/*"]
 }
