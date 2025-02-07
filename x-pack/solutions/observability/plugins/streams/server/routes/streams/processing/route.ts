@@ -11,8 +11,10 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
   FieldDefinitionConfig,
+  RecursiveRecord,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
+  recursiveRecord,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
@@ -28,7 +30,7 @@ const paramsSchema = z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
     processing: z.array(processorDefinitionSchema),
-    documents: z.array(z.record(z.unknown())),
+    documents: z.array(recursiveRecord),
     detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
 });
@@ -139,6 +141,7 @@ const assertSimulationResult = (
   }
   // Assert that the processors are purely additive to the documents
   const updatedFields = computeUpdatedFields(simulationDiffs);
+
   if (!isEmpty(updatedFields)) {
     throw new NonAdditiveProcessorError(
       `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
@@ -148,7 +151,7 @@ const assertSimulationResult = (
 
 const prepareSimulationResponse = (
   simulationResult: any,
-  docs: Array<{ _source: Record<string, unknown> }>,
+  docs: Array<{ _source: RecursiveRecord }>,
   simulationDiffs: ReturnType<typeof prepareSimulationDiffs>,
   detectedFields?: ProcessingSimulateParams['body']['detected_fields']
 ) => {
@@ -169,10 +172,10 @@ const prepareSimulationResponse = (
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 const prepareSimulationDiffs = (
   simulation: any,
-  sampleDocs: Array<{ _source: Record<string, unknown> }>
+  sampleDocs: Array<{ _source: RecursiveRecord }>
 ) => {
   // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
-  const samplesToSimulationMap = new Map<any, { _source: Record<string, unknown> }>(
+  const samplesToSimulationMap = new Map<any, { _source: RecursiveRecord }>(
     simulation.docs.map((entry: any, id: number) => [entry.doc, sampleDocs[id]])
   );
 
@@ -202,8 +205,8 @@ const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulatio
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 const computeSimulationDocuments = (
   simulation: any,
-  sampleDocs: Array<{ _source: Record<string, unknown> }>
-): Array<{ isMatch: boolean; value: Record<string, unknown> }> => {
+  sampleDocs: Array<{ _source: RecursiveRecord }>
+): Array<{ isMatch: boolean; value: RecursiveRecord }> => {
   return simulation.docs.map((entry: any, id: number) => {
     // If every processor was successful, return and flatten the simulation doc from the last processor
     if (isSuccessfulDocument(entry)) {
