@@ -38,7 +38,7 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
         body: {
           template: {
             settings: {
-              ...settings,
+              ...(settings ?? {}),
               index: {
                 ...(settings?.index ?? {}),
                 mapping: {
@@ -53,7 +53,7 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
               },
             },
             mappings: {
-              ...componentTemplate.component_template.template.mappings,
+              ...(componentTemplate.component_template.template.mappings ?? {}),
               _source: restOfSource,
             },
           },
