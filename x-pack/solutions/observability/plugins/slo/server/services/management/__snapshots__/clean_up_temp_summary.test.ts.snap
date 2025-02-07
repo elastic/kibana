@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "body": Object {
+          "query": Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "bool": Object {
+                    "must": Array [
+                      Object {
+                        "term": Object {
+                          "isTempDoc": true,
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "slo.id": "slo-id-one",
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "spaceId": "space-one",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+        "index": ".slo-observability.summary-v3*",
+        "wait_for_completion": false,
+      },
+    ],
+    Array [
+      Object {
+        "body": Object {
+          "query": Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "bool": Object {
+                    "must": Array [
+                      Object {
+                        "term": Object {
+                          "isTempDoc": true,
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "slo.id": "another-temp-id",
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "spaceId": "space-two",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+        "index": ".slo-observability.summary-v3*",
+        "wait_for_completion": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;

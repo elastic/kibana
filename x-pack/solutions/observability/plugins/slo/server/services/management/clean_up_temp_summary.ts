@@ -1,0 +1,136 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+
+interface AggBucketKey {
+  spaceId: string;
+  id: string;
+}
+
+interface AggBucket {
+  key: AggBucketKey;
+  doc_count: number;
+}
+
+export interface AggResults {
+  duplicate_ids: {
+    after_key: AggBucketKey | undefined;
+    buckets: AggBucket[];
+  };
+}
+
+export class CleanUpTempSummary {
+  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
+
+  public async execute(): Promise<void> {
+    let searchAfterKey: AggBucketKey | undefined;
+    do {
+      const { buckets, nextSearchAfterKey } = await this.findDuplicateTemporaryDocuments(
+        searchAfterKey
+      );
+      searchAfterKey = nextSearchAfterKey;
+
+      if (buckets.length > 0) {
+        await this.deleteDuplicateTemporaryDocuments(buckets);
+      }
+    } while (searchAfterKey);
+  }
+
+  private async findDuplicateTemporaryDocuments(searchAfterKey: AggBucketKey | undefined) {
+    this.logger.info('Searching for duplicate temporary documents');
+    const results = await this.esClient.search<unknown, AggResults>({
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      size: 0,
+      aggs: {
+        duplicate_ids: {
+          composite: {
+            size: 10000,
+            after: searchAfterKey,
+            sources: [
+              {
+                spaceId: {
+                  terms: {
+                    field: 'spaceId',
+                  },
+                },
+              },
+              {
+                id: {
+                  terms: {
+                    field: 'slo.id',
+                  },
+                },
+              },
+            ],
+          },
+          aggs: {
+            cardinality_istempdoc: {
+              cardinality: {
+                field: 'isTempDoc',
+              },
+            },
+            find_duplicates: {
+              bucket_selector: {
+                buckets_path: {
+                  cardinality: 'cardinality_istempdoc',
+                },
+                script: 'params.cardinality == 2',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const buckets = (results.aggregations?.duplicate_ids.buckets ?? []).map((bucket) => bucket.key);
+    const nextSearchAfterKey = results.aggregations?.duplicate_ids.after_key;
+
+    this.logger.info(`Found ${buckets.length} duplicate temporary documents`);
+
+    return { buckets, nextSearchAfterKey };
+  }
+
+  private async deleteDuplicateTemporaryDocuments(buckets: AggBucketKey[]) {
+    this.logger.info(`Deleting ${buckets.length} duplicate temporary documents`);
+    await this.esClient.deleteByQuery({
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      wait_for_completion: false,
+      body: {
+        query: {
+          bool: {
+            should: buckets.map((bucket) => {
+              return {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        isTempDoc: true,
+                      },
+                    },
+                    {
+                      term: {
+                        'slo.id': bucket.id,
+                      },
+                    },
+                    {
+                      term: {
+                        spaceId: bucket.spaceId,
+                      },
+                    },
+                  ],
+                },
+              };
+            }),
+            minimum_should_match: 1,
+          },
+        },
+      },
+    });
+  }
+}
