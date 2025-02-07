@@ -345,21 +345,22 @@ const getInsertText = (
   bodyContent: string,
   context: AutoCompleteContext
 ): string => {
-  if (name == null) return '';
+  if (name === undefined) {
+    return '';
+  }
 
   // Always create the insert text with the name first, check the end of the body content
   // to decide if we need to add a double quote after the name.
   // This is done to avoid adding a double quote if the user is typing a value after the name.
   let insertText = bodyContent.trim().endsWith('"') ? `${name}"` : `"${name}"`;
 
-  // Check if we have a conditional template
+  // check if there is template to add
   const conditionalTemplate = getConditionalTemplate(name, bodyContent, context.endpoint);
   if (conditionalTemplate) {
     template = conditionalTemplate;
   }
 
   if (template) {
-    // Insert the entire template
     let templateLines;
     const { __raw, value: templateValue } = template;
     if (__raw && templateValue) {
