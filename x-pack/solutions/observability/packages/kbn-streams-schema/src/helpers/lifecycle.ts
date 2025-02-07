@@ -10,7 +10,7 @@ import {
   isInheritLifecycle,
   WiredIngestStreamEffectiveLifecycle,
 } from '../models/ingest/lifecycle';
-import { isDescendantOf, isChildOf, getSegments } from '../helpers/hierarchy';
+import { isDescendantOf, isChildOf, getSegments } from './hierarchy';
 
 export function findInheritedLifecycle(
   definition: WiredStreamDefinition,
