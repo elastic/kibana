@@ -419,6 +419,7 @@ export const fleetGetAgentStatusHttpMock =
         return {
           results: {
             active: 50,
+            total: 50,
             inactive: 5,
             online: 40,
             error: 0,
