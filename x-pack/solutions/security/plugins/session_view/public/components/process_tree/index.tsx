@@ -52,7 +52,7 @@ export interface ProcessTreeDeps {
 
   // currently selected process
   selectedProcess?: Process | null;
-  onProcessSelected: (process: Process | null) => void;
+  onProcessSelected: (process: Process | null, userAction?: boolean) => void;
   setSearchResults?: (results: Process[]) => void;
 
   // a map for alerts with updated status and process.entity_id
