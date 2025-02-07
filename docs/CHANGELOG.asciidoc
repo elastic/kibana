@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.17.2>>
 * <<release-notes-8.17.1>>
 * <<release-notes-8.17.0>>
 * <<release-notes-8.16.4>>
@@ -86,6 +87,19 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.17.2]]
+== {kib} 8.17.2
+
+The 8.17.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.17.2]]
+=== Bug fixes
+Discover::
+* Fixes an issue where `KEEP` columns are not applied after {es} error ({kibana-pull}205833[#205833]).
+Elastic Observability solution::
+* Fixes monitor status rule for empty KQL query results ({kibana-pull}208922[#208922]).
+* Fixes knowledge base installation state ({kibana-pull}206130[#206130]).
 
 [[release-notes-8.17.1]]
 == {kib} 8.17.1
