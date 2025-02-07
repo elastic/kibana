@@ -392,7 +392,6 @@ src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
-src/platform/packages/private/serverless/project_switcher @elastic/appex-sharedux
 src/platform/packages/private/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/private/serverless/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
@@ -449,6 +448,7 @@ src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-d
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
@@ -799,10 +799,13 @@ x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/alerting_rule_utils @elastic/obs-ux-management-team
+x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
-x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
+x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana @elastic/obs-ai-assistant
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
 x-pack/platform/packages/shared/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
@@ -815,6 +818,7 @@ x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/respon
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
+x-pack/platform/packages/shared/logs_overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
@@ -825,8 +829,6 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
-x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/observability/logs_overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -909,6 +911,7 @@ x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
 x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
+x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
@@ -934,7 +937,6 @@ x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-
 x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/investigate_app @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
@@ -993,6 +995,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/se
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generative-ai
 x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
@@ -1006,7 +1009,6 @@ x-pack/solutions/security/plugins/security_solution_ess @elastic/security-soluti
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
@@ -1586,6 +1588,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.eslintignore @elastic/kibana-operations
 
 # QA - Appex QA
+/packages/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
+/packages/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
+/packages/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
+/x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
@@ -2209,6 +2215,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
@@ -2328,6 +2335,11 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-explore
 
 /x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-explore
+
+## The Hive Connector
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/security-threat-hunting
+/x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/security-threat-hunting
 
 ## Generative AI owner connectors
 # OpenAI

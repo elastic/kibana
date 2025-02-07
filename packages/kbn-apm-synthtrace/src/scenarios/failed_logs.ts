@@ -75,6 +75,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         },
       });
     },
+    teardown: async ({ logsEsClient }) => {
+      await logsEsClient.deleteComponentTemplate(LogsCustom);
+      await logsEsClient.deleteCustomPipeline();
+      if (isLogsDb) await logsEsClient.deleteIndexTemplate(IndexTemplateName.LogsDb);
+    },
     generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
 

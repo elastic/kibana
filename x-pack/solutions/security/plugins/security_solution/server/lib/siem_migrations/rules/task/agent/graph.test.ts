@@ -13,13 +13,14 @@ import type {
 import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import type { RuleMigrationsRetriever } from '../retrievers';
+import type { SiemMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
 import { getRuleMigrationAgent } from './graph';
 
 describe('getRuleMigrationAgent', () => {
   const model = new FakeLLM({
     response: JSON.stringify({}, null, 2),
   }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
-
+  const telemetryClient = {} as SiemMigrationTelemetryClient;
   const inferenceClient = {} as InferenceClient;
   const connectorId = 'draw_graphs';
   const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
@@ -33,6 +34,7 @@ describe('getRuleMigrationAgent', () => {
         ruleMigrationsRetriever,
         connectorId,
         logger,
+        telemetryClient,
       });
     } catch (error) {
       throw Error(`getRuleMigrationAgent threw an error: ${error}`);

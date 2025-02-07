@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import stats from 'stats-lite';
 import { interval, merge, of, Observable } from 'rxjs';
-import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs';
+import { filter, mergeScan, map, scan } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
-import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MAX_CAPACITY, TaskManagerConfig } from '../config';
+import {
+  CLAIM_STRATEGY_MGET,
+  DEFAULT_POLL_INTERVAL,
+  MAX_CAPACITY,
+  TaskManagerConfig,
+} from '../config';
 import { TaskCost } from '../task';
 import { getMsearchStatusCode } from './msearch_error';
 import { getBulkUpdateStatusCode, isClusterBlockException } from './bulk_update_error';
@@ -40,49 +46,16 @@ const CAPACITY_INCREASE_PERCENTAGE = 1.05;
 const POLL_INTERVAL_DECREASE_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
-interface ManagedConfigurationOpts {
-  config: TaskManagerConfig;
-  defaultCapacity?: number;
-  errors$: Observable<Error>;
-  logger: Logger;
-}
-
 interface ErrorScanResult {
   count: number;
   isBlockException: boolean;
 }
 
-export interface ManagedConfiguration {
-  startingCapacity: number;
-  capacityConfiguration$: Observable<number>;
-  pollIntervalConfiguration$: Observable<number>;
-}
-
-export function createManagedConfiguration({
-  config,
-  defaultCapacity = DEFAULT_CAPACITY,
-  logger,
-  errors$,
-}: ManagedConfigurationOpts): ManagedConfiguration {
-  const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
-  const startingCapacity = calculateStartingCapacity(config, logger, defaultCapacity);
-  const startingPollInterval = config.poll_interval;
-  return {
-    startingCapacity,
-    capacityConfiguration$: errorCheck$.pipe(
-      createCapacityScan(config, logger, startingCapacity),
-      startWith(startingCapacity),
-      distinctUntilChanged()
-    ),
-    pollIntervalConfiguration$: errorCheck$.pipe(
-      createPollIntervalScan(logger, startingPollInterval),
-      startWith(startingPollInterval),
-      distinctUntilChanged()
-    ),
-  };
-}
-
-function createCapacityScan(config: TaskManagerConfig, logger: Logger, startingCapacity: number) {
+export function createCapacityScan(
+  config: TaskManagerConfig,
+  logger: Logger,
+  startingCapacity: number
+) {
   return scan(
     (previousCapacity: number, { count: errorCount, isBlockException }: ErrorScanResult) => {
       let newCapacity: number;
@@ -124,10 +97,17 @@ function createCapacityScan(config: TaskManagerConfig, logger: Logger, startingC
   );
 }
 
-function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
+export function createPollIntervalScan(
+  logger: Logger,
+  startingPollInterval: number,
+  claimStrategy: string,
+  tmUtilizationQueue: (value?: number | undefined) => number[]
+) {
   return scan(
-    (previousPollInterval: number, { count: errorCount, isBlockException }: ErrorScanResult) => {
+    (previousPollInterval: number, [{ count: errorCount, isBlockException }, tmUtilization]) => {
       let newPollInterval: number;
+      let updatedForCapacity = false;
+      let avgTmUtilization = 0;
       if (isBlockException) {
         newPollInterval = INTERVAL_AFTER_BLOCK_EXCEPTION;
       } else {
@@ -164,19 +144,32 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
             );
             newPollInterval = previousPollInterval;
           }
+
+          // If the task claim strategy is mget, increase the poll interval if the the avg used capacity over 15s is less than 25%.
+          const queue = tmUtilizationQueue(tmUtilization);
+          avgTmUtilization = stats.mean(queue);
+          if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
+            updatedForCapacity = true;
+            if (avgTmUtilization < 25) {
+              newPollInterval = DEFAULT_POLL_INTERVAL;
+            } else {
+              // If the the used capacity is greater than or equal to 25% reset the polling interval.
+              newPollInterval = startingPollInterval;
+            }
+          }
         }
       }
-
       if (newPollInterval !== previousPollInterval) {
         if (previousPollInterval !== INTERVAL_AFTER_BLOCK_EXCEPTION) {
-          logger.debug(
-            `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).`
-          );
-        }
-        if (previousPollInterval === startingPollInterval) {
-          logger.warn(
-            `Poll interval configuration is temporarily increased after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).`
-          );
+          if (updatedForCapacity) {
+            logger.debug(
+              `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after a change in the average task load: ${avgTmUtilization}.`
+            );
+          } else {
+            logger.warn(
+              `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).`
+            );
+          }
         }
       }
       return newPollInterval;
@@ -185,7 +178,7 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
   );
 }
 
-function countErrors(
+export function countErrors(
   errors$: Observable<Error>,
   countInterval: number
 ): Observable<ErrorScanResult> {
@@ -200,11 +193,9 @@ function countErrors(
           SavedObjectsErrorHelpers.isGeneralError(e) ||
           isEsCannotExecuteScriptError(e) ||
           getMsearchStatusCode(e) === 429 ||
-          getMsearchStatusCode(e) === 500 ||
-          getMsearchStatusCode(e) === 503 ||
+          (getMsearchStatusCode(e) !== undefined && getMsearchStatusCode(e)! >= 500) ||
           getBulkUpdateStatusCode(e) === 429 ||
-          getBulkUpdateStatusCode(e) === 500 ||
-          getBulkUpdateStatusCode(e) === 503 ||
+          (getBulkUpdateStatusCode(e) !== undefined && getBulkUpdateStatusCode(e)! >= 500) ||
           isClusterBlockException(e)
       )
     )

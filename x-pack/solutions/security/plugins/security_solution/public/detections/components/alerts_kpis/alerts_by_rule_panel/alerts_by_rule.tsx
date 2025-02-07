@@ -39,7 +39,6 @@ const COLUMNS: Array<EuiBasicTableColumn<AlertsByRuleData>> = [
     render: (rule: string) => (
       <EuiText size="xs" className="eui-textTruncate">
         <DefaultDraggable
-          isDraggable={false}
           field={ALERT_RULE_NAME}
           hideTopN={true}
           id={`alert-detection-draggable-${rule}`}
