@@ -65,6 +65,8 @@ describe('useDataGridInTableSearch', () => {
       } as RenderCellValuePropsWithInTableSearch)
     ).toMatchInlineSnapshot(`
       <InTableSearchHighlightsWrapper
+        highlightBackgroundColor="#e5ffc0"
+        highlightColor="#000000"
         inTableSearchTerm="test"
       >
         <OriginalRenderCellValue
