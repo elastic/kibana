@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { browserAuthFixture, browserAuthParallelFixture } from './browser_auth';
+export { browserAuthFixture } from './browser_auth';
 export type { BrowserAuthFixture } from './browser_auth';
 export { scoutPageFixture, scoutPageParallelFixture } from './scout_page';
 export type { ScoutPage } from './scout_page';
