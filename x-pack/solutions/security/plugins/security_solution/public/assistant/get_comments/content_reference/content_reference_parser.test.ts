@@ -11,7 +11,7 @@ import type { Parent } from 'mdast';
 import { contentReferenceParser } from './content_reference_parser';
 
 describe('ContentReferenceParser', () => {
-  it('extracts references from poem', async () => {
+  it('extracts references from poem',   () => {
     const file = unified().use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse(`With a wagging tail and a wet, cold nose,{reference(ccaSI)}
 A furry friend, from head to toes.{reference(ccaSI)}
@@ -37,7 +37,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('extracts reference after linebreak', async () => {
+  it('extracts reference after linebreak',   () => {
     const file = unified().use([[markdown, {}], contentReferenceParser({ contentReferences: null })]).parse(`First line
 {reference(FTQJp)}
 `) as Parent;
@@ -50,7 +50,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('eats empty content reference', async () => {
+  it('eats empty content reference',   () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('There is an empty content reference.{reference(example)}') as Parent;
@@ -67,7 +67,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('invalid content reference has correct contentReferenceCount', async () => {
+  it('invalid content reference has correct contentReferenceCount',   () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: { "valid1": { "id": "valid1", "type": "SecurityAlertsPage" }, "valid2": { "id": "valid2", "type": "SecurityAlertsPage" } } })])
       .parse('There {reference(valid1)} is one invalid content reference {reference(invalid)} and two valid ones. {reference(valid2)}') as Parent;
@@ -93,7 +93,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('eats space preceding content reference', async () => {
+  it('eats space preceding content reference',   () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Delete space after punctuation. {reference(example)}') as Parent;
@@ -106,7 +106,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('parses when there is no space preceding the content reference', async () => {
+  it('parses when there is no space preceding the content reference',   () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('No preceding space.{reference(example)}') as Parent;
@@ -119,7 +119,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     );
   });
 
-  it('handles single citation block', async () => {
+  it('handles single citation block',   () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Hello world {reference(example)} hello wolrd') as Parent;
@@ -181,7 +181,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     ]);
   });
 
-  it('handles multiple citation blocks with different referenceIds', async () => {
+  it('handles multiple citation blocks with different referenceIds',   () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Hello world {reference(example)} hello world {reference(example2)}') as Parent;
@@ -262,7 +262,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     ]);
   });
 
-  it('handles multiple citation blocks with same referenceIds', async () => {
+  it('handles multiple citation blocks with same referenceIds',   () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Hello world {reference(example)} hello world {reference(example)}') as Parent;
@@ -343,7 +343,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
     ]);
   });
 
-  it('handles partial citation blocks', async () => {
+  it('handles partial citation blocks',   () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
       .parse('Hello world {reference(example)} hello world {reference(') as Parent;

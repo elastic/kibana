@@ -73,7 +73,7 @@ describe('contentReferenceComponentFactory', () => {
     ],
   ])(
     "Renders correct component for '%s'",
-    async (
+    (
       testId: string,
       contentReference: ContentReference,
     ) => {
@@ -91,7 +91,7 @@ describe('contentReferenceComponentFactory', () => {
     }
   );
 
-  it('renders nothing when specific contentReferenceNode is invalid', async () => {
+  it('renders nothing when specific contentReferenceNode is invalid', () => {
     const invalidContentReferenceNode: InvalidContentReferenceNode = {
       contentReferenceId: '1',
       contentReferenceCount: undefined,
@@ -107,7 +107,7 @@ describe('contentReferenceComponentFactory', () => {
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
 
-  it('renders placeholder if contentReferenceNode is unresolved', async () => {
+  it('renders placeholder if contentReferenceNode is unresolved', () => {
 
 
     const unresolvedContentReferenceNode: UnresolvedContentReferenceNode = {
