@@ -37,29 +37,6 @@ import { ScaleOptions, Orientation } from '../../common/constants';
 
 const MAX_TAG_COUNT = 200;
 
-const tgcChartCss = {
-  wrapper: css({
-    flex: '1 1 0',
-    display: 'flex',
-    flexDirection: 'column',
-    // it is used for rendering at `Canvas`.
-    height: '100%',
-    '& text': {
-      cursor: 'pointer',
-    },
-  }),
-  label: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '100%',
-      textAlign: 'center',
-      fontWeight: euiTheme.font.weight.bold,
-    }),
-  warning: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: euiTheme.size.base,
-    }),
-};
-
 export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
@@ -352,3 +329,26 @@ function getColorFromMappingFactory(
     categories: getColorCategories(rows, tagColumn),
   });
 }
+
+const tgcChartCss = {
+  wrapper: css({
+    flex: '1 1 0',
+    display: 'flex',
+    flexDirection: 'column',
+    // it is used for rendering at `Canvas`.
+    height: '100%',
+    '& text': {
+      cursor: 'pointer',
+    },
+  }),
+  label: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      textAlign: 'center',
+      fontWeight: euiTheme.font.weight.bold,
+    }),
+  warning: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: euiTheme.size.base,
+    }),
+};
