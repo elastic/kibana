@@ -853,23 +853,6 @@ components:
           $ref: '#/components/schemas/Parameters'
       required:
         - endpoint_ids
-    HostPathScriptParameters:
-      type: object
-      properties:
-        commandLine:
-          description: Command line arguments.
-          minLength: 1
-          type: string
-        hostPath:
-          description: Absolute or relative path of script on host machine.
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in seconds.
-          minimum: 1
-          type: integer
-      required:
-        - hostPath
     IsolateRouteRequestBody:
       type: object
       properties:
