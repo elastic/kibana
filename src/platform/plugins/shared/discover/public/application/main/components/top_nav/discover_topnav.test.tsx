@@ -111,7 +111,7 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover_v2: { save: true } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <RuntimeStateProvider currentDataView={dataViewMock}>
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
           <DiscoverTopNav {...props} />
         </RuntimeStateProvider>
       </DiscoverMainProvider>
@@ -125,7 +125,7 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover_v2: { save: false } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <RuntimeStateProvider currentDataView={dataViewMock}>
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
           <DiscoverTopNav {...props} />
         </RuntimeStateProvider>
       </DiscoverMainProvider>
@@ -149,7 +149,7 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMock}>
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
             <DiscoverTopNav {...props} />
           </RuntimeStateProvider>
         </DiscoverMainProvider>
@@ -171,7 +171,7 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMock}>
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
             <DiscoverTopNav {...props} />
           </RuntimeStateProvider>
         </DiscoverMainProvider>
@@ -185,7 +185,7 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMock}>
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
             <DiscoverTopNav {...props} />
           </RuntimeStateProvider>
         </DiscoverMainProvider>
@@ -208,7 +208,7 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMock}>
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
             <DiscoverTopNav {...props} />
           </RuntimeStateProvider>
         </DiscoverMainProvider>

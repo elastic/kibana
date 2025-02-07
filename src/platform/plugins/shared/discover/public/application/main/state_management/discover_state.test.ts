@@ -451,7 +451,7 @@ describe('Test discover state actions', () => {
 
   test('loadDataViewList', async () => {
     const { state } = await getState('');
-    expect(state.internalState.getState().savedDataViews.length).toBe(3);
+    expect(state.internalState2.getState().savedDataViews.length).toBe(3);
   });
 
   test('loadSavedSearch with no id given an empty URL', async () => {
@@ -725,7 +725,8 @@ describe('Test discover state actions', () => {
       state.savedSearchState.getCurrent$().getValue().searchSource?.getField('index')?.id
     ).toEqual(dataViewSpecMock.id);
     expect(state.savedSearchState.getHasChanged$().getValue()).toEqual(false);
-    expect(state.internalState.getState().adHocDataViews.length).toBe(1);
+    expect(state.internalState2.getState().adHocDataViews.length).toBe(1);
+    expect(state.runtimeStateManager.adHocDataViews$.getValue().length).toBe(1);
   });
 
   test('loadSavedSearch resetting query & filters of data service', async () => {
@@ -757,7 +758,8 @@ describe('Test discover state actions', () => {
     expect(state.appState.getState().dataSource).toEqual(
       createDataViewDataSource({ dataViewId: adHocDataViewId! })
     );
-    expect(state.internalState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
+    expect(state.internalState2.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
+    expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe(adHocDataViewId);
   });
 
   test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
@@ -852,6 +854,11 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
+    jest
+      .spyOn(discoverServiceMock.dataViews, 'get')
+      .mockImplementationOnce((id) =>
+        id === dataViewAdHoc.id ? Promise.resolve(dataViewAdHoc) : Promise.reject()
+      );
     await state.actions.onDataViewCreated(dataViewAdHoc);
     await waitFor(() => {
       expect(state.internalState2.getState().dataViewId).toBe(dataViewAdHoc.id);
@@ -924,7 +931,8 @@ describe('Test discover state actions', () => {
     expect(state.appState.getState().dataSource).toEqual(
       createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
     );
-    expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
+    expect(state.internalState2.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
+    expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe('ad-hoc-id');
     unsubscribe();
   });
 

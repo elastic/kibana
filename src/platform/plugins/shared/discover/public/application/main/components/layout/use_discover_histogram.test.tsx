@@ -124,7 +124,7 @@ describe('useDiscoverHistogram', () => {
 
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <DiscoverMainProvider value={stateContainer}>
-        <RuntimeStateProvider currentDataView={dataViewMockWithTimeField}>
+        <RuntimeStateProvider currentDataView={dataViewMockWithTimeField} adHocDataViews={[]}>
           {children as ReactElement}
         </RuntimeStateProvider>
       </DiscoverMainProvider>

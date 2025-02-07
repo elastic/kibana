@@ -143,7 +143,7 @@ const mountComponent = async ({
     <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={dataView}>
+          <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
             <DiscoverHistogramLayout {...props} />
           </RuntimeStateProvider>
         </DiscoverMainProvider>

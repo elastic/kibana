@@ -54,7 +54,7 @@ import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView } from '../../state_management/redux';
+import { useCurrentDataView, useInternalStateSelector2 } from '../../state_management/redux';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -99,7 +99,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const dataView = useCurrentDataView();
-  const dataViewLoading = useInternalStateSelector((state) => state.isDataViewLoading);
+  const dataViewLoading = useInternalStateSelector2((state) => state.isDataViewLoading);
   const customFilters = useInternalStateSelector((state) => state.customFilters);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();

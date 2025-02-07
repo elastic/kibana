@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverServices } from '../../../../build_services';
+import { InternalStateStore } from '../redux';
 
 interface DataViewData {
   /**
@@ -43,7 +43,7 @@ export async function loadDataView({
   dataViewSpec?: DataViewSpec;
   services: DiscoverServices;
   savedDataViews: DataViewListItem[];
-  adHocDataViews: DataView[];
+  adHocDataViews: DataViewListItem[];
 }): Promise<DataViewData> {
   let fetchId: string | undefined = dataViewId;
 
@@ -92,7 +92,7 @@ export async function loadDataView({
   // If nothing else is available, use the first ad hoc data view as a fallback
   let defaultAdHocDataView: DataView | null = null;
   if (!fetchedDataView && !defaultDataView && adHocDataViews.length) {
-    defaultAdHocDataView = adHocDataViews[0];
+    defaultAdHocDataView = await dataViews.get(adHocDataViews[0].id);
   }
 
   return {
@@ -174,23 +174,35 @@ export const loadAndResolveDataView = async ({
   dataViewSpec,
   savedSearch,
   isEsqlMode,
-  internalStateContainer,
+  internalState2,
   services,
 }: {
   dataViewId?: string;
   dataViewSpec?: DataViewSpec;
   savedSearch?: SavedSearch;
   isEsqlMode?: boolean;
-  internalStateContainer: DiscoverInternalStateContainer;
+  internalState2: InternalStateStore;
   services: DiscoverServices;
 }) => {
   const { dataViews, toastNotifications } = services;
-  const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
+  const { adHocDataViews, savedDataViews } = internalState2.getState();
 
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found
   let fallback = false;
-  let dataView = dataViewSpec ? undefined : adHocDataViews.find((dv) => dv.id === dataViewId);
+  let dataView: DataView | undefined;
+
+  const adHocDataViewItem = dataViewSpec
+    ? undefined
+    : adHocDataViews.find((dv) => dv.id === dataViewId);
+
+  if (adHocDataViewItem) {
+    try {
+      dataView = await dataViews.get(adHocDataViewItem.id);
+    } catch {
+      // Swallow the error and fall back to loading a data view
+    }
+  }
 
   if (!dataView) {
     const dataViewData = await loadDataView({

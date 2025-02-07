@@ -26,6 +26,7 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
 import { buildDataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { omit } from 'lodash';
+import { internalStateActions } from '../state_management/redux';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -37,7 +38,9 @@ function getHookProps(
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.replaceUrlState = replaceUrlState;
   stateContainer.appState.update({ columns: [], ...appState });
-  stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
+  stateContainer.internalState2.dispatch(
+    internalStateActions.setSavedDataViews({ savedDataViews: [dataViewMock as DataViewListItem] })
+  );
 
   const msgLoading = {
     fetchStatus: defaultFetchStatus,

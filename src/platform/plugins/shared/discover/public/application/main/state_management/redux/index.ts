@@ -18,6 +18,7 @@ export {
   internalStateActions,
   useInternalStateDispatch,
   useInternalStateSelector2,
+  useDataViewsForPicker,
 } from './internal_state';
 
 export {
@@ -27,4 +28,5 @@ export {
   useRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
+  useAdHocDataViews,
 } from './runtime_state';

@@ -27,6 +27,7 @@ import {
   isDataSourceType,
 } from '../../../../../common/data_sources';
 import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
+import { InternalStateStore } from '../redux';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
@@ -38,6 +39,7 @@ export const buildStateSubscribe =
     appState,
     dataState,
     internalState,
+    internalState2,
     savedSearchState,
     services,
     setDataView,
@@ -45,6 +47,7 @@ export const buildStateSubscribe =
     appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
     internalState: DiscoverInternalStateContainer;
+    internalState2: InternalStateStore;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
     setDataView: DiscoverStateContainer['actions']['setDataView'];
@@ -106,7 +109,7 @@ export const buildStateSubscribe =
         dataViewId,
         savedSearch,
         isEsqlMode,
-        internalStateContainer: internalState,
+        internalState2,
         services,
       });
 

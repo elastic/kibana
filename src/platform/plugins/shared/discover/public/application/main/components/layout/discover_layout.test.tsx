@@ -129,7 +129,7 @@ async function mountComponent(
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <DiscoverMainProvider value={stateContainer}>
-        <RuntimeStateProvider currentDataView={dataView}>
+        <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
           <EuiProvider>
             <DiscoverLayout {...props} />
           </EuiProvider>

@@ -21,8 +21,9 @@ import {
 } from '@reduxjs/toolkit';
 import { differenceBy, omit } from 'lodash';
 import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { useMemo } from 'react';
 import type { DiscoverServices } from '../../../../build_services';
-import type { RuntimeStateManager } from './runtime_state';
+import { useAdHocDataViews, type RuntimeStateManager } from './runtime_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
@@ -97,45 +98,11 @@ const internalStateSlice = createSlice({
       state.adHocDataViews = action.payload.adHocDataViews;
     },
 
-    setDefaultProfileAdHocDataViews: (
+    setDefaultProfileAdHocDataViewIds: (
       state,
-      action: PayloadAction<{ defaultProfileAdHocDataViews: DataViewListItem[] }>
+      action: PayloadAction<{ defaultProfileAdHocDataViewIds: string[] }>
     ) => {
-      const { defaultProfileAdHocDataViews } = action.payload;
-
-      state.adHocDataViews = state.adHocDataViews
-        .filter((dataView) => !state.defaultProfileAdHocDataViewIds.includes(dataView.id))
-        .concat(defaultProfileAdHocDataViews);
-
-      state.defaultProfileAdHocDataViewIds = defaultProfileAdHocDataViews.map(
-        (dataView) => dataView.id
-      );
-    },
-
-    appendAdHocDataViews: (
-      state,
-      action: PayloadAction<{ adHocDataViews: DataViewListItem[] }>
-    ) => {
-      const { adHocDataViews } = action.payload;
-      const newDataViews = Array.isArray(adHocDataViews) ? adHocDataViews : [adHocDataViews];
-      const existingDataViews = differenceBy(state.adHocDataViews, newDataViews, 'id');
-
-      state.adHocDataViews = existingDataViews.concat(newDataViews);
-    },
-
-    replaceAdHocDataViewWithId: (
-      state,
-      action: PayloadAction<{ prevId: string; newDataView: DataViewListItem }>
-    ) => {
-      const { prevId, newDataView } = action.payload;
-
-      state.defaultProfileAdHocDataViewIds = state.defaultProfileAdHocDataViewIds.map((id) =>
-        id === prevId ? newDataView.id : id
-      );
-
-      state.adHocDataViews = state.adHocDataViews.map((dataView) =>
-        dataView.id === prevId ? newDataView : dataView
-      );
+      state.defaultProfileAdHocDataViewIds = action.payload.defaultProfileAdHocDataViewIds;
     },
 
     setExpandedDoc: (
@@ -211,10 +178,105 @@ const setDataView =
     runtimeStateManager.currentDataView$.next(dataView);
   };
 
+const mapDataViewListItem = (dataView: DataView): DataViewListItem => ({
+  title: dataView.title,
+  name: dataView.name,
+  id: dataView.id!,
+  type: dataView.type,
+});
+
+const setAdHocDataViews =
+  (adHocDataViews: DataView[]): InternalStateThunk =>
+  (dispatch, _, { runtimeStateManager }) => {
+    dispatch(
+      internalStateSlice.actions.setAdHocDataViews({
+        adHocDataViews: adHocDataViews.map(mapDataViewListItem),
+      })
+    );
+    runtimeStateManager.adHocDataViews$.next(adHocDataViews);
+  };
+
+const setDefaultProfileAdHocDataViews =
+  (defaultProfileAdHocDataViews: DataView[]): InternalStateThunk =>
+  (dispatch, getState, { runtimeStateManager }) => {
+    const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
+    const prevState = getState();
+
+    const adHocDataViews = prevAdHocDataViews
+      .filter((dataView) => !prevState.defaultProfileAdHocDataViewIds.includes(dataView.id!))
+      .concat(defaultProfileAdHocDataViews);
+
+    const defaultProfileAdHocDataViewIds = defaultProfileAdHocDataViews.map(
+      (dataView) => dataView.id!
+    );
+
+    dispatch(setAdHocDataViews(adHocDataViews));
+    dispatch(
+      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds({
+        defaultProfileAdHocDataViewIds,
+      })
+    );
+  };
+
+const appendAdHocDataViews =
+  (dataViewsAdHoc: DataView | DataView[]): InternalStateThunk =>
+  (dispatch, _, { runtimeStateManager }) => {
+    const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
+    const newDataViews = Array.isArray(dataViewsAdHoc) ? dataViewsAdHoc : [dataViewsAdHoc];
+    const existingDataViews = differenceBy(prevAdHocDataViews, newDataViews, 'id');
+
+    dispatch(setAdHocDataViews(existingDataViews.concat(newDataViews)));
+  };
+
+const replaceAdHocDataViewWithId =
+  (prevId: string, newDataView: DataView): InternalStateThunk =>
+  (dispatch, getState, { runtimeStateManager }) => {
+    const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
+    let defaultProfileAdHocDataViewIds = getState().defaultProfileAdHocDataViewIds;
+
+    if (defaultProfileAdHocDataViewIds.includes(prevId)) {
+      defaultProfileAdHocDataViewIds = defaultProfileAdHocDataViewIds.map((id) =>
+        id === prevId ? newDataView.id! : id
+      );
+    }
+
+    dispatch(
+      setAdHocDataViews(
+        prevAdHocDataViews.map((dataView) => (dataView.id === prevId ? newDataView : dataView))
+      )
+    );
+    dispatch(
+      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds({
+        defaultProfileAdHocDataViewIds,
+      })
+    );
+  };
+
 export const internalStateActions = {
-  ...omit(internalStateSlice.actions, 'setDataViewId'),
+  ...omit(internalStateSlice.actions, 'setDataViewId', 'setDefaultProfileAdHocDataViewIds'),
   setDataView,
+  setAdHocDataViews,
+  setDefaultProfileAdHocDataViews,
+  appendAdHocDataViews,
+  replaceAdHocDataViewWithId,
 };
 
 export const useInternalStateDispatch: () => InternalStateDispatch = useDispatch;
 export const useInternalStateSelector2: TypedUseSelectorHook<DiscoverInternalState> = useSelector;
+
+export const useDataViewsForPicker = () => {
+  const originalAdHocDataViews = useAdHocDataViews();
+  const savedDataViews = useInternalStateSelector2((state) => state.savedDataViews);
+  const defaultProfileAdHocDataViewIds = useInternalStateSelector2(
+    (state) => state.defaultProfileAdHocDataViewIds
+  );
+
+  return useMemo(() => {
+    const managedDataViews = originalAdHocDataViews.filter(
+      ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
+    );
+    const adHocDataViews = differenceBy(originalAdHocDataViews, managedDataViews, 'id');
+
+    return { savedDataViews, managedDataViews, adHocDataViews };
+  }, [defaultProfileAdHocDataViewIds, originalAdHocDataViews, savedDataViews]);
+};

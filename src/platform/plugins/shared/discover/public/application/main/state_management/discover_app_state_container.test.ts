@@ -27,10 +27,12 @@ import {
 } from './discover_saved_search_container';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { omit } from 'lodash';
+import { createInternalStateStore, createRuntimeStateManager, InternalStateStore } from './redux';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
 let internalState: ReturnType<typeof getInternalStateContainer>;
+let internalState2: InternalStateStore;
 let savedSearchState: DiscoverSavedSearchContainer;
 
 describe('Test discover app state container', () => {
@@ -43,10 +45,14 @@ describe('Test discover app state container', () => {
       ...(toasts && withNotifyOnErrors(toasts)),
     });
     internalState = getInternalStateContainer();
+    internalState2 = createInternalStateStore({
+      services: discoverServiceMock,
+      runtimeStateManager: createRuntimeStateManager(),
+    });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
-      internalStateContainer: internalState,
+      internalState2,
     });
   });
 

@@ -147,7 +147,7 @@ export function DiscoverMainRoute({
 
         const persistedDataViewsExist = hasUserDataViewValue && defaultDataViewExists;
         const adHocDataViewsExist =
-          stateContainer.internalState.getState().adHocDataViews.length > 0;
+          stateContainer.internalState2.getState().adHocDataViews.length > 0;
         const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
         const canAccessWithAdHocDataViews =
           hasESDataValue && (adHocDataViewsExist || locationStateHasDataViewSpec);
@@ -337,6 +337,7 @@ export function DiscoverMainRoute({
   );
 
   const currentDataView = useRuntimeState(runtimeStateManager.currentDataView$);
+  const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   if (error) {
     return <DiscoverError error={error} />;
@@ -360,7 +361,7 @@ export function DiscoverMainRoute({
     );
   } else if (!loading && currentDataView) {
     mainContent = (
-      <RuntimeStateProvider currentDataView={currentDataView}>
+      <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
         <DiscoverMainAppMemoized stateContainer={stateContainer} />
       </RuntimeStateProvider>
     );

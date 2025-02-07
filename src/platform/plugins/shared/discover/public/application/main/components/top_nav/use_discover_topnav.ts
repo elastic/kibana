@@ -13,7 +13,6 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import {
   useSavedSearch,
   useSavedSearchHasChanged,
@@ -21,7 +20,7 @@ import {
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
-import { useCurrentDataView } from '../../state_management/redux';
+import { useAdHocDataViews, useCurrentDataView } from '../../state_management/redux';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -49,7 +48,7 @@ export const useDiscoverTopNav = ({
   const savedSearchHasChanged = useSavedSearchHasChanged();
   const shouldShowESQLToDataViewTransitionModal = !savedSearchId || savedSearchHasChanged;
   const dataView = useCurrentDataView();
-  const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
+  const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
   const onOpenInspector = useInspector({
     inspector: services.inspector,

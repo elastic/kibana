@@ -286,7 +286,7 @@ export function getDiscoverStateContainer({
    */
   const internalStateContainer = getInternalStateContainer();
 
-  const internalStateStore = createInternalStateStore({ services, runtimeStateManager });
+  const internalState2 = createInternalStateStore({ services, runtimeStateManager });
 
   /**
    * Saved Search State Container, the persisted saved object of Discover
@@ -294,7 +294,7 @@ export function getDiscoverStateContainer({
   const savedSearchContainer = getSavedSearchContainer({
     services,
     globalStateContainer,
-    internalStateContainer,
+    internalState2,
   });
 
   /**
@@ -320,7 +320,7 @@ export function getDiscoverStateContainer({
   };
 
   const setDataView = (dataView: DataView) => {
-    internalStateStore.dispatch(internalStateActions.setDataView(dataView));
+    internalState2.dispatch(internalStateActions.setDataView(dataView));
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
@@ -336,8 +336,8 @@ export function getDiscoverStateContainer({
   });
 
   const loadDataViewList = async () => {
-    const dataViewList = await services.dataViews.getIdsWithTitle(true);
-    internalStateContainer.transitions.setSavedDataViews(dataViewList);
+    const savedDataViews = await services.dataViews.getIdsWithTitle(true);
+    internalState2.dispatch(internalStateActions.setSavedDataViews({ savedDataViews }));
   };
 
   /**
@@ -361,7 +361,9 @@ export function getDiscoverStateContainer({
       services,
     });
 
-    internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView);
+    internalState2.dispatch(
+      internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
+    );
 
     if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
       await appStateContainer.replaceUrlState({
@@ -426,7 +428,7 @@ export function getDiscoverStateContainer({
 
   const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
-      internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
+      internalState2.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
       await loadDataViewList();
     }
@@ -454,6 +456,7 @@ export function getDiscoverStateContainer({
       appStateContainer,
       dataStateContainer,
       internalStateContainer,
+      internalState2,
       savedSearchContainer,
       globalStateContainer,
       services,
@@ -484,6 +487,7 @@ export function getDiscoverStateContainer({
         savedSearchState: savedSearchContainer,
         dataState: dataStateContainer,
         internalState: internalStateContainer,
+        internalState2,
         services,
         setDataView,
       })
@@ -534,8 +538,7 @@ export function getDiscoverStateContainer({
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }
-    internalStateContainer.transitions.appendAdHocDataViews(newDataView);
-
+    internalState2.dispatch(internalStateActions.appendAdHocDataViews(newDataView));
     await onChangeDataView(newDataView);
     return newDataView;
   };
@@ -563,6 +566,7 @@ export function getDiscoverStateContainer({
       dataViewId,
       services,
       internalState: internalStateContainer,
+      internalState2,
       runtimeStateManager,
       appState: appStateContainer,
     });
@@ -622,7 +626,7 @@ export function getDiscoverStateContainer({
     globalState: globalStateContainer,
     appState: appStateContainer,
     internalState: internalStateContainer,
-    internalState2: internalStateStore,
+    internalState2,
     runtimeStateManager,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,

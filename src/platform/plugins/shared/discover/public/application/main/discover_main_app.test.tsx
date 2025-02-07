@@ -20,7 +20,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from './state_management/discover_state_provider';
-import { RuntimeStateProvider } from './state_management/redux';
+import { RuntimeStateProvider, internalStateActions } from './state_management/redux';
 
 discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
   return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -33,7 +33,9 @@ describe('DiscoverMainApp', () => {
     }) as unknown as DataViewListItem[];
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.transitions.setSavedDataViews(dataViewList);
+    stateContainer.internalState2.dispatch(
+      internalStateActions.setSavedDataViews({ savedDataViews: dataViewList })
+    );
     const props = {
       stateContainer,
     };
@@ -46,7 +48,7 @@ describe('DiscoverMainApp', () => {
         <Router history={history}>
           <KibanaContextProvider services={discoverServiceMock}>
             <DiscoverMainProvider value={stateContainer}>
-              <RuntimeStateProvider currentDataView={dataViewMock}>
+              <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
                 <DiscoverMainApp {...props} />
               </RuntimeStateProvider>
             </DiscoverMainProvider>

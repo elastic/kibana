@@ -14,16 +14,20 @@ import { BehaviorSubject, skip } from 'rxjs';
 
 export interface DiscoverRuntimeState {
   currentDataView: DataView;
+  adHocDataViews: DataView[];
 }
 
-export type RuntimeStateManager = {
+type RuntimeStateManagerInternal<TNullable extends keyof DiscoverRuntimeState> = {
   [key in keyof DiscoverRuntimeState as `${key}$`]: BehaviorSubject<
-    DiscoverRuntimeState[key] | undefined
+    key extends TNullable ? DiscoverRuntimeState[key] | undefined : DiscoverRuntimeState[key]
   >;
 };
 
+export type RuntimeStateManager = RuntimeStateManagerInternal<'currentDataView'>;
+
 export const createRuntimeStateManager = (): RuntimeStateManager => ({
   currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+  adHocDataViews$: new BehaviorSubject<DataView[]>([]),
 });
 
 export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) => {
@@ -35,11 +39,12 @@ const runtimeStateContext = createContext<DiscoverRuntimeState | undefined>(unde
 
 export const RuntimeStateProvider = ({
   currentDataView,
+  adHocDataViews,
   children,
 }: PropsWithChildren<DiscoverRuntimeState>) => {
   const runtimeState = useMemo<DiscoverRuntimeState>(
-    () => ({ currentDataView }),
-    [currentDataView]
+    () => ({ currentDataView, adHocDataViews }),
+    [adHocDataViews, currentDataView]
   );
 
   return (
@@ -58,3 +63,4 @@ const useRuntimeStateContext = () => {
 };
 
 export const useCurrentDataView = () => useRuntimeStateContext().currentDataView;
+export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;

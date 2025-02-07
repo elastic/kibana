@@ -69,10 +69,6 @@ describe('test fetchAll', () => {
       getAppState: () => ({}),
       getInternalState: () => ({
         dataView: undefined,
-        isDataViewLoading: false,
-        savedDataViews: [],
-        adHocDataViews: [],
-        defaultProfileAdHocDataViewIds: [],
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
@@ -263,10 +259,6 @@ describe('test fetchAll', () => {
       getAppState: () => ({ query }),
       getInternalState: () => ({
         dataView: undefined,
-        isDataViewLoading: false,
-        savedDataViews: [],
-        adHocDataViews: [],
-        defaultProfileAdHocDataViewIds: [],
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
@@ -388,10 +380,6 @@ describe('test fetchAll', () => {
         getAppState: () => ({ query }),
         getInternalState: () => ({
           dataView: undefined,
-          isDataViewLoading: false,
-          savedDataViews: [],
-          adHocDataViews: [],
-          defaultProfileAdHocDataViewIds: [],
           expandedDoc: undefined,
           customFilters: [],
           overriddenVisContextAfterInvalidation: undefined,

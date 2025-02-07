@@ -19,7 +19,7 @@ import { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from './get_switch_data_view_app_state';
-import { RuntimeStateManager } from '../redux';
+import { internalStateActions, type InternalStateStore, type RuntimeStateManager } from '../redux';
 
 /**
  * Function executed when switching data view in the UI
@@ -28,12 +28,14 @@ export async function changeDataView({
   dataViewId,
   services,
   internalState,
+  internalState2,
   runtimeStateManager,
   appState,
 }: {
   dataViewId: string | DataView;
   services: DiscoverServices;
   internalState: DiscoverInternalStateContainer;
+  internalState2: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   appState: DiscoverAppStateContainer;
 }) {
@@ -44,7 +46,7 @@ export async function changeDataView({
   const state = appState.getState();
   let nextDataView: DataView | null = null;
 
-  internalState.transitions.setIsDataViewLoading(true);
+  internalState2.dispatch(internalStateActions.setIsDataViewLoading({ isDataViewLoading: true }));
 
   try {
     nextDataView =
@@ -86,5 +88,5 @@ export async function changeDataView({
     }
   }
 
-  internalState.transitions.setIsDataViewLoading(false);
+  internalState2.dispatch(internalStateActions.setIsDataViewLoading({ isDataViewLoading: false }));
 }
