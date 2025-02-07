@@ -268,7 +268,7 @@ export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
 export const TIMELINE_STATUS = '[data-test-subj="timeline-save-status"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
-  '[data-test-subj="formatted-field-kibana.alert.severity"]';
+  '[data-test-subj="render-content-kibana.alert.severity"]';
 
 export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
 
