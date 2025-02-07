@@ -103,7 +103,6 @@ export const handleProcessingSuggestion = async (
 
   return {
     patterns: deduplicatedSimulations.map((simulation) => simulation!.pattern),
-    chatResponses: results.flatMap((result) => result.chatResponses),
     simulations: deduplicatedSimulations as Array<ReturnType<typeof prepareSimulationResponse>>,
   };
 };
@@ -240,6 +239,10 @@ async function processPattern(
   };
 }
 
+/**
+ * We need to keep parsing additive, but overwriting timestamp or message is super common.
+ * This is a workaround for now until we found the proper solution for deal with this kind of cases.
+ */
 function sanitizePattern(pattern: string): string {
   return pattern
     .replace(/%\{([^}]+):message\}/g, '%{$1:message_derived}')
