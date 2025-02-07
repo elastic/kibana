@@ -42,9 +42,8 @@ export interface SummaryColumnFactoryDeps {
   share?: SharePluginStart;
 }
 
-export type SummaryColumnProps = DataGridCellValueElementProps;
-export type AllSummaryColumnProps = SummaryColumnProps &
-  SummaryColumnFactoryDeps & { isTracesSummary?: boolean };
+export type SummaryColumnProps = DataGridCellValueElementProps & { isTracesSummary?: boolean };
+export type AllSummaryColumnProps = SummaryColumnProps & SummaryColumnFactoryDeps;
 
 export const SummaryColumn = (props: AllSummaryColumnProps) => {
   const { isDetails } = props;

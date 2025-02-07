@@ -176,6 +176,37 @@ describe('SummaryColumn', () => {
     });
   });
 
+  describe('when rendering trace badges', () => {
+    it('should display service.name with different fields exposed', () => {
+      const record = getBaseRecord({
+        'event.outcome': 'success',
+        'transaction.name': 'GET /',
+        'transaction.duration.us': 100,
+      });
+      renderSummary(record, {
+        density: DataGridDensity.COMPACT,
+        rowHeight: ROWS_HEIGHT_OPTIONS.auto,
+        isTracesSummary: true,
+      });
+
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.EVENT_OUTCOME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.TRANSACTION_NAME_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.TRANSACTION_DURATION_FIELD}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.CONTAINER_NAME_FIELD}`)
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('when rendering the main content', () => {
     it('should display the message field as first choice', () => {
       const record = getBaseRecord();
