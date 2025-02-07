@@ -44,7 +44,6 @@ describe('useCurrentConversation', () => {
     createConversation: jest.fn(),
     deleteConversation: jest.fn(),
     getConversation: jest.fn(),
-    getDefaultConversation: jest.fn(),
     setApiConfig: jest.fn(),
   };
 

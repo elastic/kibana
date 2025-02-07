@@ -98,11 +98,6 @@ export {
 
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
-export {
-  ELASTIC_AI_ASSISTANT_TITLE,
-  WELCOME_CONVERSATION_TITLE,
-} from './impl/assistant/use_conversation/translations';
-
 export type {
   /** for rendering results in a code block */
   CodeBlockDetails,

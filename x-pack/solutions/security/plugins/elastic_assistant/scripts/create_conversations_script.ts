@@ -125,7 +125,6 @@ const retryRequest = async (
 
 const getMockConversationContent = (): Partial<ConversationCreateProps> => ({
   title: `A ${randomBytes(4).toString('hex')} title`,
-  isDefault: false,
   messages: [
     {
       content: 'Hello robot',

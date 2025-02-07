@@ -60,7 +60,8 @@ export const useChatSend = ({
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
-  const { clearConversation, removeLastMessage } = useConversation();
+  const { clearConversation, createConversation, getConversation, removeLastMessage } =
+    useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
   const isSetupComplete =
     kbStatus?.elser_exists &&
@@ -82,15 +83,20 @@ export const useChatSend = ({
         );
         return;
       }
-
+      const apiConfig = currentConversation.apiConfig;
+      let newConvo;
+      if (currentConversation.id === '') {
+        // create conversation with empty title, GENERATE_CHAT_TITLE graph step will properly title
+        newConvo = await createConversation(currentConversation);
+      }
+      const convo: Conversation = { ...currentConversation, ...(newConvo ?? {}) };
       const userMessage = getCombinedMessage({
-        currentReplacements: currentConversation.replacements,
+        currentReplacements: convo.replacements,
         promptText,
         selectedPromptContexts,
       });
 
-      const baseReplacements: Replacements =
-        userMessage.replacements ?? currentConversation.replacements;
+      const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
 
       const selectedPromptContextsReplacements = Object.values(
         selectedPromptContexts
@@ -100,12 +106,12 @@ export const useChatSend = ({
         ...baseReplacements,
         ...selectedPromptContextsReplacements,
       };
-      const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
+      const updatedMessages = [...convo.messages, userMessage].map((m) => ({
         ...m,
         content: m.content ?? '',
       }));
       setCurrentConversation({
-        ...currentConversation,
+        ...convo,
         replacements,
         messages: updatedMessages,
       });
@@ -114,38 +120,41 @@ export const useChatSend = ({
       setSelectedPromptContexts({});
 
       const rawResponse = await sendMessage({
-        apiConfig: currentConversation.apiConfig,
+        apiConfig,
         http,
         message: userMessage.content ?? '',
-        conversationId: currentConversation.id,
+        conversationId: convo.id,
         replacements,
       });
 
       assistantTelemetry?.reportAssistantMessageSent({
         role: userMessage.role,
-        actionTypeId: currentConversation.apiConfig.actionTypeId,
-        model: currentConversation.apiConfig.model,
-        provider: currentConversation.apiConfig.provider,
+        actionTypeId: apiConfig.actionTypeId,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
         isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
 
       const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
-
+      if (convo.title === '') {
+        convo.title = (await getConversation(convo.id))?.title ?? '';
+      }
       setCurrentConversation({
-        ...currentConversation,
+        ...convo,
         replacements,
         messages: [...updatedMessages, responseMessage],
       });
       assistantTelemetry?.reportAssistantMessageSent({
         role: responseMessage.role,
-        actionTypeId: currentConversation.apiConfig.actionTypeId,
-        model: currentConversation.apiConfig.model,
-        provider: currentConversation.apiConfig.provider,
+        actionTypeId: apiConfig.actionTypeId,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
         isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
     },
     [
       assistantTelemetry,
+      createConversation,
       currentConversation,
       http,
       isSetupComplete,
@@ -216,7 +225,7 @@ export const useChatSend = ({
   const handleChatSend = useCallback(
     async (promptText: string) => {
       await handleSendMessage(promptText);
-      if (currentConversation?.title === NEW_CHAT) {
+      if (currentConversation?.title === NEW_CHAT || currentConversation?.title === '') {
         await refetchCurrentUserConversations();
       }
     },

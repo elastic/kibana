@@ -44,7 +44,6 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
-import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { SettingsTabs } from '../assistant/settings/types';
 import { AssistantNavLink } from './assistant_nav_link';
 
@@ -285,9 +284,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
     // if not, check local storage
-    // last resort, go to welcome conversation
-    (conversationId?: string) =>
-      conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
+    // last resort, empty id
+    (conversationId?: string) => conversationId ?? localStorageLastConversationId ?? '',
     [localStorageLastConversationId]
   );
 

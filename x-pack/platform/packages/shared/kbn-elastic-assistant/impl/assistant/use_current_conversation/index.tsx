@@ -8,15 +8,11 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { QueryObserverResult } from '@tanstack/react-query';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { find } from 'lodash';
-import deepEqual from 'fast-deep-equal';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { getGenAiConfig } from '../../connectorland/helpers';
-import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
-import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
+import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
-import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
+import { Conversation } from '../../..';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];
@@ -57,20 +53,35 @@ export const useCurrentConversation = ({
   mayUpdateConversations,
   refetchCurrentUserConversations,
 }: Props): UseCurrentConversation => {
-  const {
-    createConversation,
-    deleteConversation,
-    getConversation,
-    getDefaultConversation,
-    setApiConfig,
-  } = useConversation();
+  const { deleteConversation, getConversation, setApiConfig } = useConversation();
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
-  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(
-    conversationId
-  );
   useEffect(() => {
-    setCurrentConversationId(conversationId);
-  }, [conversationId]);
+    if (!mayUpdateConversations || !!currentConversation) return;
+    if (conversationId === '') {
+      return setCurrentConversation({
+        apiConfig: defaultConnector
+          ? {
+              connectorId: defaultConnector.id ?? '',
+              actionTypeId: defaultConnector.actionTypeId ?? '',
+            }
+          : undefined,
+        id: '',
+        messages: [],
+        replacements: {},
+        category: 'assistant',
+        title: '',
+      });
+    }
+    if (conversations[conversationId]) {
+      setCurrentConversation(conversations[conversationId]);
+    }
+  }, [
+    conversationId,
+    conversations,
+    currentConversation,
+    defaultConnector,
+    mayUpdateConversations,
+  ]);
   /**
    * START SYSTEM PROMPT
    */
@@ -116,10 +127,9 @@ export const useCurrentConversation = ({
       cTitle,
       isStreamRefetch = false,
     }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean } = {}) => {
-      if (cId === '' || (cTitle && !conversations[cTitle])) {
+      if (cId === '') {
         return;
       }
-
       const cConversationId =
         cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id;
 
@@ -151,100 +161,24 @@ export const useCurrentConversation = ({
     [conversations, currentConversation?.id, getConversation]
   );
 
-  const initializeDefaultConversationWithConnector = useCallback(
-    async (defaultConvo: Conversation): Promise<Conversation> => {
-      const apiConfig = getGenAiConfig(defaultConnector);
-      const updatedConvo =
-        (await setApiConfig({
-          conversation: defaultConvo,
-          apiConfig: {
-            ...defaultConvo?.apiConfig,
-            connectorId: (defaultConnector?.id as string) ?? '',
-            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
-            provider: apiConfig?.apiProvider,
-            model: apiConfig?.defaultModel,
-            defaultSystemPromptId: allSystemPrompts.find((sp) => sp.isNewConversationDefault)?.id,
-          },
-        })) ?? defaultConvo;
-      await refetchCurrentUserConversations();
-      return updatedConvo;
-    },
-    [allSystemPrompts, defaultConnector, refetchCurrentUserConversations, setApiConfig]
-  );
-
   const handleOnConversationSelected = useCallback(
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
-      const allConversations = await refetchCurrentUserConversations();
-
-      // This is a default conversation that has not yet been initialized
-      // add the default connector config
-      if (cId === '' && allConversations?.data?.[cTitle]) {
-        const updatedConvo = await initializeDefaultConversationWithConnector(
-          allConversations.data[cTitle]
-        );
-        setCurrentConversationId(updatedConvo.id);
-      } else if (allConversations?.data?.[cId]) {
-        setCurrentConversationId(cId);
+      if (cId === '') {
+        return setCurrentConversation({
+          // get apiConfig from currentConversation
+          ...currentConversation,
+          id: '',
+          messages: [],
+          replacements: {},
+          category: 'assistant',
+          title: '',
+        });
       }
+      // refetch will set the currentConversation
+      await refetchCurrentConversation({ cId, cTitle });
     },
-    [
-      initializeDefaultConversationWithConnector,
-      refetchCurrentUserConversations,
-      setCurrentConversationId,
-    ]
+    [currentConversation, refetchCurrentConversation]
   );
-
-  // update currentConversation when conversations or currentConversationId update
-  useEffect(() => {
-    if (!mayUpdateConversations) return;
-    const updateConversation = async () => {
-      const nextConversation: Conversation =
-        (currentConversationId && conversations[currentConversationId]) ||
-        // if currentConversationId is not an id, it should be a title from a
-        // default conversation that has not yet been initialized
-        find(conversations, ['title', currentConversationId]) ||
-        find(conversations, ['title', WELCOME_CONVERSATION_TITLE]) ||
-        // if no Welcome convo exists, create one
-        getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
-
-      // on the off chance that the conversation is not found, return
-      if (!nextConversation) {
-        return;
-      }
-
-      if (nextConversation && nextConversation.id === '') {
-        // This is a default conversation that has not yet been initialized
-        const conversation = await initializeDefaultConversationWithConnector(nextConversation);
-        return setCurrentConversation(conversation);
-      }
-      setCurrentConversation((prev) => {
-        if (deepEqual(prev, nextConversation)) return prev;
-
-        if (
-          prev &&
-          prev.id === nextConversation.id &&
-          // if the conversation id has not changed and the previous conversation has more messages
-          // it is because the local conversation has a readable stream running
-          // and it has not yet been persisted to the stored conversation
-          prev.messages.length > nextConversation.messages.length
-        ) {
-          return {
-            ...nextConversation,
-            messages: prev.messages,
-          };
-        }
-
-        return nextConversation;
-      });
-    };
-    updateConversation();
-  }, [
-    currentConversationId,
-    conversations,
-    getDefaultConversation,
-    initializeDefaultConversationWithConnector,
-    mayUpdateConversations,
-  ]);
 
   const handleOnConversationDeleted = useCallback(
     async (cTitle: string) => {
@@ -255,52 +189,11 @@ export const useCurrentConversation = ({
   );
 
   const handleCreateConversation = useCallback(async () => {
-    const newChatExists = find(conversations, ['title', NEW_CHAT]);
-    if (newChatExists && !newChatExists.messages.length) {
-      handleOnConversationSelected({
-        cId: newChatExists.id,
-        cTitle: newChatExists.title,
-      });
-      return;
-    }
-    const newSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
-
-    let conversation: Partial<Conversation> = {};
-    if (currentConversation?.apiConfig) {
-      const { defaultSystemPromptId: _, ...restApiConfig } = currentConversation?.apiConfig;
-      conversation =
-        restApiConfig.actionTypeId != null
-          ? {
-              apiConfig: {
-                ...restApiConfig,
-                ...(newSystemPrompt?.id != null
-                  ? { defaultSystemPromptId: newSystemPrompt.id }
-                  : {}),
-              },
-            }
-          : {};
-    }
-    const newConversation = await createConversation({
-      title: NEW_CHAT,
-      ...conversation,
+    handleOnConversationSelected({
+      cId: '',
+      cTitle: '',
     });
-
-    if (newConversation) {
-      handleOnConversationSelected({
-        cId: newConversation.id,
-        cTitle: newConversation.title,
-      });
-    } else {
-      await refetchCurrentUserConversations();
-    }
-  }, [
-    allSystemPrompts,
-    conversations,
-    createConversation,
-    currentConversation?.apiConfig,
-    handleOnConversationSelected,
-    refetchCurrentUserConversations,
-  ]);
+  }, [handleOnConversationSelected]);
 
   return {
     currentConversation,

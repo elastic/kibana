@@ -62,7 +62,7 @@ export const AssistantTitle: React.FC<{
           data-test-subj="conversationTitle"
           heading="h2"
           inputAriaLabel="Edit text inline"
-          value={newTitle ?? NEW_CHAT}
+          value={newTitle || NEW_CHAT}
           size="xs"
           isInvalid={!!newTitleError}
           isReadOnly={isDisabled}

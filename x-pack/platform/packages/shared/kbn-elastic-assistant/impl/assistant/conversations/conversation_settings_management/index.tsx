@@ -42,7 +42,6 @@ import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bo
 interface Props {
   connectors: AIConnector[] | undefined;
   defaultConnector?: AIConnector;
-  defaultSelectedConversation: Conversation;
   isDisabled?: boolean;
 }
 
@@ -54,7 +53,6 @@ export const DEFAULT_TABLE_OPTIONS = {
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
   defaultConnector,
-  defaultSelectedConversation,
   isDisabled,
 }) => {
   const {
@@ -139,9 +137,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   // Local state for saving previously selected items so tab switching is friendlier
   // Conversation Selection State
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(() => {
-    return conversationSettings[defaultSelectedConversation.title];
-  });
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>();
 
   const onSelectedConversationChange = useCallback((conversation?: Conversation) => {
     setSelectedConversation(conversation);

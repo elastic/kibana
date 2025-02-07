@@ -77,12 +77,10 @@ const renderAssistant = async (extraProps = {}) => {
   return assistant;
 };
 const mockDeleteConvo = jest.fn();
-const mockGetDefaultConversation = jest.fn().mockReturnValue(mockData.welcome_id);
 const clearConversation = jest.fn();
 const mockUseConversation = {
   clearConversation: clearConversation.mockResolvedValue(mockData.welcome_id),
   getConversation: jest.fn(),
-  getDefaultConversation: mockGetDefaultConversation,
   deleteConversation: mockDeleteConvo,
   setApiConfig: jest.fn().mockResolvedValue({}),
 };

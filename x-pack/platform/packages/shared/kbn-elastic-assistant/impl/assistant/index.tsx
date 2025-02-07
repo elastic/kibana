@@ -36,7 +36,6 @@ import { useCurrentConversation } from './use_current_conversation';
 import { useDataStreamApis } from './use_data_stream_apis';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
-import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { getDefaultConnector } from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
@@ -145,10 +144,7 @@ const AssistantComponent: React.FC<Props> = ({
     refetchCurrentUserConversations,
     conversationId: getLastConversationId(conversationTitle),
     mayUpdateConversations:
-      isFetchedConnectors &&
-      isFetchedCurrentUserConversations &&
-      isFetchedPrompts &&
-      Object.keys(conversations).length > 0,
+      isFetchedConnectors && isFetchedCurrentUserConversations && isFetchedPrompts,
   });
 
   const isInitialLoad = useMemo(() => {
@@ -157,7 +153,7 @@ const AssistantComponent: React.FC<Props> = ({
     }
     return (
       (!isFetchedAnonymizationFields && !isFetchedCurrentUserConversations && !isFetchedPrompts) ||
-      !(currentConversation && currentConversation?.id !== '')
+      !currentConversation
     );
   }, [
     currentConversation,
@@ -192,13 +188,11 @@ const AssistantComponent: React.FC<Props> = ({
   // Clear it if there is no connectors
   useEffect(() => {
     if (isFetchedConnectors && !connectors?.length) {
-      return setLastConversationId(WELCOME_CONVERSATION_TITLE);
+      return setLastConversationId('');
     }
 
     if (!currentConversation?.excludeFromLastConversationStorage) {
-      setLastConversationId(
-        !isEmpty(currentConversation?.id) ? currentConversation?.id : currentConversation?.title
-      );
+      setLastConversationId(!isEmpty(currentConversation?.id) ? currentConversation?.id : '');
     }
   }, [
     isFetchedConnectors,

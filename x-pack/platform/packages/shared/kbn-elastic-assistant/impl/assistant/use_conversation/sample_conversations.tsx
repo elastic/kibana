@@ -6,11 +6,10 @@
  */
 
 import { Conversation } from '../../assistant_context/types';
-import { WELCOME_CONVERSATION_TITLE } from './translations';
 
 export const WELCOME_CONVERSATION: Conversation = {
   id: '',
-  title: WELCOME_CONVERSATION_TITLE,
+  title: 'Welcome',
   category: 'assistant',
   messages: [],
   replacements: {},

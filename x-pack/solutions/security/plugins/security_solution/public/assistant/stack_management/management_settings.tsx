@@ -14,17 +14,12 @@ import {
   formatPersistedConversations,
   useAssistantContext,
   useFetchCurrentUserConversations,
-  WELCOME_CONVERSATION_TITLE,
 } from '@kbn/elastic-assistant';
-import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 import { useKibana } from '../../common/lib/kibana';
-
-const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
-
 export const ManagementSettings = React.memo(() => {
   const {
     http,
@@ -53,15 +48,6 @@ export const ManagementSettings = React.memo(() => {
     onFetch: onFetchedConversations,
     isAssistantEnabled,
   });
-
-  const { getDefaultConversation } = useConversation();
-
-  const currentConversation = useMemo(
-    () =>
-      conversations?.[defaultSelectedConversationId] ??
-      getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
-    [conversations, getDefaultConversation]
-  );
 
   docTitle.change(SECURITY_AI_SETTINGS);
 
@@ -131,7 +117,6 @@ export const ManagementSettings = React.memo(() => {
   if (conversations) {
     return (
       <AssistantSettingsManagement
-        selectedConversation={currentConversation}
         dataViews={dataViews}
         onTabChange={handleTabChange}
         currentTab={currentTab}
