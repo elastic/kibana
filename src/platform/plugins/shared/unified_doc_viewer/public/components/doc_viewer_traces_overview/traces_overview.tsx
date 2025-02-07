@@ -48,17 +48,19 @@ export function TracesOverview({
       </EuiTitle>
       <EuiSpacer size="m" />
       {(isTransaction ? transactionAttributeIds : spanAttributeIds).map((attributeId) => (
-        <>
+        <div key={attributeId}>
           <EuiFlexGroup>
-            <EuiFlexItem>
+            <EuiFlexItem grow={1}>
               <EuiTitle size="xxxs">
                 <h3>{getAttributeConfiguration(parsedDoc)[attributeId].title}</h3>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>{getAttributeConfiguration(parsedDoc)[attributeId].content}</EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              {getAttributeConfiguration(parsedDoc)[attributeId].content}
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="xs" />
-        </>
+        </div>
       ))}
     </EuiPanel>
   );
