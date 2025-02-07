@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
@@ -97,14 +98,20 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
             </EuiFlexItem>
             {isExplicit ? (
               <>
-                <EuiFlexItem data-test-subj="synonyms-set-item-explicit-from">
-                  <EuiCode>{explicitFrom}</EuiCode>
+                <EuiFlexItem data-test-subj="synonyms-set-item-explicit-from" grow={7}>
+                  <EuiCode>
+                    <EuiTextTruncate text={explicitFrom} />
+                  </EuiCode>
                 </EuiFlexItem>
-                <EuiText>
-                  <b>{'=>'}</b>
-                </EuiText>
-                <EuiFlexItem grow={false} data-test-subj="synonyms-set-item-explicit-to">
-                  <EuiCode>{explicitTo}</EuiCode>
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <b>{'=>'}</b>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={1} data-test-subj="synonyms-set-item-explicit-to">
+                  <EuiCode>
+                    <EuiTextTruncate text={explicitTo} />
+                  </EuiCode>
                 </EuiFlexItem>
               </>
             ) : (
