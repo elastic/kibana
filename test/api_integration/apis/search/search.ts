@@ -133,8 +133,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
-              index: 'nope nope',
-              bad_query: [],
+              body: {
+                index: 'nope nope',
+                bad_query: [],
+              },
             },
           })
           .expect(400);

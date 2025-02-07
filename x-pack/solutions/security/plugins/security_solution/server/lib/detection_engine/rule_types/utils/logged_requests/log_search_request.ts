@@ -10,6 +10,8 @@ import { omit, pick } from 'lodash';
 
 // Search body fields as per https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html#search-search-api-request-body
 const BODY_FIELDS = [
+  'aggs',
+  'aggregations',
   'docvalue_fields',
   'fields',
   'stored_fields',
@@ -24,6 +26,7 @@ const BODY_FIELDS = [
   'runtime_mappings',
   'seq_no_primary_term',
   'size',
+  'sort',
   '_source',
   'stats',
   'terminate_after',
