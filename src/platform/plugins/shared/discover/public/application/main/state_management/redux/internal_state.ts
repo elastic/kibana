@@ -12,10 +12,17 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { type PayloadAction, configureStore, createSlice } from '@reduxjs/toolkit';
+import {
+  type PayloadAction,
+  configureStore,
+  createSlice,
+  type ThunkAction,
+  type ThunkDispatch,
+} from '@reduxjs/toolkit';
 import { differenceBy, omit } from 'lodash';
+import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import type { DiscoverServices } from '../../../../build_services';
-import { RuntimeStateManager } from './runtime_state';
+import type { RuntimeStateManager } from './runtime_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
@@ -187,16 +194,19 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
   });
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
-type InternalStateDispatch = InternalStateStore['dispatch'];
-type InternalStateGetState = InternalStateStore['getState'];
+
+export type InternalStateDispatch = InternalStateStore['dispatch'];
+
+export type InternalStateThunk<TReturn = void> = ThunkAction<
+  TReturn,
+  InternalStateDispatch extends ThunkDispatch<infer TState, never, never> ? TState : never,
+  InternalStateDispatch extends ThunkDispatch<never, infer TExtra, never> ? TExtra : never,
+  InternalStateDispatch extends ThunkDispatch<never, never, infer TAction> ? TAction : never
+>;
 
 const setDataView =
-  (dataView: DataView) =>
-  (
-    dispatch: InternalStateDispatch,
-    _: InternalStateGetState,
-    { runtimeStateManager }: InternalStateThunkDependencies
-  ) => {
+  (dataView: DataView): InternalStateThunk =>
+  (dispatch, _, { runtimeStateManager }) => {
     dispatch(internalStateSlice.actions.setDataViewId({ dataViewId: dataView.id }));
     runtimeStateManager.currentDataView$.next(dataView);
   };
@@ -205,3 +215,6 @@ export const internalStateActions = {
   ...omit(internalStateSlice.actions, 'setDataViewId'),
   setDataView,
 };
+
+export const useInternalStateDispatch: () => InternalStateDispatch = useDispatch;
+export const useInternalStateSelector2: TypedUseSelectorHook<DiscoverInternalState> = useSelector;

@@ -12,8 +12,12 @@ export {
   type InternalStateDataRequestParams,
   type InternalStateThunkDependencies,
   type InternalStateStore,
+  type InternalStateDispatch,
+  type InternalStateThunk,
   createInternalStateStore,
   internalStateActions,
+  useInternalStateDispatch,
+  useInternalStateSelector2,
 } from './internal_state';
 
 export {
