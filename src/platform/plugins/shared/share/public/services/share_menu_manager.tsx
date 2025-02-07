@@ -134,7 +134,6 @@ export class ShareMenuManager {
             onClose();
             unmount();
           },
-          ...startServices,
         }}
       />,
       startServices
