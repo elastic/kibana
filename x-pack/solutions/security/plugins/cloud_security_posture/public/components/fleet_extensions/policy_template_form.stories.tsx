@@ -21,6 +21,7 @@ import { NewPackagePolicyPostureInput } from './utils';
 import { getMockPolicyAWS, getMockPackageInfo } from './mocks';
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { action } from '@storybook/addon-actions';
+import { StorybookProviders } from '../../../.storybook/storybook_provider';
 
 const mockNewPolicy = getMockPolicyAWS();
 
@@ -54,17 +55,13 @@ export default {
     (CspPolicyTemplateFormChild) => {
       const queryClient = new QueryClient();
       return (
-        <I18nProvider>
-          <ThemeProvider theme={{ eui: euiDarkVars, darkMode: true }}>
-            <QueryClientProvider client={queryClient}>
-              <MemoryRouter initialEntries={['/add-integration/cspm']}>
-                <Route path="/add-integration/:integration">
-                  <CspPolicyTemplateFormChild />
-                </Route>
-              </MemoryRouter>
-            </QueryClientProvider>
-          </ThemeProvider>
-        </I18nProvider>
+        <StorybookProviders>
+          <MemoryRouter initialEntries={['/add-integration/cspm']}>
+            <Route path="/add-integration/:integration">
+              <CspPolicyTemplateFormChild />
+            </Route>
+          </MemoryRouter>
+        </StorybookProviders>
       );
     },
   ],

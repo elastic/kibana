@@ -5,44 +5,15 @@
  * 2.0.
  */
 
-import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
-import type { Configuration } from 'webpack';
-import { resolve } from 'path';
+// import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
+// import type { Configuration } from 'webpack';
+// import { resolve } from 'path';
 
-const cspmWebpack: Configuration = {
-  resolve: {
-    alias: {
-      '../../common/hooks/use_kibana': resolve(__dirname, './mocks.ts'),
-      '../../common/hooks/use_is_subscription_status_valid': resolve(__dirname, './mocks.ts'),
-      '../../../../../../../../hooks': resolve(__dirname, './mocks.ts'),
-    },
-  },
-  module: {
-    rules: [
-      {
-        test: /node_modules[\/\\]@?stream[\/\\].*.js$/,
-        include: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-          },
-        },
-      },
-    ],
-  },
-  node: {
-    fs: 'empty',
-    stream: false,
-    os: false,
-  },
-};
+import { defaultConfig, StorybookConfig } from '@kbn/storybook';
 
-module.exports = {
+const cspmStorybookConfig: StorybookConfig = {
   ...defaultConfig,
-  stories: ['../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
-  },
-  ...mergeWebpackFinal(cspmWebpack),
+  stories: ['../public/**/*.stories.tsx'],
 };
+
+module.exports = cspmStorybookConfig;

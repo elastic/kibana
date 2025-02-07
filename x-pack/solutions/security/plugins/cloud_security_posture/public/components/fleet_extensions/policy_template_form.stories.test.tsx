@@ -14,19 +14,23 @@ import userEvent from '@testing-library/user-event';
 const { AgentBased } = composeStories(stories);
 
 describe('LinkPreview', () => {
-  it('Checks if the form is valid', async () => {
-    const { getByLabelText } = render(<AgentBased />);
+  it('Checks if changing the name updated the package policy', async () => {
+    // const onChange = (obj: any) => console.log('onChange', obj);
+    const onChange = jest.fn();
+    const { container, getByLabelText, getByRole } = render(<AgentBased onChange={onChange} />);
+
+    // make sure the loading spinner is niot displayed
+    await waitFor(() => {
+      expect(container.querySelector('#name')).toBeInTheDocument();
+    });
 
     const name = getByLabelText('Name');
-    expect(name).toBeInTheDocument();
+    // await userEvent.clear(name);
+    await userEvent.type(name, 'CSPM AWS Package Policy');
 
-    await userEvent.type(name, '1');
-
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith({
-        isValid: true,
-        updatedPolicy: { ...policy, name: `${policy.name}1` },
-      });
-    });
+    // await waitFor(() => {
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ updatedPolicy: { name: 'CSPM AWS Package Policy' } })
+    );
   });
 });
