@@ -27,6 +27,8 @@ export interface PackageConnectorSettings {
 
 export interface PackagePolicyMetadata {
   package_policy_id: string;
+  package_policy_name: string;
+  package_name: string;
   agent_policy_ids: string[];
   connector_settings: PackageConnectorSettings;
 }
@@ -122,8 +124,12 @@ export class AgentlessConnectorsInfraService {
               //   continue;
               // }
 
+              console.log(policy, input);
+
               policiesMetadata.push({
                 package_policy_id: policy.id,
+                package_policy_name: policy.name,
+                package_name: policy.package?.name || '',
                 agent_policy_ids: policy.policy_ids,
                 connector_settings: {
                   id: input.compiled_input.connector_id,
@@ -248,6 +254,18 @@ export class AgentlessConnectorsInfraService {
     }
   };
 
+  public getAgentPolicyForConnectorId = async ({
+    connectorId,
+  }: {
+    connectorId: string;
+  }): Promise<PackagePolicyMetadata> => {
+    const allPolicies = await this.getConnectorPackagePolicies();
+
+    const [policy] = getPoliciesByConnectorId(allPolicies, connectorId);
+
+    return policy;
+  };
+
   private getPackageVersion = async (): Promise<string> => {
     this.logger.debug(`Fetching ${pkgName} version`);
 
@@ -314,17 +332,20 @@ export const getPoliciesToDelete = (
   return results;
 };
 
+export const getPoliciesByConnectorId = (
+  packagePolicies: PackagePolicyMetadata[],
+  connectorId: string
+): PackagePolicyMetadata[] => {
+  return packagePolicies.filter(
+    (packagePolicy) => packagePolicy.connector_settings.id === connectorId
+  );
+};
+
 export const getConnectorPolicyId = (
   packagePolicies: PackagePolicyMetadata[],
   connectorId: string
 ): string[] => {
-  const results: string[] = [];
-
-  for (const packagePolicy of packagePolicies) {
-    if (packagePolicy.connector_settings.id === connectorId) {
-      results.push(packagePolicy.package_policy_id);
-    }
-  }
-
-  return results;
+  return getPoliciesByConnectorId(packagePolicies, connectorId).map(
+    (policy) => policy.package_policy_id
+  );
 };

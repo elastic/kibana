@@ -33,3 +33,4 @@ export const DEV_TOOLS_CONSOLE_PATH = '/app/dev_tools#/console';
 
 export const CONNECTOR_DETAIL_PATH = `${CONNECTORS_PATH}/:connectorId`;
 export const CONNECTOR_DETAIL_TAB_PATH = `${CONNECTOR_DETAIL_PATH}/:tabId`;
+export const CONNECTOR_INTEGRATION_DETAIL_PATH = `/app/integrations/detail/elastic_connectors/policies?integration=:serviceType`;

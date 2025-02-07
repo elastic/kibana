@@ -10,6 +10,7 @@ export enum ErrorCode {
   ANALYTICS_COLLECTION_ALREADY_EXISTS = 'analytics_collection_already_exists',
   ANALYTICS_COLLECTION_NOT_FOUND = 'analytics_collection_not_found',
   CONNECTOR_DOCUMENT_ALREADY_EXISTS = 'connector_document_already_exists',
+  CONNECTOR_UNSUPPORTED_OPERATION = 'connector_unsupported_operation',
   CRAWLER_ALREADY_EXISTS = 'crawler_already_exists',
   DOCUMENT_NOT_FOUND = 'document_not_found',
   EXPENSIVE_QUERY_NOT_ALLOWED_ERROR = 'expensive_queries_not_allowed',

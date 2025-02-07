@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -48,10 +48,14 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(IndexViewLogic);
-  const { connector, error, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic);
+  const { connector, error, isWaitingOnAgentlessDeployment, connectorAgentlessPolicy } =
+    useValues(ConnectorViewLogic);
+
   const { isCloud } = useValues(KibanaLogic);
   const { showModal } = useActions(ConvertConnectorLogic);
   const { isModalVisible } = useValues(ConvertConnectorLogic);
+
+  console.log(connectorAgentlessPolicy);
 
   return (
     <>

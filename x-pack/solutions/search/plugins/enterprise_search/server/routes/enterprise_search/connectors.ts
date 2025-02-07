@@ -56,8 +56,10 @@ import {
   isExpensiveQueriesNotAllowedException,
   isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
+import { SavedObjectsClient } from '@kbn/core/server';
+import { AgentlessConnectorsInfraService } from '@kbn/search-connectors-plugin/server/services';
 
-export function registerConnectorRoutes({ router, log }: RouteDependencies) {
+export function registerConnectorRoutes({ router, log, getStartServices }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors',
@@ -869,6 +871,85 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           throw error;
         }
       }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/{connectorId}/agentless_policy',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { connectorId } = request.params;
+      const { client } = (await context.core).elasticsearch;
+
+      const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+
+      if (!connector) {
+        return createError({
+          errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+            {
+              defaultMessage: 'Connector with id {connectorId} is not found.',
+              values: { connectorId },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+
+      if (!connector?.is_native) {
+        return createError({
+          errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+            {
+              defaultMessage:
+                'Failed to fetch agentless deployment details: This action is only supported for Elastic-managed connectors.',
+            }
+          ),
+          response,
+          statusCode: 400,
+        });
+      }
+
+      const [_core, start] = await getStartServices();
+
+      const savedObjects = _core.savedObjects;
+
+      const agentPolicyService = start.fleet!.agentPolicyService;
+      const packagePolicyService = start.fleet!.packagePolicyService;
+
+      const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
+
+      const service = new AgentlessConnectorsInfraService(
+        soClient,
+        client.asCurrentUser,
+        packagePolicyService,
+        agentPolicyService,
+        log
+      );
+
+      const policy = await service.getAgentPolicyForConnectorId({ connectorId });
+
+      return response.ok({
+        body: {
+          policy: {
+            id: policy,
+            name: 'xd',
+          },
+          agent: {
+            id: 'xd',
+          },
+        },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }

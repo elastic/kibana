@@ -45,6 +45,11 @@ import {
   ConnectorNameAndDescriptionLogic,
 } from './connector_name_and_description_logic';
 import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
+import {
+  GetConnectorAgentlessPolicyApiLogic,
+  GetConnectorAgentlessPolicyApiLogicActions,
+  GetConnectorAgentlessPolicyApiResponse,
+} from '../../api/connector/get_connector_agentless_policy_api_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
@@ -57,6 +62,8 @@ export interface ConnectorViewActions {
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
   generateApiKeySuccess: GenerateConnectorApiKeyApiLogicActions['apiSuccess'];
   generateConfigurationSuccess: DeploymentLogicActions['generateConfigurationSuccess'];
+  getConnectorAgentlessPolicy: GetConnectorAgentlessPolicyApiLogicActions['makeRequest'];
+  getConnectorAgentlessPolicyApiSuccess: GetConnectorAgentlessPolicyApiLogicActions['apiSuccess'];
   nameAndDescriptionApiError: ConnectorNameAndDescriptionActions['apiError'];
   nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
   startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
@@ -71,9 +78,11 @@ export interface ConnectorViewValues {
   connectorError: string | undefined;
   connectorId: string | null;
   connectorName: string | null;
+  connectorAgentlessPolicy: GetConnectorAgentlessPolicyApiResponse;
   error: string | undefined;
   fetchConnectorApiStatus: Status;
   fetchIndexApiStatus: Status;
+  getConnectorAgentlessPolicyStatus: Status;
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
   hasDocumentLevelSecurityFeature: boolean;
@@ -125,6 +134,11 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['generateConfigurationSuccess'],
       GenerateConnectorApiKeyApiLogic,
       ['apiSuccess as generateApiKeySuccess'],
+      GetConnectorAgentlessPolicyApiLogic,
+      [
+        'makeRequest as getConnectorAgentlessPolicy',
+        'apiSuccess as getConnectorAgentlessPolicySuccess',
+      ],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
@@ -133,6 +147,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['data as index', 'status as fetchIndexApiStatus'],
       ConnectorConfigurationApiLogic,
       ['status as updateConnectorConfigurationStatus'],
+      GetConnectorAgentlessPolicyApiLogic,
+      ['data as connectorAgentlessPolicy', 'status as getConnectorAgentlessPolicyStatus'],
     ],
   },
   events: ({ actions }) => ({
@@ -145,6 +161,9 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     fetchConnectorApiSuccess: ({ connector }) => {
       if (!values.index && connector?.index_name) {
         actions.fetchIndex({ indexName: connector.index_name });
+      }
+      if (connector?.id && connector.is_native) {
+        actions.getConnectorAgentlessPolicy({ connectorId: connector.id });
       }
     },
     generateApiKeySuccess: () => {

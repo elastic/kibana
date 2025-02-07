@@ -10,6 +10,7 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
   EuiCopy,
@@ -32,13 +33,14 @@ import { EuiIconPlugs } from '@kbn/search-shared-ui';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
-import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
+import { CONNECTOR_DETAIL_TAB_PATH, CONNECTOR_INTEGRATION_DETAIL_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
 import { ConnectorDetailTabId } from './connector_detail';
+import { HttpLogic } from '../../../shared/http';
 
 export interface ConnectorStatsProps {
   connector: Connector;
@@ -94,8 +96,10 @@ const configureLabel = i18n.translate(
 
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
   const { connectorTypes } = useValues(KibanaLogic);
+  const { http } = useValues(HttpLogic);
   const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
   const columns = connector.is_native ? 2 : 3;
+
   return (
     <EuiFlexGrid columns={columns} direction="row">
       <EuiFlexItem>
@@ -316,14 +320,27 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
       {connector.is_native && (
         <EuiFlexItem>
           <StatCard
-            title={i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.fleetTitle', {
-              defaultMessage: 'Fleet',
-            })}
+            title={i18n.translate(
+              'xpack.enterpriseSearch.connectors.connectorStats.integrationTitle',
+              {
+                defaultMessage: 'Integration',
+              }
+            )}
             content={
-              <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   {/* TODO: Get related Integration name from Fleet */}
-                  <EuiBadge iconType={EuiIconPlugs}>Elastic connectors integration</EuiBadge>
+                  <EuiButtonEmpty
+                    iconType={EuiIconPlugs}
+                    color="text"
+                    href={http.basePath.prepend(
+                      generateEncodedPath(CONNECTOR_INTEGRATION_DETAIL_PATH, {
+                        serviceType: connector.service_type!,
+                      })
+                    )}
+                  >
+                    Elastic Connectors
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {/* TODO: Update status from Fleet host health related connector */}
