@@ -32,6 +32,7 @@ interface RulesFilterOptions {
   tags: string[];
   excludeRuleTypes: Type[];
   ruleExecutionStatus: RuleExecutionStatus;
+  ruleIds: string[];
 }
 
 /**
