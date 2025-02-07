@@ -107,7 +107,7 @@ describe('DiscoverMainRoute', () => {
       component.update();
       expect(findTestSubject(component, 'noDataViewsPrompt').length).toBe(1);
     });
-  }, 100000);
+  });
 
   // skipped because this is the case that never ever should happen, it happened once and was fixed in
   // https://github.com/elastic/kibana/pull/137824
