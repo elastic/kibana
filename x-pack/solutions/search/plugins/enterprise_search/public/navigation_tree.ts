@@ -313,6 +313,10 @@ export const getNavigationTreeDefinition = ({
                     defaultMessage: 'Stack Management',
                   }),
                 },
+                {
+                  id: 'monitoring',
+                  link: 'monitoring',
+                },
               ],
               icon: 'gear',
               id: 'project_settings_project_nav',
