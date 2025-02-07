@@ -11,12 +11,19 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { SLOGroupingValueSelector } from './slo_grouping_value_selector';
 
-export function SLOGroupings({ slo }: { slo: SLOWithSummaryResponse }) {
+const setSLOGroupingOptions = ({ slo }: { slo: SLOWithSummaryResponse }) => {
   const groupings = Object.entries(slo.groupings ?? {});
-
+  const groupBy = slo.groupBy ?? [];
   if (!groupings.length) {
-    return null;
+    return typeof groupBy === 'string'
+      ? [groupBy, '']
+      : groupBy.map((groupingKey) => [groupingKey, '']);
   }
+  return groupings;
+};
+
+export const SLOGroupings = ({ slo }: { slo: SLOWithSummaryResponse }) => {
+  const groupings = setSLOGroupingOptions({ slo });
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
@@ -34,11 +41,11 @@ export function SLOGroupings({ slo }: { slo: SLOWithSummaryResponse }) {
           <SLOGroupingValueSelector
             key={groupingKey}
             slo={slo}
-            groupingKey={groupingKey}
+            groupingKey={groupingKey as string}
             value={String(groupingValue)}
           />
         );
       })}
     </EuiFlexGroup>
   );
-}
+};

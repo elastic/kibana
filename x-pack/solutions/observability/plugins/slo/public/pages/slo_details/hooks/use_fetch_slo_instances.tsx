@@ -57,7 +57,7 @@ export function useFetchSloGroupings({
         throw new Error(`Something went wrong. Error: ${error}`);
       }
     },
-    enabled: Boolean(!!sloId && !!groupingKey && instanceId !== ALL_VALUE),
+    enabled: Boolean(!!sloId && !!groupingKey),
     staleTime: 60 * 1000,
     retry: false,
     refetchOnWindowFocus: false,

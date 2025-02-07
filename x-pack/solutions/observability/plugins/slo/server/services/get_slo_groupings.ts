@@ -29,7 +29,7 @@ export class GetSLOGroupings {
     const { slo } = await this.definitionClient.execute(sloId, this.spaceId, params.remoteName);
 
     const groupingKeys = [slo.groupBy].flat();
-    if (groupingKeys.includes(ALL_VALUE) || params.instanceId === ALL_VALUE) {
+    if (groupingKeys.includes(ALL_VALUE)) {
       throw new Error('Ungrouped SLO cannot be queried for available groupings');
     }
 
