@@ -17,6 +17,7 @@ import {
   OutputCompleteEvent,
   OutputEventType,
   FunctionCallingMode,
+  ChatCompleteMetadata,
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { InferenceClient } from '../../..';
@@ -35,6 +36,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   functionCalling,
   logger,
   system,
+  metadata,
 }: {
   connectorId: string;
   systemMessage: string;
@@ -44,6 +46,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   docBase: EsqlDocumentBase;
   functionCalling?: FunctionCallingMode;
   logger: Pick<Logger, 'debug'>;
+  metadata?: ChatCompleteMetadata;
   system?: string;
 }) => {
   return function askLlmToRespond({
@@ -73,6 +76,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
       chatCompleteApi({
         connectorId,
         functionCalling,
+        metadata,
         stream: true,
         system: `${systemMessage}
 

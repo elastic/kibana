@@ -5,49 +5,54 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
+import { useEffect, useMemo, useState } from 'react';
+import { debounce, isEmpty, uniq, uniqBy } from 'lodash';
 import {
-  DissectProcessorDefinition,
-  ReadStreamDefinition,
+  IngestStreamGetResponse,
+  getProcessorConfig,
+  UnaryOperator,
   Condition,
-  ProcessorDefinition,
-  GrokProcessorDefinition,
+  processorDefinitionSchema,
+  isSchema,
+  RecursiveRecord,
 } from '@kbn/streams-schema';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { APIReturnType, StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
+import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ProcessingDefinition } from '../types';
-import { DetectedField } from '../types';
-import { emptyEqualsToAlways } from '../../../util/condition';
+import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
+import { processorConverter } from '../utils';
 
 type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
-type SimulationRequestBody =
-  StreamsAPIClientRequestParamsOf<'POST /api/streams/{id}/processing/_simulate'>['params']['body'];
 
-export interface UseProcessingSimulatorReturnType {
+export interface TableColumn {
+  name: string;
+  origin: 'processor' | 'detected';
+}
+
+export interface UseProcessingSimulatorProps {
+  definition: IngestStreamGetResponse;
+  processors: ProcessorDefinitionWithUIAttributes[];
+}
+
+export interface UseProcessingSimulatorReturn {
+  hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
-  refreshSamples: () => void;
-  samples: Array<Record<PropertyKey, unknown>>;
-  simulate: (
-    processing: ProcessingDefinition,
-    detectedFields?: DetectedField[]
-  ) => Promise<Simulation | null>;
+  samples: RecursiveRecord[];
   simulation?: Simulation | null;
+  tableColumns: TableColumn[];
+  refreshSamples: () => void;
+  watchProcessor: (
+    processor: ProcessorDefinitionWithUIAttributes | { id: string; deleteIfExists: true }
+  ) => void;
 }
 
 export const useProcessingSimulator = ({
   definition,
-  condition,
-}: {
-  definition: ReadStreamDefinition;
-  condition?: Condition;
-}): UseProcessingSimulatorReturnType => {
+  processors,
+}: UseProcessingSimulatorProps): UseProcessingSimulatorReturn => {
   const { dependencies } = useKibana();
   const {
     data,
@@ -58,9 +63,57 @@ export const useProcessingSimulator = ({
     absoluteTimeRange: { start, end },
   } = useDateRange({ data });
 
-  const abortController = useAbortController();
+  const draftProcessors = useMemo(
+    () => processors.filter((processor) => processor.status === 'draft'),
+    [processors]
+  );
 
-  const serializedCondition = JSON.stringify(condition);
+  const [liveDraftProcessors, setLiveDraftProcessors] = useState(draftProcessors);
+
+  useEffect(() => {
+    setLiveDraftProcessors((prevLiveProcessors) => {
+      const inProgressDraft = prevLiveProcessors.find((proc) => proc.id === 'draft');
+      return inProgressDraft ? [...draftProcessors, inProgressDraft] : draftProcessors;
+    });
+  }, [draftProcessors]);
+
+  const watchProcessor = useMemo(
+    () =>
+      debounce(
+        (processor: ProcessorDefinitionWithUIAttributes | { id: string; deleteIfExists: true }) => {
+          if ('deleteIfExists' in processor) {
+            return setLiveDraftProcessors((prevLiveDraftProcessors) =>
+              prevLiveDraftProcessors.filter((proc) => proc.id !== processor.id)
+            );
+          }
+
+          if (processor.status === 'draft') {
+            setLiveDraftProcessors((prevLiveDraftProcessors) => {
+              const newLiveDraftProcessors = prevLiveDraftProcessors.slice();
+
+              const existingIndex = prevLiveDraftProcessors.findIndex(
+                (proc) => proc.id === processor.id
+              );
+
+              if (existingIndex !== -1) {
+                newLiveDraftProcessors[existingIndex] = processor;
+              } else {
+                newLiveDraftProcessors.push(processor);
+              }
+
+              return newLiveDraftProcessors;
+            });
+          }
+        },
+        500
+      ),
+    []
+  );
+
+  const samplingCondition = useMemo(
+    () => composeSamplingCondition(liveDraftProcessors),
+    [liveDraftProcessors]
+  );
 
   const {
     loading: isLoadingSamples,
@@ -75,9 +128,9 @@ export const useProcessingSimulator = ({
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
         signal,
         params: {
-          path: { id: definition.name },
+          path: { id: definition.stream.name },
           body: {
-            if: condition ? emptyEqualsToAlways(condition) : { always: {} },
+            if: samplingCondition,
             start: start?.valueOf(),
             end: end?.valueOf(),
             size: 100,
@@ -85,69 +138,103 @@ export const useProcessingSimulator = ({
         },
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [definition, streamsRepositoryClient, start, end, serializedCondition],
+    [definition, streamsRepositoryClient, start, end, samplingCondition],
     { disableToastOnError: true }
   );
 
-  const sampleDocs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
+  const sampleDocs = samples?.documents;
 
-  const [{ loading: isLoadingSimulation, error, value }, simulate] = useAsyncFn(
-    (processingDefinition: ProcessingDefinition, detectedFields?: DetectedField[]) => {
-      if (!definition) {
+  const {
+    loading: isLoadingSimulation,
+    value: simulation,
+    error: simulationError,
+  } = useStreamsAppFetch(
+    ({ signal }) => {
+      if (!definition || isEmpty<RecursiveRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
         return Promise.resolve(null);
       }
 
-      const processorDefinition: ProcessorDefinition =
-        'grok' in processingDefinition.config
-          ? ({
-              grok: {
-                field: processingDefinition.config.grok.field,
-                ignore_failure: processingDefinition.config.grok.ignore_failure,
-                ignore_missing: processingDefinition.config.grok.ignore_missing,
-                if: emptyEqualsToAlways(processingDefinition.condition),
-                patterns: processingDefinition.config.grok.patterns,
-                pattern_definitions: processingDefinition.config.grok.pattern_definitions,
-              },
-            } satisfies GrokProcessorDefinition)
-          : ({
-              dissect: {
-                field: processingDefinition.config.dissect.field,
-                ignore_failure: processingDefinition.config.dissect.ignore_failure,
-                ignore_missing: processingDefinition.config.dissect.ignore_missing,
-                if: emptyEqualsToAlways(processingDefinition.condition),
-                pattern: processingDefinition.config.dissect.pattern,
-                append_separator: processingDefinition.config.dissect.append_separator,
-              },
-            } satisfies DissectProcessorDefinition);
+      const processing = liveDraftProcessors.map(processorConverter.toAPIDefinition);
 
-      const detected_fields = detectedFields
-        ? (detectedFields.filter(
-            (field) => field.type !== 'unmapped'
-          ) as SimulationRequestBody['detected_fields'])
-        : undefined;
+      const hasValidProcessors = processing.every((processor) =>
+        isSchema(processorDefinitionSchema, processor)
+      );
+
+      // Each processor should meet the minimum schema requirements to run the simulation
+      if (!hasValidProcessors) {
+        return Promise.resolve(null);
+      }
 
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
-        signal: abortController.signal,
+        signal,
         params: {
-          path: { id: definition.name },
+          path: { id: definition.stream.name },
           body: {
             documents: sampleDocs,
-            processing: [processorDefinition],
-            detected_fields,
+            processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),
           },
         },
       });
     },
-    [definition, sampleDocs]
+    [definition, sampleDocs, liveDraftProcessors, streamsRepositoryClient],
+    { disableToastOnError: true }
   );
 
+  const tableColumns = useMemo(() => {
+    // If there is an error, we only want the source fields
+    const detectedFields = simulationError ? [] : simulation?.detected_fields ?? [];
+
+    return getTableColumns(liveDraftProcessors, detectedFields);
+  }, [liveDraftProcessors, simulation, simulationError]);
+
+  const hasLiveChanges = !isEmpty(liveDraftProcessors);
+
   return {
+    hasLiveChanges,
     isLoading: isLoadingSamples || isLoadingSimulation,
-    error: error as IHttpFetchError<ResponseErrorBody> | undefined,
+    error: simulationError as IHttpFetchError<ResponseErrorBody> | undefined,
     refreshSamples,
-    simulate,
-    simulation: value,
-    samples: sampleDocs,
+    simulation,
+    samples: sampleDocs ?? [],
+    tableColumns,
+    watchProcessor,
   };
+};
+
+const composeSamplingCondition = (
+  processors: ProcessorDefinitionWithUIAttributes[]
+): Condition | undefined => {
+  if (isEmpty(processors)) {
+    return undefined;
+  }
+
+  const uniqueFields = uniq(getSourceFields(processors));
+
+  const conditions = uniqueFields.map((field) => ({
+    field,
+    operator: 'exists' as UnaryOperator,
+  }));
+
+  return { or: conditions };
+};
+
+const getSourceFields = (processors: ProcessorDefinitionWithUIAttributes[]): string[] => {
+  return processors.map((processor) => getProcessorConfig(processor).field);
+};
+
+const getTableColumns = (
+  processors: ProcessorDefinitionWithUIAttributes[],
+  fields: DetectedField[]
+) => {
+  const uniqueProcessorsFields = getSourceFields(processors).map((name) => ({
+    name,
+    origin: 'processor',
+  }));
+
+  const uniqueDetectedFields = fields.map((field) => ({
+    name: field.name,
+    origin: 'detected',
+  }));
+
+  return uniqBy([...uniqueProcessorsFields, ...uniqueDetectedFields], 'name') as TableColumn[];
 };

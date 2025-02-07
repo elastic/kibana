@@ -269,7 +269,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [rulesUpgradeState]
   );
   const ruleActionsFactory = useCallback(
-    (rule: RuleResponse, closeRulePreview: () => void) => {
+    (rule: RuleResponse, closeRulePreview: () => void, isEditingRule: boolean) => {
       const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
       if (!ruleUpgradeState) {
         return null;
@@ -282,7 +282,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isUpgradingSecurityPackages ||
-            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange)
+            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
+            isEditingRule
           }
           onClick={() => {
             if (hasRuleTypeChange || isRulesCustomizationEnabled === false) {
