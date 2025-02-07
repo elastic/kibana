@@ -12,6 +12,20 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
 
+export enum Comparator {
+  GT = '>',
+  LT = '<',
+  GT_OR_EQ = '>=',
+  LT_OR_EQ = '<=',
+  BETWEEN = 'between',
+  NOT_BETWEEN = 'notBetween',
+}
+
+export type ComparatorFn = (value: number, threshold: number[]) => boolean;
+
+const TimeWindowUnits = new Set(['s', 'm', 'h', 'd']);
+const AggTypes = new Set(['count', 'avg', 'min', 'max', 'sum']);
+
 export const jobsSelectionSchema = schema.object(
   {
     jobIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -80,3 +94,75 @@ export type TimeUnitChar = 's' | 'm' | 'h' | 'd';
 export enum LEGACY_COMPARATORS {
   OUTSIDE_RANGE = 'outside',
 }
+
+export function validateTimeWindowUnits(timeWindowUnit: string): string | undefined {
+  if (TimeWindowUnits.has(timeWindowUnit)) {
+    return;
+  }
+
+  return i18n.translate(
+    'xpack.triggersActionsUI.data.coreQueryParams.invalidTimeWindowUnitsErrorMessage',
+    {
+      defaultMessage: 'invalid timeWindowUnit: "{timeWindowUnit}"',
+      values: {
+        timeWindowUnit,
+      },
+    }
+  );
+}
+
+export function validateAggType(aggType: string): string | undefined {
+  if (AggTypes.has(aggType)) {
+    return;
+  }
+
+  return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.invalidAggTypeErrorMessage', {
+    defaultMessage: 'invalid aggType: "{aggType}"',
+    values: {
+      aggType,
+    },
+  });
+}
+
+export function validateGroupBy(groupBy: string): string | undefined {
+  if (groupBy === 'all' || groupBy === 'top') {
+    return;
+  }
+
+  return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.invalidGroupByErrorMessage', {
+    defaultMessage: 'invalid groupBy: "{groupBy}"',
+    values: {
+      groupBy,
+    },
+  });
+}
+
+export const ComparatorFns = new Map<Comparator, ComparatorFn>([
+  [Comparator.LT, (value: number, threshold: number[]) => value < threshold[0]],
+  [Comparator.LT_OR_EQ, (value: number, threshold: number[]) => value <= threshold[0]],
+  [Comparator.GT_OR_EQ, (value: number, threshold: number[]) => value >= threshold[0]],
+  [Comparator.GT, (value: number, threshold: number[]) => value > threshold[0]],
+  [
+    Comparator.BETWEEN,
+    (value: number, threshold: number[]) => value >= threshold[0] && value <= threshold[1],
+  ],
+  [
+    Comparator.NOT_BETWEEN,
+    (value: number, threshold: number[]) => value < threshold[0] || value > threshold[1],
+  ],
+]);
+
+export const getComparatorSchemaType = (validate: (comparator: Comparator) => string | void) =>
+  schema.oneOf(
+    [
+      schema.literal(Comparator.GT),
+      schema.literal(Comparator.LT),
+      schema.literal(Comparator.GT_OR_EQ),
+      schema.literal(Comparator.LT_OR_EQ),
+      schema.literal(Comparator.BETWEEN),
+      schema.literal(Comparator.NOT_BETWEEN),
+    ],
+    { validate }
+  );
+
+export const ComparatorFnNames = new Set(ComparatorFns.keys());

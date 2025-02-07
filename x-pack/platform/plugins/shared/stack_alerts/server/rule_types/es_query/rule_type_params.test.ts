@@ -10,7 +10,8 @@ import { MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
 import type { Writable } from '@kbn/utility-types';
 import { Comparator } from '../../../common/comparator_types';
 import { ES_QUERY_MAX_HITS_PER_EXECUTION } from '../../../common';
-import { EsQueryRuleParamsSchema, EsQueryRuleParams, validateServerless } from './rule_type_params';
+import { validateServerless } from './rule_type_params';
+import { EsQueryRuleParamsSchema, EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
 const DefaultParams: Writable<Partial<EsQueryRuleParams>> = {
   index: ['index-name'],
