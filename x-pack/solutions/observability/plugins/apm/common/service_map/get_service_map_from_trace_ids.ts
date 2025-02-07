@@ -13,26 +13,19 @@ export function getConnections(paths: ConnectionNode[][] | undefined): Connectio
     return [];
   }
 
-  const connectionsById: Map<string, Connection> = new Map();
+  const connectionsById = new Set<string>();
+  const connections: Connection[] = [];
 
   paths.forEach((path) => {
-    path.forEach((location, i) => {
-      const prev = path[i - 1];
+    for (let i = 1; i < path.length; i++) {
+      const connectionId = getConnectionId({ source: path[i - 1], destination: path[i] });
 
-      if (prev) {
-        const connection = {
-          source: prev,
-          destination: location,
-        };
-
-        const id = getConnectionId(connection);
-
-        if (!connectionsById.has(id)) {
-          connectionsById.set(id, connection);
-        }
+      if (!connectionsById.has(connectionId)) {
+        connectionsById.add(connectionId);
+        connections.push({ source: path[i - 1], destination: path[i] });
       }
-    });
+    }
   });
 
-  return Array.from(connectionsById.values());
+  return connections;
 }

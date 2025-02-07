@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { from, defer, concatMap, map, EMPTY } from 'rxjs';
+import type { Logger } from '@kbn/core/server';
 import { existsQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { PassThrough } from 'stream';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { chunk } from 'lodash';
+import type { ServiceMapSpan } from '../../../common/service_map/typings';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -26,68 +26,53 @@ import {
   EVENT_OUTCOME,
 } from '../../../common/es_fields/apm';
 
-export function fetchServicePathsFromTraceIds({
+export async function fetchPathsFromTraceIds({
   apmEventClient,
   traceIds,
   start,
   end,
   terminateAfter,
+  logger,
 }: {
   apmEventClient: APMEventClient;
   traceIds: string[];
   start: number;
   end: number;
   terminateAfter: number;
+  logger: Logger;
 }) {
-  const stream = new PassThrough();
+  logger.debug(`Fetching spans (${traceIds.length} traces)`);
 
-  defer(() =>
-    from(fetchSpanIdsFromTraceIds({ apmEventClient, traceIds, terminateAfter, start, end })).pipe(
-      concatMap((spanSamples) => {
-        if (!spanSamples) {
-          return EMPTY;
-        }
-
-        return from(
-          fetchSpansFromParentIds({ apmEventClient, spanSamples, terminateAfter, start, end })
-        ).pipe(map((spans) => JSON.stringify(Array.from(spans.values()))));
-      })
-    )
-  ).subscribe({
-    next: (event) => {
-      if (!stream.write(event)) {
-        stream.pause();
-        stream.once('drain', () => stream.resume());
-      }
-    },
-    error: (error) => {
-      console.error(error);
-      stream.end();
-    },
-    complete: () => {
-      stream.end();
-    },
+  const exitSpansSample = await fetchExitSpanIdsFromTraceIds({
+    apmEventClient,
+    traceIds,
+    start,
+    end,
+    terminateAfter,
   });
 
-  return stream;
+  const entries = Array.from(exitSpansSample.entries());
+  const chunkedExitSpansSample = chunk(entries, 1_000).map(
+    (chunkedEntries) => new Map(chunkedEntries)
+  );
+  const transactionsFromExitSpans = await Promise.all(
+    chunkedExitSpansSample.map((sample) =>
+      fetchTransactionsFromExitSpans({
+        apmEventClient,
+        exitSpansSample: sample,
+        start,
+        end,
+        terminateAfter,
+      })
+    )
+  );
+
+  return transactionsFromExitSpans.reduce((acc, spans) => {
+    return acc.concat(spans);
+  }, [] as ServiceMapSpan[]);
 }
 
-interface Destination {
-  spanId: string;
-  spanType: string;
-  spanSubtype: string;
-  spanDestinationServiceResource: string;
-  serviceName: string;
-  serviceEnvironment?: string;
-  agentName: AgentName;
-  downstreamService?: {
-    agentName: AgentName;
-    serviceEnvironment?: string;
-    serviceName: string;
-  };
-}
-
-async function fetchSpanIdsFromTraceIds({
+async function fetchExitSpanIdsFromTraceIds({
   apmEventClient,
   traceIds,
   terminateAfter,
@@ -100,7 +85,7 @@ async function fetchSpanIdsFromTraceIds({
   start: number;
   end: number;
 }) {
-  const sampleExitSpans = await apmEventClient.search('get_service_paths_parent_ids', {
+  const sampleExitSpans = await apmEventClient.search('get_service_map_exit_span_samples', {
     apm: {
       events: [ProcessorEvent.span],
     },
@@ -175,7 +160,7 @@ async function fetchSpanIdsFromTraceIds({
     },
   });
 
-  const destinationsBySpanId = new Map<string, Destination>();
+  const destinationsBySpanId = new Map<string, ServiceMapSpan>();
 
   sampleExitSpans.aggregations?.exitSpans.buckets.forEach((bucket) => {
     const eventOutcomeGroup =
@@ -209,14 +194,14 @@ async function fetchSpanIdsFromTraceIds({
   return destinationsBySpanId;
 }
 
-async function fetchSpansFromParentIds({
+async function fetchTransactionsFromExitSpans({
   apmEventClient,
-  spanSamples,
+  exitSpansSample: exitSpansSample,
   start,
   end,
 }: {
   apmEventClient: APMEventClient;
-  spanSamples: Map<string, Destination>;
+  exitSpansSample: Map<string, ServiceMapSpan>;
   terminateAfter: number;
   start: number;
   end: number;
@@ -224,7 +209,7 @@ async function fetchSpansFromParentIds({
   const optionalFields = asMutableArray([SERVICE_ENVIRONMENT] as const);
   const requiredFields = asMutableArray([SERVICE_NAME, AGENT_NAME, PARENT_ID] as const);
 
-  const res = await apmEventClient.search('get_service_paths_parent_ids', {
+  const servicesResponse = await apmEventClient.search('get_transactions_for_exit_spans', {
     apm: {
       events: [ProcessorEvent.transaction],
     },
@@ -232,21 +217,25 @@ async function fetchSpansFromParentIds({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [
-            ...rangeQuery(start, end + 1000 * 1000 * 60 * 5),
-            ...termsQuery(PARENT_ID, ...spanSamples.keys()),
-          ],
+          filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
         },
       },
-      size: spanSamples.size,
+      size: exitSpansSample.size,
       fields: [...requiredFields, ...optionalFields],
     },
   });
 
-  const destinationsBySpanId = new Map(spanSamples);
+  const destinationsBySpanId = new Map(exitSpansSample);
 
-  res.hits.hits.forEach((hit) => {
-    const transaction = unflattenKnownApmEventFields(hit.fields, [...requiredFields]);
+  servicesResponse.hits.hits.forEach((hit) => {
+    let transaction;
+    try {
+      transaction = unflattenKnownApmEventFields(hit.fields, [...requiredFields]);
+    } catch (e) {
+      console.error('Failed to unflatten transaction', e);
+      return;
+    }
+
     const spanId = transaction.parent.id;
 
     const destination = destinationsBySpanId.get(spanId);
@@ -262,5 +251,5 @@ async function fetchSpansFromParentIds({
     }
   });
 
-  return destinationsBySpanId;
+  return Array.from(destinationsBySpanId.values());
 }
