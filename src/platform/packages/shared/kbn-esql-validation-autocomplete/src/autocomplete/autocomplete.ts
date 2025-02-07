@@ -216,9 +216,7 @@ export async function suggest(
     }
 
     suggestions = _suggestions.filter((def) => !isSourceCommand(def));
-  }
-
-  if (
+  } else if (
     astContext.type === 'expression' ||
     (astContext.type === 'option' && astContext.command?.name === 'join')
   ) {
@@ -235,8 +233,7 @@ export async function suggest(
       fullAst,
       resourceRetriever
     );
-  }
-  if (astContext.type === 'setting') {
+  } else if (astContext.type === 'setting') {
     suggestions = await getSettingArgsSuggestions(
       innerText,
       ast,
@@ -245,8 +242,7 @@ export async function suggest(
       getFieldsMap,
       getPolicyMetadata
     );
-  }
-  if (astContext.type === 'option' && astContext.command?.name !== 'join') {
+  } else if (astContext.type === 'option' && astContext.command?.name !== 'join') {
     // need this wrap/unwrap thing to make TS happy
     const { option, ...rest } = astContext;
     if (option && isOptionItem(option)) {
@@ -259,8 +255,7 @@ export async function suggest(
         getPolicyMetadata
       );
     }
-  }
-  if (astContext.type === 'function') {
+  } else if (astContext.type === 'function') {
     suggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
@@ -272,8 +267,7 @@ export async function suggest(
       getVariablesByType,
       supportsControls
     );
-  }
-  if (astContext.type === 'list') {
+  } else if (astContext.type === 'list') {
     suggestions = await getListArgsSuggestions(
       innerText,
       ast,
