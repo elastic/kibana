@@ -9,18 +9,16 @@ import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL } from './translations';
-import type { ContentReferenceNode } from '../content_reference_parser';
+import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface Props {
-  contentReferenceNode: ContentReferenceNode;
-  knowledgeBaseEntryContentReference: KnowledgeBaseEntryContentReference;
+  contentReferenceNode: ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>;
 }
 
 export const KnowledgeBaseEntryReference: React.FC<Props> = ({
-  contentReferenceNode,
-  knowledgeBaseEntryContentReference,
+  contentReferenceNode
 }) => {
   const { navigateToApp } = useKibana().services.application;
 
@@ -28,11 +26,11 @@ export const KnowledgeBaseEntryReference: React.FC<Props> = ({
     (e: React.MouseEvent) => {
       e.preventDefault();
       navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${knowledgeBaseEntryContentReference.knowledgeBaseEntryId}`,
+        path: `kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${contentReferenceNode.contentReference.knowledgeBaseEntryId}`,
         openInNewTab: true,
       });
     },
-    [navigateToApp, knowledgeBaseEntryContentReference]
+    [navigateToApp, contentReferenceNode]
   );
 
   return (
@@ -41,7 +39,7 @@ export const KnowledgeBaseEntryReference: React.FC<Props> = ({
       data-test-subj="KnowledgeBaseEntryReference"
     >
       <EuiLink onClick={onClick}>
-        {`${KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL}: ${knowledgeBaseEntryContentReference.knowledgeBaseEntryName}`}
+        {`${KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL}: ${contentReferenceNode.contentReference.knowledgeBaseEntryName}`}
       </EuiLink>
     </PopoverReference>
   );

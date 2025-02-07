@@ -6,21 +6,48 @@
  */
 
 import type { RemarkTokenizer } from '@elastic/eui';
-import type { ContentReferenceBlock } from '@kbn/elastic-assistant-common';
+import type { ContentReference, ContentReferenceBlock } from '@kbn/elastic-assistant-common';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
+import { StreamingOrFinalContentReferences } from './components/content_reference_component_factory';
 
-export interface ContentReferenceNode extends Node {
+/** A ContentReferenceNode that has been extracted from the message and the content reference details are available. */
+export interface ResolvedContentReferenceNode<T extends ContentReference> extends Node {
   type: 'contentReference';
   contentReferenceId: string;
   contentReferenceCount: number;
   contentReferenceBlock: ContentReferenceBlock;
+  contentReference: T
+}
+
+/** A ContentReferenceNode that has been extracted from the message but the content reference details are not available on the client **yet**. When the message finishes streaming, the details will become available. */
+export interface UnresolvedContentReferenceNode extends Node {
+  type: 'contentReference';
+  contentReferenceId: string;
+  contentReferenceCount: number;
+  contentReferenceBlock: ContentReferenceBlock;
+  contentReference: undefined
+}
+
+/** A ContentReferenceNode that has been extracted from the message but the content reference details are erroneous. */
+export interface InvalidContentReferenceNode extends Node {
+  type: 'contentReference';
+  contentReferenceId: string;
+  contentReferenceCount: undefined;
+  contentReferenceBlock: ContentReferenceBlock;
+  contentReference: undefined
+}
+
+export type ContentReferenceNode = ResolvedContentReferenceNode<ContentReference> | UnresolvedContentReferenceNode | InvalidContentReferenceNode;
+
+type Params = {
+  contentReferences: StreamingOrFinalContentReferences
 }
 
 /** Matches `{reference` and ` {reference(` */
 const REFERENCE_START_PATTERN = '\\u0020?\\{reference';
 
-export const ContentReferenceParser: Plugin = function ContentReferenceParser() {
+export const contentReferenceParser: (params: Params) => Plugin = ({contentReferences}) => function ContentReferenceParser() {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
@@ -88,25 +115,53 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
     now.offset += match.length + 1;
 
     const contentReferenceBlock: ContentReferenceBlock = `{reference(${contentReferenceId})}`;
+    const contentReference = contentReferences?.[contentReferenceId]
 
-    const getContentReferenceCount = (id: string) => {
-      if (!id) {
-        return -1;
+    const getContentReferenceCount = () => {
+      // If the content reference id is already in the contentReferenceCounts, return the existing count
+      if (contentReferenceId in contentReferenceCounts) {
+        return contentReferenceCounts[contentReferenceId];
       }
-      if (id in contentReferenceCounts) {
-        return contentReferenceCounts[id];
-      }
-      contentReferenceCounts[id] = currentContentReferenceCount++;
-      return contentReferenceCounts[id];
+      // If the content reference id is not in the contentReferenceCounts, increment the currentContentReferenceCount and return the new count
+      contentReferenceCounts[contentReferenceId] = currentContentReferenceCount++;
+      return contentReferenceCounts[contentReferenceId];
     };
 
     const toEat = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
 
-    const contentReferenceNode: ContentReferenceNode = {
+    if(contentReferences === null) {
+      // The message is still streaming, so the content reference details are not available yet
+      const contentReferenceNode: UnresolvedContentReferenceNode = {
+        type: 'contentReference',
+        contentReferenceId,
+        contentReferenceCount: getContentReferenceCount(),
+        contentReferenceBlock,
+        contentReference: undefined
+      };
+
+      return eat(toEat)(contentReferenceNode);
+    }
+
+    if(contentReference === undefined) {
+      // The message has finished streaming, but the content reference details were not found
+      const contentReferenceNode: InvalidContentReferenceNode = {
+        type: 'contentReference',
+        contentReferenceId,
+        contentReferenceCount: undefined,
+        contentReferenceBlock,
+        contentReference
+      };
+
+      return eat(toEat)(contentReferenceNode);
+    }
+
+    // The message has finished streaming and the content reference details were found
+    const contentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
       type: 'contentReference',
       contentReferenceId,
-      contentReferenceCount: getContentReferenceCount(contentReferenceId),
+      contentReferenceCount: getContentReferenceCount(),
       contentReferenceBlock,
+      contentReference
     };
 
     return eat(toEat)(contentReferenceNode);

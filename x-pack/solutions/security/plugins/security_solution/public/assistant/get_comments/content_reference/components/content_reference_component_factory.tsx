@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ContentReferences } from '@kbn/elastic-assistant-common';
+import type { ContentReferences, EsqlContentReference, KnowledgeBaseEntryContentReference, ProductDocumentationContentReference, SecurityAlertContentReference, SecurityAlertsPageContentReference } from '@kbn/elastic-assistant-common';
 import React from 'react';
-import type { ContentReferenceNode } from '../content_reference_parser';
+import type { ContentReferenceNode, ResolvedContentReferenceNode } from '../content_reference_parser';
 import { KnowledgeBaseEntryReference } from './knowledge_base_entry_reference';
 import { SecurityAlertReference } from './security_alert_reference';
 import { SecurityAlertsPageReference } from './security_alerts_page_reference';
@@ -18,77 +18,62 @@ import { EsqlQueryReference } from './esql_query_reference';
 /** While a message is being streamed, content references are null. When a message has finished streaming, content references are either defined or undefined */
 export type StreamingOrFinalContentReferences = ContentReferences | undefined | null;
 
-export interface ContentReferenceComponentFactory {
-  contentReferences: StreamingOrFinalContentReferences;
+export interface Props {
   contentReferencesVisible: boolean;
+  contentReferenceNode: ContentReferenceNode;
 }
 
-export const contentReferenceComponentFactory = ({
-  contentReferences,
+export const ContentReferenceComponentFactory: React.FC<Props> = ({
   contentReferencesVisible,
-}: ContentReferenceComponentFactory) => {
-  const ContentReferenceComponent = (
-    contentReferenceNode: ContentReferenceNode
-  ): React.ReactNode => {
-    if (!contentReferencesVisible) return null;
-    if (!contentReferenceNode.contentReferenceId) return null;
+  contentReferenceNode
+}: Props) => {
+  if (!contentReferencesVisible) return null;
 
-    const defaultNode = (
+  if (contentReferenceNode.contentReferenceCount === undefined) return null;
+
+  if (contentReferenceNode.contentReference === undefined) {
+    return (
       <ContentReferenceButton
         disabled
         contentReferenceCount={contentReferenceNode.contentReferenceCount}
       />
     );
+    }
 
-    if (contentReferences === null) return defaultNode;
-    if (contentReferences === undefined) return null;
-
-    const contentReference = contentReferences[contentReferenceNode.contentReferenceId];
-
-    if (!contentReference) return null;
-
-    switch (contentReference.type) {
-      case 'KnowledgeBaseEntry':
+  switch (contentReferenceNode.contentReference.type) {
+    case 'KnowledgeBaseEntry': {
         return (
           <KnowledgeBaseEntryReference
-            contentReferenceNode={contentReferenceNode}
-            knowledgeBaseEntryContentReference={contentReference}
+            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>}
           />
         );
+      }
       case 'SecurityAlert':
         return (
           <SecurityAlertReference
-            contentReferenceNode={contentReferenceNode}
-            securityAlertContentReference={contentReference}
+            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<SecurityAlertContentReference>}
           />
         );
       case 'SecurityAlertsPage':
         return (
           <SecurityAlertsPageReference
-            contentReferenceNode={contentReferenceNode}
-            securityAlertsPageContentReference={contentReference}
+            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<SecurityAlertsPageContentReference>}
           />
         );
       case 'ProductDocumentation':
         return (
           <ProductDocumentationReference
-            contentReferenceNode={contentReferenceNode}
-            productDocumentationContentReference={contentReference}
+            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<ProductDocumentationContentReference>}
           />
         );
-      case 'EsqlQuery':
+      case 'EsqlQuery': {
         return (
           <EsqlQueryReference
-            contentReferenceNode={contentReferenceNode}
-            esqlContentReference={contentReference}
+            contentReferenceNode={contentReferenceNode as ResolvedContentReferenceNode<EsqlContentReference>}
           />
         );
+      }
       default:
-        return defaultNode;
+        return null;
     }
   };
-
-  ContentReferenceComponent.displayName = 'ContentReferenceComponent';
-
-  return ContentReferenceComponent;
-};
