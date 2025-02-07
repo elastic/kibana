@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should fetch an index settings', async () => {
-      this.onlyEsVersion('>=9')
+      this.onlyEsVersion('>=9');
 
       const index = await svlIndicesHelpers.createIndex();
 
