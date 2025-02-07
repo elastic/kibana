@@ -28,6 +28,7 @@ import {
   TargetType,
 } from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointMetadataService } from '../metadata';
+import type { FileEventDoc } from './helpers';
 import {
   buildEsQueryParams,
   checkIfRemediationExists,
@@ -35,6 +36,7 @@ import {
   createPipeline,
   generateInsightId,
   generateTrustedAppsFilter,
+  getValidCodeSignature,
   groupEndpointIdsByOS,
 } from './helpers';
 import {
@@ -265,7 +267,6 @@ describe('helpers', () => {
       expect(result).toBe(expectedHash);
     });
   });
-
   describe('generateTrustedAppsFilter', () => {
     it('should generate a filter for process.executable.caseless entries', () => {
       const insight = getDefaultInsight({
@@ -285,9 +286,10 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
-      const filter = generateTrustedAppsFilter(insight);
-
-      expect(filter).toBe('exception-list-agnostic.attributes.entries.value:"example-value"');
+      const filter = generateTrustedAppsFilter(insight, 'test-id');
+      expect(filter).toBe(
+        '(exception-list-agnostic.attributes.tags:"policy:test-id" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.value:"example-value"'
+      );
     });
 
     it('should generate a filter for process.code_signature entries', () => {
@@ -308,10 +310,9 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
-      const filter = generateTrustedAppsFilter(insight);
-
-      expect(filter).toContain(
-        'exception-list-agnostic.attributes.entries.entries.value:(*Example,*Inc.*)'
+      const filter = generateTrustedAppsFilter(insight, 'test-id');
+      expect(filter).toBe(
+        '(exception-list-agnostic.attributes.tags:"policy:test-id" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.entries.value:(*Example,*Inc.*)'
       );
     });
 
@@ -339,14 +340,13 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
-      const filter = generateTrustedAppsFilter(insight);
-
-      expect(filter).toContain(
-        'exception-list-agnostic.attributes.entries.entries.value:(*Example,*\\(Inc.\\)*http\\://example.com*[example]*) AND exception-list-agnostic.attributes.entries.value:"example-value"'
+      const filter = generateTrustedAppsFilter(insight, 'test-id');
+      expect(filter).toBe(
+        '(exception-list-agnostic.attributes.tags:"policy:test-id" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.entries.value:(*Example,*\\(Inc.\\)*http\\://example.com*[example]*) AND exception-list-agnostic.attributes.entries.value:"example-value"'
       );
     });
 
-    it('should return empty string if no valid entries are present', () => {
+    it('should return undefined if no valid entries are present', () => {
       const insight = getDefaultInsight({
         remediation: {
           exception_list_items: [
@@ -364,28 +364,45 @@ describe('helpers', () => {
         },
       } as Partial<SecurityWorkflowInsight>);
 
-      const filter = generateTrustedAppsFilter(insight);
-
-      expect(filter).toBe('');
+      const filter = generateTrustedAppsFilter(insight, 'test-id');
+      expect(filter).toBe(undefined);
     });
   });
+
   describe('checkIfRemediationExists', () => {
     it('should return false for non-incompatible_antivirus types', async () => {
       const insight = getDefaultInsight({
         type: 'other-type' as DefendInsightType,
       });
 
+      // For non-incompatible_antivirus types, getHostMetadata should not be called.
+      const endpointMetadataClientMock = {
+        getHostMetadata: jest.fn(),
+      };
+      const exceptionListsClientMock = {
+        findExceptionListItem: jest.fn(),
+      };
+
       const result = await checkIfRemediationExists({
         insight,
-        exceptionListsClient: jest.fn() as unknown as ExceptionListClient,
+        exceptionListsClient: exceptionListsClientMock as unknown as ExceptionListClient,
+        endpointMetadataClient: endpointMetadataClientMock as unknown as EndpointMetadataService,
       });
 
       expect(result).toBe(false);
+      expect(endpointMetadataClientMock.getHostMetadata).not.toHaveBeenCalled();
     });
 
-    it('should call exceptionListsClient with the correct filter', async () => {
+    it('should call exceptionListsClient with the correct filter when valid entries exist', async () => {
       const findExceptionListItemMock = jest.fn().mockResolvedValue({ total: 1 });
+      const endpointMetadataClientMock = {
+        getHostMetadata: jest
+          .fn()
+          .mockResolvedValue({ Endpoint: { policy: { applied: { id: 'abc123' } } } }),
+      };
+
       const insight = getDefaultInsight({
+        type: DefendInsightType.Enum.incompatible_antivirus,
         remediation: {
           exception_list_items: [
             {
@@ -400,6 +417,7 @@ describe('helpers', () => {
             },
           ],
         },
+        target: { ids: ['host-id'] },
       } as Partial<SecurityWorkflowInsight>);
 
       const result = await checkIfRemediationExists({
@@ -407,18 +425,216 @@ describe('helpers', () => {
         exceptionListsClient: {
           findExceptionListItem: findExceptionListItemMock,
         } as unknown as ExceptionListClient,
+        endpointMetadataClient: endpointMetadataClientMock as unknown as EndpointMetadataService,
       });
 
+      // Ensure the metadata was fetched using the host id
+      expect(endpointMetadataClientMock.getHostMetadata).toHaveBeenCalledWith('host-id');
+
+      // Expected filter now includes the policy clause since valid entries exist.
       expect(findExceptionListItemMock).toHaveBeenCalledWith({
         listId: 'endpoint_trusted_apps',
         page: 1,
         perPage: 1,
         namespaceType: 'agnostic',
-        filter: expect.any(String),
+        filter:
+          '(exception-list-agnostic.attributes.tags:"policy:abc123" OR exception-list-agnostic.attributes.tags:"policy:all") AND exception-list-agnostic.attributes.entries.value:"example-value"',
         sortField: 'created_at',
         sortOrder: 'desc',
       });
       expect(result).toBe(true);
+    });
+
+    it('should return false if no valid entries exist even when a policy id is provided', async () => {
+      const endpointMetadataClientMock = {
+        getHostMetadata: jest
+          .fn()
+          .mockResolvedValue({ Endpoint: { policy: { applied: { id: 'abc123' } } } }),
+      };
+      const exceptionListsClientMock = {
+        findExceptionListItem: jest.fn(),
+      };
+
+      // Here the entry field is not valid, so generateTrustedAppsFilter returns an empty string.
+      const insight = getDefaultInsight({
+        type: DefendInsightType.Enum.incompatible_antivirus,
+        remediation: {
+          exception_list_items: [
+            {
+              entries: [
+                {
+                  field: 'unknown-field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'example-value',
+                },
+              ],
+            },
+          ],
+        },
+        target: { ids: ['host-id'] },
+      } as Partial<SecurityWorkflowInsight>);
+
+      const result = await checkIfRemediationExists({
+        insight,
+        exceptionListsClient: exceptionListsClientMock as unknown as ExceptionListClient,
+        endpointMetadataClient: endpointMetadataClientMock as unknown as EndpointMetadataService,
+      });
+
+      // No valid remediation filter was created, so the exception list client should not be called.
+      expect(result).toBe(false);
+      expect(exceptionListsClientMock.findExceptionListItem).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getValidCodeSignature', () => {
+    it('should return the first trusted signature for Windows', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [{ subject_name: 'Valid Cert', trusted: true }],
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({
+        field: 'process.Ext.code_signature',
+        value: 'Valid Cert',
+      });
+    });
+
+    it('should return null if no trusted signatures', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [{ subject_name: 'Valid Cert', trusted: false }],
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should return null if all Windows code signatures are untrusted', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'Cert 1', trusted: false },
+              { subject_name: 'Cert 2', trusted: false },
+            ],
+          },
+        },
+      };
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should correctly process a single object code signature for Windows', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: { subject_name: 'Valid Cert', trusted: true },
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({
+        field: 'process.Ext.code_signature',
+        value: 'Valid Cert',
+      });
+    });
+
+    it('should return the first trusted signature for Windows, skipping Microsoft Windows Hardware Compatibility Publisher', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'Microsoft Windows Hardware Compatibility Publisher', trusted: true },
+              { subject_name: 'Valid Cert', trusted: false },
+              { subject_name: 'Valid Cert2', trusted: true },
+            ],
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({
+        field: 'process.Ext.code_signature',
+        value: 'Valid Cert2',
+      });
+    });
+
+    it('should return Windows publisher if this is the only signer', () => {
+      const os = 'windows';
+      const codeSignatureSearchHit = {
+        process: {
+          Ext: {
+            code_signature: [
+              { subject_name: 'Microsoft Windows Hardware Compatibility Publisher', trusted: true },
+            ],
+          },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({
+        field: 'process.Ext.code_signature',
+        value: 'Microsoft Windows Hardware Compatibility Publisher',
+      });
+    });
+
+    it('should return the subject name for macOS when code signature is present', () => {
+      const os = 'macos';
+      const codeSignatureSearchHit = {
+        process: {
+          code_signature: { subject_name: 'Apple Inc.', trusted: true },
+        },
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toEqual({ field: 'process.code_signature', value: 'Apple Inc.' });
+    });
+
+    it('should return null if no code signature is present for macOS', () => {
+      const os = 'macos';
+      const codeSignatureSearchHit = {
+        process: {},
+      };
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should return null if code_signature field is empty for macOS', () => {
+      const os = 'macos';
+      const codeSignatureSearchHit = {
+        process: {
+          code_signature: {},
+        },
+      } as FileEventDoc;
+
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
+    });
+
+    it('should return null for non-Windows when code signature is untrusted', () => {
+      const os = 'macos';
+      const codeSignatureSearchHit = {
+        process: {
+          code_signature: { subject_name: 'Apple Inc.', trusted: false },
+        },
+      };
+      const result = getValidCodeSignature(os, codeSignatureSearchHit);
+      expect(result).toBeNull();
     });
   });
 });
