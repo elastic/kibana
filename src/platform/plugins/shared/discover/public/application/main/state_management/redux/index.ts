@@ -14,6 +14,7 @@ export {
   type InternalStateStore,
   type InternalStateDispatch,
   type InternalStateThunk,
+  InternalStateProvider2,
   createInternalStateStore,
   internalStateActions,
   useInternalStateDispatch,

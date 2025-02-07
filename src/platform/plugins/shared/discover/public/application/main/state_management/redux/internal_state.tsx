@@ -20,8 +20,14 @@ import {
   type ThunkDispatch,
 } from '@reduxjs/toolkit';
 import { differenceBy, omit } from 'lodash';
-import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import { useMemo } from 'react';
+import {
+  type TypedUseSelectorHook,
+  type ReactReduxContextValue,
+  Provider as ReduxProvider,
+  createDispatchHook,
+  createSelectorHook,
+} from 'react-redux';
+import React, { type PropsWithChildren, useMemo, createContext } from 'react';
 import type { DiscoverServices } from '../../../../build_services';
 import { useAdHocDataViews, type RuntimeStateManager } from './runtime_state';
 
@@ -261,8 +267,26 @@ export const internalStateActions = {
   replaceAdHocDataViewWithId,
 };
 
-export const useInternalStateDispatch: () => InternalStateDispatch = useDispatch;
-export const useInternalStateSelector2: TypedUseSelectorHook<DiscoverInternalState> = useSelector;
+const internalStateContext = createContext<ReactReduxContextValue>(
+  // Recommended approach for versions of Redux prior to v9:
+  // https://github.com/reduxjs/react-redux/issues/1565#issuecomment-867143221
+  null as unknown as ReactReduxContextValue
+);
+
+export const InternalStateProvider2 = ({
+  store,
+  children,
+}: PropsWithChildren<{ store: InternalStateStore }>) => (
+  <ReduxProvider store={store} context={internalStateContext}>
+    {children}
+  </ReduxProvider>
+);
+
+export const useInternalStateDispatch: () => InternalStateDispatch =
+  createDispatchHook(internalStateContext);
+
+export const useInternalStateSelector2: TypedUseSelectorHook<DiscoverInternalState> =
+  createSelectorHook(internalStateContext);
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();
