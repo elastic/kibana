@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
@@ -48,7 +49,6 @@ import { useFetchInvestigationsByAlert } from '../hooks/use_fetch_investigations
 import { useAddInvestigationItem } from '../hooks/use_add_investigation_item';
 import { AlertParams } from '../../../components/custom_threshold/types';
 import { generateInvestigationItem } from '../../../utils/investigation_item_helper';
-import { useInvestigateFeatureFlag } from '../hooks/use_investigate_feature_flag';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -68,12 +68,15 @@ export function HeaderActions({
       hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+    featureFlags,
     http,
     application: { navigateToApp },
     investigate: investigatePlugin,
   } = useKibana().services;
 
-  const isInvestigateEnabled = useInvestigateFeatureFlag();
+  const isInvestigateEnabled = useObservable(
+    featureFlags.getBooleanValue$('observability.investigateEnabled', false)
+  );
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
