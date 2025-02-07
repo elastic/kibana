@@ -65,10 +65,7 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
     await expect(customLogs.continueButton).not.toBeDisabled();
   });
 
-  test('should validate Integration Name and DataSet Name field', async ({
-    pageObjects: { customLogs },
-    page,
-  }) => {
+  test('should validate Integration Name field', async ({ pageObjects: { customLogs }, page }) => {
     await customLogs.getLogFilePathInputField(0).fill('myLogs.log');
 
     await customLogs.integrationNameInput.fill('');

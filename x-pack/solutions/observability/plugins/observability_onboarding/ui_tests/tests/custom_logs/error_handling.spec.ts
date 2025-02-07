@@ -22,7 +22,6 @@ test.describe(
     test('should be displayed when user has no previleges', async ({
       browserAuth,
       pageObjects: { customLogs },
-      page,
     }) => {
       await browserAuth.loginAsPrivilegedUser();
       await customLogs.goto();

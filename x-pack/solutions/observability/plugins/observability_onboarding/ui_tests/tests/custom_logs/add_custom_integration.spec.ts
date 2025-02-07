@@ -57,7 +57,6 @@ test.describe(
 
     test('should update instructions when automatic Agent config toggled', async ({
       pageObjects: { customLogs },
-      page,
     }) => {
       await customLogs.getLogFilePathInputField(0).fill('mylogs.log');
       await customLogs.continueButton.click();
