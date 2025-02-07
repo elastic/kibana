@@ -145,7 +145,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <>
       <>
         {!hasK8sIntegrationMultiPage && (
-          <EuiFilterGroup aria-label="Platform options">
+          <EuiFilterGroup
+            aria-label={i18n.translate('xpack.fleet.agentEnrollment.visiblePlatformSelectorLabel', {
+              defaultMessage: 'Platform options',
+            })}
+          >
             {VISIBLE_PALFORM_OPTIONS.map((option) => (
               <EuiFilterButton
                 hasActiveFilters={platform === option.id}
@@ -162,6 +166,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
                   isSelected={showExtendedPlatforms}
                   hasActiveFilters={extendedPlatforms.includes(platform)}
+                  numActiveFilters={extendedPlatforms.includes(platform) ? 1 : 0}
+                  css={css`
+                    .euiFilterButton__text {
+                      min-inline-size: 0;
+                    }
+                  `}
                 >
                   &hellip;
                 </EuiFilterButton>
@@ -171,9 +181,14 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               panelPaddingSize="none"
             >
               <EuiSelectable
-                aria-label="Additional platform options"
+                aria-label={i18n.translate(
+                  'xpack.fleet.agentEnrollment.extendedPlatformSelectorLabel',
+                  {
+                    defaultMessage: 'Additional platform options',
+                  }
+                )}
                 singleSelection={true}
-                options={EXTENDED_PLATFORM_OPTIONS.map((option) => ({
+                options={extendedPlatformOptions.map((option) => ({
                   key: option.id,
                   label: option.label,
                   checked: platform === option.id ? 'on' : undefined,

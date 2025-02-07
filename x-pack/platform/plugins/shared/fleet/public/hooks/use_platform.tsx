@@ -42,18 +42,18 @@ export const VISIBLE_PALFORM_OPTIONS: PLATFORM_OPTION[] = [
     'data-test-subj': 'platformTypeMac',
   },
   {
-    id: 'rpm_aarch64',
-    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.rpm', {
-      defaultMessage: 'RPM aarch64',
-    }),
-    'data-test-subj': 'platformTypeLinuxRpm',
-  },
-  {
     id: 'deb_aarch64',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.deb', {
       defaultMessage: 'DEB aarch64',
     }),
     'data-test-subj': 'platformTypeLinuxDeb',
+  },
+  {
+    id: 'rpm_aarch64',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.rpm', {
+      defaultMessage: 'RPM aarch64',
+    }),
+    'data-test-subj': 'platformTypeLinuxRpm',
   },
 ];
 
@@ -77,15 +77,15 @@ export const EXTENDED_PLATFORM_OPTIONS: PLATFORM_OPTION[] = [
     }),
   },
   {
-    id: 'rpm_x86_64',
-    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.rpm', {
-      defaultMessage: 'RPM x86_64',
-    }),
-  },
-  {
     id: 'deb_x86_64',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.deb', {
       defaultMessage: 'DEB x86_64',
+    }),
+  },
+  {
+    id: 'rpm_x86_64',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.rpm', {
+      defaultMessage: 'RPM x86_64',
     }),
   },
 ];
