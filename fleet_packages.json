@@ -57,5 +57,9 @@
   {
     "name": "security_detection_engine",
     "version": "8.17.7"
+  },
+  {
+    "name": "security_ai_prompts",
+    "version": "1.0.0"
   }
 ]

@@ -382,6 +382,10 @@ export default function (providerContext: FtrProviderContext) {
               type: 'osquery-saved-query',
             },
             {
+              id: 'sample_security_ai_prompt',
+              type: 'security-ai-prompt',
+            },
+            {
               id: 'sample_tag',
               type: 'tag',
             },

@@ -9,6 +9,7 @@ import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../ty
 import {
   ENDPOINT_PACKAGE_NAME,
   PREBUILT_RULES_PACKAGE_NAME,
+  SECURITY_AI_PROMPTS_PACKAGE_NAME,
 } from '../../../../../../common/detection_engine/constants';
 import type { ConfigType } from '../../../../../config';
 
@@ -42,6 +43,29 @@ export async function installEndpointPackage(
 
   return context.getInternalFleetServices().packages.ensureInstalledPackage({
     pkgName: ENDPOINT_PACKAGE_NAME,
+    pkgVersion,
+  });
+}
+
+export async function installSecurityAiPromptsPackage(
+  config: ConfigType,
+  context: SecuritySolutionApiRequestHandlerContext
+) {
+  // console.log('--> calling findLatestPackageVersion for security_ai_prompts');
+
+  try {
+    // console.log('--> inner try block');
+    await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
+  } catch (e) {
+    // console.log('--> caught error in inner catch block', e);
+  }
+
+  const pkgVersion = await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
+
+  // console.log('--> calling ensureInstalledPackage for security_ai_prompts');
+
+  return context.getInternalFleetServices().packages.ensureInstalledPackage({
+    pkgName: SECURITY_AI_PROMPTS_PACKAGE_NAME,
     pkgVersion,
   });
 }

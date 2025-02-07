@@ -134,6 +134,7 @@ describe('tagKibanaAssets', () => {
       { id: 'v1', type: 'visualization' },
       { id: 'osquery-pack-asset1', type: 'osquery-pack-asset' },
       { id: 'osquery_saved_query1', type: 'osquery-saved-query' },
+      { id: 'security-ai-prompt1', type: 'security-ai-prompt' },
     ] as any;
 
     await tagKibanaAssets({
@@ -153,6 +154,7 @@ describe('tagKibanaAssets', () => {
         { id: 'v1', type: 'visualization' },
         { id: 'osquery-pack-asset1', type: 'osquery-pack-asset' },
         { id: 'osquery_saved_query1', type: 'osquery-saved-query' },
+        { id: 'security-ai-prompt1', type: 'security-ai-prompt' },
       ],
       unassign: [],
       refresh: false,

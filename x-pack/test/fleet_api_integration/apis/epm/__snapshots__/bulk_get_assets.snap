@@ -187,6 +187,12 @@ Array [
   },
   Object {
     "appLink": "",
+    "attributes": Object {},
+    "id": "sample_security_ai_prompt",
+    "type": "security-ai-prompt",
+  },
+  Object {
+    "appLink": "",
     "attributes": Object {
       "description": "",
     },

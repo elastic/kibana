@@ -13,6 +13,7 @@ import { buildSiemResponse } from '../../../routes/utils';
 import {
   installEndpointPackage,
   installPrebuiltRulesPackage,
+  installSecurityAiPromptsPackage,
 } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 
 export const bootstrapPrebuiltRulesHandler = async (
@@ -23,12 +24,18 @@ export const bootstrapPrebuiltRulesHandler = async (
   const siemResponse = buildSiemResponse(response);
 
   try {
+    // console.log('--> inside bootstrapPrebuiltRulesHandler');
     const ctx = await context.resolve(['securitySolution']);
     const securityContext = ctx.securitySolution;
     const config = securityContext.getConfig();
 
+    // console.log('--> calling installPrebuiltRulesPackage');
     const prebuiltRulesResult = await installPrebuiltRulesPackage(config, securityContext);
+    // console.log('--> calling installEndpointPackage');
     const endpointResult = await installEndpointPackage(config, securityContext);
+    // console.log('--> calling installSecurityAiPromptsPackage');
+    const securityAiPromptsResult = await installSecurityAiPromptsPackage(config, securityContext);
+    // console.log('--> securityAiPromptsResult:', securityAiPromptsResult);
 
     const responseBody: BootstrapPrebuiltRulesResponse = {
       packages: [
@@ -41,6 +48,11 @@ export const bootstrapPrebuiltRulesHandler = async (
           name: endpointResult.package.name,
           version: endpointResult.package.version,
           status: endpointResult.status,
+        },
+        {
+          name: securityAiPromptsResult.package.name,
+          version: securityAiPromptsResult.package.version,
+          status: securityAiPromptsResult.status,
         },
       ],
     };
