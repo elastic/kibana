@@ -15,16 +15,16 @@ echo '--- Lint: eslint'
 # after possibly commiting fixed files to the repo
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  moon run :lint --affected --remote -- --fix
+  moon ci :lint -- --fix
 else
-  moon run :lint
+  moon ci :lint
 fi
 
 eslint_exit=$?
 # re-enable "Exit immediately" mode
 set -e;
 
-desc="moon run :lint"
+desc="moon ci :lint"
 if is_pr && ! is_auto_commit_disabled; then
   desc="$desc -- --fix"
 fi

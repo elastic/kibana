@@ -7,4 +7,4 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Lint: eslint (with types)'
-moon run :lint_with_types
+moon ci :lint_with_types
