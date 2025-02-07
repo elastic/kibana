@@ -54,7 +54,6 @@ import {
   VisualizeOutputState,
   VisualizeRuntimeState,
   VisualizeSerializedState,
-  isVisualizeSavedObjectState,
 } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 
@@ -67,34 +66,25 @@ export const getVisualizeEmbeddableFactory: (deps: {
 }) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   deserializeState,
-  buildEmbeddable: async (initialState: unknown, buildApi, uuid, parentApi) => {
-    // Handle state transfer from legacy visualize editor, which uses the legacy visualize embeddable and doesn't
-    // produce a snapshot state. If buildEmbeddable is passed only a savedObjectId in the state, this means deserializeState
-    // was never run, and it needs to be invoked manually
-    const state = isVisualizeSavedObjectState(initialState)
-      ? await deserializeState({
-          rawState: initialState,
-        })
-      : (initialState as VisualizeRuntimeState);
-
+  buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
     // Initialize dynamic actions
     const dynamicActionsApi = embeddableEnhancedStart?.initializeReactEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      state
+      initialState
     );
     // if it is provided, start the dynamic actions manager
     const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
 
-    const titleManager = initializeTitleManager(state);
+    const titleManager = initializeTitleManager(initialState);
 
     // Count renders; mostly used for testing.
     const renderCount$ = new BehaviorSubject<number>(0);
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
     // Track vis data and initialize it into a vis instance
-    const serializedVis$ = new BehaviorSubject<SerializedVis>(state.serializedVis);
-    const initialVisInstance = await createVisInstance(state.serializedVis);
+    const serializedVis$ = new BehaviorSubject<SerializedVis>(initialState.serializedVis);
+    const initialVisInstance = await createVisInstance(initialState.serializedVis);
     const vis$ = new BehaviorSubject<Vis>(initialVisInstance);
 
     // Track UI state
@@ -121,12 +111,12 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     // Track visualizations linked to a saved object in the library
     const savedObjectId$ = new BehaviorSubject<string | undefined>(
-      state.savedObjectId ?? state.serializedVis.id
+      initialState.savedObjectId ?? initialState.serializedVis.id
     );
     const savedObjectProperties$ = new BehaviorSubject<ExtraSavedObjectProperties | undefined>(
       undefined
     );
-    const linkedToLibrary$ = new BehaviorSubject<boolean | undefined>(state.linkedToLibrary);
+    const linkedToLibrary$ = new BehaviorSubject<boolean | undefined>(initialState.linkedToLibrary);
 
     // Track the vis expression
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
@@ -143,7 +133,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       api: customTimeRangeApi,
       serialize: serializeCustomTimeRange,
       comparators: customTimeRangeComparators,
-    } = initializeTimeRange(state);
+    } = initializeTimeRange(initialState);
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
 
@@ -269,8 +259,8 @@ export const getVisualizeEmbeddableFactory: (deps: {
             references,
           });
         },
-        canLinkToLibrary: () => Promise.resolve(!state.linkedToLibrary),
-        canUnlinkFromLibrary: () => Promise.resolve(!!state.linkedToLibrary),
+        canLinkToLibrary: () => Promise.resolve(!initialState.linkedToLibrary),
+        canUnlinkFromLibrary: () => Promise.resolve(!!initialState.linkedToLibrary),
         checkForDuplicateTitle: () => Promise.resolve(), // Handled by saveToLibrary action
         getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
         getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
