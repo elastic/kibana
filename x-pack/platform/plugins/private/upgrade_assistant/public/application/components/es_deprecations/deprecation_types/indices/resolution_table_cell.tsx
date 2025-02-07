@@ -64,20 +64,44 @@ const i18nTexts = {
       defaultMessage: 'Reindex paused',
     }
   ),
-  resolutionText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.resolutionLabel', {
+  reindexText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.reindexLabel', {
     defaultMessage: 'Reindex',
   }),
-  resolutionTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.resolutionTooltipLabel',
+  reindexTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.reindex.reindexTooltipLabel',
+    {
+      defaultMessage: 'Resolve this issue by reindexing into a new, compatible index.',
+    }
+  ),
+  updateText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.updateLabel', {
+    defaultMessage: 'Update',
+  }),
+  updateCompleteText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.reindex.updateCompleteText',
+    {
+      defaultMessage: 'Update complete',
+    }
+  ),
+  updateTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.reindex.updateTooltipLabel',
     {
       defaultMessage:
-        'Resolve this issue by reindexing this index. This issue can be resolved automatically.',
+        'Resolve this issue by updating this index. This issue can be resolved automatically either by making the index read-only (recommended for large indices) or by reindexing into a new, compatible index.',
+    }
+  ),
+  unfreezeText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.unfreezeLabel', {
+    defaultMessage: 'Unfreeze',
+  }),
+  unfreezeTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.reindex.unfreezeTooltipLabel',
+    {
+      defaultMessage: 'Resolve this issue by unfreezing this index.',
     }
   ),
 };
 
 export const ReindexResolutionCell: React.FunctionComponent = () => {
-  const { reindexState } = useIndexContext();
+  const { reindexState, deprecation, updateIndexState } = useIndexContext();
   const hasExistingAliases = reindexState.meta.aliases.length > 0;
 
   if (reindexState.loadingState === LoadingState.Loading) {
@@ -158,14 +182,51 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       );
   }
 
-  return (
-    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
+  switch (updateIndexState.status) {
+    case 'complete':
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="check" color="success" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{i18nTexts.updateCompleteText}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+  }
+
+  // reindex status "not started"
+  return deprecation.correctiveAction?.type === 'unfreeze' ? (
+    <EuiToolTip position="top" content={i18nTexts.unfreezeTooltipLabel}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon type="indexSettings" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
+          <EuiText size="s">{i18nTexts.unfreezeText}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  ) : reindexState.meta.isReadonly ? (
+    <EuiToolTip position="top" content={i18nTexts.reindexTooltipLabel}>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="indexSettings" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{i18nTexts.reindexText}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  ) : (
+    <EuiToolTip position="top" content={i18nTexts.updateTooltipLabel}>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="indexSettings" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{i18nTexts.updateText}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>

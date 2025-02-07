@@ -8,12 +8,17 @@
 import React, { createContext, useContext } from 'react';
 
 import { ApiService } from '../../../../lib/api';
-import { useReindexStatus, ReindexState } from './use_reindex_state';
+import { useReindex, ReindexState } from './use_reindex';
+import { UpdateIndexState, useUpdateIndex } from './use_readonly';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
 export interface IndexStateContext {
+  deprecation: EnrichedDeprecationInfo;
   reindexState: ReindexState;
   startReindex: () => Promise<void>;
   cancelReindex: () => Promise<void>;
+  updateIndexState: UpdateIndexState;
+  updateIndex: () => Promise<void>;
 }
 
 const IndexContext = createContext<IndexStateContext | undefined>(undefined);
@@ -29,25 +34,31 @@ export const useIndexContext = () => {
 interface Props {
   api: ApiService;
   children: React.ReactNode;
-  indexName: string;
+  deprecation: EnrichedDeprecationInfo;
 }
 
 export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   api,
-  indexName,
+  deprecation,
   children,
 }) => {
-  const { reindexState, startReindex, cancelReindex } = useReindexStatus({
+  const indexName = deprecation.index!;
+  const { reindexState, startReindex, cancelReindex } = useReindex({
     indexName,
     api,
   });
 
+  const { updateIndexState, updateIndex } = useUpdateIndex({ indexName, api });
+
   return (
     <IndexContext.Provider
       value={{
+        deprecation,
         reindexState,
         startReindex,
         cancelReindex,
+        updateIndexState,
+        updateIndex,
       }}
     >
       {children}

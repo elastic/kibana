@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ChecklistFlyout renders 1`] = `
+exports[`ReindexStep renders 1`] = `
 <Fragment>
   <EuiFlyoutBody>
     <EuiText>
@@ -88,7 +88,7 @@ exports[`ChecklistFlyout renders 1`] = `
 </Fragment>
 `;
 
-exports[`ChecklistFlyout renders for frozen indices 1`] = `
+exports[`ReindexStep renders for frozen indices 1`] = `
 <Fragment>
   <EuiFlyoutBody>
     <EuiText>
@@ -118,7 +118,7 @@ exports[`ChecklistFlyout renders for frozen indices 1`] = `
         }
       >
         <MemoizedFormattedMessage
-          defaultMessage="Frozen indices will no longer be supported after upgrade, so this index will be deleted as part the reindex operation. {docsLink}"
+          defaultMessage="Frozen indices will no longer be supported after the upgrade. As a result, this index will be transformed into a new, non-frozen index during the reindex operation. {docsLink}"
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
           values={
             Object {

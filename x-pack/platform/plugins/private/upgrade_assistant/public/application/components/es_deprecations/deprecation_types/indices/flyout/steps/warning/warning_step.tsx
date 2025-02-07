@@ -1,0 +1,198 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import {
+  IndexWarning,
+  IndexWarningType,
+  ReindexStatusResponse,
+} from '../../../../../../../../../common/types';
+import { useAppContext } from '../../../../../../../app_context';
+import {
+  DeprecatedSettingWarningCheckbox,
+  ReplaceIndexWithAliasWarningCheckbox,
+  MakeIndexReadonlyWarningCheckbox,
+  WarningCheckboxProps,
+} from './warning_step_checkbox';
+import { FrozenCallOut } from '../frozen_callout';
+
+interface CheckedIds {
+  [id: string]: boolean;
+}
+
+const warningToComponentMap: {
+  [key in IndexWarningType]: React.FunctionComponent<WarningCheckboxProps>;
+} = {
+  indexSetting: DeprecatedSettingWarningCheckbox,
+  replaceIndexWithAlias: ReplaceIndexWithAliasWarningCheckbox,
+  makeIndexReadonly: MakeIndexReadonlyWarningCheckbox,
+};
+
+export const idForWarning = (id: number) => `reindexWarning-${id}`;
+interface WarningFlyoutStepProps {
+  back: () => void;
+  confirm: () => void;
+  flow: 'readonly' | 'reindex';
+  meta: ReindexStatusResponse['meta'];
+  warnings: IndexWarning[];
+}
+
+/**
+ * Displays warning text about destructive changes required to reindex this index. The user
+ * must acknowledge each change before being allowed to proceed.
+ */
+export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> = ({
+  back,
+  confirm,
+  flow,
+  meta,
+  warnings,
+}) => {
+  const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
+  const { links } = docLinks;
+
+  const [checkedIds, setCheckedIds] = useState<CheckedIds>(
+    warnings.reduce((initialCheckedIds, warning, index) => {
+      initialCheckedIds[idForWarning(index)] = false;
+      return initialCheckedIds;
+    }, {} as { [id: string]: boolean })
+  );
+
+  // Do not allow to proceed until all checkboxes are checked.
+  const blockAdvance = Object.values(checkedIds).filter((v) => v).length < warnings.length;
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const optionId = e.target.id;
+
+    setCheckedIds((prev) => ({
+      ...prev,
+      ...{
+        [optionId]: !checkedIds[optionId],
+      },
+    }));
+  };
+
+  return (
+    <>
+      <EuiFlyoutBody>
+        {meta.isFrozen && <FrozenCallOut />}
+        {warnings.length > 0 && (
+          <>
+            {flow === 'reindex' && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.reindex.calloutTitle"
+                    defaultMessage="This index requires destructive changes that cannot be reversed"
+                  />
+                }
+                color="warning"
+                iconType="warning"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.reindex.calloutDetail"
+                    defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
+                  />
+                </p>
+              </EuiCallOut>
+            )}
+            {flow === 'readonly' && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.calloutTitle"
+                    defaultMessage="Marking the index as read-only will cause future update operations to fail"
+                  />
+                }
+                color="warning"
+                iconType="warning"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.calloutDetail"
+                    defaultMessage="Please make sure that you no longer need to write or update documents in this index anymore. You will not be able to revert the read-only status after upgrading, as it is a pre-requisite for N-2 compatibility. If unsure, please consider reindexing this index instead."
+                  />
+                </p>
+              </EuiCallOut>
+            )}
+            <EuiSpacer />
+
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+                  defaultMessage="Accept changes"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer />
+            {warnings.map((warning, index) => {
+              const WarningCheckbox = warningToComponentMap[warning.warningType];
+              return (
+                <WarningCheckbox
+                  key={idForWarning(index)}
+                  isChecked={checkedIds[idForWarning(index)]}
+                  onChange={onChange}
+                  docLinks={links}
+                  id={idForWarning(index)}
+                  meta={{ ...meta, ...warning.meta }}
+                />
+              );
+            })}
+          </>
+        )}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="arrowLeft" onClick={back} flush="left">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.cancelButtonLabel"
+                defaultMessage="Back"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill color="primary" onClick={confirm} disabled={blockAdvance}>
+              {flow === 'reindex' && (
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.reindex.startButtonLabel"
+                  defaultMessage="Start reindexing"
+                />
+              )}
+              {flow === 'readonly' && (
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.startButtonLabel"
+                  defaultMessage="Make read only"
+                />
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
+  );
+};

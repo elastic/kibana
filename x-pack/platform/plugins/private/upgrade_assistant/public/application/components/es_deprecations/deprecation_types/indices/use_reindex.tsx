@@ -11,7 +11,7 @@ import {
   ReindexStatusResponse,
   ReindexStatus,
   ReindexStep,
-  ReindexWarning,
+  IndexWarning,
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
@@ -25,12 +25,14 @@ export interface ReindexState {
   status?: ReindexStatus;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
-  reindexWarnings?: ReindexWarning[];
+  reindexWarnings?: IndexWarning[];
   hasRequiredPrivileges?: boolean;
   meta: {
     indexName: string;
     reindexName: string;
     aliases: string[];
+    isFrozen: boolean;
+    isReadonly: boolean;
   };
 }
 
@@ -49,7 +51,6 @@ const getReindexState = (
     meta: { ...meta, aliases },
     loadingState: LoadingState.Success,
   };
-
   if (warnings) {
     newReindexState.reindexWarnings = warnings;
   }
@@ -107,15 +108,18 @@ const getReindexState = (
   return newReindexState;
 };
 
-export const useReindexStatus = ({ indexName, api }: { indexName: string; api: ApiService }) => {
+export const useReindex = ({ indexName, api }: { indexName: string; api: ApiService }) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
     loadingState: LoadingState.Loading,
     errorMessage: null,
     reindexTaskPercComplete: null,
     meta: {
       indexName,
-      reindexName: '', // will be known after fetching the reindexStatus
-      aliases: [], // will be known after fetching the reindexStatus
+      // these properties will be known after fetching the reindexStatus
+      reindexName: '',
+      aliases: [],
+      isFrozen: false,
+      isReadonly: false,
     },
   });
 

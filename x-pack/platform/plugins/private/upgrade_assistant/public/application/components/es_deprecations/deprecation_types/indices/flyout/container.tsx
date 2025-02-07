@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -13,14 +13,24 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
-import { ChecklistFlyoutStep } from './checklist_step';
-import { WarningsFlyoutStep } from './warnings_step';
 import { DeprecationBadge } from '../../../../shared';
 import {
+  UIM_REINDEX_READONLY_CLICK,
+  UIM_REINDEX_READONLY_RETRY_CLICK,
   UIM_REINDEX_START_CLICK,
   UIM_REINDEX_STOP_CLICK,
+  UIM_REINDEX_UNFREEZE_CLICK,
+  UIM_REINDEX_UNFREEZE_RETRY_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
+import {
+  ReindexDetailsFlyoutStep,
+  UnfreezeDetailsFlyoutStep,
+  UpdateIndexFlyoutStep,
+  ReindexFlyoutStep,
+  WarningFlyoutStep,
+  type FlyoutStep,
+} from './steps';
 
 export interface IndexFlyoutProps extends IndexStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -31,69 +41,205 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
   reindexState,
   startReindex,
   cancelReindex,
+  updateIndexState,
+  updateIndex,
   closeFlyout,
   deprecation,
 }) => {
-  const { status, reindexWarnings } = reindexState;
-  const { index } = deprecation;
+  const { status: reindexStatus, reindexWarnings } = reindexState;
+  const { status: updateIndexStatus } = updateIndexState;
+  const { index, correctiveAction } = deprecation;
 
-  const [showWarningsStep, setShowWarningsStep] = useState(false);
+  const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('details');
+
+  const reindexStatusToFlyoutStep = useCallback(() => {
+    switch (reindexStatus) {
+      case ReindexStatus.failed:
+      case ReindexStatus.fetchFailed:
+      case ReindexStatus.cancelled:
+      case ReindexStatus.inProgress: {
+        setFlyoutStep('reindexing');
+        return;
+      }
+      case ReindexStatus.completed: {
+        setTimeout(() => setFlyoutStep('details'), 1500);
+        return;
+      }
+      default: {
+        setFlyoutStep('details');
+        return;
+      }
+    }
+  }, [reindexStatus]);
+
+  const updateStatusToFlyoutStep = useCallback(() => {
+    switch (updateIndexStatus) {
+      case 'complete': {
+        setTimeout(() => setFlyoutStep('details'), 1500);
+        return;
+      }
+    }
+  }, [updateIndexStatus]);
+
+  useMemo(() => reindexStatusToFlyoutStep(), [reindexStatusToFlyoutStep]);
+  useMemo(() => updateStatusToFlyoutStep(), [updateStatusToFlyoutStep]);
 
   const onStartReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
     startReindex();
   }, [startReindex]);
 
+  const onMakeReadonly = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_READONLY_CLICK);
+    await updateIndex();
+  }, [updateIndex]);
+
+  const onMakeReadonlyRetry = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_READONLY_RETRY_CLICK);
+    await updateIndex();
+  }, [updateIndex]);
+
+  const onUnfreeze = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_UNFREEZE_CLICK);
+    await updateIndex();
+  }, [updateIndex]);
+
+  const onUnfreezeRetry = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_UNFREEZE_RETRY_CLICK);
+    await updateIndex();
+  }, [updateIndex]);
+
   const onStopReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
     cancelReindex();
   }, [cancelReindex]);
 
-  const startReindexWithWarnings = () => {
+  const startReindexWithWarnings = useCallback(() => {
     if (
       reindexWarnings &&
       reindexWarnings.length > 0 &&
-      status !== ReindexStatus.inProgress &&
-      status !== ReindexStatus.completed
+      reindexStatus !== ReindexStatus.inProgress &&
+      reindexStatus !== ReindexStatus.completed
     ) {
-      setShowWarningsStep(true);
+      setFlyoutStep('confirmReindex');
     } else {
       onStartReindex();
     }
-  };
-  const flyoutContents = showWarningsStep ? (
-    <WarningsFlyoutStep
-      warnings={reindexState.reindexWarnings ?? []}
-      meta={reindexState.meta}
-      hideWarningsStep={() => setShowWarningsStep(false)}
-      continueReindex={() => {
-        setShowWarningsStep(false);
-        onStartReindex();
-      }}
-    />
-  ) : (
-    <ChecklistFlyoutStep
-      frozen={deprecation.frozen}
-      closeFlyout={closeFlyout}
-      startReindex={startReindexWithWarnings}
-      reindexState={reindexState}
-      cancelReindex={onStopReindex}
-    />
-  );
+  }, [reindexWarnings, reindexStatus, onStartReindex]);
+
+  const flyoutContents = useMemo(() => {
+    switch (flyoutStep) {
+      case 'details':
+        return correctiveAction?.type === 'unfreeze' ? (
+          <UnfreezeDetailsFlyoutStep
+            closeFlyout={closeFlyout}
+            startReindex={() => {
+              setFlyoutStep('confirmReindex');
+            }}
+            unfreeze={() => {
+              setFlyoutStep('unfreeze');
+              onUnfreeze();
+            }}
+            updateIndexState={updateIndexState}
+            reindexState={reindexState}
+          />
+        ) : (
+          <ReindexDetailsFlyoutStep
+            closeFlyout={closeFlyout}
+            startReindex={() => {
+              setFlyoutStep('confirmReindex');
+            }}
+            startReadonly={() => {
+              setFlyoutStep('confirmReadonly');
+            }}
+            updateIndexState={updateIndexState}
+            reindexState={reindexState}
+          />
+        );
+      case 'confirmReadonly':
+      case 'confirmReindex':
+        const flow = flyoutStep === 'confirmReadonly' ? 'readonly' : 'reindex';
+        return (
+          <WarningFlyoutStep
+            warnings={
+              reindexState.reindexWarnings?.filter(
+                ({ flow: warningFlow }) => warningFlow === 'all' || warningFlow === flow
+              ) ?? []
+            }
+            meta={reindexState.meta}
+            flow={flow}
+            back={() => setFlyoutStep('details')}
+            confirm={() => {
+              if (flyoutStep === 'confirmReadonly') {
+                setFlyoutStep('makeReadonly');
+                onMakeReadonly();
+              } else {
+                onStartReindex();
+              }
+            }}
+          />
+        );
+      case 'reindexing':
+        return (
+          <ReindexFlyoutStep
+            closeFlyout={closeFlyout}
+            startReindex={startReindexWithWarnings}
+            reindexState={reindexState}
+            cancelReindex={onStopReindex}
+          />
+        );
+      case 'unfreeze':
+        return (
+          <UpdateIndexFlyoutStep
+            action={flyoutStep}
+            indexName={index!}
+            meta={reindexState.meta}
+            retry={onUnfreezeRetry}
+            updateIndexState={updateIndexState}
+            closeFlyout={closeFlyout}
+          />
+        );
+      case 'makeReadonly':
+        return (
+          <UpdateIndexFlyoutStep
+            action={flyoutStep}
+            indexName={index!}
+            meta={reindexState.meta}
+            retry={onMakeReadonlyRetry}
+            updateIndexState={updateIndexState}
+            closeFlyout={closeFlyout}
+          />
+        );
+    }
+  }, [
+    flyoutStep,
+    correctiveAction?.type,
+    closeFlyout,
+    updateIndexState,
+    reindexState,
+    startReindexWithWarnings,
+    onStopReindex,
+    index,
+    onUnfreezeRetry,
+    onMakeReadonlyRetry,
+    onUnfreeze,
+    onMakeReadonly,
+    onStartReindex,
+  ]);
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <DeprecationBadge
           isCritical={deprecation.isCritical}
-          isResolved={status === ReindexStatus.completed}
+          isResolved={reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete'}
         />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="reindexDetailsFlyoutTitle">
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader"
-              defaultMessage="Reindex {index}"
+              defaultMessage="Update {index}"
               values={{ index }}
             />
           </h2>

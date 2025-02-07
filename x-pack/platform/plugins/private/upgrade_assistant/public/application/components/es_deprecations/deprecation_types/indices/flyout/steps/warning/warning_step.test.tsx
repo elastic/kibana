@@ -10,12 +10,12 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import SemVer from 'semver/classes/semver';
 
-import { ReindexWarning } from '../../../../../../../common/types';
-import { idForWarning, WarningsFlyoutStep } from './warnings_step';
+import { idForWarning, WarningFlyoutStep } from './warning_step';
+import { IndexWarning } from '../../../../../../../../../common/types';
 
 const kibanaVersion = new SemVer('8.0.0');
 
-jest.mock('../../../../../app_context', () => {
+jest.mock('../../../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
 
   return {
@@ -31,11 +31,12 @@ jest.mock('../../../../../app_context', () => {
   };
 });
 
-describe('WarningsFlyoutStep', () => {
+describe('WarningFlyoutStep', () => {
   const defaultProps = {
-    warnings: [] as ReindexWarning[],
-    hideWarningsStep: jest.fn(),
-    continueReindex: jest.fn(),
+    warnings: [] as IndexWarning[],
+    back: jest.fn(),
+    confirm: jest.fn(),
+    flow: 'reindex' as const,
     meta: {
       indexName: 'foo',
       reindexName: 'reindexed-foo',
@@ -44,7 +45,7 @@ describe('WarningsFlyoutStep', () => {
   };
 
   it('renders', () => {
-    expect(shallow(<WarningsFlyoutStep {...defaultProps} />)).toMatchSnapshot();
+    expect(shallow(<WarningFlyoutStep {...defaultProps} />)).toMatchSnapshot();
   });
 
   if (kibanaVersion.major === 7) {
@@ -53,28 +54,29 @@ describe('WarningsFlyoutStep', () => {
         ...defaultProps,
         warnings: [
           {
+            flow: 'all' as const,
             warningType: 'indexSetting',
             meta: {
               deprecatedSettings: ['index.force_memory_term_dictionary'],
             },
           },
-        ] as ReindexWarning[],
+        ] as IndexWarning[],
       };
       const wrapper = mount(
         <I18nProvider>
-          <WarningsFlyoutStep {...defaultPropsWithWarnings} />
+          <WarningFlyoutStep {...defaultPropsWithWarnings} />
         </I18nProvider>
       );
       const button = wrapper.find('EuiButton');
 
       button.simulate('click');
-      expect(defaultPropsWithWarnings.continueReindex).not.toHaveBeenCalled();
+      expect(defaultPropsWithWarnings.confirm).not.toHaveBeenCalled();
 
       // first warning (indexSetting)
       wrapper.find(`input#${idForWarning(1)}`).simulate('change');
       button.simulate('click');
 
-      expect(defaultPropsWithWarnings.continueReindex).toHaveBeenCalled();
+      expect(defaultPropsWithWarnings.confirm).toHaveBeenCalled();
     });
   }
 });

@@ -18,11 +18,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
-import { CancelLoadingState } from '../../../../types';
-import type { ReindexState } from '../use_reindex_state';
-import { StepProgress, StepProgressStep } from '../../../common/step_progress';
-import { getReindexProgressLabel } from '../../../../../lib/utils';
+import { ReindexStatus, ReindexStep } from '../../../../../../../../../common/types';
+import { CancelLoadingState } from '../../../../../../types';
+import type { ReindexState } from '../../../use_reindex';
+import { StepProgress, StepProgressStep } from '../../../../../common/step_progress';
+import { getReindexProgressLabel } from '../../../../../../../lib/utils';
 
 const ErrorCallout: React.FunctionComponent<{ errorMessage: string | null }> = ({
   errorMessage,

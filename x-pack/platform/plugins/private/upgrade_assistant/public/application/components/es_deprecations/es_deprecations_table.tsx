@@ -126,6 +126,7 @@ const renderTableRowCells = (
       return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'reindex':
+    case 'unfreeze':
       return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'healthIndicator':

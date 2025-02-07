@@ -22,6 +22,7 @@ import { registerRemoteClustersRoute } from './remote_clusters';
 import { registerNodeDiskSpaceRoute } from './node_disk_space';
 import { registerClusterSettingsRoute } from './cluster_settings';
 import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
+import { registerUpdateIndexRoute } from './read_only';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerAppRoutes(dependencies);
@@ -43,4 +44,7 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
 
   // Data streams reindexing
   registerMigrateDataStreamRoutes(dependencies);
+
+  // Make index read-only
+  registerUpdateIndexRoute(dependencies);
 }

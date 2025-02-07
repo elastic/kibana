@@ -16,7 +16,11 @@ import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
 } from '../es_system_indices_migration';
-import { type EsMetadata, getCorrectiveAction } from './get_corrective_actions';
+import {
+  type EsMetadata,
+  getCorrectiveAction,
+  isFrozenDeprecation,
+} from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
@@ -176,6 +180,7 @@ export const getEnrichedDeprecations = async (
 
       const enrichedDeprecation = {
         ..._.omit(deprecation, 'metadata'),
+        frozen: isFrozenDeprecation(deprecation.message, deprecation.index),
         correctiveAction,
       };
 
@@ -188,21 +193,18 @@ export const getEnrichedDeprecations = async (
       return enrichedDeprecation;
     })
     .filter((deprecation) => {
-      if (
-        deprecation.index &&
-        deprecation.message.includes(`Index [${deprecation.index}] is a frozen index`)
-      ) {
+      if (isFrozenDeprecation(deprecation.message, deprecation.index)) {
         // frozen indices are created in 7.x, so they are old / incompatible as well
         // reindexing + deleting is required, so no need to bubble up this deprecation in the UI
-        const indexDeprecations = deprecationsByIndex.get(deprecation.index)!;
-        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations.find(
+        const indexDeprecations = deprecationsByIndex.get(deprecation.index!);
+        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations?.find(
           (elem) =>
             elem.type === 'index_settings' &&
             elem.index === deprecation.index &&
-            elem.correctiveAction?.type === 'reindex'
+            elem.correctiveAction?.type === 'reindex' &&
+            elem.isCritical
         );
         if (oldIndexDeprecation) {
-          oldIndexDeprecation.frozen = true;
           return false;
         }
       }

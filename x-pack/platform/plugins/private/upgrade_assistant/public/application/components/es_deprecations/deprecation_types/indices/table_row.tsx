@@ -51,7 +51,6 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
         id: 'indexFlyout',
         Component: IndexFlyout,
         props: {
-          deprecation,
           closeFlyout,
           ...indexContext,
         },
@@ -99,7 +98,7 @@ export const IndexTableRow: React.FunctionComponent<TableRowProps> = (props) => 
   } = useAppContext();
 
   return (
-    <IndexStatusProvider indexName={props.deprecation.index!} api={api}>
+    <IndexStatusProvider deprecation={props.deprecation} api={api}>
       <IndexTableRowCells {...props} />
     </IndexStatusProvider>
   );

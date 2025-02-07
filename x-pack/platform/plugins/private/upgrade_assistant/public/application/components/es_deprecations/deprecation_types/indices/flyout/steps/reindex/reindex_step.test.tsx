@@ -9,12 +9,12 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { ReindexStatus } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../types';
-import type { ReindexState } from '../use_reindex_state';
-import { ChecklistFlyoutStep } from './checklist_step';
+import { ReindexStatus } from '../../../../../../../../../common/types';
+import { LoadingState } from '../../../../../../types';
+import type { ReindexState } from '../../../use_reindex';
+import { ReindexFlyoutStep } from './reindex_step';
 
-jest.mock('../../../../../app_context', () => {
+jest.mock('../../../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
 
   return {
@@ -33,10 +33,9 @@ jest.mock('../../../../../app_context', () => {
   };
 });
 
-describe('ChecklistFlyout', () => {
+describe('ReindexStep', () => {
   const defaultProps = {
     indexName: 'myIndex',
-    frozen: false,
     closeFlyout: jest.fn(),
     confirmInputValue: 'CONFIRM',
     onConfirmInputChange: jest.fn(),
@@ -60,31 +59,33 @@ describe('ChecklistFlyout', () => {
         indexName: 'myIndex',
         reindexName: 'reindexed-myIndex',
         aliases: [],
+        isReadonly: false,
+        isFrozen: false,
       },
     } as ReindexState,
   };
 
   it('renders', () => {
-    expect(shallow(<ChecklistFlyoutStep {...defaultProps} />)).toMatchSnapshot();
+    expect(shallow(<ReindexFlyoutStep {...defaultProps} />)).toMatchSnapshot();
   });
 
   it('renders for frozen indices', () => {
     const props = cloneDeep(defaultProps);
-    props.frozen = true;
-    expect(shallow(<ChecklistFlyoutStep {...props} />)).toMatchSnapshot();
+    props.reindexState.meta.isFrozen = true;
+    expect(shallow(<ReindexFlyoutStep {...props} />)).toMatchSnapshot();
   });
 
   it('disables button while reindexing', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.inProgress;
-    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
     expect((wrapper.find('EuiButton').props() as any).isLoading).toBe(true);
   });
 
   it('hides button if hasRequiredPrivileges is false', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.hasRequiredPrivileges = false;
-    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
     expect(wrapper.exists('EuiButton')).toBe(false);
   });
 
@@ -92,7 +93,7 @@ describe('ChecklistFlyout', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.fetchFailed;
     props.reindexState.errorMessage = 'Index not found';
-    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
     expect(wrapper.exists('EuiButton')).toBe(false);
   });
 
@@ -100,7 +101,7 @@ describe('ChecklistFlyout', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.fetchFailed;
     props.reindexState.errorMessage = 'Index not found';
-    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
     expect(wrapper.exists('[data-test-subj="fetchFailedCallout"]')).toBe(true);
   });
 
@@ -108,7 +109,7 @@ describe('ChecklistFlyout', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.failed;
     props.reindexState.errorMessage = 'Index not found';
-    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
     expect(wrapper.exists('[data-test-subj="reindexingFailedCallout"]')).toBe(true);
   });
 
@@ -121,7 +122,7 @@ describe('ChecklistFlyout', () => {
         status: undefined,
       },
     };
-    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
 
     wrapper.find('EuiButton').simulate('click');
     expect(props.startReindex).toHaveBeenCalled();

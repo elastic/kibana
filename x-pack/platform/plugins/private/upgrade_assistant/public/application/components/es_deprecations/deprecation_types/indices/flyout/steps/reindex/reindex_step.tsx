@@ -22,11 +22,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../types';
-import type { ReindexState } from '../use_reindex_state';
+import { ReindexStatus } from '../../../../../../../../../common/types';
+import { LoadingState } from '../../../../../../types';
+import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
-import { useAppContext } from '../../../../../app_context';
+import { useAppContext } from '../../../../../../../app_context';
+import { FrozenCallOut } from '../frozen_callout';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -71,13 +72,12 @@ const buttonLabel = (status?: ReindexStatus) => {
 /**
  * Displays a flyout that shows the current reindexing status for a given index.
  */
-export const ChecklistFlyoutStep: React.FunctionComponent<{
-  frozen?: boolean;
+export const ReindexFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-}> = ({ frozen, closeFlyout, reindexState, startReindex, cancelReindex }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const {
     services: {
       api,
@@ -96,6 +96,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   return (
     <Fragment>
       <EuiFlyoutBody>
+        {reindexState.meta.isFrozen && <FrozenCallOut />}
         {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
@@ -198,37 +199,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               }}
             />
           </p>
-          {frozen && (
-            <>
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndexTitle"
-                    defaultMessage="This index is frozen"
-                  />
-                }
-                iconType="iInCircle"
-              >
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
-                  defaultMessage="Frozen indices will no longer be supported after the upgrade. As a result, this index will be transformed into a new, non-frozen index during the reindex operation. {docsLink}"
-                  values={{
-                    docsLink: (
-                      <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.unfreezeApi}>
-                        {i18n.translate(
-                          'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
-                          {
-                            defaultMessage: 'Learn more',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiCallOut>
-              <EuiSpacer />
-            </>
-          )}
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
