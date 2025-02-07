@@ -38,6 +38,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly payload: ReportSource['payload'];
   public readonly scheduled_id: ReportSource['scheduled_id'];
   public readonly cron_schedule?: string;
+  public readonly notify?: string;
 
   public readonly meta: ReportSource['meta'];
 
@@ -89,6 +90,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.attempts = opts.attempts || 0;
     this.timeout = opts.timeout;
     this.cron_schedule = opts.cron_schedule;
+    this.notify = opts.notify;
 
     this.process_expiration = opts.process_expiration;
     this.started_at = opts.started_at;
@@ -157,6 +159,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       payload: this.payload,
       meta: this.meta,
       cron_schedule: this.cron_schedule!,
+      notify: this.notify,
     };
   }
 

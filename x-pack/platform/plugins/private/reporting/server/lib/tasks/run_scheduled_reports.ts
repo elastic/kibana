@@ -461,6 +461,7 @@ export class RunScheduledReportTask {
           let cronSchedule: string | undefined;
           let finalOutput: ReportOutput | undefined;
           let contentStream: ContentStream | undefined;
+          let notifyEmail: string | undefined;
 
           // find the job in the store
           const task = reportTaskParams as ReportTaskParams;
@@ -472,6 +473,7 @@ export class RunScheduledReportTask {
             this.logger.info(`report ${JSON.stringify(reportDoc)}`);
 
             cronSchedule = reportDoc.cron_schedule;
+            notifyEmail = reportDoc.notify;
             this.logger.info(`cronSchedule ${cronSchedule}`);
 
             const jobTypeId = reportDoc.jobtype;
@@ -628,19 +630,28 @@ export class RunScheduledReportTask {
           }
 
           try {
-            if (this.unsecuredActionsClient && finalOutput && contentStream?.content()) {
+            if (
+              this.unsecuredActionsClient &&
+              finalOutput &&
+              contentStream?.content() &&
+              notifyEmail
+            ) {
+              let extension = 'pdf';
+              if (jobType.toLowerCase().includes('png')) {
+                extension = 'png';
+              }
               const response = await this.unsecuredActionsClient.bulkEnqueueExecution('reporting', [
                 {
                   id: EMAIL,
                   params: {
-                    to: ['ying.gu@gmail.com'],
+                    to: [notifyEmail],
                     subject: `Scheduled Report for ${now}`,
                     message: `Here's your report!`,
                     attachments: [
                       {
                         content: contentStream?.content(),
                         contentType: finalOutput.content_type,
-                        filename: 'report.pdf',
+                        filename: `report.${extension}`,
                         encoding: 'base64',
                       },
                     ],

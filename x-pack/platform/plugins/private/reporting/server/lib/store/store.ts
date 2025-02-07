@@ -248,6 +248,7 @@ export class ReportingStore {
         status: document._source?.status,
         timeout: document._source?.timeout,
         cron_schedule: document._source?.cron_schedule,
+        notify: document._source?.notify,
       });
     } catch (err) {
       this.logger.error(

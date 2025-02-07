@@ -29,9 +29,11 @@ export const handleUnavailable = (res: KibanaResponseFactory) => {
 
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
-  body: schema.nullable(
-    schema.object({ cron: schema.string(), jobParams: schema.maybe(schema.string()) })
-  ),
+  body: schema.object({
+    cron: schema.string(),
+    notify: schema.maybe(schema.string()),
+    jobParams: schema.maybe(schema.string()),
+  }),
   query: schema.nullable(schema.object({ jobParams: schema.string({ defaultValue: '' }) })),
 };
 
@@ -107,10 +109,8 @@ export class ScheduledRequestHandler {
     const req = this.req;
     const res = this.res;
 
-    if (req.body) {
-      const { cron } = req.body;
-      cronSchedule = cron;
-    }
+    const { cron } = req.body;
+    cronSchedule = cron;
 
     if (!cronSchedule) {
       throw res.customError({
@@ -125,10 +125,9 @@ export class ScheduledRequestHandler {
   public async handleGenerateRequest(
     exportTypeId: string,
     jobParams: BaseParams,
-    cronSchedule: string
+    cronSchedule: string,
+    notifyEmail: string | undefined
   ) {
-    const reporting = this.reporting;
-
     // ensure the async dependencies are loaded
     if (!this.context.reporting) {
       return handleUnavailable(this.res);
@@ -153,7 +152,7 @@ export class ScheduledRequestHandler {
 
     let report: Report | undefined;
     try {
-      report = await this.enqueueJob(exportTypeId, jobParams, cronSchedule);
+      report = await this.enqueueJob(exportTypeId, jobParams, cronSchedule, notifyEmail);
       // const { basePath } = this.reporting.getServerInfo();
       // const publicDownloadPath = basePath + PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX;
 
@@ -180,7 +179,12 @@ export class ScheduledRequestHandler {
     }
   }
 
-  public async enqueueJob(exportTypeId: string, jobParams: BaseParams, cronSchedule: string) {
+  public async enqueueJob(
+    exportTypeId: string,
+    jobParams: BaseParams,
+    cronSchedule: string,
+    notifyEmail: string | undefined
+  ) {
     const { reporting, logger, context, req, user } = this;
 
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
@@ -234,6 +238,7 @@ export class ScheduledRequestHandler {
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
         cron_schedule: cronSchedule,
+        notify: notifyEmail,
         payload,
         migration_version: jobParams.version,
         meta: {

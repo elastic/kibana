@@ -135,6 +135,7 @@ export interface ReportSource {
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: BasePayload;
   cron_schedule?: string;
+  notify?: string;
   scheduled_id?: string;
   meta: {
     // for telemetry
@@ -177,6 +178,7 @@ export interface ScheduledReportSource {
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: BasePayload;
   cron_schedule?: string;
+  notify?: string;
   migration_version: string; // for reminding the user to update their POST URL
   meta: {
     // for telemetry

@@ -78,6 +78,13 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
+          if (req.params.exportType.toLowerCase().includes('csv')) {
+            throw res.customError({
+              statusCode: 400,
+              body: 'Scheduled CSV reports are not supported.',
+            });
+          }
+
           const requestHandler = new ScheduledRequestHandler(
             reporting,
             user,
@@ -92,7 +99,8 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
           return await requestHandler.handleGenerateRequest(
             req.params.exportType,
             jobParams,
-            cronSchedule
+            cronSchedule,
+            req.body.notify
           );
         } catch (err) {
           if (err instanceof KibanaResponse) {
