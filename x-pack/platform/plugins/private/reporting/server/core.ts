@@ -50,6 +50,7 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -73,6 +74,7 @@ export interface ReportingInternalSetup {
 }
 
 export interface ReportingInternalStart {
+  actions: ActionsPluginStartContract;
   store: ReportingStore;
   basePathService: IBasePath;
   analytics: AnalyticsServiceStart;
@@ -175,7 +177,7 @@ export class ReportingCore {
     // enable this instance to generate reports
     await Promise.all([
       executeTask.init(taskManager, basePathService),
-      runScheduledReportTask.init(taskManager, basePathService),
+      runScheduledReportTask.init(taskManager, basePathService, startDeps.actions),
     ]);
   }
 

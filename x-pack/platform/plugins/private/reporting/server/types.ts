@@ -35,6 +35,10 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import {
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server';
 
 /**
  * Plugin Setup Contract
@@ -55,6 +59,7 @@ export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   taskManager: TaskManagerSetupContract;
+  actions?: ActionsPluginSetupContract;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -62,6 +67,7 @@ export interface ReportingSetupDeps {
 }
 
 export interface ReportingStartDeps {
+  actions?: ActionsPluginStartContract;
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;

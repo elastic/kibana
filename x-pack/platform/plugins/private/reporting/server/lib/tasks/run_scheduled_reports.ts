@@ -9,10 +9,12 @@ import moment from 'moment';
 import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import * as cron from 'cron';
-import { Writable } from 'stream';
+import { Stream, Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IBasePath, KibanaRequest, Logger } from '@kbn/core/server';
@@ -20,7 +22,6 @@ import {
   CancellationToken,
   JOB_STATUS,
   KibanaShuttingDownError,
-  QueueTimeoutError,
   ReportingError,
   durationToNumber,
   numberToDuration,
@@ -43,19 +44,11 @@ import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import {
-  REPORTING_EXECUTE_TYPE,
-  ReportTaskParams,
-  ReportingTask,
-  ReportingTaskStatus,
-  TIME_BETWEEN_ATTEMPTS,
-} from '.';
-import { getContentStream } from '..';
+import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import { ReportTaskParams, ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
+import { ContentStream, getContentStream } from '..';
 import type { ReportingCore } from '../..';
-import {
-  isExecutionError,
-  mapToReportingError,
-} from '../../../common/errors/map_to_reporting_error';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { EventTracker } from '../../usage';
 import type { ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
@@ -64,6 +57,8 @@ import { ReportingExecuteTaskInstance, isOutput } from './execute_report';
 import { ReportFailedFields } from '../store/store';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
+
+const EMAIL = 'maildev-no-auth';
 
 async function finishedWithNoPendingCallbacks(stream: Writable) {
   await finished(stream, { readable: false });
@@ -104,6 +99,7 @@ export class RunScheduledReportTask {
   private store?: ReportingStore;
   private eventTracker?: EventTracker;
   private basePathService?: IBasePath;
+  private unsecuredActionsClient?: IUnsecuredActionsClient;
 
   constructor(
     private reporting: ReportingCore,
@@ -117,9 +113,17 @@ export class RunScheduledReportTask {
   /*
    * To be called from plugin start
    */
-  public async init(taskManager: TaskManagerStartContract, basePathService: IBasePath) {
+  public async init(
+    taskManager: TaskManagerStartContract,
+    basePathService: IBasePath,
+    actions?: ActionsPluginStartContract
+  ) {
     this.taskManagerStart = taskManager;
     this.basePathService = basePathService;
+
+    if (actions) {
+      this.unsecuredActionsClient = actions.getUnsecuredActionsClient();
+    }
 
     const { reporting } = this;
     const { uuid, name } = reporting.getServerInfo();
@@ -362,7 +366,7 @@ export class RunScheduledReportTask {
   private async _completeJob(
     report: SavedReport,
     output: CompletedReportOutput
-  ): Promise<SavedReport> {
+  ): Promise<{ report: SavedReport; output: ReportOutput }> {
     let docId = `/${report._index}/_doc/${report._id}`;
     const logger = this.logger.get(report._id);
 
@@ -406,7 +410,7 @@ export class RunScheduledReportTask {
     //   });
     // }
 
-    return report;
+    return { report, output: docOutput };
   }
 
   // Generic is used to let TS infer the return type at call site.
@@ -455,6 +459,8 @@ export class RunScheduledReportTask {
           this.logger.info(`STARTING SCHEDULE REPORT TASK - ${JSON.stringify(taskInstance)}`);
           let report: SavedReport | undefined;
           let cronSchedule: string | undefined;
+          let finalOutput: ReportOutput | undefined;
+          let contentStream: ContentStream | undefined;
 
           // find the job in the store
           const task = reportTaskParams as ReportTaskParams;
@@ -547,7 +553,7 @@ export class RunScheduledReportTask {
 
           try {
             const jobContentEncoding = this.getJobContentEncoding(jobType);
-            const stream = await getContentStream(
+            contentStream = await getContentStream(
               this.reporting,
               {
                 id: report._id,
@@ -567,20 +573,20 @@ export class RunScheduledReportTask {
                 { retryAt: taskRetryAt, startedAt: taskStartedAt },
                 fakeRequest,
                 cancellationToken,
-                stream,
+                contentStream!,
                 now
               ),
               this.throwIfKibanaShutsDown(),
             ]);
 
-            stream.end();
+            contentStream.end();
 
             logger.debug(`Begin waiting for the stream's pending callbacks...`);
-            await finishedWithNoPendingCallbacks(stream);
+            await finishedWithNoPendingCallbacks(contentStream);
             logger.info(`The stream's pending callbacks have completed.`);
 
-            report._seq_no = stream.getSeqNo()!;
-            report._primary_term = stream.getPrimaryTerm()!;
+            report._seq_no = contentStream.getSeqNo()!;
+            report._primary_term = contentStream.getPrimaryTerm()!;
 
             // eventLog.logExecutionComplete({
             //   ...(output.metrics ?? {}),
@@ -588,12 +594,17 @@ export class RunScheduledReportTask {
             // });
 
             if (output) {
-              logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              logger.debug(`Job output size: ${contentStream.bytesWritten} bytes.`);
               // Update the job status to "completed"
-              report = await this._completeJob(report, {
-                ...output,
-                size: stream.bytesWritten,
-              });
+              const { report: completedReport, output: completedOutput } = await this._completeJob(
+                report,
+                {
+                  ...output,
+                  size: contentStream.bytesWritten,
+                }
+              );
+              report = completedReport;
+              finalOutput = completedOutput;
             }
             // untrack the report for concurrency awareness
             logger.debug(`Stopping ${docId}.`);
@@ -616,6 +627,33 @@ export class RunScheduledReportTask {
             logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           }
 
+          try {
+            if (this.unsecuredActionsClient && finalOutput && contentStream?.content()) {
+              const response = await this.unsecuredActionsClient.bulkEnqueueExecution('reporting', [
+                {
+                  id: EMAIL,
+                  params: {
+                    to: ['ying.gu@gmail.com'],
+                    subject: `Scheduled Report for ${now}`,
+                    message: `Here's your report!`,
+                    attachments: [
+                      {
+                        content: contentStream?.content(),
+                        contentType: finalOutput.content_type,
+                        filename: 'report.pdf',
+                        encoding: 'base64',
+                      },
+                    ],
+                  },
+                },
+              ]);
+
+              logger.info(`Email action scheduled: ${JSON.stringify(response)}`);
+            }
+          } catch (err) {
+            logger.error(`Unable to schedule email action for this scheduled report`);
+          }
+
           let runAt: Date | undefined;
           if (!cronSchedule) {
             logger.error('No cron schedule found for the report');
@@ -627,6 +665,7 @@ export class RunScheduledReportTask {
 
           return {
             ...(runAt ? { runAt } : {}),
+            state: {},
           };
         },
 

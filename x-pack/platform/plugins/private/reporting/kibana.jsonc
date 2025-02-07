@@ -30,6 +30,7 @@
       "features"
     ],
     "optionalPlugins": [
+      "actions",
       "security",
       "spaces",
       "usageCollection",

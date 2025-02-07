@@ -32,7 +32,6 @@ import {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
   ExportType,
-  decryptJobHeaders,
   getFieldFormats,
 } from '@kbn/reporting-server';
 import { KibanaRequest } from '@kbn/core/server';
@@ -79,7 +78,8 @@ export class CsvSearchSourceExportType extends ExportType<
     taskInstanceFields: TaskInstanceFields,
     fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
-    stream: Writable
+    stream: Writable,
+    forceNowOverride?: string
   ) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
 

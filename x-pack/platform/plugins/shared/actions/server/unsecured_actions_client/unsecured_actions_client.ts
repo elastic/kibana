@@ -30,6 +30,7 @@ const BACKGROUND_TASK_REQUESTER_ID = 'background_task';
 const ALLOWED_REQUESTER_IDS = [
   NOTIFICATION_REQUESTER_ID,
   BACKGROUND_TASK_REQUESTER_ID,
+  'reporting',
   // For functional testing
   'functional_tester',
 ];
