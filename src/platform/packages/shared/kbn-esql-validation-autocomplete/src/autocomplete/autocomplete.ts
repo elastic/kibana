@@ -286,8 +286,7 @@ export async function suggest(
   const multiWordKeywordMatchRange = getMultiWordKeywordMatchRange(innerText);
 
   return multiWordKeywordMatchRange
-    ? suggestionsPromise
-    : suggestionsPromise.then((suggestions) =>
+    ? suggestionsPromise.then((suggestions) =>
         suggestions.map<SuggestionRawDefinition>((s) => {
           const suggestionWithRange: SuggestionRawDefinition = {
             ...s,
@@ -295,7 +294,8 @@ export async function suggest(
           };
           return suggestionWithRange;
         })
-      );
+      )
+    : suggestionsPromise;
 }
 
 export function getFieldsByTypeRetriever(
