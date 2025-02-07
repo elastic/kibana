@@ -635,9 +635,7 @@ export class SessionIndex {
       const aliasResponse = await this.options.elasticsearchClient.indices.getAlias({
         name: this.aliasName,
       });
-      console.log(aliasResponse);
       const indexNames = Object.keys(aliasResponse);
-
       const indexName = indexNames.length > 0 ? indexNames[0] : this.indexName;
 
       if (!indexName) {
