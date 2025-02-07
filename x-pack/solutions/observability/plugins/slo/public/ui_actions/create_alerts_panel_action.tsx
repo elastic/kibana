@@ -19,6 +19,7 @@ import {
   SLO_ALERTS_EMBEDDABLE_ID,
 } from '../embeddable/slo/alerts/constants';
 import { SLORepositoryClient } from '../types';
+import { openSloConfiguration } from '../embeddable/slo/alerts/slo_alerts_open_configuration';
 
 export function createAddAlertsPanelAction(
   coreStart: CoreStart,
@@ -37,9 +38,6 @@ export function createAddAlertsPanelAction(
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
       try {
-        const { openSloConfiguration } = await import(
-          '../embeddable/slo/alerts/slo_alerts_open_configuration'
-        );
         const initialState = await openSloConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(
           {

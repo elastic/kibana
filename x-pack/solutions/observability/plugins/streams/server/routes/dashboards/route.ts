@@ -57,8 +57,16 @@ const listDashboardsRoute = createServerRoute({
       id: z.string(),
     }),
   }),
-  async handler({ params, request, assets }): Promise<ListDashboardsResponse> {
-    const assetsClient = await assets.getClientWithRequest({ request });
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
+    const { assetClient, streamsClient } = await getScopedClients({ request });
+    await streamsClient.ensureStream(params.path.id);
 
     const {
       path: { id: streamId },
@@ -70,7 +78,7 @@ const listDashboardsRoute = createServerRoute({
 
     return {
       dashboards: (
-        await assetsClient.getAssets({
+        await assetClient.getAssets({
           entityId: streamId,
           entityType: 'stream',
         })
@@ -86,6 +94,13 @@ const linkDashboardRoute = createServerRoute({
   options: {
     access: 'internal',
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   params: z.object({
     path: z.object({
       id: z.string(),
@@ -95,6 +110,7 @@ const linkDashboardRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<LinkDashboardResponse> => {
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
+    await streamsClient.ensureStream(params.path.id);
     const {
       path: { dashboardId, id: streamId },
     } = params;
@@ -119,20 +135,29 @@ const unlinkDashboardRoute = createServerRoute({
   options: {
     access: 'internal',
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   params: z.object({
     path: z.object({
       id: z.string(),
       dashboardId: z.string(),
     }),
   }),
-  handler: async ({ params, request, assets }): Promise<UnlinkDashboardResponse> => {
-    const assetsClient = await assets.getClientWithRequest({ request });
+  handler: async ({ params, request, getScopedClients }): Promise<UnlinkDashboardResponse> => {
+    const { assetClient, streamsClient } = await getScopedClients({ request });
+
+    await streamsClient.ensureStream(params.path.id);
 
     const {
       path: { dashboardId, id: streamId },
     } = params;
 
-    await assetsClient.unlinkAsset({
+    await assetClient.unlinkAsset({
       entityId: streamId,
       entityType: 'stream',
       assetId: dashboardId,
@@ -150,6 +175,13 @@ const suggestDashboardsRoute = createServerRoute({
   options: {
     access: 'internal',
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   params: z.object({
     path: z.object({
       id: z.string(),
@@ -161,8 +193,10 @@ const suggestDashboardsRoute = createServerRoute({
       tags: z.optional(z.array(z.string())),
     }),
   }),
-  handler: async ({ params, request, assets }): Promise<SuggestDashboardResponse> => {
-    const assetsClient = await assets.getClientWithRequest({ request });
+  handler: async ({ params, request, getScopedClients }): Promise<SuggestDashboardResponse> => {
+    const { assetClient, streamsClient } = await getScopedClients({ request });
+
+    await streamsClient.ensureStream(params.path.id);
 
     const {
       query: { query },
@@ -170,7 +204,7 @@ const suggestDashboardsRoute = createServerRoute({
     } = params;
 
     const suggestions = (
-      await assetsClient.getSuggestions({
+      await assetClient.getSuggestions({
         assetTypes: ['dashboard'],
         query,
         tags,
@@ -193,6 +227,13 @@ const bulkDashboardsRoute = createServerRoute({
   endpoint: `POST /api/streams/{id}/dashboards/_bulk`,
   options: {
     access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
   },
   params: z.object({
     path: z.object({
