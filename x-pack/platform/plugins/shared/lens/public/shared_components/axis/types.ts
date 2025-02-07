@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-// https://github.com/DefinitelyTyped/DefinitelyTyped/pull/40309
+import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 
-import type { MovementMode, DraggableId } from '@hello-pangea/dnd';
-
-export interface BeforeCapture {
-  draggableId: DraggableId;
-  mode: MovementMode;
-}
+export type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
