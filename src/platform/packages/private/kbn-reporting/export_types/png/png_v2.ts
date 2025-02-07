@@ -39,7 +39,6 @@ import {
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
 import {
-  decryptJobHeaders,
   ExportType,
   getFullRedirectAppUrl,
   REPORTING_TRANSACTION_TYPE,
@@ -93,7 +92,8 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     taskInstanceFields: TaskInstanceFields,
     fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
-    stream: Writable
+    stream: Writable,
+    forceNowOverride?: string
   ) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
@@ -106,7 +106,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           this.config,
           this.getServerInfo(),
           payload.spaceId,
-          payload.forceNow
+          forceNowOverride ? forceNowOverride : payload.forceNow
         );
 
         const [locatorParams] = payload.locatorParams;

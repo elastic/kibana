@@ -153,9 +153,9 @@ export class ReportingCore {
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
     });
-    // setupDeps.taskManager.registerTaskDefinitions({
-    //   [runScheduledReportTask.TYPE]: runScheduledReportTask.getTaskDefinition(),
-    // });
+    setupDeps.taskManager.registerTaskDefinitions({
+      [runScheduledReportTask.TYPE]: runScheduledReportTask.getTaskDefinition(),
+    });
   }
 
   /*
@@ -175,10 +175,8 @@ export class ReportingCore {
     // enable this instance to generate reports
     await Promise.all([
       executeTask.init(taskManager, basePathService),
-      // runScheduledReportTask.init(taskManager),
+      runScheduledReportTask.init(taskManager, basePathService),
     ]);
-
-    await this.runScheduledReportTask.scheduleTask();
   }
 
   public pluginStop() {
@@ -310,8 +308,16 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async scheduleTask(report: ReportTaskParams, apiKey: string) {
+  public async scheduleOneTimeTask(report: ReportTaskParams, apiKey: string) {
     return await this.executeTask.scheduleTask(report, apiKey);
+  }
+
+  public async scheduleRecurringReportTask(
+    report: ReportTaskParams,
+    apiKey: string,
+    cronSchedule: string
+  ) {
+    return await this.runScheduledReportTask.scheduleTask(report, apiKey, cronSchedule);
   }
 
   public async getStore() {

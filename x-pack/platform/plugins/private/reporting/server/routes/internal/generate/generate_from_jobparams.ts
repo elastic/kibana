@@ -11,6 +11,7 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting } from '../../common';
 import { RequestHandler } from '../../common/generate';
+import { ScheduledRequestHandler } from '../../common/generate/scheduled_request_handler';
 
 const { GENERATE_PREFIX } = INTERNAL_ROUTES;
 
@@ -59,5 +60,50 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
     );
   };
 
+  const registerInternalPostGenerateScheduledEndpoint = () => {
+    const path = `${GENERATE_PREFIX}/{exportType}/_scheduled`;
+    router.post(
+      {
+        path,
+        security: {
+          authz: {
+            requiredPrivileges: kibanaAccessControlTags,
+          },
+        },
+        validate: ScheduledRequestHandler.getValidation(),
+        options: {
+          tags: kibanaAccessControlTags.map((accessControlTag) => `access:${accessControlTag}`),
+          access: 'internal',
+        },
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        try {
+          const requestHandler = new ScheduledRequestHandler(
+            reporting,
+            user,
+            context,
+            path,
+            req,
+            res,
+            logger
+          );
+          const jobParams = requestHandler.getJobParams();
+          const cronSchedule = requestHandler.getCronSchedule();
+          return await requestHandler.handleGenerateRequest(
+            req.params.exportType,
+            jobParams,
+            cronSchedule
+          );
+        } catch (err) {
+          if (err instanceof KibanaResponse) {
+            return err;
+          }
+          throw err;
+        }
+      })
+    );
+  };
+
   registerInternalPostGenerationEndpoint();
+  registerInternalPostGenerateScheduledEndpoint();
 }

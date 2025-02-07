@@ -27,7 +27,7 @@ import {
   PDF_JOB_TYPE,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-pdf-common';
-import { ExportType, REPORTING_TRANSACTION_TYPE, decryptJobHeaders } from '@kbn/reporting-server';
+import { ExportType, REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 
 import { KibanaRequest } from '@kbn/core/server';
 import { getCustomLogo } from './get_custom_logo';
@@ -77,7 +77,8 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
     taskInstanceFields: TaskInstanceFields,
     fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
-    stream: Writable
+    stream: Writable,
+    forceNowOverride?: string
   ) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
@@ -90,7 +91,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         return getCustomLogo(uiSettingsClient);
       }),
       mergeMap(({ logo }) => {
-        const urls = getFullUrls(this.getServerInfo(), this.config, job);
+        const urls = getFullUrls(this.getServerInfo(), this.config, job, forceNowOverride);
 
         const { browserTimezone, layout, title } = job;
         apmGetAssets?.end();

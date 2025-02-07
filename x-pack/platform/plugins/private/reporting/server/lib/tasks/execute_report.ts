@@ -62,14 +62,14 @@ import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
-interface ReportingExecuteTaskInstance {
+export interface ReportingExecuteTaskInstance {
   state: object;
   taskType: string;
   params: ReportTaskParams;
   runAt?: Date;
 }
 
-function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
+export function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
   return (output as CompletedReportOutput).size != null;
 }
 
@@ -495,7 +495,7 @@ export class ExecuteReportTask implements ReportingTask {
           logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           const eventLog = this.reporting.getEventLogger(
-            new Report({ ...task, _id: task.id, _index: task.index, api_key: apiKey })
+            new Report({ ...task, _id: task.id, _index: task.index })
           );
 
           try {

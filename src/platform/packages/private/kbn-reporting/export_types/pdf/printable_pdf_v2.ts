@@ -82,13 +82,13 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     taskInstanceFields: TaskInstanceFields,
     fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
-    stream: Writable
+    stream: Writable,
+    forceNowOverride?: string
   ) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
-    const { encryptionKey } = this.config;
 
     const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
       mergeMap(async () => {
@@ -113,7 +113,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
             this.config,
             this.getServerInfo(),
             payload.spaceId,
-            payload.forceNow
+            forceNowOverride ? forceNowOverride : payload.forceNow
           ),
           locator,
         ]) as unknown as UrlOrUrlWithContext[];

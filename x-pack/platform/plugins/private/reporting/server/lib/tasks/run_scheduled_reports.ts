@@ -6,16 +6,19 @@
  */
 
 import moment from 'moment';
+import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs';
+import * as cron from 'cron';
 import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
+import type { IBasePath, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   CancellationToken,
+  JOB_STATUS,
   KibanaShuttingDownError,
   QueueTimeoutError,
   ReportingError,
@@ -38,6 +41,8 @@ import type {
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import {
   REPORTING_EXECUTE_TYPE,
   ReportTaskParams,
@@ -55,6 +60,8 @@ import { EventTracker } from '../../usage';
 import type { ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import { errorLogger } from './error_logger';
+import { ReportingExecuteTaskInstance, isOutput } from './execute_report';
+import { ReportFailedFields } from '../store/store';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -96,6 +103,7 @@ export class RunScheduledReportTask {
   private exportTypesRegistry: ExportTypesRegistry;
   private store?: ReportingStore;
   private eventTracker?: EventTracker;
+  private basePathService?: IBasePath;
 
   constructor(
     private reporting: ReportingCore,
@@ -109,8 +117,9 @@ export class RunScheduledReportTask {
   /*
    * To be called from plugin start
    */
-  public async init(taskManager: TaskManagerStartContract) {
+  public async init(taskManager: TaskManagerStartContract, basePathService: IBasePath) {
     this.taskManagerStart = taskManager;
+    this.basePathService = basePathService;
 
     const { reporting } = this;
     const { uuid, name } = reporting.getServerInfo();
@@ -137,6 +146,10 @@ export class RunScheduledReportTask {
     return this.taskManagerStart;
   }
 
+  private getMaxAttempts() {
+    return this.config.capture.maxAttempts ?? 1;
+  }
+
   // private getEventTracker(report: Report) {
   //   if (this.eventTracker) {
   //     return this.eventTracker;
@@ -151,10 +164,10 @@ export class RunScheduledReportTask {
   //   return this.eventTracker;
   // }
 
-  // private getJobContentEncoding(jobType: string) {
-  //   const exportType = this.exportTypesRegistry.getByJobType(jobType);
-  //   return exportType.jobContentEncoding;
-  // }
+  private getJobContentEncoding(jobType: string) {
+    const exportType = this.exportTypesRegistry.getByJobType(jobType);
+    return exportType.jobContentEncoding;
+  }
 
   // private async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
   //   if (this.kibanaId == null) {
@@ -271,126 +284,155 @@ export class RunScheduledReportTask {
   //   return await store.setReportFailed(report, doc);
   // }
 
-  // private async _saveExecutionError(
-  //   report: SavedReport,
-  //   failedToExecuteErr: any
-  // ): Promise<UpdateResponse<ReportDocument>> {
-  //   const message = `Saving execution error for ${report.jobtype} job ${report._id}`;
-  //   const errorParsed = parseError(failedToExecuteErr);
-  //   const logger = this.logger.get(report._id);
-  //   // log the error
-  //   errorLogger(logger, message, failedToExecuteErr);
+  private async _saveExecutionError(
+    report: SavedReport,
+    failedToExecuteErr: any
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const message = `Saving execution error for ${report.jobtype} job ${report._id}`;
+    const errorParsed = parseError(failedToExecuteErr);
+    const logger = this.logger.get(report._id);
+    // log the error
+    errorLogger(logger, message, failedToExecuteErr);
 
-  //   // update the report in the store
-  //   const store = await this.getStore();
-  //   const doc: ReportFailedFields = {
-  //     output: null,
-  //     error: errorParsed,
-  //   };
+    // update the report in the store
+    const store = await this.getStore();
+    const doc: ReportFailedFields = {
+      output: null,
+      error: errorParsed,
+    };
 
-  //   return await store.setReportError(report, doc);
-  // }
+    return await store.setReportError(report, doc);
+  }
 
-  // private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
-  //   const docOutput = {} as ReportOutput;
-  //   const unknownMime = null;
+  private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
+    const docOutput = {} as ReportOutput;
+    const unknownMime = null;
 
-  //   if (isOutput(output)) {
-  //     docOutput.content_type = output.content_type || unknownMime;
-  //     docOutput.max_size_reached = output.max_size_reached;
-  //     docOutput.csv_contains_formulas = output.csv_contains_formulas;
-  //     docOutput.size = output.size;
-  //     docOutput.warnings =
-  //       output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
-  //     docOutput.error_code = output.error_code;
-  //   } else {
-  //     const defaultOutput = null;
-  //     docOutput.content = output.humanFriendlyMessage?.() || output.toString() || defaultOutput;
-  //     docOutput.content_type = unknownMime;
-  //     docOutput.warnings = [output.toString()];
-  //     docOutput.error_code = output.code;
-  //     docOutput.size = typeof docOutput.content === 'string' ? docOutput.content.length : 0;
-  //   }
+    if (isOutput(output)) {
+      docOutput.content_type = output.content_type || unknownMime;
+      docOutput.max_size_reached = output.max_size_reached;
+      docOutput.csv_contains_formulas = output.csv_contains_formulas;
+      docOutput.size = output.size;
+      docOutput.warnings =
+        output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
+      docOutput.error_code = output.error_code;
+    } else {
+      const defaultOutput = null;
+      docOutput.content = output.humanFriendlyMessage?.() || output.toString() || defaultOutput;
+      docOutput.content_type = unknownMime;
+      docOutput.warnings = [output.toString()];
+      docOutput.error_code = output.code;
+      docOutput.size = typeof docOutput.content === 'string' ? docOutput.content.length : 0;
+    }
 
-  //   return docOutput;
-  // }
+    return docOutput;
+  }
 
-  // private async _performJob(
-  //   task: ReportTaskParams,
-  //   taskInstanceFields: TaskInstanceFields,
-  //   cancellationToken: CancellationToken,
-  //   stream: Writable
-  // ): Promise<TaskRunResult> {
-  //   const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
+  private async _performJob(
+    task: ReportTaskParams,
+    taskInstanceFields: TaskInstanceFields,
+    fakeRequest: KibanaRequest,
+    cancellationToken: CancellationToken,
+    stream: Writable,
+    forceNowOverride: string
+  ): Promise<TaskRunResult> {
+    const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
 
-  //   if (!exportType) {
-  //     throw new Error(`No export type from ${task.jobtype} found to execute report`);
-  //   }
-  //   // run the report
-  //   // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
-  //   const queueTimeout = durationToNumber(this.config.queue.timeout);
-  //   return Rx.lastValueFrom(
-  //     Rx.from(
-  //       exportType.runTask(task.id, task.payload, taskInstanceFields, cancellationToken, stream)
-  //     ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
-  //   );
-  // }
+    if (!exportType) {
+      throw new Error(`No export type from ${task.jobtype} found to execute report`);
+    }
+    // run the report
+    // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
+    const queueTimeout = durationToNumber(this.config.queue.timeout);
+    return Rx.lastValueFrom(
+      Rx.from(
+        exportType.runTask(
+          task.id,
+          task.payload,
+          taskInstanceFields,
+          fakeRequest,
+          cancellationToken,
+          stream,
+          forceNowOverride
+        )
+      ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
+    );
+  }
 
-  // private async _completeJob(
-  //   report: SavedReport,
-  //   output: CompletedReportOutput
-  // ): Promise<SavedReport> {
-  //   let docId = `/${report._index}/_doc/${report._id}`;
-  //   const logger = this.logger.get(report._id);
+  private async _completeJob(
+    report: SavedReport,
+    output: CompletedReportOutput
+  ): Promise<SavedReport> {
+    let docId = `/${report._index}/_doc/${report._id}`;
+    const logger = this.logger.get(report._id);
 
-  //   logger.debug(`Saving ${report.jobtype} to ${docId}.`);
+    logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
-  //   const completedTime = moment();
-  //   const docOutput = this._formatOutput(output);
-  //   const store = await this.getStore();
-  //   const doc = {
-  //     completed_at: completedTime.toISOString(),
-  //     metrics: output.metrics,
-  //     output: docOutput,
-  //   };
-  //   docId = `/${report._index}/_doc/${report._id}`;
+    const completedTime = moment();
+    const docOutput = this._formatOutput(output);
+    const store = await this.getStore();
+    const doc = {
+      completed_at: completedTime.toISOString(),
+      metrics: output.metrics,
+      output: docOutput,
+    };
+    docId = `/${report._index}/_doc/${report._id}`;
 
-  //   const resp = await store.setReportCompleted(report, doc);
+    const resp = await store.setReportCompleted(report, doc);
 
-  //   logger.info(`Saved ${report.jobtype} job ${docId}`);
-  //   report._seq_no = resp._seq_no!;
-  //   report._primary_term = resp._primary_term!;
+    logger.info(`Saved ${report.jobtype} job ${docId}`);
+    report._seq_no = resp._seq_no!;
+    report._primary_term = resp._primary_term!;
 
-  //   // event tracking of completed job
-  //   const eventTracker = this.getEventTracker(report);
-  //   const byteSize = docOutput.size;
-  //   const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
+    // event tracking of completed job
+    // const eventTracker = this.getEventTracker(report);
+    const byteSize = docOutput.size;
+    const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
 
-  //   if (output.metrics?.csv != null) {
-  //     eventTracker?.completeJobCsv({
-  //       byteSize,
-  //       timeSinceCreation,
-  //       csvRows: output.metrics.csv.rows ?? -1,
-  //     });
-  //   } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
-  //     const { width, height } = report.payload.layout?.dimensions ?? {};
-  //     eventTracker?.completeJobScreenshot({
-  //       byteSize,
-  //       timeSinceCreation,
-  //       screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
-  //       numPages: output.metrics.pdf?.pages ?? -1,
-  //       screenshotPixels: Math.round((width ?? 0) * (height ?? 0)),
-  //     });
-  //   }
+    // if (output.metrics?.csv != null) {
+    //   eventTracker?.completeJobCsv({
+    //     byteSize,
+    //     timeSinceCreation,
+    //     csvRows: output.metrics.csv.rows ?? -1,
+    //   });
+    // } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
+    //   const { width, height } = report.payload.layout?.dimensions ?? {};
+    //   eventTracker?.completeJobScreenshot({
+    //     byteSize,
+    //     timeSinceCreation,
+    //     screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
+    //     numPages: output.metrics.pdf?.pages ?? -1,
+    //     screenshotPixels: Math.round((width ?? 0) * (height ?? 0)),
+    //   });
+    // }
 
-  //   return report;
-  // }
+    return report;
+  }
 
-  // // Generic is used to let TS infer the return type at call site.
-  // private async throwIfKibanaShutsDown<T>(): Promise<T> {
-  //   await Rx.firstValueFrom(this.reporting.getKibanaShutdown$());
-  //   throw new KibanaShuttingDownError();
-  // }
+  // Generic is used to let TS infer the return type at call site.
+  private async throwIfKibanaShutsDown<T>(): Promise<T> {
+    await Rx.firstValueFrom(this.reporting.getKibanaShutdown$());
+    throw new KibanaShuttingDownError();
+  }
+
+  private getFakeKibanaRequest(apiKey: string) {
+    const requestHeaders: Headers = {};
+
+    requestHeaders.authorization = `ApiKey ${apiKey}`;
+
+    // TODO pass spaceId
+    const path = addSpaceIdToPath('/', 'default');
+
+    const fakeRawRequest: FakeRawRequest = {
+      headers: requestHeaders,
+      path: '/',
+    };
+
+    const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+    this.basePathService?.set(fakeRequest, path);
+
+    return fakeRequest;
+  }
 
   /*
    * Provides a TaskRunner for Task Manager
@@ -398,67 +440,110 @@ export class RunScheduledReportTask {
   private getTaskRunner(): TaskRunCreatorFunction {
     // Keep a separate local stack for each task run
     return ({ taskInstance }: RunContext) => {
-      let jobId: string;
+      let docId: string;
       const cancellationToken = new CancellationToken();
       const {
-        attempts: taskAttempts,
         params: reportTaskParams,
         retryAt: taskRetryAt,
         startedAt: taskStartedAt,
+        apiKey,
       } = taskInstance;
 
       return {
-        /*
-         * Runs a reporting job
-         * Claim job: Finds the report in ReportingStore, updates it to "processing"
-         * Perform job: Gets the export type's runner, runs it with the job params
-         * Complete job: Updates the report in ReportStore with the output from the runner
-         * If any error happens, additional retry attempts may be picked up by a separate instance
-         */
         run: async () => {
-          this.logger.info(`STARTING SCHEDULE REPORT TASK`);
-          let nextScheduled;
+          const now = new Date().toISOString();
+          this.logger.info(`STARTING SCHEDULE REPORT TASK - ${JSON.stringify(taskInstance)}`);
+          let report: SavedReport | undefined;
+          let cronSchedule: string | undefined;
 
-          // find the job in the store and set status to processing
+          // find the job in the store
           const task = reportTaskParams as ReportTaskParams;
-          jobId = task?.id;
+          docId = task?.id;
 
           try {
-            // Update job status to claimed
-            nextScheduled = await this._claimJob(task);
+            const store = await this.getStore();
+            const reportDoc = await store.findReportFromTask(task); // receives seq_no and primary_term
+            this.logger.info(`report ${JSON.stringify(reportDoc)}`);
+
+            cronSchedule = reportDoc.cron_schedule;
+            this.logger.info(`cronSchedule ${cronSchedule}`);
+
+            const jobTypeId = reportDoc.jobtype;
+            const exportType = this.reporting.getExportTypesRegistry().getByJobType(jobTypeId);
+
+            if (exportType == null) {
+              throw new Error(`Job type ${jobTypeId} does not exist in the registry!`);
+            }
+            if (!exportType.createJob) {
+              throw new Error(`Job type ${jobTypeId} is not a valid instance!`);
+            }
+
+            const job = reportDoc.payload;
+
+            // reset the now time if it exists
+            if (job.forceNow) {
+              job.forceNow = now;
+            }
+
+            // Add the report to the report store
+            const m = moment();
+            const queueTimeout = durationToNumber(this.config.queue.timeout);
+            report = await store.addReport(
+              new Report({
+                jobtype: exportType.jobType,
+                created_by: reportDoc.created_by,
+                scheduled_id: docId,
+                payload: job,
+                migration_version: reportDoc.migration_version,
+                meta: reportDoc.meta,
+                kibana_id: this.kibanaId,
+                kibana_name: this.kibanaName,
+                max_attempts: this.getMaxAttempts(),
+                started_at: m.toISOString(),
+                timeout: queueTimeout,
+                process_expiration: m.add(queueTimeout).toISOString(),
+                status: JOB_STATUS.PROCESSING,
+              })
+            );
+
+            this.logger.info(`created report ${JSON.stringify(report)}`);
           } catch (failedToClaim) {
             // error claiming report - log the error
             // could be version conflict, or too many attempts or no longer connected to ES
-            errorLogger(this.logger, `Error in claiming ${jobId}`, failedToClaim);
+            errorLogger(this.logger, `Error in claiming ${docId}`, failedToClaim);
           }
 
           if (!report) {
-            this.reporting.untrackReport(jobId);
-
-            if (isLastAttempt) {
-              errorLogger(this.logger, `Job ${jobId} failed too many times. Exiting...`);
-              return;
-            }
-
-            const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
-            errorLogger(this.logger, errorMessage);
-
-            // Throw so Task manager can clean up the failed task
-            throw new Error(errorMessage);
+            throw new Error(`malformed report`);
           }
 
-          const { jobtype: jobType, attempts } = report;
-          const maxAttempts = this.getMaxAttempts();
-          const logger = this.logger.get(jobId);
+          // if (!report) {
+          //   this.reporting.untrackReport(jobId);
 
-          logger.info(
-            `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
-          );
-          logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
+          //   if (isLastAttempt) {
+          //     errorLogger(this.logger, `Job ${jobId} failed too many times. Exiting...`);
+          //     return;
+          //   }
 
-          const eventLog = this.reporting.getEventLogger(
-            new Report({ ...task, _id: task.id, _index: task.index })
-          );
+          //   const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
+          //   errorLogger(this.logger, errorMessage);
+
+          //   // Throw so Task manager can clean up the failed task
+          //   throw new Error(errorMessage);
+          // }
+
+          const { jobtype: jobType } = report;
+          const logger = this.logger.get(docId);
+          const fakeRequest = this.getFakeKibanaRequest(apiKey!);
+
+          // logger.info(
+          //   `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
+          // );
+          // logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
+
+          // const eventLog = this.reporting.getEventLogger(
+          //   new Report({ ...task, _id: task.id, _index: task.index })
+          // );
 
           try {
             const jobContentEncoding = this.getJobContentEncoding(jobType);
@@ -474,14 +559,16 @@ export class RunScheduledReportTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
-            eventLog.logExecutionStart();
+            // eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
               this._performJob(
                 task,
                 { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                fakeRequest,
                 cancellationToken,
-                stream
+                stream,
+                now
               ),
               this.throwIfKibanaShutsDown(),
             ]);
@@ -495,10 +582,10 @@ export class RunScheduledReportTask {
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
 
-            eventLog.logExecutionComplete({
-              ...(output.metrics ?? {}),
-              byteSize: stream.bytesWritten,
-            });
+            // eventLog.logExecutionComplete({
+            //   ...(output.metrics ?? {}),
+            //   byteSize: stream.bytesWritten,
+            // });
 
             if (output) {
               logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
@@ -509,9 +596,9 @@ export class RunScheduledReportTask {
               });
             }
             // untrack the report for concurrency awareness
-            logger.debug(`Stopping ${jobId}.`);
+            logger.debug(`Stopping ${docId}.`);
           } catch (failedToExecuteErr) {
-            eventLog.logError(failedToExecuteErr);
+            // eventLog.logError(failedToExecuteErr);
 
             await this._saveExecutionError(report, failedToExecuteErr).catch(
               (failedToSaveError) => {
@@ -525,9 +612,22 @@ export class RunScheduledReportTask {
 
             throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
           } finally {
-            this.reporting.untrackReport(jobId);
+            // this.reporting.untrackReport(jobId);
             logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           }
+
+          let runAt: Date | undefined;
+          if (!cronSchedule) {
+            logger.error('No cron schedule found for the report');
+          } else {
+            const dt = cron.sendAt(cronSchedule);
+            runAt = dt.toJSDate();
+            logger.info(`The job would next run at: ${dt.toUTC()}`);
+          }
+
+          return {
+            ...(runAt ? { runAt } : {}),
+          };
         },
 
         /*
@@ -535,8 +635,8 @@ export class RunScheduledReportTask {
          * of timeout or server shutdown
          */
         cancel: async () => {
-          if (jobId) {
-            this.logger.get(jobId).warn(`Cancelling job ${jobId}...`);
+          if (docId) {
+            this.logger.get(docId).warn(`Cancelling job ${docId}...`);
           }
           cancellationToken.cancel();
         },
@@ -552,18 +652,24 @@ export class RunScheduledReportTask {
       type: this.TYPE,
       title: 'Reporting: run scheduled reports',
       createTaskRunner: this.getTaskRunner(),
-      schedule: { interval: '1m' },
       timeout: queueTimeout,
+      maxConcurrency: 1,
+      maxAttempts: 1,
     };
   }
 
-  public async scheduleTask() {
-    return await this.getTaskManagerStart().ensureScheduled({
-      id: this.TYPE,
+  public async scheduleTask(params: ReportTaskParams, apiKey: string, cronSchedule: string) {
+    const dt = cron.sendAt(cronSchedule);
+    this.logger.info(`The job would next run at: ${dt.toUTC()}`);
+
+    const taskInstance: ReportingExecuteTaskInstance = {
       taskType: this.TYPE,
       state: {},
-      params: {},
-    });
+      params,
+      runAt: dt.toJSDate(),
+    };
+
+    return await this.getTaskManagerStart().schedule(taskInstance, { apiKey });
   }
 
   public getStatus() {

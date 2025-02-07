@@ -154,6 +154,21 @@ export class ReportingStore {
     return await client.index(doc);
   }
 
+  private async indexScheduledReport(report: Report): Promise<IndexResponse> {
+    const doc = {
+      index: REPORTING_DATA_STREAM_ALIAS,
+      id: report._id,
+      refresh: 'wait_for' as estypes.Refresh,
+      op_type: 'create' as const,
+      body: {
+        ...report.toScheduledReportSource(),
+        ...sourceDoc({}),
+      },
+    };
+    const client = await this.getClient();
+    return await client.index(doc);
+  }
+
   /**
    * Function to be called during plugin start phase. This ensures the environment is correctly
    * configured for storage of reports.
@@ -174,6 +189,17 @@ export class ReportingStore {
   public async addReport(report: Report): Promise<SavedReport> {
     try {
       report.updateWithEsDoc(await this.indexReport(report));
+      return report as SavedReport;
+    } catch (err) {
+      this.reportingCore.getEventLogger(report).logError(err);
+      this.logError(`Error in adding a report!`, err, report);
+      throw err;
+    }
+  }
+
+  public async addScheduledReport(report: Report): Promise<SavedReport> {
+    try {
+      report.updateWithEsDoc(await this.indexScheduledReport(report));
       return report as SavedReport;
     } catch (err) {
       this.reportingCore.getEventLogger(report).logError(err);
@@ -221,6 +247,7 @@ export class ReportingStore {
         process_expiration: document._source?.process_expiration,
         status: document._source?.status,
         timeout: document._source?.timeout,
+        cron_schedule: document._source?.cron_schedule,
       });
     } catch (err) {
       this.logger.error(

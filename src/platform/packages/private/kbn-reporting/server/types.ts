@@ -43,7 +43,8 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
   taskInstanceFields: TaskInstanceFields,
   fakeRequest: KibanaRequest,
   cancellationToken: CancellationToken,
-  stream: Writable
+  stream: Writable,
+  forceNowOverride?: string
 ) => Promise<TaskRunResult>;
 
 export interface TimeRangeParams {

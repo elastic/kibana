@@ -134,6 +134,8 @@ export interface ReportSource {
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: BasePayload;
+  cron_schedule?: string;
+  scheduled_id?: string;
   meta: {
     // for telemetry
     objectType: string;
@@ -170,10 +172,19 @@ export interface ReportSource {
 }
 
 export interface ScheduledReportSource {
+  jobtype: string; // refers to `ExportTypeDefinition.jobType`
+  created_at: string; // timestamp in UTC
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
-  schedule: string; // describes the schedule, should we use rRule?
-  next_run_at: string; // next time this report should run
-  // need other stuff here so that we can create a new ReportSource every time
+  payload: BasePayload;
+  cron_schedule?: string;
+  migration_version: string; // for reminding the user to update their POST URL
+  meta: {
+    // for telemetry
+    objectType: string;
+    layout?: string;
+    isDeprecated?: boolean;
+  };
+  '@timestamp'?: string; // creation timestamp, only used for data streams compatibility
 }
 
 /*
