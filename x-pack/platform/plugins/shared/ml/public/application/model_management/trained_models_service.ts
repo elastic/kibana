@@ -16,8 +16,6 @@ import {
   skip,
   exhaustMap,
   firstValueFrom,
-} from 'rxjs';
-import {
   BehaviorSubject,
   Subject,
   timer,
@@ -606,20 +604,16 @@ export class TrainedModelsService {
     }
 
     // Wait for scheduled deployments to be empty before cleaning up
-    if (this.scheduledDeployments.length > 0) {
-      this.destroySubscription = this._scheduledDeployments$
-        .pipe(
-          filter((deployments) => deployments.length === 0),
-          take(1)
-        )
-        .subscribe({
-          complete: () => {
-            this.cleanupService();
-            this.destroySubscription = undefined;
-          },
-        });
-    } else {
-      this.cleanupService();
-    }
+    this.destroySubscription = this._scheduledDeployments$
+      .pipe(
+        filter((deployments) => deployments.length === 0),
+        take(1)
+      )
+      .subscribe({
+        complete: () => {
+          this.cleanupService();
+          this.destroySubscription = undefined;
+        },
+      });
   }
 }
