@@ -153,18 +153,21 @@ export const Container: React.FC<ContainerProps> = memo(
 
     const flyoutWidth = useMemo(() => {
       if (showCollapsed) {
-        return flyoutWidths.collapsedWidth || defaultWidths.rightWidth;
+        return flyoutWidths.collapsedWidth || defaultWidths[type].rightWidth;
       }
       if (showExpanded) {
-        return flyoutWidths.expandedWidth || defaultWidths.rightWidth + defaultWidths.leftWidth;
+        return (
+          flyoutWidths.expandedWidth ||
+          defaultWidths[type].rightWidth + defaultWidths[type].leftWidth
+        );
       }
     }, [
-      showCollapsed,
-      showExpanded,
+      defaultWidths,
       flyoutWidths.collapsedWidth,
       flyoutWidths.expandedWidth,
-      defaultWidths.rightWidth,
-      defaultWidths.leftWidth,
+      showCollapsed,
+      showExpanded,
+      type,
     ]);
 
     // callback function called when user changes the flyout's width

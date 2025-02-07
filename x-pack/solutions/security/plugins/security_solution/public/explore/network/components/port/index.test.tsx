@@ -28,46 +28,28 @@ describe('Port', () => {
   const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <Port
-        contextId="test"
-        eventId="abcd"
-        fieldName="destination.port"
-        isDraggable={true}
-        value="443"
-      />
-    );
+    const wrapper = shallow(<Port value="443" />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the port', () => {
     const wrapper = mount(
       <TestProviders>
-        <Port
-          contextId="test"
-          eventId="abcd"
-          fieldName="destination.port"
-          isDraggable={true}
-          value="443"
-        />
+        <Port value="443" />
       </TestProviders>
     );
 
     expect(
-      removeExternalLinkText(wrapper.find('[data-test-subj="port"]').first().text())
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="port-or-service-name-link"]').first().text()
+      )
     ).toContain('443');
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
     const wrapper = mount(
       <TestProviders>
-        <Port
-          contextId="test"
-          eventId="abcd"
-          fieldName="destination.port"
-          isDraggable={true}
-          value="443"
-        />
+        <Port value="443" />
       </TestProviders>
     );
 
@@ -76,21 +58,5 @@ describe('Port', () => {
     ).toEqual(
       'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=443'
     );
-  });
-
-  test('it renders only one external link icon', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Port
-          contextId="test"
-          eventId="abcd"
-          fieldName="destination.port"
-          isDraggable={true}
-          value="443"
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('span [data-euiicon-type="popout"]').length).toBe(1);
   });
 });
