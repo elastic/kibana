@@ -30,6 +30,7 @@ import { ServiceNameLink } from '../sub_components/service_name_link';
 import { TraceIdLink } from '../sub_components/trace_id_link';
 import { TransactionNameLink } from '../sub_components/transaction_name_link';
 import { Timestamp } from '../sub_components/timestamp';
+import { Duration } from '../sub_components/duration';
 
 export const getAttributeConfiguration = (
   attributes: TraceDocumentOverview
@@ -88,13 +89,13 @@ export const getAttributeConfiguration = (
       title: i18n.translate('discover.docViews.tracesOverview.details.spanDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: <p>{attributes[SPAN_DURATION_FIELD]}</p>,
+      content: <Duration duration={attributes[SPAN_DURATION_FIELD] ?? 0} />,
     },
     [TRANSACTION_DURATION_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.transactionDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: <p>{attributes[TRANSACTION_DURATION_FIELD]}</p>,
+      content: <Duration duration={attributes[TRANSACTION_DURATION_FIELD] ?? 0} />,
     },
     ['type_and_subtype']: {
       title: i18n.translate('discover.docViews.tracesOverview.details.typeAndSubtype.title', {
