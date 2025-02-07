@@ -47,21 +47,26 @@ export function TracesOverview({
         <h1>{detailTitle}</h1>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {(isTransaction ? transactionAttributeIds : spanAttributeIds).map((attributeId) => (
-        <div key={attributeId}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={1}>
-              <EuiTitle size="xxxs">
-                <h3>{getAttributeConfiguration(parsedDoc)[attributeId].title}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={2}>
-              {getAttributeConfiguration(parsedDoc)[attributeId].content}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="xs" />
-        </div>
-      ))}
+      {(isTransaction ? transactionAttributeIds : spanAttributeIds).map((attributeId) => {
+        const attributeConfiguration = getAttributeConfiguration(parsedDoc)[attributeId];
+
+        if (!attributeConfiguration.content) {
+          return null;
+        }
+        return (
+          <div key={attributeId}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={1}>
+                <EuiTitle size="xxxs">
+                  <h3>{attributeConfiguration.title}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={2}>{attributeConfiguration.content}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="xs" />
+          </div>
+        );
+      })}
     </EuiPanel>
   );
 }
