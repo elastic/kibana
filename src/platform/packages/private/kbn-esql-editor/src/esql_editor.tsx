@@ -26,7 +26,13 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
+import {
+  ESQLLang,
+  ESQL_LANG_ID,
+  ESQL_WORD_SEPARATORS,
+  monaco,
+  type ESQLCallbacks,
+} from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -37,7 +43,6 @@ import {
   type ESQLControlVariable,
 } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { ESQL_WORD_SEPARATORS } from '@kbn/monaco/src/esql/language';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
