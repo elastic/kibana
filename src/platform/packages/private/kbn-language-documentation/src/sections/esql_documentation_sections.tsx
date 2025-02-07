@@ -420,13 +420,13 @@ An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. To create a
 
 \`\`\`
 PUT languages
-{
+'{
   "settings": {
     "index":{
       "mode":"lookup"
     }
   }
-}
+}'
 \`\`\`
 
 The join key field must have a compatible type and match the name of the field in the lookup index to find matching documents. You can use \`RENAME\` or \`EVAL\` to rename columns as needed.
