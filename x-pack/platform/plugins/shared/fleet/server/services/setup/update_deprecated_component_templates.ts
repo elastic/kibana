@@ -16,7 +16,9 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
   });
 
   const deprecatedTemplates = componentTemplates.component_templates.filter(
-    (componentTemplate) => !!componentTemplate.component_template.template.mappings?._source?.mode
+    (componentTemplate) =>
+      componentTemplate.component_template._meta?.managed_by === 'fleet' &&
+      !!componentTemplate.component_template.template.mappings?._source?.mode
   );
 
   appContextService

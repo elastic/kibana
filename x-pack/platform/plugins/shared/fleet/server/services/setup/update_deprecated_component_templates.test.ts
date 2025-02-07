@@ -33,6 +33,9 @@ describe('updateDeprecatedComponentTemplates', () => {
                     properties: {},
                   },
                 },
+                _meta: {
+                  managed_by: 'fleet',
+                },
               },
             },
             {
@@ -43,6 +46,9 @@ describe('updateDeprecatedComponentTemplates', () => {
                   mappings: {
                     properties: {},
                   },
+                },
+                _meta: {
+                  managed_by: 'fleet',
                 },
               },
             },
