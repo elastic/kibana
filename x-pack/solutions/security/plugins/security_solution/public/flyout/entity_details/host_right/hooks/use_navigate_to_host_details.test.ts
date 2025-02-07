@@ -99,7 +99,6 @@ describe('useNavigateToHostDetails', () => {
             contextID: mockProps.contextID,
             scopeId: mockProps.scopeId,
             hostName: mockProps.hostName,
-            isDraggable: undefined,
           },
         },
         left: {
