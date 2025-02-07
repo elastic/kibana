@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-export interface ObsAIAssistantActionParams {
-  connector: string;
-  prompts?: Array<{
-    message: string;
-    statuses: string[];
-  }>;
-  message?: string; // this is a legacy field
-}
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
+
+export const ALERT_STATUSES = [ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS_UNTRACKED];
