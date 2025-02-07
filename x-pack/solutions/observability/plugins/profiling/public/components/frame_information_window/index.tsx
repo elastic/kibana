@@ -161,7 +161,7 @@ export function FrameInformationWindow({
         <FrameInformationAIAssistant frame={frame} />
         {showSymbolsStatus &&
         symbolStatus !== FrameSymbolStatus.SYMBOLIZED &&
-        frame.frameType !== FrameType.Root ? (
+        frame.frameType < FrameType.Root ? (
           <EuiFlexItem>
             <MissingSymbolsCallout frameType={frame.frameType} />
           </EuiFlexItem>
