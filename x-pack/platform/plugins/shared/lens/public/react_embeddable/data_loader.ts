@@ -22,21 +22,8 @@ import {
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import {
-  getESQLAdHocDataview,
-  getESQLQueryColumns,
-  getIndexForESQLQuery,
-  getInitialESQLQuery,
-} from '@kbn/esql-utils';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { getEditPath } from '../../common/constants';
-import type {
-  GetStateType,
-  LensApi,
-  LensInternalApi,
-  LensPublicCallbacks,
-  LensRuntimeState,
-} from './types';
+import type { GetStateType, LensApi, LensInternalApi, LensPublicCallbacks } from './types';
 import { getExpressionRendererParams } from './expressions/expression_params';
 import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
@@ -44,12 +31,11 @@ import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
 import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
-import { getRenderMode, getParentContext } from './helper';
+import { getRenderMode, getParentContext, buildObservableVariable } from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getMergedSearchContext } from './expressions/merged_search_context';
-import { isESQLModeEnabled } from './initializers/utils';
-import { suggestionsApi } from '../lens_suggestions_api';
+import { getEmbeddableVariables } from './initializers/utils';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
@@ -84,68 +70,15 @@ function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable
   };
 }
 
-async function loadESQLAttributes(
-  { dataViews, data, visualizationMap, datasourceMap, ...rest }: LensEmbeddableStartServices,
-  updateAttributes: (attributes: LensRuntimeState['attributes']) => void
+function buildESQLControlVariablesUpdater(
+  attributes$: LensInternalApi['attributes$'],
+  updatePanelVariables: (variables: ESQLControlVariable[]) => void
 ) {
-  // Early exit if ESQL is not supported
-  if (!isESQLModeEnabled(rest)) {
-    return;
-  }
-  const indexName = await getIndexForESQLQuery({ dataViews });
-  // Early exit if there's no data view to use
-  if (!indexName) {
-    return;
-  }
-
-  const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
-
-  const esqlQuery = getInitialESQLQuery(dataView);
-
-  const defaultEsqlQuery = {
-    esql: esqlQuery,
+  return function updateESQLControlVariables(newVariables: ESQLControlVariable[]) {
+    const query = attributes$.getValue().state?.query;
+    const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
+    updatePanelVariables(esqlVariables);
   };
-
-  // For the suggestions api we need only the columns
-  // so we are requesting them with limit 0
-  // this is much more performant than requesting
-  // all the table
-  const abortController = new AbortController();
-  const columns = await getESQLQueryColumns({
-    esqlQuery,
-    search: data.search.search,
-    signal: abortController.signal,
-    timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
-  });
-
-  const context = {
-    dataViewSpec: dataView.toSpec(false),
-    fieldName: '',
-    textBasedColumns: columns,
-    query: defaultEsqlQuery,
-  };
-
-  // get the initial attributes from the suggestions api
-  const allSuggestions =
-    suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
-
-  // Lens might not return suggestions for some cases, i.e. in case of errors
-  if (!allSuggestions.length) {
-    return;
-  }
-  const [firstSuggestion] = allSuggestions;
-  const newAttributes = getLensAttributesFromSuggestion({
-    filters: [],
-    query: defaultEsqlQuery,
-    suggestion: {
-      ...firstSuggestion,
-      title: '', // when creating a new panel, we don't want to use the title from the suggestion
-    },
-    dataView,
-  });
-
-  // time to update the existing attributes$
-  updateAttributes(newAttributes);
 }
 
 /**
@@ -153,7 +86,7 @@ async function loadESQLAttributes(
  * for the ExpressionWrapper component, binding any outer context to them.
  * @returns
  */
-export async function loadEmbeddableData(
+export function loadEmbeddableData(
   uuid: string,
   getState: GetStateType,
   api: LensApi,
@@ -162,15 +95,12 @@ export async function loadEmbeddableData(
   services: LensEmbeddableStartServices,
   metaInfo?: SharingSavedObjectProps
 ) {
-  // if it's a new ES|QL panel, async load the correct attributes
-  // before subscribe to the apis
-  if (internalApi.isNewlyCreated$.getValue()) {
-    await loadESQLAttributes(services, (attributes: LensRuntimeState['attributes']) => {
-      // TODO: merge these two calls
-      internalApi.updateAttributes(attributes);
-      internalApi.updateVisualizationContext({ activeAttributes: attributes });
-    });
-  }
+  const [controlESQLVariables$] = buildObservableVariable<ESQLControlVariable[]>([]);
+  const updateESQLControlVariables = buildESQLControlVariablesUpdater(
+    internalApi.attributes$,
+    (vars: ESQLControlVariable[]) => controlESQLVariables$.next(vars)
+  );
+
   const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
     ? parentApi
     : ({} as LensPublicCallbacks);
@@ -277,11 +207,9 @@ export async function loadEmbeddableData(
       callbacks
     );
 
-    const esqlVariables = internalApi?.esqlVariables$?.getValue();
-
     const searchContext = getMergedSearchContext(
       currentState,
-      getSearchContext(parentApi, esqlVariables),
+      getSearchContext(parentApi, controlESQLVariables$?.getValue()),
       api.timeRange$,
       parentApi,
       services
@@ -348,7 +276,7 @@ export async function loadEmbeddableData(
   const mergedSubscriptions = merge(
     // on search context change, reload
     fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
-    internalApi?.esqlVariables$.pipe(
+    controlESQLVariables$.pipe(
       waitUntilChanged(),
       map(() => 'ESQLvariables' as ReloadReason)
     ),
@@ -382,6 +310,8 @@ export async function loadEmbeddableData(
 
   const subscriptions: Subscription[] = [
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
+    // In case of changes to the dashboard ES|QL controls, re-map them
+    internalApi.esqlVariables$.subscribe(updateESQLControlVariables),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set

@@ -35,15 +35,6 @@ import {
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { isObject } from 'lodash';
 import { createMockDatasource, defaultDoc } from '../mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import * as suggestionModule from '../lens_suggestions_api';
-// Need to do this magic in order to spy on specific functions
-import * as esqlUtils from '@kbn/esql-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-jest.mock('@kbn/esql-utils', () => ({
-  __esModule: true,
-  ...jest.requireActual('@kbn/esql-utils'),
-}));
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
@@ -73,11 +64,6 @@ jest.mock('@kbn/presentation-publishing', () => {
     }),
   };
 });
-
-function getUiSettingsOverrides() {
-  const core = coreMock.createStart({ basePath: '/testbasepath' });
-  return core.uiSettings;
-}
 
 // In order to listen the reload function, we need to
 // monitor the internalApi dispatchRenderStart spy
@@ -491,75 +477,5 @@ describe('Data Loader', () => {
         },
       }
     );
-  });
-
-  describe('ES|QL creation flow', () => {
-    function getTestBaseOverrides() {
-      return {
-        servicesOverrides: {
-          uiSettings: { ...getUiSettingsOverrides(), get: jest.fn().mockReturnValue(true) },
-        },
-        internalApiOverrides: {
-          isNewlyCreated$: new BehaviorSubject(true),
-        },
-      };
-    }
-    it('should not update the attributes if no index is available', async () => {
-      jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce(null);
-
-      await expectRerenderOnDataLoader(
-        async ({ internalApi }) => {
-          expect(internalApi.updateAttributes).not.toHaveBeenCalled();
-          return false;
-        },
-        undefined,
-        getTestBaseOverrides()
-      );
-    });
-
-    it('should not update the attributes if no suggestion is generated', async () => {
-      jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
-      jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
-      jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
-      jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
-
-      await expectRerenderOnDataLoader(
-        async ({ internalApi }) => {
-          expect(internalApi.updateAttributes).not.toHaveBeenCalled();
-          return false;
-        },
-        undefined,
-        getTestBaseOverrides()
-      );
-    });
-
-    it('should update the attributes if there is a valid suggestion', async () => {
-      jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
-      jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
-      jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
-      jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
-        {
-          title: 'MyTitle',
-          visualizationId: 'lnsXY',
-          datasourceId: 'form_based',
-          datasourceState: {},
-          visualizationState: {},
-          columns: 1,
-          score: 1,
-          previewIcon: 'icon',
-          changeType: 'initial',
-          keptLayerIds: [],
-        },
-      ]);
-
-      await expectRerenderOnDataLoader(
-        async ({ internalApi }) => {
-          expect(internalApi.updateAttributes).toHaveBeenCalled();
-          return false;
-        },
-        undefined,
-        getTestBaseOverrides()
-      );
-    });
   });
 });

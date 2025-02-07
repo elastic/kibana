@@ -45,9 +45,12 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
     if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
     const lensEmbeddable = await embeddable.addNewPanel<object, LensApi>({
       panelType: 'lens',
-      initialState: {
-        id: generateId(),
-        isNewPanel: true,
+      serializedState: {
+        rawState: {
+          id: generateId(),
+          isNewPanel: true,
+          attributes: { references: [] },
+        },
       },
     });
     lensEmbeddable?.onEdit();

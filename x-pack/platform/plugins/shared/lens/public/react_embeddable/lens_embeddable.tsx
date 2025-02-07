@@ -38,7 +38,7 @@ export const createLensEmbeddableFactory = (
      * final state will contain the attributes object
      */
     deserializeState: async ({ rawState, references }) =>
-      deserializeState(services.attributeService, rawState, references),
+      deserializeState(services, rawState, references),
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param state     the Lens "runtime" state, which means that 'attributes' is always present.
@@ -167,7 +167,7 @@ export const createLensEmbeddableFactory = (
       // Compute the expression using the provided parameters
       // Inside a subscription will be updated based on each unifiedSearch change
       // and as side effect update few observables as  expressionParams$, expressionAbortController$ and renderCount$ with the new values upon updates
-      const expressionConfig = await loadEmbeddableData(
+      const expressionConfig = loadEmbeddableData(
         uuid,
         getState,
         api,

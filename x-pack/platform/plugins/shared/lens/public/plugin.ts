@@ -402,12 +402,12 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
-          const { attributeService } = await this.getStartServicesForEmbeddable(startServices);
+          const services = await this.getStartServicesForEmbeddable(startServices);
           // deserialize the saved object from visualize library
           // this make sure to fit into the new embeddable model, where the following build()
           // function expects a fully loaded runtime state
           const state = await deserializeState(
-            attributeService,
+            services,
             { savedObjectId: savedObject.id },
             savedObject.references
           );
