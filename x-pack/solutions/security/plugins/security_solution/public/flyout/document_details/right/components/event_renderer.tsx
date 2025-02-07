@@ -38,7 +38,6 @@ export const EventRenderer: FC = () => {
         ? renderer.renderRow({
             contextId: 'event-details',
             data: dataAsNestedObject,
-            isDraggable: false,
             scopeId,
           })
         : null,
