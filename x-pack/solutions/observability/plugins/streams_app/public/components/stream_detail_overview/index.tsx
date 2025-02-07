@@ -301,7 +301,7 @@ function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse 
     return wiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name));
   }, [definition, wiredStreams]);
 
-  if (definition && childrenStreams?.length === 1) {
+  if (definition && childrenStreams?.length === 0) {
     return (
       <EuiFlexItem grow>
         <EuiFlexGroup alignItems="center" justifyContent="center">
