@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -63,20 +63,19 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   fullCopyButton,
   onCopy,
 }) => {
-  const getInitialPlatform = useCallback(() => {
+  const { platform, setPlatform } = usePlatform();
+  const [showExtendedPlatforms, setShowExtendedPlatforms] = useState(false);
+
+  useEffect(() => {
     if (
       hasK8sIntegration ||
       (cloudSecurityIntegration?.integrationType ===
         FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE &&
         isManaged)
-    )
-      return 'kubernetes';
-
-    return 'linux_aarch64';
-  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType, isManaged]);
-
-  const { platform, setPlatform } = usePlatform(getInitialPlatform());
-  const [showExtendedPlatforms, setShowExtendedPlatforms] = useState(false);
+    ) {
+      setPlatform('kubernetes');
+    }
+  }, [hasK8sIntegration, cloudSecurityIntegration, isManaged, setPlatform]);
 
   // Show K8 as a platform option if policy has K8s integration or is managed
   const showK8 = !hasFleetServer && (isManaged || hasK8sIntegration);
@@ -152,6 +151,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           >
             {VISIBLE_PALFORM_OPTIONS.map((option) => (
               <EuiFilterButton
+                key={option.id}
                 hasActiveFilters={platform === option.id}
                 onClick={() => setPlatform(option.id)}
                 data-test-subj={option['data-test-subj']}
@@ -179,6 +179,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               isOpen={showExtendedPlatforms}
               closePopover={() => setShowExtendedPlatforms(false)}
               panelPaddingSize="none"
+              repositionOnScroll={true}
             >
               <EuiSelectable
                 aria-label={i18n.translate(
