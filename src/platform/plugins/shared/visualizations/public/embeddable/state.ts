@@ -40,21 +40,23 @@ import {
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
 ) => {
-  return state.rawState
-    ? {
-        ...state.rawState,
-        serializedVis: deserializeSavedVisState(
-          (state.rawState as VisualizeSavedObjectInputState).savedObjectId
-            ? await deserializeSavedObjectState(state.rawState as VisualizeSavedObjectInputState)
-            : (cloneDeep(state.rawState) as VisualizeSavedVisInputState),
-          state.references ?? []
-        ),
-      }
-    : ({
-        serializedVis: {
-          data: {},
-        },
-      } as VisualizeRuntimeState);
+  if (!state.rawState)
+    return {
+      serializedVis: {
+        data: {},
+      },
+    } as VisualizeRuntimeState;
+
+  const byValueState = (state.rawState as VisualizeSavedObjectInputState).savedObjectId
+    ? await deserializeSavedObjectState(state.rawState as VisualizeSavedObjectInputState)
+    : (cloneDeep(state.rawState) as VisualizeSavedVisInputState);
+
+  const deserializedSavedVis = deserializeSavedVisState(byValueState, state.references ?? []);
+
+  return {
+    ...byValueState,
+    serializedVis: deserializedSavedVis,
+  } as VisualizeRuntimeState;
 };
 
 export const deserializeSavedVisState = (
