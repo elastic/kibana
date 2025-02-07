@@ -150,6 +150,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
             value={activeSampleSize}
             onChange={onChangeActiveSampleSize}
             data-test-subj="unifiedDataTableSampleSizeInput"
+            showRange
           />
         </EuiFormRow>
       </>
