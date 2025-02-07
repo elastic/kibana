@@ -21,6 +21,7 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
 
   // Service
   const serviceName = formatField(fieldConstants.SERVICE_NAME_FIELD);
+  const serviceEnvironment = formatField(fieldConstants.SERVICE_ENVIRONMENT_FIELD);
   const agentName = formatField(fieldConstants.AGENT_NAME_FIELD);
 
   // Transaction
@@ -49,6 +50,7 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
     [fieldConstants.HTTP_RESPONSE_STATUS_CODE_FIELD]: httpResponseStatusCode,
     [fieldConstants.TRACE_ID_FIELD]: traceId,
     [fieldConstants.SERVICE_NAME_FIELD]: serviceName,
+    [fieldConstants.SERVICE_ENVIRONMENT_FIELD]: serviceEnvironment,
     [fieldConstants.AGENT_NAME_FIELD]: agentName,
     [fieldConstants.TRANSACTION_ID_FIELD]: transactionId,
     [fieldConstants.TRANSACTION_NAME_FIELD]: transactionName,

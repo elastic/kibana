@@ -114,27 +114,32 @@ export interface LogCloudFields {
 }
 
 export interface TraceDocumentOverview
-  extends TransactionTraceFields,
+  extends ServiceFields,
+    TransactionTraceFields,
     SpanTraceFields,
     UserAgentTraceFields {
   '@timestamp': number;
   'trace.id': string;
-  'service.name': string;
-  'agent.name': string;
   'parent.id'?: string;
   'http.response.status_code'?: string;
+}
+
+export interface ServiceFields {
+  'service.name': string;
+  'service.environment': string;
+  'agent.name': string;
 }
 
 export interface TransactionTraceFields {
   'transaction.id'?: string;
   'transaction.name'?: string;
-  'transaction.duration.us'?: string;
+  'transaction.duration.us'?: number;
 }
 
 export interface SpanTraceFields {
   'span.name'?: string;
   'span.action'?: string;
-  'span.duration.us'?: string;
+  'span.duration.us'?: number;
   'span.type'?: string;
   'span.subtype'?: string;
   'span.destination.service.resource'?: string;

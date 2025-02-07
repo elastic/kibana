@@ -29,6 +29,7 @@ export const CLOUD_AVAILABILITY_ZONE_FIELD = 'cloud.availability_zone';
 export const CLOUD_PROJECT_ID_FIELD = 'cloud.project.id';
 export const CLOUD_INSTANCE_ID_FIELD = 'cloud.instance.id';
 export const SERVICE_NAME_FIELD = 'service.name';
+export const SERVICE_ENVIRONMENT_FIELD = 'service.environment';
 export const ORCHESTRATOR_CLUSTER_NAME_FIELD = 'orchestrator.cluster.name';
 export const ORCHESTRATOR_RESOURCE_ID_FIELD = 'orchestrator.resource.id';
 export const ORCHESTRATOR_NAMESPACE_FIELD = 'orchestrator.namespace';
