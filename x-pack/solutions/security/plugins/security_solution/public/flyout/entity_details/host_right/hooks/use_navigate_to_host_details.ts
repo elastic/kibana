@@ -24,7 +24,6 @@ interface UseNavigateToHostDetailsParams {
   hasNonClosedAlerts: boolean;
   isPreviewMode?: boolean;
   contextID: string;
-  isDraggable?: boolean;
 }
 
 interface UseNavigateToHostDetailsResult {
@@ -41,7 +40,6 @@ export const useNavigateToHostDetails = ({
   hasNonClosedAlerts,
   isPreviewMode,
   contextID,
-  isDraggable,
 }: UseNavigateToHostDetailsParams): UseNavigateToHostDetailsResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
@@ -78,7 +76,6 @@ export const useNavigateToHostDetails = ({
           contextID,
           scopeId,
           hostName,
-          isDraggable,
         },
       };
 
@@ -103,7 +100,6 @@ export const useNavigateToHostDetails = ({
       hasVulnerabilitiesFindings,
       hasNonClosedAlerts,
       contextID,
-      isDraggable,
     ]
   );
 

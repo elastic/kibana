@@ -6,6 +6,7 @@
  */
 
 import { createEvent, fireEvent, render } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 import { HeaderMenu } from '.';
 import { actions, actionsWithDisabledDelete } from '../mocks/header.mock';
@@ -124,7 +125,9 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={customActions}
         useCustomActions
-      />
+      />,
+
+      { wrapper: EuiThemeProvider }
     );
 
     expect(wrapper.container).toMatchSnapshot();
