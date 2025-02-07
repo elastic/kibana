@@ -29,13 +29,13 @@ export function StreamDeleteModal({
   closeModal,
   clearChildUnderEdit,
   refreshDefinition,
-  id,
+  name,
   availableStreams,
 }: {
   closeModal: () => void;
   clearChildUnderEdit: () => void;
   refreshDefinition: () => void;
-  id: string;
+  name: string;
   availableStreams: string[];
 }) {
   const {
@@ -51,7 +51,7 @@ export function StreamDeleteModal({
   const [deleteInProgress, setDeleteInProgress] = React.useState(false);
   const modalTitleId = useGeneratedHtmlId();
   const streamsToBeDeleted = availableStreams.filter(
-    (stream) => stream === id || isDescendantOf(id, stream)
+    (stream) => stream === name || isDescendantOf(name, stream)
   );
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
@@ -117,11 +117,11 @@ export function StreamDeleteModal({
             onClick={async () => {
               try {
                 setDeleteInProgress(true);
-                await streamsRepositoryClient.fetch('DELETE /api/streams/{id}', {
+                await streamsRepositoryClient.fetch('DELETE /api/streams/{name}', {
                   signal: abortController.signal,
                   params: {
                     path: {
-                      id,
+                      name,
                     },
                   },
                 });
@@ -140,7 +140,7 @@ export function StreamDeleteModal({
                   title: i18n.translate('xpack.streams.failedToDelete', {
                     defaultMessage: 'Failed to delete stream {id}',
                     values: {
-                      id,
+                      id: name,
                     },
                   }),
                 });

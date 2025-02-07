@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export function getComponentTemplateName(id: string) {
-  return `${id}@stream.layer`;
+export function getComponentTemplateName(name: string) {
+  return `${name}@stream.layer`;
 }

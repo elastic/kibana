@@ -41,11 +41,11 @@ export const useSchemaFields = ({
     refresh: refreshUnmappedFields,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}/schema/unmapped_fields', {
+      return streamsRepositoryClient.fetch('GET /api/streams/{name}/schema/unmapped_fields', {
         signal,
         params: {
           path: {
-            id: definition.stream.name,
+            name: definition.stream.name,
           },
         },
       });
@@ -103,11 +103,11 @@ export const useSchemaFields = ({
           throw new Error('The field is not different, hence updating is not necessary.');
         }
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
+        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
           signal: abortController.signal,
           params: {
             path: {
-              id: definition.stream.name,
+              name: definition.stream.name,
             },
             body: {
               ingest: {
@@ -154,11 +154,11 @@ export const useSchemaFields = ({
           throw new Error('The field is not mapped, hence it cannot be unmapped.');
         }
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
+        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
           signal: abortController.signal,
           params: {
             path: {
-              id: definition.stream.name,
+              name: definition.stream.name,
             },
             body: {
               ingest: {

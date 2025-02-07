@@ -56,11 +56,11 @@ export function ControlBar({
       return;
     }
 
-    return streamsRepositoryClient.fetch('POST /api/streams/{id}/_fork', {
+    return streamsRepositoryClient.fetch('POST /api/streams/{name}/_fork', {
       signal,
       params: {
         path: {
-          id: definition.stream.name,
+          name: definition.stream.name,
         },
         body: {
           if: emptyEqualsToAlways(routingAppState.childUnderEdit.child.if),
@@ -92,11 +92,11 @@ export function ControlBar({
       },
     } as IngestUpsertRequest;
 
-    return streamsRepositoryClient.fetch('PUT /api/streams/{id}/_ingest', {
+    return streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest', {
       signal,
       params: {
         path: {
-          id: stream.name,
+          name: stream.name,
         },
         body: request,
       },

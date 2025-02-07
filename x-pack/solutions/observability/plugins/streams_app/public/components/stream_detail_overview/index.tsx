@@ -136,11 +136,11 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
       ) {
         return undefined;
       }
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}/_details', {
+      return streamsRepositoryClient.fetch('GET /api/streams/{name}/_details', {
         signal,
         params: {
           path: {
-            id: definition.stream.name,
+            name: definition.stream.name,
           },
           query: {
             start: String(start),
