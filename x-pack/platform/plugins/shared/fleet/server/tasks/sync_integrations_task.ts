@@ -71,7 +71,7 @@ export class SyncIntegrationsTask {
               return this.runTask(taskInstance, core);
             },
             cancel: async () => {
-              this.abortController.abort('Task timed out');
+              this.abortController.abort('Task cancelled');
             },
           };
         },
