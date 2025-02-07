@@ -11,7 +11,7 @@ import * as Rx from 'rxjs';
 import { timeout } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as cron from 'cron';
-import { Stream, Writable } from 'stream';
+import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -448,6 +448,7 @@ export class RunScheduledReportTask {
       const cancellationToken = new CancellationToken();
       const {
         params: reportTaskParams,
+        runAt: taskRunAt,
         retryAt: taskRetryAt,
         startedAt: taskStartedAt,
         apiKey,
@@ -455,7 +456,7 @@ export class RunScheduledReportTask {
 
       return {
         run: async () => {
-          const now = new Date().toISOString();
+          const runAtString = taskRunAt.toISOString();
           this.logger.info(`STARTING SCHEDULE REPORT TASK - ${JSON.stringify(taskInstance)}`);
           let report: SavedReport | undefined;
           let cronSchedule: string | undefined;
@@ -488,9 +489,11 @@ export class RunScheduledReportTask {
 
             const job = reportDoc.payload;
 
+            job.title = `${job.title} - ${runAtString}`;
+
             // reset the now time if it exists
             if (job.forceNow) {
-              job.forceNow = now;
+              job.forceNow = runAtString;
             }
 
             // Add the report to the report store
@@ -576,7 +579,7 @@ export class RunScheduledReportTask {
                 fakeRequest,
                 cancellationToken,
                 contentStream!,
-                now
+                runAtString
               ),
               this.throwIfKibanaShutsDown(),
             ]);
@@ -615,7 +618,7 @@ export class RunScheduledReportTask {
 
             await this._saveExecutionError(report, failedToExecuteErr).catch(
               (failedToSaveError) => {
-                errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
+                errorLogger(logger, `Error in saving execution error ${docId}`, failedToSaveError);
               }
             );
 
@@ -645,7 +648,7 @@ export class RunScheduledReportTask {
                   id: EMAIL,
                   params: {
                     to: [notifyEmail],
-                    subject: `Scheduled Report for ${now}`,
+                    subject: `Scheduled Report for ${runAtString}`,
                     message: `Here's your report!`,
                     attachments: [
                       {
