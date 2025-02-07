@@ -94,7 +94,7 @@ export enum ExternalPageName {
   managementFiles = 'management:filesManagement',
   managementSpaces = 'management:spaces',
   managementSettings = 'management:settings',
-  managementMonitoring = 'management:stack_monitoring',
+  managementMonitoring = 'monitoring:',
   // Cloud UI
   // These are links to Cloud UI outside Kibana
   // Special Format: <cloud>:<cloudUrlKey>
