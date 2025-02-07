@@ -34,29 +34,6 @@ type PartialMergedAnnotation = Pick<
   'position' | 'icon' | 'textVisibility' | 'label' | 'isGrouped'
 >;
 
-const xyDecorationRotatedWrapperCss = {
-  self: css`
-    display: inline-block;
-    width: ${LINES_MARKER_SIZE}px;
-    overflow: hidden;
-    line-height: 1.5;
-  `,
-
-  label: css`
-    display: inline-block;
-    max-width: ${LINES_MARKER_SIZE * 3}px;
-    white-space: nowrap;
-    transform: translate(0, 100%) rotate(-90deg);
-    transform-origin: 0 0;
-
-    &::after {
-      content: '';
-      float: left;
-      margin-top: 100%;
-    }
-  `,
-};
-
 const isExtendedDecorationConfig = (
   config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined
 ): config is PartialReferenceLineDecorationConfig =>
@@ -234,3 +211,26 @@ export function Marker({
   }
   return null;
 }
+
+const xyDecorationRotatedWrapperCss = {
+  self: css`
+    display: inline-block;
+    width: ${LINES_MARKER_SIZE}px;
+    overflow: hidden;
+    line-height: 1.5;
+  `,
+
+  label: css`
+    display: inline-block;
+    max-width: ${LINES_MARKER_SIZE * 3}px;
+    white-space: nowrap;
+    transform: translate(0, 100%) rotate(-90deg);
+    transform-origin: 0 0;
+
+    &::after {
+      content: '';
+      float: left;
+      margin-top: 100%;
+    }
+  `,
+};
