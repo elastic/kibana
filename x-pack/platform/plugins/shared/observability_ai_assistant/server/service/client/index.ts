@@ -14,7 +14,6 @@ import { context } from '@opentelemetry/api';
 import { last, merge, omit } from 'lodash';
 import {
   catchError,
-  combineLatest,
   defer,
   filter,
   forkJoin,
@@ -163,7 +162,7 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  complete = ({
+  complete = async ({
     functionClient,
     connectorId,
     simulateFunctionCalling = false,
@@ -193,273 +192,243 @@ export class ObservabilityAIAssistantClient {
       | {
           except: string[];
         };
-  }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
-    return new LangTracer(context.active()).startActiveSpan(
-      'complete',
-      ({ tracer: completeTracer }) => {
-        const isConversationUpdate = persist && !!predefinedConversationId;
+  }): Promise<Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>> => {
+    const isConversationUpdate = persist && !!predefinedConversationId;
 
-        const conversationId = persist ? predefinedConversationId || v4() : '';
+    const conversationId = persist ? predefinedConversationId || v4() : '';
 
-        if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `This conversation will be persisted in Kibana and available at this url: ${
-              kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`,
-          });
-        }
+    if (persist && !isConversationUpdate && kibanaPublicUrl) {
+      adHocInstructions.push({
+        instruction_type: 'application_instruction',
+        text: `This conversation will be persisted in Kibana and available at this url: ${
+          kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
+        }`,
+      });
+    }
 
-        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
+    const userInstructions = await this.getKnowledgeBaseUserInstructions();
 
-        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+    const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+    const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
 
-        // from the initial messages, override any system message with
-        // the one that is based on the instructions (registered, request, kb)
-        const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
-          map((userInstructions) => {
-            // this is what we eventually store in the conversation
-            const messagesWithUpdatedSystemMessage = replaceSystemMessage(
-              getSystemMessageFromInstructions({
-                applicationInstructions: functionClient.getInstructions(),
-                userInstructions,
-                adHocInstructions: allAdHocInstructions,
-                availableFunctionNames: functionClient
-                  .getFunctions()
-                  .map((fn) => fn.definition.name),
-              }),
-              initialMessages
-            );
+    // from the initial messages, override any system message with
+    // the one that is based on the instructions (registered, request, kb)
+    // this is what we eventually store in the conversation
+    const messagesWithUpdatedSystemMessage = replaceSystemMessage(
+      getSystemMessageFromInstructions({
+        applicationInstructions: functionClient.getInstructions(),
+        userInstructions,
+        adHocInstructions: allAdHocInstructions,
+        availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+      }),
+      initialMessages
+    );
 
-            return messagesWithUpdatedSystemMessage;
-          }),
-          shareReplay()
-        );
-
-        // if it is:
-        // - a new conversation
-        // - no predefined title is given
-        // - we need to store the conversation
-        // we generate a title
-        // if not, we complete with an empty string
-        const title$ =
-          predefinedTitle || isConversationUpdate || !persist
-            ? of(predefinedTitle || '').pipe(shareReplay())
-            : messagesWithUpdatedSystemMessage$.pipe(
-                switchMap((messages) =>
-                  getGeneratedTitle({
-                    messages,
-                    logger: this.dependencies.logger,
-                    chat: (name, chatParams) =>
-                      this.chat(name, {
-                        ...chatParams,
-                        simulateFunctionCalling,
-                        connectorId,
-                        signal,
-                        stream: false,
-                      }),
-                    tracer: completeTracer,
-                  })
-                ),
-                shareReplay()
-              );
-
-        // we continue the conversation here, after resolving both the materialized
-        // messages and the knowledge base instructions
-        const nextEvents$ = combineLatest([
-          messagesWithUpdatedSystemMessage$,
-          userInstructions$,
-        ]).pipe(
-          switchMap(([messagesWithUpdatedSystemMessage, userInstructions]) => {
-            // if needed, inject a context function request here
-            const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
-              ? getContextFunctionRequestIfNeeded(messagesWithUpdatedSystemMessage)
-              : undefined;
-
-            return mergeOperator(
-              // if we have added a context function request, also emit
-              // the messageAdd event for it, so we can notify the consumer
-              // and add it to the conversation
-              ...(contextRequest ? [of(contextRequest)] : []),
-              continueConversation({
-                messages: [
-                  ...messagesWithUpdatedSystemMessage,
-                  ...(contextRequest ? [contextRequest.message] : []),
-                ],
-                chat: (name, chatParams) => {
-                  // inject a chat function with predefined parameters
-                  return this.chat(name, {
-                    ...chatParams,
-                    signal,
-                    simulateFunctionCalling,
-                    connectorId,
-                    stream: true,
-                  });
-                },
-                // start out with the max number of function calls
-                functionCallsLeft: MAX_FUNCTION_CALLS,
-                functionClient,
-                userInstructions,
-                adHocInstructions,
-                signal,
-                logger: this.dependencies.logger,
-                disableFunctions,
-                tracer: completeTracer,
+    // if it is:
+    // - a new conversation
+    // - no predefined title is given
+    // - we need to store the conversation
+    // we generate a title
+    // if not, we complete with an empty string
+    const title$ =
+      predefinedTitle || isConversationUpdate || !persist
+        ? of(predefinedTitle || '').pipe(shareReplay())
+        : getGeneratedTitle({
+            messages: messagesWithUpdatedSystemMessage,
+            logger: this.dependencies.logger,
+            chat: (name, chatParams) =>
+              this.chat(name, {
+                ...chatParams,
+                simulateFunctionCalling,
                 connectorId,
-                useSimulatedFunctionCalling: simulateFunctionCalling === true,
-              })
-            );
-          }),
-          shareReplay()
-        );
+                signal,
+                stream: false,
+              }),
+            tracer: new LangTracer(context.active()),
+          });
 
-        const output$ = mergeOperator(
-          // get all the events from continuing the conversation
+    // we continue the conversation here, after resolving both the materialized
+    // messages and the knowledge base instructions
+    const nextEvents$ = defer(() => {
+      // if needed, inject a context function request here
+      const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
+        ? getContextFunctionRequestIfNeeded(messagesWithUpdatedSystemMessage)
+        : undefined;
+
+      return mergeOperator(
+        // if we have added a context function request, also emit
+        // the messageAdd event for it, so we can notify the consumer
+        // and add it to the conversation
+        ...(contextRequest ? [of(contextRequest)] : []),
+        continueConversation({
+          messages: [
+            ...messagesWithUpdatedSystemMessage,
+            ...(contextRequest ? [contextRequest.message] : []),
+          ],
+          // inject a chat function with predefined parameters
+          chat: (name, chatParams) =>
+            this.chat(name, {
+              ...chatParams,
+              signal,
+              simulateFunctionCalling,
+              connectorId,
+              stream: true,
+            }),
+          // start out with the max number of function calls
+          functionCallsLeft: MAX_FUNCTION_CALLS,
+          functionClient,
+          userInstructions,
+          adHocInstructions,
+          signal,
+          logger: this.dependencies.logger,
+          disableFunctions,
+          tracer: new LangTracer(context.active()),
+          connectorId,
+          useSimulatedFunctionCalling: simulateFunctionCalling === true,
+        })
+      );
+    }).pipe(shareReplay());
+
+    const output$ = mergeOperator(
+      // get all the events from continuing the conversation
+      nextEvents$,
+      // wait until all dependencies have completed
+      forkJoin([
+        // get just the new messages
+        nextEvents$.pipe(withoutTokenCountEvents(), extractMessages()),
+        // count all the token count events emitted during completion
+        mergeOperator(
           nextEvents$,
-          // wait until all dependencies have completed
-          forkJoin([
-            messagesWithUpdatedSystemMessage$,
-            // get just the new messages
-            nextEvents$.pipe(withoutTokenCountEvents(), extractMessages()),
-            // count all the token count events emitted during completion
-            mergeOperator(
-              nextEvents$,
-              title$.pipe(filter((value): value is TokenCountEvent => typeof value !== 'string'))
-            ).pipe(extractTokenCount()),
-            // get just the title, and drop the token count events
-            title$.pipe(filter((value): value is string => typeof value === 'string')),
-          ]).pipe(
-            switchMap(
-              ([messagesWithUpdatedSystemMessage, addedMessages, tokenCountResult, title]) => {
-                const initialMessagesWithAddedMessages =
-                  messagesWithUpdatedSystemMessage.concat(addedMessages);
+          title$.pipe(filter((value): value is TokenCountEvent => typeof value !== 'string'))
+        ).pipe(extractTokenCount()),
+        // get just the title, and drop the token count events
+        title$.pipe(filter((value): value is string => typeof value === 'string')),
+      ]).pipe(
+        switchMap(([addedMessages, tokenCountResult, title]) => {
+          const initialMessagesWithAddedMessages =
+            messagesWithUpdatedSystemMessage.concat(addedMessages);
 
-                const lastMessage = last(initialMessagesWithAddedMessages);
+          const lastMessage = last(initialMessagesWithAddedMessages);
 
-                // if a function request is at the very end, close the stream to consumer
-                // without persisting or updating the conversation. we need to wait
-                // on the function response to have a valid conversation
-                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+          // if a function request is at the very end, close the stream to consumer
+          // without persisting or updating the conversation. we need to wait
+          // on the function response to have a valid conversation
+          const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                if (!persist || isFunctionRequest) {
-                  return of();
-                }
+          if (!persist || isFunctionRequest) {
+            return of();
+          }
 
-                if (isConversationUpdate) {
-                  return from(this.getConversationWithMetaFields(conversationId))
-                    .pipe(
-                      switchMap((conversation) => {
-                        if (!conversation) {
-                          return throwError(() => createConversationNotFoundError());
+          if (isConversationUpdate) {
+            return from(this.getConversationWithMetaFields(conversationId))
+              .pipe(
+                switchMap((conversation) => {
+                  if (!conversation) {
+                    return throwError(() => createConversationNotFoundError());
+                  }
+
+                  const persistedTokenCount = conversation._source?.conversation.token_count ?? {
+                    prompt: 0,
+                    completion: 0,
+                    total: 0,
+                  };
+
+                  return from(
+                    this.update(
+                      conversationId,
+
+                      merge(
+                        {},
+
+                        // base conversation without messages
+                        omit(conversation._source, 'messages'),
+
+                        // update messages
+                        { messages: initialMessagesWithAddedMessages },
+
+                        // update token count
+                        {
+                          conversation: {
+                            title: title || conversation._source?.conversation.title,
+                            token_count: {
+                              prompt: persistedTokenCount.prompt + tokenCountResult.prompt,
+                              completion:
+                                persistedTokenCount.completion + tokenCountResult.completion,
+                              total: persistedTokenCount.total + tokenCountResult.total,
+                            },
+                          },
                         }
-
-                        const persistedTokenCount = conversation._source?.conversation
-                          .token_count ?? {
-                          prompt: 0,
-                          completion: 0,
-                          total: 0,
-                        };
-
-                        return from(
-                          this.update(
-                            conversationId,
-
-                            merge(
-                              {},
-
-                              // base conversation without messages
-                              omit(conversation._source, 'messages'),
-
-                              // update messages
-                              { messages: initialMessagesWithAddedMessages },
-
-                              // update token count
-                              {
-                                conversation: {
-                                  title: title || conversation._source?.conversation.title,
-                                  token_count: {
-                                    prompt: persistedTokenCount.prompt + tokenCountResult.prompt,
-                                    completion:
-                                      persistedTokenCount.completion + tokenCountResult.completion,
-                                    total: persistedTokenCount.total + tokenCountResult.total,
-                                  },
-                                },
-                              }
-                            )
-                          )
-                        );
-                      })
+                      )
                     )
-                    .pipe(
-                      map((conversation): ConversationUpdateEvent => {
-                        return {
-                          conversation: conversation.conversation,
-                          type: StreamingChatResponseEventType.ConversationUpdate,
-                        };
-                      })
-                    );
-                }
-
-                return from(
-                  this.create({
-                    '@timestamp': new Date().toISOString(),
-                    conversation: {
-                      title,
-                      id: conversationId,
-                      token_count: tokenCountResult,
-                    },
-                    public: !!isPublic,
-                    labels: {},
-                    numeric_labels: {},
-                    messages: initialMessagesWithAddedMessages,
-                  })
-                ).pipe(
-                  map((conversation): ConversationCreateEvent => {
-                    return {
-                      conversation: conversation.conversation,
-                      type: StreamingChatResponseEventType.ConversationCreate,
-                    };
-                  })
-                );
-              }
-            )
-          )
-        );
-
-        return output$.pipe(
-          instrumentAndCountTokens('complete'),
-          withoutTokenCountEvents(),
-          catchError((error) => {
-            this.dependencies.logger.error(error);
-            return throwError(() => error);
-          }),
-          tap((event) => {
-            if (this.dependencies.logger.isLevelEnabled('debug')) {
-              switch (event.type) {
-                case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(
-                    () => `Added message: ${JSON.stringify(event.message)}`
                   );
-                  break;
+                })
+              )
+              .pipe(
+                map((conversation): ConversationUpdateEvent => {
+                  return {
+                    conversation: conversation.conversation,
+                    type: StreamingChatResponseEventType.ConversationUpdate,
+                  };
+                })
+              );
+          }
 
-                case StreamingChatResponseEventType.ConversationCreate:
-                  this.dependencies.logger.debug(
-                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
+          return from(
+            this.create({
+              '@timestamp': new Date().toISOString(),
+              conversation: {
+                title,
+                id: conversationId,
+                token_count: tokenCountResult,
+              },
+              public: !!isPublic,
+              labels: {},
+              numeric_labels: {},
+              messages: initialMessagesWithAddedMessages,
+            })
+          ).pipe(
+            map((conversation): ConversationCreateEvent => {
+              return {
+                conversation: conversation.conversation,
+                type: StreamingChatResponseEventType.ConversationCreate,
+              };
+            })
+          );
+        })
+      )
+    );
 
-                case StreamingChatResponseEventType.ConversationUpdate:
-                  this.dependencies.logger.debug(
-                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
-              }
-            }
-          }),
-          shareReplay()
-        );
-      }
+    return output$.pipe(
+      instrumentAndCountTokens('complete'),
+      withoutTokenCountEvents(),
+      catchError((error) => {
+        this.dependencies.logger.error(error);
+        return throwError(() => error);
+      }),
+      tap((event) => {
+        if (this.dependencies.logger.isLevelEnabled('debug')) {
+          switch (event.type) {
+            case StreamingChatResponseEventType.MessageAdd:
+              this.dependencies.logger.debug(
+                () => `Added message: ${JSON.stringify(event.message)}`
+              );
+              break;
+
+            case StreamingChatResponseEventType.ConversationCreate:
+              this.dependencies.logger.debug(
+                () => `Created conversation: ${JSON.stringify(event.conversation)}`
+              );
+              break;
+
+            case StreamingChatResponseEventType.ConversationUpdate:
+              this.dependencies.logger.debug(
+                () => `Updated conversation: ${JSON.stringify(event.conversation)}`
+              );
+              break;
+          }
+        }
+      }),
+      shareReplay()
     );
   };
 

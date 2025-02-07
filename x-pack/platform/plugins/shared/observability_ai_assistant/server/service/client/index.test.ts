@@ -284,7 +284,7 @@ describe('Observability AI Assistant client', () => {
         });
 
       stream = observableIntoStream(
-        client.complete({
+        await client.complete({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
