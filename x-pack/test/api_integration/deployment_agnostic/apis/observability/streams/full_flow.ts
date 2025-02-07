@@ -94,10 +94,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           it('returns a 404 for logs', async () => {
             await apiClient
-              .fetch('GET /api/streams/{id}', {
+              .fetch('GET /api/streams/{name}', {
                 params: {
                   path: {
-                    id: 'logs',
+                    name: 'logs',
                   },
                 },
               })
