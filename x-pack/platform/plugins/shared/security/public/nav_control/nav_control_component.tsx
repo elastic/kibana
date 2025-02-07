@@ -14,9 +14,11 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiThemeProvider,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { FunctionComponent, ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
@@ -24,7 +26,11 @@ import type { BuildFlavor } from '@kbn/config/src/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
-import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
+import {
+  UserAvatar,
+  type UserProfileAvatarData,
+  useUpdateUserProfile,
+} from '@kbn/user-profile-components';
 
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
@@ -39,6 +45,23 @@ interface ContextMenuProps {
 }
 
 const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
+  const { colorMode } = useEuiTheme();
+
+  const { update } = useUpdateUserProfile({
+    notificationSuccess: { enabled: false },
+  });
+
+  const updateColorMode = useCallback(() => {
+    const darkModeValue = colorMode === 'LIGHT' ? 'dark' : 'light';
+    update({
+      userSettings: {
+        darkMode: darkModeValue,
+      },
+    });
+    // small delay to give settings a chance to update
+    return window.setTimeout(() => window.location.reload(), 500);
+  }, [colorMode, update]);
+
   return (
     <>
       <EuiContextMenuPanel>
@@ -57,6 +80,7 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
               size="s"
               href={item.href}
               data-test-subj={item['data-test-subj']}
+              onClick={() => (item.id === 'colorModeSwitcher' ? updateColorMode() : null)}
             >
               {item.name}
             </EuiContextMenuItem>
@@ -81,7 +105,10 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   buildFlavour,
 }) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const { colorMode } = useEuiTheme();
 
   const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
@@ -116,6 +143,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   );
 
   const items: ContextMenuItem[] = [];
+
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
@@ -132,6 +160,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
   const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
 
+  // add "Edit profile" option
   if (!isAnonymous && !hasCustomProfileLinks) {
     const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
       name: (
@@ -152,6 +181,15 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     items.unshift(profileMenuItem);
   }
 
+  // add "Color mode" option
+  items.push({
+    name: colorMode === 'LIGHT' ? 'Dark mode' : 'Light mode',
+    icon: <EuiIcon type={colorMode === 'LIGHT' ? 'moon' : 'sun'} size="m" />,
+    href: '#',
+    id: 'colorModeSwitcher',
+  });
+
+  // add "Log out" option
   items.push({
     name: isAnonymous ? (
       <FormattedMessage

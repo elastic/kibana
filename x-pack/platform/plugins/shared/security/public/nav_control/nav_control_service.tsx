@@ -16,12 +16,14 @@ import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type {
   AuthenticationServiceSetup,
   SecurityNavControlServiceStart,
   UserMenuLink,
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 
 import { SecurityNavControl } from './nav_control_component';
 import type { SecurityLicense } from '../../common';
@@ -153,7 +155,15 @@ export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
     <KibanaContextProvider services={services}>
       <AuthenticationProvider authc={authc}>
         <SecurityApiClientsProvider {...securityApiClients}>
-          <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+          <UserProfilesKibanaProvider
+            core={services}
+            security={{
+              userProfiles: securityApiClients.userProfiles,
+            }}
+            toMountPoint={toMountPoint}
+          >
+            <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+          </UserProfilesKibanaProvider>
         </SecurityApiClientsProvider>
       </AuthenticationProvider>
     </KibanaContextProvider>
