@@ -8,20 +8,20 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiTitle,
-  EuiSpacer,
-  EuiInMemoryTable,
-  EuiText,
-  EuiIcon,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiPanel,
   EuiHorizontalRule,
-  EuiFlexGrid,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -48,16 +48,16 @@ import { useUserRelatedHosts } from '../../../../common/containers/related_entit
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import {
+  USER_DETAILS_ALERT_COUNT_TEST_ID,
+  USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID,
+  USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
   USER_DETAILS_TEST_ID,
-  USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
-  USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID,
-  USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
-  USER_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import {
-  HOST_NAME_FIELD_NAME,
   HOST_IP_FIELD_NAME,
+  HOST_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
@@ -197,7 +197,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               rowItems={ips}
               attrName={HOST_IP_FIELD_NAME}
               idPrefix={''}
-              isDraggable={false}
               render={(ip) =>
                 ip == null ? (
                   getEmptyTagValue()
