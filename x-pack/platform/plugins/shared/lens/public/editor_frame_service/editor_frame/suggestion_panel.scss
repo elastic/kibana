@@ -1,5 +1,21 @@
-@import '../../mixins';
-@import '../../variables';
+
+// SASSTODO: Create this in EUI
+@mixin lnsOverflowShadowHorizontal {
+  $hideHeight: $euiScrollBarCorner * 1.25;
+  mask-image: linear-gradient(
+    to right,
+    transparentize($euiColorDanger, .9) 0%,
+    transparentize($euiColorDanger, 0) $hideHeight,
+    transparentize($euiColorDanger, 0) calc(100% - #{$hideHeight}),
+    transparentize($euiColorDanger, .9) 100%
+  );
+}
+
+// These sizes also match canvas' page thumbnails for consistency
+$lnsSuggestionHeight: 100px;
+$lnsSuggestionWidth: 150px;
+
+
 
 .lnsSuggestionPanel .euiAccordion__buttonContent {
   width: 100%;

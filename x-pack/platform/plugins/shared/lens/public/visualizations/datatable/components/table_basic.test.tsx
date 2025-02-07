@@ -308,7 +308,7 @@ describe('DatatableComponent', () => {
         rows: [{ a: undefined, b: undefined, c: undefined }],
       },
     });
-    expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');
+    expect(screen.getByTestId('lnsDataTableContainer')).toHaveTextContent('No results found');
   });
 
   test('it renders the table with the given sorting', async () => {

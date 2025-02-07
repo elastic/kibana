@@ -16,10 +16,10 @@ import {
   EuiWrappingPopoverProps,
   EuiPopoverTitle,
   EuiText,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StartServices } from '../../types';
-import './help_popover.scss';
 
 export const HelpPopoverButton = ({
   children,
@@ -31,12 +31,32 @@ export const HelpPopoverButton = ({
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon className="lnsHelpPopover__buttonIcon" size="s" type="help" />
-
+        <EuiIcon size="s" type="help" css={HelpPopoverStyles.button} />
         {children}
       </EuiLink>
     </EuiText>
   );
+};
+
+const HelpPopoverContent = ({ title, children }: { title?: string; children: ReactNode }) => {
+  return (
+    <>
+      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
+      <EuiText className="eui-yScroll" size="s" css={HelpPopoverStyles.content}>
+        {children}
+      </EuiText>
+    </>
+  );
+};
+
+const HelpPopoverStyles = {
+  button: ({ euiTheme }: UseEuiTheme) => `
+    margin-right: ${euiTheme.size.xs};
+  `,
+  content: ({ euiTheme }: UseEuiTheme) => `
+    max-height: 40vh;
+    padding: ${euiTheme.size.m};
+  `,
 };
 
 export const HelpPopover = ({
@@ -58,18 +78,13 @@ export const HelpPopover = ({
     <EuiPopover
       anchorPosition={anchorPosition}
       button={button}
-      className="lnsHelpPopover"
       closePopover={closePopover}
       isOpen={isOpen}
       ownFocus
-      panelClassName="lnsHelpPopover__panel"
+      panelStyle={{ maxInlineSize: '480px' }}
       panelPaddingSize="none"
     >
-      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
-
-      <EuiText className="lnsHelpPopover__content" size="s">
-        {children}
-      </EuiText>
+      <HelpPopoverContent title={title}>{children}</HelpPopoverContent>
     </EuiPopover>
   );
 };
@@ -96,18 +111,13 @@ export const WrappingHelpPopover = ({
       <EuiWrappingPopover
         anchorPosition={anchorPosition}
         button={button}
-        className="lnsHelpPopover"
         closePopover={closePopover}
         isOpen={isOpen}
         ownFocus
-        panelClassName="lnsHelpPopover__panel"
+        panelStyle={{ maxInlineSize: '480px' }}
         panelPaddingSize="none"
       >
-        {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
-
-        <EuiText className="lnsHelpPopover__content" size="s">
-          {children}
-        </EuiText>
+        <HelpPopoverContent title={title}>{children}</HelpPopoverContent>
       </EuiWrappingPopover>
     </KibanaRenderContextProvider>
   );

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import './filter_popover.scss';
-
 import React, { useState } from 'react';
-import { EuiPopover, EuiSpacer } from '@elastic/eui';
+import { EuiPopover, EuiSpacer, euiTextBreakWord, useEuiFontSize, UseEuiTheme } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 // Need to keep it separate to make it work Jest mocks in dimension_panel tests
 // import { QueryInput } from '../../../../shared_components/query_input';
@@ -66,7 +64,9 @@ export const FilterPopover = ({
   return (
     <EuiPopover
       data-test-subj="indexPattern-filters-existingFilterContainer"
-      panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
+      panelStyle={{
+        width: '960px',
+      }}
       isOpen={isOpen}
       ownFocus
       closePopover={closePopover}
@@ -99,4 +99,14 @@ export const FilterPopover = ({
       />
     </EuiPopover>
   );
+};
+
+export const DraggablePopoverButtonStyles = ({ euiTheme }: UseEuiTheme) => {
+  const euiFontSize = useEuiFontSize('s');
+  return `
+    ${euiTextBreakWord()};
+    ${euiFontSize};
+    min-height: ${euiTheme.size.xl};
+    width: 100%;
+  `;
 };

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './setting_with_sibling_flyout.scss';
-
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, MutableRefObject } from 'react';
 import {
@@ -20,7 +18,10 @@ import {
   EuiFocusTrap,
   EuiOutsideClickDetector,
   EuiPortal,
+  UseEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FlyoutContainerStyles } from './flyout.styles';
 
 const DEFAULT_TITLE = i18n.translate('xpack.lens.colorSiblingFlyoutTitle', {
   defaultMessage: 'Color',
@@ -74,9 +75,9 @@ export function SettingWithSiblingFlyout({
                 role="dialog"
                 aria-labelledby="lnsSettingWithSiblingFlyoutTitle"
                 data-test-subj={dataTestSubj}
-                className="lnsSettingWithSiblingFlyout"
+                css={[FlyoutContainerStyles, SiblingFlyoutContainerStyles.self]}
               >
-                <EuiFlyoutHeader hasBorder className="lnsSettingWithSiblingFlyout__header">
+                <EuiFlyoutHeader hasBorder css={SiblingFlyoutContainerStyles.header}>
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
@@ -92,20 +93,24 @@ export function SettingWithSiblingFlyout({
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle size="xs">
-                        <h3
-                          id="lnsSettingWithSiblingFlyoutTitle"
-                          className="lnsSettingWithSiblingFlyout__headerTitle"
-                        >
-                          {title}
-                        </h3>
+                        <h3 id="lnsSettingWithSiblingFlyoutTitle">{title}</h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlyoutHeader>
 
-                {children && <div className="lnsSettingWithSiblingFlyout__content">{children}</div>}
+                {children && (
+                  <div
+                    className="eui-yScroll"
+                    css={css`
+                      flex: 1;
+                    `}
+                  >
+                    {children}
+                  </div>
+                )}
 
-                <EuiFlyoutFooter className="lnsSettingWithSiblingFlyout__footer">
+                <EuiFlyoutFooter css={SiblingFlyoutContainerStyles.footer}>
                   <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>
                     {i18n.translate('xpack.lens.settingWithSiblingFlyout.back', {
                       defaultMessage: 'Back',
@@ -120,3 +125,21 @@ export function SettingWithSiblingFlyout({
     </EuiFlexGroup>
   );
 }
+
+const SiblingFlyoutContainerStyles = {
+  self: ({ euiTheme }: UseEuiTheme) => css`
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    // making just a bit higher than the dimension flyout to stack on top of it
+    z-index: ${euiTheme.levels.menu};
+  `,
+  header: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.base};
+  `,
+  footer: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.base};
+  `,
+};

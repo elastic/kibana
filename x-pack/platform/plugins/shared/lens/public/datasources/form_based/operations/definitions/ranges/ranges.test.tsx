@@ -532,7 +532,7 @@ describe('ranges', () => {
         );
 
         expect(
-          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
         ).toBe('0 - 1000');
       });
 
@@ -560,7 +560,7 @@ describe('ranges', () => {
         );
 
         expect(
-          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+          instance.find('[data-test-subj="dataView-ranges-popover-trigger"]').first().text()
         ).not.toBe('Error');
       });
 

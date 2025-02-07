@@ -6,7 +6,6 @@
  */
 
 import './workspace_panel_wrapper.scss';
-import './message_list.scss';
 
 import React, { useState } from 'react';
 import {
@@ -17,6 +16,7 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, SerializedStyles } from '@emotion/react';
@@ -78,7 +78,6 @@ export const MessageList = ({
             minWidth={0}
             color={errorCount ? 'danger' : 'warning'}
             onClick={onButtonClick}
-            className="lnsWorkspaceWarning__button"
             data-test-subj="lens-message-list-trigger"
             title={buttonLabel}
             css={customButtonStyles}
@@ -106,11 +105,11 @@ export const MessageList = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <ul className="lnsWorkspaceWarningList">
+      <ul css={WorkspaceWarningListStyles.self} className="eui-yScroll">
         {messages.map(({ hidePopoverIcon = false, ...message }, index) => (
           <li
             key={index}
-            className="lnsWorkspaceWarningList__item"
+            css={WorkspaceWarningListStyles.item}
             data-test-subj={`lens-message-list-${message.severity}`}
           >
             {typeof message.longMessage === 'function' ? (
@@ -119,7 +118,7 @@ export const MessageList = ({
               <EuiFlexGroup
                 gutterSize="s"
                 responsive={false}
-                className="lnsWorkspaceWarningList__textItem"
+                css={WorkspaceWarningListStyles.textItem}
               >
                 {!hidePopoverIcon && (
                   <EuiFlexItem grow={false}>
@@ -130,7 +129,7 @@ export const MessageList = ({
                     )}
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
+                <EuiFlexItem grow={1} css={WorkspaceWarningListStyles.description}>
                   <EuiText size="s">{message.longMessage}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -140,4 +139,23 @@ export const MessageList = ({
       </ul>
     </EuiPopover>
   );
+};
+
+const WorkspaceWarningListStyles = {
+  self: css`
+    max-height: 320px;
+    width: 256px;
+  `,
+  item: ({ euiTheme }: UseEuiTheme) => `
+    & + & {
+      border-top: 1px solid ${euiTheme.colors.lightShade};
+    }
+  `,
+  textItem: ({ euiTheme }: UseEuiTheme) => `
+     padding: ${euiTheme.size.base}
+  `,
+  description: css`
+    overflow-wrap: break-word;
+    min-width: 0;
+  `,
 };
