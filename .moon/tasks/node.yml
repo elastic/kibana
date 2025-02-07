@@ -85,5 +85,6 @@ tasks:
       - '^:typecheck'
     options:
       runFromWorkspaceRoot: true
+      mergeOutputs: replace
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'

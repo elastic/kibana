@@ -26,6 +26,7 @@ tasks:
       - '@group(src)'
   typecheck:
     script: echo 'stubbed:noop'
+    outputs: []
   lint_with_types:
     script: echo 'stubbed:noop'
   jestCI:
