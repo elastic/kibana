@@ -8,8 +8,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
-import { map, pairwise, skip, combineLatest, distinctUntilChanged } from 'rxjs';
+import React, { useEffect, useState } from 'react';
+import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
+
 import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';

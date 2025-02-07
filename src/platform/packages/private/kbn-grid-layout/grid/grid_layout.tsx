@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -164,10 +164,6 @@ export const GridLayout = ({
   );
 };
 
-/**
- * if there is no reliance on EUI theme, then it is more performant to store styles as minimizable objects
- * outside of the React component so that it is not parsed on every render
- */
 const styles = {
   layoutPadding: css({
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
