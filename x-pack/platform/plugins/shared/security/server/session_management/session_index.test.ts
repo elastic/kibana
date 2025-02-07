@@ -91,8 +91,10 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.exists.mockResponse(true);
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [indexName]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
@@ -118,8 +120,10 @@ describe('Session index', () => {
       );
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [indexName]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
@@ -146,8 +150,10 @@ describe('Session index', () => {
       );
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [indexName]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
@@ -173,8 +179,10 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.exists.mockResponse(false);
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [indexName]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
@@ -303,8 +311,10 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.exists.mockResponse(true);
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [indexName]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
@@ -334,8 +344,10 @@ describe('Session index', () => {
       });
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [indexName]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
@@ -373,8 +385,10 @@ describe('Session index', () => {
       });
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [indexName]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
@@ -412,8 +426,10 @@ describe('Session index', () => {
       });
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [indexName]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
@@ -1134,8 +1150,10 @@ describe('Session index', () => {
       );
       mockElasticsearchClient.indices.getAlias.mockResponse({
         [REINDEXED_INDEX_NAME]: {
-          [aliasName]: {
-            is_hidden: true,
+          aliases: {
+            [aliasName]: {
+              is_hidden: true,
+            },
           },
         },
       });
