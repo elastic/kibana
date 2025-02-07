@@ -27,6 +27,7 @@ import {
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import { ServiceNameLink } from '../sub_components/service_name_link';
 import { TraceIdLink } from '../sub_components/trace_id_link';
 import { TransactionNameLink } from '../sub_components/transaction_name_link';
@@ -42,7 +43,7 @@ export const getAttributeConfiguration = (
       title: i18n.translate('discover.docViews.tracesOverview.details.spanName.title', {
         defaultMessage: 'Span name',
       }),
-      content: <p>{attributes[SPAN_NAME_FIELD]}</p>,
+      content: <EuiText size="xs">{attributes[SPAN_NAME_FIELD]}</EuiText>,
     },
     [TRANSACTION_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.transactionName.title', {
