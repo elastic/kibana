@@ -7,7 +7,7 @@
 
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
 import { Document } from '@langchain/core/documents';
-import { Client } from '@elastic/elasticsearch';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AggregationsAggregate,
   SearchHit,
@@ -27,7 +27,7 @@ export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
 
   index: string;
 
-  client: Client;
+  client: ElasticsearchClient;
 
   k: number;
 
@@ -53,7 +53,7 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
   k: number;
 
-  client: Client;
+  client: ElasticsearchClient;
 
   constructor(params: ElasticsearchRetrieverInput) {
     super(params);
