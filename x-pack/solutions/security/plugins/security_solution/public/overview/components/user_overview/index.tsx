@@ -44,7 +44,6 @@ export interface UserSummaryProps {
   scopeId?: string;
   data: UserItem;
   id: string;
-  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -71,7 +70,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
     scopeId,
     data,
     id,
-    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     isLoadingAnomaliesData,
     loading,
@@ -120,11 +118,10 @@ export const UserOverview = React.memo<UserSummaryProps>(
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
-          isDraggable={isDraggable}
           scopeId={scopeId}
         />
       ),
-      [contextID, isDraggable, scopeId]
+      [contextID, scopeId]
     );
 
     const [userRiskScore, userRiskLevel] = useMemo(() => {
@@ -264,23 +261,13 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
-                isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
             ),
           },
         ],
       ],
-      [
-        data,
-        indexPatterns,
-        getDefaultRenderer,
-        contextID,
-        scopeId,
-        isDraggable,
-        userName,
-        firstColumn,
-      ]
+      [data, indexPatterns, getDefaultRenderer, contextID, scopeId, userName, firstColumn]
     );
     return (
       <>

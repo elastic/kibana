@@ -33,7 +33,6 @@ storiesOf('Components/UserPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
@@ -52,7 +51,6 @@ storiesOf('Components/UserPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
@@ -71,7 +69,6 @@ storiesOf('Components/UserPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
@@ -110,7 +107,6 @@ storiesOf('Components/UserPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
@@ -153,7 +149,6 @@ storiesOf('Components/UserPanelContent', module)
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
