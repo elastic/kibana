@@ -180,7 +180,6 @@ export const getEnrichedDeprecations = async (
 
       const enrichedDeprecation = {
         ..._.omit(deprecation, 'metadata'),
-        frozen: isFrozenDeprecation(deprecation.message, deprecation.index),
         correctiveAction,
       };
 
@@ -195,7 +194,10 @@ export const getEnrichedDeprecations = async (
     .filter((deprecation) => {
       if (isFrozenDeprecation(deprecation.message, deprecation.index)) {
         // frozen indices are created in 7.x, so they are old / incompatible as well
-        // reindexing + deleting is required, so no need to bubble up this deprecation in the UI
+        // no need to bubble up this deprecation IF THERE IS ANOTHER CRITICAL ONE FOR THE SAME INDEX
+        // in that case, in the critical deprecation we will propose:
+        // - reindexing => the new index will not be frozen
+        // - updating index => the operation will unfreeze the index (see routes/update_index.ts)
         const indexDeprecations = deprecationsByIndex.get(deprecation.index!);
         const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations?.find(
           (elem) =>
