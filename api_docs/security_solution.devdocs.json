@@ -3011,7 +3011,13 @@
           ],
           "signature": [
             "(configurator: ",
-            "ProductFeaturesConfigurator",
+            {
+              "pluginId": "@kbn/security-solution-features",
+              "scope": "common",
+              "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+              "section": "def-common.ProductFeaturesConfigurator",
+              "text": "ProductFeaturesConfigurator"
+            },
             ") => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/server/plugin_contract.ts",
@@ -3027,7 +3033,13 @@
               "label": "configurator",
               "description": [],
               "signature": [
-                "ProductFeaturesConfigurator"
+                {
+                  "pluginId": "@kbn/security-solution-features",
+                  "scope": "common",
+                  "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                  "section": "def-common.ProductFeaturesConfigurator",
+                  "text": "ProductFeaturesConfigurator"
+                }
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
               "deprecated": false,
