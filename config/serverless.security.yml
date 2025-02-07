@@ -1,7 +1,7 @@
 # Security Project config
 
 ## Disable plugins
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.apm.enabled: false
 xpack.infra.enabled: false
 xpack.observabilityLogsExplorer.enabled: false
@@ -108,9 +108,6 @@ newsfeed.enabled: true
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
 
-## Set the dev project switcher current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
-
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
 
@@ -178,6 +175,6 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 # Experimental Security Solution features
 
 # These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental: 
+xpack.securitySolution.enableExperimental:
   - entityStoreDisabled
   - siemMigrationsDisabled

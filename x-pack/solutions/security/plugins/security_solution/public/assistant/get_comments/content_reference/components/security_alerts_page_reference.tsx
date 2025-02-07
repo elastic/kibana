@@ -11,7 +11,8 @@ import { EuiLink } from '@elastic/eui';
 import type { ContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../../common/types';
 
 interface Props {
   contentReferenceNode: ContentReferenceNode;
@@ -22,17 +23,22 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
   contentReferenceNode,
   securityAlertsPageContentReference,
 }) => {
-  const { navigateToApp } = useKibana().services.application;
+  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      navigateToApp('security', {
-        path: `alerts`,
-        openInNewTab: true,
-      });
+      openAlertsPageWithFilters(
+        {
+          selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+          fieldName: 'kibana.alert.workflow_status',
+          persist: false,
+        },
+        true,
+        '(global:(timerange:(fromStr:now-24h,kind:relative,toStr:now)))'
+      );
     },
-    [navigateToApp]
+    [openAlertsPageWithFilters]
   );
 
   return (
