@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
@@ -33,6 +32,7 @@ export const PresentationPanel = <
 ) => {
   const panelErrorCss = usePanelErrorCss();
   const { Component, hidePanelChrome, ...passThroughProps } = props;
+  const { euiTheme } = useEuiTheme();
   const { loading, value } = useAsync(async () => {
     if (hidePanelChrome) {
       return {
@@ -77,7 +77,7 @@ export const PresentationPanel = <
         showShadow={props.showShadow}
         showBorder={props.showBorder}
         css={css`
-          border-radius: ${euiThemeVars.euiBorderRadius};
+          border-radius: ${euiTheme.border.radius.medium};
         `}
         dataTestSubj="embed
         dablePanelLoadingIndicator"

@@ -77,12 +77,16 @@ const groupSummarySchema = t.type({
   worst: t.type({
     sliValue: t.number,
     status: t.string,
-    slo: t.type({
-      id: t.string,
-      instanceId: t.string,
-      name: t.string,
-      groupings: t.record(t.string, t.unknown),
-    }),
+    slo: t.intersection([
+      t.type({
+        id: t.string,
+        instanceId: t.string,
+        name: t.string,
+      }),
+      t.partial({
+        groupings: t.record(t.string, t.unknown),
+      }),
+    ]),
   }),
   violated: t.number,
   healthy: t.number,
