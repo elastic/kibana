@@ -38,22 +38,22 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
         body: {
           template: {
             settings: {
-              ...(settings ?? {}),
+              ...settings,
               index: {
-                ...(settings?.index ?? {}),
+                ...settings?.index,
                 mapping: {
-                  ...(settings?.index?.mapping ?? {}),
+                  ...settings?.index?.mapping,
                   // @ts-expect-error Property 'source' does not exist on type 'IndicesMappingLimitSettings'
                   source: {
                     // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
-                    ...(settings?.index?.mapping?.source ?? {}),
+                    ...settings?.index?.mapping?.source,
                     mode,
                   },
                 },
               },
             },
             mappings: {
-              ...(componentTemplate.component_template.template.mappings ?? {}),
+              ...componentTemplate.component_template.template.mappings,
               _source: restOfSource,
             },
           },
