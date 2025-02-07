@@ -7,23 +7,16 @@
 
 import React from 'react';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { Redirect } from 'react-router-dom';
-import { ONBOARDING_PATH } from '../../../common/constants';
 import { PluginTemplateWrapper } from '../../common/components/plugin_template_wrapper';
 import { CenteredLoadingSpinner } from '../../common/components/centered_loading_spinner';
 import { useSpaceId } from '../../common/hooks/use_space_id';
-import { OnboardingTopicId, PAGE_CONTENT_WIDTH } from '../constants';
+import { PAGE_CONTENT_WIDTH } from '../constants';
 import { OnboardingContextProvider } from './onboarding_context';
 import { OnboardingAVCBanner } from './onboarding_banner';
-import { OnboardingRoute } from './onboarding_route';
+import { OnboardingRouter } from './onboarding_router';
 import { OnboardingFooter } from './onboarding_footer';
-
-const topicPathParam = `:topicId(${Object.values(OnboardingTopicId) // any topics
-  .filter((val) => val !== OnboardingTopicId.default) // except "default"
-  .join('|')})?`; // optional parameter
 
 export const OnboardingPage = React.memo(() => {
   const spaceId = useSpaceId();
@@ -48,14 +41,7 @@ export const OnboardingPage = React.memo(() => {
           bottomBorder="extended"
           style={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
         >
-          <Routes>
-            <Route
-              path={`${ONBOARDING_PATH}/${topicPathParam}`}
-              exact
-              component={OnboardingRoute}
-            />
-            <Route path={`${ONBOARDING_PATH}/*`} render={() => <Redirect to={ONBOARDING_PATH} />} />
-          </Routes>
+          <OnboardingRouter />
         </KibanaPageTemplate.Section>
         <EuiSpacer size="l" />
         <KibanaPageTemplate.Section grow={true} restrictWidth={PAGE_CONTENT_WIDTH} paddingSize="xl">

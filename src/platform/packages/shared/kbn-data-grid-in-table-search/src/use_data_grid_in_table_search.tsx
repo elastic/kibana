@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
-import type { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiDataGridProps, EuiDataGridRefProps, useEuiTheme } from '@elastic/eui';
 import { InTableSearchControl, InTableSearchControlProps } from './in_table_search_control';
 import { RenderCellValueWrapper } from './types';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
+import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper';
+import { getHighlightColors } from './get_highlight_colors';
 
 export interface UseDataGridInTableSearchProps
   extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
@@ -49,16 +51,23 @@ export const useDataGridInTableSearch = (
     pagination,
     cellContext,
   } = props;
+  const { euiTheme } = useEuiTheme();
   const isPaginationEnabled = Boolean(pagination);
   const pageSize = (isPaginationEnabled && pagination?.pageSize) || null;
   const onChangePage = pagination?.onChangePage;
   const pageIndexRef = useRef<number>();
   pageIndexRef.current = pagination?.pageIndex ?? 0;
 
-  const renderCellValueWithInTableSearchSupport = useMemo(
-    () => wrapRenderCellValueWithInTableSearchSupport(renderCellValue),
-    [renderCellValue]
-  );
+  const renderCellValueWithInTableSearchSupport = useMemo(() => {
+    const colors = getHighlightColors(euiTheme);
+
+    return wrapRenderCellValueWithInTableSearchSupport(
+      renderCellValue,
+      // defines colors for the highlights
+      colors.highlightColor,
+      colors.highlightBackgroundColor
+    );
+  }, [renderCellValue, euiTheme]);
 
   const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] =
     useState<UseDataGridInTableSearchState>(() => ({ inTableSearchTerm: '' }));
@@ -87,7 +96,13 @@ export const useDataGridInTableSearch = (
           }
           return dataGridWrapper.contains?.(element) ?? false;
         }}
-        onChange={(searchTerm) => setInTableSearchState({ inTableSearchTerm: searchTerm || '' })}
+        onChange={(searchTerm) => {
+          const nextSearchTerm = searchTerm || '';
+          setInTableSearchState({ inTableSearchTerm: nextSearchTerm });
+          if (!nextSearchTerm) {
+            clearSearchTermRegExpCache();
+          }
+        }}
         onChangeCss={(styles) =>
           setInTableSearchState((prevState) => ({ ...prevState, inTableSearchTermCss: styles }))
         }
@@ -122,6 +137,12 @@ export const useDataGridInTableSearch = (
       inTableSearchTerm,
     };
   }, [cellContext, inTableSearchTerm]);
+
+  useEffect(() => {
+    return () => {
+      clearSearchTermRegExpCache();
+    };
+  }, []);
 
   return useMemo(
     () => ({
