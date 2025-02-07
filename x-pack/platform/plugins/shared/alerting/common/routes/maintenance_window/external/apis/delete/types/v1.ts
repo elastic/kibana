@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { deleteParamsSchemaV1 } from '..';
 
-export const getParamsSchema = schema.object({
-  id: schema.string({
-    meta: {
-      description: 'The identifier for the maintenance window.',
-    },
-  }),
-});
+export type DeleteMaintenanceWindowRequestParams = TypeOf<typeof deleteParamsSchemaV1>;

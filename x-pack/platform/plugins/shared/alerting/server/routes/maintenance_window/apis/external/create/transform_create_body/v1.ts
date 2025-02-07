@@ -15,6 +15,7 @@ import { CreateMaintenanceWindowParams } from '../../../../../../application/mai
 export const transformCreateBody = (
   createBody: CreateMaintenanceWindowRequestBodyV1
 ): CreateMaintenanceWindowParams['data'] => {
+  const kql = createBody.scope?.query.kql;
   return {
     title: createBody.title,
     duration: createBody.duration,
@@ -23,7 +24,6 @@ export const transformCreateBody = (
       dtstart: createBody.start,
       tzid: 'UTC',
     },
-    categoryIds: [],
-    scopedQuery: createBody.scope,
+    scopedQuery: kql ? { kql, filters: [] } : null,
   };
 };

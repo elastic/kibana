@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const getParamsSchema = schema.object({
-  id: schema.string({
-    meta: {
-      description: 'The identifier for the maintenance window.',
-    },
-  }),
-});
+export type { DeleteMaintenanceWindowRequestParams } from './v1';

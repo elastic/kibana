@@ -63,6 +63,7 @@ import { bulkGetMaintenanceWindowRoute as bulkGetMaintenanceWindowRouteInternal 
 
 import { getMaintenanceWindowRoute } from './maintenance_window/apis/external/get/get_maintenance_window_route';
 import { createMaintenanceWindowRoute } from './maintenance_window/apis/external/create/create_maintenance_window_route';
+import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/external/delete/delete_maintenance_window_route';
 
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
@@ -152,6 +153,7 @@ export function defineRoutes(opts: RouteOptions) {
   // Maintenance Window - External APIs
   getMaintenanceWindowRoute(router, licenseState);
   createMaintenanceWindowRoute(router, licenseState);
+  deleteMaintenanceWindowRoute(router, licenseState);
 
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);

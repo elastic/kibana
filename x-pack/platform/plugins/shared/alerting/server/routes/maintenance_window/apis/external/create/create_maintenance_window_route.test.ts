@@ -6,22 +6,21 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { maintenanceWindowClientMock } from '../../../../maintenance_window_client.mock';
+import { licenseStateMock } from '../../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
+import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { createMaintenanceWindowRoute } from './create_maintenance_window_route';
-import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
-import { MaintenanceWindowStatus } from '../../../../../common';
-
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import { CreateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/create';
-import { transformCreateBody } from './transforms';
-import { transformMaintenanceWindowToResponse } from '../../transforms';
+import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window/test_helpers';
+import { MaintenanceWindowStatus } from '../../../../../../common';
+import { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
+import { CreateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/external/apis/create';
+import { transformCreateBody } from './transform_create_body';
+import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
+jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -34,10 +33,10 @@ const mockMaintenanceWindow = {
 } as MaintenanceWindow;
 
 const createParams = {
-  title: 'test-title',
-  duration: 1000,
-  r_rule: mockMaintenanceWindow.rRule,
-  category_ids: ['observability'],
+  title: 'test-maintenance-window',
+  start: '2026-02-07T09:17:06.790Z',
+  duration: 60 * 60 * 1000, // 1 hr
+  scope: { query: { kql: "_id: '1234'" } },
 } as CreateMaintenanceWindowRequestBody;
 
 describe('createMaintenanceWindowRoute', () => {
@@ -58,10 +57,10 @@ describe('createMaintenanceWindowRoute', () => {
       { body: createParams }
     );
 
-    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window');
+    expect(config.path).toEqual('/api/maintenance_window');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
-        "access": "internal",
+        "access": "public",
       }
     `);
 
@@ -81,7 +80,7 @@ describe('createMaintenanceWindowRoute', () => {
       data: transformCreateBody(createParams),
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: transformMaintenanceWindowToResponse(mockMaintenanceWindow),
+      body: transformMaintenanceWindowToResponseV1(mockMaintenanceWindow),
     });
   });
 

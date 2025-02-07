@@ -17,7 +17,7 @@ import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
+jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

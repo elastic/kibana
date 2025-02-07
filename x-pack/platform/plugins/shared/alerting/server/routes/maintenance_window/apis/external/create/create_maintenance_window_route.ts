@@ -19,6 +19,7 @@ import {
   CreateMaintenanceWindowRequestBodyV1,
   CreateMaintenanceWindowResponseV1,
 } from '../../../../../../common/routes/maintenance_window/external/apis/create';
+import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
 import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
 import { transformCreateBodyV1 } from './transform_create_body';
 
@@ -30,7 +31,21 @@ export const createMaintenanceWindowRoute = (
     {
       path: BASE_MAINTENANCE_WINDOW_API_PATH,
       validate: {
-        body: createMaintenanceWindowRequestBodySchemaV1,
+        request: {
+          body: createMaintenanceWindowRequestBodySchemaV1,
+        },
+        response: {
+          200: {
+            body: () => maintenanceWindowResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+        },
       },
       security: {
         authz: {

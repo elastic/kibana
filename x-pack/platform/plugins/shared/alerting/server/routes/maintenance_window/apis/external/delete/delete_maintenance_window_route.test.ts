@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
-import { updateMaintenanceWindowRoute } from './update_maintenance_window_route';
+import { deleteMaintenanceWindowRoute } from './delete_maintenance_window_route';
 import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
-import { transformUpdateBody } from './transforms';
-import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
-import { UpdateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/internal/apis/update';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -24,50 +22,35 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 
 const mockMaintenanceWindow = {
   ...getMockMaintenanceWindow(),
-  eventStartTime: new Date().toISOString(),
-  eventEndTime: new Date().toISOString(),
+  startDate: new Date().toISOString(),
+  endDate: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
   id: 'test-id',
 };
 
-const updateParams: UpdateMaintenanceWindowRequestBody = {
-  title: 'new-title',
-  duration: 5000,
-  enabled: false,
-  r_rule: {
-    tzid: 'CET',
-    dtstart: '2023-03-26T00:00:00.000Z',
-    freq: 2 as const,
-    count: 10,
-  },
-  category_ids: ['observability'],
-};
-
-describe('updateMaintenanceWindowRoute', () => {
+describe('deleteMaintenanceWindowRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  test('should update the maintenance window', async () => {
+  test('should delete the maintenance window', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateMaintenanceWindowRoute(router, licenseState);
+    deleteMaintenanceWindowRoute(router, licenseState);
 
-    maintenanceWindowClient.update.mockResolvedValueOnce(mockMaintenanceWindow);
-    const [config, handler] = router.post.mock.calls[0];
+    maintenanceWindowClient.delete.mockResolvedValueOnce(mockMaintenanceWindow);
+    const [config, handler] = router.delete.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      {
-        params: { id: 'test-id' },
-        body: updateParams,
-      }
+      { params: { id: 'test-id' } }
     );
 
-    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/{id}');
+    expect(config.path).toEqual('/api/maintenance_window/{id}');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
-        "access": "internal",
+        "access": "public",
+        "summary": "Delete a maintenance window,",
       }
     `);
 
@@ -83,51 +66,39 @@ describe('updateMaintenanceWindowRoute', () => {
 
     await handler(context, req, res);
 
-    expect(maintenanceWindowClient.update).toHaveBeenLastCalledWith({
-      id: 'test-id',
-      data: transformUpdateBody(updateParams),
-    });
-
-    expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
-    });
+    expect(maintenanceWindowClient.delete).toHaveBeenLastCalledWith({ id: 'test-id' });
+    expect(res.noContent).toHaveBeenCalledTimes(1);
   });
 
-  test('ensures the license allows for updating maintenance windows', async () => {
+  test('ensures the license allows for deleting maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateMaintenanceWindowRoute(router, licenseState);
+    deleteMaintenanceWindowRoute(router, licenseState);
 
-    maintenanceWindowClient.update.mockResolvedValueOnce(mockMaintenanceWindow);
-    const [, handler] = router.post.mock.calls[0];
+    maintenanceWindowClient.delete.mockResolvedValueOnce(mockMaintenanceWindow);
+    const [, handler] = router.delete.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      {
-        params: { id: 'test-id' },
-        body: updateParams,
-      }
+      { params: { id: 'test-id' } }
     );
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  test('ensures the license check prevents for updating maintenance windows', async () => {
+  test('ensures the license check prevents for deleting maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateMaintenanceWindowRoute(router, licenseState);
+    deleteMaintenanceWindowRoute(router, licenseState);
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
-    const [, handler] = router.post.mock.calls[0];
+    const [, handler] = router.delete.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      {
-        params: { id: 'test-id' },
-        body: updateParams,
-      }
+      { params: { id: 'test-id' } }
     );
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
@@ -136,12 +107,13 @@ describe('updateMaintenanceWindowRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateMaintenanceWindowRoute(router, licenseState);
+    deleteMaintenanceWindowRoute(router, licenseState);
 
     (licenseState.ensureLicenseForMaintenanceWindow as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
-    const [, handler] = router.post.mock.calls[0];
+
+    const [, handler] = router.delete.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });

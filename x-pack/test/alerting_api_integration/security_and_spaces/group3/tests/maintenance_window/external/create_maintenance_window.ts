@@ -19,8 +19,19 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
     const objectRemover = new ObjectRemover(supertest);
     const createParams = {
       title: 'test-maintenance-window',
+      start: '2026-02-07T09:17:06.790Z',
       duration: 60 * 60 * 1000, // 1 hr
-      recurring_schedule: {},
+      scope: { query: { kql: "_id: '1234'" } },
+      // TODO schedule schema
+      // every possible field should be passed
+      // recurring: {
+      //   end: '',
+      //   every: '',
+      //   onWeekDay: '',
+      //   onMonthDay: '',
+      //   onMonth: '',
+      //   ocurrences: 1234,
+      // },
     };
     afterEach(() => objectRemover.removeAll());
 
@@ -32,21 +43,10 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send({
-              ...createParams,
-              scope: {
-                kql: "_id: '1234'",
-              },
-            });
+            .send(createParams);
 
           if (response.body.id) {
-            objectRemover.add(
-              space.id,
-              response.body.id,
-              'rules/maintenance_window',
-              'alerting',
-              true
-            );
+            objectRemover.add(space.id, response.body.id, 'maintenance_window');
           }
 
           switch (scenario.id) {
@@ -59,7 +59,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message:
-                  'API [POST /internal/alerting/rules/maintenance_window] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]',
+                  'API [POST /api/maintenance_window] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]',
                 statusCode: 403,
               });
               break;
@@ -67,11 +67,24 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
-              expect(response.body.duration).to.eql(3600000);
-              expect(response.body.recurring_schedule).to.eql(createParams.recurring_schedule);
-              expect(response.body.events.length).to.be.greaterThan(0);
-              expect(response.body.status).to.eql('running');
-              expect(response.body.scope.kql).to.eql("_id: '1234'");
+              expect(response.body.status).to.eql('upcoming');
+              expect(response.body.enabled).to.eql(true);
+              expect(response.body.scope.query.kql).to.eql("_id: '1234'");
+
+              expect(response.body.created_by).to.eql(scenario.user.username);
+              expect(response.body.updated_by).to.eql(scenario.user.username);
+
+              // TODO schedule schema
+              // We want to guarantee every field is returned as expected
+              expect(response.body.duration).to.eql(createParams.duration);
+              expect(response.body.start).to.eql(createParams.start);
+              // expect(response.body.expiration_date).to.eql('???');
+              // expect(response.body.recurring.end).to.eql();
+              // expect(response.body.recurring.every).to.eql();
+              // expect(response.body.recurring.onWeekDay).to.eql();
+              // expect(response.body.recurring.onMonthDay).to.eql();
+              // expect(response.body.recurring.onMonth).to.eql();
+              // expect(response.body.recurring.occurrences).to.eql();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -79,6 +92,21 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         });
       });
     }
+
+    it('should throw if creating maintenance window with invalid scoped query', async () => {
+      await supertest
+        .post(`${getUrlPrefix('space1')}/api/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          scope: {
+            query: {
+              kql: 'invalid_kql:',
+            },
+          },
+        })
+        .expect(400);
+    });
 
     // TODO schedule schema
     describe.skip('schedule schema validation', () => {
@@ -144,56 +172,14 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
 
         expect(response.body.r_rule.bymonthday).to.eql(rrule.bymonthday);
       });
-    });
 
-    it('should create maintenance window with category ids', async () => {
-      const response = await supertest
-        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          ...createParams,
-          category_ids: ['observability', 'securitySolution'],
-        })
-        .expect(200);
-
-      objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
-
-      expect(response.body.category_ids).eql(['observability', 'securitySolution']);
-    });
-
-    it('should throw if creating maintenance window with invalid categories', async () => {
-      await supertest
-        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          ...createParams,
-          category_ids: ['something-else'],
-        })
-        .expect(400);
-    });
-
-    it('should throw if creating maintenance window with invalid scoped query', async () => {
-      await supertest
-        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          ...createParams,
-          scoped_query: {
-            kql: 'invalid_kql:',
-            filters: [],
-          },
-        })
-        .expect(400);
-    });
-
-    describe('validation', () => {
       it('should return 400 if the timezone is not valid', async () => {
         await supertest
           .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
           .set('kbn-xsrf', 'foo')
           .send({
             ...createParams,
-            r_rule: { ...createParams.r_rule, tzid: 'invalid' },
+            // r_rule: { ...createParams.r_rule, tzid: 'invalid' },
           })
           .expect(400);
       });
@@ -204,7 +190,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
           .set('kbn-xsrf', 'foo')
           .send({
             ...createParams,
-            r_rule: { ...createParams.r_rule, byweekday: ['invalid'] },
+            // r_rule: { ...createParams.r_rule, byweekday: ['invalid'] },
           })
           .expect(400);
       });
@@ -215,7 +201,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
           .set('kbn-xsrf', 'foo')
           .send({
             ...createParams,
-            r_rule: { ...createParams.r_rule, bymonthday: [35] },
+            // r_rule: { ...createParams.r_rule, bymonthday: [35] },
           })
           .expect(400);
       });
@@ -226,7 +212,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
           .set('kbn-xsrf', 'foo')
           .send({
             ...createParams,
-            r_rule: { ...createParams.r_rule, bymonth: [14] },
+            // r_rule: { ...createParams.r_rule, bymonth: [14] },
           })
           .expect(400);
       });

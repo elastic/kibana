@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { alertsFilterQuerySchemaV1 } from '../../../../../alerts_filter_query';
 
 // TODO schedule schema
 const scheduleSchema = schema.object({
@@ -26,7 +25,15 @@ const scheduleSchema = schema.object({
 
 export const bodySchema = schema.object({
   title: schema.string(),
-  scope: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+  scope: schema.maybe(
+    schema.object({
+      query: schema.object({
+        kql: schema.string({
+          meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+        }),
+      }),
+    })
+  ),
 });
 
 export const createMaintenanceWindowRequestBodySchema = schema.intersection([

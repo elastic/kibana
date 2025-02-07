@@ -15,6 +15,7 @@ import { MaintenanceWindow } from '../../../../../../../application/maintenance_
 export const transformMaintenanceWindowToResponse = (
   maintenanceWindow: MaintenanceWindow
 ): MaintenanceWindowResponseV1 => {
+  const kql = maintenanceWindow.scopedQuery?.kql;
   return {
     id: maintenanceWindow.id,
     title: maintenanceWindow.title,
@@ -31,8 +32,6 @@ export const transformMaintenanceWindowToResponse = (
     created_at: maintenanceWindow.createdAt,
     updated_at: maintenanceWindow.updatedAt,
     status: maintenanceWindow.status,
-    ...(maintenanceWindow.scopedQuery?.kql !== undefined
-      ? { scoped: { query: { kql: maintenanceWindow.scopedQuery } } }
-      : {}),
+    ...(kql ? { scope: { query: { kql } } } : {}),
   };
 };

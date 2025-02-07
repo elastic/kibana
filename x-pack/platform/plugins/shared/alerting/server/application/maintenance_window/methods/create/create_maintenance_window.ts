@@ -63,13 +63,17 @@ export async function createMaintenanceWindow(
     );
   }
 
-  if (scopedQueryWithGeneratedValue) {
-    if (data.categoryIds?.length !== 1) {
-      throw Boom.badRequest(
-        `Error validating create maintenance window data - scoped query must be accompanied by 1 category ID`
-      );
-    }
-  }
+  // This validation was removed so that the new POST maintenance window API can be created.
+  // The categoryIDs field will be completely removed in the future.
+  // https://github.com/elastic/kibana/issues/197530
+  //
+  // if (scopedQueryWithGeneratedValue) {
+  //   if (data.categoryIds?.length !== 1) {
+  //     throw Boom.badRequest(
+  //       `Error validating create maintenance window data - scoped query must be accompanied by 1 category ID`
+  //     );
+  //   }
+  // }
 
   const id = SavedObjectsUtils.generateId();
   const expirationDate = moment().utc().add(1, 'year').toISOString();

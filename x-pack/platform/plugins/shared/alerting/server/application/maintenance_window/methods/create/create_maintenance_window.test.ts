@@ -283,7 +283,10 @@ describe('MaintenanceWindowClient - create', () => {
     `);
   });
 
-  it('should throw if trying to create a MW with a scoped query with other than 1 category ID', async () => {
+  // This validation was removed so that the new POST maintenance window API can be created.
+  // The categoryIDs field will be completely removed in the future.
+  // https://github.com/elastic/kibana/issues/197530
+  it.skip('should throw if trying to create a MW with a scoped query with other than 1 category ID', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({

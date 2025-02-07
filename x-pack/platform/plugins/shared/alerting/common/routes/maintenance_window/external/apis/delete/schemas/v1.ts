@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const getParamsSchema = schema.object({
+export const deleteParamsSchema = schema.object({
   id: schema.string({
     meta: {
       description: 'The identifier for the maintenance window.',

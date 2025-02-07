@@ -13,29 +13,25 @@ import {
   BASE_MAINTENANCE_WINDOW_API_PATH,
 } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
-import { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
-import {
-  getParamsSchemaV1,
-  GetMaintenanceWindowRequestParamsV1,
-  GetMaintenanceWindowResponseV1,
-} from '../../../../../../common/routes/maintenance_window/external/apis/get';
-import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
-import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
 
-export const getMaintenanceWindowRoute = (
+import {
+  deleteParamsSchemaV1,
+  DeleteMaintenanceWindowRequestParamsV1,
+} from '../../../../../../common/routes/maintenance_window/external/apis/delete';
+
+export const deleteMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.delete(
     {
       path: `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`,
       validate: {
         request: {
-          params: getParamsSchemaV1,
+          params: deleteParamsSchemaV1,
         },
         response: {
-          200: {
-            body: () => maintenanceWindowResponseSchemaV1,
+          204: {
             description: 'Indicates a successful call.',
           },
           400: {
@@ -51,32 +47,25 @@ export const getMaintenanceWindowRoute = (
       },
       security: {
         authz: {
-          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
         },
       },
       options: {
         access: 'public',
-        summary: 'Gets a maintenance window by ID.',
+        summary: 'Delete a maintenance window,',
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForMaintenanceWindow();
 
+        const params: DeleteMaintenanceWindowRequestParamsV1 = req.params;
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
-        const params: GetMaintenanceWindowRequestParamsV1 = req.params;
+        await maintenanceWindowClient.delete({ id: params.id });
 
-        const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.get({
-          id: params.id,
-        });
-
-        const response: GetMaintenanceWindowResponseV1 =
-          transformMaintenanceWindowToResponseV1(maintenanceWindow);
-
-        return res.ok({
-          body: response,
-        });
+        return res.noContent();
       })
     )
   );
