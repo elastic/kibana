@@ -58352,6 +58352,7 @@ components:
         - medium_impact
         - high_impact
         - extreme_impact
+        - unassigned
       type: string
     Security_Entity_Analytics_API_AssetCriticalityRecord:
       allOf:
