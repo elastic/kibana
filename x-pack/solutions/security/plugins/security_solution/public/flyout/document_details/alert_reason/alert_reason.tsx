@@ -40,7 +40,6 @@ export const AlertReason: React.FC = () => {
         ? renderer.renderRow({
             contextId: 'event-details',
             data: dataAsNestedObject,
-            isDraggable: false,
             scopeId,
           })
         : null,
