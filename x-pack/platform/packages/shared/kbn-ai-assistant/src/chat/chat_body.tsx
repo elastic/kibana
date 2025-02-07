@@ -28,12 +28,11 @@ import {
   VisualizeESQLUserIntention,
   type ChatActionClickPayload,
   type Feedback,
-  aiAssistantFunctionCallingMode,
+  aiAssistantSimulatedFunctionCalling,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { FunctionCallingMode } from '@kbn/inference-common';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
@@ -144,9 +143,9 @@ export function ChatBody({
     services: { uiSettings },
   } = useKibana();
 
-  const functionCallingMode = uiSettings!.get<FunctionCallingMode>(
-    aiAssistantFunctionCallingMode,
-    'auto'
+  const useSimulatedFunctionCalling = uiSettings!.get<boolean>(
+    aiAssistantSimulatedFunctionCalling,
+    false
   );
 
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
@@ -418,7 +417,7 @@ export function ChatBody({
           </div>
         </EuiFlexItem>
 
-        {functionCallingMode === 'simulated' ? (
+        {useSimulatedFunctionCalling ? (
           <EuiFlexItem grow={false}>
             <SimulatedFunctionCallingCallout />
           </EuiFlexItem>

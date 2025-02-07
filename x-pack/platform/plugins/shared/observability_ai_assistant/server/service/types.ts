@@ -8,7 +8,6 @@
 import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { FunctionCallingMode } from '@kbn/inference-common';
 import { ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
@@ -57,7 +56,7 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     chat: FunctionCallChatFunction;
     connectorId: string;
-    functionCallingMode: FunctionCallingMode;
+    useSimulatedFunctionCalling: boolean;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;

@@ -21,7 +21,6 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
-import { FunctionCallingMode } from '@kbn/inference-common';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
@@ -55,7 +54,7 @@ function executeFunctionAndCatchError({
   logger,
   tracer,
   connectorId,
-  functionCallingMode,
+  useSimulatedFunctionCalling,
 }: {
   name: string;
   args: string | undefined;
@@ -66,7 +65,7 @@ function executeFunctionAndCatchError({
   logger: Logger;
   tracer: LangTracer;
   connectorId: string;
-  functionCallingMode: FunctionCallingMode;
+  useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -87,7 +86,7 @@ function executeFunctionAndCatchError({
           signal,
           messages,
           connectorId,
-          functionCallingMode,
+          useSimulatedFunctionCalling,
         })
       );
 
@@ -185,7 +184,7 @@ export function continueConversation({
   disableFunctions,
   tracer,
   connectorId,
-  functionCallingMode,
+  useSimulatedFunctionCalling,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -202,7 +201,7 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
-  functionCallingMode: FunctionCallingMode;
+  useSimulatedFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -320,7 +319,7 @@ export function continueConversation({
       logger,
       tracer,
       connectorId,
-      functionCallingMode,
+      useSimulatedFunctionCalling,
     });
   }
 
@@ -349,7 +348,7 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
-              functionCallingMode,
+              useSimulatedFunctionCalling,
             });
           })
         )

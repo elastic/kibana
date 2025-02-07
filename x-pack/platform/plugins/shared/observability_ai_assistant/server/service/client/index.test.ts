@@ -872,7 +872,7 @@ describe('Observability AI Assistant client', () => {
               },
             },
           ],
-          functionCallingMode: 'auto',
+          useSimulatedFunctionCalling: false,
         });
       });
 

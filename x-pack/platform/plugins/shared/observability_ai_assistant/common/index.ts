@@ -41,7 +41,7 @@ export {
 
 export {
   aiAssistantLogsIndexPattern,
-  aiAssistantFunctionCallingMode,
+  aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
 } from './ui_settings/settings_keys';
 

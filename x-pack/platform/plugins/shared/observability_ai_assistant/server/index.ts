@@ -22,7 +22,7 @@ export type { ObservabilityAIAssistantClient } from './service/client';
 
 export {
   aiAssistantLogsIndexPattern,
-  aiAssistantFunctionCallingMode,
+  aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
 } from '../common';
 

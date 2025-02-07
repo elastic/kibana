@@ -50,7 +50,7 @@ describe('chatFunctionClient', () => {
           messages: [],
           signal: new AbortController().signal,
           connectorId: 'foo',
-          functionCallingMode: 'auto',
+          useSimulatedFunctionCalling: false,
         });
       }).rejects.toThrowError(`Function arguments are invalid`);
 
@@ -112,7 +112,7 @@ describe('chatFunctionClient', () => {
         messages: [],
         signal: new AbortController().signal,
         connectorId: 'foo',
-        functionCallingMode: 'auto',
+        useSimulatedFunctionCalling: false,
       });
 
       expect(result).toEqual({

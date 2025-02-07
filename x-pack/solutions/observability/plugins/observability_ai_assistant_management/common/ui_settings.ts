@@ -9,59 +9,32 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import {
-  aiAssistantFunctionCallingMode,
+  aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { FunctionCallingModeEnum } from './function_calling_mode';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
-  [aiAssistantFunctionCallingMode]: {
+  [aiAssistantSimulatedFunctionCalling]: {
     category: ['observability'],
     name: i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsPage.functionCallingModeLabel',
+      'xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingLabel',
       {
-        defaultMessage: 'Function calling mode',
+        defaultMessage: 'Simulate function calling',
       }
     ),
-    value: FunctionCallingModeEnum.Auto,
+    value: false,
     description: i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsPage.functionCallingModeDescription',
+      'xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingDescription',
       {
         defaultMessage:
-          '<em>[technical preview]</em> Select a mode: Auto chooses the best option based on the connector, Native requires API support, and Simulated does not need API support for functions or tools, but it may impact performance.',
+          '<em>[technical preview]</em> Use simulated function calling. Simulated function calling does not need API support for functions or tools, but it may decrease performance. Simulated function calling is currently always enabled for connectors that do not have API support for Native function calling, regardless of this setting.',
         values: {
           em: (chunks) => `<em>${chunks}</em>`,
         },
       }
     ),
-    schema: schema.oneOf(
-      [
-        schema.literal(FunctionCallingModeEnum.Auto),
-        schema.literal(FunctionCallingModeEnum.Native),
-        schema.literal(FunctionCallingModeEnum.Simulated),
-      ],
-      { defaultValue: FunctionCallingModeEnum.Auto }
-    ),
-    options: [
-      FunctionCallingModeEnum.Auto,
-      FunctionCallingModeEnum.Native,
-      FunctionCallingModeEnum.Simulated,
-    ],
-    type: 'select',
-    optionLabels: {
-      [FunctionCallingModeEnum.Auto]: i18n.translate(
-        'xpack.observabilityAiAssistantManagement.functionCallingModeValueAuto',
-        { defaultMessage: 'Auto (default)' }
-      ),
-      [FunctionCallingModeEnum.Native]: i18n.translate(
-        'xpack.observabilityAiAssistantManagement.functionCallingModeValueNative',
-        { defaultMessage: 'Native' }
-      ),
-      [FunctionCallingModeEnum.Simulated]: i18n.translate(
-        'xpack.observabilityAiAssistantManagement.functionCallingModeValueSimulated',
-        { defaultMessage: 'Simulated' }
-      ),
-    },
+    schema: schema.boolean(),
+    type: 'boolean',
     requiresPageReload: true,
   },
   [aiAssistantSearchConnectorIndexPattern]: {

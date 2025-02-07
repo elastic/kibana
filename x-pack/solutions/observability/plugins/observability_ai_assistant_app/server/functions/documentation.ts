@@ -62,14 +62,14 @@ export async function registerDocumentationFunction({
         required: ['query'],
       } as const,
     },
-    async ({ arguments: { query, product }, connectorId, functionCallingMode }) => {
+    async ({ arguments: { query, product }, connectorId, useSimulatedFunctionCalling }) => {
       const response = await llmTasks!.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,
         max: 3,
         connectorId,
         request: resources.request,
-        functionCalling: functionCallingMode,
+        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'auto',
       });
 
       return {

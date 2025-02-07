@@ -11,8 +11,7 @@ import * as t from 'io-ts';
 import { from, map } from 'rxjs';
 import { Readable } from 'stream';
 import { AssistantScope } from '@kbn/ai-assistant-common';
-import { FunctionCallingMode } from '@kbn/inference-common';
-import { aiAssistantFunctionCallingMode } from '../..';
+import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
@@ -101,10 +100,10 @@ async function initializeChatRequest({
     return connector;
   });
 
-  const [client, cloudStart, functionCallingMode] = await Promise.all([
+  const [client, cloudStart, useSimulatedFunctionCalling] = await Promise.all([
     service.getClient({ request, scopes }),
     cloud?.start(),
-    (await context.core).uiSettings.client.get<FunctionCallingMode>(aiAssistantFunctionCallingMode),
+    (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
   ]);
 
   if (!client) {
@@ -120,7 +119,7 @@ async function initializeChatRequest({
   return {
     client,
     isCloudEnabled: Boolean(cloudStart?.isCloudEnabled),
-    functionCallingMode,
+    useSimulatedFunctionCalling,
     signal: controller.signal,
   };
 }
@@ -153,9 +152,8 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       body: { name, messages, connectorId, functions, functionCall },
     } = params;
 
-    const { client, functionCallingMode, signal, isCloudEnabled } = await initializeChatRequest(
-      resources
-    );
+    const { client, useSimulatedFunctionCalling, signal, isCloudEnabled } =
+      await initializeChatRequest(resources);
 
     const response$ = client.chat(name, {
       stream: true,
@@ -168,7 +166,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
             functionCall,
           }
         : {}),
-      functionCallingMode,
+      useSimulatedFunctionCalling,
       tracer: new LangTracer(otelContext.active()),
     });
 
@@ -192,9 +190,8 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
     }),
   }),
   handler: async (resources): Promise<Readable> => {
-    const { client, functionCallingMode, signal, isCloudEnabled } = await initializeChatRequest(
-      resources
-    );
+    const { client, useSimulatedFunctionCalling, signal, isCloudEnabled } =
+      await initializeChatRequest(resources);
 
     const { connectorId, prompt, context } = resources.params.body;
 
@@ -207,7 +204,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
               ...params,
               stream: true,
               connectorId,
-              functionCallingMode,
+              useSimulatedFunctionCalling,
               signal,
               tracer: new LangTracer(otelContext.active()),
             })
@@ -259,9 +256,8 @@ async function chatComplete(
     },
   } = params;
 
-  const { client, isCloudEnabled, signal, functionCallingMode } = await initializeChatRequest(
-    resources
-  );
+  const { client, isCloudEnabled, signal, useSimulatedFunctionCalling } =
+    await initializeChatRequest(resources);
 
   const functionClient = await service.getFunctionClient({
     signal,
@@ -280,7 +276,7 @@ async function chatComplete(
     signal,
     functionClient,
     instructions,
-    functionCallingMode,
+    useSimulatedFunctionCalling,
     disableFunctions,
   });
 
