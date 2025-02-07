@@ -8,9 +8,31 @@
 import { z } from '@kbn/zod';
 import { createIsNarrowSchema } from '../helpers';
 import { IngestStreamDefinition, ingestStreamDefinitionSchema } from './ingest';
+import { GroupStreamDefinition, groupStreamDefinitionSchema } from './group';
 
-export type StreamDefinition = IngestStreamDefinition;
+export type StreamDefinition = IngestStreamDefinition | GroupStreamDefinition;
 
-export const streamDefinitionSchema: z.Schema<StreamDefinition> = ingestStreamDefinitionSchema;
+export const streamDefinitionSchema: z.Schema<StreamDefinition> = z.union([
+  ingestStreamDefinitionSchema,
+  groupStreamDefinitionSchema,
+]);
 
 export const isStreamDefinition = createIsNarrowSchema(z.unknown(), streamDefinitionSchema);
+
+export type Primitive = string | number | boolean | null | undefined;
+
+export const primitive: z.ZodType<Primitive> = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+  z.undefined(),
+]);
+
+export interface RecursiveRecord {
+  [key: PropertyKey]: Primitive | Primitive[] | RecursiveRecord;
+}
+
+export const recursiveRecord: z.ZodType<RecursiveRecord> = z.record(
+  z.union([primitive, z.array(primitive), z.lazy(() => recursiveRecord)])
+);

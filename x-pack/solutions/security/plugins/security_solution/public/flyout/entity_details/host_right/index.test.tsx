@@ -10,14 +10,14 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { mockHostRiskScoreState, mockObservedHostData } from '../mocks';
 import type {
-  FlyoutPanelProps,
-  ExpandableFlyoutState,
   ExpandableFlyoutApi,
+  ExpandableFlyoutState,
+  FlyoutPanelProps,
 } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
-  useExpandableFlyoutState,
   useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 import type { HostPanelProps } from '.';
 import { HostPanel } from '.';
@@ -26,7 +26,6 @@ const mockProps: HostPanelProps = {
   hostName: 'test',
   contextID: 'test-host -panel',
   scopeId: 'test-scope-id',
-  isDraggable: false,
   isPreviewMode: false,
 };
 

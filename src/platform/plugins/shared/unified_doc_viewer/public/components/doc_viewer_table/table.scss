@@ -23,10 +23,6 @@
     border-bottom: $euiBorderThin;
   }
 
-  &.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
-    background-color: tintOrShade($euiColorLightShade, 50%, 0);
-  }
-
   & [data-gridcell-column-id='name'] .euiDataGridRowCell__content {
     padding-top: 0;
     padding-bottom: 0;

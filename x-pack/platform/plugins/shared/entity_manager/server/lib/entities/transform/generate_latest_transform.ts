@@ -50,6 +50,7 @@ export function generateLatestTransform(
     transformId: generateLatestTransformId(definition),
     frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
     syncDelay: definition.latest.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
+    docsPerSecond: definition.latest.settings?.docsPerSecond,
   });
 }
 
@@ -59,13 +60,15 @@ const generateTransformPutRequest = ({
   transformId,
   frequency,
   syncDelay,
+  docsPerSecond,
 }: {
   definition: EntityDefinition;
   transformId: string;
   filter: QueryDslQueryContainer[];
   frequency: string;
   syncDelay: string;
-}) => {
+  docsPerSecond?: number;
+}): TransformPutTransformRequest => {
   return {
     transform_id: transformId,
     _meta: {
@@ -73,6 +76,7 @@ const generateTransformPutRequest = ({
       managed: definition.managed,
     },
     defer_validation: true,
+    timeout: definition.latest.settings?.timeout,
     source: {
       index: definition.indexPatterns,
       ...(filter.length > 0 && {
@@ -97,6 +101,7 @@ const generateTransformPutRequest = ({
     settings: {
       deduce_mappings: false,
       unattended: true,
+      docs_per_second: docsPerSecond,
     },
     pivot: {
       group_by: {

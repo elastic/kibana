@@ -7,12 +7,14 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { SIEM_RULE_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   StopRuleMigrationRequestParams,
   type StopRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { SiemMigrationAuditLogger } from './util/audit';
+import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsStopRoute = (
@@ -23,7 +25,7 @@ export const registerSiemRuleMigrationsStopRoute = (
     .put({
       path: SIEM_RULE_MIGRATION_STOP_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
@@ -35,6 +37,7 @@ export const registerSiemRuleMigrationsStopRoute = (
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<StopRuleMigrationResponse>> => {
           const migrationId = req.params.migration_id;
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
@@ -44,10 +47,13 @@ export const registerSiemRuleMigrationsStopRoute = (
             if (!exists) {
               return res.noContent();
             }
+            await siemMigrationAuditLogger.logStop({ migrationId });
+
             return res.ok({ body: { stopped } });
-          } catch (err) {
-            logger.error(err);
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logStop({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

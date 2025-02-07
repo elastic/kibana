@@ -8,8 +8,7 @@
  */
 
 import { Observable } from 'rxjs';
-// @ts-expect-error
-import fetchMock from 'fetch-mock/es5/client';
+import fetchMock from 'fetch-mock';
 
 import { loadingServiceMock } from './http_service.test.mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
