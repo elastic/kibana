@@ -629,7 +629,6 @@
     "@kbn/logging": "link:src/platform/packages/shared/kbn-logging",
     "@kbn/logging-mocks": "link:src/platform/packages/shared/kbn-logging-mocks",
     "@kbn/logs-data-access-plugin": "link:x-pack/platform/plugins/shared/logs_data_access",
-    "@kbn/logs-explorer-plugin": "link:x-pack/solutions/observability/plugins/logs_explorer",
     "@kbn/logs-overview": "link:x-pack/platform/packages/shared/logs_overview",
     "@kbn/logs-shared-plugin": "link:x-pack/platform/plugins/shared/logs_shared",
     "@kbn/logstash-plugin": "link:x-pack/platform/plugins/private/logstash",

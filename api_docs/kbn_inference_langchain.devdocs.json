@@ -233,7 +233,15 @@
             "label": "_identifyingParams",
             "description": [],
             "signature": [
-              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; temperature?: number | undefined; functionCalling?: ",
+              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; temperature?: number | undefined; functionCalling?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -273,7 +281,15 @@
             "label": "identifyingParams",
             "description": [],
             "signature": [
-              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; temperature?: number | undefined; functionCalling?: ",
+              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; temperature?: number | undefined; functionCalling?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -1005,7 +1021,15 @@
                     "section": "def-common.FunctionCallingMode",
                     "text": "FunctionCallingMode"
                   },
-                  " | undefined; abortSignal?: AbortSignal | undefined; } & TToolOptions"
+                  " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteMetadata",
+                    "text": "ChatCompleteMetadata"
+                  },
+                  " | undefined; } & TToolOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
                 "deprecated": false,
