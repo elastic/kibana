@@ -77,4 +77,5 @@ export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase
   HIGH_IMPACT: 'high_impact',
   EXTREME_IMPACT: 'extreme_impact',
   DELETED: 'deleted',
+  UNASSIGNED: 'unassigned',
 };

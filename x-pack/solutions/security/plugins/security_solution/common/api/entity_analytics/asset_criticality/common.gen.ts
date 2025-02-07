@@ -42,6 +42,7 @@ export const AssetCriticalityLevel = z.enum([
   'medium_impact',
   'high_impact',
   'extreme_impact',
+  'unassigned',
 ]);
 export type AssetCriticalityLevelEnum = typeof AssetCriticalityLevel.enum;
 export const AssetCriticalityLevelEnum = AssetCriticalityLevel.enum;

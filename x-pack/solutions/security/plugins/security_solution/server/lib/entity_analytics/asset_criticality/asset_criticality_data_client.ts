@@ -327,9 +327,15 @@ export class AssetCriticalityDataClient {
           doc: {
             id_field: record.idField,
             id_value: record.idValue,
-            criticality_level: record.criticalityLevel,
+            criticality_level:
+              record.criticalityLevel === 'unassigned'
+                ? CRITICALITY_VALUES.DELETED
+                : record.criticalityLevel,
             asset: {
-              criticality: record.criticalityLevel,
+              criticality:
+                record.criticalityLevel === 'unassigned'
+                  ? CRITICALITY_VALUES.DELETED
+                  : record.criticalityLevel,
             },
             ...getImplicitEntityFields(record),
             '@timestamp': new Date().toISOString(),
