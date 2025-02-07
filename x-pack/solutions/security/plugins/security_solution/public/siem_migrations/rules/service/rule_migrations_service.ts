@@ -39,10 +39,17 @@ import {
   upsertMigrationResources,
   getIntegrations,
 } from '../api';
+import {
+  getMissingCapabilities,
+  type MissingCapability,
+  type CapabilitiesLevel,
+} from './capabilities';
 import type { RuleMigrationStats } from '../types';
-import { getSuccessToast } from './success_notification';
+import { getSuccessToast } from './notifications/success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
+import { getNoConnectorToast } from './notifications/no_connector_notification';
+import { getMissingCapabilitiesToast } from './notifications/missing_capabilities_notification';
 
 // use the default assistant namespace since it's the only one we use
 const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
@@ -76,9 +83,19 @@ export class SiemRulesMigrationsService {
     return this.latestStats$.asObservable();
   }
 
+  public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
+    return getMissingCapabilities(this.core.application.capabilities, level);
+  }
+
+  public hasMissingCapabilities(level?: CapabilitiesLevel): boolean {
+    return this.getMissingCapabilities(level).length > 0;
+  }
+
   public isAvailable() {
     return (
-      !ExperimentalFeaturesService.get().siemMigrationsDisabled && licenseService.isEnterprise()
+      !ExperimentalFeaturesService.get().siemMigrationsDisabled &&
+      licenseService.isEnterprise() &&
+      !this.hasMissingCapabilities('minimum')
     );
   }
 
@@ -128,9 +145,17 @@ export class SiemRulesMigrationsService {
     migrationId: string,
     retry?: SiemMigrationRetryFilter
   ): Promise<StartRuleMigrationResponse> {
+    const missingCapabilities = this.getMissingCapabilities('all');
+    if (missingCapabilities.length > 0) {
+      this.core.notifications.toasts.add(
+        getMissingCapabilitiesToast(missingCapabilities, this.core)
+      );
+      return { started: false };
+    }
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
-      throw new Error(i18n.MISSING_CONNECTOR_ERROR);
+      this.core.notifications.toasts.add(getNoConnectorToast(this.core));
+      return { started: false };
     }
 
     const langSmithSettings = this.traceOptionsStorage.get();
@@ -176,8 +201,9 @@ export class SiemRulesMigrationsService {
     }
 
     return getRuleMigrationsStatsAll(params).catch((e) => {
-      // Retry only on network errors (no status) and 503s, otherwise throw
-      if (e.status && e.status !== 503) {
+      // Retry only on network errors (no status) and 503 (Service Unavailable), otherwise throw
+      const status = e.response?.status || e.status;
+      if (status && status !== 503) {
         throw e;
       }
       const nextSleepSecs = sleepSecs ? sleepSecs * 2 : 1; // Exponential backoff
@@ -217,7 +243,7 @@ export class SiemRulesMigrationsService {
 
         if (result.status === SiemMigrationTaskStatus.STOPPED) {
           const connectorId = this.connectorIdStorage.get();
-          if (connectorId) {
+          if (connectorId && !this.hasMissingCapabilities('all')) {
             // automatically resume stopped migrations when connector is available
             await startRuleMigration({ migrationId: result.id, connectorId });
             pendingMigrationIds.push(result.id);
