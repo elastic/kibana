@@ -12,8 +12,8 @@ import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/t
 
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
-import { addInferenceEndpoint } from '../lib/add_inference_endpoint';
 import { inferenceEndpointExists } from '../lib/inference_endpoint_exists';
+import { unflattenObject } from '../utils/unflatten_object';
 
 const inferenceEndpointSchema = schema.object({
   config: schema.object({
@@ -90,7 +90,27 @@ export const getInferenceServicesRoute = (
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           const { config, secrets } = request.body;
-          const result = await addInferenceEndpoint(esClient, config, secrets);
+
+          const inferenceBody = {
+            service: config.provider,
+            service_settings: {
+              ...unflattenObject(config?.providerConfig ?? {}),
+              ...unflattenObject(secrets?.providerSecrets ?? {}),
+            },
+          };
+
+          const result = await esClient.transport.request<InferenceInferenceEndpointInfo>(
+            {
+              method: 'PUT',
+              path: `/_inference/${config.taskType}/${config.inferenceId}`,
+              body: JSON.stringify(inferenceBody),
+            },
+            {
+              headers: {
+                'content-type': 'application/json',
+              },
+            }
+          );
 
           return response.ok({
             body: result,
