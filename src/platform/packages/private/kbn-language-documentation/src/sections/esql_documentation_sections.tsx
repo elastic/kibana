@@ -431,7 +431,7 @@ PUT languages
 }
 \`\`\`
 
-The join key field must match the name of the field in the lookup index to find matching documents. You can use \`RENAME\` or \`EVAL\` to rename columns as needed.
+The join key field must have a compatible type and match the name of the field in the lookup index to find matching documents. You can use \`RENAME\` or \`EVAL\` to rename columns as needed.
 
 \`\`\`
 FROM employees
