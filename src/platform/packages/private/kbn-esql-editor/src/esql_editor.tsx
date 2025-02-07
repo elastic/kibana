@@ -37,6 +37,7 @@ import {
   type ESQLControlVariable,
 } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { ESQL_WORD_SEPARATORS } from '@kbn/monaco/src/esql/language';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -682,7 +683,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     scrollBeyondLastLine: false,
     theme: ESQL_LANG_ID,
     wordWrap: 'on',
-    wordSeparators: '`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?',
+    wordSeparators: ESQL_WORD_SEPARATORS,
     wrappingIndent: 'none',
   };
 
