@@ -441,7 +441,12 @@ function InheritModalWired({
 
       <ModalFooter
         definition={definition}
-        confirmationLabel="Set to default"
+        confirmationLabel={i18n.translate(
+          'xpack.streams.streamDetailLifecycle.defaultLifecycleAction',
+          {
+            defaultMessage: 'Set to default',
+          }
+        )}
         closeModal={closeModal}
         onConfirm={() => updateLifecycle({ inherit: {} })}
         updateInProgress={updateInProgress}
