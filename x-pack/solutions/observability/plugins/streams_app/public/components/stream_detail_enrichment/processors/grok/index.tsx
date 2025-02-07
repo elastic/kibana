@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { StreamDefinition } from '@kbn/streams-schema';
+import { RecursiveRecord, StreamDefinition } from '@kbn/streams-schema';
 import { GrokPatternDefinition } from './grok_pattern_definition';
 import { GrokPatternsEditor } from './grok_patterns_editor';
 import { ProcessorFieldSelector } from '../processor_field_selector';
@@ -23,7 +23,7 @@ export const GrokProcessorForm = ({
 }: {
   definition?: StreamDefinition;
   refreshSimulation?: UseProcessingSimulatorReturn['refreshSimulation'];
-  samples?: Array<Record<PropertyKey, unknown>>;
+  samples?: RecursiveRecord[];
 }) => {
   return (
     <>

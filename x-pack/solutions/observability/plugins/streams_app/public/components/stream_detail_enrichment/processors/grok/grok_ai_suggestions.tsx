@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { StreamDefinition } from '@kbn/streams-schema';
+import { RecursiveRecord, StreamDefinition } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -131,7 +131,7 @@ export function GrokAiSuggestions({
 }: {
   definition: StreamDefinition;
   refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
-  samples: Array<Record<PropertyKey, unknown>>;
+  samples: RecursiveRecord[];
   extraButtons?: React.ReactNode;
 }) {
   const { dependencies } = useKibana();

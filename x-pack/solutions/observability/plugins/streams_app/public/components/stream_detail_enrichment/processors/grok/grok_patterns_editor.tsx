@@ -24,7 +24,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamDefinition } from '@kbn/streams-schema';
+import { RecursiveRecord, StreamDefinition } from '@kbn/streams-schema';
 import React from 'react';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
@@ -38,7 +38,7 @@ export const GrokPatternsEditor = ({
 }: {
   definition?: StreamDefinition;
   refreshSimulation?: UseProcessingSimulatorReturn['refreshSimulation'];
-  samples?: Array<Record<PropertyKey, unknown>>;
+  samples?: RecursiveRecord[];
 }) => {
   const {
     formState: { errors },

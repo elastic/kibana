@@ -21,7 +21,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProcessorType, IngestStreamGetResponse } from '@kbn/streams-schema';
+import { ProcessorType, IngestStreamGetResponse, RecursiveRecord } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
@@ -50,7 +50,7 @@ export interface ProcessorPanelProps {
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
   isInitiallyOpen?: boolean;
   onAddProcessor: UseDefinitionReturn['addProcessor'];
-  samples: Array<Record<PropertyKey, unknown>>;
+  samples: RecursiveRecord[];
 }
 
 export interface EditProcessorPanelProps extends ProcessorPanelProps {
