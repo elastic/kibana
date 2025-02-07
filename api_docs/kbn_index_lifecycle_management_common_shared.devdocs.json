@@ -729,6 +729,14 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/application/sections/edit_policy/form/deserializer_and_serializer.test.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/solutions/observability/plugins/streams_app/public/components/stream_detail_lifecycle/modal.tsx"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/solutions/observability/plugins/streams_app/public/components/stream_detail_lifecycle/modal.tsx"
               }
             ]
           }
