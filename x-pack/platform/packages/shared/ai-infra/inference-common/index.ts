@@ -56,6 +56,8 @@ export {
   isToolValidationError,
   isTokenLimitReachedError,
   isToolNotFoundError,
+  type ChatCompleteMetadata,
+  type ConnectorTelemetryMetadata,
 } from './src/chat_complete';
 export {
   OutputEventType,
@@ -96,6 +98,7 @@ export {
   isInferenceRequestError,
   isInferenceRequestAbortedError,
 } from './src/errors';
+export { generateFakeToolCallId } from './src/utils';
 export { elasticModelDictionary } from './src/const';
 
 export { truncateList } from './src/truncate_list';
@@ -103,6 +106,9 @@ export {
   InferenceConnectorType,
   isSupportedConnectorType,
   isSupportedConnector,
+  getConnectorDefaultModel,
+  getConnectorProvider,
+  connectorToInference,
   type InferenceConnector,
 } from './src/connectors';
 export {
