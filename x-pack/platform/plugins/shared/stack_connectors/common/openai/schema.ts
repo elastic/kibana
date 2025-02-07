@@ -8,6 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
+export const TelemtryMetadataSchema = schema.object({
+  pluginId: schema.maybe(schema.string()),
+  aggregateBy: schema.maybe(schema.string()),
+});
+
 // Connector schema
 export const ConfigSchema = schema.oneOf([
   schema.object({
@@ -37,6 +42,7 @@ export const RunActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 const AIMessage = schema.object({
@@ -145,6 +151,7 @@ export const InvokeAIActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
