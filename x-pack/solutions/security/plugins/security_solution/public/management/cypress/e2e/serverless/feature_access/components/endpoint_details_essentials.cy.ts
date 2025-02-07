@@ -22,9 +22,6 @@ describe(
     ],
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['defendInsights'])}`,
-        ],
         productTypes: [
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },
