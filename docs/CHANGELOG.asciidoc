@@ -283,11 +283,13 @@ The 8.16.4 release includes the following bug fixes.
 [float]
 [[fixes-v8.16.4]]
 === Bug fixes
-Dashboards::
+Dashboards and visualizations::
 * Fixes an issue with all embeddables getting rebuilt on refresh ({kibana-pull}209677[#209677]).
 * Sets options list control to fetch a maximum of 1,000 terms upon scrolling ({kibana-pull}207901[#207901]).
 * Fixes scroll-jumping when interacting with the Lens editor flyout ({kibana-pull}207429[#207429]).
 * Fixes an issue with Kibana Chrome appearing in generated reports ({kibana-pull}206988[#206988]).
+* Fixes missing highlight theme for HJSON in *Vega* ({kibana-pull}208858[#208858]).
+* Adds an accessible label to range slider in *Lens* ({kibana-pull}205308[#205308]).
 Discover::
 * Fixes document comparison table padding ({kibana-pull}205984[#205984]).
 Osquery::
@@ -307,10 +309,6 @@ Kibana security::
 * Fixes breaks in YAML parsing by using single quotes in Structured log template ({kibana-pull}209736[#209736]).
 * Adds missing fields to input manifest templates ({kibana-pull}208768[#208768]).
 * Adds missing fields into AWS S3 manifest ({kibana-pull}208080[#208080]).
-Lens & Visualizations::
-* Fixes missing highlight theme for HJSON in *Vega* ({kibana-pull}208858[#208858]).
-* Adds an accessible label to range slider in *Lens* ({kibana-pull}205308[#205308]).
-
 [[release-notes-8.16.3]]
 == {kib} 8.16.3
 
