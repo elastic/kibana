@@ -61,7 +61,9 @@ export function TracesOverview({
                   <h3>{attributeConfiguration.title}</h3>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={2}>{attributeConfiguration.content}</EuiFlexItem>
+              <EuiFlexItem grow={2}>
+                <div>{attributeConfiguration.content}</div>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="xs" />
           </div>
