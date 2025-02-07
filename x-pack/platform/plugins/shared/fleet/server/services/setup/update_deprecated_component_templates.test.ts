@@ -36,7 +36,7 @@ describe('updateDeprecatedComponentTemplates', () => {
               },
             },
             {
-              name: 'metricsother',
+              name: 'metrics-other',
               component_template: {
                 template: {
                   settings: {},
