@@ -86,4 +86,7 @@ export const useStoredIntegrationSearchTerm = (spaceId: string) =>
  * Stores the integration search term per space
  */
 export const useStoredAssistantConnectorId = (spaceId: string) =>
-  useDefinedLocalStorage<string | null>(`${LocalStorageKey.assistantConnectorId}.${spaceId}`, null);
+  useDefinedLocalStorage<string | undefined>(
+    `${LocalStorageKey.assistantConnectorId}.${spaceId}`,
+    undefined
+  );

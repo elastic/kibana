@@ -89,6 +89,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         'securitySolutionCasesV2',
         'securitySolutionCasesV3',
         'securitySolutionNotes',
+        'securitySolutionSiemMigrations',
         'securitySolutionTimeline',
         'siem',
         'siemV2',
