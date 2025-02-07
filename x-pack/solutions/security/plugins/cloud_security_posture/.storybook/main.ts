@@ -10,10 +10,16 @@
 // import { resolve } from 'path';
 
 import { defaultConfig, StorybookConfig } from '@kbn/storybook';
+import def from 'ajv/dist/vocabularies/discriminator';
 
 const cspmStorybookConfig: StorybookConfig = {
   ...defaultConfig,
   stories: ['../public/**/*.stories.tsx'],
+  addons: [...(defaultConfig.addons || []), '@storybook/addon-interactions'],
+  features: {
+    ...defaultConfig.features,
+    interactionsDebugger: true,
+  },
 };
 
 module.exports = cspmStorybookConfig;

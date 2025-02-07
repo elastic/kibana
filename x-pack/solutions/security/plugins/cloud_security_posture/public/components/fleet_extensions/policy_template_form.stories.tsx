@@ -7,16 +7,14 @@
 
 import React, { useState } from 'react';
 import { Meta, Story } from '@storybook/react';
+import { within, userEvent, waitFor } from '@storybook/testing-library';
+import { expect } from '@storybook/jest';
 import {
   NewPackagePolicy,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
   SetupTechnology,
 } from '@kbn/fleet-plugin/public/types';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
-import { I18nProvider } from '@kbn/i18n-react';
-import { ThemeProvider } from '@emotion/react';
-import { euiDarkVars } from '@kbn/ui-theme';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { NewPackagePolicyPostureInput } from './utils';
 import { getMockPolicyAWS, getMockPackageInfo } from './mocks';
 import { CspPolicyTemplateForm } from './policy_template_form';
@@ -53,7 +51,6 @@ export default {
   component: CspPolicyTemplateForm,
   decorators: [
     (CspPolicyTemplateFormChild) => {
-      const queryClient = new QueryClient();
       return (
         <StorybookProviders>
           <MemoryRouter initialEntries={['/add-integration/cspm']}>
@@ -92,11 +89,17 @@ const Template: Story<PackagePolicyReplaceDefineStepExtensionComponentProps> = (
 
 export const AgentBased = Template.bind({});
 AgentBased.args = defaultProps;
-// AgentBased.play = async ({ canvasElement }) => {
-//   const canvas = within(canvasElement);
-//   await userEvent.type(canvas.getByLabelText('Name'), 'AWS Package Policy');
-//   expect(canvas.getByLabelText('Name')).toHaveValue('AWS Package Policy');
-// };
+AgentBased.play = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  await waitFor(() => {
+    expect(canvas.getByLabelText('Name')).toBeInTheDocument;
+  });
+
+  const nameInput = canvas.getByLabelText('Name');
+  await userEvent.clear(nameInput);
+  await userEvent.type(nameInput, 'AWS Package Policy');
+  expect(nameInput).toHaveValue('AWS Package Policy');
+};
 
 export const Agentless = Template.bind({});
 Agentless.args = {

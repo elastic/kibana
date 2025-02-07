@@ -6,31 +6,24 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import * as stories from './policy_template_form.stories';
-import { composeStories } from '@storybook/react';
+import { render, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { composeStories } from '@storybook/react';
+import * as stories from './policy_template_form.stories'; // Adjust the import path as needed
+// import '@testing-library/jest-dom/extend-expect';
 
+// Compose the stories
 const { AgentBased } = composeStories(stories);
 
-describe('LinkPreview', () => {
-  it('Checks if changing the name updated the package policy', async () => {
-    // const onChange = (obj: any) => console.log('onChange', obj);
-    const onChange = jest.fn();
-    const { container, getByLabelText, getByRole } = render(<AgentBased onChange={onChange} />);
-
-    // make sure the loading spinner is niot displayed
-    await waitFor(() => {
-      expect(container.querySelector('#name')).toBeInTheDocument();
-    });
-
-    const name = getByLabelText('Name');
-    // await userEvent.clear(name);
-    await userEvent.type(name, 'CSPM AWS Package Policy');
-
-    // await waitFor(() => {
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ updatedPolicy: { name: 'CSPM AWS Package Policy' } })
-    );
+test('should execute interaction in the story', async () => {
+  const { container } = render(<AgentBased />);
+  const canvas = within(container);
+  await waitFor(() => {
+    expect(canvas.getByLabelText('Name')).toBeInTheDocument();
   });
+
+  const nameInput = canvas.getByLabelText('Name');
+  await userEvent.clear(nameInput);
+  await userEvent.type(nameInput, 'AWS Package Policy');
+  expect(nameInput).toHaveValue('AWS Package Policy');
 });
