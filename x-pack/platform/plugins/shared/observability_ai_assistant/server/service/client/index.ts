@@ -166,7 +166,7 @@ export class ObservabilityAIAssistantClient {
   complete = ({
     functionClient,
     connectorId,
-    useSimulatedFunctionCalling = false,
+    simulateFunctionCalling = false,
     instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
@@ -187,7 +187,7 @@ export class ObservabilityAIAssistantClient {
     isPublic?: boolean;
     kibanaPublicUrl?: string;
     instructions?: AdHocInstruction[];
-    useSimulatedFunctionCalling?: boolean;
+    simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
       | {
@@ -254,7 +254,7 @@ export class ObservabilityAIAssistantClient {
                     chat: (name, chatParams) =>
                       this.chat(name, {
                         ...chatParams,
-                        useSimulatedFunctionCalling,
+                        simulateFunctionCalling,
                         connectorId,
                         signal,
                         stream: false,
@@ -292,7 +292,7 @@ export class ObservabilityAIAssistantClient {
                   return this.chat(name, {
                     ...chatParams,
                     signal,
-                    useSimulatedFunctionCalling,
+                    simulateFunctionCalling,
                     connectorId,
                     stream: true,
                   });
@@ -307,7 +307,7 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
-                useSimulatedFunctionCalling,
+                simulateFunctionCalling,
               })
             );
           }),
@@ -471,7 +471,7 @@ export class ObservabilityAIAssistantClient {
       functions,
       functionCall,
       signal,
-      useSimulatedFunctionCalling,
+      simulateFunctionCalling,
       tracer,
       stream,
     }: {
@@ -480,7 +480,7 @@ export class ObservabilityAIAssistantClient {
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
-      useSimulatedFunctionCalling?: boolean;
+      simulateFunctionCalling?: boolean;
       tracer: LangTracer;
       stream: TStream;
     }
@@ -513,7 +513,7 @@ export class ObservabilityAIAssistantClient {
       ),
       toolChoice,
       tools,
-      functionCalling: (useSimulatedFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
+      functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
     };
 
     if (stream) {

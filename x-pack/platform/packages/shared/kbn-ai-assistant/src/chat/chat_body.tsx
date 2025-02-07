@@ -143,7 +143,7 @@ export function ChatBody({
     services: { uiSettings },
   } = useKibana();
 
-  const useSimulatedFunctionCalling = uiSettings!.get<boolean>(
+  const simulateFunctionCalling = uiSettings!.get<boolean>(
     aiAssistantSimulatedFunctionCalling,
     false
   );
@@ -417,7 +417,7 @@ export function ChatBody({
           </div>
         </EuiFlexItem>
 
-        {useSimulatedFunctionCalling ? (
+        {simulateFunctionCalling ? (
           <EuiFlexItem grow={false}>
             <SimulatedFunctionCallingCallout />
           </EuiFlexItem>

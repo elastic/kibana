@@ -100,7 +100,7 @@ async function initializeChatRequest({
     return connector;
   });
 
-  const [client, cloudStart, useSimulatedFunctionCalling] = await Promise.all([
+  const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
     service.getClient({ request, scopes }),
     cloud?.start(),
     (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
@@ -119,7 +119,7 @@ async function initializeChatRequest({
   return {
     client,
     isCloudEnabled: Boolean(cloudStart?.isCloudEnabled),
-    useSimulatedFunctionCalling,
+    simulateFunctionCalling,
     signal: controller.signal,
   };
 }
@@ -152,8 +152,9 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       body: { name, messages, connectorId, functions, functionCall },
     } = params;
 
-    const { client, useSimulatedFunctionCalling, signal, isCloudEnabled } =
-      await initializeChatRequest(resources);
+    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
+      resources
+    );
 
     const response$ = client.chat(name, {
       stream: true,
@@ -166,7 +167,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
             functionCall,
           }
         : {}),
-      useSimulatedFunctionCalling,
+      simulateFunctionCalling,
       tracer: new LangTracer(otelContext.active()),
     });
 
@@ -190,8 +191,9 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
     }),
   }),
   handler: async (resources): Promise<Readable> => {
-    const { client, useSimulatedFunctionCalling, signal, isCloudEnabled } =
-      await initializeChatRequest(resources);
+    const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
+      resources
+    );
 
     const { connectorId, prompt, context } = resources.params.body;
 
@@ -204,7 +206,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
               ...params,
               stream: true,
               connectorId,
-              useSimulatedFunctionCalling,
+              simulateFunctionCalling,
               signal,
               tracer: new LangTracer(otelContext.active()),
             })
@@ -256,8 +258,9 @@ async function chatComplete(
     },
   } = params;
 
-  const { client, isCloudEnabled, signal, useSimulatedFunctionCalling } =
-    await initializeChatRequest(resources);
+  const { client, isCloudEnabled, signal, simulateFunctionCalling } = await initializeChatRequest(
+    resources
+  );
 
   const functionClient = await service.getFunctionClient({
     signal,
@@ -276,7 +279,7 @@ async function chatComplete(
     signal,
     functionClient,
     instructions,
-    useSimulatedFunctionCalling,
+    simulateFunctionCalling,
     disableFunctions,
   });
 
