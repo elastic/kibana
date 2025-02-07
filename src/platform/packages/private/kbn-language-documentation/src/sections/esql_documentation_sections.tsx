@@ -402,7 +402,6 @@ FROM employees
         defaultMessage: 'LOOKUP JOIN',
       }),
       preview: true,
-      ignoreTag: true,
       description: (
         <Markdown
           openLinksInNewTab={true}
@@ -411,7 +410,6 @@ FROM employees
             {
               defaultMessage: `### LOOKUP JOIN
 You can use \`LOOKUP JOIN\` to add data from an existing index to incoming rows. While this is similar to \`ENRICH\`, it does not require an enrich policy to be executed beforehand. Additionally, if multiple matching documents are found in the lookup index, they will generate multiple output rows.
-
 
 \`\`\`
 ROW language_code = 1
