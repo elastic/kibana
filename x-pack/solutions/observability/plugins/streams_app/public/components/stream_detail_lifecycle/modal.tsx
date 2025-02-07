@@ -25,6 +25,7 @@ import {
   isWiredStreamGetResponse,
   findInheritedLifecycle,
   findInheritingStreams,
+  isDslLifecycle,
 } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -92,6 +93,11 @@ const isInvalidRetention = (value: string) => {
   return isNaN(num) || num < 1 || num % 1 > 0;
 };
 
+const parseRetentionDuration = (value: string = '') => {
+  const result = /(\d+)([d|m|s|h])/.exec(value);
+  return { value: result?.[1], unit: result?.[2] };
+};
+
 function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }: ModalOptions) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
@@ -100,9 +106,19 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
     { name: 'Seconds', value: 's' },
   ];
 
-  const [selectedUnit, setSelectedUnit] = useState(timeUnits[0]);
-  const [retentionValue, setRetentionValue] = useState('1');
-  const [noRetention, toggleNoRetention] = useToggle(false);
+  const existingRetention = isDslLifecycle(definition.stream.ingest.lifecycle)
+    ? parseRetentionDuration(definition.stream.ingest.lifecycle.dsl.data_retention)
+    : undefined;
+  const [selectedUnit, setSelectedUnit] = useState(
+    (existingRetention && timeUnits.find((unit) => unit.value === existingRetention.unit)) ||
+      timeUnits[0]
+  );
+  const [retentionValue, setRetentionValue] = useState(
+    (existingRetention && existingRetention.value) || '1'
+  );
+  const [noRetention, toggleNoRetention] = useToggle(
+    Boolean(existingRetention && !existingRetention.value)
+  );
   const [showUnitMenu, { on: openUnitMenu, off: closeUnitMenu }] = useBoolean(false);
   const invalidRetention = useMemo(
     () => isInvalidRetention(retentionValue) && !noRetention,
