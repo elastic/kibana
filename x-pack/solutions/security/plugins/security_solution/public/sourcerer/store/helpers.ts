@@ -118,6 +118,7 @@ export const validateSelectedPatterns = (
           }
         : {}),
       loading: false,
+      dataViewSpec: dataViewOverride,
     },
   };
 };

@@ -34,6 +34,11 @@ export const useSourcererDataView = (
     return sourcererSelectors.sourcererScopeSelectedPatterns(state, scopeId);
   });
 
+  // NOTE: currently this is only defined when an adhoc DV is created
+  const optionalSelectedDataViewSpec = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewSpec(state, scopeId);
+  });
+
   const selectedPatterns = useMemo(
     () => sortWithExcludesAtEnd(scopeSelectedPatterns),
     [scopeSelectedPatterns]
@@ -47,9 +52,15 @@ export const useSourcererDataView = (
         title: selectedPatterns.join(','),
         name: selectedDataView?.dataView?.name ?? selectedPatterns.join(','),
         id: selectedDataViewId ?? undefined,
+        fields: optionalSelectedDataViewSpec?.fields,
       },
     };
-  }, [selectedDataView, selectedDataViewId, selectedPatterns]);
+  }, [
+    optionalSelectedDataViewSpec?.fields,
+    selectedDataView,
+    selectedDataViewId,
+    selectedPatterns,
+  ]);
 
   const indicesExist = useMemo(() => {
     if (loading || sourcererDataView.loading) {

@@ -35,6 +35,8 @@ export interface SourcererScope {
    * selectedDataViewId === null OR defaultDataView.id
    * saved timeline has pattern that is not in the default */
   missingPatterns: string[];
+
+  dataViewSpec?: DataViewSpec;
 }
 
 export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
