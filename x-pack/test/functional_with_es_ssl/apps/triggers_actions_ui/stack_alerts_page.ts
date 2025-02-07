@@ -58,7 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         await loadAlertsPage();
         const filtersBar = await pageObjects.triggersActionsUI.getFilterGroupWrapper();
-        expect(filtersBar).to.exist();
+        expect(filtersBar).to.not.be(null);
       });
 
       describe('feature filters', function () {
