@@ -62,6 +62,7 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
     });
     const expectedData: GetAgentStatusResponse['results'] = {
       active: 50,
+      total: 50,
       all: 0,
       inactive: 5,
       online: 40,
