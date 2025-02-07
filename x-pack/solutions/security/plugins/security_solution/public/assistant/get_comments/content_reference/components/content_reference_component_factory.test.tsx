@@ -14,6 +14,9 @@ import type { ContentReferenceNode } from '../content_reference_parser';
 const testContentReferenceNode = { contentReferenceId: '1' } as ContentReferenceNode;
 
 jest.mock('../../../../common/lib/kibana', () => ({
+  useNavigation: jest.fn().mockReturnValue({
+    navigateTo: jest.fn(),
+  }),
   useKibana: jest.fn().mockReturnValue({
     services: {
       discover: {
@@ -153,5 +156,27 @@ describe('contentReferenceComponentFactory', () => {
 
     expect(container).toBeEmptyDOMElement();
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
+  });
+
+  it('renders nothing if contentReferenceId is empty string', async () => {
+    const Component = contentReferenceComponentFactory({
+      contentReferences: {
+        '1': {
+          id: '1',
+          type: 'SecurityAlertsPage',
+        },
+      } as ContentReferences,
+      contentReferencesVisible: true,
+      loading: false,
+    });
+
+    const { container } = render(
+      <Component
+        {...({ contentReferenceId: '', contentReferenceCount: -1 } as ContentReferenceNode)}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText('[-1]')).not.toBeInTheDocument();
   });
 });

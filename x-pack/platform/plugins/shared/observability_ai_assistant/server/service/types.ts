@@ -56,7 +56,7 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     chat: FunctionCallChatFunction;
     connectorId: string;
-    useSimulatedFunctionCalling: boolean;
+    simulateFunctionCalling: boolean;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;
