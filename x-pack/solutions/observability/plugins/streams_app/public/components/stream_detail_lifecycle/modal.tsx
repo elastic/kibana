@@ -56,7 +56,7 @@ import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useWiredStreams } from './hooks/use_wired_streams';
+import { useWiredStreams } from '../../hooks/use_wired_streams';
 
 export type LifecycleEditAction = 'none' | 'dsl' | 'ilm' | 'inherit';
 
@@ -396,10 +396,10 @@ function InheritModalWired({
   updateInProgress,
   updateLifecycle,
 }: ModalOptions & { definition: WiredStreamGetResponse }) {
-  const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams({ definition });
+  const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
 
   const parents = useMemo(() => {
-    if (wiredStreamsLoading) return [];
+    if (wiredStreamsLoading || !wiredStreams) return [];
     const ancestors = getAncestors(definition.stream.name);
     return wiredStreams.filter((stream) => ancestors.includes(stream.name));
   }, [definition, wiredStreams, wiredStreamsLoading]);
@@ -504,9 +504,9 @@ function ModalFooter({
   onConfirm: () => void;
   closeModal: () => void;
 }) {
-  const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams({ definition });
+  const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
   const inheritingStreams = useMemo(() => {
-    if (wiredStreamsLoading || !isWiredStreamGetResponse(definition)) {
+    if (!isWiredStreamGetResponse(definition) || wiredStreamsLoading || !wiredStreams) {
       return [];
     }
     return findInheritingStreams(

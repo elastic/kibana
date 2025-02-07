@@ -37,6 +37,7 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
 import { AssetImage } from '../asset_image';
+import { useWiredStreams } from '../../hooks/use_wired_streams';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -289,32 +290,16 @@ function QuickLinks({ definition }: { definition?: IngestStreamGetResponse }) {
 }
 
 function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse }) {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
   const router = useStreamsAppRouter();
 
-  const streamsListFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams', {
-        signal,
-      });
-    },
-    [streamsRepositoryClient]
-  );
+  const { wiredStreams } = useWiredStreams();
 
   const childrenStreams = useMemo(() => {
     if (!definition) {
       return [];
     }
-    return streamsListFetch.value?.streams.filter(
-      (d) => isWiredStreamDefinition(d) && isDescendantOf(definition.stream.name, d.name)
-    );
-  }, [definition, streamsListFetch.value?.streams]);
+    return wiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name));
+  }, [definition, wiredStreams]);
 
   if (definition && childrenStreams?.length === 1) {
     return (
