@@ -583,6 +583,25 @@ export function getDateLiterals(options?: {
   ];
 }
 
+export function getControlSuggestionIfSupported(
+  supportsControls: boolean,
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+) {
+  if (!supportsControls) {
+    return [];
+  }
+  if (supportsControls) {
+    const variableType = ESQLVariableType.FUNCTIONS;
+    const variables = getVariablesByType?.(variableType) ?? [];
+    const controlSuggestion = getControlSuggestion(
+      variableType,
+      variables?.map((v) => `?${v.key}`)
+    );
+    return controlSuggestion;
+  }
+  return [];
+}
+
 export function getControlSuggestion(
   type: ESQLVariableType,
   variables?: string[]
@@ -603,7 +622,7 @@ export function getControlSuggestion(
           defaultMessage: 'Click to create',
         }
       ),
-      sortText: '1A',
+      sortText: '1',
       command: {
         id: `esql.control.${type}.create`,
         title: i18n.translate(

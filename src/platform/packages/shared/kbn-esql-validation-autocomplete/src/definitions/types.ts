@@ -16,7 +16,7 @@ import type {
   ESQLMessage,
 } from '@kbn/esql-ast';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLCallbacks, ESQLControlVariable, ESQLVariableType } from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -208,7 +208,9 @@ export interface CommandBaseDefinition<CommandName extends string> {
     getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
     fullTextAst?: ESQLAst,
     definition?: CommandDefinition<CommandName>,
-    callbacks?: ESQLCallbacks
+    callbacks?: ESQLCallbacks,
+    getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+    supportsControls?: boolean
   ) => Promise<SuggestionRawDefinition[]>;
   /** @deprecated this property will disappear in the future */
   signature: {

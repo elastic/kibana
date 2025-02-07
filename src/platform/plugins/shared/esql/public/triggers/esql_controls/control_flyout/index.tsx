@@ -71,7 +71,10 @@ export function ESQLControlsFlyout({
         search={search}
       />
     );
-  } else if (variableType === ESQLVariableType.FIELDS) {
+  } else if (
+    variableType === ESQLVariableType.FIELDS ||
+    variableType === ESQLVariableType.FUNCTIONS
+  ) {
     return (
       <FieldControlForm
         variableType={variableType}

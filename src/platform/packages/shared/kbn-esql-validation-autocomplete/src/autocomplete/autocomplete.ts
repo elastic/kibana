@@ -228,10 +228,11 @@ export async function suggest(
       getFieldsByType,
       getFieldsMap,
       getPolicies,
-      getPolicyMetadata,
+      getVariablesByType,
       resourceRetriever?.getPreferences,
       fullAst,
-      resourceRetriever
+      resourceRetriever,
+      supportsControls
     );
   }
   if (astContext.type === 'setting') {
@@ -415,10 +416,11 @@ async function getSuggestionsWithinCommandExpression(
   getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
-  getPolicyMetadata: GetPolicyMetadataFn,
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
   fullAst?: ESQLAst,
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  supportsControls?: boolean
 ) {
   const commandDef = getCommandDefinition(command.name);
 
@@ -440,7 +442,9 @@ async function getSuggestionsWithinCommandExpression(
       getPreferences,
       fullAst,
       commandDef,
-      callbacks
+      callbacks,
+      getVariablesByType,
+      supportsControls
     );
   } else {
     // The deprecated path.
@@ -451,8 +455,7 @@ async function getSuggestionsWithinCommandExpression(
       getSources,
       getColumnsByType,
       getFieldsMap,
-      getPolicies,
-      getPolicyMetadata
+      getPolicies
     );
   }
 }
@@ -476,8 +479,7 @@ async function getExpressionSuggestionsByType(
   getSources: () => Promise<ESQLSourceResult[]>,
   getFieldsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
-  getPolicies: GetPoliciesFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getPolicies: GetPoliciesFn
 ) {
   const commandDef = getCommandDefinition(command.name);
   const { argIndex, prevIndex, lastArg, nodeArg } = extractArgMeta(command, node);
