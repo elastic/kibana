@@ -16,9 +16,7 @@ interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<EsqlContentReference>;
 }
 
-export const EsqlQueryReference: React.FC<Props> = ({
-  contentReferenceNode,
-}) => {
+export const EsqlQueryReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const {
     discover: { locator },
     application: { navigateToApp },
@@ -37,7 +35,7 @@ export const EsqlQueryReference: React.FC<Props> = ({
         timeRange: {
           from: 'now-5y',
           to: 'now',
-        }
+        },
       });
 
       navigateToApp(url.app, {

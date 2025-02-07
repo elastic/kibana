@@ -12,8 +12,10 @@ import { contentReferenceParser } from './content_reference_parser';
 
 describe('ContentReferenceParser', () => {
   it('extracts references from poem', async () => {
-    const file = unified().use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
-      .parse(`With a wagging tail and a wet, cold nose,{reference(ccaSI)}
+    const file = unified().use([
+      [markdown, {}],
+      contentReferenceParser({ contentReferences: null }),
+    ]).parse(`With a wagging tail and a wet, cold nose,{reference(ccaSI)}
 A furry friend, from head to toes.{reference(ccaSI)}
 Loyal companion, always near,{reference(ccaSI)}
 Chasing squirrels, full of cheer.{reference(ccaSI)}
@@ -38,7 +40,10 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
   });
 
   it('extracts reference after linebreak', async () => {
-    const file = unified().use([[markdown, {}], contentReferenceParser({ contentReferences: null })]).parse(`First line
+    const file = unified().use([
+      [markdown, {}],
+      contentReferenceParser({ contentReferences: null }),
+    ]).parse(`First line
 {reference(FTQJp)}
 `) as Parent;
 
@@ -69,8 +74,18 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
 
   it('invalid content reference has correct contentReferenceCount', async () => {
     const file = unified()
-      .use([[markdown, {}], contentReferenceParser({ contentReferences: { "valid1": { "id": "valid1", "type": "SecurityAlertsPage" }, "valid2": { "id": "valid2", "type": "SecurityAlertsPage" } } })])
-      .parse('There {reference(valid1)} is one invalid content reference {reference(invalid)} and two valid ones. {reference(valid2)}') as Parent;
+      .use([
+        [markdown, {}],
+        contentReferenceParser({
+          contentReferences: {
+            valid1: { id: 'valid1', type: 'SecurityAlertsPage' },
+            valid2: { id: 'valid2', type: 'SecurityAlertsPage' },
+          },
+        }),
+      ])
+      .parse(
+        'There {reference(valid1)} is one invalid content reference {reference(invalid)} and two valid ones. {reference(valid2)}'
+      ) as Parent;
 
     expect(file.children[0].children).toEqual(
       expect.arrayContaining([

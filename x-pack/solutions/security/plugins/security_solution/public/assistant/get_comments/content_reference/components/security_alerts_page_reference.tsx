@@ -18,9 +18,7 @@ interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertsPageContentReference>;
 }
 
-export const SecurityAlertsPageReference: React.FC<Props> = ({
-  contentReferenceNode,
-}) => {
+export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
 
   const onClick = useCallback(
