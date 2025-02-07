@@ -839,9 +839,39 @@ components:
           required:
             - parameters
     GetProcessesRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
     IsolateRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
     KillProcessRouteRequestBody:
       allOf:
         - type: object
@@ -921,28 +951,6 @@ components:
           type: string
       required:
         - hostStatuses
-    NoParametersRequestSchema:
-      type: object
-      properties:
-        body:
-          type: object
-          properties:
-            agent_type:
-              $ref: '#/components/schemas/AgentTypes'
-            alert_ids:
-              $ref: '#/components/schemas/AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/CaseIds'
-            comment:
-              $ref: '#/components/schemas/Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Parameters'
-          required:
-            - endpoint_ids
-      required:
-        - body
     Page:
       default: 1
       description: Page number
@@ -1073,7 +1081,22 @@ components:
       minLength: 1
       type: array
     UnisolateRouteRequestBody:
-      $ref: '#/components/schemas/NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/CaseIds'
+        comment:
+          $ref: '#/components/schemas/Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Parameters'
+      required:
+        - endpoint_ids
     UploadRouteRequestBody:
       allOf:
         - type: object
