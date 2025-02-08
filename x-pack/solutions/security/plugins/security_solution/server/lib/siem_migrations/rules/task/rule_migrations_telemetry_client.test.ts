@@ -202,7 +202,7 @@ describe('siemMigrationTelemetry', () => {
       migrationId: 'testmigration',
       model: 'testModel',
       postFilterRuleCount: 1,
-      postFilterRuleNames: 'rule1id',
+      postFilterRuleName: 'rule1id',
       preFilterRuleCount: 2,
       preFilterRuleNames: ['rule1id', 'rule2id'],
     });
@@ -215,7 +215,7 @@ describe('siemMigrationTelemetry', () => {
       migrationId: 'testmigration',
       model: 'testModel',
       postFilterRuleCount: 0,
-      postFilterRuleNames: '',
+      postFilterRuleName: '',
       preFilterRuleCount: 2,
       preFilterRuleNames: ['rule1id', 'rule2id'],
     });
