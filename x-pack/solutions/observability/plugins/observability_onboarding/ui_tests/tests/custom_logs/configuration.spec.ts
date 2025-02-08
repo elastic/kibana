@@ -41,6 +41,7 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
   });
 
   test(`should allow updating Advanced Settings`, async ({ pageObjects: { customLogs } }) => {
+    await customLogs.getLogFilePathInputField(0).fill('myLogs.log');
     await expect(customLogs.advancedSettingsContent).not.toBeVisible();
     await customLogs.clickAdvancedSettingsButton();
     await expect(
@@ -49,20 +50,21 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
     ).toBeVisible();
     await expect(customLogs.namespaceInput).toHaveValue('default');
 
+    await customLogs.namespaceInput.fill('');
+    await expect(
+      customLogs.continueButton,
+      'Continue button should be disabled when Namespace is empty'
+    ).toBeDisabled();
+
+    await customLogs.namespaceInput.fill('default');
+    await expect(customLogs.customConfigInput).toHaveValue('');
+    await expect(customLogs.continueButton).not.toBeDisabled();
+
     await customLogs.clickAdvancedSettingsButton();
     await expect(
       customLogs.advancedSettingsContent,
       'Advanced Settings should be closed'
     ).not.toBeVisible();
-
-    customLogs.clickAdvancedSettingsButton();
-    await customLogs.namespaceInput.fill('');
-    await expect(customLogs.continueButton).toBeDisabled();
-
-    await customLogs.namespaceInput.fill('default');
-    await customLogs.getLogFilePathInputField(0).fill('myLogs.log');
-    await expect(customLogs.customConfigInput).toHaveValue('');
-    await expect(customLogs.continueButton).not.toBeDisabled();
   });
 
   test('should validate Integration Name field', async ({ pageObjects: { customLogs }, page }) => {

@@ -39,6 +39,7 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
   test('should be installed sucessfully', async ({
     pageObjects: { customLogs },
     onboardingApi,
+    page,
   }) => {
     // download agent
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-download', 'loading');
@@ -46,24 +47,56 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
       customLogs.getStepStatusLocator('loading'),
       'Downloading Elastic Agent'
     );
+
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-download', 'danger');
+    await expect(customLogs.getStepStatusLocator('danger'), 'Download Elastic Agent').toBeVisible();
+
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-download', 'complete');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('complete'),
       'Elastic Agent downloaded'
     );
+
     // extract agent
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-extract', 'loading');
+    await checkAgentStatusUpdated(
+      customLogs.getStepStatusLocator('loading'),
+      'Extracting Elastic Agent'
+    );
+
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('complete'),
       'Elastic Agent extracted'
     );
+
     // install agent
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-install', 'danger');
+    await checkAgentStatusUpdated(
+      customLogs.getStepStatusLocator('danger'),
+      'Install Elastic Agent'
+    );
+
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-install', 'complete');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('complete'),
       'Elastic Agent installed'
     );
+
     // agent status
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-status', 'loading');
+    await checkAgentStatusUpdated(
+      customLogs.getStepStatusLocator('loading'),
+      'Connecting to the Elastic Agent'
+    );
+
+    await expect(customLogs.getCheckLogsStepLocator('incomplete')).toBeVisible();
+    await expect(
+      page.locator('.euiStep__title', {
+        hasText: 'Ship logs to Elastic Observability',
+      })
+    ).toBeVisible();
+
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete', {
       agentId: 'test-agent-id',
     });
@@ -73,12 +106,12 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
     );
   });
 
-  test('should be configured sucessfully and wait for logs', async ({
+  test('should be configured sucessfully for Linux and wait for logs', async ({
     pageObjects: { customLogs },
     onboardingApi,
     page,
   }) => {
-    // install and connect agent
+    // install and connect agent for linux
     await customLogs.autoDownloadConfigurationToggle.click();
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-download', 'complete');
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
@@ -110,7 +143,35 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
     ).toBeVisible();
   });
 
-  test('should ship logs to Elastic', async ({ page }) => {
+  test('should be configured sucessfully for MacOS and wait for logs', async ({
+    pageObjects: { customLogs },
+    onboardingApi,
+    page,
+  }) => {
+    // install and connect agent for macos
+    await customLogs.selectPlatform('macos');
+    await customLogs.autoDownloadConfigurationToggle.click();
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-download', 'complete');
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-install', 'complete');
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete', {
+      agentId: 'test-agent-id',
+    });
+
+    await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-config', 'complete');
+    await checkAgentStatusUpdated(
+      customLogs.getStepStatusLocator('complete'),
+      'Elastic Agent config written to /Library/Elastic/Agent/elastic-agent.yml'
+    );
+
+    await expect(customLogs.getCheckLogsStepLocator('loading')).toBeVisible();
+
+    await expect(
+      page.locator('.euiStep__title', { hasText: 'Waiting for logs to be shipped...' })
+    ).toBeVisible();
+  });
+
+  test('should ship logs to Elastic', async ({ page, pageObjects: { customLogs } }) => {
     await page.route('**/progress', (route) => {
       route.fulfill({
         status: 200,
@@ -127,12 +188,7 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
       });
     });
 
-    await expect(
-      page.testSubj
-        .locator('obltOnboardingCheckLogsStep')
-        .locator('.euiStep__titleWrapper [class$="euiStepNumber-s-complete"]')
-    ).toBeVisible();
-
+    await expect(customLogs.getCheckLogsStepLocator('complete')).toBeVisible();
     await expect(
       page.locator('.euiStep__title', { hasText: 'Logs are being shipped!' })
     ).toBeVisible();

@@ -111,4 +111,10 @@ export class CustomLogsPage {
   async selectPlatform(name: 'linux' | 'macos' | 'windows') {
     return this.page.testSubj.click(name);
   }
+
+  getCheckLogsStepLocator(status: 'loading' | 'incomplete' | 'complete') {
+    return this.page.testSubj
+      .locator('obltOnboardingCheckLogsStep')
+      .locator(`.euiStep__titleWrapper [class$="euiStepNumber-s-${status}"]`);
+  }
 }

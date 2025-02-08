@@ -44,16 +44,22 @@ test.describe(
       // validate default 'Install the Elastic Agent' instructions
       await expect(page.testSubj.locator('linux-tar')).toHaveAttribute('aria-pressed', 'true');
       await expect(customLogs.autoDownloadConfigurationToggle).not.toBeChecked();
+      await expect(customLogs.installCodeSnippet).toBeVisible();
 
       await customLogs.selectPlatform('macos');
       await expect(customLogs.autoDownloadConfigurationToggle).not.toBeChecked();
+      await expect(customLogs.installCodeSnippet).toBeVisible();
 
       await customLogs.selectPlatform('windows');
       await expect(customLogs.autoDownloadConfigurationToggle).toBeDisabled();
       await expect(customLogs.windowsInstallElasticAgentDocLink).toBeVisible();
+      await expect(customLogs.installCodeSnippet).not.toBeVisible();
+      await expect(
+        customLogs.configureElasticAgentStep.getByText('Step 2 is disabled')
+      ).toBeVisible();
     });
 
-    test('should update instructions when automatic Agent config toggled', async ({
+    test('should update instructions when automatic config download toggled', async ({
       pageObjects: { customLogs },
     }) => {
       await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
@@ -66,6 +72,9 @@ test.describe(
       await customLogs.selectPlatform('macos');
       await expect(customLogs.autoDownloadConfigurationCallout).toBeVisible();
       await expect(customLogs.installCodeSnippet).toContainText('autoDownloadConfig=1');
+
+      await customLogs.autoDownloadConfigurationToggle.click();
+      await expect(customLogs.installCodeSnippet).not.toContainText('autoDownloadConfig=1');
     });
   }
 );
