@@ -14,11 +14,11 @@ export {
   type InternalStateStore,
   type InternalStateDispatch,
   type InternalStateThunk,
-  InternalStateProvider2,
+  InternalStateProvider,
   createInternalStateStore,
   internalStateActions,
   useInternalStateDispatch,
-  useInternalStateSelector2,
+  useInternalStateSelector,
   useDataViewsForPicker,
 } from './internal_state';
 

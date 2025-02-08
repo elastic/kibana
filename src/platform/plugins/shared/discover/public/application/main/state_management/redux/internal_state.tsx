@@ -269,7 +269,7 @@ const internalStateContext = createContext<ReactReduxContextValue>(
   null as unknown as ReactReduxContextValue
 );
 
-export const InternalStateProvider2 = ({
+export const InternalStateProvider = ({
   store,
   children,
 }: PropsWithChildren<{ store: InternalStateStore }>) => (
@@ -281,13 +281,13 @@ export const InternalStateProvider2 = ({
 export const useInternalStateDispatch: () => InternalStateDispatch =
   createDispatchHook(internalStateContext);
 
-export const useInternalStateSelector2: TypedUseSelectorHook<DiscoverInternalState> =
+export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();
-  const savedDataViews = useInternalStateSelector2((state) => state.savedDataViews);
-  const defaultProfileAdHocDataViewIds = useInternalStateSelector2(
+  const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
+  const defaultProfileAdHocDataViewIds = useInternalStateSelector(
     (state) => state.defaultProfileAdHocDataViewIds
   );
 

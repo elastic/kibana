@@ -75,7 +75,7 @@ import {
 import {
   internalStateActions,
   useInternalStateDispatch,
-  useInternalStateSelector2,
+  useInternalStateSelector,
 } from '../../state_management/redux';
 
 const containerStyles = css`
@@ -116,7 +116,7 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
-  const requestParams = useInternalStateSelector2((state) => state.dataRequestParams);
+  const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
   const [
     dataSource,
     query,
@@ -142,7 +142,7 @@ function DiscoverDocumentsComponent({
       state.density,
     ];
   });
-  const expandedDoc = useInternalStateSelector2((state) => state.expandedDoc);
+  const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -159,7 +159,7 @@ function DiscoverDocumentsComponent({
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading =
-    useInternalStateSelector2((state) => state.isDataViewLoading) && !isEsqlMode;
+    useInternalStateSelector((state) => state.isDataViewLoading) && !isEsqlMode;
   const isEmptyDataResult =
     isEsqlMode || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);

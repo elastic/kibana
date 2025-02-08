@@ -29,7 +29,7 @@ import {
   useCurrentDataView,
   useDataViewsForPicker,
   useInternalStateDispatch,
-  useInternalStateSelector2,
+  useInternalStateSelector,
 } from '../../state_management/redux';
 
 export interface DiscoverTopNavProps {
@@ -58,7 +58,7 @@ export const DiscoverTopNav = ({
   const query = useAppStateSelector((state) => state.query);
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
-  const isESQLToDataViewTransitionModalVisible = useInternalStateSelector2(
+  const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
   const savedSearch = useSavedSearchInitial();
