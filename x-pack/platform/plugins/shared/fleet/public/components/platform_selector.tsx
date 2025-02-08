@@ -194,6 +194,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   key: option.id,
                   label: option.label,
                   checked: platform === option.id ? 'on' : undefined,
+                  'data-test-subj': option['data-test-subj'],
                 }))}
                 onChange={(_allOptions, _event, option) => setPlatform(option.key)}
                 style={{ width: 150 }}
