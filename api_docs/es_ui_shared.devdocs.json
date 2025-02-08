@@ -844,6 +844,20 @@
             "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.Error.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

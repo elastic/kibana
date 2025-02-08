@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { changeUserSectionWidthsAction } from '../store/actions';
 import {
   selectDefaultWidths,
+  selectPushVsOverlay,
   selectUserSectionWidths,
   useDispatch,
   useSelector,
@@ -23,8 +24,7 @@ import {
 import { LeftSection } from './left_section';
 import { RightSection } from './right_section';
 
-const RIGHT_SECTION_MIN_WIDTH = '380px';
-const LEFT_SECTION_MIN_WIDTH = '380px';
+const MIN_SECTION_WIDTH = '380px';
 const LEFT_PANEL_ID = 'left';
 const RIGHT_PANEL_ID = 'right';
 
@@ -38,6 +38,10 @@ interface ResizableContainerProps {
    */
   rightComponent: React.ReactElement;
   /**
+   * If the left section is not shown we disable the resize button and hide the left size of the resizable panel
+   */
+  showLeft: boolean;
+  /**
    * If the preview section is shown we disable the resize button
    */
   showPreview: boolean;
@@ -48,19 +52,20 @@ interface ResizableContainerProps {
  * It allows the resizing of the sections, saving the percentages in local storage.
  */
 export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
-  ({ leftComponent, rightComponent, showPreview }: ResizableContainerProps) => {
+  ({ leftComponent, rightComponent, showLeft, showPreview }: ResizableContainerProps) => {
     const dispatch = useDispatch();
 
     const { leftPercentage, rightPercentage } = useSelector(selectUserSectionWidths);
+    const type = useSelector(selectPushVsOverlay);
     const defaultPercentages = useSelector(selectDefaultWidths);
 
     const initialLeftPercentage = useMemo(
-      () => leftPercentage || defaultPercentages.leftPercentage,
-      [defaultPercentages.leftPercentage, leftPercentage]
+      () => (showLeft ? leftPercentage || defaultPercentages[type].leftPercentage : 0),
+      [defaultPercentages, leftPercentage, showLeft, type]
     );
     const initialRightPercentage = useMemo(
-      () => rightPercentage || defaultPercentages.rightPercentage,
-      [defaultPercentages.rightPercentage, rightPercentage]
+      () => (showLeft ? rightPercentage || defaultPercentages[type].rightPercentage : 100),
+      [defaultPercentages, rightPercentage, showLeft, type]
     );
 
     const onWidthChange = useCallback(
@@ -86,19 +91,20 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
             <EuiResizablePanel
               id={LEFT_PANEL_ID}
               initialSize={initialLeftPercentage}
-              size={leftPercentage}
-              minSize={LEFT_SECTION_MIN_WIDTH}
               paddingSize="none"
+              minSize={MIN_SECTION_WIDTH}
               data-test-subj={RESIZABLE_LEFT_SECTION_TEST_ID}
             >
               <LeftSection component={leftComponent} />
             </EuiResizablePanel>
-            <EuiResizableButton disabled={showPreview} data-test-subj={RESIZABLE_BUTTON_TEST_ID} />
+            <EuiResizableButton
+              disabled={showPreview || !showLeft}
+              data-test-subj={RESIZABLE_BUTTON_TEST_ID}
+            />
             <EuiResizablePanel
               id={RIGHT_PANEL_ID}
               initialSize={initialRightPercentage}
-              size={rightPercentage}
-              minSize={RIGHT_SECTION_MIN_WIDTH}
+              minSize={MIN_SECTION_WIDTH}
               paddingSize="none"
               data-test-subj={RESIZABLE_RIGHT_SECTION_TEST_ID}
             >
