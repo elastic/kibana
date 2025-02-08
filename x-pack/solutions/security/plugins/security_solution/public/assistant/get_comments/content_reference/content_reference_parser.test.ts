@@ -58,7 +58,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
   it('eats empty content reference', () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
-      .parse('There is an empty content reference.{reference(example)}') as Parent;
+      .parse('There is an empty content reference.{reference()}') as Parent;
 
     expect(file.children[0].children).toEqual(
       expect.arrayContaining([
@@ -66,7 +66,6 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
         expect.objectContaining({
           type: 'contentReference',
           contentReferenceCount: 1,
-          contentReferenceId: 'example',
         }),
       ])
     );
@@ -128,8 +127,20 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
 
     expect(file.children[0].children).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ type: 'text', value: 'No preceding space.' }),
         expect.objectContaining({ type: 'contentReference' }),
+      ])
+    );
+  });
+
+  it('correct content reference count when contentReferences is null', () => {
+    const file = unified()
+      .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
+      .parse('No preceding space.{reference(example)} {reference(example2)}') as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'contentReference', contentReferenceId: "example", contentReferenceCount: 1, contentReference: undefined }),
+        expect.objectContaining({ type: 'contentReference', contentReferenceId: "example2", contentReferenceCount: 2, contentReference: undefined }),
       ])
     );
   });
