@@ -44,7 +44,17 @@ jest.mock('../../common/lib/kibana', () => ({
     addWarning: jest.fn(),
     remove: jest.fn(),
   }),
-  useKibana: jest.fn(),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          securitySolutionTimeline: {
+            crud: true,
+          },
+        },
+      },
+    },
+  }),
 }));
 
 const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
@@ -191,12 +201,8 @@ describe('useTimelineEventsHandler', () => {
       [DataLoadingState, TimelineArgs],
       UseTimelineEventsProps
     >((args) => useTimelineEvents(args), {
-      initialProps: { ...props, startDate: '', endDate: '' },
+      initialProps: props,
     });
-
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender({ ...props, startDate, endDate });
 
     mockUseRouteSpy.mockReturnValue([
       {
@@ -207,6 +213,12 @@ describe('useTimelineEventsHandler', () => {
         pathName: '/timelines',
       },
     ]);
+
+    rerender({ ...props, startDate, endDate });
+
+    await waitFor(() => {
+      expect(result.current[0]).toEqual(DataLoadingState.loaded);
+    });
 
     expect(mockSearch).toHaveBeenCalledTimes(1);
 
