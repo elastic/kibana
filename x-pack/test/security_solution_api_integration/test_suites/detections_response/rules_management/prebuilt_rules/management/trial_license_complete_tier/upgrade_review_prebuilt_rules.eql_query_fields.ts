@@ -334,7 +334,7 @@ export default ({ getService }: FtrProviderContext): void => {
             type: 'eql',
             query: 'query where true',
             language: 'eql',
-            filters: [{ field: 'query' }],
+            filters: [{ query: 'query' }],
           } as RuleUpdateProps);
 
           // Add a v2 rule asset to make the upgrade possible, update an eql_query field, and create the new rule assets
@@ -363,7 +363,7 @@ export default ({ getService }: FtrProviderContext): void => {
             current_version: {
               query: 'query where true',
               language: 'eql',
-              filters: [{ field: 'query' }],
+              filters: [{ query: 'query' }],
             },
             target_version: {
               query: 'query where false',
@@ -373,7 +373,7 @@ export default ({ getService }: FtrProviderContext): void => {
             merged_version: {
               query: 'query where true',
               language: 'eql',
-              filters: [{ field: 'query' }],
+              filters: [{ query: 'query' }],
             },
             diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
             merge_outcome: ThreeWayMergeOutcome.Current,
