@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
 import globby from 'globby';
 import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
-import cypress from 'cypress';
-import { findChangedFiles } from 'find-cypress-specs';
 import path from 'path';
-import grep from '@cypress/grep/src/plugin';
+import execa from 'execa';
 
 import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 
@@ -26,14 +25,48 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { createKbnClient } from '../endpoint/common/stack_services';
 import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
-import { renderSummaryTable } from './print_run';
-import { parseTestFileConfig, retrieveIntegrations, setDefaultToolingLoggingLevel } from './utils';
+import { retrieveIntegrations } from './utils';
 import { getFTRConfig } from './get_ftr_config';
+
+/* eslint-disable @typescript-eslint/no-var-requires */
+
+export async function mergeSummary(directories: string[], log: ToolingLog) {
+  const combined = {
+    durationInMS: 0,
+    passed: [],
+    skipped: [],
+    failed: [],
+    warned: [],
+    timedOut: [],
+    status: 'passed',
+    startedAt: Number.MAX_SAFE_INTEGER,
+  };
+
+  directories.forEach((directory) => {
+    try {
+      const json = require(directory);
+      combined.durationInMS += json.durationInMS;
+      combined.passed = combined.passed.concat(json.passed);
+      combined.skipped = combined.skipped.concat(json.skipped);
+      combined.failed = combined.failed.concat(json.failed);
+      combined.warned = combined.warned.concat(json.warned);
+      combined.timedOut = combined.timedOut.concat(json.timedOut);
+      combined.status = json.status === 'failed' ? 'failed' : combined.status;
+      combined.startedAt =
+        json.startedAt < combined.startedAt ? json.startedAt : combined.startedAt;
+    } catch (err) {
+      log.error(err);
+    }
+  });
+
+  return combined;
+}
 
 export const cli = () => {
   run(
@@ -54,8 +87,6 @@ export const cli = () => {
         )
         .boolean('inspect');
 
-      const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
-
       _cliLogger.info(`
 ----------------------------------------------
 Script arguments:
@@ -67,18 +98,18 @@ ${JSON.stringify(argv, null, 2)}
 `);
 
       const isOpen = argv._.includes('open');
-      const cypressConfigFilePath = require.resolve(`../../../../${argv.configFile}`) as string;
+      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
-      // Adjust tooling log level based on the `TOOLING_LOG_LEVEL` property, which can be
-      // defined in the cypress config file or set in the `env`
-      setDefaultToolingLoggingLevel(cypressConfigFile?.env?.TOOLING_LOG_LEVEL);
+      // if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
+      //   createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
+      // }
 
       const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
 
       log.info(`
 ----------------------------------------------
-Cypress config for file: ${cypressConfigFilePath}:
+Playwright config for file: ${cypressConfigFilePath}:
 ----------------------------------------------
 
 ${JSON.stringify(cypressConfigFile, null, 2)}
@@ -86,71 +117,17 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 ----------------------------------------------
 `);
 
-      const specConfig = cypressConfigFile.e2e.specPattern;
+      const specConfig = cypressConfigFile.testMatch;
       const specArg = argv.spec;
       const specPattern = specArg ?? specConfig;
-      const excludeSpecPattern = cypressConfigFile.e2e.excludeSpecPattern;
 
       log.info('Config spec pattern:', specConfig);
-      log.info('Exclude spec pattern:', excludeSpecPattern);
       log.info('Arguments spec pattern:', specArg);
       log.info('Resulting spec pattern:', specPattern);
 
-      // The grep function will filter Cypress specs by tags: it will include and exclude
-      // spec files according to the tags configuration.
-      const grepSpecPattern = grep({
-        ...cypressConfigFile,
-        specPattern,
-        excludeSpecPattern: [],
-      }).specPattern;
-
-      log.info('Resolved spec files or pattern after grep:', grepSpecPattern);
-
-      const isGrepReturnedFilePaths = _.isArray(grepSpecPattern);
-      const isGrepReturnedSpecPattern = !isGrepReturnedFilePaths && grepSpecPattern === specPattern;
-      const grepFilterSpecs = cypressConfigFile.env?.grepFilterSpecs;
-
-      // IMPORTANT!
-      // When grep returns the same spec pattern as it gets in its arguments, we treat it as
-      // it couldn't find any concrete specs to execute (maybe because all of them are skipped).
-      // In this case, we do an early return - it's important to do that.
-      // If we don't return early, these specs will start executing, and Cypress will be skipping
-      // tests at runtime: those that should be excluded according to the tags passed in the config.
-      // This can take so much time that the job can fail by timeout in CI.
-      if (!isOpen && grepFilterSpecs && isGrepReturnedSpecPattern) {
-        log.info('No tests found - all tests could have been skipped via Cypress tags');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
-      }
-
-      const concreteFilePaths = isGrepReturnedFilePaths
-        ? grepSpecPattern // use the returned concrete file paths
-        : globby.sync(
-            specPattern,
-            excludeSpecPattern
-              ? {
-                  ignore: excludeSpecPattern,
-                }
-              : undefined
-          ); // convert the glob pattern to concrete file paths
-
-      let files = retrieveIntegrations(concreteFilePaths);
+      const files = retrieveIntegrations(globby.sync(specPattern));
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
-
-      if (argv.changedSpecsOnly) {
-        files = (findChangedFiles('main', false) as string[]).reduce((acc, itemPath) => {
-          const existing = files.find((grepFilePath) => grepFilePath.includes(itemPath));
-          if (existing) {
-            acc.push(existing);
-          }
-          return acc;
-        }, [] as string[]);
-
-        // to avoid running too many tests, we limit the number of files to 3
-        // we may extend this in the future
-        files = files.slice(0, 3);
-      }
 
       if (!files?.length) {
         log.info('No tests found');
@@ -247,7 +224,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               const esPort: number = getEsPort();
               const kibanaPort: number = getKibanaPort();
               const fleetServerPort: number = getFleetServerPort();
-              const specFileFTRConfig = parseTestFileConfig(filePath);
+              const specFileFTRConfig = { ftrConfig: {} }; // parseTestFileConfig(filePath);
               const ftrConfigFilePath = path.resolve(
                 _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
               );
@@ -290,25 +267,25 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               const baseUrl = createUrlFromFtrConfig('kibana');
 
-              log.info(`
-----------------------------------------------
-Cypress FTR setup for file: ${filePath}:
-----------------------------------------------
+              //               log.info(`
+              // ----------------------------------------------
+              // Playwright FTR setup for file: ${filePath}:
+              // ----------------------------------------------
 
-${JSON.stringify(
-  config.getAll(),
-  (key, v) => {
-    if (Array.isArray(v) && v.length > 32) {
-      return v.slice(0, 32).concat('... trimmed after 32 items.');
-    } else {
-      return v;
-    }
-  },
-  2
-)}
+              // ${JSON.stringify(
+              //   config.getAll(),
+              //   (key, v) => {
+              //     if (Array.isArray(v) && v.length > 32) {
+              //       return v.slice(0, 32).concat('... trimmed after 32 items.');
+              //     } else {
+              //       return v;
+              //     }
+              //   },
+              //   2
+              // )}
 
-----------------------------------------------
-`);
+              // ----------------------------------------------
+              // `);
 
               const lifecycle = new Lifecycle(log);
 
@@ -327,7 +304,7 @@ ${JSON.stringify(
               };
 
               // Setup fleet if Cypress config requires it
-              let fleetServer: StartedFleetServer | undefined;
+              let fleetServer: void | StartedFleetServer;
               let shutdownEs;
 
               try {
@@ -342,7 +319,6 @@ ${JSON.stringify(
                     }),
                   { retries: 2, forever: false }
                 );
-
                 await runKibanaServer({
                   procs,
                   config,
@@ -350,21 +326,18 @@ ${JSON.stringify(
                   extraKbnOpts:
                     options?.installDir || options?.ci || !isOpen
                       ? []
-                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+                      : ['--dev', '--no-dev-credentials'],
                   onEarlyExit,
                   inspect: argv.inspect,
                 });
-
                 if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
                   log.info(`Setting up fleet-server for this Cypress config`);
-
                   const kbnClient = createKbnClient({
                     url: baseUrl,
                     username: config.get('servers.kibana.username'),
                     password: config.get('servers.kibana.password'),
                     log,
                   });
-
                   fleetServer = await pRetry(
                     async () =>
                       startFleetServer({
@@ -381,28 +354,28 @@ ${JSON.stringify(
                     { retries: 2, forever: false }
                   );
                 }
-
                 await providers.loadAll();
-
                 const functionalTestRunner = new FunctionalTestRunner(
                   log,
                   config,
                   EsVersion.getDefault()
                 );
-
                 const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
                   retries: 1,
                 });
-
                 log.debug(
                   `Env. variables returned by [functionalTestRunner.run()]:\n`,
                   JSON.stringify(ftrEnv, null, 2)
                 );
 
+                const baseDir = path.resolve(
+                  __dirname,
+                  `../../../../../target/kibana-security-solution/playwright/`
+                );
+
                 // Normalized the set of available env vars in cypress
                 const cyCustomEnv = {
                   ...ftrEnv,
-
                   // NOTE:
                   // ELASTICSEARCH_URL needs to be created here with auth because SIEM cypress setup depends on it. At some
                   // points we should probably try to refactor that code to use `ELASTICSEARCH_URL_WITH_AUTH` instead
@@ -413,73 +386,94 @@ ${JSON.stringify(
                     ftrEnv.ELASTICSEARCH_USERNAME ?? config.get('servers.elasticsearch.username'),
                   ELASTICSEARCH_PASSWORD:
                     ftrEnv.ELASTICSEARCH_PASSWORD ?? config.get('servers.elasticsearch.password'),
-
                   FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
-
                   KIBANA_URL: baseUrl,
                   KIBANA_URL_WITH_AUTH: createUrlFromFtrConfig('kibana', true),
                   KIBANA_USERNAME: config.get('servers.kibana.username'),
                   KIBANA_PASSWORD: config.get('servers.kibana.password'),
-
                   IS_SERVERLESS: config.get('serverless'),
-
+                  OUTPUT_DIR: path.resolve(baseDir, filePath.replace('.spec.ts', '')),
+                  PLAYWRIGHT_JSON_OUTPUT_FILE: path.resolve(
+                    baseDir,
+                    `json-report/`,
+                    filePath.replace('.spec.ts', '.json')
+                  ),
+                  PLAYWRIGHT_JUNIT_OUTPUT_FILE: path.resolve(
+                    baseDir,
+                    `junit-report/`,
+                    filePath.replace('.spec.ts', '.xml')
+                  ),
+                  PLAYWRIGHT_SUMMARY_JSON_OUTPUT_FILE: path.resolve(
+                    baseDir,
+                    `summary-report/`,
+                    filePath.replace('.spec.ts', '.json')
+                  ),
                   ...argv.env,
                 };
-
                 log.info(`
-----------------------------------------------
-Cypress run ENV for file: ${filePath}:
-----------------------------------------------
+                ----------------------------------------------
+                Playwright run ENV for file: ${filePath}:
+                ----------------------------------------------
+                ${JSON.stringify(cyCustomEnv, null, 2)}
+                ----------------------------------------------
+                `);
 
-${JSON.stringify(cyCustomEnv, null, 2)}
+                if (
+                  !fs.existsSync(
+                    path.resolve(
+                      __dirname,
+                      '../../../../../target/kibana-security-solution/playwright/'
+                    )
+                  )
+                ) {
+                  fs.mkdirSync(
+                    path.resolve(
+                      __dirname,
+                      '../../../../../target/kibana-security-solution/playwright/'
+                    ),
+                    { recursive: true }
+                  );
+                }
 
-----------------------------------------------
-`);
+                if (!fs.existsSync(path.resolve(__dirname, '../../../../../.ftr'))) {
+                  fs.mkdirSync(path.resolve(__dirname, '../../../../../.ftr'), { recursive: true });
+                }
+
+                fs.writeFileSync(
+                  path.resolve(__dirname, '../../../../../.ftr/playwright.env'),
+                  Object.entries(cyCustomEnv)
+                    .map(([key, value]) => `${key}=${value}`)
+                    .join('\n')
+                );
 
                 if (isOpen) {
-                  await cypress.open({
-                    configFile: cypressConfigFilePath,
-                    config: {
-                      e2e: {
-                        baseUrl,
+                  await execa.command(
+                    `npx playwright test --config ${cypressConfigFilePath} --grep ${filePath.substring(
+                      filePath.indexOf('/') + 1
+                    )} --ui`,
+                    {
+                      env: {
+                        ...cyCustomEnv,
                       },
-                      env: cyCustomEnv,
-                    },
-                  });
+                      stdout: process.stdout,
+                    }
+                  );
                 } else {
-                  result = await cypress.run({
-                    browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
-                    spec: filePath,
-                    configFile: cypressConfigFilePath,
-                    reporter: argv.reporter as string,
-                    reporterOptions: argv.reporterOptions,
-                    headed: argv.headed as boolean,
-                    config: {
-                      e2e: {
-                        baseUrl,
+                  await execa.command(
+                    `npx playwright test --config ${cypressConfigFilePath} --grep ${filePath.substring(
+                      filePath.indexOf('/') + 1
+                    )}`,
+                    {
+                      env: {
+                        ...cyCustomEnv,
                       },
-                      numTestsKeptInMemory: 0,
-                      env: cyCustomEnv,
-                    },
-                    runnerUi: !process.env.CI,
-                  });
-                  if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
-                    _.pull(failedSpecFilePaths, filePath);
-                  }
+                      stdout: process.stdout,
+                    }
+                  );
+                  _.pull(failedSpecFilePaths, filePath);
                 }
               } catch (error) {
                 log.error(error);
-
-                if (!result) {
-                  // `result` will be `undefined` when the process above does not reach the `cypress.run()`.
-                  // This can happen when there are errors setting up the run environment, and thus, we need
-                  // ensure we report the run as a failure.
-                  result = {
-                    status: 'failed',
-                    failures: 1,
-                    message: error.message,
-                  };
-                }
               }
 
               if (fleetServer) {
@@ -499,54 +493,19 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           }
         );
 
-      const initialResults = await runSpecs(files);
-      // If there are failed tests, retry them
-      const retryResults = await runSpecs([...failedSpecFilePaths]);
+      await runSpecs(files);
 
-      const finalResults = [
-        // Don't include failed specs from initial run in results
-        ..._.filter(
-          initialResults,
-          (initialResult: CypressCommandLine.CypressRunResult) =>
-            initialResult?.runs &&
-            _.some(
-              initialResult?.runs,
-              (runResult) => !failedSpecFilePaths.includes(runResult.spec.absolute)
-            )
+      const results = await mergeSummary(
+        globby.sync(
+          path.resolve(
+            __dirname,
+            '../../../../../target/kibana-security-solution/playwright/summary-report/**/*.json'
+          )
         ),
-        ..._.filter(retryResults, (retryResult) => !!retryResult),
-      ] as CypressCommandLine.CypressRunResult[];
+        _cliLogger
+      );
 
-      try {
-        renderSummaryTable(finalResults);
-      } catch (e) {
-        log.error('Failed to render summary table');
-        log.error(e);
-      }
-
-      const hasFailedTests = (
-        runResults: Array<
-          | CypressCommandLine.CypressFailedRunResult
-          | CypressCommandLine.CypressRunResult
-          | undefined
-        >
-      ) =>
-        _.some(
-          // only fail the job if retry failed as well
-          runResults,
-          (runResult) =>
-            (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-            (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
-        );
-
-      const hasFailedInitialTests = hasFailedTests(initialResults);
-      const hasFailedRetryTests = hasFailedTests(retryResults);
-
-      // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
-      if (
-        (hasFailedRetryTests && failedSpecFilePaths.length) ||
-        (hasFailedInitialTests && !retryResults.length)
-      ) {
+      if (results.status === 'failed') {
         throw createFailError('Not all tests passed');
       }
     },

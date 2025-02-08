@@ -9,35 +9,38 @@ import { prefixedOutputLogger } from '../../../../scripts/endpoint/common/utils'
 import type { RuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 
-const RUNTIME_SERVICES_CACHE = new WeakMap<Cypress.PluginConfigOptions, RuntimeServices>();
+const RUNTIME_SERVICES_CACHE = new WeakMap<Cypress.PluginConfigOptions['env'], RuntimeServices>();
 
-export const setupStackServicesUsingCypressConfig = async (config: Cypress.PluginConfigOptions) => {
-  if (RUNTIME_SERVICES_CACHE.has(config)) {
+export const setupStackServicesUsingCypressConfig = async (
+  configEnv: Cypress.PluginConfigOptions['env'],
+  logPrefix: string = 'cy.dfw'
+) => {
+  if (RUNTIME_SERVICES_CACHE.has(configEnv)) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return RUNTIME_SERVICES_CACHE.get(config)!;
+    return RUNTIME_SERVICES_CACHE.get(configEnv)!;
   }
 
-  const isServerless = config.env.IS_SERVERLESS;
-  const isCloudServerless = config.env.CLOUD_SERVERLESS;
+  const isServerless = configEnv.IS_SERVERLESS;
+  const isCloudServerless = configEnv.CLOUD_SERVERLESS;
 
   const stackServices = await createRuntimeServices({
-    kibanaUrl: config.env.KIBANA_URL,
-    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.KIBANA_USERNAME,
-    password: config.env.KIBANA_PASSWORD,
-    esUsername: config.env.ELASTICSEARCH_USERNAME,
-    esPassword: config.env.ELASTICSEARCH_PASSWORD,
+    kibanaUrl: configEnv.KIBANA_URL,
+    elasticsearchUrl: configEnv.ELASTICSEARCH_URL,
+    fleetServerUrl: configEnv.FLEET_SERVER_URL,
+    username: configEnv.KIBANA_USERNAME,
+    password: configEnv.KIBANA_PASSWORD,
+    esUsername: configEnv.ELASTICSEARCH_USERNAME,
+    esPassword: configEnv.ELASTICSEARCH_PASSWORD,
     asSuperuser: !isCloudServerless,
     useCertForSsl: !isCloudServerless && isServerless,
   }).then(({ log, ...others }) => {
     return {
       ...others,
-      log: prefixedOutputLogger('cy.dfw', log),
+      log: prefixedOutputLogger(logPrefix, log),
     };
   });
 
-  RUNTIME_SERVICES_CACHE.set(config, stackServices);
+  RUNTIME_SERVICES_CACHE.set(configEnv, stackServices);
 
   return stackServices;
 };

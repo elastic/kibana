@@ -33,7 +33,7 @@ export default defineCypressConfig({
   },
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
-  video: false,
+  video: true,
   videosFolder: '../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
@@ -43,7 +43,6 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
-      esArchiver(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
           launchOptions.args.push('--window-size=1920,1200');
@@ -56,11 +55,15 @@ export default defineCypressConfig({
         }
         return launchOptions;
       });
+
+      esArchiver(on, config);
+
       samlAuthentication(on, config);
       esClient(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
+
       return config;
     },
   },

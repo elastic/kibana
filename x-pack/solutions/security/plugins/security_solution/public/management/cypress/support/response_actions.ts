@@ -20,7 +20,7 @@ export const responseActionTasks = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
-  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config.env);
 
   on('task', {
     getLatestActionDoc: async () => {
