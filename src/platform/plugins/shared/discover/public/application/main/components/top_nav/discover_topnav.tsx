@@ -140,11 +140,7 @@ export const DiscoverTopNav = ({
       if (shouldDismissModal) {
         services.storage.set(ESQL_TRANSITION_MODAL_KEY, true);
       }
-      dispatch(
-        internalStateActions.setIsESQLToDataViewTransitionModalVisible({
-          isVisible: false,
-        })
-      );
+      dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false));
       // the user dismissed the modal, we don't need to save the search or switch to the data view mode
       if (needsSave == null) {
         return;
@@ -155,11 +151,7 @@ export const DiscoverTopNav = ({
           services,
           state: stateContainer,
           onClose: () =>
-            dispatch(
-              internalStateActions.setIsESQLToDataViewTransitionModalVisible({
-                isVisible: false,
-              })
-            ),
+            dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false)),
           onSaveCb: () => {
             stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
           },

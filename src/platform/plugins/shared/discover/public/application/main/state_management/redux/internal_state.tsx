@@ -51,55 +51,43 @@ const internalStateSlice = createSlice({
   name: 'internalState',
   initialState,
   reducers: {
-    setDataViewId: (state, action: PayloadAction<{ dataViewId: string | undefined }>) => {
-      if (action.payload.dataViewId !== state.dataViewId) {
+    setDataViewId: (state, action: PayloadAction<string | undefined>) => {
+      if (action.payload !== state.dataViewId) {
         state.expandedDoc = undefined;
       }
 
-      state.dataViewId = action.payload.dataViewId;
+      state.dataViewId = action.payload;
     },
 
-    setIsDataViewLoading: (state, action: PayloadAction<{ isDataViewLoading: boolean }>) => {
-      state.isDataViewLoading = action.payload.isDataViewLoading;
+    setIsDataViewLoading: (state, action: PayloadAction<boolean>) => {
+      state.isDataViewLoading = action.payload;
     },
 
-    setIsESQLToDataViewTransitionModalVisible: (
-      state,
-      action: PayloadAction<{ isVisible: boolean }>
-    ) => {
-      state.isESQLToDataViewTransitionModalVisible = action.payload.isVisible;
+    setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
+      state.isESQLToDataViewTransitionModalVisible = action.payload;
     },
 
-    setSavedDataViews: (state, action: PayloadAction<{ savedDataViews: DataViewListItem[] }>) => {
-      state.savedDataViews = action.payload.savedDataViews;
+    setSavedDataViews: (state, action: PayloadAction<DataViewListItem[]>) => {
+      state.savedDataViews = action.payload;
     },
 
-    setAdHocDataViews: (state, action: PayloadAction<{ adHocDataViews: DataViewSpec[] }>) => {
-      state.adHocDataViews = action.payload.adHocDataViews;
+    setAdHocDataViews: (state, action: PayloadAction<DataViewSpec[]>) => {
+      state.adHocDataViews = action.payload;
     },
 
-    setDefaultProfileAdHocDataViewIds: (
-      state,
-      action: PayloadAction<{ defaultProfileAdHocDataViewIds: string[] }>
-    ) => {
-      state.defaultProfileAdHocDataViewIds = action.payload.defaultProfileAdHocDataViewIds;
+    setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
+      state.defaultProfileAdHocDataViewIds = action.payload;
     },
 
-    setExpandedDoc: (
-      state,
-      action: PayloadAction<{ expandedDoc: DataTableRecord | undefined }>
-    ) => {
-      state.expandedDoc = action.payload.expandedDoc;
+    setExpandedDoc: (state, action: PayloadAction<DataTableRecord | undefined>) => {
+      state.expandedDoc = action.payload;
     },
 
     setOverriddenVisContextAfterInvalidation: (
       state,
-      action: PayloadAction<{
-        overriddenVisContextAfterInvalidation: DiscoverInternalState['overriddenVisContextAfterInvalidation'];
-      }>
+      action: PayloadAction<DiscoverInternalState['overriddenVisContextAfterInvalidation']>
     ) => {
-      state.overriddenVisContextAfterInvalidation =
-        action.payload.overriddenVisContextAfterInvalidation;
+      state.overriddenVisContextAfterInvalidation = action.payload;
     },
 
     resetOnSavedSearchChange: (state) => {
@@ -107,11 +95,8 @@ const internalStateSlice = createSlice({
       state.expandedDoc = undefined;
     },
 
-    setDataRequestParams: (
-      state,
-      action: PayloadAction<{ dataRequestParams: InternalStateDataRequestParams }>
-    ) => {
-      state.dataRequestParams = action.payload.dataRequestParams;
+    setDataRequestParams: (state, action: PayloadAction<InternalStateDataRequestParams>) => {
+      state.dataRequestParams = action.payload;
     },
 
     setResetDefaultProfileState: {
@@ -163,7 +148,7 @@ type InternalStateThunkActionCreator<TArgs extends unknown[] = [], TReturn = voi
 const setDataView: InternalStateThunkActionCreator<[DataView]> =
   (dataView) =>
   (dispatch, _, { runtimeStateManager }) => {
-    dispatch(internalStateSlice.actions.setDataViewId({ dataViewId: dataView.id }));
+    dispatch(internalStateSlice.actions.setDataViewId(dataView.id));
     runtimeStateManager.currentDataView$.next(dataView);
   };
 
@@ -171,9 +156,9 @@ const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =
   (adHocDataViews) =>
   (dispatch, _, { runtimeStateManager }) => {
     dispatch(
-      internalStateSlice.actions.setAdHocDataViews({
-        adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec(false)),
-      })
+      internalStateSlice.actions.setAdHocDataViews(
+        adHocDataViews.map((dataView) => dataView.toSpec(false))
+      )
     );
     runtimeStateManager.adHocDataViews$.next(adHocDataViews);
   };
@@ -194,9 +179,7 @@ const setDefaultProfileAdHocDataViews: InternalStateThunkActionCreator<[DataView
 
     dispatch(setAdHocDataViews(adHocDataViews));
     dispatch(
-      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds({
-        defaultProfileAdHocDataViewIds,
-      })
+      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds(defaultProfileAdHocDataViewIds)
     );
   };
 
@@ -228,9 +211,7 @@ const replaceAdHocDataViewWithId: InternalStateThunkActionCreator<[string, DataV
       )
     );
     dispatch(
-      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds({
-        defaultProfileAdHocDataViewIds,
-      })
+      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds(defaultProfileAdHocDataViewIds)
     );
   };
 

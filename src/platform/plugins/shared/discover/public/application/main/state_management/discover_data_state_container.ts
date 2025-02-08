@@ -258,10 +258,8 @@ export function getDataStateContainer({
 
           internalState.dispatch(
             internalStateActions.setDataRequestParams({
-              dataRequestParams: {
-                timeRangeAbsolute: timefilter.getAbsoluteTime(),
-                timeRangeRelative: timefilter.getTime(),
-              },
+              timeRangeAbsolute: timefilter.getAbsoluteTime(),
+              timeRangeRelative: timefilter.getTime(),
             })
           );
 

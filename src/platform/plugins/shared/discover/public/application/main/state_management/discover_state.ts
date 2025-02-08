@@ -330,7 +330,7 @@ export function getDiscoverStateContainer({
 
   const loadDataViewList = async () => {
     const savedDataViews = await services.dataViews.getIdsWithTitle(true);
-    internalState.dispatch(internalStateActions.setSavedDataViews({ savedDataViews }));
+    internalState.dispatch(internalStateActions.setSavedDataViews(savedDataViews));
   };
 
   /**

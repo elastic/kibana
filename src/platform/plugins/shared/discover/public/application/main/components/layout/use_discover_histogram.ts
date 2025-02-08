@@ -337,37 +337,21 @@ export const useDiscoverHistogram = ({
           stateContainer.savedSearchState.updateVisContext({
             nextVisContext,
           });
-          dispatch(
-            internalStateActions.setOverriddenVisContextAfterInvalidation({
-              overriddenVisContextAfterInvalidation: undefined,
-            })
-          );
+          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(undefined));
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyOverridden:
           // if the visualization was invalidated as incompatible and rebuilt
           // (it will be used later for saving the visualization via Save button)
-          dispatch(
-            internalStateActions.setOverriddenVisContextAfterInvalidation({
-              overriddenVisContextAfterInvalidation: nextVisContext,
-            })
-          );
+          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(nextVisContext));
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyCreated:
         case UnifiedHistogramExternalVisContextStatus.applied:
           // clearing the value in the internal state so we don't use it during saved search saving
-          dispatch(
-            internalStateActions.setOverriddenVisContextAfterInvalidation({
-              overriddenVisContextAfterInvalidation: undefined,
-            })
-          );
+          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(undefined));
           break;
         case UnifiedHistogramExternalVisContextStatus.unknown:
           // using `{}` to overwrite the value inside the saved search SO during saving
-          dispatch(
-            internalStateActions.setOverriddenVisContextAfterInvalidation({
-              overriddenVisContextAfterInvalidation: {},
-            })
-          );
+          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation({}));
           break;
       }
     },

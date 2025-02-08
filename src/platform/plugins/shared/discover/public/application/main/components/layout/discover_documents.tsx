@@ -209,7 +209,7 @@ function DiscoverDocumentsComponent({
 
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
-      dispatch(internalStateActions.setExpandedDoc({ expandedDoc: doc }));
+      dispatch(internalStateActions.setExpandedDoc(doc));
     },
     [dispatch]
   );

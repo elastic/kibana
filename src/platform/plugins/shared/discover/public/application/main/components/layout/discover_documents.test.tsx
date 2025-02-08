@@ -49,15 +49,13 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   });
   stateContainer.internalState.dispatch(
     internalStateActions.setDataRequestParams({
-      dataRequestParams: {
-        timeRangeRelative: {
-          from: '2020-05-14T11:05:13.590',
-          to: '2020-05-14T11:20:13.590',
-        },
-        timeRangeAbsolute: {
-          from: '2020-05-14T11:05:13.590',
-          to: '2020-05-14T11:20:13.590',
-        },
+      timeRangeRelative: {
+        from: '2020-05-14T11:05:13.590',
+        to: '2020-05-14T11:20:13.590',
+      },
+      timeRangeAbsolute: {
+        from: '2020-05-14T11:05:13.590',
+        to: '2020-05-14T11:20:13.590',
       },
     })
   );

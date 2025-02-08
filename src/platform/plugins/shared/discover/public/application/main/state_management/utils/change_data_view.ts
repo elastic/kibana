@@ -43,7 +43,7 @@ export async function changeDataView({
   const state = appState.getState();
   let nextDataView: DataView | null = null;
 
-  internalState.dispatch(internalStateActions.setIsDataViewLoading({ isDataViewLoading: true }));
+  internalState.dispatch(internalStateActions.setIsDataViewLoading(true));
 
   try {
     nextDataView =
@@ -83,9 +83,9 @@ export async function changeDataView({
     appState.update(nextAppState);
 
     if (internalState.getState().expandedDoc) {
-      internalState.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
+      internalState.dispatch(internalStateActions.setExpandedDoc(undefined));
     }
   }
 
-  internalState.dispatch(internalStateActions.setIsDataViewLoading({ isDataViewLoading: false }));
+  internalState.dispatch(internalStateActions.setIsDataViewLoading(false));
 }

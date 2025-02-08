@@ -172,11 +172,7 @@ export const useTopNavLinks = ({
                 shouldShowESQLToDataViewTransitionModal &&
                 !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
               ) {
-                dispatch(
-                  internalStateActions.setIsESQLToDataViewTransitionModalVisible({
-                    isVisible: true,
-                  })
-                );
+                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
               } else {
                 state.actions.transitionFromESQLToDataView(dataView.id ?? '');
               }

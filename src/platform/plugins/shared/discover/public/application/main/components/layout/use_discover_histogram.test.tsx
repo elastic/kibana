@@ -392,10 +392,8 @@ describe('useDiscoverHistogram', () => {
       const timeRangeRel = { from: 'now-15m', to: 'now' };
       stateContainer.internalState.dispatch(
         internalStateActions.setDataRequestParams({
-          dataRequestParams: {
-            timeRangeAbsolute: timeRangeAbs,
-            timeRangeRelative: timeRangeRel,
-          },
+          timeRangeAbsolute: timeRangeAbs,
+          timeRangeRelative: timeRangeRel,
         })
       );
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });

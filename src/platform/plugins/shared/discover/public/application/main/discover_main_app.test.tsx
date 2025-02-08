@@ -33,9 +33,7 @@ describe('DiscoverMainApp', () => {
     }) as unknown as DataViewListItem[];
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.dispatch(
-      internalStateActions.setSavedDataViews({ savedDataViews: dataViewList })
-    );
+    stateContainer.internalState.dispatch(internalStateActions.setSavedDataViews(dataViewList));
     const props = {
       stateContainer,
     };

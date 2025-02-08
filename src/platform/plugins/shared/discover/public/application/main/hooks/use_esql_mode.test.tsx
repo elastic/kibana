@@ -39,7 +39,7 @@ function getHookProps(
   stateContainer.appState.replaceUrlState = replaceUrlState;
   stateContainer.appState.update({ columns: [], ...appState });
   stateContainer.internalState.dispatch(
-    internalStateActions.setSavedDataViews({ savedDataViews: [dataViewMock as DataViewListItem] })
+    internalStateActions.setSavedDataViews([dataViewMock as DataViewListItem])
   );
 
   const msgLoading = {
