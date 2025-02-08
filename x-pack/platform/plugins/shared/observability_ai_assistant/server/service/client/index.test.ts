@@ -487,14 +487,8 @@ describe('Observability AI Assistant client', () => {
               user: {
                 name: 'johndoe',
               },
+              systemMessage: EXPECTED_STORED_SYSTEM_MESSAGE,
               messages: [
-                {
-                  '@timestamp': expect.any(String),
-                  message: {
-                    content: EXPECTED_STORED_SYSTEM_MESSAGE,
-                    role: MessageRole.System,
-                  },
-                },
                 {
                   '@timestamp': expect.any(String),
                   message: {
