@@ -10,15 +10,19 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSplitPanel,
   EuiText,
   useEuiTheme,
-  EuiSplitPanel,
-  transparentize,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
-import { selectDefaultWidths, selectUserSectionWidths, useSelector } from '../store/redux';
+import {
+  selectDefaultWidths,
+  selectPushVsOverlay,
+  selectUserSectionWidths,
+  useSelector,
+} from '../store/redux';
 import {
   PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
@@ -86,14 +90,17 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
 
     const { rightPercentage } = useSelector(selectUserSectionWidths);
     const defaultPercentages = useSelector(selectDefaultWidths);
+    const type = useSelector(selectPushVsOverlay);
 
     // Calculate the width of the preview section based on the following
     // - if only the right section is visible, then we use 100% of the width (minus some padding)
     // - if both the right and left sections are visible, we use the width of the right section (minus the same padding)
     const width = useMemo(() => {
-      const percentage = rightPercentage ? rightPercentage : defaultPercentages.rightPercentage;
+      const percentage = rightPercentage
+        ? rightPercentage
+        : defaultPercentages[type].rightPercentage;
       return showExpanded ? `calc(${percentage}% - 8px)` : `calc(100% - 8px)`;
-    }, [defaultPercentages.rightPercentage, rightPercentage, showExpanded]);
+    }, [defaultPercentages, rightPercentage, showExpanded, type]);
 
     const closeButton = (
       <EuiFlexItem grow={false}>
@@ -137,7 +144,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
         <EuiSplitPanel.Outer
           css={css`
             margin: ${euiTheme.size.xs};
-            box-shadow: 0 0 16px 0 ${transparentize(euiTheme.colors.mediumShade, 0.5)};
+            box-shadow: 0 0 ${euiTheme.size.base} 0 ${euiTheme.colors.lightShade};
           `}
           data-test-subj={PREVIEW_SECTION_TEST_ID}
           className="eui-fullHeight"
