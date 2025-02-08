@@ -79,12 +79,16 @@ export const deepMockedFields = shallowMockedFields.map(
 ) as DataView['fields'];
 
 export const buildDataViewMock = ({
-  name,
-  fields: definedFields,
+  id,
+  title,
+  name = 'data-view-mock',
+  fields: definedFields = [] as unknown as DataView['fields'],
   timeFieldName,
 }: {
-  name: string;
-  fields: DataView['fields'];
+  id?: string;
+  title?: string;
+  name?: string;
+  fields?: DataView['fields'];
   timeFieldName?: string;
 }): DataView => {
   const dataViewFields = [...definedFields] as DataView['fields'];
@@ -105,9 +109,12 @@ export const buildDataViewMock = ({
     return new DataViewField(spec);
   };
 
+  id = id ?? `${name}-id`;
+  title = title ?? `${name}-title`;
+
   const dataView = {
-    id: `${name}-id`,
-    title: `${name}-title`,
+    id,
+    title,
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
@@ -122,7 +129,7 @@ export const buildDataViewMock = ({
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
     isTimeNanosBased: () => false,
     isPersisted: () => true,
-    toSpec: () => ({}),
+    toSpec: () => ({ id, title, name }),
     toMinimalSpec: () => ({}),
     getTimeField: () => {
       return dataViewFields.find((field) => field.name === timeFieldName);

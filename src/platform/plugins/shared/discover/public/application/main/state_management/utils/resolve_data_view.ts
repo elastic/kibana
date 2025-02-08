@@ -43,7 +43,7 @@ export async function loadDataView({
   dataViewSpec?: DataViewSpec;
   services: DiscoverServices;
   savedDataViews: DataViewListItem[];
-  adHocDataViews: DataViewListItem[];
+  adHocDataViews: DataViewSpec[];
 }): Promise<DataViewData> {
   let fetchId: string | undefined = dataViewId;
 
@@ -91,7 +91,7 @@ export async function loadDataView({
 
   // If nothing else is available, use the first ad hoc data view as a fallback
   let defaultAdHocDataView: DataView | null = null;
-  if (!fetchedDataView && !defaultDataView && adHocDataViews.length) {
+  if (!fetchedDataView && !defaultDataView && adHocDataViews[0]?.id) {
     defaultAdHocDataView = await dataViews.get(adHocDataViews[0].id);
   }
 
@@ -196,7 +196,7 @@ export const loadAndResolveDataView = async ({
     ? undefined
     : adHocDataViews.find((dv) => dv.id === dataViewId);
 
-  if (adHocDataViewItem) {
+  if (adHocDataViewItem?.id) {
     try {
       dataView = await dataViews.get(adHocDataViewItem.id);
     } catch {

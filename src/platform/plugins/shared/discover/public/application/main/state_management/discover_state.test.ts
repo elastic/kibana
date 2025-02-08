@@ -47,11 +47,15 @@ async function getState(
   const nextHistory = createBrowserHistory();
   nextHistory.push(url);
 
-  discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
-    ...dataViewMock,
-    isPersisted: () => false,
-    id: 'ad-hoc-id',
-    title: 'test',
+  discoverServiceMock.dataViews.create = jest.fn().mockImplementation((spec) => {
+    spec.id = spec.id ?? 'ad-hoc-id';
+    spec.title = spec.title ?? 'test';
+    return Promise.resolve({
+      ...dataViewMock,
+      isPersisted: () => false,
+      toSpec: () => spec,
+      ...spec,
+    });
   });
   const runtimeStateManager = createRuntimeStateManager();
   const nextState = getDiscoverStateContainer({
@@ -876,14 +880,11 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const selectedDataViewId = state.internalState.getState().dataViewId;
-    await waitFor(() => {
-      expect(selectedDataViewId).toBe(dataViewMock.id);
-    });
+    expect(selectedDataViewId).toBe(dataViewMock.id);
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.onDataViewEdited(dataViewMock);
-
     await waitFor(() => {
-      expect(state.internalState.getState().dataViewId).not.toBe(selectedDataViewId);
+      expect(state.internalState.getState().dataViewId).toBe(selectedDataViewId);
     });
     unsubscribe();
   });

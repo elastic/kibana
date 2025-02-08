@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
@@ -40,7 +40,7 @@ export interface DiscoverInternalState {
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
-  adHocDataViews: DataViewListItem[];
+  adHocDataViews: DataViewSpec[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -98,7 +98,7 @@ const internalStateSlice = createSlice({
       state.savedDataViews = action.payload.savedDataViews;
     },
 
-    setAdHocDataViews: (state, action: PayloadAction<{ adHocDataViews: DataViewListItem[] }>) => {
+    setAdHocDataViews: (state, action: PayloadAction<{ adHocDataViews: DataViewSpec[] }>) => {
       state.adHocDataViews = action.payload.adHocDataViews;
     },
 
@@ -180,19 +180,12 @@ const setDataView =
     runtimeStateManager.currentDataView$.next(dataView);
   };
 
-const mapDataViewListItem = (dataView: DataView): DataViewListItem => ({
-  title: dataView.title,
-  name: dataView.name,
-  id: dataView.id!,
-  type: dataView.type,
-});
-
 const setAdHocDataViews =
   (adHocDataViews: DataView[]): InternalStateThunk =>
   (dispatch, _, { runtimeStateManager }) => {
     dispatch(
       internalStateSlice.actions.setAdHocDataViews({
-        adHocDataViews: adHocDataViews.map(mapDataViewListItem),
+        adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec(false)),
       })
     );
     runtimeStateManager.adHocDataViews$.next(adHocDataViews);
