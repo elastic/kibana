@@ -27,6 +27,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     modelName,
     logger,
     abortSignal,
+    metadata,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -50,6 +51,9 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         subActionParams: {
           body: request,
           signal: abortSignal,
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
       })
     ).pipe(

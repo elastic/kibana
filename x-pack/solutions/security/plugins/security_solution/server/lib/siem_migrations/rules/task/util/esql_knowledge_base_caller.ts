@@ -25,11 +25,7 @@ export const getEsqlKnowledgeBase: GetEsqlTranslatorToolParams =
         client,
         connectorId,
         input,
-        logger: {
-          debug: (source) => {
-            logger.debug(typeof source === 'function' ? source() : source);
-          },
-        },
+        logger,
       })
     );
     return content;
