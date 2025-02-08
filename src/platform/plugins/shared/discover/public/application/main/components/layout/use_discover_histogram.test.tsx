@@ -29,7 +29,7 @@ import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import { RuntimeStateProvider } from '../../state_management/redux';
+import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 
 const mockData = dataPluginMock.createStartContract();
@@ -390,10 +390,14 @@ describe('useDiscoverHistogram', () => {
       const stateContainer = getStateContainer();
       const timeRangeAbs = { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
       const timeRangeRel = { from: 'now-15m', to: 'now' };
-      stateContainer.internalState.transitions.setDataRequestParams({
-        timeRangeAbsolute: timeRangeAbs,
-        timeRangeRelative: timeRangeRel,
-      });
+      stateContainer.internalState2.dispatch(
+        internalStateActions.setDataRequestParams({
+          dataRequestParams: {
+            timeRangeAbsolute: timeRangeAbs,
+            timeRangeRelative: timeRangeRel,
+          },
+        })
+      );
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       act(() => {
         fetch$.next();

@@ -302,7 +302,7 @@ export function getDiscoverStateContainer({
    */
   const appStateContainer = getDiscoverAppStateContainer({
     stateStorage,
-    internalStateContainer,
+    internalState2,
     savedSearchContainer,
     services,
   });
@@ -330,6 +330,7 @@ export function getDiscoverStateContainer({
     searchSessionManager,
     appStateContainer,
     internalStateContainer,
+    internalState2,
     runtimeStateManager,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
@@ -594,7 +595,7 @@ export function getDiscoverStateContainer({
       });
     }
 
-    internalStateContainer.transitions.resetOnSavedSearchChange();
+    internalState2.dispatch(internalStateActions.resetOnSavedSearchChange());
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };

@@ -64,11 +64,13 @@ export async function changeDataView({
 
   if (nextDataView && currentDataView) {
     // Reset the default profile state if we are switching to a different data view
-    internalState.transitions.setResetDefaultProfileState({
-      columns: true,
-      rowHeight: true,
-      breakdownField: true,
-    });
+    internalState2.dispatch(
+      internalStateActions.setResetDefaultProfileState({
+        columns: true,
+        rowHeight: true,
+        breakdownField: true,
+      })
+    );
 
     const nextAppState = getDataViewAppState(
       currentDataView,
@@ -83,8 +85,8 @@ export async function changeDataView({
 
     appState.update(nextAppState);
 
-    if (internalState.getState().expandedDoc) {
-      internalState.transitions.setExpandedDoc(undefined);
+    if (internalState2.getState().expandedDoc) {
+      internalState2.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
     }
   }
 

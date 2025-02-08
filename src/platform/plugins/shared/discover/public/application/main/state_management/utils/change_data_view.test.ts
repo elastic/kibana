@@ -82,12 +82,20 @@ describe('changeDataView', () => {
 
   it('should call setResetDefaultProfileState correctly when switching data view', async () => {
     const params = setupTestParams(dataViewComplexMock);
-    expect(params.internalState.transitions.setResetDefaultProfileState).not.toHaveBeenCalled();
+    expect(params.internalState2.getState().resetDefaultProfileState).toEqual(
+      expect.objectContaining({
+        columns: false,
+        rowHeight: false,
+        breakdownField: false,
+      })
+    );
     await changeDataView({ dataViewId: dataViewComplexMock.id!, ...params });
-    expect(params.internalState.transitions.setResetDefaultProfileState).toHaveBeenCalledWith({
-      columns: true,
-      rowHeight: true,
-      breakdownField: true,
-    });
+    expect(params.internalState2.getState().resetDefaultProfileState).toEqual(
+      expect.objectContaining({
+        columns: true,
+        rowHeight: true,
+        breakdownField: true,
+      })
+    );
   });
 });

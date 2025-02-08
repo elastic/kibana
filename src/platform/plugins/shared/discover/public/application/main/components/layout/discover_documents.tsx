@@ -48,7 +48,6 @@ import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -73,7 +72,11 @@ import {
   useAdditionalCellActions,
   useProfileAccessor,
 } from '../../../../context_awareness';
-import { useInternalStateSelector2 } from '../../state_management/redux';
+import {
+  internalStateActions,
+  useInternalStateDispatch,
+  useInternalStateSelector2,
+} from '../../state_management/redux';
 
 const containerStyles = css`
   position: relative;
@@ -109,10 +112,11 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
+  const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
-  const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
+  const requestParams = useInternalStateSelector2((state) => state.dataRequestParams);
   const [
     dataSource,
     query,
@@ -138,7 +142,7 @@ function DiscoverDocumentsComponent({
       state.density,
     ];
   });
-  const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
+  const expandedDoc = useInternalStateSelector2((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -205,9 +209,9 @@ function DiscoverDocumentsComponent({
 
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
-      stateContainer.internalState.transitions.setExpandedDoc(doc);
+      dispatch(internalStateActions.setExpandedDoc({ expandedDoc: doc }));
     },
-    [stateContainer]
+    [dispatch]
   );
 
   const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(

@@ -53,7 +53,6 @@ export const loadSavedSearch = async (
   const { savedSearchId, initialAppState } = params ?? {};
   const {
     appStateContainer,
-    internalStateContainer,
     internalState2,
     savedSearchContainer,
     globalStateContainer,
@@ -145,7 +144,7 @@ export const loadSavedSearch = async (
     nextSavedSearch = savedSearchContainer.updateWithFilterManagerFilters();
   }
 
-  internalStateContainer.transitions.resetOnSavedSearchChange();
+  internalState2.dispatch(internalStateActions.resetOnSavedSearchChange());
 
   return nextSavedSearch;
 };

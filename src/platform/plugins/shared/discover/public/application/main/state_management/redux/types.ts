@@ -21,7 +21,6 @@
 //   savedDataViewIds: string[];
 //   adHocDataViewIds: string[];
 //   globalFilters: Filter[];
-//   customFilters: Filter[];
 //   expandedDoc: DataTableRecord | undefined;
 //   isESQLToDataViewTransitionModalVisible?: boolean;
 //   resetDefaultProfileState: {

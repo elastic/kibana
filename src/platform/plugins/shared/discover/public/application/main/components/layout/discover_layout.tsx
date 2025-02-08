@@ -34,7 +34,6 @@ import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
@@ -100,7 +99,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   });
   const dataView = useCurrentDataView();
   const dataViewLoading = useInternalStateSelector2((state) => state.isDataViewLoading);
-  const customFilters = useInternalStateSelector((state) => state.customFilters);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
   const fetchCounter = useRef<number>(0);
@@ -411,7 +409,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                additionalFilters={customFilters}
                 columns={currentColumns}
                 documents$={stateContainer.dataState.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}

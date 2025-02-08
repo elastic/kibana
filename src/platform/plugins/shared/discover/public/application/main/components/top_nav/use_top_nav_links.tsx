@@ -172,7 +172,11 @@ export const useTopNavLinks = ({
                 shouldShowESQLToDataViewTransitionModal &&
                 !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
               ) {
-                state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
+                dispatch(
+                  internalStateActions.setIsESQLToDataViewTransitionModalVisible({
+                    isVisible: true,
+                  })
+                );
               } else {
                 state.actions.transitionFromESQLToDataView(dataView.id ?? '');
               }
@@ -215,12 +219,13 @@ export const useTopNavLinks = ({
 
     return entries;
   }, [
-    services,
     appMenuRegistry,
-    state,
-    dataView,
+    services,
+    defaultMenu?.saveItem?.disabled,
     isEsqlMode,
+    dataView,
     shouldShowESQLToDataViewTransitionModal,
-    defaultMenu,
+    dispatch,
+    state,
   ]);
 };

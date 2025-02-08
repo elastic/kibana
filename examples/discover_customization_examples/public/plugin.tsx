@@ -262,7 +262,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             });
 
             const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
-              stateContainer.internalState.transitions.setCustomFilters(newFilters);
               stateContainer.actions.fetchData();
             });
 

@@ -26,6 +26,7 @@ import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { createInternalStateStore, createRuntimeStateManager } from '../state_management/redux';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -67,18 +68,9 @@ describe('test fetchAll', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       getAppState: () => ({}),
-      getInternalState: () => ({
-        dataView: undefined,
-        expandedDoc: undefined,
-        customFilters: [],
-        overriddenVisContextAfterInvalidation: undefined,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-        },
-        dataRequestParams: {},
+      internalState2: createInternalStateStore({
+        services: discoverServiceMock,
+        runtimeStateManager: createRuntimeStateManager(),
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -257,18 +249,9 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       getAppState: () => ({ query }),
-      getInternalState: () => ({
-        dataView: undefined,
-        expandedDoc: undefined,
-        customFilters: [],
-        overriddenVisContextAfterInvalidation: undefined,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-        },
-        dataRequestParams: {},
+      internalState2: createInternalStateStore({
+        services: discoverServiceMock,
+        runtimeStateManager: createRuntimeStateManager(),
       }),
     };
     fetchAll(subjects, false, deps);
@@ -378,18 +361,9 @@ describe('test fetchAll', () => {
         savedSearch: savedSearchMock,
         services: discoverServiceMock,
         getAppState: () => ({ query }),
-        getInternalState: () => ({
-          dataView: undefined,
-          expandedDoc: undefined,
-          customFilters: [],
-          overriddenVisContextAfterInvalidation: undefined,
-          resetDefaultProfileState: {
-            resetId: 'test',
-            columns: false,
-            rowHeight: false,
-            breakdownField: false,
-          },
-          dataRequestParams: {},
+        internalState2: createInternalStateStore({
+          services: discoverServiceMock,
+          runtimeStateManager: createRuntimeStateManager(),
         }),
       };
       fetchAll(subjects, false, deps);

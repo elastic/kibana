@@ -30,7 +30,7 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
-import { RuntimeStateManager } from './redux';
+import { internalStateActions, InternalStateStore, RuntimeStateManager } from './redux';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -140,6 +140,7 @@ export function getDataStateContainer({
   searchSessionManager,
   appStateContainer,
   internalStateContainer,
+  internalState2,
   runtimeStateManager,
   getSavedSearch,
   setDataView,
@@ -148,6 +149,7 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   appStateContainer: DiscoverAppStateContainer;
   internalStateContainer: DiscoverInternalStateContainer;
+  internalState2: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
@@ -233,6 +235,7 @@ export function getDataStateContainer({
             services,
             getAppState: appStateContainer.getState,
             getInternalState: internalStateContainer.getState,
+            internalState2,
             savedSearch: getSavedSearch(),
           };
 
@@ -257,10 +260,14 @@ export function getDataStateContainer({
             return;
           }
 
-          internalStateContainer.transitions.setDataRequestParams({
-            timeRangeAbsolute: timefilter.getAbsoluteTime(),
-            timeRangeRelative: timefilter.getTime(),
-          });
+          internalState2.dispatch(
+            internalStateActions.setDataRequestParams({
+              dataRequestParams: {
+                timeRangeAbsolute: timefilter.getAbsoluteTime(),
+                timeRangeRelative: timefilter.getTime(),
+              },
+            })
+          );
 
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
@@ -268,7 +275,7 @@ export function getDataStateContainer({
             query: appStateContainer.getState().query,
           });
 
-          const { resetDefaultProfileState } = internalStateContainer.getState();
+          const { resetDefaultProfileState } = internalState2.getState();
           const dataView = runtimeStateManager.currentDataView$.getValue();
           const defaultProfileState = dataView
             ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
@@ -298,7 +305,7 @@ export function getDataStateContainer({
             },
             async () => {
               const { resetDefaultProfileState: currentResetDefaultProfileState } =
-                internalStateContainer.getState();
+                internalState2.getState();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
                 return;
@@ -317,11 +324,13 @@ export function getDataStateContainer({
 
               // Clear the default profile state flags after the data fetching
               // is done so refetches don't reset the state again
-              internalStateContainer.transitions.setResetDefaultProfileState({
-                columns: false,
-                rowHeight: false,
-                breakdownField: false,
-              });
+              internalState2.dispatch(
+                internalStateActions.setResetDefaultProfileState({
+                  columns: false,
+                  rowHeight: false,
+                  breakdownField: false,
+                })
+              );
             }
           );
 

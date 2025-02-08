@@ -9,7 +9,7 @@
 
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -43,7 +43,6 @@ export interface DiscoverInternalState {
   adHocDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
-  customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
   isESQLToDataViewTransitionModalVisible?: boolean;
   resetDefaultProfileState: {
@@ -62,7 +61,6 @@ const initialState: DiscoverInternalState = {
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,
-  customFilters: [],
   overriddenVisContextAfterInvalidation: undefined,
   resetDefaultProfileState: {
     resetId: '',
@@ -118,13 +116,11 @@ const internalStateSlice = createSlice({
       state.expandedDoc = action.payload.expandedDoc;
     },
 
-    setCustomFilters: (state, action: PayloadAction<{ customFilters: Filter[] }>) => {
-      state.customFilters = action.payload.customFilters;
-    },
-
     setOverriddenVisContextAfterInvalidation: (
       state,
-      action: PayloadAction<{ overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext }>
+      action: PayloadAction<{
+        overriddenVisContextAfterInvalidation: DiscoverInternalState['overriddenVisContextAfterInvalidation'];
+      }>
     ) => {
       state.overriddenVisContextAfterInvalidation =
         action.payload.overriddenVisContextAfterInvalidation;
