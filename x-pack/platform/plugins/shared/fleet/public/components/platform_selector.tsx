@@ -163,6 +163,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               button={
                 <EuiFilterButton
                   iconType="arrowDown"
+                  data-test-subj="platformSelectorExtended"
                   onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
                   isSelected={showExtendedPlatforms}
                   hasActiveFilters={extendedPlatforms.includes(platform)}
