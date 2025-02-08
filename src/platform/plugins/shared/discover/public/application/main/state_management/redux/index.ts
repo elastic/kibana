@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
+
 export {
-  type DiscoverInternalState,
-  type InternalStateDataRequestParams,
-  type InternalStateThunkDependencies,
   type InternalStateStore,
-  type InternalStateDispatch,
-  type InternalStateThunk,
   InternalStateProvider,
   createInternalStateStore,
   internalStateActions,
@@ -23,7 +20,6 @@ export {
 } from './internal_state';
 
 export {
-  type DiscoverRuntimeState,
   type RuntimeStateManager,
   createRuntimeStateManager,
   useRuntimeState,

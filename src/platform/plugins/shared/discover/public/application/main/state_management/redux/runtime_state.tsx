@@ -12,7 +12,7 @@ import React, { type PropsWithChildren, createContext, useContext, useMemo, useS
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, skip } from 'rxjs';
 
-export interface DiscoverRuntimeState {
+interface DiscoverRuntimeState {
   currentDataView: DataView;
   adHocDataViews: DataView[];
 }

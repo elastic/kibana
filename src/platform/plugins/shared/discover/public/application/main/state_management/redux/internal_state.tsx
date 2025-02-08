@@ -9,8 +9,6 @@
 
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimeRange } from '@kbn/es-query';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import {
   type PayloadAction,
@@ -30,29 +28,7 @@ import {
 import React, { type PropsWithChildren, useMemo, createContext } from 'react';
 import type { DiscoverServices } from '../../../../build_services';
 import { useAdHocDataViews, type RuntimeStateManager } from './runtime_state';
-
-export interface InternalStateDataRequestParams {
-  timeRangeAbsolute?: TimeRange;
-  timeRangeRelative?: TimeRange;
-}
-
-export interface DiscoverInternalState {
-  dataViewId: string | undefined;
-  isDataViewLoading: boolean;
-  savedDataViews: DataViewListItem[];
-  adHocDataViews: DataViewSpec[];
-  defaultProfileAdHocDataViewIds: string[];
-  expandedDoc: DataTableRecord | undefined;
-  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
-  isESQLToDataViewTransitionModalVisible?: boolean;
-  resetDefaultProfileState: {
-    resetId: string;
-    columns: boolean;
-    rowHeight: boolean;
-    breakdownField: boolean;
-  };
-  dataRequestParams: InternalStateDataRequestParams;
-}
+import type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
 
 const initialState: DiscoverInternalState = {
   dataViewId: undefined,
@@ -138,19 +114,26 @@ const internalStateSlice = createSlice({
       state.dataRequestParams = action.payload.dataRequestParams;
     },
 
-    setResetDefaultProfileState: (
-      state,
-      action: PayloadAction<Omit<DiscoverInternalState['resetDefaultProfileState'], 'resetId'>>
-    ) => {
-      state.resetDefaultProfileState = {
-        ...action.payload,
-        resetId: uuidv4(),
-      };
+    setResetDefaultProfileState: {
+      prepare: (
+        resetDefaultProfileState: Omit<DiscoverInternalState['resetDefaultProfileState'], 'resetId'>
+      ) => ({
+        payload: {
+          ...resetDefaultProfileState,
+          resetId: uuidv4(),
+        },
+      }),
+      reducer: (
+        state,
+        action: PayloadAction<DiscoverInternalState['resetDefaultProfileState']>
+      ) => {
+        state.resetDefaultProfileState = action.payload;
+      },
     },
   },
 });
 
-export interface InternalStateThunkDependencies {
+interface InternalStateThunkDependencies {
   services: DiscoverServices;
   runtimeStateManager: RuntimeStateManager;
 }
@@ -164,24 +147,28 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
-export type InternalStateDispatch = InternalStateStore['dispatch'];
+type InternalStateDispatch = InternalStateStore['dispatch'];
 
-export type InternalStateThunk<TReturn = void> = ThunkAction<
+type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,
   InternalStateDispatch extends ThunkDispatch<infer TState, never, never> ? TState : never,
   InternalStateDispatch extends ThunkDispatch<never, infer TExtra, never> ? TExtra : never,
   InternalStateDispatch extends ThunkDispatch<never, never, infer TAction> ? TAction : never
 >;
 
-const setDataView =
-  (dataView: DataView): InternalStateThunk =>
+type InternalStateThunkActionCreator<TArgs extends unknown[] = [], TReturn = void> = (
+  ...args: TArgs
+) => InternalStateThunkAction<TReturn>;
+
+const setDataView: InternalStateThunkActionCreator<[DataView]> =
+  (dataView) =>
   (dispatch, _, { runtimeStateManager }) => {
     dispatch(internalStateSlice.actions.setDataViewId({ dataViewId: dataView.id }));
     runtimeStateManager.currentDataView$.next(dataView);
   };
 
-const setAdHocDataViews =
-  (adHocDataViews: DataView[]): InternalStateThunk =>
+const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =
+  (adHocDataViews) =>
   (dispatch, _, { runtimeStateManager }) => {
     dispatch(
       internalStateSlice.actions.setAdHocDataViews({
@@ -191,8 +178,8 @@ const setAdHocDataViews =
     runtimeStateManager.adHocDataViews$.next(adHocDataViews);
   };
 
-const setDefaultProfileAdHocDataViews =
-  (defaultProfileAdHocDataViews: DataView[]): InternalStateThunk =>
+const setDefaultProfileAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =
+  (defaultProfileAdHocDataViews) =>
   (dispatch, getState, { runtimeStateManager }) => {
     const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
     const prevState = getState();
@@ -213,8 +200,8 @@ const setDefaultProfileAdHocDataViews =
     );
   };
 
-const appendAdHocDataViews =
-  (dataViewsAdHoc: DataView | DataView[]): InternalStateThunk =>
+const appendAdHocDataViews: InternalStateThunkActionCreator<[DataView | DataView[]]> =
+  (dataViewsAdHoc) =>
   (dispatch, _, { runtimeStateManager }) => {
     const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
     const newDataViews = Array.isArray(dataViewsAdHoc) ? dataViewsAdHoc : [dataViewsAdHoc];
@@ -223,8 +210,8 @@ const appendAdHocDataViews =
     dispatch(setAdHocDataViews(existingDataViews.concat(newDataViews)));
   };
 
-const replaceAdHocDataViewWithId =
-  (prevId: string, newDataView: DataView): InternalStateThunk =>
+const replaceAdHocDataViewWithId: InternalStateThunkActionCreator<[string, DataView]> =
+  (prevId, newDataView) =>
   (dispatch, getState, { runtimeStateManager }) => {
     const prevAdHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
     let defaultProfileAdHocDataViewIds = getState().defaultProfileAdHocDataViewIds;

@@ -91,3 +91,30 @@
 //   hideAggregatedPreview?: boolean;
 //   timeRestore?: boolean;
 // }
+
+import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { TimeRange } from '@kbn/es-query';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+export interface InternalStateDataRequestParams {
+  timeRangeAbsolute?: TimeRange;
+  timeRangeRelative?: TimeRange;
+}
+
+export interface DiscoverInternalState {
+  dataViewId: string | undefined;
+  isDataViewLoading: boolean;
+  savedDataViews: DataViewListItem[];
+  adHocDataViews: DataViewSpec[];
+  defaultProfileAdHocDataViewIds: string[];
+  expandedDoc: DataTableRecord | undefined;
+  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
+  isESQLToDataViewTransitionModalVisible?: boolean;
+  resetDefaultProfileState: {
+    resetId: string;
+    columns: boolean;
+    rowHeight: boolean;
+    breakdownField: boolean;
+  };
+  dataRequestParams: InternalStateDataRequestParams;
+}
