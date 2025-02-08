@@ -70,7 +70,7 @@ function getProps(
     mockDiscoverService.capabilities = capabilities as typeof mockDiscoverService.capabilities;
   }
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState2.dispatch(internalStateActions.setDataView(dataViewMock));
+  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataViewMock));
 
   return {
     stateContainer,

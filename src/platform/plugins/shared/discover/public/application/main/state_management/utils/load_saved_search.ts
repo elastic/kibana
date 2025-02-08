@@ -31,7 +31,7 @@ import { InternalStateStore, internalStateActions } from '../redux';
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
   dataStateContainer: DiscoverDataStateContainer;
-  internalState2: InternalStateStore;
+  internalState: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
   globalStateContainer: DiscoverGlobalStateContainer;
   services: DiscoverServices;
@@ -49,13 +49,8 @@ export const loadSavedSearch = async (
 ): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');
   const { savedSearchId, initialAppState } = params ?? {};
-  const {
-    appStateContainer,
-    internalState2,
-    savedSearchContainer,
-    globalStateContainer,
-    services,
-  } = deps;
+  const { appStateContainer, internalState, savedSearchContainer, globalStateContainer, services } =
+    deps;
 
   const appStateExists = !appStateContainer.isEmptyURL();
   const appState = appStateExists ? appStateContainer.getState() : initialAppState;
@@ -75,7 +70,7 @@ export const loadSavedSearch = async (
         dataViewId,
         query: appState?.query,
         services,
-        internalState2,
+        internalState,
       })
     );
   }
@@ -110,7 +105,7 @@ export const loadSavedSearch = async (
         query: appState.query,
         savedSearch: nextSavedSearch,
         services,
-        internalState2,
+        internalState,
       });
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
       if (
@@ -142,7 +137,7 @@ export const loadSavedSearch = async (
     nextSavedSearch = savedSearchContainer.updateWithFilterManagerFilters();
   }
 
-  internalState2.dispatch(internalStateActions.resetOnSavedSearchChange());
+  internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
 
   return nextSavedSearch;
 };
@@ -153,12 +148,12 @@ export const loadSavedSearch = async (
  * @param deps
  */
 function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
-  const { dataStateContainer, internalState2, services, setDataView } = deps;
+  const { dataStateContainer, internalState, services, setDataView } = deps;
   const savedSearchDataView = savedSearch.searchSource.getField('index')!;
 
   setDataView(savedSearchDataView);
   if (!savedSearchDataView.isPersisted()) {
-    internalState2.dispatch(internalStateActions.appendAdHocDataViews(savedSearchDataView));
+    internalState.dispatch(internalStateActions.appendAdHocDataViews(savedSearchDataView));
   }
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
@@ -196,13 +191,13 @@ const getStateDataView = async (
     query,
     savedSearch,
     services,
-    internalState2,
+    internalState,
   }: {
     dataViewId?: string;
     query: DiscoverAppState['query'];
     savedSearch?: SavedSearch;
     services: DiscoverServices;
-    internalState2: InternalStateStore;
+    internalState: InternalStateStore;
   }
 ) => {
   const { dataView, dataViewSpec } = params;
@@ -222,7 +217,7 @@ const getStateDataView = async (
     savedSearch,
     isEsqlMode: isEsqlQuery,
     services,
-    internalState2,
+    internalState,
   });
 
   return result.dataView;

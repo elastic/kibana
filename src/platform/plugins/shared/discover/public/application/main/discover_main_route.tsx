@@ -147,7 +147,7 @@ export function DiscoverMainRoute({
 
         const persistedDataViewsExist = hasUserDataViewValue && defaultDataViewExists;
         const adHocDataViewsExist =
-          stateContainer.internalState2.getState().adHocDataViews.length > 0;
+          stateContainer.internalState.getState().adHocDataViews.length > 0;
         const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
         const canAccessWithAdHocDataViews =
           hasESDataValue && (adHocDataViewsExist || locationStateHasDataViewSpec);

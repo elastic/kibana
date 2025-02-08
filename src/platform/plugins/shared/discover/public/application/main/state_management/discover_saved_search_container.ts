@@ -139,11 +139,11 @@ export interface DiscoverSavedSearchContainer {
 export function getSavedSearchContainer({
   services,
   globalStateContainer,
-  internalState2,
+  internalState,
 }: {
   services: DiscoverServices;
   globalStateContainer: DiscoverGlobalStateContainer;
-  internalState2: InternalStateStore;
+  internalState: InternalStateStore;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -183,7 +183,7 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
 
     const dataView = nextSavedSearch.searchSource.getField('index');
-    const profileDataViewIds = internalState2.getState().defaultProfileAdHocDataViewIds;
+    const profileDataViewIds = internalState.getState().defaultProfileAdHocDataViewIds;
     let replacementDataView: DataView | undefined;
 
     // If the Discover session is using a default profile ad hoc data view,

@@ -29,7 +29,7 @@ describe('test useInspector', () => {
     const requests = new RequestAdapter();
     const lensRequests = new RequestAdapter();
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.internalState2.dispatch(
+    stateContainer.internalState.dispatch(
       internalStateActions.setExpandedDoc({ expandedDoc: {} as unknown as DataTableRecord })
     );
     const { result } = renderHook(
@@ -55,6 +55,6 @@ describe('test useInspector', () => {
       ...requests.getRequests(),
       ...lensRequests.getRequests(),
     ]);
-    expect(stateContainer.internalState2.getState().expandedDoc).toBe(undefined);
+    expect(stateContainer.internalState.getState().expandedDoc).toBe(undefined);
   });
 });

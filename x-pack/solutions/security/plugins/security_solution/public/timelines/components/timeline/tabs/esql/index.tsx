@@ -219,7 +219,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverAppState,
       });
 
-      const internalStateSubscription = from(stateContainer.internalState2).subscribe({
+      const internalStateSubscription = from(stateContainer.internalState).subscribe({
         next: setDiscoverInternalState,
       });
 

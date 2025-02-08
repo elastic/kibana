@@ -26,13 +26,13 @@ import { internalStateActions, type InternalStateStore, type RuntimeStateManager
 export async function changeDataView({
   dataViewId,
   services,
-  internalState2,
+  internalState,
   runtimeStateManager,
   appState,
 }: {
   dataViewId: string | DataView;
   services: DiscoverServices;
-  internalState2: InternalStateStore;
+  internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   appState: DiscoverAppStateContainer;
 }) {
@@ -43,7 +43,7 @@ export async function changeDataView({
   const state = appState.getState();
   let nextDataView: DataView | null = null;
 
-  internalState2.dispatch(internalStateActions.setIsDataViewLoading({ isDataViewLoading: true }));
+  internalState.dispatch(internalStateActions.setIsDataViewLoading({ isDataViewLoading: true }));
 
   try {
     nextDataView =
@@ -61,7 +61,7 @@ export async function changeDataView({
 
   if (nextDataView && currentDataView) {
     // Reset the default profile state if we are switching to a different data view
-    internalState2.dispatch(
+    internalState.dispatch(
       internalStateActions.setResetDefaultProfileState({
         columns: true,
         rowHeight: true,
@@ -82,10 +82,10 @@ export async function changeDataView({
 
     appState.update(nextAppState);
 
-    if (internalState2.getState().expandedDoc) {
-      internalState2.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
+    if (internalState.getState().expandedDoc) {
+      internalState.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
     }
   }
 
-  internalState2.dispatch(internalStateActions.setIsDataViewLoading({ isDataViewLoading: false }));
+  internalState.dispatch(internalStateActions.setIsDataViewLoading({ isDataViewLoading: false }));
 }

@@ -47,8 +47,8 @@ function getStateContainer(savedSearch?: SavedSearch) {
 
   stateContainer.appState.update(appState);
 
-  stateContainer.internalState2.dispatch(internalStateActions.setDataView(dataView));
-  stateContainer.internalState2.dispatch(
+  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataView));
+  stateContainer.internalState.dispatch(
     internalStateActions.setDataRequestParams({
       dataRequestParams: {
         timeRangeAbsolute: {

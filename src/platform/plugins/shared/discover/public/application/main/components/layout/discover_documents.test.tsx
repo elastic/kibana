@@ -47,7 +47,7 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   stateContainer.appState.update({
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
-  stateContainer.internalState2.dispatch(
+  stateContainer.internalState.dispatch(
     internalStateActions.setDataRequestParams({
       dataRequestParams: {
         timeRangeRelative: {

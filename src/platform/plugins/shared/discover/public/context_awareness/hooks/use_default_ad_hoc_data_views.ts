@@ -28,7 +28,7 @@ export const useDefaultAdHocDataViews = ({
   rootProfileState: RootProfileState;
 }) => {
   const { dataViews } = useDiscoverServices();
-  const { internalState2 } = stateContainer;
+  const { internalState } = stateContainer;
 
   const initializeDataViews = useLatest(async () => {
     if (rootProfileState.rootProfileLoading) {
@@ -37,7 +37,7 @@ export const useDefaultAdHocDataViews = ({
 
     // Clear the cache of old data views before creating
     // the new ones to avoid cache hits on duplicate IDs
-    for (const prevId of internalState2.getState().defaultProfileAdHocDataViewIds) {
+    for (const prevId of internalState.getState().defaultProfileAdHocDataViewIds) {
       dataViews.clearInstanceCache(prevId);
     }
 
@@ -46,7 +46,7 @@ export const useDefaultAdHocDataViews = ({
       profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
     );
 
-    internalState2.dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
+    internalState.dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
   });
 
   // This approach allows us to return a callback with a stable reference
@@ -54,11 +54,11 @@ export const useDefaultAdHocDataViews = ({
 
   // Make sure to clean up on unmount
   useUnmount(() => {
-    for (const prevId of internalState2.getState().defaultProfileAdHocDataViewIds) {
+    for (const prevId of internalState.getState().defaultProfileAdHocDataViewIds) {
       dataViews.clearInstanceCache(prevId);
     }
 
-    internalState2.dispatch(internalStateActions.setDefaultProfileAdHocDataViews([]));
+    internalState.dispatch(internalStateActions.setDefaultProfileAdHocDataViews([]));
   });
 
   return { initializeProfileDataViews };

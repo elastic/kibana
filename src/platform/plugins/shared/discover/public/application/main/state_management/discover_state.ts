@@ -130,7 +130,7 @@ export interface DiscoverStateContainer {
   /**
    * Internal shared state that's used at several places in the UI
    */
-  internalState2: InternalStateStore;
+  internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   /**
    * State of saved search, the saved object of Discover
@@ -279,7 +279,7 @@ export function getDiscoverStateContainer({
   /**
    * Internal state store, state that's not persisted and not part of the URL
    */
-  const internalState2 = createInternalStateStore({ services, runtimeStateManager });
+  const internalState = createInternalStateStore({ services, runtimeStateManager });
 
   /**
    * Saved Search State Container, the persisted saved object of Discover
@@ -287,7 +287,7 @@ export function getDiscoverStateContainer({
   const savedSearchContainer = getSavedSearchContainer({
     services,
     globalStateContainer,
-    internalState2,
+    internalState,
   });
 
   /**
@@ -295,7 +295,7 @@ export function getDiscoverStateContainer({
    */
   const appStateContainer = getDiscoverAppStateContainer({
     stateStorage,
-    internalState2,
+    internalState,
     savedSearchContainer,
     services,
   });
@@ -313,7 +313,7 @@ export function getDiscoverStateContainer({
   };
 
   const setDataView = (dataView: DataView) => {
-    internalState2.dispatch(internalStateActions.setDataView(dataView));
+    internalState.dispatch(internalStateActions.setDataView(dataView));
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
@@ -322,7 +322,7 @@ export function getDiscoverStateContainer({
     services,
     searchSessionManager,
     appStateContainer,
-    internalState2,
+    internalState,
     runtimeStateManager,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
@@ -330,7 +330,7 @@ export function getDiscoverStateContainer({
 
   const loadDataViewList = async () => {
     const savedDataViews = await services.dataViews.getIdsWithTitle(true);
-    internalState2.dispatch(internalStateActions.setSavedDataViews({ savedDataViews }));
+    internalState.dispatch(internalStateActions.setSavedDataViews({ savedDataViews }));
   };
 
   /**
@@ -354,7 +354,7 @@ export function getDiscoverStateContainer({
       services,
     });
 
-    internalState2.dispatch(
+    internalState.dispatch(
       internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
     );
 
@@ -421,7 +421,7 @@ export function getDiscoverStateContainer({
 
   const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
-      internalState2.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
+      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
       await loadDataViewList();
     }
@@ -448,7 +448,7 @@ export function getDiscoverStateContainer({
     return loadSavedSearchFn(params ?? {}, {
       appStateContainer,
       dataStateContainer,
-      internalState2,
+      internalState,
       savedSearchContainer,
       globalStateContainer,
       services,
@@ -478,7 +478,7 @@ export function getDiscoverStateContainer({
         appState: appStateContainer,
         savedSearchState: savedSearchContainer,
         dataState: dataStateContainer,
-        internalState2,
+        internalState,
         services,
         setDataView,
       })
@@ -529,7 +529,7 @@ export function getDiscoverStateContainer({
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }
-    internalState2.dispatch(internalStateActions.appendAdHocDataViews(newDataView));
+    internalState.dispatch(internalStateActions.appendAdHocDataViews(newDataView));
     await onChangeDataView(newDataView);
     return newDataView;
   };
@@ -556,7 +556,7 @@ export function getDiscoverStateContainer({
     await changeDataView({
       dataViewId,
       services,
-      internalState2,
+      internalState,
       runtimeStateManager,
       appState: appStateContainer,
     });
@@ -584,7 +584,7 @@ export function getDiscoverStateContainer({
       });
     }
 
-    internalState2.dispatch(internalStateActions.resetOnSavedSearchChange());
+    internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
@@ -615,7 +615,7 @@ export function getDiscoverStateContainer({
   return {
     globalState: globalStateContainer,
     appState: appStateContainer,
-    internalState2,
+    internalState,
     runtimeStateManager,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,

@@ -68,7 +68,7 @@ describe('test fetchAll', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       getAppState: () => ({}),
-      internalState2: createInternalStateStore({
+      internalState: createInternalStateStore({
         services: discoverServiceMock,
         runtimeStateManager: createRuntimeStateManager(),
       }),
@@ -249,7 +249,7 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       getAppState: () => ({ query }),
-      internalState2: createInternalStateStore({
+      internalState: createInternalStateStore({
         services: discoverServiceMock,
         runtimeStateManager: createRuntimeStateManager(),
       }),
@@ -361,7 +361,7 @@ describe('test fetchAll', () => {
         savedSearch: savedSearchMock,
         services: discoverServiceMock,
         getAppState: () => ({ query }),
-        internalState2: createInternalStateStore({
+        internalState: createInternalStateStore({
           services: discoverServiceMock,
           runtimeStateManager: createRuntimeStateManager(),
         }),

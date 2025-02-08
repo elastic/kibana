@@ -138,7 +138,7 @@ export function getDataStateContainer({
   services,
   searchSessionManager,
   appStateContainer,
-  internalState2,
+  internalState,
   runtimeStateManager,
   getSavedSearch,
   setDataView,
@@ -146,7 +146,7 @@ export function getDataStateContainer({
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   appStateContainer: DiscoverAppStateContainer;
-  internalState2: InternalStateStore;
+  internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
@@ -231,7 +231,7 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             getAppState: appStateContainer.getState,
-            internalState2,
+            internalState,
             savedSearch: getSavedSearch(),
           };
 
@@ -256,7 +256,7 @@ export function getDataStateContainer({
             return;
           }
 
-          internalState2.dispatch(
+          internalState.dispatch(
             internalStateActions.setDataRequestParams({
               dataRequestParams: {
                 timeRangeAbsolute: timefilter.getAbsoluteTime(),
@@ -271,7 +271,7 @@ export function getDataStateContainer({
             query: appStateContainer.getState().query,
           });
 
-          const { resetDefaultProfileState } = internalState2.getState();
+          const { resetDefaultProfileState } = internalState.getState();
           const dataView = runtimeStateManager.currentDataView$.getValue();
           const defaultProfileState = dataView
             ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
@@ -301,7 +301,7 @@ export function getDataStateContainer({
             },
             async () => {
               const { resetDefaultProfileState: currentResetDefaultProfileState } =
-                internalState2.getState();
+                internalState.getState();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
                 return;
@@ -320,7 +320,7 @@ export function getDataStateContainer({
 
               // Clear the default profile state flags after the data fetching
               // is done so refetches don't reset the state again
-              internalState2.dispatch(
+              internalState.dispatch(
                 internalStateActions.setResetDefaultProfileState({
                   columns: false,
                   rowHeight: false,

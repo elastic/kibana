@@ -16,7 +16,7 @@ import type { DiscoverStateContainer } from '../state_management/discover_state'
  * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
  */
 export function useUrlTracking(stateContainer: DiscoverStateContainer) {
-  const { savedSearchState, internalState2 } = stateContainer;
+  const { savedSearchState, internalState } = stateContainer;
   const { urlTracker } = useDiscoverServices();
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export function useUrlTracking(stateContainer: DiscoverStateContainer) {
         // Disable for ad hoc data views, since they can't be restored after a page refresh
         dataView.isPersisted() ||
         // Unless it's a default profile data view, which can be restored on refresh
-        internalState2.getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
+        internalState.getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
         // Or we're in ES|QL mode, in which case we don't care about the data view
         isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
 
@@ -43,5 +43,5 @@ export function useUrlTracking(stateContainer: DiscoverStateContainer) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [internalState2, savedSearchState, urlTracker]);
+  }, [internalState, savedSearchState, urlTracker]);
 }

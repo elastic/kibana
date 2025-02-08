@@ -105,8 +105,8 @@ async function mountComponent(
     interval: 'auto',
     query,
   });
-  stateContainer.internalState2.dispatch(internalStateActions.setDataView(dataView));
-  stateContainer.internalState2.dispatch(
+  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataView));
+  stateContainer.internalState.dispatch(
     internalStateActions.setDataRequestParams({
       dataRequestParams: {
         timeRangeAbsolute: time,

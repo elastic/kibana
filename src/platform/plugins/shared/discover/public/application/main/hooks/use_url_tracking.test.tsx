@@ -56,7 +56,7 @@ describe('useUrlTracking', () => {
     const services = createDiscoverServicesMock();
     const savedSearch = omit(createSavedSearchAdHocMock(), 'id');
     const stateContainer = getDiscoverStateMock({ savedSearch });
-    stateContainer.internalState2.dispatch(
+    stateContainer.internalState.dispatch(
       internalStateActions.setDefaultProfileAdHocDataViews([
         savedSearch.searchSource.getField('index')!,
       ])

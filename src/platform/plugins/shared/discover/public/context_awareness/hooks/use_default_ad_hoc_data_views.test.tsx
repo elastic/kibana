@@ -35,10 +35,10 @@ const renderDefaultAdHocDataViewsHook = ({
     { id: '5', title: 'test5' },
   ];
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.internalState2.dispatch(
+  stateContainer.internalState.dispatch(
     internalStateActions.appendAdHocDataViews(existingAdHocDataVew)
   );
-  stateContainer.internalState2.dispatch(
+  stateContainer.internalState.dispatch(
     internalStateActions.setDefaultProfileAdHocDataViews(previousSpecs as unknown as DataView[])
   );
   const { result, unmount } = renderHook(useDefaultAdHocDataViews, {
@@ -87,7 +87,7 @@ describe('useDefaultAdHocDataViews', () => {
       existingAdHocDataVew,
       ...previousSpecs,
     ]);
-    expect(stateContainer.internalState2.getState().defaultProfileAdHocDataViewIds).toEqual(
+    expect(stateContainer.internalState.getState().defaultProfileAdHocDataViewIds).toEqual(
       previousSpecs.map((s) => s.id)
     );
     await result.current.initializeProfileDataViews();
@@ -97,7 +97,7 @@ describe('useDefaultAdHocDataViews', () => {
       existingAdHocDataVew,
       ...newSpecs,
     ]);
-    expect(stateContainer.internalState2.getState().defaultProfileAdHocDataViewIds).toEqual(
+    expect(stateContainer.internalState.getState().defaultProfileAdHocDataViewIds).toEqual(
       newSpecs.map((s) => s.id)
     );
   });
@@ -117,7 +117,7 @@ describe('useDefaultAdHocDataViews', () => {
       existingAdHocDataVew,
       ...previousSpecs,
     ]);
-    expect(stateContainer.internalState2.getState().defaultProfileAdHocDataViewIds).toEqual(
+    expect(stateContainer.internalState.getState().defaultProfileAdHocDataViewIds).toEqual(
       previousSpecs.map((s) => s.id)
     );
     await result.current.initializeProfileDataViews();
@@ -127,7 +127,7 @@ describe('useDefaultAdHocDataViews', () => {
       existingAdHocDataVew,
       ...previousSpecs,
     ]);
-    expect(stateContainer.internalState2.getState().defaultProfileAdHocDataViewIds).toEqual(
+    expect(stateContainer.internalState.getState().defaultProfileAdHocDataViewIds).toEqual(
       previousSpecs.map((s) => s.id)
     );
   });
@@ -140,7 +140,7 @@ describe('useDefaultAdHocDataViews', () => {
       existingAdHocDataVew,
       ...previousSpecs,
     ]);
-    expect(stateContainer.internalState2.getState().defaultProfileAdHocDataViewIds).toEqual(
+    expect(stateContainer.internalState.getState().defaultProfileAdHocDataViewIds).toEqual(
       previousSpecs.map((s) => s.id)
     );
     unmount();
@@ -148,6 +148,6 @@ describe('useDefaultAdHocDataViews', () => {
     expect(stateContainer.runtimeStateManager.adHocDataViews$.getValue()).toEqual([
       existingAdHocDataVew,
     ]);
-    expect(stateContainer.internalState2.getState().defaultProfileAdHocDataViewIds).toEqual([]);
+    expect(stateContainer.internalState.getState().defaultProfileAdHocDataViewIds).toEqual([]);
   });
 });

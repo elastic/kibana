@@ -30,7 +30,7 @@ import { createInternalStateStore, createRuntimeStateManager, InternalStateStore
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
-let internalState2: InternalStateStore;
+let internalState: InternalStateStore;
 let savedSearchState: DiscoverSavedSearchContainer;
 
 describe('Test discover app state container', () => {
@@ -42,21 +42,21 @@ describe('Test discover app state container', () => {
       history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });
-    internalState2 = createInternalStateStore({
+    internalState = createInternalStateStore({
       services: discoverServiceMock,
       runtimeStateManager: createRuntimeStateManager(),
     });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
-      internalState2,
+      internalState,
     });
   });
 
   const getStateContainer = () =>
     getDiscoverAppStateContainer({
       stateStorage,
-      internalState2,
+      internalState,
       savedSearchContainer: savedSearchState,
       services: discoverServiceMock,
     });
@@ -274,13 +274,13 @@ describe('Test discover app state container', () => {
   describe('initAndSync', () => {
     it('should call setResetDefaultProfileState correctly with no initial state', () => {
       const state = getStateContainer();
-      expect(omit(internalState2.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState2.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
@@ -291,13 +291,13 @@ describe('Test discover app state container', () => {
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
       const state = getStateContainer();
-      expect(omit(internalState2.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState2.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: true,
         breakdownField: true,
@@ -308,13 +308,13 @@ describe('Test discover app state container', () => {
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
       const state = getStateContainer();
-      expect(omit(internalState2.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState2.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         rowHeight: false,
         breakdownField: true,
@@ -331,13 +331,13 @@ describe('Test discover app state container', () => {
         managed: false,
       });
       const state = getStateContainer();
-      expect(omit(internalState2.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState2.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,

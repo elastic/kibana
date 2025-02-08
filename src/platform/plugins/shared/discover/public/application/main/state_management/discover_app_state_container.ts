@@ -185,12 +185,12 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  */
 export const getDiscoverAppStateContainer = ({
   stateStorage,
-  internalState2,
+  internalState,
   savedSearchContainer,
   services,
 }: {
   stateStorage: IKbnUrlStateStorage;
-  internalState2: InternalStateStore;
+  internalState: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
 }): DiscoverAppStateContainer => {
@@ -268,7 +268,7 @@ export const getDiscoverAppStateContainer = ({
       const { breakdownField, columns, rowHeight } = getCurrentUrlState(stateStorage, services);
 
       // Only set default state which is not already set in the URL
-      internalState2.dispatch(
+      internalState.dispatch(
         internalStateActions.setResetDefaultProfileState({
           columns: columns === undefined,
           rowHeight: rowHeight === undefined,

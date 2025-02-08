@@ -177,7 +177,7 @@ describe('test getDataStateContainer', () => {
     const appUnsub = stateContainer.appState.initAndSync();
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState2.dispatch(
+    stateContainer.internalState.dispatch(
       internalStateActions.setResetDefaultProfileState({
         columns: true,
         rowHeight: true,
@@ -195,7 +195,7 @@ describe('test getDataStateContainer', () => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
     expect(
-      omit(stateContainer.internalState2.getState().resetDefaultProfileState, 'resetId')
+      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
     ).toEqual({
       columns: false,
       rowHeight: false,
@@ -214,7 +214,7 @@ describe('test getDataStateContainer', () => {
     const appUnsub = stateContainer.appState.initAndSync();
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState2.dispatch(
+    stateContainer.internalState.dispatch(
       internalStateActions.setResetDefaultProfileState({
         columns: false,
         rowHeight: false,
@@ -230,7 +230,7 @@ describe('test getDataStateContainer', () => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
     expect(
-      omit(stateContainer.internalState2.getState().resetDefaultProfileState, 'resetId')
+      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
     ).toEqual({
       columns: false,
       rowHeight: false,

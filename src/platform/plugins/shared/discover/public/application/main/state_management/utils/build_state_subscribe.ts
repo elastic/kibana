@@ -37,14 +37,14 @@ export const buildStateSubscribe =
   ({
     appState,
     dataState,
-    internalState2,
+    internalState,
     savedSearchState,
     services,
     setDataView,
   }: {
     appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
-    internalState2: InternalStateStore;
+    internalState: InternalStateStore;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
     setDataView: DiscoverStateContainer['actions']['setDataView'];
@@ -106,7 +106,7 @@ export const buildStateSubscribe =
         dataViewId,
         savedSearch,
         isEsqlMode,
-        internalState2,
+        internalState,
         services,
       });
 

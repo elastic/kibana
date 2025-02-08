@@ -47,7 +47,7 @@ import { InternalStateStore } from '../state_management/redux';
 export interface FetchDeps {
   abortController: AbortController;
   getAppState: () => DiscoverAppState;
-  internalState2: InternalStateStore;
+  internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
@@ -71,7 +71,7 @@ export function fetchAll(
   const {
     initialFetchStatus,
     getAppState,
-    internalState2,
+    internalState,
     services,
     inspectorAdapters,
     savedSearch,
@@ -96,7 +96,7 @@ export function fetchAll(
         dataView,
         services,
         sort: getAppState().sort as SortOrder[],
-        inputTimeRange: internalState2.getState().dataRequestParams.timeRangeAbsolute,
+        inputTimeRange: internalState.getState().dataRequestParams.timeRangeAbsolute,
       });
     }
 
@@ -117,7 +117,7 @@ export function fetchAll(
           data,
           expressions,
           profilesManager,
-          timeRange: internalState2.getState().dataRequestParams.timeRangeAbsolute,
+          timeRange: internalState.getState().dataRequestParams.timeRangeAbsolute,
         })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';

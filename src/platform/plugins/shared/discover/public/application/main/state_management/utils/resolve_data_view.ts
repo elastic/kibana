@@ -174,18 +174,18 @@ export const loadAndResolveDataView = async ({
   dataViewSpec,
   savedSearch,
   isEsqlMode,
-  internalState2,
+  internalState,
   services,
 }: {
   dataViewId?: string;
   dataViewSpec?: DataViewSpec;
   savedSearch?: SavedSearch;
   isEsqlMode?: boolean;
-  internalState2: InternalStateStore;
+  internalState: InternalStateStore;
   services: DiscoverServices;
 }) => {
   const { dataViews, toastNotifications } = services;
-  const { adHocDataViews, savedDataViews } = internalState2.getState();
+  const { adHocDataViews, savedDataViews } = internalState.getState();
 
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found
