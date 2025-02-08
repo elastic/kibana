@@ -31,6 +31,7 @@ import {
   isAggregatableFieldOverallStats,
   isNonAggregatableFieldOverallStats,
   isNonAggregatableSampledDocs,
+  isUnsupportedVectorField,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
@@ -214,6 +215,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       const nonAggregatableFields = hasPopulatedFieldsInfo
         ? originalNonAggregatableFields.filter((fieldName) => populatedFieldsInIndex.has(fieldName))
         : originalNonAggregatableFields;
+      const supportedNonAggregatableFields = nonAggregatableFields.filter((fieldName) => {
+        return !isUnsupportedVectorField(fieldName);
+      });
 
       const documentCountStats = await getDocumentCountStats(
         data.search,
@@ -227,7 +231,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         .search<IKibanaSearchRequest, IKibanaSearchResponse>(
           {
             params: getSampleOfDocumentsForNonAggregatableFields(
-              nonAggregatableFields,
+              supportedNonAggregatableFields,
               index,
               searchQuery,
               timeFieldName,
@@ -244,7 +248,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           })
         );
 
-      const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
+      const nonAggregatableFieldsObs = supportedNonAggregatableFields.map((fieldName: string) =>
         data.search
           .search<IKibanaSearchRequest, IKibanaSearchResponse>(
             {
