@@ -287,7 +287,7 @@ export const mockLineLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineWidth: {
         type: 'DYNAMIC',
@@ -352,7 +352,7 @@ export const mockClientServerLineLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineWidth: {
         type: 'DYNAMIC',
