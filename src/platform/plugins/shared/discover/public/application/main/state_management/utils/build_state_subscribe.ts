@@ -8,7 +8,6 @@
  */
 
 import { isEqual } from 'lodash';
-import type { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -38,7 +37,6 @@ export const buildStateSubscribe =
   ({
     appState,
     dataState,
-    internalState,
     internalState2,
     savedSearchState,
     services,
@@ -46,7 +44,6 @@ export const buildStateSubscribe =
   }: {
     appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
-    internalState: DiscoverInternalStateContainer;
     internalState2: InternalStateStore;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;

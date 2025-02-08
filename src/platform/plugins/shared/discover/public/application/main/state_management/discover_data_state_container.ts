@@ -28,7 +28,6 @@ import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
 import { internalStateActions, InternalStateStore, RuntimeStateManager } from './redux';
 
@@ -139,7 +138,6 @@ export function getDataStateContainer({
   services,
   searchSessionManager,
   appStateContainer,
-  internalStateContainer,
   internalState2,
   runtimeStateManager,
   getSavedSearch,
@@ -148,7 +146,6 @@ export function getDataStateContainer({
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   appStateContainer: DiscoverAppStateContainer;
-  internalStateContainer: DiscoverInternalStateContainer;
   internalState2: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   getSavedSearch: () => SavedSearch;
@@ -234,7 +231,6 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             getAppState: appStateContainer.getState,
-            getInternalState: internalStateContainer.getState,
             internalState2,
             savedSearch: getSavedSearch(),
           };

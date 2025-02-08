@@ -14,7 +14,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverServices } from '../../../../build_services';
@@ -27,14 +26,12 @@ import { internalStateActions, type InternalStateStore, type RuntimeStateManager
 export async function changeDataView({
   dataViewId,
   services,
-  internalState,
   internalState2,
   runtimeStateManager,
   appState,
 }: {
   dataViewId: string | DataView;
   services: DiscoverServices;
-  internalState: DiscoverInternalStateContainer;
   internalState2: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   appState: DiscoverAppStateContainer;

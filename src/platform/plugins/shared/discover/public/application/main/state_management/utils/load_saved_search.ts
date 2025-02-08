@@ -12,7 +12,6 @@ import { cloneDeep, isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getEsqlDataView } from './get_esql_data_view';
 import { loadAndResolveDataView } from './resolve_data_view';
-import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverDataStateContainer } from '../discover_data_state_container';
 import { cleanupUrlState } from './cleanup_url_state';
 import { getValidFilters } from '../../../../utils/get_valid_filters';
@@ -32,7 +31,6 @@ import { InternalStateStore, internalStateActions } from '../redux';
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
   dataStateContainer: DiscoverDataStateContainer;
-  internalStateContainer: DiscoverInternalStateContainer;
   internalState2: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
   globalStateContainer: DiscoverGlobalStateContainer;

@@ -47,10 +47,6 @@ import {
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
 } from './discover_app_state_container';
-import {
-  DiscoverInternalStateContainer,
-  getInternalStateContainer,
-} from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 import {
   getDefaultAppState,
@@ -134,7 +130,6 @@ export interface DiscoverStateContainer {
   /**
    * Internal shared state that's used at several places in the UI
    */
-  internalState: DiscoverInternalStateContainer;
   internalState2: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   /**
@@ -282,10 +277,8 @@ export function getDiscoverStateContainer({
   const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
 
   /**
-   * Internal State Container, state that's not persisted and not part of the URL
+   * Internal state store, state that's not persisted and not part of the URL
    */
-  const internalStateContainer = getInternalStateContainer();
-
   const internalState2 = createInternalStateStore({ services, runtimeStateManager });
 
   /**
@@ -329,7 +322,6 @@ export function getDiscoverStateContainer({
     services,
     searchSessionManager,
     appStateContainer,
-    internalStateContainer,
     internalState2,
     runtimeStateManager,
     getSavedSearch: savedSearchContainer.getState,
@@ -456,7 +448,6 @@ export function getDiscoverStateContainer({
     return loadSavedSearchFn(params ?? {}, {
       appStateContainer,
       dataStateContainer,
-      internalStateContainer,
       internalState2,
       savedSearchContainer,
       globalStateContainer,
@@ -487,7 +478,6 @@ export function getDiscoverStateContainer({
         appState: appStateContainer,
         savedSearchState: savedSearchContainer,
         dataState: dataStateContainer,
-        internalState: internalStateContainer,
         internalState2,
         services,
         setDataView,
@@ -566,7 +556,6 @@ export function getDiscoverStateContainer({
     await changeDataView({
       dataViewId,
       services,
-      internalState: internalStateContainer,
       internalState2,
       runtimeStateManager,
       appState: appStateContainer,
@@ -626,7 +615,6 @@ export function getDiscoverStateContainer({
   return {
     globalState: globalStateContainer,
     appState: appStateContainer,
-    internalState: internalStateContainer,
     internalState2,
     runtimeStateManager,
     dataState: dataStateContainer,
