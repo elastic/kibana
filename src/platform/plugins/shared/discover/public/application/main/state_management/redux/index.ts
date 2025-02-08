@@ -7,17 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+import { internalStateSlice } from './internal_state';
+import {
+  appendAdHocDataViews,
+  replaceAdHocDataViewWithId,
+  setAdHocDataViews,
+  setDataView,
+  setDefaultProfileAdHocDataViews,
+} from './actions';
+
 export type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
 
+export { type InternalStateStore, createInternalStateStore } from './internal_state';
+
+export const internalStateActions = {
+  ...omit(internalStateSlice.actions, 'setDataViewId', 'setDefaultProfileAdHocDataViewIds'),
+  setDataView,
+  setAdHocDataViews,
+  setDefaultProfileAdHocDataViews,
+  appendAdHocDataViews,
+  replaceAdHocDataViewWithId,
+};
+
 export {
-  type InternalStateStore,
   InternalStateProvider,
-  createInternalStateStore,
-  internalStateActions,
   useInternalStateDispatch,
   useInternalStateSelector,
   useDataViewsForPicker,
-} from './internal_state';
+} from './hooks';
 
 export {
   type RuntimeStateManager,

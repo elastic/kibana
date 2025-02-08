@@ -56,7 +56,7 @@ const useRuntimeStateContext = () => {
   const context = useContext(runtimeStateContext);
 
   if (!context) {
-    throw new Error('useRuntimeState must be used within a RuntimeStateProvider');
+    throw new Error('useRuntimeStateContext must be used within a RuntimeStateProvider');
   }
 
   return context;
