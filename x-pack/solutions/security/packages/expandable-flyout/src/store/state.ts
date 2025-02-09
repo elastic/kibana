@@ -46,7 +46,7 @@ export const initialPanelsState: PanelsState = {
   needsSync: false,
 };
 
-export interface DefaultWidthsState {
+interface DefaultSectionWidthsState {
   /**
    * Default width for the right section (calculated from the window width)
    */
@@ -71,6 +71,17 @@ export interface DefaultWidthsState {
    * Value of the preview width in percentage (of the flyout total width)
    */
   previewPercentage: number;
+}
+
+export interface DefaultWidthsState {
+  /**
+   * Default width for all the sections in overlay mode
+   */
+  overlay: DefaultSectionWidthsState;
+  /**
+   * Default widths for all the sections in push mode
+   */
+  push: DefaultSectionWidthsState;
 }
 
 export interface UserFlyoutWidthsState {
@@ -116,7 +127,10 @@ export interface UiState {
 
 export const initialUiState: UiState = {
   pushVsOverlay: 'overlay',
-  defaultWidths: {} as DefaultWidthsState,
+  defaultWidths: {
+    overlay: {},
+    push: {},
+  } as DefaultWidthsState,
   userFlyoutWidths: {},
   userSectionWidths: {} as UserSectionWidthsState,
 };

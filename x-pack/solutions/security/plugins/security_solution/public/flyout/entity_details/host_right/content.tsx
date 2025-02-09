@@ -25,7 +25,6 @@ interface HostPanelContentProps {
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   hostName: string;
   onAssetCriticalityChange: () => void;
@@ -41,7 +40,6 @@ export const HostPanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
-  isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
@@ -80,7 +78,6 @@ export const HostPanelContent = ({
         observedData={observedHost}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={isDraggable}
         observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
