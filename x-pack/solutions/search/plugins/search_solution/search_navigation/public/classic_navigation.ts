@@ -11,13 +11,13 @@ import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { ChromeNavLink, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 
-import type { ClassicNavItem, ClassicNavItemDeepLink, ClassicNavigationFactoryFn } from './types';
+import type { ClassicNavItem, ClassicNavItemDeepLink } from './types';
 import { stripTrailingSlash } from './utils';
 
 type DeepLinksMap = Record<string, ChromeNavLink | undefined>;
 type SolutionNavItems = SolutionNavProps['items'];
 
-export const classicNavigationFactory: ClassicNavigationFactoryFn = (
+export const classicNavigationFactory = (
   classicItems: ClassicNavItem[],
   core: CoreStart,
   history: ScopedHistory<unknown>

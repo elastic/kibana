@@ -4,8 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { columns } from './columns';
-import { RenderCellValue } from './render_cell_value';
-
-export { columns, RenderCellValue };
+export * from './src/actions';
