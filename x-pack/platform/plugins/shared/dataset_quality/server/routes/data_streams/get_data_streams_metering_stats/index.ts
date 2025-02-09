@@ -22,7 +22,9 @@ export async function getDataStreamsMeteringStats({
 }: {
   esClient: ElasticsearchClient;
   dataStreams: string[];
-}): Promise<Record<string, { size?: string; sizeBytes: number; totalDocs: number }>> {
+}): Promise<
+  Record<string, { size?: string; sizeBytes: number; totalDocs: number; creationDate?: number }>
+> {
   if (!dataStreams.length) {
     return {};
   }

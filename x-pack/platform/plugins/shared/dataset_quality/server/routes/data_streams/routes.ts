@@ -97,6 +97,7 @@ const statsRoute = createDatasetQualityServerRoute({
         dataStream.size = dataStreamsStats[dataStream.name]?.size;
         dataStream.sizeBytes = dataStreamsStats[dataStream.name]?.sizeBytes;
         dataStream.totalDocs = dataStreamsStats[dataStream.name]?.totalDocs;
+        dataStream.creationDate = dataStreamsStats[dataStream.name]?.creationDate;
 
         return dataStream;
       }),

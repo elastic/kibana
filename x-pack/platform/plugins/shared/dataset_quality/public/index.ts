@@ -11,6 +11,9 @@ import { DatasetQualityPlugin } from './plugin';
 
 export type { DatasetQualityPluginSetup, DatasetQualityPluginStart } from './types';
 
+export { DataStreamsStatsService } from './services/data_streams_stats/data_streams_stats_service';
+export type { IDataStreamsStatsClient } from './services/data_streams_stats/types';
+
 export function plugin(context: PluginInitializerContext<DatasetQualityConfig>) {
   return new DatasetQualityPlugin(context);
 }

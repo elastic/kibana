@@ -15,17 +15,34 @@ export async function getDataStreamsStats({
 }: {
   esClient: ElasticsearchClient;
   dataStreams: string[];
-}): Promise<Record<string, { size: string; sizeBytes: number; totalDocs: number }>> {
+}): Promise<
+  Record<string, { size: string; sizeBytes: number; totalDocs: number; creationDate?: number }>
+> {
   if (!dataStreams.length) {
     return {};
   }
 
   const matchingDataStreamsStats = dataStreamService.getStreamsStats(esClient, dataStreams);
   const indicesDocsCount = indexStatsService.getIndicesDocCounts(esClient, dataStreams);
+  const matchingStreamsCreationDate = Promise.all(
+    dataStreams.map(async (name) =>
+      dataStreamService.getMatchingDataStreams(esClient, name).then(async ([result]) => {
+        const oldestIndex = result?.indices[0];
+        if (!oldestIndex) {
+          return { name, creationDate: undefined };
+        }
 
-  const [indicesDocsCountStats, dataStreamsStats] = await Promise.all([
+        const response = await esClient.indices.getSettings({ index: oldestIndex.index_name });
+        const creationDate = response[oldestIndex.index_name].settings?.index?.creation_date;
+        return { name, creationDate: creationDate ? Number(creationDate) : undefined };
+      })
+    )
+  );
+
+  const [indicesDocsCountStats, dataStreamsStats, dataStreamsCreationDate] = await Promise.all([
     indicesDocsCount,
     matchingDataStreamsStats,
+    matchingStreamsCreationDate,
   ]);
 
   return dataStreamsStats.reduce(
@@ -35,6 +52,8 @@ export async function getDataStreamsStats({
         size: dataStream.store_size!.toString(),
         sizeBytes: dataStream.store_size_bytes,
         totalDocs: indicesDocsCountStats!.docsCountPerDataStream[dataStream.data_stream],
+        creationDate: dataStreamsCreationDate.find((ds) => ds.name === dataStream.data_stream)
+          ?.creationDate,
       },
     }),
     {}

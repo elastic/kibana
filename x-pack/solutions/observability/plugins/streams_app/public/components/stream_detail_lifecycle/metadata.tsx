@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
@@ -15,7 +16,7 @@ import {
   isInheritLifecycle,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
@@ -26,6 +27,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -33,6 +35,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useDataStreamStats } from './hooks/use_data_stream_stats';
 
 export function RetentionMetadata({
   definition,
@@ -47,6 +50,16 @@ export function RetentionMetadata({
 }) {
   const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
   const router = useStreamsAppRouter();
+  const { stats, isLoading: isLoadingStats } = useDataStreamStats({ definition });
+  const bytesPerDay = useMemo(() => {
+    if (!stats || !stats.creationDate || !stats.sizeBytes) {
+      return undefined;
+    }
+    const daysSinceCreation = Math.ceil(
+      moment.duration(moment().diff(moment(stats.creationDate))).asDays()
+    );
+    return stats.sizeBytes / daysSinceCreation;
+  }, [stats]);
 
   const lifecycle = definition.effective_lifecycle;
 
@@ -171,6 +184,28 @@ export function RetentionMetadata({
           </EuiFlexGroup>
         }
       />
+      <EuiHorizontalRule margin="m" />
+      <MetadataRow
+        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRate', {
+          defaultMessage: 'Ingestion',
+        })}
+        value={
+          isLoadingStats || !stats ? (
+            <EuiLoadingSpinner size="s" />
+          ) : bytesPerDay ? (
+            `${formatBytes(bytesPerDay)} / Day - ${formatBytes(bytesPerDay * 30)} / Month`
+          ) : (
+            '-'
+          )
+        }
+      />
+      <EuiHorizontalRule margin="m" />
+      <MetadataRow
+        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {
+          defaultMessage: 'Total doc count',
+        })}
+        value={isLoadingStats || !stats ? <EuiLoadingSpinner size="s" /> : stats.totalDocs}
+      />
     </EuiPanel>
   );
 }
@@ -197,3 +232,15 @@ function MetadataRow({
     </EuiFlexGroup>
   );
 }
+
+const formatBytes = (bytes: number, decimals = 0) => {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
