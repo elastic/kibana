@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   IngestStreamGetResponse,
@@ -27,6 +27,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { EditLifecycleModal, LifecycleEditAction } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
+import { IngestionRate } from './ingestion_rate';
 
 function useLifecycleState({
   definition,
@@ -175,24 +176,30 @@ export function StreamDetailLifecycle({
         ilmLocator={ilmLocator}
       />
 
-      <EuiFlexItem grow={false}>
-        <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem grow={1}>
-              <RetentionSummary definition={definition} />
-            </EuiFlexItem>
+      <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="s">
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={1}>
+            <RetentionSummary definition={definition} />
+          </EuiFlexItem>
 
-            <EuiFlexItem grow={4}>
-              <RetentionMetadata
-                definition={definition}
-                lifecycleActions={lifecycleActions}
-                ilmLocator={ilmLocator}
-                openEditModal={(action) => setOpenEditModal(action)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFlexItem grow={4}>
+            <RetentionMetadata
+              definition={definition}
+              lifecycleActions={lifecycleActions}
+              ilmLocator={ilmLocator}
+              openEditModal={(action) => setOpenEditModal(action)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+
+      <EuiSpacer />
+
+      <EuiFlexGroup>
+        <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+          <IngestionRate definition={definition} />
         </EuiPanel>
-      </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }
