@@ -28,11 +28,9 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
 
   useEffect(() => {
-    if (!cloud?.isServerlessEnabled && activeSolutionId === 'es') {
-      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indicesList);
-    } else {
-      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
-    }
+    const isActiveSolutionSearch = !cloud?.isServerlessEnabled && activeSolutionId === 'es';
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
+    breadcrumbService.setContentBreadcrumbs(isActiveSolutionSearch);
   }, [activeSolutionId, cloud]);
 
   return (

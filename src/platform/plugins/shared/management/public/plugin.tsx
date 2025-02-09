@@ -131,17 +131,8 @@ export class ManagementPlugin
               const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
-              coreStart.chrome.getActiveSolutionNavId$().subscribe((activeSolutionId) => {
-                if (activeSolutionId === 'es') {
-                  const [, ...trailingBreadcrumbs] = newBreadcrumbs;
-                  coreStart.chrome.setBreadcrumbs(trailingBreadcrumbs, {
-                    project: { value: trailingBreadcrumbs, absolute: true },
-                  });
-                } else {
-                  coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
-                    project: { value: newBreadcrumbs, absolute: true },
-                  });
-                }
+              coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
+                project: { value: newBreadcrumbs, absolute: true },
               });
             }
           },

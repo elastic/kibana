@@ -19,15 +19,18 @@ import { SolutionEmptyPrompt } from './solution_empty_prompt';
 interface ManagementLandingPageProps {
   onAppMounted: (id: string) => void;
   setBreadcrumbs: () => void;
+  setContentBreadcrumbs?: () => void;
 }
 
 export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
+  setContentBreadcrumbs,
 }: ManagementLandingPageProps) => {
   const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart } =
     useAppContext();
   setBreadcrumbs();
+  if (setContentBreadcrumbs) setContentBreadcrumbs();
 
   useEffect(() => {
     onAppMounted('');

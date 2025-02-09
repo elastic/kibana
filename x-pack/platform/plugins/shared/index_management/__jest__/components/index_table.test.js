@@ -155,7 +155,10 @@ describe('index table', () => {
     setUiMetricService(services.uiMetricService);
 
     httpService.setup(httpSetup);
-    breadcrumbService.setup(() => undefined);
+    breadcrumbService.setup(
+      () => undefined,
+      () => undefined
+    );
     notificationService.setup(notificationServiceMock.createStartContract());
 
     store = indexManagementStore(services);

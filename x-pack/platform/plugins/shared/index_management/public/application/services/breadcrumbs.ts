@@ -10,6 +10,7 @@ import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { EuiBreadcrumb } from '@elastic/eui';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
+type SetContentBreadcrumbs = ManagementAppMountParams['setContentBreadcrumbs'];
 
 export enum IndexManagementBreadcrumb {
   home = 'home',
@@ -56,16 +57,14 @@ export class BreadcrumbService {
     home: [] as EuiBreadcrumb[],
   };
   private setBreadcrumbsHandler?: SetBreadcrumbs;
+  private setContentBreadcrumbsHandler?: SetContentBreadcrumbs;
 
-  public setup(setBreadcrumbsHandler: SetBreadcrumbs): void {
+  public setup(
+    setBreadcrumbsHandler: SetBreadcrumbs,
+    setContentBreadcrumbsHandler: SetContentBreadcrumbs
+  ): void {
     this.setBreadcrumbsHandler = setBreadcrumbsHandler;
-    this.breadcrumbs.content = [
-      {
-        text: i18n.translate('xpack.idxMgmt.breadcrumb.contentLabel', {
-          defaultMessage: 'Content',
-        }),
-      },
-    ];
+    this.setContentBreadcrumbsHandler = setContentBreadcrumbsHandler;
     this.breadcrumbs.home = [
       {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.homeLabel', {
@@ -203,16 +202,6 @@ export class BreadcrumbService {
         href: `/enrich_policies/create`,
       },
     ];
-    this.breadcrumbs.indicesList = [
-      ...this.breadcrumbs.content,
-      ...this.breadcrumbs.home,
-      {
-        text: i18n.translate('xpack.idxMgmt.breadcrumb.indicesListLabel', {
-          defaultMessage: 'Indices',
-        }),
-        href: `/indices`,
-      },
-    ];
   }
 
   public setBreadcrumbs(
@@ -244,6 +233,12 @@ export class BreadcrumbService {
     });
 
     this.setBreadcrumbsHandler(newBreadcrumbs);
+  }
+  public setContentBreadcrumbs(showContentBreadcrumb: boolean): void {
+    if (!this.setContentBreadcrumbsHandler) {
+      throw new Error(`BreadcrumbService#setup() must be called first!`);
+    }
+    this.setContentBreadcrumbsHandler(showContentBreadcrumb);
   }
 }
 
