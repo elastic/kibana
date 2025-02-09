@@ -8,9 +8,15 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DataStreamMigrationStatus } from '../../../../../../../common/types';
+import {
+  DataStreamMigrationStatus,
+  DataStreamResolutionType,
+} from '../../../../../../../common/types';
 
-export const getPrimaryButtonLabel = (status?: DataStreamMigrationStatus) => {
+export const getPrimaryButtonLabel = (
+  status?: DataStreamMigrationStatus,
+  resolutionType?: DataStreamResolutionType
+) => {
   switch (status) {
     case DataStreamMigrationStatus.fetchFailed:
     case DataStreamMigrationStatus.failed:
@@ -24,21 +30,24 @@ export const getPrimaryButtonLabel = (status?: DataStreamMigrationStatus) => {
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.reindexingLabel"
-          defaultMessage="Reindexing…"
+          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migrating}}…"
+          values={{ resolutionType }}
         />
       );
     case DataStreamMigrationStatus.cancelled:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.restartLabel"
-          defaultMessage="Restart reindexing"
+          defaultMessage="{resolutionType, select, reindex {Restart reindexing} readonly {Restart marking as read only} other {Restart migration}}"
+          values={{ resolutionType }}
         />
       );
     default:
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.runReindexLabel"
-          defaultMessage="Start reindexing"
+          defaultMessage="{resolutionType, select, reindex {Start reindexing} readonly {Start marking as read only} other {Start migration}}"
+          values={{ resolutionType }}
         />
       );
   }

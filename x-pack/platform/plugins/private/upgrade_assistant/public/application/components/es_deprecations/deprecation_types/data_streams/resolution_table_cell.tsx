@@ -36,7 +36,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexInProgressText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} in progress…',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migration}} in progress…',
         values: { resolutionType },
       }
     ),
@@ -44,7 +44,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCompleteText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} complete',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migration}} complete',
         values: { resolutionType },
       }
     ),
@@ -52,7 +52,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFailedText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} failed',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migration}} failed',
         values: { resolutionType },
       }
     ),
@@ -60,7 +60,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexFetchFailedText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} status not available',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migration}} status not available',
         values: { resolutionType },
       }
     ),
@@ -68,21 +68,21 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.reindexCanceledText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Marking as readonly} other {Migration}} cancelled',
+          '{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migration}} cancelled',
         values: { resolutionType },
       }
     ),
     resolutionText: i18n.translate(
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionLabel',
       {
-        defaultMessage: 'Mark as readonly, or Reindex',
+        defaultMessage: 'Mark as read only, or reindex',
       }
     ),
     resolutionTooltipLabel: i18n.translate(
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipLabel',
       {
         defaultMessage:
-          'Resolve this issue by reindexing this data stream or marking its indices as readonly. This issue can be resolved automatically.',
+          'Resolve this issue by reindexing this data stream or marking its indices as read only. This issue can be resolved automatically.',
       }
     ),
   };

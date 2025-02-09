@@ -49,7 +49,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
     loadingState === LoadingState.Loading || status === DataStreamMigrationStatus.inProgress;
   const isCompleted = status === DataStreamMigrationStatus.completed;
   const hasFetchFailed = status === DataStreamMigrationStatus.fetchFailed;
-  const hasReindexingFailed = status === DataStreamMigrationStatus.failed;
+  const hasMigrationFailed = status === DataStreamMigrationStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
@@ -91,7 +91,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               <>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutDescription"
-                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
+                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
                 />
 
                 <EuiSpacer size="s" />
@@ -116,22 +116,25 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </>
         )}
 
-        {(hasFetchFailed || hasReindexingFailed) && (
+        {(hasFetchFailed || hasMigrationFailed) && (
           <>
             <EuiCallOut
               color="danger"
               iconType="warning"
-              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
+              data-test-subj={
+                hasFetchFailed ? 'fetchFailedCallout' : 'dataStreamMigrationFailedCallout'
+              }
               title={
                 hasFetchFailed ? (
                   <FormattedMessage
                     id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.fetchFailedCalloutTitle"
-                    defaultMessage="Reindex status not available"
+                    defaultMessage="Migration status not available"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingFailedCalloutTitle"
-                    defaultMessage="Reindexing error"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.migrationFailedCalloutTitle"
+                    defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read only} other {Migration}} error"
+                    values={{ resolutionType }}
                   />
                 )
               }
@@ -173,11 +176,12 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                     iconType={'pause'}
                     onClick={cancelAction}
                     disabled={!hasRequiredPrivileges}
-                    data-test-subj="cancelDataStreamReindexingButton"
+                    data-test-subj="cancelDataStreamMigrationButton"
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelReindexButtonLabel"
-                      defaultMessage="Cancel reindexing"
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelMigrationButtonLabel"
+                      defaultMessage="Cancel {resolutionType, select, reindex {reindexing} readonly {marking as read only} other {migration}}"
+                      values={{ resolutionType }}
                     />
                   </EuiButton>
                 </EuiFlexItem>
@@ -194,7 +198,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                     onClick={executeAction}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}
-                    data-test-subj="startDataStreamReindexingButton"
+                    data-test-subj="startDataStreamMigrationButton"
                   >
                     {getPrimaryButtonLabel(status)}
                   </EuiButton>

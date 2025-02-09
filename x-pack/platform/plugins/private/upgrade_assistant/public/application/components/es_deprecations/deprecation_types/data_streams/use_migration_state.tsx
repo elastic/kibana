@@ -46,50 +46,49 @@ const getMigrationState = (
     meta: updatedMeta,
   }: DataStreamReindexStatusResponse & { meta?: DataStreamMetadata | null }
 ) => {
-  const newReindexState: MigrationState = {
+  const newMigrationState: MigrationState = {
     ...migrationState,
-    migrationWarnings: warnings,
     meta: updatedMeta || migrationState.meta,
     loadingState: LoadingState.Success,
   };
 
   if (warnings) {
-    newReindexState.migrationWarnings = warnings;
+    newMigrationState.migrationWarnings = warnings;
   }
 
   if (hasRequiredPrivileges !== undefined) {
-    newReindexState.hasRequiredPrivileges = hasRequiredPrivileges;
+    newMigrationState.hasRequiredPrivileges = hasRequiredPrivileges;
   }
 
   if (migrationOp) {
-    newReindexState.status = migrationOp.status;
+    newMigrationState.status = migrationOp.status;
 
     if (migrationOp.status === DataStreamMigrationStatus.notStarted) {
-      return newReindexState;
+      return newMigrationState;
     }
 
     if (migrationOp.status === DataStreamMigrationStatus.failed) {
-      newReindexState.errorMessage = migrationOp.errorMessage;
-      return newReindexState;
+      newMigrationState.errorMessage = migrationOp.errorMessage;
+      return newMigrationState;
     }
 
     if (
       migrationOp.status === DataStreamMigrationStatus.inProgress ||
       migrationOp.status === DataStreamMigrationStatus.completed
     ) {
-      newReindexState.taskStatus = migrationOp.progressDetails;
-      newReindexState.taskPercComplete = migrationOp.taskPercComplete;
+      newMigrationState.taskStatus = migrationOp.progressDetails;
+      newMigrationState.taskPercComplete = migrationOp.taskPercComplete;
     }
 
     if (
       migrationState.cancelLoadingState === CancelLoadingState.Requested &&
       migrationOp.status === DataStreamMigrationStatus.inProgress
     ) {
-      newReindexState.cancelLoadingState = CancelLoadingState.Loading;
+      newMigrationState.cancelLoadingState = CancelLoadingState.Loading;
     }
   }
 
-  return newReindexState;
+  return newMigrationState;
 };
 
 export const useMigrationStatus = ({
@@ -160,11 +159,7 @@ export const useMigrationStatus = ({
         }
 
         setMigrationState((prevValue: MigrationState) => {
-          if (!data) {
-            return prevValue;
-          }
-
-          return getMigrationState(prevValue, data);
+          return getMigrationState(prevValue, data!);
         });
 
         if (data.migrationOp && data.migrationOp.status === DataStreamMigrationStatus.inProgress) {

@@ -21,7 +21,7 @@ import {
   DataStreamReindexStatusCancelled,
 } from '../../../common/types';
 
-import { error } from './error';
+import { DataStreamMigrationError, error } from './error';
 
 interface DataStreamMigrationService {
   /**
@@ -343,10 +343,13 @@ export const dataStreamMigrationServiceFactory = ({
             throw error.readonlyTaskFailed(`Could not set index ${index} to readonly.`);
           }
         } catch (err) {
+          if (err instanceof DataStreamMigrationError) {
+            throw err;
+          }
           // ES errors are serializable, so we can just stringify the error and throw it.
           const stringifiedErr = JSON.stringify(err, null, 2);
           throw error.readonlyTaskFailed(
-            `Could not set migrate data stream index ${index} to readonly. ${stringifiedErr}`
+            `Could not migrate index "${index}". Got: ${stringifiedErr}`
           );
         }
       }

@@ -38,7 +38,7 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
-            defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as readonly} other {executed}}."
+            defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read only} other {migrated}}."
             values={{ count: meta.indicesRequiringUpgradeCount, resolutionType }}
           />
         </p>

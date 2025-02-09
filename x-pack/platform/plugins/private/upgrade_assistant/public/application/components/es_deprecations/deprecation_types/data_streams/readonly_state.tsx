@@ -17,7 +17,7 @@ interface ReadOnlyExecuteResponse {
   migrationOp: DataStreamMigrationOperation;
 }
 
-const DEFAULT_BATCH_SIZE = 1;
+const DEFAULT_BATCH_SIZE = 10;
 
 export async function* readOnlyExecute(
   dataStreamName: string,
@@ -81,7 +81,7 @@ export async function* readOnlyExecute(
     return {
       migrationOp: {
         status: DataStreamMigrationStatus.failed,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
+        errorMessage: error.message || 'Unknown error occurred',
       },
     };
   }
