@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ConfirmReindexingFlyoutStep } from './confirm_step';
+export { ConfirmMigrationFlyoutStep } from './confirm_step';

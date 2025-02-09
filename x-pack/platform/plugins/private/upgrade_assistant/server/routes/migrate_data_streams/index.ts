@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { dataStreamMigrationServiceFactory } from './data_stream_migration_service';
+export { registerMigrateDataStreamRoutes } from './data_stream_routes';

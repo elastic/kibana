@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { registerReindexDataStreamRoutes } from './reindex_data_stream';
+export { IncompatibleDataInDataStreamWarningCheckbox } from './incompatible_data';
+
+export { AffectExistingSetupsWarningCheckbox } from './existing_setups';
+
+export type { WarningCheckboxProps } from './warning_step_checkbox';
