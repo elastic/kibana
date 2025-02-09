@@ -7,7 +7,7 @@
 
 export interface ObsAIAssistantActionParams {
   connector: string;
-  prompts: Array<{
+  prompts?: Array<{
     message: string;
     statuses: string[];
   }>;

@@ -28,25 +28,32 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
-import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
+import {
+  EMPTY_EQUALS_CONDITION,
+  alwaysToEmptyEquals,
+  emptyEqualsToAlways,
+} from '../../util/condition';
 
 export function ConditionEditor(props: {
   condition: Condition;
   readonly?: boolean;
   onConditionChange?: (condition: Condition) => void;
 }) {
+  const normalizedCondition = alwaysToEmptyEquals(props.condition);
+
+  const handleConditionChange = (condition: Condition) => {
+    props.onConditionChange?.(emptyEqualsToAlways(condition));
+  };
+
   if (props.readonly) {
     return (
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="xs">
-        <ConditionDisplay condition={props.condition} />
+        <ConditionDisplay condition={normalizedCondition} />
       </EuiPanel>
     );
   }
   return (
-    <ConditionForm
-      condition={props.condition}
-      onConditionChange={props.onConditionChange || (() => {})}
-    />
+    <ConditionForm condition={normalizedCondition} onConditionChange={handleConditionChange} />
   );
 }
 
@@ -84,6 +91,7 @@ export function ConditionForm(props: {
           })}
         >
           <EuiButton
+            data-test-subj="streamsAppConditionFormDisableRoutingButton"
             size={'xs' as 's'} // TODO: remove this cast when EUI is updated - EuiButton takes xs, but the type is wrong
             onClick={() => props.onConditionChange({ never: {} })}
             disabled={props.condition === undefined}

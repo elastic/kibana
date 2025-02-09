@@ -376,23 +376,7 @@
         "label": "LogEntryColumn",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
-          {
-            "pluginId": "@kbn/react-kibana-context-styled",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextStyledPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
-          {
-            "pluginId": "@kbn/react-kibana-context-styled",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextStyledPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
+          "React.ForwardRefExoticComponent<Omit<Omit<Omit<any, \"ref\"> & React.RefAttributes<unknown>, \"ref\"> & { ref?: ((instance: unknown) => void) | React.RefObject<unknown> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
@@ -560,23 +544,7 @@
         "label": "LogEntryRowWrapper",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
-          {
-            "pluginId": "@kbn/react-kibana-context-styled",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextStyledPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
-          {
-            "pluginId": "@kbn/react-kibana-context-styled",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextStyledPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
+          "React.ForwardRefExoticComponent<Omit<Omit<Omit<any, \"ref\"> & React.RefAttributes<unknown>, \"ref\"> & { ref?: ((instance: unknown) => void) | React.RefObject<unknown> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "deprecated": false,
@@ -3315,9 +3283,9 @@
           "QueryDslQueryContainer",
           "[] | undefined; logsSource?: ",
           {
-            "pluginId": "@kbn/observability-logs-overview",
+            "pluginId": "@kbn/logs-overview",
             "scope": "public",
-            "docId": "kibKbnObservabilityLogsOverviewPluginApi",
+            "docId": "kibKbnLogsOverviewPluginApi",
             "section": "def-public.LogsSourceConfiguration",
             "text": "LogsSourceConfiguration"
           },
@@ -5622,19 +5590,8 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"index_name\""
+                  "\"kibana_advanced_setting\""
                 ],
-                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "logsShared",
-                "id": "def-common.defaultLogViewAttributes.logIndices.indexName",
-                "type": "string",
-                "tags": [],
-                "label": "indexName",
-                "description": [],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false

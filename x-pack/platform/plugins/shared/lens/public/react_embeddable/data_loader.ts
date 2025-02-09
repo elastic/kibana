@@ -7,6 +7,7 @@
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
   BehaviorSubject,
@@ -41,6 +42,7 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 ];
 
 type ReloadReason =
+  | 'ESQLvariables'
   | 'attributes'
   | 'savedObjectId'
   | 'overrides'
@@ -48,7 +50,7 @@ type ReloadReason =
   | 'viewMode'
   | 'searchContext';
 
-function getSearchContext(parentApi: unknown) {
+function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable[] = []) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
     ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
     : {
@@ -59,6 +61,7 @@ function getSearchContext(parentApi: unknown) {
       };
 
   return {
+    esqlVariables,
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
     timeRange: unifiedSearch$.timeRange$.getValue(),
@@ -186,16 +189,18 @@ export function loadEmbeddableData(
       callbacks
     );
 
+    const esqlVariables = internalApi?.esqlVariables$?.getValue();
+
     const searchContext = getMergedSearchContext(
       currentState,
-      getSearchContext(parentApi),
+      getSearchContext(parentApi, esqlVariables),
       api.timeRange$,
       parentApi,
       services
     );
 
     // Go concurrently: build the expression and fetch the dataViews
-    const [{ params, abortController, ...rest }, dataViews] = await Promise.all([
+    const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
         searchContext,
         api,
@@ -235,9 +240,12 @@ export function loadEmbeddableData(
     });
 
     // Publish the used dataViews on the Lens API
-    internalApi.updateDataViews(dataViews);
+    internalApi.updateDataViews(dataViewIds);
 
-    if (params?.expression != null && !dispatchBlockingErrorIfAny()) {
+    // This will catch also failed loaded dataViews
+    const hasBlockingErrors = dispatchBlockingErrorIfAny();
+
+    if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
     }
 
@@ -252,6 +260,10 @@ export function loadEmbeddableData(
   const mergedSubscriptions = merge(
     // on search context change, reload
     fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
+    internalApi?.esqlVariables$.pipe(
+      waitUntilChanged(),
+      map(() => 'ESQLvariables' as ReloadReason)
+    ),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change

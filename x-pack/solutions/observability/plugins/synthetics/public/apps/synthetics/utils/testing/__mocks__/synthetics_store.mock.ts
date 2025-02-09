@@ -114,6 +114,12 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: null,
   },
+  privateLocations: {
+    isCreatePrivateLocationFlyoutVisible: false,
+    loading: false,
+    error: null,
+    data: [],
+  },
   settings: {
     loading: false,
     error: null,
@@ -124,6 +130,7 @@ export const mockState: SyntheticsAppState = {
     locationMonitors: [],
   },
   defaultAlerting: {
+    inspectLoading: false,
     loading: false,
     error: null,
     success: null,

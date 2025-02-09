@@ -7,6 +7,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
+import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
@@ -19,6 +21,7 @@ import type {
 } from '../types';
 import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
 import type { UserMessage } from '../../types';
+import { getEmbeddableVariables } from './utils';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,
@@ -66,12 +69,25 @@ export function initializeInternalApi(
     activeData: undefined,
   });
 
+  const [esqlVariables$] = buildObservableVariable(
+    apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
+  );
+
+  const query = initialState.attributes.state.query;
+
+  const panelEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+  esqlVariables$.subscribe((newVariables) => {
+    const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
+    panelEsqlVariables$.next(esqlVariables);
+  });
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
     attributes$,
     overrides$,
     disableTriggers$,
+    esqlVariables$: panelEsqlVariables$,
     dataLoading$,
     hasRenderCompleted$,
     expressionParams$,

@@ -7,15 +7,15 @@
 
 import { StreamDefinition, isUnwiredStreamDefinition } from '@kbn/streams-schema';
 
-export function getIndexPatterns(definition: StreamDefinition | undefined) {
-  if (!definition) {
+export function getIndexPatterns(stream: StreamDefinition | undefined) {
+  if (!stream) {
     return undefined;
   }
-  if (!isUnwiredStreamDefinition(definition)) {
-    return [definition.name];
+  if (!isUnwiredStreamDefinition(stream)) {
+    return [stream.name];
   }
-  const isRoot = definition.name.indexOf('.') === -1;
-  const dataStreamOfDefinition = definition.name;
+  const isRoot = stream.name.indexOf('.') === -1;
+  const dataStreamOfDefinition = stream.name;
   return isRoot
     ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
     : [`${dataStreamOfDefinition}*`];

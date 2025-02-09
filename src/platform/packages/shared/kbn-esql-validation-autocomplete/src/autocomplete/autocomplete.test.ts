@@ -472,11 +472,13 @@ describe('autocomplete', () => {
       const expectedDateDiff2ndArgSuggestions = [
         TIME_PICKER_SUGGESTION,
         ...TIME_SYSTEM_PARAMS.map((t) => `${t}, `),
-        ...getFieldNamesByType('date').map((name) => `${name}, `),
-        ...getFunctionSignaturesByReturnType('eval', 'date', { scalar: true }).map((s) => ({
-          ...s,
-          text: `${s.text},`,
-        })),
+        ...getFieldNamesByType(['date', 'date_nanos']).map((name) => `${name}, `),
+        ...getFunctionSignaturesByReturnType('eval', ['date', 'date_nanos'], { scalar: true }).map(
+          (s) => ({
+            ...s,
+            text: `${s.text},`,
+          })
+        ),
       ];
       testSuggestions('FROM a | EVAL DATE_DIFF("day", /)', expectedDateDiff2ndArgSuggestions);
 
@@ -1183,7 +1185,7 @@ describe('autocomplete', () => {
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 36 } },
-      { text: 'IS NULL', rangeToReplace: { start: 37, end: 37 } },
+      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
       '!= $0',
       '== $0',
       'IN $0',
@@ -1198,7 +1200,7 @@ describe('autocomplete', () => {
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
       { text: 'IS NULL', rangeToReplace: { start: 28, end: 32 } },
-      { text: '!= $0', rangeToReplace: { start: 33, end: 33 } },
+      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
       '== $0',
       'IN $0',
       'AND $0',

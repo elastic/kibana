@@ -5,18 +5,19 @@
  * 2.0.
  */
 import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiProgress,
   EuiSpacer,
   EuiText,
-  EuiHorizontalRule,
-  EuiPopoverTitle,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsProgressBarData, GroupBySelection } from './types';
@@ -45,6 +46,7 @@ const StyledEuiProgress = styled(EuiProgress)`
 const DataStatsWrapper = styled.div`
   width: 250px;
 `;
+
 export interface AlertsProcessBarProps {
   data: AlertsProgressBarData[];
   isLoading: boolean;
@@ -58,6 +60,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   addFilter,
   groupBySelection,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
@@ -97,7 +100,6 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   const labelWithHoverActions = (key: string) => {
     return (
       <DefaultDraggable
-        isDraggable={false}
         field={groupBySelection}
         hideTopN={true}
         id={`top-alerts-${key}`}
@@ -112,6 +114,14 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
       </DefaultDraggable>
     );
   };
+
+  const color = useMemo(
+    () =>
+      euiTheme.themeName === 'EUI_THEME_BOREALIS'
+        ? euiTheme.colors.vis.euiColorVis6
+        : euiTheme.colors.vis.euiColorVis9,
+    [euiTheme]
+  );
 
   return (
     <>
@@ -159,7 +169,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                             </EuiText>
                           }
                           max={1}
-                          color={`vis9`}
+                          color={color}
                           size="s"
                           value={item.percentage}
                           label={

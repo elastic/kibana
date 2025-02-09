@@ -97,7 +97,7 @@ LOCALlogs-.->|"mount[1]"|STagentlogs
 LOCALlogs-.->|"mount[2]"|SEelasticsearchlogs
 SElogsscript-.->|http requests to trigger logs|elasticsearch
 ```
-[1] https://github.com/elastic/elastic-package/blob/main/internal/profile/_static/docker-compose-stack.yml#L133-L135
+[1] https://github.com/elastic/elastic-package/blob/main/internal/stack/_static/docker-compose-stack.yml.tmpl
 
 [2] https://github.com/elastic/integrations/blob/main/packages/elasticsearch/_dev/deploy/docker/docker-compose.yml#L39
 This is a simplified version as there is some gymnastics involved to work around permissions, but the workflow remains the same
@@ -178,4 +178,3 @@ If you need to look at the raw filebeat/metrics logs they are stored under `/usr
 - [v2 diagram](https://github.com/elastic/elastic-agent-shipper/issues/3)
 - [Agent onboarding (internal)](https://ela.st/agent-onboarding-doc)
 - [Elastic Agent architecture v2 (internal)](https://ela.st/agent-v2-archicture-doc)
-

@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiPanel,
-  EuiToolTip,
   EuiSkeletonTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -24,10 +23,9 @@ import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
-import * as i18n from './translations';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { getAnonymizationTooltip } from './get_anonymization_tooltip';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
+import * as i18n from './translations';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;
@@ -35,9 +33,7 @@ interface OwnProps {
   isDisabled: boolean;
   isLoading: boolean;
   isSettingsModalVisible: boolean;
-  onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  showAnonymizedValues: boolean;
   onChatCleared: () => void;
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
@@ -54,6 +50,9 @@ interface OwnProps {
 }
 
 type Props = OwnProps;
+
+export const AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID = 'aiAssistantSettingsMenuContainer';
+
 /**
  * Renders the header of the Elastic AI Assistant.
  * Provide a user interface for selecting and managing conversations,
@@ -65,9 +64,7 @@ export const AssistantHeader: React.FC<Props> = ({
   isDisabled,
   isLoading,
   isSettingsModalVisible,
-  onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
-  showAnonymizedValues,
   onChatCleared,
   chatHistoryVisible,
   setChatHistoryVisible,
@@ -81,14 +78,6 @@ export const AssistantHeader: React.FC<Props> = ({
   refetchPrompts,
 }) => {
   const { euiTheme } = useEuiTheme();
-
-  const showAnonymizedValuesChecked = useMemo(
-    () =>
-      selectedConversation?.replacements != null &&
-      Object.keys(selectedConversation?.replacements).length > 0 &&
-      showAnonymizedValues,
-    [selectedConversation?.replacements, showAnonymizedValues]
-  );
 
   const selectedConnectorId = useMemo(
     () => selectedConversation?.apiConfig?.connectorId,
@@ -104,12 +93,6 @@ export const AssistantHeader: React.FC<Props> = ({
     },
     [onConversationSelected]
   );
-
-  const conversationHasReplacements = !isEmpty(selectedConversation?.replacements);
-  const anonymizationTooltip = getAnonymizationTooltip({
-    conversationHasReplacements,
-    showAnonymizedValuesChecked,
-  });
 
   return (
     <>
@@ -190,26 +173,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   onConnectorSelected={onConversationChange}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={anonymizationTooltip}
-                  data-test-subj="showAnonymizedValuesTooltip"
-                >
-                  <EuiButtonIcon
-                    css={css`
-                      border-radius: 50%;
-                    `}
-                    display="base"
-                    data-test-subj="showAnonymizedValues"
-                    isSelected={showAnonymizedValuesChecked}
-                    aria-label={anonymizationTooltip}
-                    iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
-                    onClick={onToggleShowAnonymizedValues}
-                    disabled={!conversationHasReplacements}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
                 <SettingsContextMenu isDisabled={isDisabled} onChatCleared={onChatCleared} />
               </EuiFlexItem>
             </EuiFlexGroup>

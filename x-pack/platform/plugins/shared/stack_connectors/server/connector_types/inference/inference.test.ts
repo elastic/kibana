@@ -84,7 +84,7 @@ describe('InferenceConnector', () => {
             n: undefined,
           },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
         { asStream: true, meta: true }
       );
@@ -237,6 +237,7 @@ describe('InferenceConnector', () => {
       });
       streamMock.complete();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockEsClient.inference.inference.mockResolvedValue(streamMock.transform as any);
     };
 
@@ -287,7 +288,7 @@ describe('InferenceConnector', () => {
             n: undefined,
           },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
         { asStream: true, meta: true }
       );
@@ -309,7 +310,7 @@ describe('InferenceConnector', () => {
         {
           body: { messages: [{ content: 'Hello world', role: 'user' }], n: undefined },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
         { asStream: true, meta: true, signal }
       );

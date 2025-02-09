@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiFieldText,
+  EuiSuperSelect,
   EuiForm,
   EuiFormRow,
   EuiModal,
@@ -24,6 +25,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
+import { indexModeDescriptions, indexModeLabels } from '../../../../lib/index_mode_labels';
 import { createIndex } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
 
@@ -41,6 +44,7 @@ export interface CreateIndexModalProps {
 
 export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalProps) => {
   const [indexName, setIndexName] = useState<string>('');
+  const [indexMode, setIndexMode] = useState<string>(STANDARD_INDEX_MODE);
   const [indexNameError, setIndexNameError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | undefined>();
@@ -48,7 +52,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
   const putCreateIndex = useCallback(async () => {
     setIsSaving(true);
     try {
-      const { error } = await createIndex(indexName);
+      const { error } = await createIndex(indexName, indexMode);
       setIsSaving(false);
       if (!error) {
         notificationService.showSuccessToast(
@@ -66,7 +70,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       setIsSaving(false);
       setCreateError(e.message);
     }
-  }, [closeModal, indexName, loadIndices]);
+  }, [closeModal, indexMode, indexName, loadIndices]);
 
   const onSave = () => {
     if (isValidIndexName(indexName)) {
@@ -84,7 +88,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
   };
 
   return (
-    <EuiModal onClose={closeModal} initialFocus="[name=indexName]">
+    <EuiModal onClose={closeModal} initialFocus="[name=indexName]" css={{ width: 450 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -130,6 +134,50 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
               value={indexName}
               onChange={(e) => onNameChange(e.target.value)}
               data-test-subj="createIndexNameFieldText"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
+              defaultMessage: 'Index mode',
+            })}
+            isDisabled={isSaving}
+          >
+            <EuiSuperSelect
+              fullWidth
+              hasDividers
+              name="indexMode"
+              valueOfSelected={indexMode}
+              onChange={(mode) => setIndexMode(mode)}
+              data-test-subj="indexModeField"
+              options={[
+                {
+                  value: STANDARD_INDEX_MODE,
+                  inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
+                  'data-test-subj': 'indexModeStandardOption',
+                  dropdownDisplay: (
+                    <Fragment>
+                      <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
+                      <EuiText size="s" color="subdued">
+                        <p>{indexModeDescriptions[STANDARD_INDEX_MODE]}</p>
+                      </EuiText>
+                    </Fragment>
+                  ),
+                },
+                {
+                  value: LOOKUP_INDEX_MODE,
+                  inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
+                  'data-test-subj': 'indexModeLookupOption',
+                  dropdownDisplay: (
+                    <Fragment>
+                      <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
+                      <EuiText size="s" color="subdued">
+                        <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
+                      </EuiText>
+                    </Fragment>
+                  ),
+                },
+              ]}
             />
           </EuiFormRow>
         </EuiForm>

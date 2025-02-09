@@ -7,29 +7,21 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { testSubjectIds } from '../../../constants/test_subject_ids';
 
-const CIS_AZURE_OPTION_TEST_ID = 'cisAzureTestId';
-const CIS_AZURE_SINGLE_SUB_TEST_ID = 'azureSingleAccountTestId';
-const AZURE_CREDENTIAL_SELECTOR = 'azure-credentials-type-selector';
+const {
+  CIS_AZURE_OPTION_TEST_ID,
+  CIS_AZURE_SINGLE_SUB_TEST_ID,
+  AZURE_CREDENTIAL_SELECTOR,
+  CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS,
+  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+} = testSubjectIds;
 
 const clientId = 'clientIdTest';
 const tenantId = 'tenantIdTest';
 const clientCertificatePath = 'clientCertificatePathTest';
 const clientSecret = 'clientSecretTest';
-
-export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
-  TENANT_ID: 'cisAzureTenantId',
-  CLIENT_ID: 'cisAzureClientId',
-  CLIENT_SECRET: 'passwordInput-client-secret',
-  CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
-  CLIENT_CERTIFICATE_PASSWORD: 'cisAzureClientCertificatePassword',
-  CLIENT_USERNAME: 'cisAzureClientUsername',
-  CLIENT_PASSWORD: 'cisAzureClientPassword',
-};
-export const CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
-  ARM_TEMPLATE: 'cisAzureArmTemplate',
-  MANUAL: 'cisAzureManual',
-};
+const clientCertificatePassword = 'clientCertificatePasswordTest';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -136,6 +128,12 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
           clientCertificatePath
         );
+
+        await cisIntegration.fillInTextField(
+          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+          clientCertificatePassword
+        );
+
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
@@ -248,6 +246,12 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
           clientCertificatePath
         );
+
+        await cisIntegration.fillInTextField(
+          CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+          clientCertificatePassword
+        );
+
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);

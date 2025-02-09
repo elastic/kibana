@@ -6,18 +6,19 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { WiredReadStreamDefinition } from '@kbn/streams-schema';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 
-type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor';
+type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor' | 'lifecycle';
 
 function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['route', 'enrich', 'schemaEditor'].includes(value);
+  return ['route', 'enrich', 'schemaEditor', 'lifecycle'].includes(value);
 }
 
 export function WiredStreamDetailManagement({
@@ -25,7 +26,7 @@ export function WiredStreamDetailManagement({
   refreshDefinition,
   isLoadingDefinition,
 }: {
-  definition?: WiredReadStreamDefinition;
+  definition?: WiredStreamGetResponse;
   refreshDefinition: () => void;
   isLoadingDefinition: boolean;
 }) {
@@ -60,6 +61,14 @@ export function WiredStreamDetailManagement({
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
+      }),
+    },
+    lifecycle: {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+        defaultMessage: 'Data retention',
       }),
     },
   };

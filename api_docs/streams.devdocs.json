@@ -149,7 +149,23 @@
               "section": "def-common.ProcessorDefinition",
               "text": "ProcessorDefinition"
             },
-            ">, \"many\">; documents: Zod.ZodArray<Zod.ZodRecord<Zod.ZodString, Zod.ZodUnknown>, \"many\">; detected_fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+            ">, \"many\">; documents: Zod.ZodArray<Zod.ZodType<",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            ", Zod.ZodTypeDef, ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            ">, \"many\">; detected_fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -165,7 +181,15 @@
               "section": "def-common.NamedFieldDefinitionConfig",
               "text": "NamedFieldDefinitionConfig"
             },
-            ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { documents: Record<string, unknown>[]; processing: ",
+            ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { documents: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            "[]; processing: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -181,7 +205,15 @@
               "section": "def-common.NamedFieldDefinitionConfig",
               "text": "NamedFieldDefinitionConfig"
             },
-            "[] | undefined; }, { documents: Record<string, unknown>[]; processing: ",
+            "[] | undefined; }, { documents: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            "[]; processing: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -197,7 +229,15 @@
               "section": "def-common.NamedFieldDefinitionConfig",
               "text": "NamedFieldDefinitionConfig"
             },
-            "[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: ",
+            "[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { documents: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            "[]; processing: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -213,7 +253,15 @@
               "section": "def-common.NamedFieldDefinitionConfig",
               "text": "NamedFieldDefinitionConfig"
             },
-            "[] | undefined; }; }, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: ",
+            "[] | undefined; }; }, { path: { id: string; }; body: { documents: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            "[]; processing: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -231,7 +279,15 @@
             },
             "[] | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { documents: { isMatch: boolean; value: Record<string, unknown>; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
+            ", { documents: { isMatch: boolean; value: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            "; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -289,7 +345,15 @@
             },
             " & { name: string; })[]; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: unknown[] | null; }, undefined>; \"GET /api/streams/{id}/schema/unmapped_fields\": ",
+            ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            "[] | null; }, undefined>; \"GET /api/streams/{id}/schema/unmapped_fields\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -357,7 +421,15 @@
             },
             " | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { documents: unknown[]; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
+            ", { documents: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.RecursiveRecord",
+              "text": "RecursiveRecord"
+            },
+            "[]; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
             "StreamsRouteHandlerResources",
             ", undefined, { enabled: boolean; }>; security?: ",
             "RouteSecurity",
@@ -478,32 +550,32 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.IngestStreamUpsertRequest",
-              "text": "IngestStreamUpsertRequest"
+              "section": "def-common.StreamUpsertRequest",
+              "text": "StreamUpsertRequest"
             },
             ", Zod.ZodTypeDef, ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.IngestStreamUpsertRequest",
-              "text": "IngestStreamUpsertRequest"
+              "section": "def-common.StreamUpsertRequest",
+              "text": "StreamUpsertRequest"
             },
             ">; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.IngestStreamUpsertRequest",
-              "text": "IngestStreamUpsertRequest"
+              "section": "def-common.StreamUpsertRequest",
+              "text": "StreamUpsertRequest"
             },
             "; }, { path: { id: string; }; body: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.IngestStreamUpsertRequest",
-              "text": "IngestStreamUpsertRequest"
+              "section": "def-common.StreamUpsertRequest",
+              "text": "StreamUpsertRequest"
             },
             "; }>, ",
             "StreamsRouteHandlerResources",
@@ -524,8 +596,8 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.IngestStreamDefinition",
-              "text": "IngestStreamDefinition"
+              "section": "def-common.StreamDefinition",
+              "text": "StreamDefinition"
             },
             "[]; }, undefined>; \"GET /api/streams/{id}/_details\": ",
             {
@@ -554,8 +626,8 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.IngestStreamGetResponse",
-              "text": "IngestStreamGetResponse"
+              "section": "def-common.StreamGetResponse",
+              "text": "StreamGetResponse"
             },
             ", undefined>; \"POST /api/streams/{id}/dashboards/_bulk\": ",
             {
@@ -772,7 +844,23 @@
             "section": "def-common.ProcessorDefinition",
             "text": "ProcessorDefinition"
           },
-          ">, \"many\">; documents: Zod.ZodArray<Zod.ZodRecord<Zod.ZodString, Zod.ZodUnknown>, \"many\">; detected_fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          ">, \"many\">; documents: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          ">, \"many\">; detected_fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -788,7 +876,15 @@
             "section": "def-common.NamedFieldDefinitionConfig",
             "text": "NamedFieldDefinitionConfig"
           },
-          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { documents: Record<string, unknown>[]; processing: ",
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { documents: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          "[]; processing: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -804,7 +900,15 @@
             "section": "def-common.NamedFieldDefinitionConfig",
             "text": "NamedFieldDefinitionConfig"
           },
-          "[] | undefined; }, { documents: Record<string, unknown>[]; processing: ",
+          "[] | undefined; }, { documents: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          "[]; processing: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -820,7 +924,15 @@
             "section": "def-common.NamedFieldDefinitionConfig",
             "text": "NamedFieldDefinitionConfig"
           },
-          "[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: ",
+          "[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { documents: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          "[]; processing: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -836,7 +948,15 @@
             "section": "def-common.NamedFieldDefinitionConfig",
             "text": "NamedFieldDefinitionConfig"
           },
-          "[] | undefined; }; }, { path: { id: string; }; body: { documents: Record<string, unknown>[]; processing: ",
+          "[] | undefined; }; }, { path: { id: string; }; body: { documents: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          "[]; processing: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -854,7 +974,15 @@
           },
           "[] | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { documents: { isMatch: boolean; value: Record<string, unknown>; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
+          ", { documents: { isMatch: boolean; value: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          "; }[]; success_rate: number; failure_rate: number; detected_fields: { name: string; type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\" | \"unmapped\"; }[]; }, undefined>; \"POST /api/streams/{id}/schema/fields_simulation\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -912,7 +1040,15 @@
           },
           " & { name: string; })[]; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: unknown[] | null; }, undefined>; \"GET /api/streams/{id}/schema/unmapped_fields\": ",
+          ", { status: \"unknown\" | \"success\" | \"failure\"; simulationError: string | null; documentsWithRuntimeFieldsApplied: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          "[] | null; }, undefined>; \"GET /api/streams/{id}/schema/unmapped_fields\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -980,7 +1116,15 @@
           },
           " | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { documents: unknown[]; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
+          ", { documents: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
+          },
+          "[]; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
           "StreamsRouteHandlerResources",
           ", undefined, { enabled: boolean; }>; security?: ",
           "RouteSecurity",
@@ -1101,32 +1245,32 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamUpsertRequest",
-            "text": "IngestStreamUpsertRequest"
+            "section": "def-common.StreamUpsertRequest",
+            "text": "StreamUpsertRequest"
           },
           ", Zod.ZodTypeDef, ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamUpsertRequest",
-            "text": "IngestStreamUpsertRequest"
+            "section": "def-common.StreamUpsertRequest",
+            "text": "StreamUpsertRequest"
           },
           ">; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamUpsertRequest",
-            "text": "IngestStreamUpsertRequest"
+            "section": "def-common.StreamUpsertRequest",
+            "text": "StreamUpsertRequest"
           },
           "; }, { path: { id: string; }; body: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamUpsertRequest",
-            "text": "IngestStreamUpsertRequest"
+            "section": "def-common.StreamUpsertRequest",
+            "text": "StreamUpsertRequest"
           },
           "; }>, ",
           "StreamsRouteHandlerResources",
@@ -1147,8 +1291,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           "[]; }, undefined>; \"GET /api/streams/{id}/_details\": ",
           {
@@ -1177,8 +1321,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamGetResponse",
-            "text": "IngestStreamGetResponse"
+            "section": "def-common.StreamGetResponse",
+            "text": "StreamGetResponse"
           },
           ", undefined>; \"POST /api/streams/{id}/dashboards/_bulk\": ",
           {

@@ -59,8 +59,6 @@ import { hasEnterpriseLicense } from '../common/utils/licensing';
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { CONNECTORS_PATH, CRAWLERS_PATH } from './applications/enterprise_search_content/routes';
 import { docLinks } from './applications/shared/doc_links';
-import connectorIcon from './assets/images/connector.svg';
-import crawlerIcon from './assets/images/crawler.svg';
 
 import type { DynamicSideNavItems } from './navigation_tree';
 
@@ -108,7 +106,6 @@ export type UpdateSideNavDefinitionFn = (items: Partial<DynamicSideNavItems>) =>
 
 const contentLinks: AppDeepLink[] = [
   {
-    euiIconType: connectorIcon,
     id: 'connectors',
     path: `/${CONNECTORS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentConnectorsLinkLabel', {
@@ -116,7 +113,6 @@ const contentLinks: AppDeepLink[] = [
     }),
   },
   {
-    euiIconType: crawlerIcon,
     id: 'webCrawlers',
     path: `/${CRAWLERS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
@@ -213,10 +209,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private isSidebarEnabled = true;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { config } = this;
-    if (!config.ui?.enabled) {
-      return;
-    }
     const { cloud, share } = plugins;
 
     core.application.register({
@@ -485,9 +477,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    if (!this.config.ui?.enabled) {
-      return;
-    }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
