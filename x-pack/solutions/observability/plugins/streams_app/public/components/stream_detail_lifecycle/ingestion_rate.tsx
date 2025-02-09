@@ -6,122 +6,95 @@
  */
 
 import moment from 'moment';
-import React, { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { useDataStreamStats } from './hooks/use_data_stream_stats';
-import { EuiFlexGroup, EuiLoadingChart, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiText,
+} from '@elastic/eui';
 import { AreaSeries, Axis, Chart, Settings } from '@elastic/charts';
-import { useKibana } from '../../hooks/use_kibana';
 import { formatBytes } from './helpers/format_bytes';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { useIngestionRate } from './hooks/use_ingestion_rate';
 
 export function IngestionRate({ definition }: { definition?: IngestStreamGetResponse }) {
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
-  const { stats, isLoading: statsIsLoading } = useDataStreamStats({ definition });
+  const [timeRange, setTimeRange] = useState({ start: 'now-60d', end: 'now' });
 
-  const ingestionRateFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      if (!definition || statsIsLoading || !stats?.bytesPerDay) {
-        return;
-      }
-
-      const { rawResponse } = await lastValueFrom(
-        data.search.search<
-          IKibanaSearchRequest,
-          IKibanaSearchResponse<{
-            aggregations: { docs_count: { buckets: Array<{ key: string; doc_count: number }> } };
-          }>
-        >(
-          {
-            params: {
-              index: definition.stream.name,
-              track_total_hits: false,
-              body: {
-                size: 0,
-                query: {
-                  bool: {
-                    filter: [{ range: { '@timestamp': { gte: 'now-60d' } } }],
-                  },
-                },
-                aggs: {
-                  docs_count: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: '2d',
-                      min_doc_count: 0,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          { abortSignal: signal }
-        )
-      );
-
-      return rawResponse.aggregations.docs_count.buckets.map(({ key, doc_count }) => ({
-        key,
-        value: doc_count * stats.bytesPerDay!,
-      }));
-    },
-    [definition, stats, statsIsLoading]
-  );
+  const { isLoading, ingestionRate, refresh } = useIngestionRate({
+    definition,
+    start: timeRange.start,
+    end: timeRange.end,
+  });
 
   const sizeUnit = useMemo(() => {
-    if (!ingestionRateFetch.value) return;
-    return formatBytes(Math.max(...ingestionRateFetch.value?.map(({ value }) => value))).unit;
-  }, [ingestionRateFetch.value]);
+    if (!ingestionRate) return;
+    return formatBytes(Math.max(...ingestionRate.map(({ value }) => value))).unit;
+  }, [ingestionRate]);
 
-  return statsIsLoading || ingestionRateFetch.loading || !ingestionRateFetch.value ? (
-    <EuiLoadingChart />
-  ) : (
+  return (
     <>
-      <EuiFlexGroup>
-        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-          <EuiText>
-            <h5>
-              {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRatePanel', {
-                defaultMessage: 'Ingestion rate',
-              })}
-            </h5>
-          </EuiText>
-        </EuiPanel>
-      </EuiFlexGroup>
+      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={3}>
+            <EuiText>
+              <h5>
+                {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRatePanel', {
+                  defaultMessage: 'Ingestion rate',
+                })}
+              </h5>
+            </EuiText>
+          </EuiFlexItem>
 
-      <EuiSpacer size="xs" />
+          <EuiFlexItem grow={1}>
+            <EuiSuperDatePicker
+              isLoading={isLoading}
+              start={timeRange.start}
+              end={timeRange.end}
+              onTimeChange={({ start, end }) => setTimeRange({ start, end })}
+              onRefresh={() => refresh()}
+              updateButtonProps={{ iconOnly: true, fill: false }}
+              width="full"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
 
-      <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} />
-        <AreaSeries
-          id="ingestionRate"
-          name="Ingestion rate"
-          data={ingestionRateFetch.value}
-          color="#61A2FF"
-          xScaleType="time"
-          xAccessor={'key'}
-          yAccessors={['value']}
-        />
+      <EuiSpacer size="s" />
 
-        <Axis
-          id="bottom-axis"
-          position="bottom"
-          tickFormat={(value) => moment(value).format('YYYY-MM-DD')}
-          gridLine={{ visible: false }}
-        />
-        <Axis
-          id="left-axis"
-          position="left"
-          tickFormat={(value) => `${formatBytes(value, sizeUnit).value} ${sizeUnit}`}
-          gridLine={{ visible: true }}
-        />
-      </Chart>
+      {isLoading || !ingestionRate ? (
+        <EuiLoadingChart />
+      ) : (
+        <Chart size={{ height: 250 }}>
+          <Settings showLegend={false} />
+          <AreaSeries
+            id="ingestionRate"
+            name="Ingestion rate"
+            data={ingestionRate}
+            color="#61A2FF"
+            xScaleType="time"
+            xAccessor={'key'}
+            yAccessors={['value']}
+          />
+
+          <Axis
+            id="bottom-axis"
+            position="bottom"
+            tickFormat={(value) => moment(value).format('YYYY-MM-DD')}
+            gridLine={{ visible: false }}
+          />
+          <Axis
+            id="left-axis"
+            position="left"
+            tickFormat={(value) => `${formatBytes(value, sizeUnit).value} ${sizeUnit}`}
+            gridLine={{ visible: true }}
+          />
+        </Chart>
+      )}
     </>
   );
 }

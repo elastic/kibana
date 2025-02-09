@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   IngestStreamGetResponse,
   IngestStreamLifecycle,
@@ -193,7 +193,7 @@ export function StreamDetailLifecycle({
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiSpacer />
+      <EuiSpacer size="s" />
 
       <EuiFlexGroup>
         <EuiPanel hasShadow={false} hasBorder paddingSize="s">
