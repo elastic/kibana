@@ -130,63 +130,6 @@ export function registerMigrateDataStreamRoutes({
 
   router.get(
     {
-<<<<<<< HEAD:x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts
-      path: `${BASE_PATH}/{dataStreamName}`,
-      options: {
-        access: 'public',
-        summary: `Get data stream status`,
-      },
-      validate: {
-        params: schema.object({
-          dataStreamName: schema.string(),
-        }),
-      },
-    },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
-      const {
-        elasticsearch: { client: esClient },
-      } = await core;
-      const { dataStreamName } = request.params;
-      const asCurrentUser = esClient.asCurrentUser;
-
-      const reindexService = dataStreamReindexServiceFactory({
-        esClient: asCurrentUser,
-        log,
-        licensing,
-      });
-
-      try {
-        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(dataStreamName);
-
-        // If the user doesn't have privileges than querying for warnings is going to fail.
-        const warnings = hasRequiredPrivileges
-          ? await reindexService.detectReindexWarnings(dataStreamName)
-          : [];
-
-        const reindexOp = await reindexService.fetchReindexStatus(dataStreamName);
-
-        const body: DataStreamReindexStatusResponse = {
-          reindexOp,
-          warnings,
-          hasRequiredPrivileges,
-        };
-
-        return response.ok({
-          body,
-        });
-      } catch (err) {
-        if (err instanceof errors.ResponseError) {
-          return handleEsError({ error: err, response });
-        }
-        return mapAnyErrorToKibanaHttpResponse(error);
-      }
-    })
-  );
-
-  router.get(
-    {
-=======
->>>>>>> 9afc910ac4c ([Upgrade Assistant] [Core] Data streams readonly flow (#209562)):x-pack/platform/plugins/private/upgrade_assistant/server/routes/migrate_data_streams/data_stream_routes.ts
       path: `${BASE_PATH}/{dataStreamName}/metadata`,
       options: {
         access: 'public',
