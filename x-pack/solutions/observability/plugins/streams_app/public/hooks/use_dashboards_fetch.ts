@@ -7,7 +7,7 @@
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
-export const useDashboardsFetch = (id?: string) => {
+export const useDashboardsFetch = (name?: string) => {
   const {
     dependencies: {
       start: {
@@ -18,19 +18,19 @@ export const useDashboardsFetch = (id?: string) => {
 
   const dashboardsFetch = useStreamsAppFetch(
     ({ signal }) => {
-      if (!id) {
+      if (!name) {
         return Promise.resolve(undefined);
       }
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}/dashboards', {
+      return streamsRepositoryClient.fetch('GET /api/streams/{name}/dashboards', {
         signal,
         params: {
           path: {
-            id,
+            name,
           },
         },
       });
     },
-    [id, streamsRepositoryClient]
+    [name, streamsRepositoryClient]
   );
 
   return dashboardsFetch;
