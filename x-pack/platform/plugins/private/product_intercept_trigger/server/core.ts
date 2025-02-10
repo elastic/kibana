@@ -17,13 +17,16 @@ import type {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { parseIntervalAsMillisecond } from '@kbn/task-manager-plugin/server/lib/intervals';
 import { schema } from '@kbn/config-schema';
+import semverLt from 'semver/functions/lt';
 
-interface ProductInterceptTriggerCoreInitDeps {
+export interface ProductInterceptTriggerCoreInitDeps {
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
+  cloud: CloudSetup;
 }
 
 interface ProductInterceptTriggerCoreStartUpArgs {
@@ -51,6 +54,7 @@ export class ProductInterceptTriggerCore {
   private readonly taskManagerSetup: TaskManagerSetupContract;
   private taskManager?: TaskManagerStartContract;
   private readonly isServerless: boolean;
+  private readonly isCloudDeployment: boolean;
 
   private readonly taskType = 'productInterceptDialogTrigger';
   // define a scope so we might be able to use this to track if we have already scheduled a task in time past
@@ -58,12 +62,13 @@ export class ProductInterceptTriggerCore {
 
   constructor(
     private readonly ctx: PluginInitializerContext<unknown>,
-    { core, logger, taskManager }: ProductInterceptTriggerCoreInitDeps
+    { core, logger, taskManager, cloud }: ProductInterceptTriggerCoreInitDeps
   ) {
     this.core = core;
     this.logger = logger;
     this.taskManagerSetup = taskManager;
     this.isServerless = this.ctx.env.packageInfo.buildFlavor === 'serverless';
+    this.isCloudDeployment = cloud.isCloudEnabled;
 
     this.registerTrigger.call(this);
     this.registerRoutes.call(this);
@@ -79,11 +84,16 @@ export class ProductInterceptTriggerCore {
           1: {
             schema: schema.object({
               runs: schema.number(),
+              /**
+               * The kibana version the task was installed on
+               */
+              installedOn: schema.string(),
               firstScheduledAt: schema.string(),
             }),
             up: (state) => {
               return {
                 runs: state.runs || 0,
+                installedOn: state.installedOn || this.ctx.env.packageInfo.version,
                 firstScheduledAt: state.firstScheduledAt || new Date().toISOString(),
               };
             },
@@ -100,6 +110,7 @@ export class ProductInterceptTriggerCore {
                 // updating the state value provides the basis that allows us to infer if the user
                 // interacted with the dialog on the last run if there was one on the client
                 state: {
+                  installedOn: context.taskInstance.state.installedOn,
                   runs: context.taskInstance.state.runs + 1,
                   firstScheduledAt: context.taskInstance.state.firstScheduledAt,
                 },
@@ -213,9 +224,24 @@ export class ProductInterceptTriggerCore {
     this.taskManager = taskManager;
 
     const existingTask = await this.fetchRegisteredTriggerTask();
+    let shouldReschedule = false;
+
+    if (
+      this.isCloudDeployment &&
+      existingTask &&
+      semverLt(existingTask.state.installedOn, this.ctx.env.packageInfo.version)
+    ) {
+      // if we are in a cloud deployment, we check on init if the existing task version matches the current version, else we can infer that an upgrade happened
+      this.logger.debug(
+        'Product intercept dialog task was installed on a different version, rescheduling'
+      );
+      await this.taskManager.remove(existingTask.id);
+
+      shouldReschedule = true;
+    }
 
     // ideally we would only schedule the task if it's not already scheduled and the kibana is configured to use the product intercept dialog
-    if (!existingTask) {
+    if (!existingTask || shouldReschedule) {
       this.logger.debug('No existing trigger task found, scheduling one');
 
       await this.taskManager.schedule({
@@ -226,6 +252,7 @@ export class ProductInterceptTriggerCore {
         state: {
           // set initial state, the up method for task definition, handles the propagation of the state in perpetuity
           runs: 0,
+          installedOn: this.ctx.env.packageInfo.version,
           firstScheduledAt: new Date().toISOString(),
         },
         enabled: true,

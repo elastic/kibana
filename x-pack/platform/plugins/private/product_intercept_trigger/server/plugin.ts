@@ -19,15 +19,13 @@ import {
   type PluginInitializerContext,
   type Logger,
 } from '@kbn/core/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import { ProductInterceptTriggerCore } from './core';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { ProductInterceptTriggerCore, type ProductInterceptTriggerCoreInitDeps } from './core';
 
-interface ProductInterceptDialogPluginSetup {
-  taskManager: TaskManagerSetupContract;
-}
+type ProductInterceptDialogPluginSetup = Pick<
+  ProductInterceptTriggerCoreInitDeps,
+  'taskManager' | 'cloud'
+>;
 
 interface ProductInterceptDialogPluginStart {
   taskManager: TaskManagerStartContract;
@@ -47,9 +45,10 @@ export class ProductInterceptDialogPlugin
     this.logger = initContext.logger.get();
   }
 
-  public setup(core: CoreSetup, { taskManager }) {
+  public setup(core: CoreSetup, { taskManager, cloud }) {
     this.productInterceptDialogCore = new ProductInterceptTriggerCore(this.initContext, {
       core,
+      cloud,
       logger: this.logger,
       taskManager,
     });
