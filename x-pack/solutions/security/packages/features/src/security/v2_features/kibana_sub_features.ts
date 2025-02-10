@@ -17,6 +17,15 @@ import { SecuritySubFeatureId } from '../../product_features_keys';
 import { APP_ID } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 
+const TRANSLATIONS = Object.freeze({
+  all: i18n.translate('xpack.securitySolution.kibanaSubFeatures.allPrivilegeName', {
+    defaultMessage: 'All',
+  }),
+  read: i18n.translate('xpack.securitySolution.kibanaSubFeatures.readPrivilegeName', {
+    defaultMessage: 'Read',
+  }),
+});
+
 const endpointListSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -46,7 +55,7 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeEndpointList`, `${APP_ID}-readEndpointList`],
           id: 'endpoint_list_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -57,7 +66,7 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readEndpointList`],
           id: 'endpoint_list_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -104,7 +113,7 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'trusted_applications_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
@@ -115,7 +124,7 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
           id: 'trusted_applications_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -161,7 +170,7 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'host_isolation_exceptions_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
@@ -172,7 +181,7 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
           id: 'host_isolation_exceptions_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -215,7 +224,7 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'blocklist_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
@@ -226,7 +235,7 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
           api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
           id: 'blocklist_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -272,7 +281,7 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'event_filters_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
@@ -283,7 +292,7 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
           api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
           id: 'event_filters_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -323,7 +332,7 @@ const policyManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writePolicyManagement`, `${APP_ID}-readPolicyManagement`],
           id: 'policy_management_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: ['policy-settings-protection-updates-note'],
             read: [],
@@ -334,7 +343,7 @@ const policyManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readPolicyManagement`],
           id: 'policy_management_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: ['policy-settings-protection-updates-note'],
@@ -374,7 +383,7 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeActionsLogManagement`, `${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -385,7 +394,7 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -422,7 +431,7 @@ const hostIsolationSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeHostIsolationRelease`],
           id: 'host_isolation_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -462,7 +471,7 @@ const processOperationsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeProcessOperations`],
           id: 'process_operations_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -501,7 +510,7 @@ const fileOperationsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeFileOperations`],
           id: 'file_operations_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -543,7 +552,7 @@ const executeActionSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeExecuteOperations`],
           id: 'execute_operations_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -584,7 +593,7 @@ const scanActionSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeScanOperations`],
           id: 'scan_operations_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -625,7 +634,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -636,7 +645,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -675,7 +684,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
         {
           id: 'endpoint_exceptions_all',
           includeIn: 'all',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -685,12 +694,49 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
         {
           id: 'endpoint_exceptions_read',
           includeIn: 'read',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
           },
           ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].read,
+        },
+      ],
+    },
+  ],
+});
+
+const globalArtifactManagementSubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: false,
+  privilegesTooltip: undefined,
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement',
+    {
+      defaultMessage: 'Global Artifact Management',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',
+    {
+      defaultMessage:
+        'Manage (create, update, delete) global Elastic Defend artifacts (ex. Trusted Applications, Event Filters, etc.). ' +
+        'NOTE: A user still requires "ALL" access to a given artifact type to manage global artifacts.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeGlobalArtifacts`],
+          id: 'global_artifact_management_all',
+          includeIn: 'none',
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeGlobalArtifacts'],
         },
       ],
     },
@@ -738,6 +784,16 @@ export const getSecurityV2SubFeaturesMap = ({
     ],
     [SecuritySubFeatureId.blocklist, enableSpaceAwarenessIfNeeded(blocklistSubFeature())],
     [SecuritySubFeatureId.eventFilters, enableSpaceAwarenessIfNeeded(eventFiltersSubFeature())],
+
+    ...((experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+      ? [
+          [
+            SecuritySubFeatureId.globalArtifactManagement,
+            enableSpaceAwarenessIfNeeded(globalArtifactManagementSubFeature()),
+          ],
+        ]
+      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
+
     [
       SecuritySubFeatureId.policyManagement,
       enableSpaceAwarenessIfNeeded(policyManagementSubFeature()),
