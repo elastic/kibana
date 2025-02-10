@@ -67,7 +67,13 @@ export function IngestionRate({ definition }: { definition?: IngestStreamGetResp
       <EuiSpacer size="s" />
 
       {isLoading || !ingestionRate ? (
-        <EuiLoadingChart />
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          style={{ width: '100%', height: '250px' }}
+        >
+          <EuiLoadingChart />
+        </EuiFlexGroup>
       ) : (
         <Chart size={{ height: 250 }}>
           <Settings showLegend={false} />
