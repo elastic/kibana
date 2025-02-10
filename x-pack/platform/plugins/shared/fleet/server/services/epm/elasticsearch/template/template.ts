@@ -1223,11 +1223,11 @@ const updateExistingDataStream = async ({
       { logger }
     );
   } catch (err) {
-    logger.error(`Error updating index settings for ${dataStreamName}: ${err}`);
+    logger.error(`Error updating index settings of data stream ${dataStreamName}: ${err}`);
     // Same as above - Check if this error can happen because of invalid settings;
     // We are returning a 500 but in that case it should be a 400 instead
     throw new PackageESError(
-      `Could not update index settings for ${dataStreamName}: ${err.message}`
+      `Could not update index settings of data stream ${dataStreamName}: ${err.message}`
     );
   }
 };
