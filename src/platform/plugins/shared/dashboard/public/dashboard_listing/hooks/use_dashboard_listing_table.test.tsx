@@ -45,7 +45,7 @@ jest.mock('../_dashboard_listing_strings', () => ({
   },
 }));
 
-jest.mock('../../services/dashboard_content_management_service/lib/delete_dashboards', () => ({}));
+jest.mock('../../dashboard_content_management/delete_dashboards', () => ({}));
 
 describe('useDashboardListingTable', () => {
   const dashboardBackupService = getDashboardBackupService();
@@ -61,7 +61,7 @@ describe('useDashboardListingTable', () => {
     coreServices.uiSettings.get = getUiSettingsMock;
     coreServices.notifications.toasts.addError = jest.fn();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/dashboard_content_management_service/lib/delete_dashboards').deleteDashboards =
+    require('../../services/dashboard_content_management/delete_dashboards').deleteDashboards =
       deleteDashboards;
   });
 

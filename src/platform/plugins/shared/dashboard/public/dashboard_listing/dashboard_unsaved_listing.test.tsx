@@ -22,7 +22,7 @@ import { coreServices } from '../services/kibana_services';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 import { DashboardAttributes } from '../../server';
 
-jest.mock('../services/dashboard_content_management_service/lib/find_dashboards', () => ({}));
+jest.mock('../dashboard_content_management/find_dashboards', () => ({}));
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   goToDashboard: jest.fn(),
@@ -73,7 +73,7 @@ describe('Unsaved listing', () => {
       },
     ]);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../services/dashboard_content_management_service/lib/find_dashboards').findDashboardsByIds =
+    require('../dashboard_content_management/find_dashboards').findDashboardsByIds =
       findDashboardsByIdsMock;
   });
 

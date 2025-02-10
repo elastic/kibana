@@ -12,10 +12,9 @@ import { act } from 'react-dom/test-utils';
 import { mount, ReactWrapper, ComponentType } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-
 import { DashboardListingPage, DashboardListingPageProps } from './dashboard_listing_page';
 
-jest.mock('../../services/dashboard_content_management_service/lib/find_dashboards', () => ({}));
+jest.mock('../../dashboard_content_management/find_dashboards', () => ({}));
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
@@ -95,7 +94,7 @@ test('When given a title that matches multiple dashboards, filter on the title',
   const props = makeDefaultProps();
   props.title = title;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('../../services/dashboard_content_management_service/lib/find_dashboards').findDashboardIdByTitle =
+  require('../../dashboard_content_management/find_dashboards').findDashboardIdByTitle =
     async () => {
       return undefined;
     };
@@ -119,7 +118,7 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
   const props = makeDefaultProps();
   props.title = title;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('../../services/dashboard_content_management_service/lib/find_dashboards').findDashboardIdByTitle =
+  require('../../dashboard_content_management/find_dashboards').findDashboardIdByTitle =
     async () => {
       return { id: 'you_found_me' };
     };
