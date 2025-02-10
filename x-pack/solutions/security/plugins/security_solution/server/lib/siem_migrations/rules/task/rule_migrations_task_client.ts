@@ -97,13 +97,13 @@ export class RuleMigrationsTaskClient {
       await withAbortRace(new Promise((resolve) => setTimeout(resolve, seconds * 1000)));
     };
 
-    const stats = { completed: 0, failed: 0 };
     const telemetryClient = new SiemMigrationTelemetryClient(
       this.dependencies.telemetry,
       migrationId,
       model.model
     );
-    const endSiemMigration = telemetryClient.startSiemMigration();
+    const migrationTaskTelemetry = telemetryClient.startSiemMigrationTask();
+
     try {
       this.logger.debug(`Creating agent for migration ID:${migrationId}`);
 
@@ -127,34 +127,28 @@ export class RuleMigrationsTaskClient {
               await this.data.rules.saveCompleted(ruleMigration);
               return; // skip already installed rules
             }
-            const endRuleTranslation = telemetryClient.startRuleTranslation();
+            migrationTaskTelemetry.ruleTranslation.start();
             try {
-              const invocationData = {
-                original_rule: ruleMigration.original_rule,
-              };
-
               // using withAbortRace is a workaround for the issue with the langGraph signal not working properly
               const migrationResult = await withAbortRace<MigrateRuleState>(
-                agent.invoke(invocationData, config)
+                agent.invoke({ original_rule: ruleMigration.original_rule }, config)
               );
 
               this.logger.debug(
                 `Migration of rule "${ruleMigration.original_rule.title}" finished`
               );
-              endRuleTranslation({ migrationResult });
-              await this.data.rules.saveCompleted({
+              const ruleMigrationTranslated = {
                 ...ruleMigration,
                 elastic_rule: migrationResult.elastic_rule,
                 translation_result: migrationResult.translation_result,
                 comments: migrationResult.comments,
-              });
-              stats.completed++;
+              };
+              await this.data.rules.saveCompleted(ruleMigrationTranslated);
+              migrationTaskTelemetry.ruleTranslation.success(ruleMigrationTranslated);
             } catch (error) {
-              stats.failed++;
               if (error instanceof AbortError) {
                 throw error;
               }
-              endRuleTranslation({ error });
               this.logger.error(
                 `Error migrating rule "${ruleMigration.original_rule.title} with error: ${error.message}"`
               );
@@ -162,6 +156,7 @@ export class RuleMigrationsTaskClient {
                 ...ruleMigration,
                 comments: [generateAssistantComment(`Error migrating rule: ${error.message}`)],
               });
+              migrationTaskTelemetry.ruleTranslation.failure(error);
             }
           })
         );
@@ -175,9 +170,8 @@ export class RuleMigrationsTaskClient {
         }
       } while (!isDone);
 
+      migrationTaskTelemetry.success();
       this.logger.info(`Finished migration ID:${migrationId}`);
-
-      endSiemMigration({ stats });
     } catch (error) {
       await this.data.rules.releaseProcessing(migrationId);
 
@@ -185,7 +179,7 @@ export class RuleMigrationsTaskClient {
         this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
         return;
       } else {
-        endSiemMigration({ error, stats });
+        migrationTaskTelemetry.failure(error);
         this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
     } finally {
@@ -296,6 +290,7 @@ export class RuleMigrationsTaskClient {
     const model = await actionsClientChat.createModel({
       signal: abortController.signal,
       temperature: 0.05,
+      maxRetries: 10,
     });
     return model;
   }

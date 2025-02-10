@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
@@ -75,60 +76,82 @@ export class SiemMigrationTelemetryClient {
       postFilterRuleCount: postFilterRule ? 1 : 0,
     });
   }
-  public startRuleTranslation(): (
-    args: Pick<RuleTranslationEvent, 'error' | 'migrationResult'>
-  ) => void {
+  // public startRuleTranslation(): (
+  //   args: Pick<RuleTranslationEvent, 'error' | 'migrationResult'>
+  // ) => void {
+  //   const startTime = Date.now();
+
+  //   return ({ error, migrationResult }) => {
+  //     const duration = Date.now() - startTime;
+
+  //     if (error) {
+  //       this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE.eventType, {
+  //         migrationId: this.migrationId,
+  //         error: error.message,
+  //         model: this.modelName,
+  //       });
+  //       return;
+  //     }
+
+  //     this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS.eventType, {
+  //       migrationId: this.migrationId,
+  //       translationResult: migrationResult?.translation_result,
+  //       duration,
+  //       model: this.modelName,
+  //       prebuiltMatch: migrationResult?.elastic_rule?.prebuilt_rule_id ? true : false,
+  //     });
+  //   };
+  // }
+  public startSiemMigrationTask() {
     const startTime = Date.now();
-
-    return ({ error, migrationResult }) => {
-      const duration = Date.now() - startTime;
-
-      if (error) {
-        this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE.eventType, {
+    let ruleTranslationBatchStartTime = Date.now();
+    const stats = { failed: 0, completed: 0 };
+    return {
+      ruleTranslation: {
+        start: () => {
+          ruleTranslationBatchStartTime = Date.now();
+        },
+        success: (migrationResult: RuleMigration) => {
+          stats.completed++;
+          this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS.eventType, {
+            migrationId: this.migrationId,
+            translationResult: migrationResult?.translation_result,
+            duration: Date.now() - ruleTranslationBatchStartTime,
+            model: this.modelName,
+            prebuiltMatch: migrationResult?.elastic_rule?.prebuilt_rule_id ? true : false,
+          });
+        },
+        failure: (error: Error) => {
+          stats.failed++;
+          this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE.eventType, {
+            migrationId: this.migrationId,
+            duration: Date.now() - ruleTranslationBatchStartTime,
+            error: error.message,
+            model: this.modelName,
+          });
+        },
+      },
+      success: () => {
+        this.telemetry.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS.eventType, {
           migrationId: this.migrationId,
-          error: error.message,
-          model: this.modelName,
+          model: this.modelName || '',
+          completed: stats.completed,
+          failed: stats.failed,
+          total: stats.completed + stats.failed,
+          duration: Date.now() - startTime,
         });
-        return;
-      }
-
-      this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS.eventType, {
-        migrationId: this.migrationId,
-        translationResult: migrationResult?.translation_result,
-        duration,
-        model: this.modelName,
-        prebuiltMatch: migrationResult?.elastic_rule?.prebuilt_rule_id ? true : false,
-      });
-    };
-  }
-  public startSiemMigration(): (args: Pick<SiemMigrationEvent, 'error' | 'stats'>) => void {
-    const startTime = Date.now();
-
-    return ({ error, stats }) => {
-      const duration = Date.now() - startTime;
-      const total = stats?.completed + stats?.failed;
-
-      if (error) {
+      },
+      failure: (error: Error) => {
         this.telemetry.reportEvent(SIEM_MIGRATIONS_MIGRATION_FAILURE.eventType, {
           migrationId: this.migrationId,
           model: this.modelName || '',
-          completed: stats?.completed,
-          failed: stats?.failed,
-          total,
-          duration,
+          completed: stats.completed,
+          failed: stats.failed,
+          total: stats.completed + stats.failed,
+          duration: Date.now() - startTime,
           error: error.message,
         });
-        return;
-      }
-
-      this.telemetry.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS.eventType, {
-        migrationId: this.migrationId,
-        model: this.modelName || '',
-        completed: stats?.completed,
-        failed: stats?.failed,
-        total,
-        duration,
-      });
+      },
     };
   }
 }
