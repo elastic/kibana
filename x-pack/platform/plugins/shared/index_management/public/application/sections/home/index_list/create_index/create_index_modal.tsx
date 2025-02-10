@@ -25,12 +25,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import {
-  LOGSDB_INDEX_MODE,
-  LOOKUP_INDEX_MODE,
-  STANDARD_INDEX_MODE,
-  TIME_SERIES_MODE,
-} from '../../../../../../common/constants';
+import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
 import { indexModeDescriptions, indexModeLabels } from '../../../../lib/index_mode_labels';
 import { createIndex } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
@@ -165,32 +160,6 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                       <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
                       <EuiText size="s" color="subdued">
                         <p>{indexModeDescriptions[STANDARD_INDEX_MODE]}</p>
-                      </EuiText>
-                    </Fragment>
-                  ),
-                },
-                {
-                  value: TIME_SERIES_MODE,
-                  inputDisplay: indexModeLabels[TIME_SERIES_MODE],
-                  'data-test-subj': 'indexModeTimeSeriesOption',
-                  dropdownDisplay: (
-                    <Fragment>
-                      <strong>{indexModeLabels[TIME_SERIES_MODE]}</strong>
-                      <EuiText size="s" color="subdued">
-                        <p>{indexModeDescriptions[TIME_SERIES_MODE]}</p>
-                      </EuiText>
-                    </Fragment>
-                  ),
-                },
-                {
-                  value: LOGSDB_INDEX_MODE,
-                  inputDisplay: indexModeLabels[LOGSDB_INDEX_MODE],
-                  'data-test-subj': 'indexModeLogsdbOption',
-                  dropdownDisplay: (
-                    <Fragment>
-                      <strong>{indexModeLabels[LOGSDB_INDEX_MODE]}</strong>
-                      <EuiText size="s" color="subdued">
-                        <p>{indexModeDescriptions[LOGSDB_INDEX_MODE]}</p>
                       </EuiText>
                     </Fragment>
                   ),
