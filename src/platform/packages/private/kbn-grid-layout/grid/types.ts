@@ -120,7 +120,7 @@ export type UseCustomDragHandle =
       ) => React.ReactNode;
     }
   | {
-      useCustomDragHandle: false | undefined;
+      useCustomDragHandle?: false;
       renderPanelContents: (panelId: string) => React.ReactNode;
     };
 
