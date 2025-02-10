@@ -15,8 +15,7 @@ import {
   AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
   OPEN_TELEMETRY_BASE_AGENT_NAMES,
-  RUM_AGENT_NAMES,
-  type OpenTelemetryAgentName,
+  RUM_AGENT_NAMES
 } from '@kbn/elastic-agent-utils/src/agent_names';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
@@ -682,7 +681,7 @@ export const tasks: TelemetryTask[] = [
                 },
               },
             });
-            const aggregatedServices: Record<OpenTelemetryAgentName, number> = {};
+            const aggregatedServices: Record<string, number> = {};
             for (const bucket of response.aggregations?.agent_name.buckets ?? []) {
               const fullAgentName = bucket.key as string;
               aggregatedServices[fullAgentName] = bucket.services.value || 0;
@@ -1184,14 +1183,12 @@ export const tasks: TelemetryTask[] = [
           for (const agentBucket of response.aggregations.agent_name.buckets) {
             const agentKey = agentBucket.key as string;
   
-            dynamicAgentData[agentKey] = {
+            dynamicAgentData[agentKey as AgentName] = {
               agent: {
                 activation_method: agentBucket[AGENT_ACTIVATION_METHOD].buckets
                   .map((bucket) => bucket.key as string)
                   .slice(0, size),
-                version: agentBucket[AGENT_VERSION].buckets.map(
-                  (bucket) => bucket.key as string
-                ),
+                version: agentBucket[AGENT_VERSION].buckets.map((bucket) => bucket.key as string),
               },
               service: {
                 framework: {
@@ -1205,9 +1202,9 @@ export const tasks: TelemetryTask[] = [
                     flatten(
                       agentBucket[SERVICE_FRAMEWORK_NAME].buckets.map((fwBucket: any) =>
                         fwBucket[SERVICE_FRAMEWORK_VERSION].buckets.map(
-                          (versionBucket) => ({
+                          (versionBucket: { key: string; doc_count: number }) => ({
                             doc_count: versionBucket.doc_count,
-                            name: toComposite(fwBucket.key, versionBucket.key),
+                            name: `${fwBucket.key}/${versionBucket.key}`,
                           })
                         )
                       )
@@ -1229,9 +1226,9 @@ export const tasks: TelemetryTask[] = [
                     flatten(
                       agentBucket[SERVICE_LANGUAGE_NAME].buckets.map((langBucket: any) =>
                         langBucket[SERVICE_LANGUAGE_VERSION].buckets.map(
-                          (versionBucket) => ({
+                          (versionBucket: { key: string; doc_count: number }) => ({
                             doc_count: versionBucket.doc_count,
-                            name: toComposite(langBucket.key, versionBucket.key),
+                            name: `${langBucket.key}/${versionBucket.key}`,
                           })
                         )
                       )
@@ -1253,9 +1250,9 @@ export const tasks: TelemetryTask[] = [
                     flatten(
                       agentBucket[SERVICE_RUNTIME_NAME].buckets.map((runtimeBucket: any) =>
                         runtimeBucket[SERVICE_RUNTIME_VERSION].buckets.map(
-                          (versionBucket) => ({
+                          (versionBucket: { key: string; doc_count: number }) => ({
                             doc_count: versionBucket.doc_count,
-                            name: toComposite(runtimeBucket.key, versionBucket.key),
+                            name: `${runtimeBucket.key}/${versionBucket.key}`,
                           })
                         )
                       )
@@ -1268,6 +1265,7 @@ export const tasks: TelemetryTask[] = [
                 },
               },
             };
+            
           }
   
           return {
