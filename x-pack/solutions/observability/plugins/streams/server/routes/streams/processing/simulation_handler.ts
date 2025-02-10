@@ -13,16 +13,15 @@ import { SimulationFailedError } from '../../../lib/streams/errors/simulation_fa
 import { DetectedMappingFailureError } from '../../../lib/streams/errors/detected_mapping_failure_error';
 import { NonAdditiveProcessorError } from '../../../lib/streams/errors/non_additive_processor_error';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
-import { ProcessingSimulateParams } from './route';
+import { ProcessingSimulateBody } from './route';
 
-export const prepareSimulationBody = (params: ProcessingSimulateParams) => {
-  const { path, body } = params;
+export const prepareSimulationBody = (name: string, body: ProcessingSimulateBody) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { processing, documents, detected_fields } = body;
 
   const processors = formatToIngestProcessors(processing);
   const docs = documents.map((doc, id) => ({
-    _index: path.name,
+    _index: name,
     _id: id.toString(),
     _source: doc,
   }));
@@ -30,7 +29,7 @@ export const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   const simulationBody: any = {
     docs,
     pipeline_substitutions: {
-      [`${path.name}@stream.processing`]: {
+      [`${name}@stream.processing`]: {
         processors,
       },
     },
@@ -39,7 +38,7 @@ export const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   if (detected_fields) {
     const properties = computeMappingProperties(detected_fields);
     simulationBody.component_template_substitutions = {
-      [`${path.name}@stream.layer`]: {
+      [`${name}@stream.layer`]: {
         template: {
           mappings: {
             properties,
@@ -94,7 +93,7 @@ export const prepareSimulationResponse = (
   simulationResult: any,
   docs: Array<{ _source: RecursiveRecord }>,
   simulationDiffs: ReturnType<typeof prepareSimulationDiffs>,
-  detectedFields?: ProcessingSimulateParams['body']['detected_fields']
+  detectedFields?: ProcessingSimulateBody['detected_fields']
 ) => {
   const confirmedValidDetectedFields = computeMappingProperties(detectedFields ?? []);
   const documents = computeSimulationDocuments(simulationResult, docs);
@@ -193,7 +192,7 @@ const computeSuccessRate = (simulation: any) => {
 };
 
 const computeMappingProperties = (
-  detectedFields: NonNullable<ProcessingSimulateParams['body']['detected_fields']>
+  detectedFields: NonNullable<ProcessingSimulateBody['detected_fields']>
 ) => {
   return Object.fromEntries(detectedFields.map(({ name, type }) => [name, { type }]));
 };

@@ -6,6 +6,9 @@
  */
 
 import {
+  NamedFieldDefinitionConfig,
+  ProcessorDefinition,
+  RecursiveRecord,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
   recursiveRecord,
@@ -23,16 +26,22 @@ import {
   prepareSimulationResponse,
 } from './simulation_handler';
 
-const paramsSchema = z.object({
-  path: z.object({ name: z.string() }),
-  body: z.object({
-    processing: z.array(processorDefinitionSchema),
-    documents: z.array(recursiveRecord),
-    detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
-  }),
+export interface ProcessingSimulateBody {
+  processing: ProcessorDefinition[];
+  documents: RecursiveRecord[];
+  detected_fields?: NamedFieldDefinitionConfig[];
+}
+
+const processingSimulateBodySchema: z.Schema<ProcessingSimulateBody> = z.object({
+  processing: z.array(processorDefinitionSchema),
+  documents: z.array(recursiveRecord),
+  detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
 });
 
-export type ProcessingSimulateParams = z.infer<typeof paramsSchema>;
+const paramsSchema = z.object({
+  path: z.object({ name: z.string() }),
+  body: processingSimulateBodySchema,
+});
 
 export const simulateProcessorRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/processing/_simulate',
@@ -55,7 +64,7 @@ export const simulateProcessorRoute = createServerRoute({
       throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
     }
 
-    const simulationBody = prepareSimulationBody(params);
+    const simulationBody = prepareSimulationBody(params.path.name, params.body);
 
     const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
 
@@ -72,16 +81,22 @@ export const simulateProcessorRoute = createServerRoute({
   },
 });
 
-const suggestionsParamsSchema = z.object({
-  path: z.object({ name: z.string() }),
-  body: z.object({
-    field: z.string(),
-    connectorId: z.string(),
-    samples: z.array(recursiveRecord),
-  }),
+export interface ProcessingSuggestionBody {
+  field: string;
+  connectorId: string;
+  samples: RecursiveRecord[];
+}
+
+const processingSuggestionSchema = z.object({
+  field: z.string(),
+  connectorId: z.string(),
+  samples: z.array(recursiveRecord),
 });
 
-export type ProcessingSuggestionParams = z.infer<typeof suggestionsParamsSchema>;
+const suggestionsParamsSchema = z.object({
+  path: z.object({ name: z.string() }),
+  body: processingSuggestionSchema,
+});
 
 export const processingSuggestionRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/processing/_suggestions',

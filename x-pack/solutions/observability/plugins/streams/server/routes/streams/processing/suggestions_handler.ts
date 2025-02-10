@@ -9,7 +9,6 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { get, groupBy, mapValues, orderBy, shuffle, uniq, uniqBy } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
 import { RecursiveRecord } from '@kbn/streams-schema';
-import { ProcessingSuggestionParams } from './route';
 import {
   assertSimulationResult,
   executeSimulation,
@@ -17,10 +16,11 @@ import {
   prepareSimulationDiffs,
   prepareSimulationResponse,
 } from './simulation_handler';
+import { ProcessingSuggestionBody } from './route';
 
 export const handleProcessingSuggestion = async (
-  id: string,
-  body: ProcessingSuggestionParams['body'],
+  name: string,
+  body: ProcessingSuggestionBody,
   inferenceClient: InferenceClient,
   scopedClusterClient: IScopedClusterClient
 ) => {
@@ -73,7 +73,7 @@ export const handleProcessingSuggestion = async (
 
   const results = await Promise.all(
     patternsToProcess.map((sample) =>
-      processPattern(sample, id, body, inferenceClient, scopedClusterClient, field, samples)
+      processPattern(sample, name, body, inferenceClient, scopedClusterClient, field, samples)
     )
   );
 
@@ -92,8 +92,8 @@ type SimulationWithPattern = ReturnType<typeof prepareSimulationResponse> & { pa
 
 async function processPattern(
   sample: { truncatedPattern: string; count: number; exampleValues: string[] },
-  id: string,
-  body: ProcessingSuggestionParams['body'],
+  name: string,
+  body: ProcessingSuggestionBody,
   inferenceClient: InferenceClient,
   scopedClusterClient: IScopedClusterClient,
   field: string,
@@ -152,22 +152,17 @@ async function processPattern(
     await Promise.all(
       patterns.map(async (pattern) => {
         // Validate match on current sample
-        const simulationBody = prepareSimulationBody({
-          path: {
-            id,
-          },
-          body: {
-            processing: [
-              {
-                grok: {
-                  field,
-                  if: { always: {} },
-                  patterns: [pattern],
-                },
+        const simulationBody = prepareSimulationBody(name, {
+          processing: [
+            {
+              grok: {
+                field,
+                if: { always: {} },
+                patterns: [pattern],
               },
-            ],
-            documents: samples,
-          },
+            },
+          ],
+          documents: samples,
         });
         const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
         const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
