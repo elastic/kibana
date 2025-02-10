@@ -19,7 +19,11 @@ import {
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import {
+  ESQLVariableType,
+  ESQLControlVariable,
+  getAllFunctions,
+} from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
@@ -130,6 +134,17 @@ export function FieldControlForm({
             })
           );
         });
+      }
+
+      if (variableType === ESQLVariableType.FUNCTIONS) {
+        const aggregatedFunctions = getAllFunctions({ type: 'agg' }).map((func) => {
+          return {
+            label: func.name,
+            key: func.name,
+            'data-test-subj': func.name,
+          };
+        });
+        setAvailableIdentifiersOptions(aggregatedFunctions);
       }
     }
   }, [availableIdentifiersOptions.length, variableType, cursorPosition, queryString, search]);
