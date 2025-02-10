@@ -28,6 +28,7 @@ import { EditLifecycleModal, LifecycleEditAction } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
 import { IngestionRate } from './ingestion_rate';
+import { useDataStreamStats } from './hooks/use_data_stream_stats';
 
 function useLifecycleState({
   definition,
@@ -112,6 +113,12 @@ export function StreamDetailLifecycle({
     setUpdateInProgress,
   } = useLifecycleState({ definition, isServerless });
 
+  const {
+    stats,
+    isLoading: isLoadingStats,
+    refresh: refreshStats,
+  } = useDataStreamStats({ definition });
+
   const { signal } = useAbortController();
 
   if (!definition) {
@@ -188,6 +195,8 @@ export function StreamDetailLifecycle({
               lifecycleActions={lifecycleActions}
               ilmLocator={ilmLocator}
               openEditModal={(action) => setOpenEditModal(action)}
+              isLoadingStats={isLoadingStats}
+              stats={stats}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -197,7 +206,12 @@ export function StreamDetailLifecycle({
 
       <EuiFlexGroup>
         <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-          <IngestionRate definition={definition} />
+          <IngestionRate
+            definition={definition}
+            refreshStats={refreshStats}
+            isLoadingStats={isLoadingStats}
+            stats={stats}
+          />
         </EuiPanel>
       </EuiFlexGroup>
     </>

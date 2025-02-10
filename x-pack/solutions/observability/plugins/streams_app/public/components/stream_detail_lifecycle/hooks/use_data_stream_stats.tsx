@@ -8,15 +8,21 @@
 import moment from 'moment';
 import { useMemo } from 'react';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+
+export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number] & {
+  bytesPerDoc: number;
+  bytesPerDay: number;
+};
 
 export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGetResponse }) => {
   const {
     services: { dataStreamsClient },
   } = useKibana();
 
-  const result = useStreamsAppFetch(() => {
+  const statsFetch = useStreamsAppFetch(() => {
     if (!definition) {
       return;
     }
@@ -26,25 +32,26 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
     );
   }, [dataStreamsClient, definition]);
 
-  const stats = useMemo(() => {
-    const stats = result.value?.dataStreamsStats[0];
-    if (!stats || !stats.creationDate || !stats.sizeBytes) {
+  const stats = useMemo<DataStreamStats | undefined>(() => {
+    const dsStats = statsFetch.value?.dataStreamsStats[0];
+    if (!dsStats || !dsStats.creationDate || !dsStats.sizeBytes) {
       return undefined;
     }
     const daysSinceCreation = Math.max(
       1,
-      Math.ceil(moment.duration(moment().diff(moment(stats.creationDate))).asDays())
+      Math.ceil(moment.duration(moment().diff(moment(dsStats.creationDate))).asDays())
     );
 
     return {
-      ...stats,
-      bytesPerDay: stats.sizeBytes / daysSinceCreation,
-      bytesPerDoc: stats.totalDocs ? stats.sizeBytes / stats.totalDocs : 0,
+      ...dsStats,
+      bytesPerDay: dsStats.sizeBytes / daysSinceCreation,
+      bytesPerDoc: dsStats.totalDocs ? dsStats.sizeBytes / dsStats.totalDocs : 0,
     };
-  }, [result.value]);
+  }, [statsFetch.value]);
 
   return {
     stats,
-    isLoading: result.loading,
+    isLoading: statsFetch.loading,
+    refresh: statsFetch.refresh,
   };
 };

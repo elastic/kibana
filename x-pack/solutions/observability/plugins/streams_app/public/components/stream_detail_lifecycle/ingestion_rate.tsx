@@ -7,6 +7,8 @@
 
 import moment from 'moment';
 import React, { useMemo, useState } from 'react';
+import { lastValueFrom } from 'rxjs';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { i18n } from '@kbn/i18n';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
@@ -20,16 +22,77 @@ import {
 } from '@elastic/eui';
 import { AreaSeries, Axis, Chart, Settings } from '@elastic/charts';
 import { formatBytes } from './helpers/format_bytes';
-import { useIngestionRate } from './hooks/use_ingestion_rate';
+import { useKibana } from '../../hooks/use_kibana';
+import { DataStreamStats } from './hooks/use_data_stream_stats';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 
-export function IngestionRate({ definition }: { definition?: IngestStreamGetResponse }) {
+export function IngestionRate({
+  definition,
+  stats,
+  isLoadingStats,
+  refreshStats,
+}: {
+  definition?: IngestStreamGetResponse;
+  stats?: DataStreamStats;
+  isLoadingStats: boolean;
+  refreshStats: () => void;
+}) {
+  const {
+    dependencies: {
+      start: { data },
+    },
+  } = useKibana();
   const [timeRange, setTimeRange] = useState({ start: 'now-60d', end: 'now' });
 
-  const { isLoading, ingestionRate, refresh } = useIngestionRate({
-    definition,
-    start: timeRange.start,
-    end: timeRange.end,
-  });
+  const { loading: isLoadingIngestionRate, value: ingestionRate } = useStreamsAppFetch(
+    async ({ signal }) => {
+      if (!definition || isLoadingStats || !stats?.bytesPerDay) {
+        return;
+      }
+
+      const { rawResponse } = await lastValueFrom(
+        data.search.search<
+          IKibanaSearchRequest,
+          IKibanaSearchResponse<{
+            aggregations: { docs_count: { buckets: Array<{ key: string; doc_count: number }> } };
+          }>
+        >(
+          {
+            params: {
+              index: definition.stream.name,
+              track_total_hits: false,
+              body: {
+                size: 0,
+                query: {
+                  bool: {
+                    filter: [
+                      { range: { '@timestamp': { gte: timeRange.start, lte: timeRange.end } } },
+                    ],
+                  },
+                },
+                aggs: {
+                  docs_count: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: '2d',
+                      min_doc_count: 0,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          { abortSignal: signal }
+        )
+      );
+
+      return rawResponse.aggregations.docs_count.buckets.map(({ key, doc_count }) => ({
+        key,
+        value: doc_count * stats.bytesPerDoc,
+      }));
+    },
+    [definition, stats, isLoadingStats, timeRange]
+  );
 
   const sizeUnit = useMemo(() => {
     if (!ingestionRate) return;
@@ -52,11 +115,13 @@ export function IngestionRate({ definition }: { definition?: IngestStreamGetResp
 
           <EuiFlexItem grow={1}>
             <EuiSuperDatePicker
-              isLoading={isLoading}
+              isLoading={isLoadingIngestionRate || isLoadingStats}
               start={timeRange.start}
               end={timeRange.end}
               onTimeChange={({ start, end }) => setTimeRange({ start, end })}
-              onRefresh={() => refresh()}
+              onRefresh={() => {
+                refreshStats();
+              }}
               updateButtonProps={{ iconOnly: true, fill: false }}
               width="full"
             />
@@ -66,7 +131,7 @@ export function IngestionRate({ definition }: { definition?: IngestStreamGetResp
 
       <EuiSpacer size="s" />
 
-      {isLoading || !ingestionRate ? (
+      {isLoadingIngestionRate || isLoadingStats || !ingestionRate ? (
         <EuiFlexGroup
           justifyContent="center"
           alignItems="center"

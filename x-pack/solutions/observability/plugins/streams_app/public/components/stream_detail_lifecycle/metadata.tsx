@@ -34,7 +34,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useDataStreamStats } from './hooks/use_data_stream_stats';
+import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
 
 export function RetentionMetadata({
@@ -42,16 +42,18 @@ export function RetentionMetadata({
   ilmLocator,
   lifecycleActions,
   openEditModal,
+  stats,
+  isLoadingStats,
 }: {
   definition: IngestStreamGetResponse;
   ilmLocator?: LocatorPublic<IlmLocatorParams>;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
+  stats?: DataStreamStats;
+  isLoadingStats: boolean;
 }) {
   const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
   const router = useStreamsAppRouter();
-  const { stats, isLoading: isLoadingStats } = useDataStreamStats({ definition });
-
   const lifecycle = definition.effective_lifecycle;
 
   const contextualMenu =
