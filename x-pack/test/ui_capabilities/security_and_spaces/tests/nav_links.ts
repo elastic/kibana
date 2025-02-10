@@ -71,6 +71,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'guidedOnboardingFeature',
                 'securitySolutionAssistant',
                 'securitySolutionAttackDiscovery',
+                'securitySolutionSiemMigrations',
                 'dataQuality'
               )
             );

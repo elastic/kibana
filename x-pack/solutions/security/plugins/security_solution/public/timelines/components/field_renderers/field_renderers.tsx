@@ -25,8 +25,7 @@ export const IpOverviewId = 'ip-overview';
 export const locationRenderer = (
   fieldNames: string[],
   data: NetworkDetailsStrategyResponse['networkDetails'],
-  contextID?: string,
-  isDraggable?: boolean
+  contextID?: string
 ): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -40,7 +39,6 @@ export const locationRenderer = (
                 id={`location-renderer-default-draggable-${IpOverviewId}-${
                   contextID ? `${contextID}-` : ''
                 }${fieldName}`}
-                isDraggable={isDraggable ?? false}
                 field={fieldName}
                 value={locationValue}
                 isAggregatable={true}
@@ -58,8 +56,7 @@ export const locationRenderer = (
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
   flowTarget: FlowTarget | FlowTargetSourceDest,
-  contextID?: string,
-  isDraggable?: boolean
+  contextID?: string
 ): React.ReactElement =>
   as && as.organization && as.organization.name && as.number ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -68,7 +65,6 @@ export const autonomousSystemRenderer = (
           id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }${flowTarget}.as.organization.name`}
-          isDraggable={isDraggable ?? false}
           field={`${flowTarget}.as.organization.name`}
           value={as.organization.name}
         />
@@ -79,7 +75,6 @@ export const autonomousSystemRenderer = (
           id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }${flowTarget}.as.number`}
-          isDraggable={false}
           field={`${flowTarget}.as.number`}
           value={`${as.number}`}
           isAggregatable={true}
@@ -95,14 +90,12 @@ interface HostIdRendererTypes {
   contextID?: string;
   host: HostEcs;
   ipFilter?: string;
-  isDraggable?: boolean;
   noLink?: boolean;
 }
 
 export const hostIdRenderer = ({
   contextID,
   host,
-  isDraggable = false,
   ipFilter,
   noLink,
 }: HostIdRendererTypes): React.ReactElement =>
@@ -113,7 +106,6 @@ export const hostIdRenderer = ({
           id={`host-id-renderer-default-draggable-${IpOverviewId}-${
             contextID ? `${contextID}-` : ''
           }host-id`}
-          isDraggable={isDraggable}
           field="host.id"
           value={host.id[0]}
           isAggregatable={true}
@@ -136,8 +128,7 @@ export const hostIdRenderer = ({
 export const hostNameRenderer = (
   host?: HostEcs,
   ipFilter?: string,
-  contextID?: string,
-  isDraggable?: boolean
+  contextID?: string
 ): React.ReactElement =>
   host &&
   host.name &&
@@ -148,7 +139,6 @@ export const hostNameRenderer = (
       id={`host-name-renderer-default-draggable-${IpOverviewId}-${
         contextID ? `${contextID}-` : ''
       }host-name`}
-      isDraggable={isDraggable ?? false}
       field={'host.name'}
       value={host.name[0]}
       isAggregatable={true}

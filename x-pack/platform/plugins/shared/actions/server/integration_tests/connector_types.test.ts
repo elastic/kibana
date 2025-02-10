@@ -52,7 +52,7 @@ describe('Connector type config checks', () => {
   });
 
   for (const connectorTypeId of connectorTypes) {
-    const skipConnectorType = ['.gen-ai'];
+    const skipConnectorType = ['.gen-ai', '.inference'];
     if (skipConnectorType.includes(connectorTypeId)) {
       continue;
     }
