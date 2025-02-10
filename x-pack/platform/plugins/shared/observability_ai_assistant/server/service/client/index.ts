@@ -233,7 +233,7 @@ export class ObservabilityAIAssistantClient {
                     stream: false,
                   }),
                 tracer: completeTracer,
-              });
+              }).pipe(shareReplay());
 
         // we continue the conversation here, after resolving both the materialized
         // messages and the knowledge base instructions
