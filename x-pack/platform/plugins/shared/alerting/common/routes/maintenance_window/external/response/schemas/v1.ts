@@ -24,24 +24,61 @@ const scheduleSchema = schema.object({
   ),
 });
 
-// TO REVIEW
 const maintenanceWindowResponseFieldsSchema = schema.object({
-  id: schema.string(),
-  title: schema.string(),
-  enabled: schema.boolean(),
-  expiration_date: schema.string(),
+  id: schema.string({
+    meta: {
+      description: 'The identifier for the maintenance window.',
+    },
+  }),
+  title: schema.string({
+    meta: {
+      description: 'The name of the maintenance window.',
+    },
+  }),
+  enabled: schema.boolean({
+    meta: {
+      description:
+        'Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.',
+    },
+  }),
+  created_by: schema.nullable(
+    schema.string({
+      meta: {
+        description: 'The identifier for the user that created the maintenance window.',
+      },
+    })
+  ),
+  updated_by: schema.nullable(
+    schema.string({
+      meta: {
+        description: 'The identifier for the user that last updated this maintenance window.',
+      },
+    })
+  ),
+  created_at: schema.string({
+    meta: {
+      description: 'The date and time when the maintenance window was created.',
+    },
+  }),
+  updated_at: schema.string({
+    meta: {
+      description: 'The date and time when the maintenance window was last updated.',
+    },
+  }),
 
-  created_by: schema.nullable(schema.string()),
-  updated_by: schema.nullable(schema.string()),
-  created_at: schema.string(),
-  updated_at: schema.string(),
-
-  status: schema.oneOf([
-    schema.literal(maintenanceWindowStatusV1.RUNNING),
-    schema.literal(maintenanceWindowStatusV1.UPCOMING),
-    schema.literal(maintenanceWindowStatusV1.FINISHED),
-    schema.literal(maintenanceWindowStatusV1.ARCHIVED),
-  ]),
+  status: schema.oneOf(
+    [
+      schema.literal(maintenanceWindowStatusV1.RUNNING),
+      schema.literal(maintenanceWindowStatusV1.UPCOMING),
+      schema.literal(maintenanceWindowStatusV1.FINISHED),
+      schema.literal(maintenanceWindowStatusV1.ARCHIVED),
+    ],
+    {
+      meta: {
+        description: 'The current status of the maintenance window.',
+      },
+    }
+  ),
 
   scope: schema.maybe(
     schema.object({

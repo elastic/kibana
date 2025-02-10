@@ -61,6 +61,7 @@ describe('createMaintenanceWindowRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",
+        "summary": "Create a maintenance window.",
       }
     `);
 

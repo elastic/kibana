@@ -54,6 +54,7 @@ export const createMaintenanceWindowRoute = (
       },
       options: {
         access: 'public',
+        summary: 'Create a maintenance window.',
       },
     },
     router.handleLegacyErrors(

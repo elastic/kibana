@@ -52,7 +52,7 @@ export const deleteMaintenanceWindowRoute = (
       },
       options: {
         access: 'public',
-        summary: 'Delete a maintenance window,',
+        summary: 'Deletes a maintenance window by ID.',
       },
     },
     router.handleLegacyErrors(

@@ -24,7 +24,12 @@ const scheduleSchema = schema.object({
 });
 
 export const bodySchema = schema.object({
-  title: schema.string(),
+  title: schema.string({
+    meta: {
+      description:
+        'The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.',
+    },
+  }),
   scope: schema.maybe(
     schema.object({
       query: schema.object({

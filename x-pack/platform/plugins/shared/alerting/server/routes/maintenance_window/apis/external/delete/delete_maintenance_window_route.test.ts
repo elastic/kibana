@@ -50,7 +50,7 @@ describe('deleteMaintenanceWindowRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",
-        "summary": "Delete a maintenance window,",
+        "summary": "Deletes a maintenance window by ID.",
       }
     `);
 
