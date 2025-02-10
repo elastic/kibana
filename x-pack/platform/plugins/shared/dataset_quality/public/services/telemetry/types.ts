@@ -38,6 +38,7 @@ export enum NavigationSource {
   Table = 'table',
   ActionMenu = 'action_menu',
   DegradedFieldFlyoutHeader = 'degraded_field_flyout_header',
+  FailedDocsFlyoutErrorsTable = 'failed_docs_flyout_errors_table',
 }
 
 export interface WithTrackingId {

@@ -11,6 +11,62 @@ import type { Parent } from 'mdast';
 import { ContentReferenceParser } from './content_reference_parser';
 
 describe('ContentReferenceParser', () => {
+  it('extracts references from poem', async () => {
+    const file = unified().use([[markdown, {}], ContentReferenceParser])
+      .parse(`With a wagging tail and a wet, cold nose,{reference(ccaSI)}
+A furry friend, from head to toes.{reference(ccaSI)}
+Loyal companion, always near,{reference(ccaSI)}
+Chasing squirrels, full of cheer.{reference(ccaSI)}
+A paw to hold, a gentle nudge,
+{reference(ccaSI)}
+A furry alarm, a playful judge.{reference(ccaSI)}
+From golden retrievers to tiny Chihuahuas,{reference(ccaSI)}
+Their love's a gift, that always conquers.{reference(ccaSI)}
+So cherish your dog, with all your might,{reference(ccaSI)}
+Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
+
+    expect(
+      (file.children[0] as Parent).children.filter(
+        (child) => (child.type as string) === 'contentReference'
+      )
+    ).toHaveLength(10);
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'text', value: '\nA paw to hold, a gentle nudge,\n' }),
+      ])
+    );
+  });
+
+  it('extracts reference after linebreak', async () => {
+    const file = unified().use([[markdown, {}], ContentReferenceParser]).parse(`First line
+{reference(FTQJp)}
+`) as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'text', value: 'First line\n' }),
+        expect.objectContaining({ type: 'contentReference' }),
+      ])
+    );
+  });
+
+  it('eats empty content reference', async () => {
+    const file = unified()
+      .use([[markdown, {}], ContentReferenceParser])
+      .parse('There is an empty content reference.{reference()}') as Parent;
+
+    expect(file.children[0].children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'text', value: 'There is an empty content reference.' }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceCount: -1,
+          contentReferenceId: '',
+        }),
+      ])
+    );
+  });
+
   it('eats space preceding content reference', async () => {
     const file = unified()
       .use([[markdown, {}], ContentReferenceParser])
