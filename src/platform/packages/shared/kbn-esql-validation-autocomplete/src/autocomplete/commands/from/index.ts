@@ -9,7 +9,7 @@
 
 import { metadataOption } from '../../../definitions/options';
 import type { SuggestionRawDefinition } from '../../types';
-import { handleFragment, removeQuoteForSuggestedSources } from '../../helper';
+import { getOverlapRange, handleFragment, removeQuoteForSuggestedSources } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
 import { isRestartingExpression, sourceExists } from '../../../shared/helpers';
 import {
@@ -43,6 +43,8 @@ export async function suggest({
     );
   };
 
+  const metadataOverlap = getOverlapRange(innerText, 'METADATA');
+
   // FROM /
   if (indexes.length === 0) {
     addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
@@ -53,6 +55,14 @@ export async function suggest({
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
     suggestions.push(...(await getRecommendedQueriesSuggestions()));
+  }
+  // FROM something MET/
+  else if (
+    indexes.length > 0 &&
+    /^FROM \S+\s+/i.test(innerText) &&
+    metadataOverlap.start !== metadataOverlap.end
+  ) {
+    suggestions.push(buildOptionDefinition(metadataOption));
   }
   // FROM someth/
   // FROM something/

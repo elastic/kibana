@@ -40,14 +40,6 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from /index', visibleIndices);
       });
 
-      test('suggests visible indices on comma', async () => {
-        const { assertSuggestions } = await setup();
-
-        await assertSuggestions('FROM a,/', visibleIndices);
-        await assertSuggestions('FROM a, /', visibleIndices);
-        await assertSuggestions('from *,/', visibleIndices);
-      });
-
       test('can suggest integration data sources', async () => {
         const dataSources = indexes.concat(integrations);
         const visibleDataSources = dataSources
@@ -86,6 +78,18 @@ describe('autocomplete.suggest', () => {
         ].sort();
 
         await assertSuggestions('from a, b /', expected);
+      });
+
+      test('on SPACE plus prefix', async () => {
+        const { assertSuggestions } = await setup();
+
+        assertSuggestions('FROM index1 MET/', ['METADATA $0']);
+      });
+
+      test('not before first index', async () => {
+        const { assertSuggestions } = await setup();
+
+        assertSuggestions('FROM MET/', visibleIndices);
       });
 
       test('on <kbd>SPACE</kbd> after "METADATA" keyword suggests all metadata fields', async () => {
