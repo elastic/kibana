@@ -214,7 +214,7 @@ export const checkForFrozenIndices = async ({
     // See https://www.elastic.co/guide/en/elasticsearch/reference/current/data-tiers.html#data-tier-allocation for
     // details on _tier_preference
     const tierPreferencesResp = await esClient.indices.getSettings({
-      // Use the original index patterns again instead of just the concrete names of the partial and restored indices:
+      // Use the original index patterns again instead of just the concrete names of the partial indices:
       // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
       index: inputIndices,
       filter_path: '*.settings.index.routing.allocation.include._tier_preference',
