@@ -6,7 +6,10 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import {
+  SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_TEMP_INDEX_NAME,
+} from '../../../common/constants';
 
 interface AggBucketKey {
   spaceId: string;
@@ -29,6 +32,12 @@ export class CleanUpTempSummary {
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
   public async execute(): Promise<void> {
+    const openCircuitBreaker = await this.shouldOpenCircuitBreaker();
+    if (openCircuitBreaker) {
+      this.logger.info('No temporary documents found, skipping.');
+      return;
+    }
+
     let searchAfterKey: AggBucketKey | undefined;
     do {
       const { buckets, nextSearchAfterKey } = await this.findDuplicateTemporaryDocuments(
@@ -40,6 +49,11 @@ export class CleanUpTempSummary {
         await this.deleteDuplicateTemporaryDocuments(buckets);
       }
     } while (searchAfterKey);
+  }
+
+  private async shouldOpenCircuitBreaker() {
+    const results = await this.esClient.count({ index: SUMMARY_TEMP_INDEX_NAME });
+    return results.count === 0;
   }
 
   private async findDuplicateTemporaryDocuments(searchAfterKey: AggBucketKey | undefined) {

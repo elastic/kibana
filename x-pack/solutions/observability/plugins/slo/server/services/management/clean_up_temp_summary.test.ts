@@ -40,6 +40,23 @@ describe('CleanUpTempSummary', () => {
     jest.useRealTimers();
   });
 
+  it('returns early if there is no temporary documents', async () => {
+    esClientMock.count.mockResolvedValueOnce({
+      count: 0,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+    });
+
+    await service.execute();
+
+    expect(esClientMock.search).not.toHaveBeenCalled();
+    expect(esClientMock.deleteByQuery).not.toHaveBeenCalled();
+  });
+
   it("deletes nothing when there isn't a duplicate temporary documents", async () => {
     esClientMock.search.mockResolvedValueOnce({
       ...commonEsResponse,
