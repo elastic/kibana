@@ -23,7 +23,6 @@ export async function reIndexKnowledgeBase({
     const originalIndex = `${resourceNames.aliases.kb}-000001`;
     const tempIndex = `${resourceNames.aliases.kb}-000002`;
 
-    // Get index settings
     const indexSettings = await esClient.asInternalUser.indices.getSettings({
       index: originalIndex,
     });
@@ -53,9 +52,7 @@ export async function reIndexKnowledgeBase({
     });
 
     // Create temporary index
-    await esClient.asInternalUser.indices.create({
-      index: tempIndex,
-    });
+    await esClient.asInternalUser.indices.create({ index: tempIndex });
 
     // Perform reindex to temporary index
     await esClient.asInternalUser.reindex({
