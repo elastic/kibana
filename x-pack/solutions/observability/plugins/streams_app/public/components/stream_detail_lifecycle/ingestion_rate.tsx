@@ -63,12 +63,12 @@ export function IngestionRate({
         )
       );
 
-      return rawResponse.aggregations.docs_count.buckets.map(({ key, doc_count }) => ({
+      return rawResponse.aggregations.docs_count.buckets.map(({ key, doc_count: docCount }) => ({
         key,
-        value: doc_count * stats.bytesPerDoc,
+        value: docCount * stats.bytesPerDoc,
       }));
     },
-    [definition, stats, isLoadingStats, timeRange]
+    [data.search, definition, stats, isLoadingStats, timeRange]
   );
 
   const sizeUnit = useMemo(() => {
