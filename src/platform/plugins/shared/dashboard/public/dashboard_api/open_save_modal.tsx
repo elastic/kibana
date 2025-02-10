@@ -13,15 +13,15 @@ import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { SaveDashboardReturn } from '../dashboard_content_management/types';
 import { DashboardSaveOptions } from '../dashboard_container/types';
 import { coreServices, dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardState } from './types';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../utils/telemetry_constants';
 import { extractTitleAndCount } from '../dashboard_container/embeddable/api/lib/extract_title_and_count';
 import { DashboardSaveModal } from '../dashboard_container/embeddable/api/overlays/save_modal';
-import { checkForDuplicateDashboardTitle } from '../services/dashboard_content_management_service/lib/check_for_duplicate_dashboard_title';
-import { saveDashboardState } from '../services/dashboard_content_management_service/lib/save_dashboard_state';
+import { checkForDuplicateDashboardTitle } from '../dashboard_content_management/check_for_duplicate_dashboard_title';
+import { saveDashboardState } from '../dashboard_content_management/save_dashboard_state';
 
 /**
  * @description exclusively for user directed dashboard save actions, also

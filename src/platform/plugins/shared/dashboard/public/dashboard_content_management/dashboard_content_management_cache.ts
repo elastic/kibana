@@ -8,7 +8,7 @@
  */
 
 import LRUCache from 'lru-cache';
-import type { DashboardGetOut } from '../../../server/content_management';
+import type { DashboardGetOut } from '../../server/content_management';
 
 const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
 const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes

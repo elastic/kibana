@@ -17,10 +17,10 @@ import type {
   DashboardSearchIn,
   DashboardSearchOut,
   DashboardSearchOptions,
-} from '../../../../server/content_management';
-import { getDashboardContentManagementCache } from '../dashboard_content_management_cache';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { contentManagementService } from '../../kibana_services';
+} from '../../server/content_management';
+import { getDashboardContentManagementCache } from './dashboard_content_management_cache';
+import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
+import { contentManagementService } from '../services/kibana_services';
 
 export interface SearchDashboardsArgs {
   options?: DashboardSearchOptions;

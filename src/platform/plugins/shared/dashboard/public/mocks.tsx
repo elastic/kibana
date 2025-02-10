@@ -13,7 +13,7 @@ import { DashboardStart } from './plugin';
 import { DashboardState } from './dashboard_api/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { DashboardPanelState } from '../common';
-import { SavedDashboardInput } from './services/dashboard_content_management_service/types';
+import { SavedDashboardInput } from './dashboard_content_management/types';
 
 export type Start = jest.Mocked<DashboardStart>;
 

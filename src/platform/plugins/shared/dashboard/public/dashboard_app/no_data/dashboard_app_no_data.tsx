@@ -31,7 +31,7 @@ import {
   lensService,
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { searchDashboards } from '../../services/dashboard_content_management_service/lib/find_dashboards';
+import { searchDashboards } from '../../dashboard_content_management/find_dashboards';
 
 function generateId() {
   return uuidv4();

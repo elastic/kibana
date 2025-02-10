@@ -56,7 +56,7 @@ import { DashboardLocatorParams } from '../dashboard_container/types';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
-} from '../services/dashboard_content_management_service/types';
+} from '../dashboard_content_management/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 

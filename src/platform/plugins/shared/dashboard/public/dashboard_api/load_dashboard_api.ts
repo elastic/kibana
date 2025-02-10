@@ -20,7 +20,7 @@ import {
 } from '../services/dashboard_backup_service';
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
-import { loadDashboardState } from '../services/dashboard_content_management_service/lib/load_dashboard_state';
+import { loadDashboardState } from '../dashboard_content_management/load_dashboard_state';
 
 export async function loadDashboardApi({
   getCreationOptions,

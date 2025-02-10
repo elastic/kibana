@@ -8,18 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getDashboardContentManagementCache } from '../dashboard_content_management_cache';
+import { getDashboardContentManagementCache } from './dashboard_content_management_cache';
 import type {
   DashboardCreateIn,
   DashboardCreateOut,
   DashboardUpdateIn,
   DashboardUpdateOut,
-} from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { getDashboardBackupService } from '../../dashboard_backup_service';
-import { contentManagementService, coreServices } from '../../kibana_services';
-import { SaveDashboardProps, SaveDashboardReturn } from '../types';
-import { getSerializedState } from '../../../dashboard_api/get_serialized_state';
+} from '../../server/content_management';
+import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
+import { contentManagementService, coreServices } from '../services/kibana_services';
+import { SaveDashboardProps, SaveDashboardReturn } from './types';
+import { getSerializedState } from '../dashboard_api/get_serialized_state';
 
 export const saveDashboardState = async ({
   controlGroupReferences,

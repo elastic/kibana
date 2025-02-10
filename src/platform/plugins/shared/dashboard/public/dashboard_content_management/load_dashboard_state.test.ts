@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDashboardContentManagementCache } from '../dashboard_content_management_cache';
-import { contentManagementService } from '../../kibana_services';
+import { getDashboardContentManagementCache } from './dashboard_content_management_cache';
+import { contentManagementService } from '../services/kibana_services';
 import { loadDashboardState } from './load_dashboard_state';
 
 describe('Load dashboard state', () => {

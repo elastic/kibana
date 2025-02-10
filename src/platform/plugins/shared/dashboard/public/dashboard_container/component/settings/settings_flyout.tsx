@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DashboardSettings } from '../../../dashboard_api/types';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { savedObjectsTaggingService } from '../../../services/kibana_services';
-import { checkForDuplicateDashboardTitle } from '../../../services/dashboard_content_management_service/lib/check_for_duplicate_dashboard_title';
+import { checkForDuplicateDashboardTitle } from '../../../dashboard_content_management/check_for_duplicate_dashboard_title';
 
 interface DashboardSettingsProps {
   onClose: () => void;

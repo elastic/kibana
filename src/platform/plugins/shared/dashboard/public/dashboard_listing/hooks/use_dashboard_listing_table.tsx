@@ -37,13 +37,13 @@ import { DashboardSavedObjectUserContent } from '../types';
 import {
   UpdateDashboardMetaProps,
   updateDashboardMeta,
-} from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
-import { checkForDuplicateDashboardTitle } from '../../services/dashboard_content_management_service/lib/check_for_duplicate_dashboard_title';
-import { deleteDashboards } from '../../services/dashboard_content_management_service/lib/delete_dashboards';
+} from '../../dashboard_content_management/update_dashboard_meta';
+import { checkForDuplicateDashboardTitle } from '../../dashboard_content_management/check_for_duplicate_dashboard_title';
+import { deleteDashboards } from '../../dashboard_content_management/delete_dashboards';
 import {
   findDashboardsByIds,
   searchDashboards,
-} from '../../services/dashboard_content_management_service/lib/find_dashboards';
+} from '../../dashboard_content_management/find_dashboards';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];

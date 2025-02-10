@@ -77,7 +77,7 @@ import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
 } from './dashboard_container/panel_placement';
-import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
+import type { FindDashboardsService } from './dashboard_content_management/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
@@ -185,7 +185,7 @@ export class DashboardPlugin
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
             const [{ loadDashboardState }] = await Promise.all([
-              import('./services/dashboard_content_management_service/lib/load_dashboard_state'),
+              import('./dashboard_content_management/load_dashboard_state'),
               untilPluginStartServicesReady(),
             ]);
             return (await loadDashboardState({ id: dashboardId })).dashboardInput?.filters ?? [];
@@ -349,7 +349,7 @@ export class DashboardPlugin
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
         const { findDashboardById, findDashboardIdByTitle, findDashboardsByIds, searchDashboards } =
-          await import('./services/dashboard_content_management_service/lib/find_dashboards');
+          await import('./dashboard_content_management/find_dashboards');
         return {
           search: searchDashboards,
           findById: findDashboardById,

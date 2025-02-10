@@ -26,7 +26,7 @@ import {
 } from '../services/dashboard_backup_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { findDashboardsByIds } from '../services/dashboard_content_management_service/lib/find_dashboards';
+import { findDashboardsByIds } from '../dashboard_content_management/find_dashboards';
 
 const DashboardUnsavedItem = ({
   id,

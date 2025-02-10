@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
+import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
 import type {
   DashboardAttributes,
   DashboardUpdateIn,
   DashboardUpdateOut,
-} from '../../../../server/content_management';
+} from '../../server/content_management';
 import { findDashboardsByIds } from './find_dashboards';
-import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
+import { contentManagementService, savedObjectsTaggingService } from '../services/kibana_services';
 
 export interface UpdateDashboardMetaProps {
   id: DashboardUpdateIn['id'];

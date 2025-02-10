@@ -21,7 +21,7 @@ import {
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { findDashboardIdByTitle } from '../../services/dashboard_content_management_service/lib/find_dashboards';
+import { findDashboardIdByTitle } from '../../dashboard_content_management/find_dashboards';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
