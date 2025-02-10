@@ -126,7 +126,7 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   return (
     <EuiFieldNumber
       fullWidth
-      readOnly={isLoading || (isEdit && !updatable)}
+      disabled={isLoading || (isEdit && !updatable)}
       data-test-subj={`${key}-number`}
       value={innerValue as number}
       isInvalid={!isValid}
