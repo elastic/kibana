@@ -7,11 +7,11 @@
 
 import {
   Condition,
-  FilterCondition,
-  isAndCondition,
   isFilterCondition,
+  isAndCondition,
   isOrCondition,
-} from '@kbn/streams-schema';
+  FilterCondition,
+} from '../models';
 
 export function getFields(
   condition: Condition
