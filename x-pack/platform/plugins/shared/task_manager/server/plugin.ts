@@ -29,7 +29,12 @@ import {
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
-import { TaskManagerConfig, CLAIM_STRATEGY_MGET, MGET_DEFAULT_POLL_INTERVAL } from './config';
+import {
+  TaskManagerConfig,
+  CLAIM_STRATEGY_MGET,
+  MGET_DEFAULT_POLL_INTERVAL,
+  DEFAULT_POLL_INTERVAL,
+} from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
@@ -170,7 +175,7 @@ export class TaskManagerPlugin
       this.config.poll_interval > MGET_DEFAULT_POLL_INTERVAL
     ) {
       this.logger.warn(
-        `By default, task manager polls occur every ${MGET_DEFAULT_POLL_INTERVAL}ms and increases to 3s when the demand is low. Setting xpack.task_manager.poll_interval to a value greater than the default (${MGET_DEFAULT_POLL_INTERVAL} ms) can increase task latency and reduce overall throughput; it is not recommended.`
+        `By default, task manager polls occur every ${MGET_DEFAULT_POLL_INTERVAL}ms and increases to ${DEFAULT_POLL_INTERVAL}ms when the demand is low. Setting xpack.task_manager.poll_interval can increase task latency and reduce overall throughput; it is not recommended.`
       );
     }
 
