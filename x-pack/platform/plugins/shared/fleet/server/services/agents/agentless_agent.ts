@@ -210,6 +210,13 @@ class AgentlessAgentService {
     const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
+    const urlEndpoint = prependAgentlessApiBasePathToEndpoint(
+      agentlessConfig,
+      `/deployments/${policyId}`
+    );
+    logger.info(
+      `[Agentless API] Call Agentless API endpoint ${urlEndpoint} to upgrade agentless deployment`
+    );
     const requestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, `/deployments/${policyId}`),
       method: 'PUT',
@@ -227,7 +234,7 @@ class AgentlessAgentService {
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
 
-    logger.debug(
+    logger.info(
       `[Agentless API] Start upgrading agentless deployment for agent policy ${requestConfigDebugStatus}`
     );
 
@@ -241,9 +248,9 @@ class AgentlessAgentService {
       logger.error('[Agentless API] kibana.yml is currently missing Agentless API configuration');
     }
 
-    logger.debug(`[Agentless API] Upgrading agentless agent with TLS config with certificate`);
+    logger.info(`[Agentless API] Upgrading agentless agent with TLS config with certificate`);
 
-    logger.debug(
+    logger.info(
       `[Agentless API] Upgrade agentless deployment with request config ${requestConfigDebugStatus}`
     );
 
