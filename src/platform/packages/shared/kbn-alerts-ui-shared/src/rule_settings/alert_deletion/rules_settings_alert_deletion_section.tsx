@@ -20,7 +20,7 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-plugin/common';
+import type { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
 import {
   ACTIVE_ALERT_DELETION_LABEL,
   ALERT_DELETION_DESCRIPTION,
@@ -33,8 +33,8 @@ import {
 } from './translations';
 
 interface Props {
-  onChange: (key: keyof RulesSettingsAlertDeletionProperties, value: number | boolean) => void;
-  settings?: RulesSettingsAlertDeletionProperties;
+  onChange: (key: keyof RulesSettingsAlertsDeletionProperties, value: number | boolean) => void;
+  settings?: RulesSettingsAlertsDeletionProperties;
   canWrite: boolean;
   hasError: boolean;
 }
@@ -79,10 +79,10 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
               <EuiSwitch
                 data-test-subj="rulesSettingsActiveAlertDeletionSwitch"
                 label=""
-                checked={settings!.isActiveAlertDeletionEnabled}
+                checked={settings!.isActiveAlertsDeletionEnabled}
                 disabled={!canWrite}
                 onChange={(e) => {
-                  onChange('isActiveAlertDeletionEnabled', e.target.checked);
+                  onChange('isActiveAlertsDeletionEnabled', e.target.checked);
                 }}
               />
             </EuiFormRow>
@@ -91,12 +91,12 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
             <EuiFormRow label={THRESHOLD_LABEL}>
               <EuiFieldNumber
                 data-test-subj="rulesSettingsActiveAlertDeletionThreshold"
-                value={settings!.activeAlertDeletionThreshold}
+                value={settings!.activeAlertsDeletionThreshold}
                 onChange={(e) => {
-                  onChange('activeAlertDeletionThreshold', parseInt(e.target.value, 10));
+                  onChange('activeAlertsDeletionThreshold', parseInt(e.target.value, 10));
                 }}
                 append={[DAYS_LABEL]}
-                disabled={!canWrite || !settings!.isActiveAlertDeletionEnabled}
+                disabled={!canWrite || !settings!.isActiveAlertsDeletionEnabled}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -109,10 +109,10 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
               <EuiSwitch
                 data-test-subj="rulesSettingsInactiveAlertDeletionSwitch"
                 label=""
-                checked={settings!.isInactiveAlertDeletionEnabled}
+                checked={settings!.isInactiveAlertsDeletionEnabled}
                 disabled={!canWrite}
                 onChange={(e) => {
-                  onChange('isInactiveAlertDeletionEnabled', e.target.checked);
+                  onChange('isInactiveAlertsDeletionEnabled', e.target.checked);
                 }}
               />
             </EuiFormRow>
@@ -121,12 +121,12 @@ export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
             <EuiFormRow label="Threshold">
               <EuiFieldNumber
                 data-test-subj="rulesSettingsInactiveAlertDeletionThreshold"
-                value={settings!.inactiveAlertDeletionThreshold}
+                value={settings!.inactiveAlertsDeletionThreshold}
                 onChange={(e) => {
-                  onChange('inactiveAlertDeletionThreshold', parseInt(e.target.value, 10));
+                  onChange('inactiveAlertsDeletionThreshold', parseInt(e.target.value, 10));
                 }}
                 append={[DAYS_LABEL]}
-                disabled={!canWrite || !settings!.isInactiveAlertDeletionEnabled}
+                disabled={!canWrite || !settings!.isInactiveAlertsDeletionEnabled}
               />
             </EuiFormRow>
           </EuiFlexItem>
