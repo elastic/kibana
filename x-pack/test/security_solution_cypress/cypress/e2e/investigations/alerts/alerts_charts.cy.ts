@@ -136,7 +136,7 @@ describe('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] },
       clickAlertsHistogramLegend();
       clickAlertsHistogramLegendAddToTimeline(ruleConfigs.name);
 
-      cy.get(TOASTER).should('have.text', `Added ${ruleConfigs.name} to timeline`);
+      cy.get(TOASTER).should('have.text', `Added ${ruleConfigs.name} to Timeline`);
     });
   });
 });
