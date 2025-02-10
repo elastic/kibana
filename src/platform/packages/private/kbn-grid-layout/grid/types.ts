@@ -107,18 +107,17 @@ export interface PanelInteractionEvent {
   };
 }
 
-// TODO: Remove from Dashboard plugin as part of https://github.com/elastic/kibana/issues/190446
-export enum PanelPlacementStrategy {
-  /** Place on the very top of the grid layout, add the height of this panel to all other panels. */
-  placeAtTop = 'placeAtTop',
-  /** Look for the smallest y and x value where the default panel will fit. */
-  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
-}
-
-export interface PanelPlacementSettings {
-  strategy?: PanelPlacementStrategy;
-  height: number;
-  width: number;
-}
+export type UseCustomDragHandle =
+  | {
+      useCustomDragHandle: true;
+      renderPanelContents: (
+        panelId: string,
+        setDragHandles: (refs: Array<HTMLElement | null>) => void
+      ) => React.ReactNode;
+    }
+  | {
+      useCustomDragHandle?: false;
+      renderPanelContents: (panelId: string) => React.ReactNode;
+    };
 
 export type GridAccessMode = 'VIEW' | 'EDIT';

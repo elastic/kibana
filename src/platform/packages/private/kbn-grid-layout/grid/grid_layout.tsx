@@ -16,23 +16,11 @@ import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridAccessMode, GridLayoutData, GridSettings } from './types';
+import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import { GridLayoutContext } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';
-
-type CustomDragHandleProps =
-  | {
-      useCustomDragHandle: true;
-      renderPanelContents: (
-        panelId: string,
-        setDragHandles: (refs: Array<HTMLElement | null>) => void
-      ) => React.ReactNode;
-    }
-  | {
-      useCustomDragHandle?: false;
-      renderPanelContents: (panelId: string) => React.ReactNode;
-    };
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -41,7 +29,7 @@ export type GridLayoutProps = {
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
-} & CustomDragHandleProps;
+} & UseCustomDragHandle;
 
 export const GridLayout = ({
   layout,
@@ -145,33 +133,29 @@ export const GridLayout = ({
   }, []);
 
   return (
-    <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-      <div
-        ref={(divElement) => {
-          layoutRef.current = divElement;
-          setDimensionsRef(divElement);
-        }}
-        className={classNames('kbnGrid', className)}
-        css={[
-          styles.layoutPadding,
-          styles.hasActivePanel,
-          styles.singleColumn,
-          styles.hasExpandedPanel,
-        ]}
-      >
-        {Array.from({ length: rowCount }, (_, rowIndex) => {
-          return (
-            <GridRow
-              key={rowIndex}
-              rowIndex={rowIndex}
-              useCustomDragHandle={useCustomDragHandle}
-              renderPanelContents={renderPanelContents}
-              gridLayoutStateManager={gridLayoutStateManager}
-            />
-          );
-        })}
-      </div>
-    </GridHeightSmoother>
+    <GridLayoutContext.Provider
+      value={{ renderPanelContents, useCustomDragHandle, gridLayoutStateManager }}
+    >
+      <GridHeightSmoother>
+        <div
+          ref={(divElement) => {
+            layoutRef.current = divElement;
+            setDimensionsRef(divElement);
+          }}
+          className={classNames('kbnGrid', className)}
+          css={[
+            styles.layoutPadding,
+            styles.hasActivePanel,
+            styles.singleColumn,
+            styles.hasExpandedPanel,
+          ]}
+        >
+          {Array.from({ length: rowCount }, (_, rowIndex) => {
+            return <GridRow key={rowIndex} rowIndex={rowIndex} />;
+          })}
+        </div>
+      </GridHeightSmoother>
+    </GridLayoutContext.Provider>
   );
 };
 

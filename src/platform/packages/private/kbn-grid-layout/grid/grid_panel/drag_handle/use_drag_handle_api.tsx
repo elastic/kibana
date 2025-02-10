@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-import { GridLayoutStateManager } from '../../types';
 import { useGridLayoutEvents } from '../../use_grid_layout_events';
 import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 
@@ -19,17 +18,14 @@ export interface DragHandleApi {
 }
 
 export const useDragHandleApi = ({
-  gridLayoutStateManager,
   panelId,
   rowIndex,
 }: {
-  gridLayoutStateManager: GridLayoutStateManager;
   panelId: string;
   rowIndex: number;
 }): DragHandleApi => {
   const startInteraction = useGridLayoutEvents({
     interactionType: 'drag',
-    gridLayoutStateManager,
     panelId,
     rowIndex,
   });
