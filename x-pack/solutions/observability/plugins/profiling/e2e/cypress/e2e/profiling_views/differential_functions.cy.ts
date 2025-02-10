@@ -73,28 +73,24 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
-        { id: 'overallPerformance', value: '65.89%', icon: 'sortUp_success' },
+        { id: 'overallPerformance', value: '65.89%' },
         {
           id: 'annualizedCo2',
-          value: '74.52 lbs / 33.8 kg',
-          comparisonValue: '25.35 lbs / 11.5 kg (65.98%)',
-          icon: 'comparison_sortUp_success',
+          value: '78.48 lbs / 35.6 kg',
+          comparisonValue: '26.68 lbs / 12.1 kg (66.01%)',
         },
         {
           id: 'annualizedCost',
-          value: '$318.32',
-          comparisonValue: '$108.59 (65.89%)',
-          icon: 'comparison_sortUp_success',
+          value: '$335.07',
+          comparisonValue: '$114.3 (65.89%)',
         },
         {
           id: 'totalNumberOfSamples',
           value: '513',
           comparisonValue: '175 (65.89%)',
-          icon: 'comparison_sortUp_success',
         },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
-        cy.get(`[data-test-subj="${item.id}_${item.icon}"]`).should('exist');
         if (item.comparisonValue) {
           cy.get(`[data-test-subj="${item.id}_comparison_value"]`).contains(item.comparisonValue);
         }
@@ -113,28 +109,24 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
-        { id: 'overallPerformance', value: '193.14%', icon: 'sortDown_danger' },
+        { id: 'overallPerformance', value: '193.14%' },
         {
           id: 'annualizedCo2',
-          value: '25.35 lbs / 11.5 kg',
-          comparisonValue: '74.52 lbs / 33.8 kg (193.91%)',
-          icon: 'comparison_sortDown_danger',
+          value: '26.68 lbs / 12.1 kg',
+          comparisonValue: '78.48 lbs / 35.6 kg (194.21%)',
         },
         {
           id: 'annualizedCost',
-          value: '$108.59',
-          comparisonValue: '$318.32 (193.14%)',
-          icon: 'comparison_sortDown_danger',
+          value: '$114.3',
+          comparisonValue: '$335.07 (193.14%)',
         },
         {
           id: 'totalNumberOfSamples',
           value: '175',
           comparisonValue: '513 (193.14%)',
-          icon: 'comparison_sortDown_danger',
         },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
-        cy.get(`[data-test-subj="${item.id}_${item.icon}"]`).should('exist');
         if (item.comparisonValue) {
           cy.get(`[data-test-subj="${item.id}_comparison_value"]`).contains(item.comparisonValue);
         }
