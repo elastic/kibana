@@ -13,6 +13,7 @@ import {
   EuiSplitPanel,
   EuiText,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -134,21 +135,16 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       <div
         css={css`
           position: absolute;
-          top: 8px;
-          bottom: 8px;
-          right: 4px;
+          top: 0px;
+          bottom: 0px;
+          right: 0px;
           width: ${width};
           z-index: 1000;
+          padding: ${euiTheme.size.m} ${euiTheme.size.s} 0px ${euiTheme.size.s};
+          background: ${transparentize(euiTheme.colors.shadow, 0.1)};
         `}
       >
-        <EuiSplitPanel.Outer
-          css={css`
-            margin: ${euiTheme.size.xs};
-            box-shadow: 0 0 ${euiTheme.size.base} 0 ${euiTheme.colors.lightShade};
-          `}
-          data-test-subj={PREVIEW_SECTION_TEST_ID}
-          className="eui-fullHeight"
-        >
+        <EuiSplitPanel.Outer data-test-subj={PREVIEW_SECTION_TEST_ID} className="eui-fullHeight">
           {isPreviewBanner(banner) && (
             <EuiSplitPanel.Inner
               grow={false}
