@@ -43,31 +43,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         if (isGroupStreamDefinitionBase(stream)) return [];
         return stream.ingest.routing.map((r) => r.destination);
       }
-      const logs = await apiClient.fetch('GET /api/streams/{id}', {
+      const logs = await apiClient.fetch('GET /api/streams/{name}', {
         params: {
-          path: { id: 'logs' },
+          path: { name: 'logs' },
         },
       });
       expect(getChildNames(logs.body.stream)).to.contain('logs.deeply');
 
-      const logsDeeply = await apiClient.fetch('GET /api/streams/{id}', {
+      const logsDeeply = await apiClient.fetch('GET /api/streams/{name}', {
         params: {
-          path: { id: 'logs.deeply' },
+          path: { name: 'logs.deeply' },
         },
       });
       expect(getChildNames(logsDeeply.body.stream)).to.contain('logs.deeply.nested');
 
-      const logsDeeplyNested = await apiClient.fetch('GET /api/streams/{id}', {
+      const logsDeeplyNested = await apiClient.fetch('GET /api/streams/{name}', {
         params: {
-          path: { id: 'logs.deeply.nested' },
+          path: { name: 'logs.deeply.nested' },
         },
       });
       expect(getChildNames(logsDeeplyNested.body.stream)).to.contain(
         'logs.deeply.nested.streamname'
       );
-      const logsDeeplyNestedStreamname = await apiClient.fetch('GET /api/streams/{id}', {
+      const logsDeeplyNestedStreamname = await apiClient.fetch('GET /api/streams/{name}', {
         params: {
-          path: { id: 'logs.deeply.nested.streamname' },
+          path: { name: 'logs.deeply.nested.streamname' },
         },
       });
       expect(

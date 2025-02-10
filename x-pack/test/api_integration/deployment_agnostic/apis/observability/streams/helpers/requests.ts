@@ -40,14 +40,14 @@ export async function forkStream(
   root: string,
   body: ClientRequestParamsOf<
     StreamsRouteRepository,
-    'POST /api/streams/{id}/_fork'
+    'POST /api/streams/{name}/_fork'
   >['params']['body']
 ) {
   return client
-    .fetch(`POST /api/streams/{id}/_fork`, {
+    .fetch(`POST /api/streams/{name}/_fork`, {
       params: {
         path: {
-          id: root,
+          name: root,
         },
         body,
       },
@@ -63,10 +63,10 @@ export async function putStream(
   expectStatusCode: number = 200
 ) {
   return await apiClient
-    .fetch('PUT /api/streams/{id}', {
+    .fetch('PUT /api/streams/{name}', {
       params: {
         path: {
-          id: name,
+          name,
         },
         body,
       },
@@ -81,10 +81,10 @@ export async function getStream(
   expectStatusCode: number = 200
 ) {
   return await apiClient
-    .fetch('GET /api/streams/{id}', {
+    .fetch('GET /api/streams/{name}', {
       params: {
         path: {
-          id: name,
+          name,
         },
       },
     })

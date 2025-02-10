@@ -133,11 +133,11 @@ export const useDefinition = (
   const saveChanges = async () => {
     startsSaving();
     try {
-      await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
+      await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
         signal: abortController.signal,
         params: {
           path: {
-            id: definition.stream.name,
+            name: definition.stream.name,
           },
           body: {
             ingest: {
