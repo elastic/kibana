@@ -27,14 +27,15 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
   const locator = locators.get(syntheticsMonitorDetailLocatorID);
 
   const { 'monitor.name': name, 'observer.geo.name': location } = slo.groupings;
-  const { configId, locationId } = slo.meta?.synthetics || {};
+
+  const { locationId, monitorId } = slo.meta?.synthetics || {};
 
   const indicator = slo.indicator;
   if (!syntheticsAvailabilityIndicatorSchema.is(indicator)) {
     return null;
   }
 
-  const onMonitorClick = () => locator?.navigate({ configId, locationId });
+  const onMonitorClick = () => locator?.navigate({ monitorId, locationId });
   const showOverviewItem = name || location;
 
   if (!showOverviewItem) {

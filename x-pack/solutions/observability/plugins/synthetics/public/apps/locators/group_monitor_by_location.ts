@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
+import { syntheticsMonitorLocationQueryLocatorID } from '@kbn/observability-plugin/common';
 
 async function navigate({
   monitorId,
@@ -24,12 +24,12 @@ async function navigate({
 
   return {
     app: 'synthetics',
-    path: `/monitor/${monitorId}${queryParam}`,
+    path: `/monitor/${queryParam}`,
     state: {},
   };
 }
 
 export const monitorDetailNavigatorParams = {
-  id: syntheticsMonitorDetailLocatorID,
+  id: syntheticsMonitorLocationQueryLocatorID,
   getLocation: navigate,
 };
