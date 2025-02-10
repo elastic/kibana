@@ -23,6 +23,7 @@ import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_i
 import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
+import { getErrorText } from '../utils';
 
 interface MatchParams {
   name: string;
@@ -136,7 +137,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
             />
           </h2>
         }
-        body={<p>{error.message}</p>}
+        body={<p>{getErrorText(error)}</p>}
         actions={
           <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
             <FormattedMessage

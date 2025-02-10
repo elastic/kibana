@@ -61,6 +61,11 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getSiemMigrationsFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
 }));
 
 export const createProductFeaturesServiceMock = (
@@ -180,6 +185,21 @@ export const createProductFeaturesServiceMock = (
                 },
                 read: {
                   ui: ['entity-analytics'],
+                },
+              },
+            },
+          ])
+        )
+      ),
+      siemMigrations: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  api: ['test-api-action'],
+                  ui: ['test-ui-action'],
                 },
               },
             },

@@ -44,7 +44,6 @@ interface Props {
   filePath: string | null | undefined;
   hostName: string | null | undefined;
   id: string;
-  isDraggable?: boolean;
   message: string | null | undefined;
   outcome: string | null | undefined;
   packageName: string | null | undefined;
@@ -87,7 +86,6 @@ export const SystemGenericFileLine = React.memo<Props>(
     filePath,
     hostName,
     id,
-    isDraggable,
     message,
     outcome,
     packageName,
@@ -117,7 +115,6 @@ export const SystemGenericFileLine = React.memo<Props>(
         <UserHostWorkingDir
           eventId={id}
           contextId={contextId}
-          isDraggable={isDraggable}
           userDomain={userDomain}
           userName={userName}
           workingDirectory={workingDirectory}
@@ -136,7 +133,6 @@ export const SystemGenericFileLine = React.memo<Props>(
             fileExtOriginalPath={fileExtOriginalPath}
             fileName={fileName}
             filePath={filePath}
-            isDraggable={isDraggable}
           />
         )}
         {showVia(eventAction) && (
@@ -150,24 +146,16 @@ export const SystemGenericFileLine = React.memo<Props>(
             endgamePid={endgamePid}
             endgameProcessName={endgameProcessName}
             eventId={id}
-            isDraggable={isDraggable}
             processPid={processPid}
             processName={processName}
             processExecutable={processExecutable}
           />
         </TokensFlexItem>
-        <Args
-          args={args}
-          contextId={contextId}
-          eventId={id}
-          processTitle={processTitle}
-          isDraggable={isDraggable}
-        />
+        <Args args={args} contextId={contextId} eventId={id} processTitle={processTitle} />
         <ExitCodeDraggable
           contextId={contextId}
           endgameExitCode={endgameExitCode}
           eventId={id}
-          isDraggable={isDraggable}
           processExitCode={processExitCode}
           text={i18n.WITH_EXIT_CODE}
         />
@@ -176,7 +164,6 @@ export const SystemGenericFileLine = React.memo<Props>(
             contextId={contextId}
             endgameParentProcessName={endgameParentProcessName}
             eventId={id}
-            isDraggable={isDraggable}
             processParentName={processParentName}
             processParentPid={processParentPid}
             processPpid={processPpid}
@@ -193,7 +180,6 @@ export const SystemGenericFileLine = React.memo<Props>(
             contextId={contextId}
             eventId={id}
             field="event.outcome"
-            isDraggable={isDraggable}
             queryValue={outcome}
             value={outcome}
             isAggregatable={true}
@@ -203,34 +189,22 @@ export const SystemGenericFileLine = React.memo<Props>(
         <AuthSsh
           contextId={contextId}
           eventId={id}
-          isDraggable={isDraggable}
           sshSignature={sshSignature}
           sshMethod={sshMethod}
         />
         <Package
           contextId={contextId}
           eventId={id}
-          isDraggable={isDraggable}
           packageName={packageName}
           packageSummary={packageSummary}
           packageVersion={packageVersion}
         />
       </EuiFlexGroup>
       {!skipRedundantFileDetails && (
-        <FileHash
-          contextId={contextId}
-          eventId={id}
-          fileHashSha256={fileHashSha256}
-          isDraggable={isDraggable}
-        />
+        <FileHash contextId={contextId} eventId={id} fileHashSha256={fileHashSha256} />
       )}
       {!skipRedundantProcessDetails && (
-        <ProcessHash
-          contextId={contextId}
-          eventId={id}
-          isDraggable={isDraggable}
-          processHashSha256={processHashSha256}
-        />
+        <ProcessHash contextId={contextId} eventId={id} processHashSha256={processHashSha256} />
       )}
 
       {message != null && showMessage && (
@@ -254,7 +228,6 @@ SystemGenericFileLine.displayName = 'SystemGenericFileLine';
 interface GenericDetailsProps {
   contextId: string;
   data: Ecs;
-  isDraggable?: boolean;
   showMessage?: boolean;
   skipRedundantFileDetails?: boolean;
   skipRedundantProcessDetails?: boolean;
@@ -266,7 +239,6 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
   ({
     contextId,
     data,
-    isDraggable,
     showMessage = true,
     skipRedundantFileDetails = false,
     skipRedundantProcessDetails = false,
@@ -351,10 +323,9 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
           sshSignature={sshSignature}
           sshMethod={sshMethod}
           outcome={outcome}
-          isDraggable={isDraggable}
         />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
+        <NetflowRenderer data={data} timelineId={timelineId} />
       </Details>
     );
   }

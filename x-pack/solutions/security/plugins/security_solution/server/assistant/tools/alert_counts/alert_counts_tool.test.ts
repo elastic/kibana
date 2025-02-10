@@ -13,7 +13,7 @@ import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 describe('AlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';
@@ -32,7 +32,7 @@ describe('AlertCountsTool', () => {
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const logger = loggerMock.create();
-  const contentReferencesStore = contentReferencesStoreFactoryMock();
+  const contentReferencesStore = newContentReferencesStoreMock();
   const rest = {
     isEnabledKnowledgeBase,
     chain,
@@ -191,7 +191,7 @@ describe('AlertCountsTool', () => {
         replacements,
         request,
         ...rest,
-        contentReferencesStore: false,
+        contentReferencesStore: undefined,
       }) as DynamicTool;
 
       const result = await tool.func('');

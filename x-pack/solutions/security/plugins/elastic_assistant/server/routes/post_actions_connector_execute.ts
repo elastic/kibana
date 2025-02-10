@@ -12,7 +12,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
 import {
   API_VERSIONS,
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
@@ -119,8 +119,9 @@ export const postActionsConnectorExecuteRoute = (
             });
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
 
-          const contentReferencesStore =
-            contentReferencesEnabled && contentReferencesStoreFactory();
+          const contentReferencesStore = contentReferencesEnabled
+            ? newContentReferencesStore()
+            : undefined;
 
           onLlmResponse = async (
             content: string,

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { WiredStreamDefinition, getSegments } from '@kbn/streams-schema';
+
+export const LOGS_ROOT_STREAM_NAME = 'logs';
 
 export const rootStreamDefinition: WiredStreamDefinition = {
-  name: 'logs',
+  name: LOGS_ROOT_STREAM_NAME,
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
@@ -34,3 +36,8 @@ export const rootStreamDefinition: WiredStreamDefinition = {
     },
   },
 };
+
+export function hasSupportedStreamsRoot(streamName: string) {
+  const root = getSegments(streamName)[0];
+  return [LOGS_ROOT_STREAM_NAME].includes(root);
+}
