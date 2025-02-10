@@ -22,14 +22,16 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
     services: { dataStreamsClient },
   } = useKibana();
 
-  const statsFetch = useStreamsAppFetch(() => {
+  const statsFetch = useStreamsAppFetch(async () => {
     if (!definition) {
       return;
     }
 
-    return dataStreamsClient.then((client) =>
-      client.getDataStreamsStats({ types: [], datasetQuery: definition.stream.name })
-    );
+    const client = await dataStreamsClient;
+    return client.getDataStreamsStats({
+      datasetQuery: definition.stream.name,
+      includeCreationDate: true,
+    });
   }, [dataStreamsClient, definition]);
 
   const stats = useMemo<DataStreamStats | undefined>(() => {
