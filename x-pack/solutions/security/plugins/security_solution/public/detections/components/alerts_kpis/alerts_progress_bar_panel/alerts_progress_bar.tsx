@@ -97,7 +97,6 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   const labelWithHoverActions = (key: string) => {
     return (
       <DefaultDraggable
-        isDraggable={false}
         field={groupBySelection}
         hideTopN={true}
         id={`top-alerts-${key}`}

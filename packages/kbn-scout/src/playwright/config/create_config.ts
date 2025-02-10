@@ -17,7 +17,15 @@ import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
-  const runId = generateTestRunId();
+  /**
+   * Playwright loads the config file multiple times, so we need to generate a unique run id
+   * and store it in the environment to be used across all config function calls.
+   */
+  let runId = process.env.TEST_RUN_ID;
+  if (!runId) {
+    runId = generateTestRunId();
+    process.env.TEST_RUN_ID = runId;
+  }
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,

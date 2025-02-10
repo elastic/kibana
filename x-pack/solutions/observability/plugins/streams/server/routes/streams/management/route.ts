@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { RecursiveRecord, conditionSchema } from '@kbn/streams-schema';
+import {
+  RecursiveRecord,
+  conditionSchema,
+  conditionToQueryDsl,
+  getFields,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
-import { getFields } from '../../../lib/streams/helpers/condition_fields';
-import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
