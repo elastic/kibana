@@ -54,7 +54,7 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
       env:
-        NODE_OPTIONS: "--max-old-space-size=6144"
+        NODE_OPTIONS: "--max-old-space-size=8192"
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: ${{ env.CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES }}
       with:
         category: "/language:${{matrix.language}}"
