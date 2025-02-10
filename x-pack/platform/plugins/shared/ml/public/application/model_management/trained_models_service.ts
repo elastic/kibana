@@ -13,7 +13,6 @@ import {
   forkJoin,
   mergeMap,
   takeWhile,
-  skip,
   exhaustMap,
   firstValueFrom,
   BehaviorSubject,
@@ -28,6 +27,7 @@ import {
   withLatestFrom,
   filter,
   catchError,
+  debounceTime,
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
@@ -81,6 +81,7 @@ export class TrainedModelsService {
   private savedObjectsApiService!: SavedObjectsApiService;
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
+  private processedDeployments = new Set<string>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -340,6 +341,7 @@ export class TrainedModelsService {
       this._reloadSubject$
         .pipe(
           tap(() => this._isLoading$.next(true)),
+          debounceTime(100),
           switchMap(() => {
             const modelsList$ = from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
               catchError((error) => {
@@ -383,7 +385,31 @@ export class TrainedModelsService {
     this.subscription.add(
       this._scheduledDeployments$
         .pipe(
-          distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+          filter((deployments) => deployments.length > 0),
+          tap(() => this.fetchModels()),
+          switchMap((deployments) =>
+            this._isLoading$.pipe(
+              filter((isLoading) => !isLoading),
+              take(1),
+              map(() => deployments)
+            )
+          ),
+          // Check if the model is already deployed and remove it from the scheduled deployments if so
+          switchMap((deployments) => {
+            const filteredDeployments = deployments.filter((deployment) => {
+              const model = this.modelItems.find((m) => m.model_id === deployment.modelId);
+              return !(model && this.isModelAlreadyDeployed(model, deployment));
+            });
+
+            return of(filteredDeployments).pipe(
+              tap((filtered) => {
+                if (!isEqual(deployments, filtered)) {
+                  this.setScheduledDeployments?.(filtered);
+                }
+              }),
+              filter((filtered) => isEqual(deployments, filtered)) // Only proceed if no changes were made
+            );
+          }),
           switchMap((deployments) =>
             from(deployments).pipe(mergeMap((deployment) => this.handleDeployment$(deployment)))
           )
@@ -394,32 +420,11 @@ export class TrainedModelsService {
 
   private handleDeployment$(deployment: StartAllocationParams) {
     return of(deployment).pipe(
-      tap(() => this.fetchModels()),
-      // Make sure we operate on the latest model items
-      switchMap(() =>
-        this._modelItems$.pipe(
-          skip(1),
-          take(1),
-          tap((modelItems) => {
-            const model = modelItems.find((m) => m.model_id === deployment.modelId);
-            // If the model is already deployed, remove from schedule
-            if (model && this.isModelAlreadyDeployed(model, deployment)) {
-              this.removeScheduledDeployments({
-                deploymentId: deployment.deploymentParams.deployment_id!,
-              });
-            }
-          })
-        )
-      ),
-      // Stop further processing if the model is already deployed
-      filter((modelItems) => {
-        const model = modelItems.find((m) => m.model_id === deployment.modelId);
-        return !(model && this.isModelAlreadyDeployed(model, deployment));
-      }),
       // Wait for the model to be ready for deployment (downloaded or started)
       switchMap(() => {
         return this.waitForModelReady(deployment.modelId);
       }),
+      tap(() => this.processedDeployments.add(deployment.deploymentParams.deployment_id!)),
       tap(() => this.setDeployingStateForModel(deployment.modelId)),
       exhaustMap(() => {
         return firstValueFrom(
@@ -453,6 +458,7 @@ export class TrainedModelsService {
                 this.removeScheduledDeployments({
                   deploymentId: deployment.deploymentParams.deployment_id!,
                 });
+                this.processedDeployments.delete(deployment.deploymentParams.deployment_id!);
                 // Manually update the BehaviorSubject to ensure proper cleanup
                 // if user navigates away, as localStorage hook won't be available to handle updates
                 const updatedDeployments = this._scheduledDeployments$
@@ -472,7 +478,8 @@ export class TrainedModelsService {
     return !!(
       model &&
       isNLPModelItem(model) &&
-      model.deployment_ids.includes(deployment.deploymentParams.deployment_id!)
+      (model.deployment_ids.includes(deployment.deploymentParams.deployment_id!) ||
+        this.processedDeployments.has(deployment.deploymentParams.deployment_id!))
     );
   }
 
