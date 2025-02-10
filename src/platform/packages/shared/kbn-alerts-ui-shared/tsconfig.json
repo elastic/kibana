@@ -34,5 +34,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/shared-ux-table-persist",
+    "@kbn/alerting-plugin",
+    "@kbn/actions-plugin",
   ]
 }
