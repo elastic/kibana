@@ -3337,7 +3337,7 @@ const matchOperatorDefinition: FunctionDefinition = {
   supportedOptions: [],
   validate: undefined,
   examples: [
-    'FROM books \n| WHERE MATCH(author, "Faulkner")\n| KEEP book_no, author \n| SORT book_no \n| LIMIT 5;',
+    'FROM books \n| WHERE MATCH(author, "Faulkner")\n| KEEP book_no, author \n| SORT book_no \n| LIMIT 5',
   ],
 };
 
