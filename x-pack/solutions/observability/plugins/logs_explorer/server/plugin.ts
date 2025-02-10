@@ -6,13 +6,10 @@
  */
 
 import { Plugin, CoreSetup } from '@kbn/core/server';
-import { uiSettings } from '../common/ui_settings';
 import type { LogsExplorerSetupDeps } from './types';
 
 export class LogsExplorerServerPlugin implements Plugin {
   setup(core: CoreSetup, plugins: LogsExplorerSetupDeps) {
-    core.uiSettings.register(uiSettings);
-
     return {};
   }
 
