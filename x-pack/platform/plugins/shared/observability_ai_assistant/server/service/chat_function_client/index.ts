@@ -167,7 +167,7 @@ export class ChatFunctionClient {
     messages,
     signal,
     connectorId,
-    useSimulatedFunctionCalling,
+    simulateFunctionCalling,
   }: {
     chat: FunctionCallChatFunction;
     name: string;
@@ -175,7 +175,7 @@ export class ChatFunctionClient {
     messages: Message[];
     signal: AbortSignal;
     connectorId: string;
-    useSimulatedFunctionCalling: boolean;
+    simulateFunctionCalling: boolean;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -194,7 +194,7 @@ export class ChatFunctionClient {
         screenContexts: this.screenContexts,
         chat,
         connectorId,
-        useSimulatedFunctionCalling,
+        simulateFunctionCalling,
       },
       signal
     );
