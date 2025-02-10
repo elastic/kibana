@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALL_LOGS_DATA_VIEW_ID = 'discover-observability-root-profile-all-logs';
+export const ALL_LOGS_DATA_VIEW_ID = 'discover-observability-solution-all-logs';
 
 export const getAllLogsDataViewSpec = ({
   allLogsIndexPattern,
