@@ -183,10 +183,17 @@ export function storedPackagePoliciesToAgentPermissions(
     }
     // namespace is either the package policy's or the agent policy one
     const namespace = packagePolicy?.namespace || agentPolicyNamespace;
-    return maybeAddAgentlessPermissions(packagePolicy, {
-      indices: dataStreamsForPermissions.map((ds) => getDataStreamPrivileges(ds, namespace)),
-      ...clusterRoleDescriptor,
-    });
+
+    return [
+      packagePolicy.id,
+      maybeAddAdditionnalPackagePoliciesPermissions(
+        packagePolicy,
+        maybeAddAgentlessPermissions(packagePolicy, {
+          indices: dataStreamsForPermissions.map((ds) => getDataStreamPrivileges(ds, namespace)),
+          ...clusterRoleDescriptor,
+        })
+      ),
+    ];
   });
 
   return Object.fromEntries(permissionEntries);
@@ -254,15 +261,33 @@ function universalProfilingPermissions(packagePolicyId: string): [string, Securi
 function maybeAddAgentlessPermissions(
   packagePolicy: PackagePolicy,
   existing: SecurityRoleDescriptor
-): [string, SecurityRoleDescriptor] {
+): SecurityRoleDescriptor {
   if (!packagePolicy.supports_agentless) {
-    return [packagePolicy.id, existing];
+    return existing;
   }
   existing.indices!.push({
     names: ['agentless-*'],
     privileges: AGENTLESS_INDEX_PERMISSIONS,
   });
-  return [packagePolicy.id, existing];
+  return existing;
+}
+
+function maybeAddAdditionnalPackagePoliciesPermissions(
+  packagePolicy: PackagePolicy,
+  existing: SecurityRoleDescriptor
+): SecurityRoleDescriptor {
+  if (
+    !packagePolicy.additional_datastreams_permissions ||
+    !packagePolicy.additional_datastreams_permissions.length
+  ) {
+    return existing;
+  }
+
+  existing.indices!.push({
+    names: packagePolicy.additional_datastreams_permissions,
+    privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
+  });
+  return existing;
 }
 
 function apmPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {

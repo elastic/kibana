@@ -182,6 +182,14 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
+  // TODO add validations
+  additional_datastreams_permissions: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      meta: {
+        description: 'Additionnal datstream permissions, that will be added to the agent policy.',
+      },
+    })
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -305,6 +313,14 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
         },
       })
     )
+  ),
+  // TODO add validation
+  additional_datastreams_permissions: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      meta: {
+        description: 'Additionnal datstream permissions, that will be added to the agent policy.',
+      },
+    })
   ),
 });
 
