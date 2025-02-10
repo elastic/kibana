@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { RulesSettingsAlertDeletionSection } from './rules_settings_alert_deletion_section';
+import { RulesSettingsAlertsDeletionSection } from './rules_settings_alert_deletion_section';
 import { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
 
 const initialSettings: RulesSettingsAlertsDeletionProperties = {
@@ -19,12 +19,12 @@ const initialSettings: RulesSettingsAlertsDeletionProperties = {
   isInactiveAlertsDeletionEnabled: true,
 };
 
-describe('RulesSettingsAlertDeletionSection', () => {
+describe('RulesSettingsAlertsDeletionSection', () => {
   const noop = () => {};
 
   test('should enable the active alert threshold input when the active alert switch is enabled', async () => {
     render(
-      <RulesSettingsAlertDeletionSection
+      <RulesSettingsAlertsDeletionSection
         onChange={noop}
         settings={initialSettings}
         canWrite={true}
@@ -42,7 +42,7 @@ describe('RulesSettingsAlertDeletionSection', () => {
     };
 
     render(
-      <RulesSettingsAlertDeletionSection
+      <RulesSettingsAlertsDeletionSection
         onChange={noop}
         settings={settings}
         canWrite={true}
@@ -58,7 +58,7 @@ describe('RulesSettingsAlertDeletionSection', () => {
 
   test('should enable the inactive alert threshold input when the inactive alert switch is enabled', async () => {
     render(
-      <RulesSettingsAlertDeletionSection
+      <RulesSettingsAlertsDeletionSection
         onChange={noop}
         settings={initialSettings}
         canWrite={true}
@@ -76,7 +76,7 @@ describe('RulesSettingsAlertDeletionSection', () => {
     };
 
     render(
-      <RulesSettingsAlertDeletionSection
+      <RulesSettingsAlertsDeletionSection
         onChange={noop}
         settings={settings}
         canWrite={true}
@@ -89,7 +89,7 @@ describe('RulesSettingsAlertDeletionSection', () => {
 
   test('should show error message when error', () => {
     render(
-      <RulesSettingsAlertDeletionSection
+      <RulesSettingsAlertsDeletionSection
         onChange={noop}
         settings={initialSettings}
         canWrite={true}

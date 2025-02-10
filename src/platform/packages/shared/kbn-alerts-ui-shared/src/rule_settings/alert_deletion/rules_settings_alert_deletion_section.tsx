@@ -38,7 +38,7 @@ interface Props {
   canWrite: boolean;
   hasError: boolean;
 }
-export const RulesSettingsAlertDeletionSection = memo((props: Props) => {
+export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
   const { onChange, settings, hasError, canWrite } = props;
 
   if (hasError || !settings) {
