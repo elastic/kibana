@@ -167,11 +167,25 @@ export class AgentlessConnectorsInfraService {
     this.logger.debug(`Latest package version for ${pkgName} is ${pkgVersion}`);
 
     const createdPolicy = await this.agentPolicyService.create(this.soClient, this.esClient, {
-      name: `${connector.service_type} connector: ${connector.id}`,
+      name: `Agentless policy for ${connector.service_type} connector: ${connector.id}`,
       description: `Automatically generated on ${new Date(Date.now()).toISOString()}`,
+      global_data_tags: [
+        {
+          name: 'organization',
+          value: 'elastic',
+        },
+        {
+          name: 'division',
+          value: 'engineering',
+        },
+        {
+          name: 'team',
+          value: 'search-extract-and-transform',
+        },
+      ],
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
-      inactivity_timeout: 1209600,
+      inactivity_timeout: 3600,
       is_protected: false,
       supports_agentless: true,
     });
@@ -203,6 +217,7 @@ export class AgentlessConnectorsInfraService {
           streams: [],
         },
       ],
+      supports_agentless: true,
     });
 
     this.logger.info(
