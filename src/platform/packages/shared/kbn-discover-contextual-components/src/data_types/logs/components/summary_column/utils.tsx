@@ -15,23 +15,18 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   AGENT_NAME_FIELD,
-  CLOUD_INSTANCE_ID_FIELD,
-  CONTAINER_ID_FIELD,
-  CONTAINER_NAME_FIELD,
+  DATASTREAM_TYPE_FIELD,
   DURATION_FIELDS,
   EVENT_OUTCOME_FIELD,
   FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT,
-  HOST_NAME_FIELD,
-  ORCHESTRATOR_CLUSTER_NAME_FIELD,
-  ORCHESTRATOR_NAMESPACE_FIELD,
-  ORCHESTRATOR_RESOURCE_ID_FIELD,
   SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
-  SPAN_NAME_FIELD,
   TRANSACTION_DURATION_FIELD,
-  TRANSACTION_NAME_FIELD,
+  TRACE_FIELDS,
+  DataTableRecord,
+  getFieldValue,
+  RESOURCE_FIELDS,
 } from '@kbn/discover-utils';
-import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import {
   LogDocument,
   ResourceFields,
@@ -45,52 +40,29 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 import { EventOutcomeBadgeWithActions } from '../event_outcome_badge';
+
 /**
- * getUnformattedResourceFields definitions
+ * Takes a `DataTableRecord` compatible document, and then with an array
+ * of field names, constructs an object containing extracted data from the
+ * `DataTableRecord`, excluding all `undefined`/`null` cases.
  */
-export const getUnformattedResourceFields = (doc: LogDocument): Readonly<ResourceFields> => {
-  const serviceName = getFieldValue(doc, SERVICE_NAME_FIELD);
-  const hostName = getFieldValue(doc, HOST_NAME_FIELD);
-  const agentName = getFieldValue(doc, AGENT_NAME_FIELD);
-  const orchestratorClusterName = getFieldValue(doc, ORCHESTRATOR_CLUSTER_NAME_FIELD);
-  const orchestratorResourceId = getFieldValue(doc, ORCHESTRATOR_RESOURCE_ID_FIELD);
-  const orchestratorNamespace = getFieldValue(doc, ORCHESTRATOR_NAMESPACE_FIELD);
-  const containerName = getFieldValue(doc, CONTAINER_NAME_FIELD);
-  const containerId = getFieldValue(doc, CONTAINER_ID_FIELD);
-  const cloudInstanceId = getFieldValue(doc, CLOUD_INSTANCE_ID_FIELD);
+const getUnformattedFields = <
+  Document extends DataTableRecord,
+  Fields extends string & keyof Document['flattened'],
+  Formatted extends Record<Fields, NonNullable<Document['flattened'][Fields]>>
+>(
+  doc: Document,
+  fields: readonly Fields[]
+): Readonly<Formatted> =>
+  fields.reduce((acc, field) => {
+    const fieldValue = getFieldValue(doc, field);
 
-  return {
-    [SERVICE_NAME_FIELD]: serviceName,
-    [HOST_NAME_FIELD]: hostName,
-    [AGENT_NAME_FIELD]: agentName,
-    [ORCHESTRATOR_CLUSTER_NAME_FIELD]: orchestratorClusterName,
-    [ORCHESTRATOR_RESOURCE_ID_FIELD]: orchestratorResourceId,
-    [ORCHESTRATOR_NAMESPACE_FIELD]: orchestratorNamespace,
-    [CONTAINER_NAME_FIELD]: containerName,
-    [CONTAINER_ID_FIELD]: containerId,
-    [CLOUD_INSTANCE_ID_FIELD]: cloudInstanceId,
-  };
-};
+    if (fieldValue != null) {
+      acc[field] = fieldValue as Formatted[Fields];
+    }
 
-export const getUnformattedTraceBadgeFields = (doc: TraceDocument): Readonly<TraceFields> => {
-  const serviceName = getFieldValue(doc, SERVICE_NAME_FIELD);
-  const eventOutcome = getFieldValue(doc, EVENT_OUTCOME_FIELD);
-  const agentName = getFieldValue(doc, AGENT_NAME_FIELD);
-  const transactionName = getFieldValue(doc, TRANSACTION_NAME_FIELD);
-  const transactionDuration = getFieldValue(doc, TRANSACTION_DURATION_FIELD);
-  const spanName = getFieldValue(doc, SPAN_NAME_FIELD);
-  const spanDuration = getFieldValue(doc, SPAN_DURATION_FIELD);
-
-  return {
-    [SERVICE_NAME_FIELD]: serviceName,
-    [EVENT_OUTCOME_FIELD]: eventOutcome,
-    [AGENT_NAME_FIELD]: agentName,
-    [TRANSACTION_NAME_FIELD]: transactionName,
-    [TRANSACTION_DURATION_FIELD]: transactionDuration,
-    [SPAN_NAME_FIELD]: spanName,
-    [SPAN_DURATION_FIELD]: spanDuration,
-  };
-};
+    return acc;
+  }, {} as Formatted);
 
 const DurationIcon = () => {
   const { euiTheme } = useEuiTheme();
@@ -158,7 +130,7 @@ const getResourceBadgeIcon = (
       return () => {
         const { euiTheme } = useEuiTheme();
 
-        const value = (fields as Readonly<TraceFields>)[name as keyof TraceFields];
+        const value = (fields as Readonly<TraceFields>)[name];
 
         const color = value === 'failure' ? 'danger' : value === 'success' ? 'success' : 'subdued';
 
@@ -179,26 +151,29 @@ const getResourceBadgeIcon = (
   }
 };
 
-export const createTraceBadgeFields = (
-  row: DataTableRecord,
+export const isTraceDocument = (row: DataTableRecord): row is TraceDocument =>
+  getFieldValue(row, DATASTREAM_TYPE_FIELD) === 'traces';
+
+export const createTraceFields = (
+  row: TraceDocument,
   dataView: DataView,
   core: CoreStart,
   share?: SharePluginStart
 ): ResourceFieldDescriptor[] => {
-  const traceBadgeFields = getUnformattedTraceBadgeFields(row as TraceDocument);
-  const availableFields = getAvailableTraceBadgeFields(traceBadgeFields);
+  const traceFields = getUnformattedFields(row, TRACE_FIELDS);
+  const availableFields = getAvailableTraceBadgeFields(traceFields);
 
   return availableFields.map((name) => {
     const field = dataView.getFieldByName(name);
     const formatter = field && dataView.getFormatterForField(field);
-    const rawValue = traceBadgeFields[name];
+    const rawValue = traceFields[name];
     const formattedField = formatter ? formatter.convert(rawValue) : `${rawValue}`;
 
     return {
       name,
       value: DURATION_FIELDS.includes(name) ? `${formattedField}µs` : formattedField,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
-      Icon: getResourceBadgeIcon(name, traceBadgeFields),
+      Icon: getResourceBadgeIcon(name, traceFields),
     };
   });
 };
@@ -208,12 +183,12 @@ export const createResourceFields = (
   core: CoreStart,
   share?: SharePluginStart
 ): ResourceFieldDescriptor[] => {
-  const resourceDoc = getUnformattedResourceFields(row as LogDocument);
+  const resourceDoc = getUnformattedFields(row as LogDocument, RESOURCE_FIELDS);
   const availableResourceFields = getAvailableResourceFields(resourceDoc);
 
   return availableResourceFields.map((name) => ({
     name,
-    value: resourceDoc[name] as string,
+    value: resourceDoc[name],
     ResourceBadge: getResourceBadgeComponent(name, core, share),
     Icon: getResourceBadgeIcon(name, resourceDoc),
   }));

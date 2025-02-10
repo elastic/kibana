@@ -23,8 +23,9 @@ import { Resource } from './resource';
 import { Content } from './content';
 import {
   createResourceFields,
-  createTraceBadgeFields,
+  createTraceFields,
   formatJsonDocumentForContent,
+  isTraceDocument,
 } from './utils';
 import {
   closeCellActionPopoverText,
@@ -74,9 +75,10 @@ const SummaryCell = ({
   const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
   const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
-  const resourceFields = isTracesSummary
-    ? createTraceBadgeFields(row, dataView, core, share)
-    : createResourceFields(row, core, share);
+  const resourceFields =
+    isTracesSummary && isTraceDocument(row)
+      ? createTraceFields(row, dataView, core, share)
+      : createResourceFields(row, core, share);
   const shouldRenderResource = resourceFields.length > 0;
 
   return isSingleLine ? (
@@ -110,9 +112,10 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { row, dataView, fieldFormats, onFilter, closePopover, share, core, isTracesSummary } =
     props;
 
-  const resourceFields = isTracesSummary
-    ? createTraceBadgeFields(row, dataView, core, share)
-    : createResourceFields(row, core, share);
+  const resourceFields =
+    isTracesSummary && isTraceDocument(row)
+      ? createTraceFields(row, dataView, core, share)
+      : createResourceFields(row, core, share);
   const shouldRenderResource = resourceFields.length > 0;
 
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });

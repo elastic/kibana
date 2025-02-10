@@ -22,7 +22,6 @@ export const TRANSACTION_NAME_FIELD = 'transaction.name';
 export const TRANSACTION_DURATION_FIELD = 'transaction.duration.us';
 export const SPAN_NAME_FIELD = 'span.name';
 export const SPAN_DURATION_FIELD = 'span.duration.us';
-export const DURATION_FIELDS: readonly string[] = [SPAN_DURATION_FIELD, TRANSACTION_DURATION_FIELD];
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';
@@ -38,6 +37,7 @@ export const CLOUD_PROJECT_ID_FIELD = 'cloud.project.id';
 export const CLOUD_INSTANCE_ID_FIELD = 'cloud.instance.id';
 export const SERVICE_NAME_FIELD = 'service.name';
 export const ORCHESTRATOR_CLUSTER_NAME_FIELD = 'orchestrator.cluster.name';
+export const ORCHESTRATOR_CLUSTER_ID_FIELD = 'orchestrator.cluster.id';
 export const ORCHESTRATOR_RESOURCE_ID_FIELD = 'orchestrator.resource.id';
 export const ORCHESTRATOR_NAMESPACE_FIELD = 'orchestrator.namespace';
 export const CONTAINER_NAME_FIELD = 'container.name';

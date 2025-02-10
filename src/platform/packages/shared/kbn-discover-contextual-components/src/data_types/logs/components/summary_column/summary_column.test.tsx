@@ -182,6 +182,7 @@ describe('SummaryColumn', () => {
         'event.outcome': 'success',
         'transaction.name': 'GET /',
         'transaction.duration.us': 100,
+        'data_stream.type': 'traces',
       });
       renderSummary(record, {
         density: DataGridDensity.COMPACT,
