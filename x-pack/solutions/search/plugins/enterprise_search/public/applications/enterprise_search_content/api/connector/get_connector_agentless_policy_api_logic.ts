@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Agent } from '@kbn/fleet-plugin/common';
 import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -17,9 +18,7 @@ export interface GetConnectorAgentlessPolicyApiResponse {
     id: string;
     name: string;
   };
-  agent: {
-    id: string;
-  };
+  agent: Pick<Agent, 'last_checkin_status' | 'id' | 'status'>;
 }
 
 export const getConnectorAgentlessPolicy = async ({

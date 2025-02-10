@@ -257,11 +257,13 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         (index && [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus)),
     ],
     isWaitingOnAgentlessDeployment: [
-      () => [selectors.connector],
+      () => [selectors.connector, ],
       (connector: Connector) => {
         if (!connector || !connector.is_native) return false;
 
-        return !hasConnectorBeenSeenRecently(connector);
+        const connectorNotCheckedInYet = connector.last_seen == null;
+
+        return connectorNotCheckedInYet;
       },
     ],
     pipelineData: [

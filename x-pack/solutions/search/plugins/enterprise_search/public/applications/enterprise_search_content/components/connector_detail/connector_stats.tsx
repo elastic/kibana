@@ -10,6 +10,7 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
+  EuiBadgeProps,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
@@ -23,6 +24,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,7 +35,13 @@ import { EuiIconPlugs } from '@kbn/search-shared-ui';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
-import { CONNECTOR_DETAIL_TAB_PATH, CONNECTOR_INTEGRATION_DETAIL_PATH } from '../../routes';
+import {
+  CONNECTOR_DETAIL_TAB_PATH,
+  CONNECTOR_INTEGRATION_DETAIL_PATH,
+  FLEET_AGENT_DETAIL_LOGS_PATH,
+  FLEET_AGENT_DETAIL_PATH,
+  FLEET_POLICY_DETAIL_PATH,
+} from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
@@ -41,16 +49,108 @@ import {
 
 import { ConnectorDetailTabId } from './connector_detail';
 import { HttpLogic } from '../../../shared/http';
+import { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
+
+import { Agent } from '@kbn/fleet-plugin/common';
+
+import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 
 export interface ConnectorStatsProps {
   connector: Connector;
   indexData?: ElasticsearchIndex;
+  agentlessOverview?: GetConnectorAgentlessPolicyApiResponse;
 }
 
 export interface StatCardProps {
   content: ReactNode;
   footer: ReactNode;
   title: string;
+}
+
+function getStatusComponent({
+  status,
+  ...restOfProps
+}: {
+  status: Agent['status'];
+} & EuiBadgeProps): React.ReactElement {
+  switch (status) {
+    case 'error':
+    case 'degraded':
+      return (
+        <EuiBadge color="warning" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.unhealthyStatusText"
+            defaultMessage="Unhealthy"
+          />
+        </EuiBadge>
+      );
+    case 'inactive':
+      return (
+        <EuiBadge color={euiVars.euiColorDarkShade} {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.inactiveStatusText"
+            defaultMessage="Inactive"
+          />
+        </EuiBadge>
+      );
+    case 'offline':
+      return (
+        <EuiBadge color="default" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.offlineStatusText"
+            defaultMessage="Offline"
+          />
+        </EuiBadge>
+      );
+    case 'uninstalled':
+      return (
+        <EuiBadge color="default" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.uninstalledStatusText"
+            defaultMessage="Uninstalled"
+          />
+        </EuiBadge>
+      );
+    case 'orphaned':
+      return (
+        <EuiBadge color="warning" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.orphanedStatusText"
+            defaultMessage="Orphaned"
+          />
+        </EuiBadge>
+      );
+
+    case 'unenrolling':
+    case 'enrolling':
+    case 'updating':
+      return (
+        <EuiBadge color="primary" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.updatingStatusText"
+            defaultMessage="Updating"
+          />
+        </EuiBadge>
+      );
+    case 'unenrolled':
+      return (
+        <EuiBadge color={euiVars.euiColorDisabled} {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.unenrolledStatusText"
+            defaultMessage="Unenrolled"
+          />
+        </EuiBadge>
+      );
+    default:
+      return (
+        <EuiBadge color="success" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.healthyStatusText"
+            defaultMessage="Healthy"
+          />
+        </EuiBadge>
+      );
+  }
 }
 
 export const StatCard: React.FC<StatCardProps> = ({ title, content, footer }) => {
@@ -94,11 +194,32 @@ const configureLabel = i18n.translate(
   }
 );
 
-export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
+const noAgentLabel = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.noAgentFound',
+  {
+    defaultMessage: 'No agent found',
+  }
+);
+
+const noPolicyLabel = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.noPolicyFound',
+  {
+    defaultMessage: 'No policy found',
+  }
+);
+
+export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
+  connector,
+  indexData,
+  agentlessOverview,
+}) => {
   const { connectorTypes } = useValues(KibanaLogic);
   const { http } = useValues(HttpLogic);
   const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
   const columns = connector.is_native ? 2 : 3;
+
+  const agnetlessPolicyExists = !!agentlessOverview?.policy;
+  const agentlessAgentExists = !!agentlessOverview?.agent;
 
   return (
     <EuiFlexGrid columns={columns} direction="row">
@@ -329,13 +450,13 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
             content={
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  {/* TODO: Get related Integration name from Fleet */}
                   <EuiButtonEmpty
+                    isDisabled={!connector.service_type}
                     iconType={EuiIconPlugs}
                     color="text"
                     href={http.basePath.prepend(
                       generateEncodedPath(CONNECTOR_INTEGRATION_DETAIL_PATH, {
-                        serviceType: connector.service_type!,
+                        serviceType: connector.service_type || '',
                       })
                     )}
                   >
@@ -343,69 +464,90 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {/* TODO: Update status from Fleet host health related connector */}
-                  <EuiHealth color="success">
-                    <EuiText size="s">
-                      {i18n.translate('xpack.enterpriseSearch.content.conectors.hostHealth', {
-                        defaultMessage: 'Healthy',
-                      })}
-                    </EuiText>
-                  </EuiHealth>
+                  {agentlessAgentExists ? (
+                    getStatusComponent({
+                      status: agentlessOverview.agent.status,
+                    })
+                  ) : (
+                    <EuiBadge color="default">{noAgentLabel}</EuiBadge>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
             footer={
-              <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmptyTo
-                    isDisabled={!connector.index_name}
-                    size="s"
-                    // TODO: Update path to Fleet's Hosts overview
-                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                      connectorId: connector.id,
-                      tabId: ConnectorDetailTabId.PIPELINES,
-                    })}
-                  >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.hostOverview',
-                      {
-                        defaultMessage: 'Host overview',
+                  {agentlessAgentExists ? (
+                    <EuiButtonEmpty
+                      isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
+                      size="s"
+                      href={
+                        !!agentlessOverview && !!agentlessOverview.agent.id
+                          ? http.basePath.prepend(
+                              generateEncodedPath(FLEET_AGENT_DETAIL_PATH, {
+                                agentId: agentlessOverview.agent.id,
+                              })
+                            )
+                          : ''
                       }
-                    )}
-                  </EuiButtonEmptyTo>
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.connectors.connectorStats.hostOverview',
+                        {
+                          defaultMessage: 'Host overview',
+                        }
+                      )}
+                    </EuiButtonEmpty>
+                  ) : (
+                    <EuiText size="s" color="warning">
+                      {noAgentLabel}
+                    </EuiText>
+                  )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmptyTo
-                    isDisabled={!connector.index_name}
-                    size="s"
-                    // TODO: Update path to Fleet's Logs
-                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                      connectorId: connector.id,
-                      tabId: ConnectorDetailTabId.PIPELINES,
-                    })}
-                  >
-                    {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.logs', {
-                      defaultMessage: 'Logs',
-                    })}
-                  </EuiButtonEmptyTo>
+                  {agentlessAgentExists && (
+                    <EuiButtonEmpty
+                      isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
+                      size="s"
+                      iconType="discoverApp"
+                      href={http.basePath.prepend(
+                        generateEncodedPath(FLEET_AGENT_DETAIL_LOGS_PATH, {
+                          agentId: agentlessOverview.agent.id,
+                        })
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.connectors.connectorStats.managePolicy',
+                        {
+                          defaultMessage: 'View logs',
+                        }
+                      )}
+                    </EuiButtonEmpty>
+                  )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmptyTo
-                    isDisabled={!connector.index_name}
-                    size="s"
-                    // TODO: Update path to Fleet's Policies
-                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                      connectorId: connector.id,
-                      tabId: ConnectorDetailTabId.PIPELINES,
-                    })}
-                  >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.managePolicy',
-                      {
-                        defaultMessage: 'Manage policy',
-                      }
-                    )}
-                  </EuiButtonEmptyTo>
+                  {agnetlessPolicyExists ? (
+                    <EuiButtonEmpty
+                      isDisabled={!agentlessOverview || !agentlessOverview.policy.id}
+                      size="s"
+                      href={http.basePath.prepend(
+                        generateEncodedPath(FLEET_POLICY_DETAIL_PATH, {
+                          policyId: agentlessOverview.policy.id,
+                        })
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.connectors.connectorStats.managePolicy',
+                        {
+                          defaultMessage: 'Manage policy',
+                        }
+                      )}
+                    </EuiButtonEmpty>
+                  ) : (
+                    <EuiText size="s" color="warning">
+                      {noPolicyLabel}
+                    </EuiText>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
