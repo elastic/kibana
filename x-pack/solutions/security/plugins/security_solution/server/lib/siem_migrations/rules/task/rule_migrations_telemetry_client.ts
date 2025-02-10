@@ -28,12 +28,12 @@ interface PrebuiltRuleMatchEvent {
 }
 
 interface RuleTranslationEvent {
-  error?: string;
+  error?: Error;
   migrationResult?: MigrateRuleState;
 }
 
 interface SiemMigrationEvent {
-  error?: string;
+  error?: Error;
   stats: {
     failed: number;
     completed: number;
@@ -86,7 +86,7 @@ export class SiemMigrationTelemetryClient {
       if (error) {
         this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE.eventType, {
           migrationId: this.migrationId,
-          error,
+          error: error.message,
           model: this.modelName,
         });
         return;
@@ -116,7 +116,7 @@ export class SiemMigrationTelemetryClient {
           failed: stats?.failed,
           total,
           duration,
-          error,
+          error: error.message,
         });
         return;
       }

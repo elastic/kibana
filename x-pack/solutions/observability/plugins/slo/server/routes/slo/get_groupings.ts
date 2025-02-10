@@ -6,7 +6,6 @@
  */
 
 import { getSLOGroupingsParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { KibanaSavedObjectsSLORepository } from '../../services';
 import { GetSLOGroupings } from '../../services/get_slo_groupings';
 import { SloDefinitionClient } from '../../services/slo_definition_client';
@@ -38,8 +37,6 @@ export const getSLOGroupingsRoute = createSloServerRoute({
 
     const getSLOGroupings = new GetSLOGroupings(definitionClient, esClient, settings, spaceId);
 
-    return await executeWithErrorHandler(() =>
-      getSLOGroupings.execute(params.path.id, params.query)
-    );
+    return await getSLOGroupings.execute(params.path.id, params.query);
   },
 });
