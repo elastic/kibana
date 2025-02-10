@@ -13,31 +13,31 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { TransportResult } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import {
-  DataStreamReindexStatus,
-  DataStreamReindexOperation,
+  DataStreamMigrationStatus,
+  DataStreamMigrationOperation,
   DataStreamMetadata,
-  DataStreamReindexWarning,
+  DataStreamMigrationWarning,
   DataStreamReindexTaskStatusResponse,
   DataStreamReindexStatusCancelled,
 } from '../../../common/types';
 
-import { error } from './error';
+import { DataStreamMigrationError, error } from './error';
 
-interface DataStreamReindexService {
+interface DataStreamMigrationService {
   /**
-   * Checks whether or not the user has proper privileges required to reindex this index.
+   * Checks whether or not the user has proper privileges required to migrate this index.
    * @param dataStreamName
    */
   hasRequiredPrivileges: (dataStreamName: string) => Promise<boolean>;
 
   /**
-   * Checks an index's settings and mappings to flag potential issues during reindex.
+   * Checks an index's settings and mappings to flag potential issues during migration.
    * Resolves to null if index does not exist.
    * @param dataStreamName
    */
-  detectReindexWarnings: (
+  detectMigrationWarnings: (
     dataStreamName: string
-  ) => Promise<DataStreamReindexWarning[] | undefined>;
+  ) => Promise<DataStreamMigrationWarning[] | undefined>;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -49,7 +49,7 @@ interface DataStreamReindexService {
    * Polls Elasticsearch's Data stream status API to retrieve the status of the reindex operation.
    * @param dataStreamName
    */
-  fetchReindexStatus: (dataStreamName: string) => Promise<DataStreamReindexOperation>;
+  fetchMigrationStatus: (dataStreamName: string) => Promise<DataStreamMigrationOperation>;
 
   /**
    * Cancels an in-progress reindex operation for a given index.
@@ -62,18 +62,24 @@ interface DataStreamReindexService {
    * @param dataStreamName
    */
   getDataStreamMetadata: (dataStreamName: string) => Promise<DataStreamMetadata | null>;
+
+  /**
+   * Marks the given indices as read-only.
+   * @param indices
+   */
+  readonlyIndices: (indices: string[]) => Promise<void>;
 }
 
-export interface DataStreamReindexServiceFactoryParams {
+export interface DataStreamMigrationServiceFactoryParams {
   esClient: ElasticsearchClient;
   log: Logger;
   licensing: LicensingPluginSetup;
 }
 
-export const dataStreamReindexServiceFactory = ({
+export const dataStreamMigrationServiceFactory = ({
   esClient,
   licensing,
-}: DataStreamReindexServiceFactoryParams): DataStreamReindexService => {
+}: DataStreamMigrationServiceFactoryParams): DataStreamMigrationService => {
   return {
     hasRequiredPrivileges: async (dataStreamName: string): Promise<boolean> => {
       /**
@@ -107,10 +113,15 @@ export const dataStreamReindexServiceFactory = ({
 
       return resp.has_all_requested;
     },
-    async detectReindexWarnings(): Promise<DataStreamReindexWarning[]> {
+    async detectMigrationWarnings(): Promise<DataStreamMigrationWarning[]> {
       return [
         {
+          warningType: 'affectExistingSetups',
+          resolutionType: 'readonly',
+        },
+        {
           warningType: 'incompatibleDataStream',
+          resolutionType: 'reindex',
         },
       ];
     },
@@ -151,7 +162,7 @@ export const dataStreamReindexServiceFactory = ({
         );
       }
     },
-    async fetchReindexStatus(dataStreamName: string): Promise<DataStreamReindexOperation> {
+    async fetchMigrationStatus(dataStreamName: string): Promise<DataStreamMigrationOperation> {
       // Check reindexing task progress
       try {
         const taskResponse = await esClient.transport.request<DataStreamReindexTaskStatusResponse>({
@@ -187,8 +198,8 @@ export const dataStreamReindexServiceFactory = ({
 
           // Update the status
           return {
-            reindexTaskPercComplete: 1,
-            status: DataStreamReindexStatus.completed,
+            taskPercComplete: 1,
+            status: DataStreamMigrationStatus.completed,
             progressDetails: {
               startTimeMs: taskResponse.start_time_millis,
               successCount: taskResponse.successes,
@@ -202,8 +213,8 @@ export const dataStreamReindexServiceFactory = ({
           const perc = taskResponse.successes / taskResponse.total_indices_in_data_stream;
 
           return {
-            status: DataStreamReindexStatus.inProgress,
-            reindexTaskPercComplete: perc,
+            status: DataStreamMigrationStatus.inProgress,
+            taskPercComplete: perc,
             progressDetails: {
               startTimeMs: taskResponse.start_time_millis,
               successCount: taskResponse.successes,
@@ -221,12 +232,12 @@ export const dataStreamReindexServiceFactory = ({
           // cancelled, never started, or successful task but finished from than 24 hours ago
           // Since this API should be called as a follow up from _migrate API, we can assume that the task is not started
           return {
-            status: DataStreamReindexStatus.notStarted,
+            status: DataStreamMigrationStatus.notStarted,
           };
         }
 
         return {
-          status: DataStreamReindexStatus.failed,
+          status: DataStreamMigrationStatus.failed,
           errorMessage: err.toString(),
         };
       }
@@ -242,7 +253,7 @@ export const dataStreamReindexServiceFactory = ({
       }
 
       return {
-        status: DataStreamReindexStatus.cancelled,
+        status: DataStreamMigrationStatus.cancelled,
       };
     },
     async getDataStreamMetadata(dataStreamName: string): Promise<DataStreamMetadata | null> {
@@ -319,6 +330,28 @@ export const dataStreamReindexServiceFactory = ({
         throw error.cannotGrabMetadata(
           `Could not grab metadata for ${dataStreamName}. ${err.message.toString()}`
         );
+      }
+    },
+
+    async readonlyIndices(indices: string[]) {
+      for (const index of indices) {
+        try {
+          const unfreeze = await esClient.indices.unfreeze({ index });
+          const addBlock = await esClient.indices.addBlock({ index, block: 'write' });
+
+          if (!unfreeze.acknowledged || !addBlock.acknowledged) {
+            throw error.readonlyTaskFailed(`Could not set index ${index} to readonly.`);
+          }
+        } catch (err) {
+          if (err instanceof DataStreamMigrationError) {
+            throw err;
+          }
+          // ES errors are serializable, so we can just stringify the error and throw it.
+          const stringifiedErr = JSON.stringify(err, null, 2);
+          throw error.readonlyTaskFailed(
+            `Could not migrate index "${index}". Got: ${stringifiedErr}`
+          );
+        }
       }
     },
   };

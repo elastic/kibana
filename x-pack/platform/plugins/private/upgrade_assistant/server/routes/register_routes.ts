@@ -21,7 +21,7 @@ import { registerUpgradeStatusRoute } from './status';
 import { registerRemoteClustersRoute } from './remote_clusters';
 import { registerNodeDiskSpaceRoute } from './node_disk_space';
 import { registerClusterSettingsRoute } from './cluster_settings';
-import { registerReindexDataStreamRoutes } from './reindex_data_streams';
+import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerAppRoutes(dependencies);
@@ -42,5 +42,5 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   registerClusterSettingsRoute(dependencies);
 
   // Data streams reindexing
-  registerReindexDataStreamRoutes(dependencies);
+  registerMigrateDataStreamRoutes(dependencies);
 }
