@@ -316,8 +316,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     enableFallback:
       // NOTE: there are cases where sourcerer does not know the dataViewId to display and only knows required patterns.
       // In that case, we enable the fallback dataview creation that will try to create adhoc data view based on the patterns & will select it.
-      (!loading && dataViewId === null && isModified === 'deprecated') ||
-      isModified === 'missingPatterns',
+      !loading &&
+      ((dataViewId === null && isModified === 'deprecated') || isModified === 'missingPatterns'),
     missingPatterns,
     onResolveErrorManually: handleDataViewFallbackError,
   });
