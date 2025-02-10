@@ -88,4 +88,37 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
       'from index | eval bs = bucket(bytes, 20, 25324, 74999)',
     ],
   },
+  {
+    name: 'categorize',
+    alias: ['bin'],
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.categorize', {
+      defaultMessage: `Groups text messages into categories of similarly formatted text values.`,
+    }),
+    type: 'agg',
+    supportedCommands: ['stats'],
+    supportedOptions: ['by'],
+    signatures: [
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'keyword',
+            optional: false,
+          },
+        ],
+        returnType: 'keyword',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'text',
+            optional: false,
+          },
+        ],
+        returnType: 'keyword',
+      },
+    ],
+    examples: ['FROM sample_data\n| STATS count=COUNT() BY category=CATEGORIZE(message)'],
+  },
 ];

@@ -76,7 +76,7 @@
     "@kbn/navigation-plugin",
     "@kbn/observability-alert-details",
     "@kbn/investigation-shared",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/ui-theme",
     "@kbn/core-application-common",
     "@kbn/securitysolution-ecs",
