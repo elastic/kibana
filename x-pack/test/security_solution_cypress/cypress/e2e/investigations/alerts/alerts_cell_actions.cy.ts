@@ -14,14 +14,13 @@ import {
   ALERT_TABLE_SEVERITY_VALUES,
   PROVIDER_BADGE,
 } from '../../../screens/timeline';
-
 import {
-  scrollAlertTableColumnIntoViewAndTest,
   addAlertPropertyToTimeline,
-  filterForAlertProperty,
-  showTopNAlertProperty,
   clickExpandActions,
+  filterForAlertProperty,
   filterOutAlertProperty,
+  scrollAlertTableColumnIntoViewAndTest,
+  showTopNAlertProperty,
 } from '../../../tasks/alerts';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -29,10 +28,10 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
-  removeKqlFilter,
   fillAddFilterForm,
   fillKqlQueryBar,
   openAddFilterPopover,
+  removeKqlFilter,
 } from '../../../tasks/search_bar';
 import { openActiveTimeline } from '../../../tasks/timeline';
 
@@ -60,10 +59,10 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
           .first()
           .invoke('text')
           .then((severityVal) => {
-            filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+            filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 1);
             cy.get(FILTER_BADGE)
               .first()
-              .should('have.text', `kibana.alert.severity: ${severityVal}`);
+              .should('have.text', `kibana.alert.severity: ${severityVal.toLowerCase()}`);
           });
         removeKqlFilter();
       });
@@ -100,10 +99,10 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
           .first()
           .invoke('text')
           .then((severityVal) => {
-            filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+            filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 1);
             cy.get(FILTER_BADGE)
               .first()
-              .should('have.text', `NOT kibana.alert.severity: ${severityVal}`);
+              .should('have.text', `NOT kibana.alert.severity: ${severityVal.toLowerCase()}`);
           });
       });
     }
@@ -114,7 +113,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
       cy.window().then((win) => {
         cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
       });
-      clickExpandActions(ALERT_TABLE_SEVERITY_VALUES, 0);
+      clickExpandActions(ALERT_TABLE_SEVERITY_VALUES, 1);
       // We are not able to test the "copy to clipboard" action execution
       // due to browsers security limitation accessing the clipboard services.
       // We assume external `copy` library works
@@ -128,11 +127,11 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then((severityVal) => {
-          addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
+          addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 1);
           openActiveTimeline();
           cy.get(PROVIDER_BADGE)
             .first()
-            .should('have.text', `kibana.alert.severity: "${severityVal}"`);
+            .should('have.text', `kibana.alert.severity: "${severityVal.toLowerCase()}"`);
         });
     });
   });
@@ -151,7 +150,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   it('should show top N for a property', () => {
     scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_SEVERITY_HEADER, () => {
       cy.get(ALERT_TABLE_SEVERITY_VALUES);
-      showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+      showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 1);
       cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
     });
   });

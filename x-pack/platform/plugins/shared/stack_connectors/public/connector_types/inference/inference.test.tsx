@@ -17,7 +17,7 @@ let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   ExperimentalFeaturesService.init({
-    experimentalFeatures: { ...experimentalFeaturesMock, inferenceConnectorOn: true } as any,
+    experimentalFeatures: { ...experimentalFeaturesMock } as any,
   });
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });

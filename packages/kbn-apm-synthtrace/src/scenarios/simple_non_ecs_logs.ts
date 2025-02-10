@@ -78,6 +78,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       await logsEsClient.createIndex('cloud-logs-synth.2-default');
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
     },
+    teardown: async ({ logsEsClient }) => {
+      await logsEsClient.deleteIndexTemplate(IndexTemplateName.LogsDb);
+    },
     generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
 
