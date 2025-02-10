@@ -38,20 +38,19 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provide
             </span>
           </EuiFlexItem>
         ) : null}
-       
       </EuiFlexGroup>
     </EuiFlexItem>
     {isEndpointPreconfigured(inferenceId) ? (
-          <EuiFlexItem grow={false}>
-            <span>
-              <EuiBetaBadge
-                label={i18n.PRECONFIGURED_LABEL}
-                size="s"
-                color="hollow"
-                alignment="middle"
-              />
-            </span>
-          </EuiFlexItem>
-        ) : null}
+      <EuiFlexItem grow={false}>
+        <span>
+          <EuiBetaBadge
+            label={i18n.PRECONFIGURED_LABEL}
+            size="s"
+            color="hollow"
+            alignment="middle"
+          />
+        </span>
+      </EuiFlexItem>
+    ) : null}
   </EuiFlexGroup>
 );
