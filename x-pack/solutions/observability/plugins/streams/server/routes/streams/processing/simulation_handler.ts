@@ -22,7 +22,7 @@ export const prepareSimulationBody = (params: ProcessingSimulateParams) => {
 
   const processors = formatToIngestProcessors(processing);
   const docs = documents.map((doc, id) => ({
-    _index: path.id,
+    _index: path.name,
     _id: id.toString(),
     _source: doc,
   }));
@@ -30,7 +30,7 @@ export const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   const simulationBody: any = {
     docs,
     pipeline_substitutions: {
-      [`${path.id}@stream.processing`]: {
+      [`${path.name}@stream.processing`]: {
         processors,
       },
     },
@@ -39,7 +39,7 @@ export const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   if (detected_fields) {
     const properties = computeMappingProperties(detected_fields);
     simulationBody.component_template_substitutions = {
-      [`${path.id}@stream.layer`]: {
+      [`${path.name}@stream.layer`]: {
         template: {
           mappings: {
             properties,

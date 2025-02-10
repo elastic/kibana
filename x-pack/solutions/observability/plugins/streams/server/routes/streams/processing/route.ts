@@ -24,7 +24,7 @@ import {
 } from './simulation_handler';
 
 const paramsSchema = z.object({
-  path: z.object({ id: z.string() }),
+  path: z.object({ name: z.string() }),
   body: z.object({
     processing: z.array(processorDefinitionSchema),
     documents: z.array(recursiveRecord),
@@ -35,7 +35,7 @@ const paramsSchema = z.object({
 export type ProcessingSimulateParams = z.infer<typeof paramsSchema>;
 
 export const simulateProcessorRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/processing/_simulate',
+  endpoint: 'POST /api/streams/{name}/processing/_simulate',
   options: {
     access: 'internal',
   },
@@ -50,9 +50,9 @@ export const simulateProcessorRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.id} not found.`);
+      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
     }
 
     const simulationBody = prepareSimulationBody(params);
@@ -73,7 +73,7 @@ export const simulateProcessorRoute = createServerRoute({
 });
 
 const suggestionsParamsSchema = z.object({
-  path: z.object({ id: z.string() }),
+  path: z.object({ name: z.string() }),
   body: z.object({
     field: z.string(),
     connectorId: z.string(),
@@ -84,7 +84,7 @@ const suggestionsParamsSchema = z.object({
 export type ProcessingSuggestionParams = z.infer<typeof suggestionsParamsSchema>;
 
 export const processingSuggestionRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/processing/_suggestions',
+  endpoint: 'POST /api/streams/{name}/processing/_suggestions',
   options: {
     access: 'internal',
   },
@@ -99,7 +99,7 @@ export const processingSuggestionRoute = createServerRoute({
   handler: async ({ params, request, logger, getScopedClients }) => {
     const { inferenceClient, scopedClusterClient } = await getScopedClients({ request });
     return handleProcessingSuggestion(
-      params.path.id,
+      params.path.name,
       params.body,
       inferenceClient,
       scopedClusterClient
