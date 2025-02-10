@@ -7,7 +7,4 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-export MOON_LOG_FILE=moon.log
-moon ci @kbn/health-gateway-server:typecheck @kbn/discover-plugin:typecheck -c 1
-
-#moon ci :typecheck -c 3
+moon ci :typecheck -c 3

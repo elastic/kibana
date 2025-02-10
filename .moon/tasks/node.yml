@@ -9,10 +9,6 @@ fileGroups:
     - 'src/**/*'
 
 tasks:
-  greet:
-    deps:
-      - ^:greet
-    script: echo "Hello from $MOON_PROJECT_ROOT!"
   jest:
     description: Run jest tests
     command: node
@@ -23,6 +19,7 @@ tasks:
       - scripts/jest.js
       - '--cache'
       - '--passWithNoTests'
+
   jestCI:
     description: Run jest tests (in band)
     command: node
@@ -33,11 +30,12 @@ tasks:
       - scripts/jest.js
       - '--passWithNoTests'
       - '--runInBand'
+
   lint:
     command: node
     args:
       - scripts/eslint.js
-      - '@meta(sourceRoot)'
+      - '$projectSource'
       - '--no-error-on-unmatched-pattern'
     options:
       runFromWorkspaceRoot: true
@@ -52,11 +50,12 @@ tasks:
       # Root configs, any format
       - '/.eslintignore'
       - '/.eslintrc.*'
+
   lint-fix:
     command: node
     args:
       - scripts/eslint.js
-      - '@meta(sourceRoot)'
+      - '$projectSource'
       - '--no-error-on-unmatched-pattern'
       - '--fix'
     options:
@@ -72,22 +71,27 @@ tasks:
       # Root configs, any format
       - '/.eslintignore'
       - '/.eslintrc.*'
+
   lint_with_types:
-    options:
-      runFromWorkspaceRoot: true
     command: node
     args:
-      - $workspaceRoot/scripts/eslint_with_types.js
+      - scripts/eslint_with_types.js
       - '--project'
-      - $projectRoot/tsconfig.json
+      - '$projectSource/tsconfig.json'
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'
+    options:
+      runFromWorkspaceRoot: true
+
   genTypecheckConfig:
-    script: "node $workspaceRoot/scripts/type_check.js --project $projectRoot/tsconfig.json --config-only"
+    script: "node scripts/type_check.js --project $projectSource/tsconfig.json --config-only"
     inputs:
       - "tsconfig.json"
     outputs:
       - "tsconfig.moon.json"
+    options:
+      runFromWorkspaceRoot: true
+
   typecheck:
     command:
       - 'tsc'
