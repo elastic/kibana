@@ -1057,9 +1057,9 @@ export const UnifiedDataTable = ({
 
     return {
       allowDensity: Boolean(onUpdateDataGridDensity),
-      allowRowHeight: false,
+      allowRowHeight: Boolean(onChangeRowHeight) || Boolean(onChangeHeaderRowHeight),
       allowResetButton: false,
-      additionalDisplaySettings: (
+      customRender: ({ densityControl }) => (
         <>
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
@@ -1073,6 +1073,7 @@ export const UnifiedDataTable = ({
             onChangeSampleSize={onUpdateSampleSize}
             lineCountInput={lineCountInput}
             headerLineCountInput={headerLineCountInput}
+            densityControl={densityControl}
           />
         </>
       ),

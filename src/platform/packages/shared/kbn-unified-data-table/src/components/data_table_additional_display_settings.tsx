@@ -30,6 +30,7 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   onChangeSampleSize?: (sampleSize: number) => void;
   lineCountInput: number;
   headerLineCountInput: number;
+  densityControl: React.ReactNode;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -48,6 +49,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   onChangeSampleSize,
   lineCountInput,
   headerLineCountInput,
+  densityControl,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -93,6 +95,43 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
 
   const settings = [];
 
+  if (onChangeSampleSize) {
+    let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
+
+    if (
+      step > 1 &&
+      ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||
+        !checkIfValueIsMultipleOfStep(minRangeSampleSize, step) ||
+        !checkIfValueIsMultipleOfStep(maxAllowedSampleSize, step))
+    ) {
+      step = 1; // Eui is very strict about step, so we need to switch to 1 if the value is not a multiple of the step
+    }
+
+    settings.push(
+      <>
+        <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+          <EuiRange
+            compressed
+            fullWidth
+            min={minRangeSampleSize}
+            max={maxAllowedSampleSize}
+            step={step}
+            showInput
+            value={activeSampleSize}
+            onChange={onChangeActiveSampleSize}
+            data-test-subj="unifiedDataTableSampleSizeInput"
+            showRange
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule margin="xs" />
+      </>
+    );
+  }
+
+  if (Boolean(densityControl)) {
+    settings.push(densityControl);
+  }
+
   if (onChangeHeaderRowHeight && onChangeHeaderRowHeightLines) {
     settings.push(
       <RowHeightSettings
@@ -121,39 +160,6 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         data-test-subj="unifiedDataTableRowHeightSettings"
         lineCountInput={lineCountInput}
       />
-    );
-  }
-
-  if (onChangeSampleSize) {
-    let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
-
-    if (
-      step > 1 &&
-      ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||
-        !checkIfValueIsMultipleOfStep(minRangeSampleSize, step) ||
-        !checkIfValueIsMultipleOfStep(maxAllowedSampleSize, step))
-    ) {
-      step = 1; // Eui is very strict about step, so we need to switch to 1 if the value is not a multiple of the step
-    }
-
-    settings.push(
-      <>
-        <EuiHorizontalRule margin="xs" />
-        <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-          <EuiRange
-            compressed
-            fullWidth
-            min={minRangeSampleSize}
-            max={maxAllowedSampleSize}
-            step={step}
-            showInput
-            value={activeSampleSize}
-            onChange={onChangeActiveSampleSize}
-            data-test-subj="unifiedDataTableSampleSizeInput"
-            showRange
-          />
-        </EuiFormRow>
-      </>
     );
   }
 
