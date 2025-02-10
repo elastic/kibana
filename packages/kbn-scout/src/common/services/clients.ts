@@ -8,15 +8,17 @@
  */
 
 import { createEsClientForTesting, KbnClient } from '@kbn/test';
-import { ScoutLogger } from './logger';
+import supertest, { type AgentOptions } from 'supertest';
+import { kbnTestConfig } from '@kbn/test';
+import * as Url from 'url';
 import { ScoutTestConfig, EsClient } from '../../types';
-
+import { ScoutLogger } from './logger';
 interface ClientOptions {
   serviceName: string;
   url: string;
   username: string;
   password: string;
-  log: ScoutLogger;
+  log?: ScoutLogger;
 }
 
 function createClientUrlWithAuth({ serviceName, url, username, password, log }: ClientOptions) {
@@ -24,12 +26,45 @@ function createClientUrlWithAuth({ serviceName, url, username, password, log }: 
   clientUrl.username = username;
   clientUrl.password = password;
 
-  log.serviceLoaded(`${serviceName}Client`);
+  if (log) log.serviceLoaded(`${serviceName}Client`);
+
   return clientUrl.toString();
 }
 
 let esClientInstance: EsClient | null = null;
 let kbnClientInstance: KbnClient | null = null;
+let kbnSuperTestWithAuthClientInstance: supertest.Agent | null = null;
+
+export const kbnSuperTestWithAuthClient = () => {
+  if (!kbnSuperTestWithAuthClientInstance) {
+    const kibanaUrl = createClientUrlWithAuth({
+      serviceName: 'kbn',
+      url: Url.format({
+        protocol: kbnTestConfig.getUrlParts().protocol,
+        hostname: kbnTestConfig.getUrlParts().hostname,
+        port: kbnTestConfig.getUrlParts().port,
+      }),
+      username: 'elastic',
+      password: 'changeme',
+    });
+
+    const options: AgentOptions = {};
+    // if (kibanaServerConfig.certificateAuthorities) {
+    //   options.ca = kibanaServerConfig.certificateAuthorities;
+    //   options.rejectUnauthorized = false;
+    // }
+
+    // const serverArgs = config.get('kbnTestServer.serverArgs', []) as string[];
+    // const http2Enabled = serverArgs.includes('--server.protocol=http2');
+    // if (http2Enabled) {
+    //   options.http2 = true;
+    // }
+
+    kbnSuperTestWithAuthClientInstance = supertest(kibanaUrl, options);
+  }
+
+  return kbnSuperTestWithAuthClientInstance;
+};
 
 export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
   if (!esClientInstance) {
