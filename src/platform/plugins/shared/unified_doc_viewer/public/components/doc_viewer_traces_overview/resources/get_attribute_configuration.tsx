@@ -38,13 +38,14 @@ import { HttpStatusCode } from '../sub_components/http_status_code';
 
 export const getAttributeConfiguration = (
   attributes: TraceDocumentOverview
-): Record<string, { title: string; content: React.ReactNode }> => {
+): Record<string, { title: string; content: React.ReactNode; value: any }> => {
   return {
     [SPAN_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanName.title', {
         defaultMessage: 'Span name',
       }),
       content: <EuiText size="xs">{attributes[SPAN_NAME_FIELD]}</EuiText>,
+      value: attributes[SPAN_NAME_FIELD],
     },
     [TRANSACTION_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.transactionName.title', {
@@ -56,6 +57,7 @@ export const getAttributeConfiguration = (
           transactionName={attributes[TRANSACTION_NAME_FIELD]}
         />
       ),
+      value: attributes[TRANSACTION_NAME_FIELD],
     },
     [SERVICE_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.service.title', {
@@ -67,12 +69,14 @@ export const getAttributeConfiguration = (
           agentName={attributes[AGENT_NAME_FIELD]}
         />
       ),
+      value: attributes[SERVICE_NAME_FIELD],
     },
     [TRACE_ID_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.traceId.title', {
         defaultMessage: 'Trace ID',
       }),
       content: <TraceIdLink traceId={attributes[TRACE_ID_FIELD]} />,
+      value: attributes[TRACE_ID_FIELD],
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]: {
       title: i18n.translate(
@@ -87,36 +91,50 @@ export const getAttributeConfiguration = (
           environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
         />
       ) : null,
+      value: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
     },
     [TIMESTAMP_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.timestamp.title', {
         defaultMessage: 'Start time',
       }),
       content: <Timestamp timestamp={attributes[TIMESTAMP_FIELD]} />,
+      value: attributes[TIMESTAMP_FIELD],
     },
     [SPAN_DURATION_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanDuration.title', {
         defaultMessage: 'Duration',
       }),
       content: <Duration duration={attributes[SPAN_DURATION_FIELD] ?? 0} />,
+      value: attributes[SPAN_DURATION_FIELD] ?? 0,
     },
     [TRANSACTION_DURATION_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.transactionDuration.title', {
         defaultMessage: 'Duration',
       }),
       content: <Duration duration={attributes[TRANSACTION_DURATION_FIELD] ?? 0} />,
+      value: attributes[TRANSACTION_DURATION_FIELD] ?? 0,
     },
-    ['type_and_subtype']: {
-      title: i18n.translate('discover.docViews.tracesOverview.details.typeAndSubtype.title', {
-        defaultMessage: 'Type & Subtype',
+    [SPAN_TYPE_FIELD]: {
+      title: i18n.translate('discover.docViews.tracesOverview.details.spanType.title', {
+        defaultMessage: 'Type',
       }),
-      content:
-        attributes[SPAN_TYPE_FIELD] || attributes[SPAN_SUBTYPE_FIELD] ? (
-          <div>
-            <EuiBadge color="hollow">{attributes[SPAN_TYPE_FIELD]}</EuiBadge>
-            <EuiBadge color="hollow">{attributes[SPAN_SUBTYPE_FIELD]}</EuiBadge>
-          </div>
-        ) : null,
+      content: attributes[SPAN_TYPE_FIELD] ? (
+        <div>
+          <EuiBadge color="hollow">{attributes[SPAN_TYPE_FIELD]}</EuiBadge>
+        </div>
+      ) : null,
+      value: attributes[SPAN_TYPE_FIELD],
+    },
+    [SPAN_SUBTYPE_FIELD]: {
+      title: i18n.translate('discover.docViews.tracesOverview.details.spanSubtype.title', {
+        defaultMessage: 'Subtype',
+      }),
+      content: attributes[SPAN_SUBTYPE_FIELD] ? (
+        <div>
+          <EuiBadge color="hollow">{attributes[SPAN_SUBTYPE_FIELD]}</EuiBadge>
+        </div>
+      ) : null,
+      value: attributes[SPAN_SUBTYPE_FIELD],
     },
     [HTTP_RESPONSE_STATUS_CODE_FIELD]: {
       title: i18n.translate(
@@ -128,16 +146,25 @@ export const getAttributeConfiguration = (
       content: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD] ? (
         <HttpStatusCode code={attributes[HTTP_RESPONSE_STATUS_CODE_FIELD]} />
       ) : null,
+      value: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD],
     },
-    ['user_agent_and_version']: {
-      title: i18n.translate('discover.docViews.tracesOverview.details.userAgentAndVersion.title', {
-        defaultMessage: 'User agent & Version',
+    [USER_AGENT_NAME_FIELD]: {
+      title: i18n.translate('discover.docViews.tracesOverview.details.userAgent.title', {
+        defaultMessage: 'User agent',
       }),
-      content: (
-        <p>
-          {attributes[USER_AGENT_NAME_FIELD]} - {attributes[USER_AGENT_VERSION_FIELD]}
-        </p>
-      ),
+      content: attributes[USER_AGENT_NAME_FIELD] ? (
+        <EuiText size="xs">{attributes[USER_AGENT_NAME_FIELD]}</EuiText>
+      ) : null,
+      value: attributes[USER_AGENT_NAME_FIELD],
+    },
+    [USER_AGENT_VERSION_FIELD]: {
+      title: i18n.translate('discover.docViews.tracesOverview.details.userAgentVersion.title', {
+        defaultMessage: 'User agent version',
+      }),
+      content: attributes[USER_AGENT_VERSION_FIELD] ? (
+        <EuiText size="xs">{attributes[USER_AGENT_VERSION_FIELD]}</EuiText>
+      ) : null,
+      value: attributes[USER_AGENT_VERSION_FIELD],
     },
   };
 };
