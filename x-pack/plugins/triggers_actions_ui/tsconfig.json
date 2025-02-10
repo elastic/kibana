@@ -73,7 +73,8 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/cloud-plugin",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/core-notifications-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }
