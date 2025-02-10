@@ -8,8 +8,6 @@ import React, { ReactNode } from 'react';
 
 import { useValues } from 'kea';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
 import {
   EuiBadge,
   EuiBadgeProps,
@@ -27,17 +25,21 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
-
+import { Agent } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
 import { EuiIconPlugs } from '@kbn/search-shared-ui';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
+import { KibanaDeps } from '../../../../../common/types';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
+import { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
 import {
   CONNECTOR_DETAIL_TAB_PATH,
   CONNECTOR_INTEGRATION_DETAIL_PATH,
@@ -50,12 +52,6 @@ import {
 } from '../../utils/connector_status_helpers';
 
 import { ConnectorDetailTabId } from './connector_detail';
-import { HttpLogic } from '../../../shared/http';
-import { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
-
-import { Agent } from '@kbn/fleet-plugin/common';
-
-import { KibanaDeps } from '@kbn/enterprise-search-plugin/common/types';
 
 export interface ConnectorStatsProps {
   connector: Connector;

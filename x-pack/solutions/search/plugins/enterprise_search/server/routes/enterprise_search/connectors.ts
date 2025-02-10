@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,8 @@ import {
   isStatusTransitionException,
 } from '@kbn/search-connectors/utils/identify_exceptions';
 
+import { AgentlessConnectorsInfraService } from '@kbn/search-connectors-plugin/server/services';
+
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { generateConfig } from '../../lib/connectors/generate_config';
@@ -56,8 +59,6 @@ import {
   isExpensiveQueriesNotAllowedException,
   isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
-import { SavedObjectsClient } from '@kbn/core/server';
-import { AgentlessConnectorsInfraService } from '@kbn/search-connectors-plugin/server/services';
 
 export function registerConnectorRoutes({ router, log, getStartServices }: RouteDependencies) {
   router.post(

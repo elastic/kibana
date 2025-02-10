@@ -22,6 +22,11 @@ import {
   GenerateConnectorApiKeyApiLogic,
 } from '../../api/connector/generate_connector_api_key_api_logic';
 import {
+  GetConnectorAgentlessPolicyApiLogic,
+  GetConnectorAgentlessPolicyApiLogicActions,
+  GetConnectorAgentlessPolicyApiResponse,
+} from '../../api/connector/get_connector_agentless_policy_api_logic';
+import {
   ConnectorConfigurationApiLogic,
   PostConnectorConfigurationActions,
 } from '../../api/connector/update_connector_configuration_api_logic';
@@ -34,22 +39,13 @@ import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,
 } from '../../utils/connector_helpers';
-import {
-  getConnectorLastSeenError,
-  hasConnectorBeenSeenRecently,
-  isLastSeenOld,
-} from '../../utils/connector_status_helpers';
+import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
 
 import {
   ConnectorNameAndDescriptionActions,
   ConnectorNameAndDescriptionLogic,
 } from './connector_name_and_description_logic';
 import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
-import {
-  GetConnectorAgentlessPolicyApiLogic,
-  GetConnectorAgentlessPolicyApiLogicActions,
-  GetConnectorAgentlessPolicyApiResponse,
-} from '../../api/connector/get_connector_agentless_policy_api_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
@@ -257,7 +253,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         (index && [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus)),
     ],
     isWaitingOnAgentlessDeployment: [
-      () => [selectors.connector, ],
+      () => [selectors.connector],
       (connector: Connector) => {
         if (!connector || !connector.is_native) return false;
 

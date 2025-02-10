@@ -18,13 +18,6 @@ import { login, ROLE } from '../../tasks/login';
 describe(
   'When defining a kibana role for Endpoint security access',
   {
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['defendInsights'])}`,
-        ],
-      },
-    },
     tags: '@ess',
   },
   () => {
