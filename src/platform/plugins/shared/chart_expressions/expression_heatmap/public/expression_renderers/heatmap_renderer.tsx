@@ -21,6 +21,8 @@ import {
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
+import { css } from '@emotion/react';
+import { UseEuiTheme } from '@elastic/eui';
 import { MultiFilterEvent } from '../../common/types';
 import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
@@ -39,6 +41,17 @@ import {
 interface ExpressioHeatmapRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
 }
+
+const heatmapContainerCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: '100%',
+    height: '100%',
+    padding: euiTheme.size.s,
+    // the FocusTrap is adding extra divs which are making the visualization redraw twice
+    // with a visible glitch. This make the chart library resilient to this extra reflow
+    overflow: 'auto hidden',
+    userSelect: 'text',
+  });
 
 export const heatmapRenderer: (
   deps: ExpressioHeatmapRendererDependencies
@@ -101,7 +114,7 @@ export const heatmapRenderer: (
 
     render(
       <KibanaRenderContextProvider {...core}>
-        <div className="heatmap-container" data-test-subj="heatmapChart">
+        <div className="eui-scrollBar" css={heatmapContainerCss} data-test-subj="heatmapChart">
           <HeatmapComponent
             {...config}
             onClickValue={onClickValue}

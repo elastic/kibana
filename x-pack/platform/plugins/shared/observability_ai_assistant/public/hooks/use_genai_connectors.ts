@@ -10,6 +10,8 @@ import type { FindActionResult } from '@kbn/actions-plugin/server';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
+import { useKibana } from './use_kibana';
+import { isInferenceEndpointExists } from './inference_endpoint_exists';
 
 export interface UseGenAIConnectorsResult {
   connectors?: FindActionResult[];
@@ -30,6 +32,9 @@ export function useGenAIConnectorsWithoutContext(
   assistant: ObservabilityAIAssistantService
 ): UseGenAIConnectorsResult {
   const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
+  const {
+    services: { http },
+  } = useKibana();
 
   const [selectedConnector, setSelectedConnector] = useLocalStorage(
     `xpack.observabilityAiAssistant.lastUsedConnector`,
@@ -49,15 +54,32 @@ export function useGenAIConnectorsWithoutContext(
         signal: controller.signal,
       })
       .then((results) => {
-        setConnectors(results);
-        setSelectedConnector((connectorId) => {
-          if (connectorId && results.findIndex((result) => result.id === connectorId) === -1) {
-            return '';
-          }
-          return connectorId;
-        });
+        return results
+          .reduce<Promise<FindActionResult[]>>(async (result, connector) => {
+            if (
+              connector.actionTypeId !== '.inference' ||
+              (connector.actionTypeId === '.inference' &&
+                (await isInferenceEndpointExists(
+                  http,
+                  (connector as FindActionResult)?.config?.inferenceId
+                )))
+            ) {
+              return [...(await result), connector];
+            }
 
-        setError(undefined);
+            return result;
+          }, Promise.resolve([]))
+          .then((c) => {
+            setConnectors(c);
+            setSelectedConnector((connectorId) => {
+              if (connectorId && c.findIndex((result) => result.id === connectorId) === -1) {
+                return '';
+              }
+              return connectorId;
+            });
+
+            setError(undefined);
+          });
       })
       .catch((err) => {
         setError(err);
@@ -66,7 +88,7 @@ export function useGenAIConnectorsWithoutContext(
       .finally(() => {
         setLoading(false);
       });
-  }, [assistant, controller.signal, setSelectedConnector]);
+  }, [assistant, controller.signal, http, setSelectedConnector]);
 
   useEffect(() => {
     fetchConnectors();

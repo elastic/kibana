@@ -30,6 +30,7 @@ export const contentReferenceComponentFactory = ({
     contentReferenceNode: ContentReferenceNode
   ): React.ReactNode => {
     if (!contentReferencesVisible) return null;
+    if (!contentReferenceNode.contentReferenceId) return null;
 
     const defaultNode = (
       <ContentReferenceButton
