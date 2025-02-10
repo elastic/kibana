@@ -25,6 +25,11 @@ jest.mock('../../../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => mockUseMissingRiskEnginePrivileges(),
 }));
 
+const mockUseContractComponents = jest.fn(() => ({}));
+jest.mock('../../../../common/hooks/use_contract_component', () => ({
+  useContractComponents: () => mockUseContractComponents(),
+}));
+
 const defaultProps = {
   visible: true,
   toggle: mockToggle,
