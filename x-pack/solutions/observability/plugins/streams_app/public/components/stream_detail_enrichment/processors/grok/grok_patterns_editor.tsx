@@ -22,24 +22,15 @@ import {
   EuiIcon,
   EuiFieldText,
   EuiButtonIcon,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RecursiveRecord, StreamDefinition } from '@kbn/streams-schema';
 import React from 'react';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
-import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
-import { GrokAiSuggestions, useAiEnabled } from './grok_ai_suggestions';
+import { GrokAiSuggestions } from './grok_ai_suggestions';
 
-export const GrokPatternsEditor = ({
-  definition,
-  refreshSimulation,
-  samples,
-}: {
-  definition?: StreamDefinition;
-  refreshSimulation?: UseProcessingSimulatorReturn['refreshSimulation'];
-  samples?: RecursiveRecord[];
-}) => {
+export const GrokPatternsEditor = () => {
   const {
     formState: { errors },
     register,
@@ -47,8 +38,6 @@ export const GrokPatternsEditor = ({
   const { fields, append, remove, move } = useFieldArray<Pick<GrokFormState, 'patterns'>>({
     name: 'patterns',
   });
-
-  const isAiEnabled = useAiEnabled();
 
   const fieldsWithError = fields.map((field, id) => {
     return {
@@ -70,18 +59,6 @@ export const GrokPatternsEditor = ({
   };
 
   const getRemovePatternHandler = (id: number) => (fields.length > 1 ? () => remove(id) : null);
-
-  const addButton = (
-    <EuiButtonEmpty
-      data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
-      onClick={handleAddPattern}
-    >
-      {i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
-        { defaultMessage: 'Add pattern' }
-      )}
-    </EuiButtonEmpty>
-  );
 
   return (
     <>
@@ -110,16 +87,20 @@ export const GrokPatternsEditor = ({
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      {isAiEnabled && refreshSimulation && definition && samples ? (
-        <GrokAiSuggestions
-          definition={definition}
-          refreshSimulation={refreshSimulation}
-          samples={samples}
-          extraButtons={addButton}
-        />
-      ) : (
-        addButton
-      )}
+      <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <GrokAiSuggestions />
+        </EuiFlexItem>
+        <EuiButtonEmpty
+          data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
+          onClick={handleAddPattern}
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
+            { defaultMessage: 'Add pattern' }
+          )}
+        </EuiButtonEmpty>
+      </EuiFlexGroup>
     </>
   );
 };

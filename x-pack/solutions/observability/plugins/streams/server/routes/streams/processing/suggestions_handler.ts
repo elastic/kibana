@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { get, uniqBy } from 'lodash';
+import { get, groupBy, mapValues, orderBy, shuffle, uniq, uniqBy } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
 import { RecursiveRecord } from '@kbn/streams-schema';
 import { ProcessingSuggestionParams } from './route';
@@ -25,7 +25,7 @@ export const handleProcessingSuggestion = async (
   scopedClusterClient: IScopedClusterClient
 ) => {
   const { field, samples } = body;
-  // Step 1: EVAL pattern
+  // Turn sample messages into patterns to group by
   const evalPattern = (sample: string) => {
     return sample
       .replace(/[ \t\n]+/g, ' ')
@@ -37,61 +37,42 @@ export const handleProcessingSuggestion = async (
       .replace(/0(.0)+/g, 'p');
   };
 
-  const inputPatterns = samples.map((sample) => ({
-    sample,
-    pattern: evalPattern(get(sample, field) as string),
-    fieldValue: get(sample, field) as string,
-  }));
-
   const NUMBER_PATTERN_CATEGORIES = 5;
   const NUMBER_SAMPLES_PER_PATTERN = 8;
 
-  // Step 2: STATS count and example by pattern
-  const patternStats = inputPatterns.reduce((acc, { sample, pattern, fieldValue }) => {
-    if (!acc[pattern]) {
-      acc[pattern] = { count: 0, examples: new Set<string>() };
-    }
-    acc[pattern].count += 1;
-    acc[pattern].examples.add(fieldValue);
-    return acc;
-  }, {} as Record<string, { count: number; examples: Set<string> }>);
+  const samplesWithPatterns = samples.map((sample) => {
+    const pattern = evalPattern(get(sample, field) as string);
+    return {
+      document: sample,
+      fullPattern: pattern,
+      truncatedPattern: pattern.slice(0, 10),
+      fieldValue: get(sample, field) as string,
+    };
+  });
 
-  // Step 3: STATS total_count, format, total_examples by LEFT(pattern, 10)
-  const leftPatternStats = Object.entries(patternStats).reduce(
-    (acc, [pattern, { count, examples }]) => {
-      const leftPattern = pattern.slice(0, 10);
-      if (!acc[leftPattern]) {
-        acc[leftPattern] = {
-          totalCount: 0,
-          format: new Set<string>(),
-          totalExamples: new Set<string>(),
-        };
-      }
-      acc[leftPattern].totalCount += count;
-      acc[leftPattern].format.add(pattern);
-      examples.forEach((example) => acc[leftPattern].totalExamples.add(example));
-      return acc;
-    },
-    {} as Record<string, { totalCount: number; format: Set<string>; totalExamples: Set<string> }>
-  );
-
-  // Step 4: SORT total_count DESC and LIMIT 100
-  const sortedStats = Object.entries(leftPatternStats)
-    .sort(([, a], [, b]) => b.totalCount - a.totalCount)
-    .slice(0, NUMBER_PATTERN_CATEGORIES)
-    .map(([leftPattern, { totalCount: totalCount, format, totalExamples: totalExamples }]) => {
-      const examplesArray = Array.from(totalExamples);
-      // shuffle so we don't only get examples from the first pattern
-      examplesArray.sort(() => Math.random() - 0.5);
-      return {
-        leftPattern,
-        totalCount,
-        totalExamples: examplesArray.slice(0, NUMBER_SAMPLES_PER_PATTERN),
-      };
-    });
+  const patternsToProcess = orderBy(
+    Object.values(
+      mapValues(
+        // group by truncated pattern
+        groupBy(samplesWithPatterns, 'truncatedPattern'),
+        (samplesForTruncatedPattern, truncatedPattern) => {
+          // return truncated pattern, count, and unique example values, shuffled
+          return {
+            truncatedPattern,
+            count: samplesForTruncatedPattern.length,
+            exampleValues: shuffle(
+              uniq(samplesForTruncatedPattern.map(({ fieldValue }) => fieldValue))
+            ).slice(0, NUMBER_SAMPLES_PER_PATTERN),
+          };
+        }
+      )
+    ),
+    'count',
+    'desc'
+  ).slice(0, NUMBER_PATTERN_CATEGORIES);
 
   const results = await Promise.all(
-    sortedStats.map((sample) =>
+    patternsToProcess.map((sample) =>
       processPattern(sample, id, body, inferenceClient, scopedClusterClient, field, samples)
     )
   );
@@ -110,7 +91,7 @@ export const handleProcessingSuggestion = async (
 type SimulationWithPattern = ReturnType<typeof prepareSimulationResponse> & { pattern: string };
 
 async function processPattern(
-  sample: { leftPattern: string; totalCount: number; totalExamples: string[] },
+  sample: { truncatedPattern: string; count: number; exampleValues: string[] },
   id: string,
   body: ProcessingSuggestionParams['body'],
   inferenceClient: InferenceClient,
@@ -155,7 +136,7 @@ async function processPattern(
       },
     } as const,
     input: `Logs:
-        ${sample.totalExamples.join('\n')}
+        ${sample.exampleValues.join('\n')}
         Given the raw messages coming from one data source, help us do the following: 
         1. Name the log source based on logs format.
         2. Write a parsing rule for Elastic ingest pipeline to extract structured fields from the raw message.

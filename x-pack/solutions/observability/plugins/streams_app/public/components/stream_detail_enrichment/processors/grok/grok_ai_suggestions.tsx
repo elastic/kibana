@@ -24,12 +24,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { RecursiveRecord, StreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
+import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
-import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
+import { SampleDocument, UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
+import { useStreamsEnrichmentContext } from '../../enrichment_context';
 
 const RefreshButton = ({
   generatePatterns,
@@ -42,17 +44,13 @@ const RefreshButton = ({
   connectors?: FindActionResult[];
   currentConnector?: string;
 }) => {
-  const [isPopoverOpen, setPopover] = useState(false);
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
   });
 
   const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
-
-  const closePopover = () => {
-    setPopover(false);
+    togglePopover(!isPopoverOpen);
   };
 
   return (
@@ -60,6 +58,7 @@ const RefreshButton = ({
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
+          iconType="sparkles"
           data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
           onClick={generatePatterns}
           disabled={currentConnector === undefined}
@@ -112,7 +111,7 @@ const RefreshButton = ({
   );
 };
 
-export function useAiEnabled() {
+function useAiEnabled() {
   const { dependencies } = useKibana();
   const { observabilityAIAssistant } = dependencies.start;
 
@@ -123,15 +122,15 @@ export function useAiEnabled() {
   return aiAssistantEnabled && (genAiConnectors?.connectors || []).length > 0;
 }
 
-export function GrokAiSuggestions({
+function InnerGrokAiSuggestions({
   definition,
   refreshSimulation,
-  samples,
+  filteredSamples,
   extraButtons,
 }: {
-  definition: StreamDefinition;
+  definition: IngestStreamGetResponse;
   refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
-  samples: RecursiveRecord[];
+  filteredSamples: SampleDocument[];
   extraButtons?: React.ReactNode;
 }) {
   const { dependencies } = useKibana();
@@ -167,11 +166,11 @@ export function GrokAiSuggestions({
       .fetch('POST /api/streams/{id}/processing/_suggestions', {
         signal: abortController.signal,
         params: {
-          path: { id: definition.name },
+          path: { id: definition.stream.name },
           body: {
             field: fieldValue,
             connectorId: currentConnector,
-            samples,
+            samples: filteredSamples,
           },
         },
       })
@@ -186,9 +185,9 @@ export function GrokAiSuggestions({
   }, [
     abortController.signal,
     currentConnector,
-    definition.name,
+    definition.stream.name,
     fieldValue,
-    samples,
+    filteredSamples,
     streamsRepositoryClient,
   ]);
 
@@ -319,4 +318,15 @@ export function GrokAiSuggestions({
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
+}
+
+export function GrokAiSuggestions() {
+  const isAiEnabled = useAiEnabled();
+  const props = useStreamsEnrichmentContext();
+
+  if (!isAiEnabled || !props.filteredSamples.length) {
+    return null;
+  }
+
+  return <InnerGrokAiSuggestions {...props} />;
 }

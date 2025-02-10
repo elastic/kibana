@@ -35,7 +35,7 @@ interface ProcessorOutcomePreviewProps {
   columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturn['isLoading'];
   simulation: UseProcessingSimulatorReturn['simulation'];
-  samples: UseProcessingSimulatorReturn['samples'];
+  filteredSamples: UseProcessingSimulatorReturn['samples'];
   onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
   selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
   setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
@@ -45,7 +45,7 @@ export const ProcessorOutcomePreview = ({
   columns,
   isLoading,
   simulation,
-  samples,
+  filteredSamples,
   onRefreshSamples,
   selectedDocsFilter,
   setSelectedDocsFilter,
@@ -82,7 +82,7 @@ export const ProcessorOutcomePreview = ({
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      <OutcomePreviewTable documents={samples} columns={tableColumns} />
+      <OutcomePreviewTable documents={filteredSamples} columns={tableColumns} />
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </>
   );

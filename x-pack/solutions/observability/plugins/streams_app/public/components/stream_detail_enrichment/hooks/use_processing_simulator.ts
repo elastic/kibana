@@ -63,11 +63,14 @@ export interface UseProcessingSimulatorProps {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
+export type SampleDocument = RecursiveRecord;
+
 export interface UseProcessingSimulatorReturn {
   hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
-  samples: RecursiveRecord[];
+  samples: SampleDocument[];
+  filteredSamples: SampleDocument[];
   simulation?: Simulation | null;
   tableColumns: TableColumn[];
   refreshSamples: () => void;
@@ -181,7 +184,7 @@ export const useProcessingSimulator = ({
     refresh: refreshSimulation,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition || isEmpty<RecursiveRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
+      if (!definition || isEmpty<SampleDocument[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
         return Promise.resolve(null);
       }
 
@@ -249,7 +252,8 @@ export const useProcessingSimulator = ({
     error: simulationError as IHttpFetchError<ResponseErrorBody> | undefined,
     refreshSamples,
     simulation,
-    samples: filteredSamples ?? [],
+    samples: sampleDocs ?? [],
+    filteredSamples: filteredSamples ?? [],
     tableColumns,
     watchProcessor,
     refreshSimulation,

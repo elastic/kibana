@@ -34,6 +34,7 @@ import {
   UseProcessingSimulatorReturn,
   useProcessingSimulator,
 } from './hooks/use_processing_simulator';
+import { StreamsEnrichmentContextProvider } from './enrichment_context';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -60,6 +61,8 @@ export function StreamDetailEnrichmentContent({
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
 
+  const processingSimulator = useProcessingSimulator({ definition, processors });
+
   const {
     hasLiveChanges,
     isLoading,
@@ -68,10 +71,9 @@ export function StreamDetailEnrichmentContent({
     simulation,
     tableColumns,
     watchProcessor,
-    refreshSimulation,
     selectedDocsFilter,
     setSelectedDocsFilter,
-  } = useProcessingSimulator({ definition, processors });
+  } = processingSimulator;
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges || hasLiveChanges,
@@ -86,70 +88,73 @@ export function StreamDetailEnrichmentContent({
   }
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
-      <EuiSplitPanel.Inner
-        paddingSize="none"
-        css={css`
-          display: flex;
-          overflow: auto;
-        `}
-      >
-        <EuiResizableContainer>
-          {(EuiResizablePanel, EuiResizableButton) => (
-            <>
-              <EuiResizablePanel
-                initialSize={25}
-                minSize="400px"
-                tabIndex={0}
-                paddingSize="none"
-                css={verticalFlexCss}
-              >
-                <ProcessorsEditor
-                  definition={definition}
-                  processors={processors}
-                  onUpdateProcessor={updateProcessor}
-                  onDeleteProcessor={deleteProcessor}
-                  onWatchProcessor={watchProcessor}
-                  onAddProcessor={addProcessor}
-                  onReorderProcessor={reorderProcessors}
-                  refreshSimulation={refreshSimulation}
-                  samples={samples}
-                />
-              </EuiResizablePanel>
+    <StreamsEnrichmentContextProvider
+      definition={definition}
+      processingSimulator={processingSimulator}
+    >
+      <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+        <EuiSplitPanel.Inner
+          paddingSize="none"
+          css={css`
+            display: flex;
+            overflow: auto;
+          `}
+        >
+          <EuiResizableContainer>
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel
+                  initialSize={25}
+                  minSize="400px"
+                  tabIndex={0}
+                  paddingSize="none"
+                  css={verticalFlexCss}
+                >
+                  <ProcessorsEditor
+                    definition={definition}
+                    processors={processors}
+                    onUpdateProcessor={updateProcessor}
+                    onDeleteProcessor={deleteProcessor}
+                    onWatchProcessor={watchProcessor}
+                    onAddProcessor={addProcessor}
+                    onReorderProcessor={reorderProcessors}
+                  />
+                </EuiResizablePanel>
 
-              <EuiResizableButton indicator="border" accountForScrollbars="both" />
+                <EuiResizableButton indicator="border" accountForScrollbars="both" />
 
-              <EuiResizablePanel
-                initialSize={75}
-                minSize="300px"
-                tabIndex={0}
-                paddingSize="s"
-                css={verticalFlexCss}
-              >
-                <MemoSimulationPlayground
-                  definition={definition}
-                  columns={tableColumns}
-                  simulation={simulation}
-                  samples={samples}
-                  onRefreshSamples={refreshSamples}
-                  isLoading={isLoading}
-                  selectedDocsFilter={selectedDocsFilter}
-                  setSelectedDocsFilter={setSelectedDocsFilter}
-                />
-              </EuiResizablePanel>
-            </>
-          )}
-        </EuiResizableContainer>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
-        <ManagementBottomBar
-          onCancel={resetChanges}
-          onConfirm={saveChanges}
-          isLoading={isSavingChanges}
-          disabled={!hasChanges}
-        />
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+                <EuiResizablePanel
+                  initialSize={75}
+                  minSize="300px"
+                  tabIndex={0}
+                  paddingSize="s"
+                  css={verticalFlexCss}
+                >
+                  <MemoSimulationPlayground
+                    definition={definition}
+                    columns={tableColumns}
+                    simulation={simulation}
+                    samples={samples}
+                    onRefreshSamples={refreshSamples}
+                    isLoading={isLoading}
+                    selectedDocsFilter={selectedDocsFilter}
+                    setSelectedDocsFilter={setSelectedDocsFilter}
+                  />
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={false} color="subdued">
+          <ManagementBottomBar
+            onCancel={resetChanges}
+            onConfirm={saveChanges}
+            isLoading={isSavingChanges}
+            disabled={!hasChanges}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </StreamsEnrichmentContextProvider>
   );
 }
 
@@ -161,8 +166,6 @@ interface ProcessorsEditorProps {
   onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
   onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
-  refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
-  samples: UseProcessingSimulatorReturn['samples'];
 }
 
 const ProcessorsEditor = React.memo(
@@ -174,8 +177,6 @@ const ProcessorsEditor = React.memo(
     onReorderProcessor,
     onUpdateProcessor,
     onWatchProcessor,
-    refreshSimulation,
-    samples,
   }: ProcessorsEditorProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -239,7 +240,6 @@ const ProcessorsEditor = React.memo(
                   onDeleteProcessor={onDeleteProcessor}
                   onUpdateProcessor={onUpdateProcessor}
                   onWatchProcessor={onWatchProcessor}
-                  refreshSimulation={refreshSimulation}
                 />
               ))}
             </SortableList>
@@ -249,8 +249,6 @@ const ProcessorsEditor = React.memo(
             definition={definition}
             onAddProcessor={onAddProcessor}
             onWatchProcessor={onWatchProcessor}
-            refreshSimulation={refreshSimulation}
-            samples={samples}
           />
         </EuiPanel>
       </>

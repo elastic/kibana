@@ -21,7 +21,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProcessorType, IngestStreamGetResponse, RecursiveRecord } from '@kbn/streams-schema';
+import { ProcessorType, IngestStreamGetResponse } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
@@ -44,13 +44,11 @@ import { UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator'
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
-  refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
 }
 
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
   isInitiallyOpen?: boolean;
   onAddProcessor: UseDefinitionReturn['addProcessor'];
-  samples: RecursiveRecord[];
 }
 
 export interface EditProcessorPanelProps extends ProcessorPanelProps {
@@ -59,13 +57,7 @@ export interface EditProcessorPanelProps extends ProcessorPanelProps {
   onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
 }
 
-export function AddProcessorPanel({
-  onAddProcessor,
-  onWatchProcessor,
-  refreshSimulation,
-  definition,
-  samples,
-}: AddProcessorPanelProps) {
+export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
 
   const [hasChanges, setHasChanges] = useState(false);
@@ -176,13 +168,7 @@ export function AddProcessorPanel({
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector />
             <EuiSpacer size="m" />
-            {type === 'grok' && (
-              <GrokProcessorForm
-                refreshSimulation={refreshSimulation}
-                definition={definition.stream}
-                samples={samples}
-              />
-            )}
+            {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
           </EuiForm>
         </FormProvider>
