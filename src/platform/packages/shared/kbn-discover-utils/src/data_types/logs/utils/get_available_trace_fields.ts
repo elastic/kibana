@@ -10,7 +10,7 @@
 import { TraceFields } from '../../..';
 import * as constants from '../constants';
 
-export const getAvailableTraceBadgeFields = (traceDoc: TraceFields) => {
+export const getAvailableTraceFields = (traceDoc: TraceFields) => {
   const availableTraceFields = [
     constants.SERVICE_NAME_FIELD,
     constants.EVENT_OUTCOME_FIELD,

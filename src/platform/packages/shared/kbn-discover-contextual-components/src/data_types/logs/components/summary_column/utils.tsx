@@ -33,7 +33,7 @@ import {
   TraceFields,
   TraceDocument,
   getAvailableResourceFields,
-  getAvailableTraceBadgeFields,
+  getAvailableTraceFields,
 } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -161,7 +161,7 @@ export const createTraceFields = (
   share?: SharePluginStart
 ): ResourceFieldDescriptor[] => {
   const traceFields = getUnformattedFields(row, TRACE_FIELDS);
-  const availableFields = getAvailableTraceBadgeFields(traceFields);
+  const availableFields = getAvailableTraceFields(traceFields);
 
   return availableFields.map((name) => {
     const field = dataView.getFieldByName(name);
