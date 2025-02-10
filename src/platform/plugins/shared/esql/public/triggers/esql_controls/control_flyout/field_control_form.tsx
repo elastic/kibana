@@ -22,7 +22,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import {
   ESQLVariableType,
   ESQLControlVariable,
-  getAllFunctions,
+  aggregationFunctionDefinitions,
 } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
@@ -137,7 +137,7 @@ export function FieldControlForm({
       }
 
       if (variableType === ESQLVariableType.FUNCTIONS) {
-        const aggregatedFunctions = getAllFunctions({ type: 'agg' }).map((func) => {
+        const aggregatedFunctions = aggregationFunctionDefinitions.map((func) => {
           return {
             label: func.name,
             key: func.name,
