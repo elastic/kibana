@@ -238,20 +238,20 @@ export async function createRule<Params extends RuleParams = never>(
     },
   });
 
-  const alertRuntimeFields = ruleType.alerts?.runtimeFields;
+  const alertRuntimeFields = ruleType.alerts?.ruleFieldsToAddAlertRuntimeMappings;
 
   if (alertRuntimeFields && alertRuntimeFields.length) {
     const runtimeFieldsToAdd: string[] = [];
     try {
       alertRuntimeFields.forEach((field) => {
-        const fieldInRule = get(ruleAttributes, field.fieldInRule);
+        const fieldInRule = get(ruleAttributes, field);
         if (fieldInRule) {
           if (Array.isArray(fieldInRule)) {
             fieldInRule.forEach((value) => {
-              runtimeFieldsToAdd.push(`${field.prefix}.${value}`);
+              runtimeFieldsToAdd.push(value);
             });
           } else {
-            runtimeFieldsToAdd.push(`${field.prefix}.${fieldInRule}`);
+            runtimeFieldsToAdd.push(fieldInRule);
           }
         }
       });
@@ -260,14 +260,13 @@ export async function createRule<Params extends RuleParams = never>(
     }
 
     if (runtimeFieldsToAdd.length > 0) {
-      let existingRuntimeFields = [];
       if (ruleType.alerts?.context) {
         const indexName = getIndexTemplateAndPattern({
           context: ruleType.alerts?.context,
           namespace: context.spaceId,
         }).name;
 
-        existingRuntimeFields = await context.alertsService!.getRuntimeFields({
+        const existingRuntimeFields = await context.alertsService!.getRuntimeFields({
           index: indexName,
         });
 

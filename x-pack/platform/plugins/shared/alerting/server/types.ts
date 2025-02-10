@@ -265,21 +265,10 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   formatAlert?: FormatAlert<AlertData>;
 
   /**
-   * Optional list of runtime fields to add alert's runtime mappings.
+   * Optional list of runtime fields from the rule to add alert's runtime mappings.
+   * Example: ['params.groupBy']
    */
-  runtimeFields?: AlertRuntimeField[];
-}
-
-// Example:
-// { fieldInRule: 'params.groupBy', prefix:'kibana.alert.grouping' }
-// if params.groupBy value in the rule is: host.name and host.id
-// The runtime field in the alert mapping wiil be:
-// kibana.alert.grouping.host.name and kibana.alert.grouping.host.id
-export interface AlertRuntimeField {
-  // Path to the field in the rule SO
-  fieldInRule: string;
-  // Prefix to add field
-  prefix: string;
+  ruleFieldsToAddAlertRuntimeMappings?: string[];
 }
 
 export interface RuleType<
