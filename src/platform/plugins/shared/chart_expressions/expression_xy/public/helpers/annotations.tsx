@@ -121,8 +121,22 @@ export function MarkerBody({
     );
   }
   return (
-    <div css={xyDecorationRotatedWrapperCss.self} data-test-subj="xyVisAnnotationText">
-      <div className="eui-textTruncate" css={xyDecorationRotatedWrapperCss.label}>
+    <div
+      className="xyDecorationRotatedWrapper"
+      data-test-subj="xyVisAnnotationText"
+      css={[
+        xyDecorationRotatedWrapperStyles,
+        {
+          maxWidth: LINES_MARKER_SIZE,
+        },
+      ]}
+    >
+      <div
+        className="eui-textTruncate xyDecorationRotatedWrapper__label"
+        css={{
+          maxWidth: LINES_MARKER_SIZE * 3,
+        }}
+      >
         {label}
       </div>
     </div>
@@ -212,25 +226,21 @@ export function Marker({
   return null;
 }
 
-const xyDecorationRotatedWrapperCss = {
-  self: css`
-    display: inline-block;
-    width: ${LINES_MARKER_SIZE}px;
-    overflow: hidden;
-    line-height: 1.5;
-  `,
+const xyDecorationRotatedWrapperStyles = css({
+  display: 'inline-block',
+  overflow: 'hidden',
+  lineHeight: 1.5,
 
-  label: css`
-    display: inline-block;
-    max-width: ${LINES_MARKER_SIZE * 3}px;
-    white-space: nowrap;
-    transform: translate(0, 100%) rotate(-90deg);
-    transform-origin: 0 0;
+  '& .xyDecorationRotatedWrapper__label': {
+    display: 'inline-block',
+    whiteSpace: 'nowrap',
+    transform: 'translate(0, 100%) rotate(-90deg)',
+    transformOrigin: '0 0',
 
-    &::after {
-      content: '';
-      float: left;
-      margin-top: 100%;
-    }
-  `,
-};
+    '&::after': {
+      content: '""',
+      float: 'left',
+      marginTop: '100%',
+    },
+  },
+});
