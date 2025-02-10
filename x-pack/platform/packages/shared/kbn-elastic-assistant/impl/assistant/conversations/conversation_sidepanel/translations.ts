@@ -41,3 +41,30 @@ export const DELETE_BUTTON_TEXT = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
+
+export const DATE_CATEGORY_LABELS: Record<string, string> = {
+  TODAY: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.today', {
+    defaultMessage: 'Today',
+  }),
+  YESTERDAY: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.yesterday', {
+    defaultMessage: 'Yesterday',
+  }),
+  THIS_WEEK: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.thisWeek', {
+    defaultMessage: 'This Week',
+  }),
+  LAST_WEEK: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.lastWeek', {
+    defaultMessage: 'Last Week',
+  }),
+  THIS_MONTH: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.thisMonth', {
+    defaultMessage: 'This Month',
+  }),
+  LAST_MONTH: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.lastMonth', {
+    defaultMessage: 'Last Month',
+  }),
+  THIS_YEAR: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.thisYear', {
+    defaultMessage: 'This Year',
+  }),
+  OLDER: i18n.translate('xpack.aiAssistant.conversationList.dateGroupTitle.older', {
+    defaultMessage: 'Older',
+  }),
+};

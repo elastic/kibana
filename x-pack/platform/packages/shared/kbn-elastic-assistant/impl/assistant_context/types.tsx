@@ -37,8 +37,8 @@ export interface Conversation {
   id: string;
   title: string;
   messages: ClientMessage[];
-  updatedAt?: Date;
-  createdAt?: Date;
+  updatedAt?: string;
+  createdAt?: string;
   replacements: Replacements;
   excludeFromLastConversationStorage?: boolean;
 }

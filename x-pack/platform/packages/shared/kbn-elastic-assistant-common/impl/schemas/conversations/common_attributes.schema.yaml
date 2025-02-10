@@ -305,7 +305,7 @@ components:
           description: The last time conversation was updated.
           type: string
         createdAt:
-          description: The last time conversation was updated.
+          description: The time conversation was created.
           type: string
         replacements:
           $ref: '#/components/schemas/Replacements'
@@ -384,6 +384,9 @@ components:
           type: boolean
         replacements:
           $ref: '#/components/schemas/Replacements'
+        createdAt:
+          description: Set the creation date.
+          type: string
 
     ConversationMessageCreateProps:
       type: object

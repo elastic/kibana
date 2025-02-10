@@ -57,23 +57,24 @@ export const useCurrentConversation = ({
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
   useEffect(() => {
     if (!mayUpdateConversations || !!currentConversation) return;
+    const emptyConversation = {
+      apiConfig: defaultConnector
+        ? {
+            connectorId: defaultConnector.id ?? '',
+            actionTypeId: defaultConnector.actionTypeId ?? '',
+          }
+        : undefined,
+      id: '',
+      messages: [],
+      replacements: {},
+      category: 'assistant',
+      title: '',
+    };
     if (conversationId === '') {
-      return setCurrentConversation({
-        apiConfig: defaultConnector
-          ? {
-              connectorId: defaultConnector.id ?? '',
-              actionTypeId: defaultConnector.actionTypeId ?? '',
-            }
-          : undefined,
-        id: '',
-        messages: [],
-        replacements: {},
-        category: 'assistant',
-        title: '',
-      });
+      return setCurrentConversation(emptyConversation);
     }
     if (conversations[conversationId]) {
-      setCurrentConversation(conversations[conversationId]);
+      setCurrentConversation(conversations[conversationId] ?? emptyConversation);
     }
   }, [
     conversationId,

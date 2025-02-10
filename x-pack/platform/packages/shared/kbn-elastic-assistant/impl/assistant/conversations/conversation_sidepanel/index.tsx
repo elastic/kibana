@@ -13,12 +13,16 @@ import {
   EuiListGroupItem,
   EuiPanel,
   EuiConfirmModal,
+  EuiText,
+  EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
-import { isEmpty, findIndex, orderBy } from 'lodash';
+import { isEmpty, findIndex } from 'lodash';
+import { useConversationsByDate } from './use_conversations_by_date';
 import { DataStreamApis } from '../../use_data_stream_apis';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
@@ -79,14 +83,19 @@ export const ConversationSidePanel = React.memo<Props>(
     onConversationDeleted,
     onConversationCreate,
   }) => {
+    const euiTheme = useEuiTheme();
+
+    const titleClassName = css`
+      text-transform: uppercase;
+      font-weight: ${euiTheme.euiTheme.font.weight.bold};
+    `;
     const [deleteConversationItem, setDeleteConversationItem] = useState<Conversation | null>(null);
 
+    const conversationsCategorizedByDate = useConversationsByDate(Object.values(conversations));
+
     const conversationList = useMemo(
-      () =>
-        orderBy(Object.values(conversations), 'updatedAt', 'desc').sort((a, b) =>
-          a.id.length > b.id.length ? -1 : 1
-        ),
-      [conversations]
+      () => Object.values(conversationsCategorizedByDate).flatMap((p) => p),
+      [conversationsCategorizedByDate]
     );
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
@@ -184,36 +193,51 @@ export const ConversationSidePanel = React.memo<Props>(
             `}
           >
             <EuiPanel hasShadow={false} borderRadius="none">
-              <EuiListGroup
-                size="xs"
-                css={css`
-                  padding: 0;
-                `}
-              >
-                {conversationList.map((conversation) => (
-                  <EuiListGroupItem
-                    key={conversation.id + conversation.title}
-                    onClick={() =>
-                      onConversationSelected({ cId: conversation.id, cTitle: conversation.title })
-                    }
-                    label={conversation.title}
-                    data-test-subj={`conversation-select-${conversation.title}`}
-                    isActive={
-                      !isEmpty(conversation.id)
-                        ? conversation.id === currentConversation?.id
-                        : conversation.title === currentConversation?.title
-                    }
-                    extraAction={{
-                      color: 'danger',
-                      onClick: () => setDeleteConversationItem(conversation),
-                      iconType: 'trash',
-                      iconSize: 's',
-                      'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
-                      'data-test-subj': 'delete-option',
-                    }}
-                  />
-                ))}
-              </EuiListGroup>
+              {Object.entries(conversationsCategorizedByDate).map(([category, convoList]) =>
+                convoList.length ? (
+                  <EuiFlexItem grow={false} key={category}>
+                    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+                      <EuiText css={titleClassName} size="s">
+                        {i18n.DATE_CATEGORY_LABELS[category]}
+                      </EuiText>
+                    </EuiPanel>
+                    <EuiListGroup
+                      size="xs"
+                      css={css`
+                        padding: 0;
+                      `}
+                    >
+                      {convoList.map((conversation) => (
+                        <EuiListGroupItem
+                          key={conversation.id + conversation.title}
+                          onClick={() =>
+                            onConversationSelected({
+                              cId: conversation.id,
+                              cTitle: conversation.title,
+                            })
+                          }
+                          label={conversation.title}
+                          data-test-subj={`conversation-select-${conversation.title}`}
+                          isActive={
+                            !isEmpty(conversation.id)
+                              ? conversation.id === currentConversation?.id
+                              : conversation.title === currentConversation?.title
+                          }
+                          extraAction={{
+                            color: 'danger',
+                            onClick: () => setDeleteConversationItem(conversation),
+                            iconType: 'trash',
+                            iconSize: 's',
+                            'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                            'data-test-subj': 'delete-option',
+                          }}
+                        />
+                      ))}
+                    </EuiListGroup>
+                    <EuiSpacer size="s" />
+                  </EuiFlexItem>
+                ) : null
+              )}
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

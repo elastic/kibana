@@ -318,7 +318,7 @@ export const ConversationResponse = z.object({
    */
   updatedAt: z.string().optional(),
   /**
-   * The last time conversation was updated.
+   * The time conversation was created.
    */
   createdAt: z.string(),
   replacements: Replacements.optional(),
@@ -395,6 +395,10 @@ export const ConversationCreateProps = z.object({
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
   replacements: Replacements.optional(),
+  /**
+   * Set the creation date.
+   */
+  createdAt: z.string().optional(),
 });
 
 export type ConversationMessageCreateProps = z.infer<typeof ConversationMessageCreateProps>;

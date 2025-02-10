@@ -34,7 +34,12 @@ export const createConversation = async ({
   logger,
 }: CreateConversationParams): Promise<ConversationResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateScheme(createdAt, spaceId, user, conversation);
+  const body = transformToCreateScheme(
+    conversation.createdAt ?? createdAt,
+    spaceId,
+    user,
+    conversation
+  );
   try {
     const response = await esClient.create({
       body,

@@ -35,7 +35,7 @@ export const create = async () => {
     .option('kibana', {
       type: 'string',
       description: 'Kibana url including auth',
-      default: `http://elastic:changeme@localhost:5601`,
+      default: `http://elastic:changeme@localhost:5601/kbn`,
     })
     .parse();
   const kibanaUrl = removeTrailingSlash(argv.kibana);
@@ -122,30 +122,59 @@ const retryRequest = async (
     throw e; // If retries are exhausted, throw the error
   }
 };
+const getRandomISODate = () => {
+  const now = new Date();
+  const probabilities = [
+    { chance: 3 / 10, daysAgo: Math.floor(Math.random() * 335) + 31 }, // Over a month ago
+    { chance: 1 / 10, daysAgo: 4 }, // In the last week
+    { chance: 1 / 10, daysAgo: 1 }, // Yesterday
+    { chance: 1 / 10, daysAgo: 0 }, // Today
+    { chance: 2 / 10, daysAgo: Math.floor(Math.random() * 7) + 7 }, // Two weeks ago
+    { chance: 2 / 10, daysAgo: Math.floor(Math.random() * 14) + 14 }, // Over two weeks ago
+  ];
 
-const getMockConversationContent = (): Partial<ConversationCreateProps> => ({
-  title: `A ${randomBytes(4).toString('hex')} title`,
-  messages: [
-    {
-      content: 'Hello robot',
-      role: 'user',
-      timestamp: '2019-12-13T16:40:33.400Z',
-      traceData: {
-        traceId: '1',
-        transactionId: '2',
+  const rand = Math.random();
+  let cumulativeProbability = 0;
+
+  for (const { chance, daysAgo } of probabilities) {
+    cumulativeProbability += chance;
+    if (rand <= cumulativeProbability) {
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() - daysAgo);
+      return targetDate.toISOString();
+    }
+  }
+
+  // Fallback (should never be reached)
+  return now.toISOString();
+};
+const getMockConversationContent = (): Partial<ConversationCreateProps> => {
+  const timestamp = getRandomISODate();
+  return {
+    title: `A ${randomBytes(4).toString('hex')} title`,
+    createdAt: timestamp,
+    messages: [
+      {
+        content: 'Hello robot',
+        role: 'user',
+        timestamp,
+        traceData: {
+          traceId: '1',
+          transactionId: '2',
+        },
       },
-    },
-    {
-      content: 'Hello human',
-      role: 'assistant',
-      timestamp: '2019-12-13T16:41:33.400Z',
-      traceData: {
-        traceId: '3',
-        transactionId: '4',
+      {
+        content: 'Hello human',
+        role: 'assistant',
+        timestamp,
+        traceData: {
+          traceId: '3',
+          transactionId: '4',
+        },
       },
-    },
-  ],
-});
+    ],
+  };
+};
 
 export const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
 
