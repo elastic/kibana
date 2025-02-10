@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef } from 'react';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import {
+  COLOR_MODES_STANDARD,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { noop } from 'lodash';
 
@@ -49,6 +56,8 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
     const scrollElement = useRef<HTMLDivElement>(null);
+    const { euiTheme, colorMode } = useEuiTheme();
+    const isDark = colorMode === COLOR_MODES_STANDARD.dark;
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
       DEFAULT_TAB.id
@@ -77,6 +86,34 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
+
+    const buttonGroupStyles = useMemo(
+      () => css`
+        button {
+          position: relative;
+        }
+        button:not(:first-child)::before {
+          position: absolute;
+          left: 0px;
+          content: ' ';
+          width: 1px;
+          height: 70%;
+          background-color: ${euiTheme.colors.darkShade};
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        button[aria-pressed='true'],
+        button[aria-pressed='true'] + button {
+          &::before {
+            content: none;
+          }
+        }
+        button[aria-pressed='true'] {
+          text-decoration: none;
+        }
+      `,
+      [euiTheme.colors.darkShade]
+    );
 
     const onSearchTermChanged = useCallback(
       (searchQuery: string) => {
@@ -144,6 +181,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       >
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
+            css={isDark ? buttonGroupStyles : undefined}
             buttonSize="compressed"
             color="primary"
             idSelected={toggleIdSelected}
