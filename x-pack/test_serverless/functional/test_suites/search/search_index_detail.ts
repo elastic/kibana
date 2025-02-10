@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const indexName = 'test-my-index';
 
   // Failing: See https://github.com/elastic/kibana/issues/203508
+  // Failing: See https://github.com/elastic/kibana/issues/203508
   describe.skip('index details page - search solution', function () {
     describe('developer', function () {
       before(async () => {
