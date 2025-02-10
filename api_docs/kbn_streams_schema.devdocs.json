@@ -21,6 +21,102 @@
     "functions": [
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.asIngestStreamDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "asIngestStreamDefinition",
+        "description": [],
+        "signature": [
+          "<TValue extends ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
+          },
+          ">(value: TValue) => Extract<TValue, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamDefinition",
+            "text": "IngestStreamDefinition"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.asIngestStreamDefinition.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.asIngestStreamGetResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "asIngestStreamGetResponse",
+        "description": [],
+        "signature": [
+          "<TValue extends ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamGetResponse",
+            "text": "StreamGetResponse"
+          },
+          ">(value: TValue) => Extract<TValue, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamGetResponse",
+            "text": "IngestStreamGetResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.asIngestStreamGetResponse.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.assertsSchema",
         "type": "Function",
         "tags": [],
@@ -80,8 +176,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamGetResponse",
-            "text": "IngestStreamGetResponse"
+            "section": "def-common.StreamGetResponse",
+            "text": "StreamGetResponse"
           },
           ">(value: TValue) => Extract<TValue, ",
           {
@@ -93,7 +189,7 @@
           },
           ">"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -101,6 +197,54 @@
           {
             "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.asUnwiredStreamGetResponse.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.asWiredStreamDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "asWiredStreamDefinition",
+        "description": [],
+        "signature": [
+          "<TValue extends ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
+          },
+          ">(value: TValue) => Extract<TValue, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStreamDefinition",
+            "text": "WiredStreamDefinition"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.asWiredStreamDefinition.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
@@ -128,8 +272,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamGetResponse",
-            "text": "IngestStreamGetResponse"
+            "section": "def-common.StreamGetResponse",
+            "text": "StreamGetResponse"
           },
           ">(value: TValue) => Extract<TValue, ",
           {
@@ -141,7 +285,7 @@
           },
           ">"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -161,6 +305,53 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.conditionToQueryDsl",
+        "type": "Function",
+        "tags": [],
+        "label": "conditionToQueryDsl",
+        "description": [],
+        "signature": [
+          "(condition: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ") => any"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/condition_to_query_dsl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.conditionToQueryDsl.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/condition_to_query_dsl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -327,6 +518,53 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getFields",
+        "description": [],
+        "signature": [
+          "(condition: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ") => { name: string; type: \"string\" | \"number\"; }[]"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/condition_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getFields.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/condition_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getParentId",
         "type": "Function",
         "tags": [],
@@ -366,15 +604,7 @@
         "label": "getProcessorConfig",
         "description": [],
         "signature": [
-          "(processor: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ProcessorDefinition",
-            "text": "ProcessorDefinition"
-          },
-          ") => ",
+          "(processor: TProcessorDefinition) => ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -390,18 +620,12 @@
           {
             "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.getProcessorConfig.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "processor",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.ProcessorDefinition",
-                "text": "ProcessorDefinition"
-              }
+              "TProcessorDefinition"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
             "deprecated": false,
@@ -420,7 +644,15 @@
         "label": "getProcessorType",
         "description": [],
         "signature": [
-          "(processor: TProcessorDefinition) => ProcessorTypeOf<TProcessorDefinition>"
+          "(processor: TProcessorDefinition) => ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ProcessorTypeOf",
+            "text": "ProcessorTypeOf"
+          },
+          "<TProcessorDefinition>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
         "deprecated": false,
@@ -1024,6 +1256,94 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isGroupStreamDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isGroupStreamDefinition",
+        "description": [],
+        "signature": [
+          "<TValue extends ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
+          },
+          ">(value: TValue) => value is Extract<TValue, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamDefinition",
+            "text": "GroupStreamDefinition"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isGroupStreamDefinition.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isGroupStreamDefinitionBase",
+        "type": "Function",
+        "tags": [],
+        "label": "isGroupStreamDefinitionBase",
+        "description": [],
+        "signature": [
+          "<TValue extends unknown>(value: TValue) => value is Extract<TValue, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamDefinitionBase",
+            "text": "GroupStreamDefinitionBase"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isGroupStreamDefinitionBase.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isIlmLifecycle",
         "type": "Function",
         "tags": [],
@@ -1075,8 +1395,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           ">(value: TValue) => value is Extract<TValue, ",
           {
@@ -1240,46 +1560,6 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.isReadStream",
-        "type": "Function",
-        "tags": [],
-        "label": "isReadStream",
-        "description": [],
-        "signature": [
-          "<TValue extends unknown>(value: TValue) => value is Extract<TValue, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ReadStreamDefinition",
-            "text": "ReadStreamDefinition"
-          },
-          ">"
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.isReadStream.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "signature": [
-              "TValue"
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isRoot",
         "type": "Function",
         "tags": [],
@@ -1324,8 +1604,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           ">(value: TValue) => value is Extract<TValue, ",
           {
@@ -1420,8 +1700,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           ">"
         ],
@@ -1497,54 +1777,6 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.isUnwiredReadStream",
-        "type": "Function",
-        "tags": [],
-        "label": "isUnwiredReadStream",
-        "description": [],
-        "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ReadStreamDefinition",
-            "text": "ReadStreamDefinition"
-          },
-          ">(value: TValue) => value is Extract<TValue, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.UnwiredReadStreamDefinition",
-            "text": "UnwiredReadStreamDefinition"
-          },
-          ">"
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.isUnwiredReadStream.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "signature": [
-              "TValue"
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isUnwiredStreamDefinition",
         "type": "Function",
         "tags": [],
@@ -1556,8 +1788,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           ">(value: TValue) => value is Extract<TValue, ",
           {
@@ -1593,10 +1825,10 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.isUnWiredStreamGetResponse",
+        "id": "def-common.isUnwiredStreamGetResponse",
         "type": "Function",
         "tags": [],
-        "label": "isUnWiredStreamGetResponse",
+        "label": "isUnwiredStreamGetResponse",
         "description": [],
         "signature": [
           "<TValue extends ",
@@ -1604,8 +1836,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamGetResponse",
-            "text": "IngestStreamGetResponse"
+            "section": "def-common.StreamGetResponse",
+            "text": "StreamGetResponse"
           },
           ">(value: TValue) => value is Extract<TValue, ",
           {
@@ -1617,62 +1849,14 @@
           },
           ">"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.isUnWiredStreamGetResponse.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "signature": [
-              "TValue"
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/type_guards.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.isWiredReadStream",
-        "type": "Function",
-        "tags": [],
-        "label": "isWiredReadStream",
-        "description": [],
-        "signature": [
-          "<TValue extends ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ReadStreamDefinition",
-            "text": "ReadStreamDefinition"
-          },
-          ">(value: TValue) => value is Extract<TValue, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredReadStreamDefinition",
-            "text": "WiredReadStreamDefinition"
-          },
-          ">"
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.isWiredReadStream.$1",
+            "id": "def-common.isUnwiredStreamGetResponse.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
@@ -1700,8 +1884,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           ">(value: TValue) => value is Extract<TValue, ",
           {
@@ -1748,8 +1932,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamGetResponse",
-            "text": "IngestStreamGetResponse"
+            "section": "def-common.StreamGetResponse",
+            "text": "StreamGetResponse"
           },
           ">(value: TValue) => value is Extract<TValue, ",
           {
@@ -1761,7 +1945,7 @@
           },
           ">"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1960,20 +2144,6 @@
             "description": [],
             "signature": [
               "string | undefined"
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.DissectProcessorConfig.ignore_failure",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ignore_failure",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
             "deprecated": false,
@@ -2215,20 +2385,6 @@
           },
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.GrokProcessorConfig.ignore_failure",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ignore_failure",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.GrokProcessorConfig.ignore_missing",
             "type": "CompoundType",
             "tags": [],
@@ -2272,6 +2428,176 @@
               }
             ],
             "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GroupBase",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupBase",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GroupBase.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GroupBase.members",
+            "type": "Array",
+            "tags": [],
+            "label": "members",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GroupStreamDefinitionBase",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupStreamDefinitionBase",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GroupStreamDefinitionBase.group",
+            "type": "Object",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.GroupBase",
+                "text": "GroupBase"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GroupStreamGetResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupStreamGetResponse",
+        "description": [
+          "\nGroup get response"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamGetResponse",
+            "text": "GroupStreamGetResponse"
+          },
+          " extends ",
+          "StreamGetResponseBase"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GroupStreamGetResponse.stream",
+            "type": "Object",
+            "tags": [],
+            "label": "stream",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.GroupStreamDefinitionBase",
+                "text": "GroupStreamDefinitionBase"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GroupStreamUpsertRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupStreamUpsertRequest",
+        "description": [
+          "\nGroup upsert request"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamUpsertRequest",
+            "text": "GroupStreamUpsertRequest"
+          },
+          " extends ",
+          "StreamUpsertRequestBase"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GroupStreamUpsertRequest.stream",
+            "type": "Object",
+            "tags": [],
+            "label": "stream",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.GroupStreamDefinitionBase",
+                "text": "GroupStreamDefinitionBase"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2613,6 +2939,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.ProcessorBase.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.ProcessorBase.if",
             "type": "CompoundType",
             "tags": [],
@@ -2660,6 +3000,72 @@
               }
             ],
             "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.ProcessorBase.ignore_failure",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_failure",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.RecursiveRecord",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecursiveRecord",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/core.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.RecursiveRecord.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: PropertyKey]: RecursiveRecord | Primitive | Primitive[]",
+            "description": [],
+            "signature": [
+              "[key: PropertyKey]:  ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.RecursiveRecord",
+                "text": "RecursiveRecord"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Primitive",
+                "text": "Primitive"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Primitive",
+                "text": "Primitive"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/core.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2848,97 +3254,6 @@
               }
             ],
             "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.UnwiredReadStreamDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "UnwiredReadStreamDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.UnwiredReadStreamDefinition",
-            "text": "UnwiredReadStreamDefinition"
-          },
-          " extends ReadStreamDefinitionBase"
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.UnwiredReadStreamDefinition.stream",
-            "type": "Object",
-            "tags": [],
-            "label": "stream",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.UnwiredStreamDefinition",
-                "text": "UnwiredStreamDefinition"
-              }
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.UnwiredReadStreamDefinition.data_stream_exists",
-            "type": "boolean",
-            "tags": [],
-            "label": "data_stream_exists",
-            "description": [],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.UnwiredReadStreamDefinition.effective_lifecycle",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "effective_lifecycle",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.IngestStreamLifecycle",
-                "text": "IngestStreamLifecycle"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.IngestStreamLifecycleError",
-                "text": "IngestStreamLifecycleError"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.IngestStreamLifecycleDisabled",
-                "text": "IngestStreamLifecycleDisabled"
-              }
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3177,71 +3492,6 @@
               }
             ],
             "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.WiredReadStreamDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "WiredReadStreamDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredReadStreamDefinition",
-            "text": "WiredReadStreamDefinition"
-          },
-          " extends ReadStreamDefinitionBase"
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.WiredReadStreamDefinition.stream",
-            "type": "Object",
-            "tags": [],
-            "label": "stream",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.WiredStreamDefinition",
-                "text": "WiredStreamDefinition"
-              }
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.WiredReadStreamDefinition.effective_lifecycle",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "effective_lifecycle",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/streams-schema",
-                "scope": "common",
-                "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.IngestStreamLifecycle",
-                "text": "IngestStreamLifecycle"
-              },
-              " & { from: string; }"
-            ],
-            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3498,6 +3748,29 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.GroupStreamDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "GroupStreamDefinition",
+        "description": [],
+        "signature": [
+          "StreamDefinitionBase",
+          " & ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamDefinitionBase",
+            "text": "GroupStreamDefinitionBase"
+          }
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.IngestGetResponse",
         "type": "Type",
         "tags": [],
@@ -3681,6 +3954,21 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.Primitive",
+        "type": "Type",
+        "tags": [],
+        "label": "Primitive",
+        "description": [],
+        "signature": [
+          "string | number | boolean | null | undefined"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/core.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.ProcessorConfig",
         "type": "Type",
         "tags": [],
@@ -3754,29 +4042,22 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.ReadStreamDefinition",
+        "id": "def-common.ProcessorTypeOf",
         "type": "Type",
         "tags": [],
-        "label": "ReadStreamDefinition",
+        "label": "ProcessorTypeOf",
         "description": [],
         "signature": [
+          "UnionKeysOf<TProcessorDefinition> & ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredReadStreamDefinition",
-            "text": "WiredReadStreamDefinition"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.UnwiredReadStreamDefinition",
-            "text": "UnwiredReadStreamDefinition"
+            "section": "def-common.ProcessorType",
+            "text": "ProcessorType"
           }
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/processors/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3793,16 +4074,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredStreamDefinition",
-            "text": "WiredStreamDefinition"
+            "section": "def-common.IngestStreamDefinition",
+            "text": "IngestStreamDefinition"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.UnwiredStreamDefinition",
-            "text": "UnwiredStreamDefinition"
+            "section": "def-common.GroupStreamDefinition",
+            "text": "GroupStreamDefinition"
           }
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/core.ts",
@@ -3822,16 +4103,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredStreamGetResponse",
-            "text": "WiredStreamGetResponse"
+            "section": "def-common.IngestStreamGetResponse",
+            "text": "IngestStreamGetResponse"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.UnwiredStreamGetResponse",
-            "text": "UnwiredStreamGetResponse"
+            "section": "def-common.GroupStreamGetResponse",
+            "text": "GroupStreamGetResponse"
           }
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/api.ts",
@@ -3847,7 +4128,21 @@
         "label": "StreamUpsertRequest",
         "description": [],
         "signature": [
-          "WiredStreamUpsertRequest | UnwiredStreamUpsertRequest"
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamUpsertRequest",
+            "text": "IngestStreamUpsertRequest"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamUpsertRequest",
+            "text": "GroupStreamUpsertRequest"
+          }
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/api.ts",
         "deprecated": false,
@@ -4273,6 +4568,161 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.groupBaseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "groupBaseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupBase",
+            "text": "GroupBase"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupBase",
+            "text": "GroupBase"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.groupStreamDefinitionBaseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "groupStreamDefinitionBaseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamDefinitionBase",
+            "text": "GroupStreamDefinitionBase"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamDefinitionBase",
+            "text": "GroupStreamDefinitionBase"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.groupStreamDefinitionSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "groupStreamDefinitionSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamDefinition",
+            "text": "GroupStreamDefinition"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamDefinition",
+            "text": "GroupStreamDefinition"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.groupStreamGetResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "groupStreamGetResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamGetResponse",
+            "text": "GroupStreamGetResponse"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamGetResponse",
+            "text": "GroupStreamGetResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.groupStreamUpsertRequestSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "groupStreamUpsertRequestSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamUpsertRequest",
+            "text": "GroupStreamUpsertRequest"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.GroupStreamUpsertRequest",
+            "text": "GroupStreamUpsertRequest"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/group/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.ingestStreamDefinitionSchema",
         "type": "Object",
         "tags": [],
@@ -4360,6 +4810,37 @@
           ">"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.ingestStreamGetResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ingestStreamGetResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamGetResponse",
+            "text": "IngestStreamGetResponse"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamGetResponse",
+            "text": "IngestStreamGetResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4583,6 +5064,37 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.primitive",
+        "type": "Object",
+        "tags": [],
+        "label": "primitive",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Primitive",
+            "text": "Primitive"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Primitive",
+            "text": "Primitive"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/core.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.processorDefinitionSchema",
         "type": "Object",
         "tags": [],
@@ -4614,10 +5126,10 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.readStreamSchema",
+        "id": "def-common.recursiveRecord",
         "type": "Object",
         "tags": [],
-        "label": "readStreamSchema",
+        "label": "recursiveRecord",
         "description": [],
         "signature": [
           "Zod.ZodType<",
@@ -4625,20 +5137,20 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ReadStreamDefinition",
-            "text": "ReadStreamDefinition"
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
           },
           ", Zod.ZodTypeDef, ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ReadStreamDefinition",
-            "text": "ReadStreamDefinition"
+            "section": "def-common.RecursiveRecord",
+            "text": "RecursiveRecord"
           },
           ">"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/core.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4687,20 +5199,51 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           ", Zod.ZodTypeDef, ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           ">"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/core.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.streamGetResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "streamGetResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamGetResponse",
+            "text": "StreamGetResponse"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamGetResponse",
+            "text": "StreamGetResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4718,16 +5261,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamUpsertRequest",
-            "text": "IngestStreamUpsertRequest"
+            "section": "def-common.StreamUpsertRequest",
+            "text": "StreamUpsertRequest"
           },
           ", Zod.ZodTypeDef, ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamUpsertRequest",
-            "text": "IngestStreamUpsertRequest"
+            "section": "def-common.StreamUpsertRequest",
+            "text": "StreamUpsertRequest"
           },
           ">"
         ],
@@ -4877,6 +5420,37 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.unwiredStreamGetResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "unwiredStreamGetResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.UnwiredStreamGetResponse",
+            "text": "UnwiredStreamGetResponse"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.UnwiredStreamGetResponse",
+            "text": "UnwiredStreamGetResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.wiredIngestSchema",
         "type": "Object",
         "tags": [],
@@ -4939,37 +5513,6 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.wiredReadStreamDefinitionSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "wiredReadStreamDefinitionSchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredReadStreamDefinition",
-            "text": "WiredReadStreamDefinition"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredReadStreamDefinition",
-            "text": "WiredReadStreamDefinition"
-          },
-          ">"
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/legacy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.wiredStreamDefinitionSchema",
         "type": "Object",
         "tags": [],
@@ -5010,6 +5553,37 @@
           "Zod.ZodType<WiredStreamDefinitionBase, Zod.ZodTypeDef, WiredStreamDefinitionBase>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.wiredStreamGetResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "wiredStreamGetResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStreamGetResponse",
+            "text": "WiredStreamGetResponse"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStreamGetResponse",
+            "text": "WiredStreamGetResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/models/ingest/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

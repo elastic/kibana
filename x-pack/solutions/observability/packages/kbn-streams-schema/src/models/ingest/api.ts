@@ -26,7 +26,6 @@ import {
   wiredStreamDefinitionSchemaBase,
 } from './base';
 import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
-import { createIsNarrowSchema, createAsSchemaOrThrow } from '../../helpers';
 import {
   UnwiredIngestStreamEffectiveLifecycle,
   WiredIngestStreamEffectiveLifecycle,
@@ -146,33 +145,12 @@ const ingestStreamGetResponseSchema: z.Schema<IngestStreamGetResponse> = z.union
   unwiredStreamGetResponseSchema,
 ]);
 
-const isWiredStreamGetResponse = createIsNarrowSchema(
-  ingestStreamGetResponseSchema,
-  wiredStreamGetResponseSchema
-);
-
-const isUnWiredStreamGetResponse = createIsNarrowSchema(
-  ingestStreamGetResponseSchema,
-  unwiredStreamGetResponseSchema
-);
-
-const asWiredStreamGetResponse = createAsSchemaOrThrow(
-  ingestStreamGetResponseSchema,
-  wiredStreamGetResponseSchema
-);
-
-const asUnwiredStreamGetResponse = createAsSchemaOrThrow(
-  ingestStreamGetResponseSchema,
-  unwiredStreamGetResponseSchema
-);
-
 export {
   ingestStreamUpsertRequestSchema,
   ingestUpsertRequestSchema,
-  isWiredStreamGetResponse,
-  isUnWiredStreamGetResponse,
-  asWiredStreamGetResponse,
-  asUnwiredStreamGetResponse,
+  ingestStreamGetResponseSchema,
+  wiredStreamGetResponseSchema,
+  unwiredStreamGetResponseSchema,
   type IngestGetResponse,
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,

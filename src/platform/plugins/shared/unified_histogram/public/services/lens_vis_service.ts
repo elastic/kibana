@@ -49,6 +49,7 @@ import {
   deriveLensSuggestionFromLensAttributes,
   type QueryParams,
   injectESQLQueryIntoLensLayers,
+  TIMESTAMP_COLUMN,
 } from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
@@ -496,13 +497,14 @@ export class LensVisService {
         interval,
         breakdownColumn,
       });
+      const dateFieldLabel = `${dataView.timeFieldName} every ${interval}`;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
         textBasedColumns: [
           {
-            id: `${dataView.timeFieldName} every ${interval}`,
-            name: `${dataView.timeFieldName} every ${interval}`,
+            id: TIMESTAMP_COLUMN,
+            name: dateFieldLabel,
             meta: {
               type: 'date',
             },
@@ -526,9 +528,13 @@ export class LensVisService {
 
       // here the attributes contain the main query and not the histogram one
       const updatedAttributesWithQuery = preferredVisAttributes
-        ? injectESQLQueryIntoLensLayers(preferredVisAttributes, {
-            esql: esqlQuery,
-          })
+        ? injectESQLQueryIntoLensLayers(
+            preferredVisAttributes,
+            {
+              esql: esqlQuery,
+            },
+            dateFieldLabel
+          )
         : undefined;
 
       const suggestions =
@@ -598,7 +604,7 @@ export class LensVisService {
 
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown}${sortBy} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL ${TIMESTAMP_COLUMN}=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by ${TIMESTAMP_COLUMN}${breakdown}${sortBy}`
     );
   };
 

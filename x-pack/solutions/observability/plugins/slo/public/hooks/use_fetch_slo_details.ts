@@ -50,7 +50,7 @@ export function useFetchSloDetails({
             params: {
               path: { id: sloId! },
               query: {
-                ...(!!instanceId && instanceId !== ALL_VALUE && { instanceId }),
+                ...(instanceId !== ALL_VALUE && { instanceId }),
                 ...(remoteName && { remoteName }),
               },
             },

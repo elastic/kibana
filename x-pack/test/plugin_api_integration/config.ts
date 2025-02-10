@@ -37,7 +37,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
           'crowdstrikeConnectorOn',
           'microsoftDefenderEndpointOn',
-          'inferenceConnectorOn',
         ])}`,
         ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { isUnwiredStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -35,15 +36,45 @@ export function StreamDetailView() {
     refresh,
     loading,
   } = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
-        signal,
-        params: {
-          path: {
-            id: key,
+    async ({ signal }) => {
+      return streamsRepositoryClient
+        .fetch('GET /api/streams/{id}', {
+          signal,
+          params: {
+            path: {
+              id: key,
+            },
           },
-        },
-      });
+        })
+        .then((response) => {
+          if (isWiredStreamGetResponse(response)) {
+            return {
+              dashboards: response.dashboards,
+              inherited_fields: response.inherited_fields,
+              elasticsearch_assets: [],
+              effective_lifecycle: response.effective_lifecycle,
+              name: key,
+              stream: {
+                ...response.stream,
+              },
+            };
+          }
+
+          if (isUnwiredStreamGetResponse(response)) {
+            return {
+              dashboards: response.dashboards,
+              elasticsearch_assets: response.elasticsearch_assets,
+              inherited_fields: {},
+              effective_lifecycle: response.effective_lifecycle,
+              name: key,
+              data_stream_exists: response.data_stream_exists,
+              stream: {
+                ...response.stream,
+              },
+            };
+          }
+          throw new Error('Stream detail only supports IngestStreams.');
+        });
     },
     [streamsRepositoryClient, key]
   );
