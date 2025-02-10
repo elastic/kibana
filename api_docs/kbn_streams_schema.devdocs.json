@@ -309,6 +309,53 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.conditionToQueryDsl",
+        "type": "Function",
+        "tags": [],
+        "label": "conditionToQueryDsl",
+        "description": [],
+        "signature": [
+          "(condition: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ") => any"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/condition_to_query_dsl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.conditionToQueryDsl.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/condition_to_query_dsl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.createAsSchemaOrThrow",
         "type": "Function",
         "tags": [],
@@ -461,6 +508,53 @@
               "string"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/hierarchy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getFields",
+        "description": [],
+        "signature": [
+          "(condition: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ") => { name: string; type: \"string\" | \"number\"; }[]"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/condition_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getFields.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/condition_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
