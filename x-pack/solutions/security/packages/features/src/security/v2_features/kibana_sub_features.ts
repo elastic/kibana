@@ -18,12 +18,18 @@ import { APP_ID } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 
 const TRANSLATIONS = Object.freeze({
-  all: i18n.translate('xpack.securitySolution.kibanaSubFeatures.allPrivilegeName', {
-    defaultMessage: 'All',
-  }),
-  read: i18n.translate('xpack.securitySolution.kibanaSubFeatures.readPrivilegeName', {
-    defaultMessage: 'Read',
-  }),
+  all: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.allPrivilegeName',
+    {
+      defaultMessage: 'All',
+    }
+  ),
+  read: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.readPrivilegeName',
+    {
+      defaultMessage: 'Read',
+    }
+  ),
 });
 
 const endpointListSubFeature = (): SubFeatureConfig => ({
