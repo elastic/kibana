@@ -6,9 +6,11 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { assertionMessages, test, testData } from '../../fixtures';
+import { assertionMessages, generateIntegrationName, test } from '../../fixtures';
 
 test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@svlOblt'] }, () => {
+  const logsFilePath = `${generateIntegrationName('mylogs')}.log`;
+
   test.beforeEach(async ({ browserAuth, pageObjects: { customLogs } }) => {
     await browserAuth.loginAsAdmin();
     await customLogs.goto();
@@ -41,7 +43,7 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
   });
 
   test(`should allow updating Advanced Settings`, async ({ pageObjects: { customLogs } }) => {
-    await customLogs.getLogFilePathInputField(0).fill('myLogs.log');
+    await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
     await expect(customLogs.advancedSettingsContent).not.toBeVisible();
     await customLogs.clickAdvancedSettingsButton();
     await expect(
@@ -68,7 +70,7 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
   });
 
   test('should validate Integration Name field', async ({ pageObjects: { customLogs }, page }) => {
-    await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
+    await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
 
     await customLogs.integrationNameInput.fill('');
     await expect(customLogs.continueButton).toBeDisabled();
@@ -83,15 +85,12 @@ test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@sv
   });
 
   test('should validate DataSet Name field', async ({ pageObjects: { customLogs }, page }) => {
-    await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
+    await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
     await customLogs.datasetNameInput.fill('');
     await expect(customLogs.continueButton).toBeDisabled();
 
     await customLogs.datasetNameInput.fill('hello$world');
-    await expect(
-      customLogs.datasetNameInput,
-      `value should contain '_' instead of special chars`
-    ).toHaveValue('hello_world');
+    await expect(customLogs.datasetNameInput).toHaveValue('hello_world');
 
     await customLogs.datasetNameInput.fill('H3llowOrld');
     await expect(

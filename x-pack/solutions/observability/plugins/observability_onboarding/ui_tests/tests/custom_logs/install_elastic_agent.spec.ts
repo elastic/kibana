@@ -6,12 +6,14 @@
  */
 
 import { expect, Locator } from '@kbn/scout-oblt';
-import { test, testData } from '../../fixtures';
+import { generateIntegrationName, test } from '../../fixtures';
 
 const checkAgentStatusUpdated = async (locator: Locator, status: string) =>
   expect(locator.getByText(status)).toBeVisible();
 
 test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlOblt'] }, () => {
+  const integrationName = generateIntegrationName('mylogs');
+  const logsFilePath = `${integrationName}.log`;
   let onboardingId: string;
 
   test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
@@ -27,76 +29,70 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
     // login and create custom integration
     await browserAuth.loginAsAdmin();
     await pageObjects.customLogs.goto();
-    await pageObjects.customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
+    await pageObjects.customLogs.getLogFilePathInputField(0).fill(logsFilePath);
     await pageObjects.customLogs.continueButton.click();
     await pageObjects.customLogs.apiKeyCreatedCallout.waitFor({ state: 'visible' });
   });
 
   test.afterEach(async ({ fleetApi }) => {
-    await fleetApi.integration.delete(testData.CUSTOM_INTEGRATION_NAME);
+    await fleetApi.integration.delete(integrationName);
   });
 
   test('should be installed sucessfully', async ({
     pageObjects: { customLogs },
     onboardingApi,
-    page,
   }) => {
-    // download agent
+    // downloading agent
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-download', 'loading');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('loading'),
       'Downloading Elastic Agent'
     );
-
+    // downloading agent failed
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-download', 'danger');
     await expect(customLogs.getStepStatusLocator('danger'), 'Download Elastic Agent').toBeVisible();
-
+    // downloading agent completed
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-download', 'complete');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('complete'),
       'Elastic Agent downloaded'
     );
 
-    // extract agent
+    // extracting agent
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-extract', 'loading');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('loading'),
       'Extracting Elastic Agent'
     );
-
+    // extracting agent completed
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('complete'),
       'Elastic Agent extracted'
     );
 
-    // install agent
+    // installing agent failed
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-install', 'danger');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('danger'),
       'Install Elastic Agent'
     );
-
+    // installing agent completed
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-install', 'complete');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('complete'),
       'Elastic Agent installed'
     );
 
-    // agent status
+    // agent connecting
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-status', 'loading');
     await checkAgentStatusUpdated(
       customLogs.getStepStatusLocator('loading'),
       'Connecting to the Elastic Agent'
     );
-
     await expect(customLogs.getCheckLogsStepLocator('incomplete')).toBeVisible();
-    await expect(
-      page.locator('.euiStep__title', {
-        hasText: 'Ship logs to Elastic Observability',
-      })
-    ).toBeVisible();
-
+    await expect(customLogs.checkLogsStepMessage).toHaveText('Ship logs to Elastic Observability');
+    // agent connected
     await onboardingApi.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete', {
       agentId: 'test-agent-id',
     });
@@ -109,7 +105,6 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
   test('should be configured sucessfully for Linux and wait for logs', async ({
     pageObjects: { customLogs },
     onboardingApi,
-    page,
   }) => {
     // install and connect agent for linux
     await customLogs.autoDownloadConfigurationToggle.click();
@@ -132,21 +127,13 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
       'Elastic Agent config written to /opt/Elastic/Agent/elastic-agent.yml'
     );
 
-    await expect(
-      page.testSubj
-        .locator('obltOnboardingCheckLogsStep')
-        .locator('.euiStep__titleWrapper [class$="euiStepNumber-s-loading"]')
-    ).toBeVisible();
-
-    await expect(
-      page.locator('.euiStep__title', { hasText: 'Waiting for logs to be shipped...' })
-    ).toBeVisible();
+    await expect(customLogs.getCheckLogsStepLocator('loading')).toBeVisible();
+    await expect(customLogs.checkLogsStepMessage).toHaveText('Waiting for logs to be shipped...');
   });
 
   test('should be configured sucessfully for MacOS and wait for logs', async ({
     pageObjects: { customLogs },
     onboardingApi,
-    page,
   }) => {
     // install and connect agent for macos
     await customLogs.selectPlatform('macos');
@@ -165,10 +152,7 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
     );
 
     await expect(customLogs.getCheckLogsStepLocator('loading')).toBeVisible();
-
-    await expect(
-      page.locator('.euiStep__title', { hasText: 'Waiting for logs to be shipped...' })
-    ).toBeVisible();
+    await expect(customLogs.checkLogsStepMessage).toHaveText('Waiting for logs to be shipped...');
   });
 
   test('should ship logs to Elastic', async ({ page, pageObjects: { customLogs } }) => {
@@ -189,11 +173,9 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
     });
 
     await expect(customLogs.getCheckLogsStepLocator('complete')).toBeVisible();
-    await expect(
-      page.locator('.euiStep__title', { hasText: 'Logs are being shipped!' })
-    ).toBeVisible();
+    await expect(customLogs.checkLogsStepMessage).toHaveText('Logs are being shipped!');
 
-    await page.testSubj.click('obltOnboardingExploreLogs');
+    await customLogs.exploreLogsButton.click();
     await expect(page).toHaveURL(/\/app\/discover/);
   });
 });

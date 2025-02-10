@@ -6,28 +6,31 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, testData } from '../../fixtures';
+import { generateIntegrationName, test } from '../../fixtures';
 
 test.describe(
-  'OBservability Onboarding - Custom Integration',
+  'Observability Onboarding - Custom Integration',
   { tag: ['@ess', '@svlOblt'] },
   () => {
+    const integrationName = generateIntegrationName('mylogs');
+    const logsFilePath = `${integrationName}.log`;
+
     test.beforeEach(async ({ browserAuth, pageObjects: { customLogs } }) => {
       await browserAuth.loginAsAdmin();
       await customLogs.goto();
     });
 
     test.afterEach(async ({ fleetApi }) => {
-      await fleetApi.integration.delete(testData.CUSTOM_INTEGRATION_NAME);
+      await fleetApi.integration.delete(integrationName);
     });
 
     test('should be installed, show API Key and correct instructions', async ({
       pageObjects: { customLogs },
       page,
     }) => {
-      await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
-      await expect(customLogs.integrationNameInput).toHaveValue(testData.CUSTOM_INTEGRATION_NAME);
-      await expect(customLogs.datasetNameInput).toHaveValue(testData.CUSTOM_INTEGRATION_NAME);
+      await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
+      await expect(customLogs.integrationNameInput).toHaveValue(integrationName);
+      await expect(customLogs.datasetNameInput).toHaveValue(integrationName);
       await expect(customLogs.serviceNameInput).toHaveValue('');
 
       await customLogs.continueButton.click();
@@ -62,7 +65,7 @@ test.describe(
     test('should update instructions when automatic config download toggled', async ({
       pageObjects: { customLogs },
     }) => {
-      await customLogs.getLogFilePathInputField(0).fill(testData.LOG_FILE_PATH);
+      await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
       await customLogs.continueButton.click();
 
       await customLogs.autoDownloadConfigurationToggle.click();

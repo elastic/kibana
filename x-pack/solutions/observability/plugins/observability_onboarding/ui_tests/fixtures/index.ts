@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { test as base, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
 import { mergeTests } from 'playwright/test';
 import { onboardingApiFixture, OnboardingApiFixture } from './onboarding_api';
@@ -33,5 +34,6 @@ export const test = testFixtures.extend<ExtendedScoutTestFixtures, ExtendedScout
   },
 });
 
-export * as testData from './constants';
+export const generateIntegrationName = (name: string) => `${name}_${uuidv4().slice(0, 5)}`;
+
 export * as assertionMessages from './assertion_messages';

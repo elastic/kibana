@@ -28,6 +28,8 @@ export class CustomLogsPage {
   public configureElasticAgentStep: Locator;
   public downloadConfigurationButton: Locator;
   public continueButton: Locator;
+  public exploreLogsButton: Locator;
+  public checkLogsStepMessage: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.advancedSettingsContent = this.page.testSubj
@@ -76,6 +78,11 @@ export class CustomLogsPage {
     this.downloadConfigurationButton = this.page.testSubj.locator(
       'obltOnboardingConfigureElasticAgentStepDownloadConfig'
     );
+
+    this.exploreLogsButton = this.page.testSubj.locator('obltOnboardingExploreLogs');
+    this.checkLogsStepMessage = this.page.testSubj
+      .locator('obltOnboardingCheckLogsStep')
+      .locator(`.euiStep__title`);
   }
 
   async goto() {
