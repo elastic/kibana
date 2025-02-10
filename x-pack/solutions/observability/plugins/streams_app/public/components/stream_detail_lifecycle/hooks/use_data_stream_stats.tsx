@@ -39,7 +39,7 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
     }
     const daysSinceCreation = Math.max(
       1,
-      Math.ceil(moment.duration(moment().diff(moment(dsStats.creationDate))).asDays())
+      Math.round(moment().diff(moment(dsStats.creationDate), 'days'))
     );
 
     return {
