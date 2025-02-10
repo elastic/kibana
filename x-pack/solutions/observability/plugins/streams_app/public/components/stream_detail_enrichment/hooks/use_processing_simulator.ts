@@ -14,7 +14,7 @@ import {
   Condition,
   processorDefinitionSchema,
   isSchema,
-  RecursiveRecord,
+  SampleDocument,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
@@ -62,8 +62,6 @@ export interface UseProcessingSimulatorProps {
   definition: IngestStreamGetResponse;
   processors: ProcessorDefinitionWithUIAttributes[];
 }
-
-export type SampleDocument = RecursiveRecord;
 
 export interface UseProcessingSimulatorReturn {
   hasLiveChanges: boolean;

@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { RecursiveRecord } from '@kbn/streams-schema';
+import { SampleDocument } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
@@ -170,7 +170,7 @@ const OutcomeControls = ({
 };
 
 interface OutcomePreviewTableProps {
-  documents: RecursiveRecord[];
+  documents: SampleDocument[];
   columns: string[];
 }
 

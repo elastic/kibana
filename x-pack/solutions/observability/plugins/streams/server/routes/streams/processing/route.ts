@@ -8,10 +8,10 @@
 import {
   NamedFieldDefinitionConfig,
   ProcessorDefinition,
-  RecursiveRecord,
+  SampleDocument,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
-  recursiveRecord,
+  sampleDocument,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { checkAccess } from '../../../lib/streams/stream_crud';
@@ -28,13 +28,13 @@ import {
 
 export interface ProcessingSimulateBody {
   processing: ProcessorDefinition[];
-  documents: RecursiveRecord[];
+  documents: SampleDocument[];
   detected_fields?: NamedFieldDefinitionConfig[];
 }
 
 const processingSimulateBodySchema: z.Schema<ProcessingSimulateBody> = z.object({
   processing: z.array(processorDefinitionSchema),
-  documents: z.array(recursiveRecord),
+  documents: z.array(sampleDocument),
   detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
 });
 
@@ -84,13 +84,13 @@ export const simulateProcessorRoute = createServerRoute({
 export interface ProcessingSuggestionBody {
   field: string;
   connectorId: string;
-  samples: RecursiveRecord[];
+  samples: SampleDocument[];
 }
 
 const processingSuggestionSchema = z.object({
   field: z.string(),
   connectorId: z.string(),
-  samples: z.array(recursiveRecord),
+  samples: z.array(sampleDocument),
 });
 
 const suggestionsParamsSchema = z.object({

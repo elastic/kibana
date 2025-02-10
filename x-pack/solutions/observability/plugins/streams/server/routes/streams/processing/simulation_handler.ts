@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { FieldDefinitionConfig, RecursiveRecord } from '@kbn/streams-schema';
+import { FieldDefinitionConfig, SampleDocument } from '@kbn/streams-schema';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import { SimulationFailedError } from '../../../lib/streams/errors/simulation_failed_error';
 import { DetectedMappingFailureError } from '../../../lib/streams/errors/detected_mapping_failure_error';
@@ -91,7 +91,7 @@ export const assertSimulationResult = (
 
 export const prepareSimulationResponse = (
   simulationResult: any,
-  docs: Array<{ _source: RecursiveRecord }>,
+  docs: Array<{ _source: SampleDocument }>,
   simulationDiffs: ReturnType<typeof prepareSimulationDiffs>,
   detectedFields?: ProcessingSimulateBody['detected_fields']
 ) => {
@@ -112,10 +112,10 @@ export const prepareSimulationResponse = (
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 export const prepareSimulationDiffs = (
   simulation: any,
-  sampleDocs: Array<{ _source: RecursiveRecord }>
+  sampleDocs: Array<{ _source: SampleDocument }>
 ) => {
   // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
-  const samplesToSimulationMap = new Map<any, { _source: RecursiveRecord }>(
+  const samplesToSimulationMap = new Map<any, { _source: SampleDocument }>(
     simulation.docs.map((entry: any, id: number) => [entry.doc, sampleDocs[id]])
   );
 
@@ -145,8 +145,8 @@ const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulatio
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 const computeSimulationDocuments = (
   simulation: any,
-  sampleDocs: Array<{ _source: RecursiveRecord }>
-): Array<{ isMatch: boolean; value: RecursiveRecord }> => {
+  sampleDocs: Array<{ _source: SampleDocument }>
+): Array<{ isMatch: boolean; value: SampleDocument }> => {
   return simulation.docs.map((entry: any, id: number) => {
     // If every processor was successful, return and flatten the simulation doc from the last processor
     if (isSuccessfulDocument(entry)) {

@@ -24,13 +24,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, SampleDocument } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
-import { SampleDocument, UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
+import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
 import { useStreamsEnrichmentContext } from '../../enrichment_context';
 
 const RefreshButton = ({
@@ -163,10 +163,10 @@ function InnerGrokAiSuggestions({
     setSuggestionsError(undefined);
     setSuggestions(undefined);
     streamsRepositoryClient
-      .fetch('POST /api/streams/{id}/processing/_suggestions', {
+      .fetch('POST /api/streams/{name}/processing/_suggestions', {
         signal: abortController.signal,
         params: {
-          path: { id: definition.stream.name },
+          path: { name: definition.stream.name },
           body: {
             field: fieldValue,
             connectorId: currentConnector,

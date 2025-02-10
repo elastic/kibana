@@ -8,7 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get, groupBy, mapValues, orderBy, shuffle, uniq, uniqBy } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { RecursiveRecord } from '@kbn/streams-schema';
+import { SampleDocument } from '@kbn/streams-schema';
 import {
   assertSimulationResult,
   executeSimulation,
@@ -97,7 +97,7 @@ async function processPattern(
   inferenceClient: InferenceClient,
   scopedClusterClient: IScopedClusterClient,
   field: string,
-  samples: RecursiveRecord[]
+  samples: SampleDocument[]
 ) {
   const chatResponse = await inferenceClient.output({
     id: 'get_pattern_suggestions',
