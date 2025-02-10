@@ -16,6 +16,13 @@ import { getCommandDefinition } from '../shared/helpers';
 import { getCommandSignature } from '../definitions/helpers';
 import { buildDocumentation } from './documentation_util';
 
+const techPreviewLabel = i18n.translate(
+  'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
+  {
+    defaultMessage: `Technical Preview`,
+  }
+);
+
 export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;
   return getOperatorSuggestion(assignFn);
@@ -45,12 +52,16 @@ export const getCommandAutocompleteDefinitions = (
     ];
 
     for (const type of types) {
+      let detail = type.description || commandDefinition.description;
+      if (commandDefinition.preview) {
+        detail = `[${techPreviewLabel}] ${detail}`;
+      }
       const suggestion: SuggestionRawDefinition = {
         label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
         text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,
         asSnippet: true,
         kind: 'Method',
-        detail: type.description || commandDefinition.description,
+        detail,
         documentation: {
           value: buildDocumentation(commandSignature.declaration, commandSignature.examples),
         },
