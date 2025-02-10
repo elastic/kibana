@@ -70,7 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
         await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Infrastructure inventory',
+          text: 'Infrastructure Inventory',
         });
 
         {
