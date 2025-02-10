@@ -34,45 +34,25 @@ export const LabelAppendWithMessageVariables: React.FunctionComponent<Props> = (
   showButtonTitle = false,
   isOptionalField = false,
 }) => {
-  const messageVariablesLength = messageVariables?.length ?? 0;
-  if (isOptionalField && messageVariablesLength === 0) {
-    return (
-      <EuiText size="xs" color="subdued">
-        {OPTIONAL_LABEL}
-      </EuiText>
-    );
-  }
-  if (isOptionalField && messageVariablesLength > 0) {
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+      {isOptionalField && (
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             {OPTIONAL_LABEL}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={onSelectEventHandler}
-            paramsProperty={paramsProperty}
-            buttonTitle={buttonTitle}
-            showButtonTitle={showButtonTitle}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-  if (!isOptionalField && messageVariablesLength > 0) {
-    return (
-      <AddMessageVariables
-        messageVariables={messageVariables}
-        onSelectEventHandler={onSelectEventHandler}
-        paramsProperty={paramsProperty}
-        buttonTitle={buttonTitle}
-        showButtonTitle={showButtonTitle}
-      />
-    );
-  }
-  return null;
+      )}
+      <EuiFlexItem grow={false}>
+        <AddMessageVariables
+          messageVariables={messageVariables}
+          onSelectEventHandler={onSelectEventHandler}
+          paramsProperty={paramsProperty}
+          buttonTitle={buttonTitle}
+          showButtonTitle={showButtonTitle}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 LabelAppendWithMessageVariables.displayName = 'LabelAppendWithMessageVariables';
