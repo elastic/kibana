@@ -1212,7 +1212,7 @@ const updateExistingDataStream = async ({
   }
 
   try {
-    logger.debug(`Updating index settings for ${dataStreamName}`);
+    logger.debug(`Updating index settings of data stream  ${dataStreamName}`);
 
     await retryTransientEsErrors(
       () =>
