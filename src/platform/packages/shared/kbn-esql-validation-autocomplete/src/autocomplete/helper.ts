@@ -103,7 +103,9 @@ export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'ind
   const fromCommand = commands.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
   // the marker gets added in queries like "FROM "
-  return args.filter((arg) => arg.sourceType === sourceType || arg.text !== EDITOR_MARKER);
+  return args.filter(
+    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
+  );
 }
 
 export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
