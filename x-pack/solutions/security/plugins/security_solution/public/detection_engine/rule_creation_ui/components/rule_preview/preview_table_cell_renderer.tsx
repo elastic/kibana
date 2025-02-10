@@ -26,7 +26,6 @@ export const PreviewRenderCellValue: React.FC<
   colIndex,
   columnId,
   rowRenderers,
-  isDraggable,
   truncate,
 }) => {
   return (
@@ -44,7 +43,6 @@ export const PreviewRenderCellValue: React.FC<
       colIndex={colIndex}
       columnId={columnId}
       rowRenderers={rowRenderers}
-      isDraggable={isDraggable}
       truncate={truncate}
       userProfiles={{ profiles: [], isLoading: false }}
     />

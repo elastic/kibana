@@ -47,7 +47,6 @@ type RenderCellValueProps = Pick<
   | 'rowRenderers'
   | 'isDetails'
   | 'isExpandable'
-  | 'isDraggable'
   | 'isExpanded'
   | 'colIndex'
   | 'setCellProps'
@@ -70,7 +69,6 @@ export const CellValue = memo(function RenderCellValue({
   rowRenderers,
   isDetails,
   isExpandable,
-
   isExpanded,
   colIndex,
   eventId,
@@ -155,7 +153,6 @@ export const CellValue = memo(function RenderCellValue({
           eventId={eventId}
           header={myHeader}
           isDetails={isDetails}
-
           isExpandable={isExpandable}
           isExpanded={isExpanded}
           linkValues={linkValues ?? localLinkValues}
