@@ -71,7 +71,6 @@ const DraggableLegendItemComponent: React.FC<{
                 field={field}
                 hideTopN={true}
                 id={dataProviderId}
-                isDraggable={false}
                 scopeId={scopeId}
                 value={value}
               >
