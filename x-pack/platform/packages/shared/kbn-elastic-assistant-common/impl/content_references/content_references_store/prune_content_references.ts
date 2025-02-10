@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { ContentReferences, ContentReference } from '../../schemas';
-import { getContentReferenceId } from '../references/utils';
+import { getContentReferenceIds } from '../references/utils';
 import { ContentReferencesStore, ContentReferenceBlock } from '../types';
 
 /**
@@ -21,22 +22,22 @@ export const pruneContentReferences = (
 ): ContentReferences | undefined => {
   const fullStore = contentReferencesStore.getStore();
   const prunedStore: Record<string, ContentReference> = {};
-  const matches = content.matchAll(/\{reference\([0-9a-zA-Z]+\)\}/g);
-  let isPrunedStoreEmpty = true;
+  const matches = content.matchAll(/\{reference\([0-9a-zA-Z, ]+\)\}/g);
 
   for (const match of matches) {
     const referenceElement = match[0];
-    const referenceId = getContentReferenceId(referenceElement as ContentReferenceBlock);
+    const referenceIds = getContentReferenceIds(referenceElement as ContentReferenceBlock);
+    for (const referenceId of referenceIds) {
     if (!(referenceId in prunedStore)) {
       const contentReference = fullStore[referenceId];
       if (contentReference) {
-        isPrunedStoreEmpty = false;
         prunedStore[referenceId] = contentReference;
       }
     }
   }
+  }
 
-  if (isPrunedStoreEmpty) {
+  if (isEmpty(prunedStore)) {
     return undefined;
   }
 

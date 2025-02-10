@@ -10,6 +10,7 @@ import type { ContentReference, ContentReferenceBlock } from '@kbn/elastic-assis
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
 import type { StreamingOrFinalContentReferences } from './components/content_reference_component_factory';
+import { getContentReferenceIds } from '@kbn/elastic-assistant-common/impl/content_references/references/utils';
 
 /** A ContentReferenceNode that has been extracted from the message and the content reference details are available. */
 export interface ResolvedContentReferenceNode<T extends ContentReference> extends Node {
@@ -59,6 +60,16 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
     let currentContentReferenceCount = 1;
     const contentReferenceCounts: Record<string, number> = {};
 
+    const getContentReferenceCount = (contentReferenceId: string) => {
+      // If the content reference id is already in the contentReferenceCounts, return the existing count
+      if (contentReferenceId in contentReferenceCounts) {
+        return contentReferenceCounts[contentReferenceId];
+      }
+      // If the content reference id is not in the contentReferenceCounts, increment the currentContentReferenceCount and return the new count
+      contentReferenceCounts[contentReferenceId] = currentContentReferenceCount++;
+      return contentReferenceCounts[contentReferenceId];
+    };
+
     const tokenizeCustomCitation: RemarkTokenizer = function tokenizeCustomCitation(
       eat,
       value,
@@ -97,14 +108,14 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
         return '';
       }
 
-      const contentReferenceId = readArg('(', ')');
+      const contentReferenceIdString = readArg('(', ')');
 
       const closeChar = value[index];
       if (closeChar !== '}') return false;
 
       const now = eat.now();
 
-      if (!contentReferenceId) {
+      if (!contentReferenceIdString) {
         this.file.info('No content reference id found', {
           line: now.line,
           column: now.column + match.length + 1,
@@ -118,32 +129,32 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
       now.column += match.length + 1;
       now.offset += match.length + 1;
 
-      const contentReferenceBlock: ContentReferenceBlock = `{reference(${contentReferenceId})}`;
-      const contentReference = contentReferences?.[contentReferenceId];
+      const contentReferenceBlock: ContentReferenceBlock = `{reference(${contentReferenceIdString})}`;
+      const contentReferenceIds = getContentReferenceIds(contentReferenceBlock);
 
-      const getContentReferenceCount = () => {
-        // If the content reference id is already in the contentReferenceCounts, return the existing count
-        if (contentReferenceId in contentReferenceCounts) {
-          return contentReferenceCounts[contentReferenceId];
-        }
-        // If the content reference id is not in the contentReferenceCounts, increment the currentContentReferenceCount and return the new count
-        contentReferenceCounts[contentReferenceId] = currentContentReferenceCount++;
-        return contentReferenceCounts[contentReferenceId];
-      };
+      let toEat = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
 
-      const toEat = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
+      const contentReferenceParts = contentReferenceIds.map((contentReferenceId, i) => ({
+        contentReferenceId: contentReferenceId.trim(),
+        toEat: i === 0 ? toEat : '',
+      }));
+
+      for (const contentReferencePart of contentReferenceParts) {
+        const { contentReferenceId, toEat } = contentReferencePart;
+        const contentReference = contentReferences?.[contentReferenceId];
 
       if (contentReferences === null) {
         // The message is still streaming, so the content reference details are not available yet
         const contentReferenceNode: UnresolvedContentReferenceNode = {
           type: 'contentReference',
           contentReferenceId,
-          contentReferenceCount: getContentReferenceCount(),
+          contentReferenceCount: getContentReferenceCount(contentReferenceId),
           contentReferenceBlock,
           contentReference: undefined,
         };
 
-        return eat(toEat)(contentReferenceNode);
+        eat(toEat)(contentReferenceNode);
+        continue
       }
 
       if (contentReference === undefined) {
@@ -156,19 +167,21 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
           contentReference,
         };
 
-        return eat(toEat)(contentReferenceNode);
+        eat(toEat)(contentReferenceNode);
+        continue
       }
 
       // The message has finished streaming and the content reference details were found
       const contentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
         type: 'contentReference',
         contentReferenceId,
-        contentReferenceCount: getContentReferenceCount(),
+        contentReferenceCount: getContentReferenceCount(contentReferenceId),
         contentReferenceBlock,
         contentReference,
       };
 
-      return eat(toEat)(contentReferenceNode);
+        eat(toEat)(contentReferenceNode);
+      }
     };
 
     tokenizeCustomCitation.notInLink = true;
