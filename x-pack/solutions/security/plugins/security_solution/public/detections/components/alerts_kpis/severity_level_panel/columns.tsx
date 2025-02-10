@@ -29,7 +29,6 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
         render: (severity: Severity) => (
           <EuiHealth color={severityColors[severity]} textSize="xs">
             <DefaultDraggable
-              isDraggable={false}
               field={ALERT_SEVERITY}
               hideTopN
               id={`alert-severity-draggable-${severity}`}

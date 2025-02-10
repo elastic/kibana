@@ -54,7 +54,7 @@ function executeFunctionAndCatchError({
   logger,
   tracer,
   connectorId,
-  useSimulatedFunctionCalling,
+  simulateFunctionCalling,
 }: {
   name: string;
   args: string | undefined;
@@ -65,7 +65,7 @@ function executeFunctionAndCatchError({
   logger: Logger;
   tracer: LangTracer;
   connectorId: string;
-  useSimulatedFunctionCalling: boolean;
+  simulateFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -86,7 +86,7 @@ function executeFunctionAndCatchError({
           signal,
           messages,
           connectorId,
-          useSimulatedFunctionCalling,
+          simulateFunctionCalling,
         })
       );
 
@@ -184,7 +184,7 @@ export function continueConversation({
   disableFunctions,
   tracer,
   connectorId,
-  useSimulatedFunctionCalling,
+  simulateFunctionCalling,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -201,7 +201,7 @@ export function continueConversation({
       };
   tracer: LangTracer;
   connectorId: string;
-  useSimulatedFunctionCalling: boolean;
+  simulateFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -319,7 +319,7 @@ export function continueConversation({
       logger,
       tracer,
       connectorId,
-      useSimulatedFunctionCalling,
+      simulateFunctionCalling,
     });
   }
 
@@ -348,7 +348,7 @@ export function continueConversation({
               disableFunctions,
               tracer,
               connectorId,
-              useSimulatedFunctionCalling,
+              simulateFunctionCalling,
             });
           })
         )
