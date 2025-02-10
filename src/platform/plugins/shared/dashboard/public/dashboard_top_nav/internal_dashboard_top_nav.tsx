@@ -330,11 +330,14 @@ export function InternalDashboardTopNav({
   }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
 
   const setFavoriteButtonMountPoint = useCallback(
-    (mountPoint: MountPoint<HTMLElement> | undefined) =>
-      coreServices.chrome.setBreadcrumbsAppendExtension({
-        content: mountPoint,
-        order: 0,
-      }),
+    (mountPoint: MountPoint<HTMLElement> | undefined) => {
+      if (mountPoint) {
+        return coreServices.chrome.setBreadcrumbsAppendExtension({
+          content: mountPoint,
+          order: 0,
+        });
+      }
+    },
     []
   );
 
