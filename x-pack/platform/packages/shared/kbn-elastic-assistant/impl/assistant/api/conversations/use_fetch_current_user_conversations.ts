@@ -22,6 +22,8 @@ export interface FetchConversationsResponse {
 
 export interface UseFetchCurrentUserConversationsParams {
   http: HttpSetup;
+  page?: number;
+  perPage?: number;
   onFetch: (result: FetchConversationsResponse) => Record<string, Conversation>;
   signal?: AbortSignal | undefined;
   refetchOnWindowFocus?: boolean;
@@ -41,29 +43,34 @@ export interface UseFetchCurrentUserConversationsParams {
 const query = {
   page: 1,
   per_page: 99,
+  fields: ['id', 'title', 'apiConfig', 'updatedAt'],
 };
-
-export const CONVERSATIONS_QUERY_KEYS = [
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-  query.page,
-  query.per_page,
-  API_VERSIONS.public.v1,
-];
 
 export const useFetchCurrentUserConversations = ({
   http,
   onFetch,
+  page,
+  perPage,
   signal,
   refetchOnWindowFocus = true,
   isAssistantEnabled,
 }: UseFetchCurrentUserConversationsParams) =>
   useQuery(
-    CONVERSATIONS_QUERY_KEYS,
+    [
+      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+      page ?? query.page,
+      perPage ?? query.per_page,
+      API_VERSIONS.public.v1,
+    ],
     async () =>
       http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
         method: 'GET',
         version: API_VERSIONS.public.v1,
-        query,
+        query: {
+          ...query,
+          page: page ?? query.page,
+          per_page: perPage ?? query.per_page,
+        },
         signal,
       }),
     {

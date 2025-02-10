@@ -189,12 +189,14 @@ export const useCurrentConversation = ({
     [conversations, deleteConversation, refetchCurrentUserConversations]
   );
 
-  const handleCreateConversation = useCallback(async () => {
-    handleOnConversationSelected({
-      cId: '',
-      cTitle: '',
-    });
-  }, [handleOnConversationSelected]);
+  const handleCreateConversation = useCallback(
+    async () =>
+      handleOnConversationSelected({
+        cId: '',
+        cTitle: '',
+      }),
+    [handleOnConversationSelected]
+  );
 
   return {
     currentConversation,

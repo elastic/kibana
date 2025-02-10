@@ -41,6 +41,8 @@ export interface FindResponse<T> {
   total: number;
 }
 
+const camelToSnake = (camelStr: string): string =>
+  camelStr.replace(/(?<!^)([A-Z])/g, '_$1').toLowerCase();
 export const findDocuments = async <TSearchSchema>({
   esClient,
   filter,
@@ -74,7 +76,7 @@ export const findDocuments = async <TSearchSchema>({
           track_total_hits: true,
           sort,
         },
-        _source: true,
+        _source: fields?.length ? fields.map((f) => camelToSnake(f)) : true,
         from: (page - 1) * perPage,
         ignore_unavailable: true,
         index,
