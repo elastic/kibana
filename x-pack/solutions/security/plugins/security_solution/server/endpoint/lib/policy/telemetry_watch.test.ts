@@ -131,7 +131,7 @@ describe('Telemetry config watcher', () => {
     }
   );
 
-  it.each([true, false])('updates `global_telemetry_config` field to %s', async (value) => {
+  it.each([true, false])('updates `global_telemetry_enabled` field to %s', async (value) => {
     preparePackagePolicyMock({ isGlobalTelemetryEnabled: !value });
 
     await telemetryWatcher.watch(value);
