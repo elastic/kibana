@@ -25,6 +25,7 @@ import {
   SIEM_RULE_MIGRATION_RESOURCES_PATH,
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
+  SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationRequestBody,
@@ -42,6 +43,7 @@ import type {
   UpdateRuleMigrationResponse,
   StartRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
+  GetRuleMigrationPrivilegesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface GetRuleMigrationStatsParams {
@@ -213,6 +215,20 @@ export const getRuleMigrations = async ({
   );
 };
 
+export interface GetRuleMigrationMissingPrivilegesParams {
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Retrieves all the migration rule documents of a specific migration. */
+export const getRuleMigrationMissingPrivileges = async ({
+  signal,
+}: GetRuleMigrationMissingPrivilegesParams): Promise<GetRuleMigrationPrivilegesResponse> => {
+  return KibanaServices.get().http.get<GetRuleMigrationPrivilegesResponse>(
+    SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
+    { version: '1', signal }
+  );
+};
+
 export interface GetRuleMigrationTranslationStatsParams {
   /** `id` of the migration to get translation stats for */
   migrationId: string;
@@ -287,6 +303,8 @@ export const getIntegrations = async ({
 };
 
 export interface UpdateRulesParams {
+  /** `id` of the migration to install rules for */
+  migrationId: string;
   /** The list of migration rules data to update */
   rulesToUpdate: UpdateRuleMigrationData[];
   /** Optional AbortSignal for cancelling request */
@@ -294,12 +312,12 @@ export interface UpdateRulesParams {
 }
 /** Updates provided migration rules. */
 export const updateMigrationRules = async ({
+  migrationId,
   rulesToUpdate,
   signal,
 }: UpdateRulesParams): Promise<UpdateRuleMigrationResponse> => {
-  return KibanaServices.get().http.put<UpdateRuleMigrationResponse>(SIEM_RULE_MIGRATIONS_PATH, {
-    version: '1',
-    body: JSON.stringify(rulesToUpdate),
-    signal,
-  });
+  return KibanaServices.get().http.put<UpdateRuleMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
+    { version: '1', body: JSON.stringify(rulesToUpdate), signal }
+  );
 };
