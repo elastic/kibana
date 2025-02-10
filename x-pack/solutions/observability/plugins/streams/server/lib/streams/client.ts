@@ -35,6 +35,8 @@ import {
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
   streamDefinitionSchema,
+  findInheritedLifecycle,
+  findInheritingStreams,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
@@ -63,7 +65,6 @@ import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
-import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
 
@@ -476,7 +477,7 @@ export class StreamsClient {
       }
       if (!isChildOf(definition.name, item.destination)) {
         throw new MalformedStreamIdError(
-          `The ID (${item.destination}) from the child stream must start with the parent's id (${definition.name}), followed by a dot and a name`
+          `The ID (${item.destination}) from the child stream must start with the parent's name (${definition.name}), followed by a dot and a name`
         );
       }
       await this.validateAndUpsertStream({
@@ -556,7 +557,7 @@ export class StreamsClient {
     }
     if (!isChildOf(parentDefinition.name, childDefinition.name)) {
       throw new MalformedStreamIdError(
-        `The ID (${name}) from the new stream must start with the parent's id (${parentDefinition.name}), followed by a dot and a name`
+        `The ID (${name}) from the new stream must start with the parent's name (${parentDefinition.name}), followed by a dot and a name`
       );
     }
 
@@ -618,7 +619,7 @@ export class StreamsClient {
 
       if (isIngestStreamDefinition(streamDefinition)) {
         const privileges = await checkAccess({
-          id: name,
+          name,
           scopedClusterClient: this.dependencies.scopedClusterClient,
         });
         if (!privileges.read) {
@@ -649,7 +650,7 @@ export class StreamsClient {
         assertsSchema(streamDefinitionSchema, source);
         return source;
       }),
-      checkAccess({ id: name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
+      checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
             throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
@@ -784,7 +785,7 @@ export class StreamsClient {
     });
 
     const privileges = await checkAccessBulk({
-      ids: streams
+      names: streams
         .filter((stream) => !isGroupStreamDefinition(stream))
         .map((stream) => stream.name),
       scopedClusterClient,
@@ -807,7 +808,7 @@ export class StreamsClient {
     if (isUnwiredStreamDefinition(definition)) {
       await deleteUnmanagedStreamObjects({
         scopedClusterClient,
-        id: definition.name,
+        name: definition.name,
         logger,
       });
     } else if (isWiredStreamDefinition(definition)) {
@@ -831,7 +832,7 @@ export class StreamsClient {
         await this.deleteStream(item.destination);
       }
 
-      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger });
+      await deleteStreamObjects({ scopedClusterClient, name: definition.name, logger });
     }
 
     await assetClient.syncAssetList({
@@ -883,7 +884,7 @@ export class StreamsClient {
       definition && isGroupStreamDefinition(definition)
         ? { write: true, read: true }
         : await checkAccess({
-            id: name,
+            name,
             scopedClusterClient: this.dependencies.scopedClusterClient,
           });
 

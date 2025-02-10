@@ -6,12 +6,12 @@
  */
 
 import {
-  Condition,
   FilterCondition,
-  isAndCondition,
+  Condition,
   isFilterCondition,
+  isAndCondition,
   isOrCondition,
-} from '@kbn/streams-schema';
+} from '../models';
 
 function conditionToClause(condition: FilterCondition) {
   switch (condition.operator) {

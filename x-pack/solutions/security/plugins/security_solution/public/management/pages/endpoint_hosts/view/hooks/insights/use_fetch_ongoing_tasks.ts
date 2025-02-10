@@ -19,12 +19,14 @@ interface UseFetchOngoingScansConfig {
   isPolling: boolean;
   endpointId: string;
   onSuccess: () => void;
+  onInsightGenerationFailure: () => void;
 }
 
 export const useFetchOngoingScans = ({
   isPolling,
   endpointId,
   onSuccess,
+  onInsightGenerationFailure,
 }: UseFetchOngoingScansConfig) => {
   const { http } = useKibana().services;
   const toasts = useToasts();
@@ -51,6 +53,17 @@ export const useFetchOngoingScans = ({
             endpoint_ids: [endpointId],
           },
         });
+        if (response.data.length) {
+          const failedInsight = response.data.find((insight) => insight.status === 'failed');
+
+          if (failedInsight) {
+            toasts.addDanger({
+              title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
+              text: failedInsight.failureReason,
+            });
+            onInsightGenerationFailure();
+          }
+        }
         return response.data;
       } catch (error) {
         toasts.addDanger({

@@ -12,10 +12,10 @@ import { createSelector } from 'reselect';
 import { panelsReducer, uiReducer } from './reducers';
 import { initialState, State } from './state';
 import {
-  savePushVsOverlayToLocalStorageMiddleware,
-  saveUserSectionWidthsToLocalStorageMiddleware,
-  saveUserFlyoutWidthsToLocalStorageMiddleware,
   clearAllUserWidthsFromLocalStorageMiddleware,
+  savePushVsOverlayToLocalStorageMiddleware,
+  saveUserFlyoutWidthsToLocalStorageMiddleware,
+  saveUserSectionWidthsToLocalStorageMiddleware,
 } from './middlewares';
 
 export const store = configureStore({
