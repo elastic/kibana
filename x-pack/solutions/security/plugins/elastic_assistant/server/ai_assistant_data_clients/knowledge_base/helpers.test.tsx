@@ -20,7 +20,7 @@ import {
   EsqlContentReference,
   IndexEntry,
 } from '@kbn/elastic-assistant-common';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');
@@ -149,7 +149,7 @@ describe('getStructuredToolForIndexEntry', () => {
   const mockEsClient = {} as ElasticsearchClient;
 
   const mockIndexEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' }) as IndexEntry;
-  const contentReferencesStore = contentReferencesStoreFactoryMock();
+  const contentReferencesStore = newContentReferencesStoreMock();
 
   it('should return a DynamicStructuredTool with correct name and schema', () => {
     const tool = getStructuredToolForIndexEntry({

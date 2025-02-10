@@ -23,7 +23,6 @@ describe('plain_row_renderer', () => {
   test('renders correctly against snapshot', () => {
     const children = plainRowRenderer.renderRow({
       data: mockDatum,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = shallow(<span>{children}</span>);
@@ -37,7 +36,6 @@ describe('plain_row_renderer', () => {
   test('should render a plain row', () => {
     const children = plainRowRenderer.renderRow({
       data: mockDatum,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = mount(<span>{children}</span>);

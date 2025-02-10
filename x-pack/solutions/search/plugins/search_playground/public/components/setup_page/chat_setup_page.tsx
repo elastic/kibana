@@ -23,6 +23,7 @@ import { AnalyticsEvents } from '../../analytics/constants';
 import { AddDataSources } from './add_data_sources';
 import { ConnectLLMButton } from './connect_llm_button';
 import { CreateIndexButton } from './create_index_button';
+import { UploadFileButton } from '../upload_file_button';
 
 export const ChatSetupPage: React.FC = () => {
   const usageTracker = useUsageTracker();
@@ -72,6 +73,9 @@ export const ChatSetupPage: React.FC = () => {
               <EuiFlexItem grow={false}>
                 {indices.length ? <AddDataSources /> : <CreateIndexButton />}
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <UploadFileButton isSetup={true} />
+              </EuiFlexItem>
             </>
           )}
         </EuiFlexGroup>
@@ -86,7 +90,12 @@ export const ChatSetupPage: React.FC = () => {
               />
             </span>
           </EuiTitle>{' '}
-          <EuiLink href={docLinks.chatPlayground} target="_blank" external>
+          <EuiLink
+            data-test-subj="searchPlaygroundChatSetupPageReadDocumentationLink"
+            href={docLinks.chatPlayground}
+            target="_blank"
+            external
+          >
             <FormattedMessage
               id="xpack.searchPlayground.setupPage.documentationLink"
               defaultMessage="Read documentation"

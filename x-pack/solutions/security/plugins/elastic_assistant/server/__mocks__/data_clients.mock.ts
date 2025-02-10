@@ -69,6 +69,7 @@ const createKnowledgeBaseDataClientMock = () => {
     getRequiredKnowledgeBaseDocumentEntries: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
     isInferenceEndpointExists: jest.fn(),
+    getInferenceEndpointId: jest.fn(),
     isModelInstalled: jest.fn(),
     isSecurityLabsDocsLoaded: jest.fn(),
     isSetupAvailable: jest.fn(),

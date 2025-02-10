@@ -22,7 +22,7 @@
         "tags": [],
         "label": "coreInternalLifecycleMock",
         "description": [],
-        "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+        "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,13 +39,7 @@
               ">; context: jest.Mocked<",
               "InternalContextSetup",
               ">; elasticsearch: MockedElasticSearchServicePreboot; http: ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-server.InternalHttpServicePrebootMock",
-                "text": "InternalHttpServicePrebootMock"
-              },
+              "InternalHttpServicePrebootMock",
               "; httpResources: { createRegistrar: jest.Mock<jest.Mocked<",
               "HttpResources",
               ">, [], any>; }; uiSettings: jest.Mocked<",
@@ -53,16 +47,10 @@
               ">; logging: jest.Mocked<",
               "InternalLoggingServicePreboot",
               ">; preboot: ",
-              {
-                "pluginId": "@kbn/core-preboot-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCorePrebootServerMocksPluginApi",
-                "section": "def-server.InternalPrebootServicePrebootMock",
-                "text": "InternalPrebootServicePrebootMock"
-              },
+              "InternalPrebootServicePrebootMock",
               "; }"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -87,13 +75,7 @@
               "; elasticsearch: MockedInternalElasticSearchServiceSetup; featureFlags: jest.Mocked<",
               "InternalFeatureFlagsSetup",
               ">; http: ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-server.InternalHttpServiceSetupMock",
-                "text": "InternalHttpServiceSetupMock"
-              },
+              "InternalHttpServiceSetupMock",
               "; savedObjects: jest.Mocked<",
               "InternalSavedObjectsServiceSetup",
               ">; status: jest.Mocked<",
@@ -126,7 +108,7 @@
               "UserProfileServiceSetup",
               ">; }"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -149,13 +131,7 @@
               "; elasticsearch: MockedInternalElasticsearchServiceStart; featureFlags: jest.Mocked<",
               "FeatureFlagsStart",
               ">; http: ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-server.InternalHttpServiceStartMock",
-                "text": "InternalHttpServiceStartMock"
-              },
+              "InternalHttpServiceStartMock",
               "; metrics: jest.Mocked<",
               "MetricsServiceSetup",
               ">; savedObjects: jest.Mocked<",
@@ -174,7 +150,7 @@
               "InternalUserProfileServiceStart",
               ">; }"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -190,7 +166,7 @@
         "tags": [],
         "label": "coreLifecycleMock",
         "description": [],
-        "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+        "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -204,7 +180,7 @@
             "signature": [
               "() => CorePrebootMockType"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -220,7 +196,7 @@
             "signature": [
               "({ pluginStartDeps, pluginStartContract, }?: { pluginStartDeps?: object | undefined; pluginStartContract?: any; }) => CoreSetupMockType"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -235,7 +211,7 @@
                 "signature": [
                   "{ pluginStartDeps?: object | undefined; pluginStartContract?: any; }"
                 ],
-                "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/core_setup.mock.ts",
+                "path": "src/core/packages/lifecycle/server-mocks/src/core_setup.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -261,7 +237,7 @@
               "CoreStart",
               ">"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

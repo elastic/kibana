@@ -136,17 +136,21 @@ export const streamGraph = async ({
 
   // Stream is from openai functions agent
   let finalMessage = '';
-  const stream = assistantGraph.streamEvents(inputs, {
-    callbacks: [
-      apmTracer,
-      ...(traceOptions?.tracers ?? []),
-      ...(telemetryTracer ? [telemetryTracer] : []),
-    ],
-    runName: DEFAULT_ASSISTANT_GRAPH_ID,
-    streamMode: 'values',
-    tags: traceOptions?.tags ?? [],
-    version: 'v1',
-  });
+  const stream = assistantGraph.streamEvents(
+    inputs,
+    {
+      callbacks: [
+        apmTracer,
+        ...(traceOptions?.tracers ?? []),
+        ...(telemetryTracer ? [telemetryTracer] : []),
+      ],
+      runName: DEFAULT_ASSISTANT_GRAPH_ID,
+      streamMode: 'values',
+      tags: traceOptions?.tags ?? [],
+      version: 'v1',
+    },
+    inputs?.provider === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+  );
 
   const pushStreamUpdate = async () => {
     for await (const { event, data, tags } of stream) {
@@ -155,8 +159,6 @@ export const streamGraph = async ({
           const chunk = data?.chunk;
           const msg = chunk.message;
           if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-            // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
-            // however, no harm to keep it in
             /* empty */
           } else if (!didEnd) {
             push({ payload: msg.content, type: 'content' });

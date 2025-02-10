@@ -54,6 +54,7 @@ export type FieldMap<T extends string = string> = Record<
     dynamic?: boolean | 'strict';
     properties?: Record<string, { type: string }>;
     inference_id?: string;
+    search_inference_id?: string;
     copy_to?: string;
   }
 >;

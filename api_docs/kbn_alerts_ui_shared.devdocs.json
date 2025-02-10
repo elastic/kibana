@@ -2625,9 +2625,7 @@
                     "section": "def-common.Query",
                     "text": "Query"
                   },
-                  ">, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; saveQueryMenuVisibility?: ",
-                  "SavedQueryMenuVisibility",
-                  " | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
+                  ">, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; allowSavingQueries?: boolean | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
@@ -5605,7 +5603,7 @@
         "signature": [
           "{ [x: string]: Pick<",
           "OptionsListControlState",
-          ", \"title\" | \"fieldName\" | \"exclude\" | \"existsSelected\" | \"selectedOptions\">; }"
+          ", \"title\" | \"fieldName\" | \"exclude\" | \"selectedOptions\" | \"existsSelected\">; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "deprecated": false,

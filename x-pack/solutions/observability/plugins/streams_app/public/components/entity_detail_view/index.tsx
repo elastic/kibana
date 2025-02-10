@@ -11,8 +11,9 @@ import { css } from '@emotion/css';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
   IngestStreamEffectiveLifecycle,
-  ReadStreamDefinition,
+  IngestStreamGetResponse,
   isDslLifecycle,
+  isErrorLifecycle,
   isIlmLifecycle,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -43,7 +44,7 @@ export function EntityDetailViewWithoutParams({
     displayName?: string;
     id: string;
   };
-  definition?: ReadStreamDefinition;
+  definition?: IngestStreamGetResponse;
 }) {
   const router = useStreamsAppRouter();
   useStreamsAppBreadcrumbs(() => {
@@ -171,6 +172,16 @@ function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecyc
     );
   }
 
+  if (isErrorLifecycle(lifecycle)) {
+    return (
+      <EuiBadge color="hollow">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
+          defaultMessage: 'Error: {message}',
+          values: { message: lifecycle.error.message },
+        })}
+      </EuiBadge>
+    );
+  }
   if (isDslLifecycle(lifecycle)) {
     return (
       <EuiBadge color="hollow">

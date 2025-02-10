@@ -775,9 +775,17 @@
         "label": "createLogsContextService",
         "description": [],
         "signature": [
-          "({ logsDataAccess }: ",
+          "({ logsDataAccess, }: ",
           "LogsContextServiceDeps",
-          ") => Promise<{ isLogsIndexPattern: (indexPattern: unknown) => boolean; }>"
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogsContextService",
+            "text": "LogsContextService"
+          },
+          ">"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
         "deprecated": false,
@@ -788,7 +796,7 @@
             "id": "def-common.createLogsContextService.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ logsDataAccess }",
+            "label": "{\n  logsDataAccess,\n}",
             "description": [],
             "signature": [
               "LogsContextServiceDeps"
@@ -3543,6 +3551,22 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogsContextService.getAllLogsIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllLogsIndexPattern",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.LogsContextService.isLogsIndexPattern",

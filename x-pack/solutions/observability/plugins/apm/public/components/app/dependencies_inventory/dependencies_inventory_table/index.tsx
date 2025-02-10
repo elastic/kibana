@@ -7,10 +7,11 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -24,7 +25,7 @@ export function DependenciesInventoryTable() {
   const {
     query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled, offset },
   } = useApmParams('/dependencies/inventory');
-
+  const { onPageReady } = usePerformanceContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { euiTheme } = useEuiTheme();
@@ -51,6 +52,17 @@ export function DependenciesInventoryTable() {
     },
     [start, end, environment, offset, kuery, comparisonEnabled]
   );
+
+  useEffect(() => {
+    if (status === FETCH_STATUS.SUCCESS) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [status, onPageReady, rangeFrom, rangeTo]);
 
   const dependencies =
     data?.dependencies.map((dependency) => {

@@ -12,6 +12,8 @@ import {
   validateCATrustedFingerPrint,
   validateKafkaHeaders,
   validateKafkaHosts,
+  validateKibanaURL,
+  validateKibanaAPIKey,
 } from './output_form_validators';
 
 describe('Output form validation', () => {
@@ -127,6 +129,58 @@ describe('Output form validation', () => {
       const res = validateESHosts(['ftp://test.fr']);
 
       expect(res).toEqual([{ index: 0, message: 'Invalid protocol' }]);
+    });
+  });
+
+  describe('validateKibanaURL', () => {
+    it('should not work with empty url', () => {
+      const res = validateKibanaURL('', true);
+
+      expect(res).toEqual(['URL is required']);
+    });
+
+    it('should work with empty url if syncEnabled is false', () => {
+      const res = validateKibanaURL('', false);
+
+      expect(res).toBeUndefined();
+    });
+
+    it('should work with valid url', () => {
+      const res = validateKibanaURL('https://test.fr:9200', true);
+
+      expect(res).toBeUndefined();
+    });
+
+    it('should return an error with invalid url', () => {
+      const res = validateKibanaURL('toto', false);
+
+      expect(res).toEqual(['Invalid URL']);
+    });
+
+    it('should return an error with url with invalid port', () => {
+      const res = validateKibanaURL('https://test.fr:qwerty9200', true);
+
+      expect(res).toEqual(['Invalid URL']);
+    });
+
+    it('should return an error when invalid protocol', () => {
+      const res = validateKibanaURL('ftp://test.fr', false);
+
+      expect(res).toEqual(['Invalid protocol']);
+    });
+  });
+
+  describe('validateKibanaAPIKey', () => {
+    it('should not work with empty url', () => {
+      const res = validateKibanaAPIKey('');
+
+      expect(res).toEqual(['Kibana API Key is required']);
+    });
+
+    it('should work with valid url', () => {
+      const res = validateKibanaAPIKey('apikey');
+
+      expect(res).toBeUndefined();
     });
   });
 

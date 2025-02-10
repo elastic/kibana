@@ -13,7 +13,7 @@ import { getAllComments } from '../../../../common/lib/api/attachments';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   postCaseReq,
-  postCaseResp,
+  getCaseWithoutCommentsResp,
   postCommentUserReq,
   getPostCaseRequest,
   postCommentAlertReq,
@@ -56,8 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await getCase({ supertest, caseId: postedCase.id });
 
       const data = removeServerGeneratedPropertiesFromCase(theCase);
-      expect(data).to.eql(postCaseResp());
-      expect(data.comments?.length).to.eql(0);
+      expect(data).to.eql(getCaseWithoutCommentsResp());
     });
 
     it('should set totalComment to 0 when all attachments are alerts', async () => {
