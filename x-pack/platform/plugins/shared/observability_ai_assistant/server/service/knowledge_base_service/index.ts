@@ -7,6 +7,7 @@
 
 import { serverUnavailable } from '@hapi/boom';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
@@ -48,6 +49,19 @@ export interface RecalledEntry {
 
 function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
+}
+
+function isSemanticTextUnsupportedError(error: Error) {
+  const semanticTextUnsupportedError =
+    'The [sparse_vector] field type is not supported on indices created on versions 8.0 to 8.10';
+
+  const isSemanticTextUnspported =
+    error instanceof EsErrors.ResponseError &&
+    (error.message.includes(semanticTextUnsupportedError) ||
+      // @ts-expect-error
+      error.meta?.body?.error?.caused_by?.reason.includes(semanticTextUnsupportedError));
+
+  return isSemanticTextUnspported;
 }
 
 export class KnowledgeBaseService {
@@ -422,6 +436,11 @@ export class KnowledgeBaseService {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
+
+      if (isSemanticTextUnsupportedError(error)) {
+        this.reIndexKnowledgeBase();
+      }
+
       throw error;
     }
   };
@@ -449,5 +468,109 @@ export class KnowledgeBaseService {
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
+  };
+
+  reIndexKnowledgeBase = async (): Promise<void> => {
+    try {
+      const originalIndex = `${resourceNames.aliases.kb}-000001`;
+      const tempIndex = `${resourceNames.aliases.kb}-000002`;
+      const esClient = this.dependencies.esClient.asInternalUser;
+
+      // Get index settings
+      const indexSettings = await esClient.indices.getSettings({
+        index: originalIndex,
+      });
+
+      const createdVersion = parseInt(
+        indexSettings[originalIndex]?.settings?.index?.version?.created ?? '',
+        10
+      );
+
+      // Check if the index was created before version 8.11
+      const versionThreshold = 8110000; // Version 8.11.0
+      if (createdVersion >= versionThreshold) {
+        this.dependencies.logger.warn(
+          `Knowledge base index "${originalIndex}" was created in version ${createdVersion}, which do not require reindexing.`
+        );
+        return;
+      }
+
+      this.dependencies.logger.info(
+        `Knowledge base index was created in ${createdVersion} and is eligible for reindexing. Starting now...`
+      );
+
+      // Prevent writes to existing index
+      await esClient.indices.putSettings({
+        index: originalIndex,
+        body: { settings: { 'index.blocks.write': true } },
+      });
+
+      // Create temporary index
+      await esClient.indices.create({
+        index: tempIndex,
+      });
+
+      // Perform reindex to temporary index
+      await esClient.reindex({
+        body: {
+          source: { index: originalIndex },
+          dest: { index: tempIndex },
+        },
+        refresh: true,
+        wait_for_completion: true,
+      });
+
+      // Delete original index
+      await esClient.indices.delete({
+        index: originalIndex,
+      });
+
+      // Prevent writes to temporary index
+      await esClient.indices.putSettings({
+        index: tempIndex,
+        body: { settings: { 'index.blocks.write': true } },
+      });
+
+      // Re-create original index
+      await esClient.indices.create({
+        index: originalIndex,
+      });
+
+      // Perform reindex back to original index
+      await esClient.reindex({
+        body: {
+          source: { index: tempIndex },
+          dest: { index: originalIndex },
+        },
+        refresh: true,
+        wait_for_completion: true,
+      });
+
+      // Delete temporary index
+      await esClient.indices.delete({
+        index: tempIndex,
+      });
+
+      // Re-create aliases
+      await esClient.indices.updateAliases({
+        body: {
+          actions: [
+            {
+              add: {
+                index: originalIndex,
+                alias: '.kibana-observability-ai-assistant-kb',
+                is_write_index: true,
+              },
+            },
+          ],
+        },
+      });
+
+      this.dependencies.logger.info(
+        'Reindexing knowledge base completed successfully. Semantic text field is now supported.'
+      );
+    } catch (error) {
+      throw new Error(`Failed to reindex knowledge base: ${error.message}`);
+    }
   };
 }
