@@ -98,7 +98,6 @@ tasks:
       - '--build'
       - '$projectSource/tsconfig.moon.json'
       - '--pretty'
-      - '--verbose'
     inputs:
       - '@group(src)'
       - 'tsconfig.json'
