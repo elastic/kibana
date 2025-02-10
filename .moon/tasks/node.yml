@@ -72,7 +72,7 @@ tasks:
     command:
       - 'tsc'
       - '--build'
-      - '$projectRoot/tsconfig.moon.json'
+      - 'tsconfig.moon.json'
       - '--pretty'
     inputs:
       - '@group(src)'
