@@ -10,21 +10,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';
 
 const Settings = dynamic(async () => ({
   default: (await import('../../../settings')).Settings,
 }));
 
-export const settingsRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const settingsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'settings',
   path: '',
   title: i18n.translate('xpack.ml.settings.docTitle', {
@@ -32,8 +28,12 @@ export const settingsRouteFactory = (
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB'),
+    getStackManagementBreadcrumb(navigateToApp),
+    {
+      text: i18n.translate('xpack.ml.settingsLabel', {
+        defaultMessage: 'Machine Learning Settings',
+      }),
+    },
   ],
 });
 

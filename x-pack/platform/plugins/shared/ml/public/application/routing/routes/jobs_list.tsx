@@ -15,12 +15,11 @@ import {
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { NavigateToPath } from '../../contexts/kibana';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 import type { MlRoute } from '../router';
 import { PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
-import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+import { type NavigateToApp, getStackManagementBreadcrumb } from '../breadcrumbs';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { basicResolvers, initSavedObjects } from '../resolvers';
@@ -29,7 +28,7 @@ const JobsPage = dynamic(async () => ({
   default: (await import('../../jobs/jobs_list')).JobsPage,
 }));
 
-export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+export const jobListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'anomaly_detection',
   title: i18n.translate('xpack.ml.anomalyDetection.jobs.docTitle', {
     defaultMessage: 'Anomaly Detection Jobs',
@@ -37,10 +36,10 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   path: '',
   render: () => <PageWrapper />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getStackManagementBreadcrumb(navigateToApp),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.jobsManagementLabel', {
-        defaultMessage: 'Jobs',
+        defaultMessage: 'Anomaly Detection Jobs',
       }),
     },
   ],

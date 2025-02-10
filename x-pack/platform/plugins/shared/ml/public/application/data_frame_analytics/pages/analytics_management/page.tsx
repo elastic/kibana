@@ -6,17 +6,15 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUrlState, usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
+import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
-// import { JobMap } from '../job_map';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
@@ -38,7 +36,6 @@ export const getDefaultDFAListState = (): ListingPageUrlState => ({
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
-  const [globalState] = useUrlState('_g');
 
   const [dfaPageState, setDfaPageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
@@ -49,10 +46,6 @@ export const Page: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
 
-  const location = useLocation();
-  const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
-  const mapJobId = globalState?.ml?.jobId;
-  const mapModelId = globalState?.ml?.modelId;
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -71,16 +64,11 @@ export const Page: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} forceRefresh={isLoading} />
       <UpgradeWarning />
 
-      {/* {selectedTabId === 'map' && (mapJobId || mapModelId) && (
-        <JobMap analyticsId={mapJobId} modelId={mapModelId} />
-      )} */}
-      {/* {selectedTabId === 'data_frame_analytics' && ( */}
       <DataFrameAnalyticsList
         blockRefresh={blockRefresh}
         pageState={dfaPageState}
         updatePageState={setDfaPageState}
       />
-      {/* )} */}
       <HelpMenu docLink={helpLink} />
     </>
   );

@@ -9,21 +9,17 @@ import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers, initSavedObjects } from '../../resolvers';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';
 
 const Page = dynamic(async () => ({
   default: (await import('../../../data_frame_analytics/pages/analytics_management')).Page,
 }));
 
-export const analyticsJobsListRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const analyticsJobsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'data_frame_analytics',
   path: '',
   title: i18n.translate('xpack.ml.dataFrameAnalytics.jobs.docTitle', {
@@ -31,11 +27,10 @@ export const analyticsJobsListRouteFactory = (
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
+    getStackManagementBreadcrumb(navigateToApp),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.jobsManagementLabel', {
-        defaultMessage: 'Jobs',
+        defaultMessage: 'Data Frame Analytics Jobs',
       }),
     },
   ],

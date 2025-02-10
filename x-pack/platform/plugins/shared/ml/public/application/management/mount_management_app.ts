@@ -12,7 +12,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { MlFeatures, NLPSettings, ExperimentalFeatures } from '../../../common/constants/app';
 import type { MlStartDependencies } from '../../plugin';
-import { getJobsListBreadcrumbs } from './breadcrumbs';
 import { App } from '../app';
 
 const renderApp = (

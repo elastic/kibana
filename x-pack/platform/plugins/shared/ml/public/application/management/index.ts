@@ -22,6 +22,7 @@ export enum MANAGEMENT_SECTION_IDS {
   SUPPLIED_CONFIGURATIONS = 'supplied_configurations',
   AD_SETTINGS = 'ad_settings',
 }
+type ManagementSectionId = `${MANAGEMENT_SECTION_IDS}`;
 
 export const MANAGEMENT_SECTIONS = {
   [MANAGEMENT_SECTION_IDS.OVERVIEW]: i18n.translate('xpack.ml.management.overviewTitle', {
@@ -66,7 +67,7 @@ export function registerManagementSections(
   experimentalFeatures: ExperimentalFeatures
 ) {
   Object.keys(MANAGEMENT_SECTIONS).forEach((sectionId) => {
-    const sectionTitle = MANAGEMENT_SECTIONS[sectionId];
+    const sectionTitle = MANAGEMENT_SECTIONS[sectionId as ManagementSectionId];
     management.sections.section.machineLearning
       .registerApp({
         id: sectionId,

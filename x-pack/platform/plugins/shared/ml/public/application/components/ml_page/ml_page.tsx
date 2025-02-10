@@ -21,8 +21,9 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
 
 import * as routes from '../../routing/routes';
-import * as overviewRoutes from '../../routing/routes/overview_management';
+import * as overviewRoutes from '../../routing/routes/overview_management'; // GOOD
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';
+// import * as dataViewSelectRoutes from '../../routing/routes/data_view_select';
 import * as dfaRoutes from '../../routing/routes/data_frame_analytics_management';
 import * as suppliedConfigsRoutes from '../../routing/routes/supplied_configurations';
 import * as settingsRoutes from '../../routing/routes/settings';
@@ -66,6 +67,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     const navigateToPath = useNavigateToPath();
     const {
       services: {
+        application: { navigateToApp },
         http: { basePath },
         mlServices: { httpService },
       },
@@ -79,20 +81,20 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     useEffect(() => {
       const subscriptions = new Subscription();
 
-    subscriptions.add(
-      httpService.getLoadingCount$
-        .pipe(
-          map((v) => v !== 0),
-          distinctUntilChanged()
-        )
-        .subscribe((loading) => {
-          setIsLoading(loading);
-        })
-    );
-    return function cleanup() {
-      subscriptions.unsubscribe();
-    };
-  }, [httpService?.getLoadingCount$]);
+      subscriptions.add(
+        httpService.getLoadingCount$
+          .pipe(
+            map((v) => v !== 0),
+            distinctUntilChanged()
+          )
+          .subscribe((loading) => {
+            setIsLoading(loading);
+          })
+      );
+      return function cleanup() {
+        subscriptions.unsubscribe();
+      };
+    }, [httpService?.getLoadingCount$]);
 
     const routeList = useMemo(
       () => {
@@ -121,9 +123,17 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
             break;
         }
 
-        return Object.values(currentRoutes)
-          .map((routeFactory) => routeFactory(navigateToPath, basePath.get()))
-          .filter((d) => !d.disabled);
+        const currentRoutesList = Object.values(currentRoutes);
+
+        if (entryPoint !== undefined) {
+          return currentRoutesList
+            .map((routeFactory) => routeFactory(navigateToApp))
+            .filter((d) => !d.disabled);
+        } else {
+          return currentRoutesList
+            .map((routeFactory) => routeFactory(navigateToPath, basePath.get()))
+            .filter((d) => !d.disabled);
+        }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [entryPoint]

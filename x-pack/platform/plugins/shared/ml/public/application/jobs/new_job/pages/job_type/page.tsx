@@ -19,11 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import {
-  useMlKibana,
-  useMlManagementLocator,
-  useNavigateToPath,
-} from '../../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
 
 import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
@@ -43,7 +39,6 @@ export const Page: FC = () => {
   } = useMlKibana();
 
   const dataSourceContext = useDataSource();
-  const navigateToPath = useNavigateToPath();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   );
@@ -152,7 +147,7 @@ export const Page: FC = () => {
       dataVisualizerLink,
       recentlyAccessed
     );
-    navigateToPath(`/jobs/new_job/datavisualizer${getUrlParams()}`); // TODO: does this one need to be updated?
+    navigateToManagementPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
   };
 
   const jobTypes = [

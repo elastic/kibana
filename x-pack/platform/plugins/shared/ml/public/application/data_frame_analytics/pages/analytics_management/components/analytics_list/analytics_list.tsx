@@ -26,7 +26,7 @@ import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { ImportJobsFlyout } from '../../../../../components/import_export_jobs';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
+import { useMlManagementLocator } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
@@ -99,7 +99,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   pageState,
   updatePageState,
 }) => {
-  const navigateToPath = useNavigateToPath();
+  const mlManagementLocator = useMlManagementLocator();
 
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
@@ -201,9 +201,11 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   );
 
   const navigateToSourceSelection = useCallback(async () => {
-    await navigateToPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    await mlManagementLocator?.navigate({
+      sectionId: 'ml',
+      appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION}`,
+    });
+  }, [mlManagementLocator]);
 
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
     if (search.error !== null) {
@@ -269,15 +271,15 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           {stats}
           <EuiFlexGroup grow={false} direction="row" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <ExportJobsFlyout isDisabled={false} currentTab={'data-frame-analytics'} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ImportJobsFlyout isDisabled={false} onImportComplete={getAnalyticsCallback} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <ExportJobsFlyout isDisabled={false} currentTab={'data-frame-analytics'} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ImportJobsFlyout isDisabled={false} onImportComplete={getAnalyticsCallback} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <CreateAnalyticsButton

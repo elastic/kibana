@@ -11,12 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
 
 const SuppliedConfigurations = dynamic(async () => ({
@@ -24,10 +23,7 @@ const SuppliedConfigurations = dynamic(async () => ({
     .SuppliedConfigurations,
 }));
 
-export const suppliedConfigurationsRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'supplied_configurations',
   path: '',
   title: i18n.translate('xpack.ml.suppliedConfigurations.suppliedConfigurations.docTitle', {
@@ -35,13 +31,12 @@ export const suppliedConfigurationsRouteFactory = (
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
+    getStackManagementBreadcrumb(navigateToApp),
     {
       text: i18n.translate(
         'xpack.ml.suppliedConfigurationsBreadcrumbs.suppliedConfigurationsLabel',
         {
-          defaultMessage: 'Supplied configurations',
+          defaultMessage: 'Anomaly Detection Supplied Configurations',
         }
       ),
     },

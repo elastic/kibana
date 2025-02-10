@@ -106,12 +106,12 @@ export class MlManagementLocatorInternal {
     return { path, url };
   };
 
-  public readonly getRedirectUrl = async (
+  public readonly getRedirectUrl = (
     params: MlLocatorParams,
     appId: string = 'anomaly_detection'
   ) => {
     const path = this.getPath(params);
-    const url = await this._locator?.getRedirectUrl({
+    const url = this._locator?.getRedirectUrl({
       sectionId: this._sectionId,
       appId: `${appId}/${path}`,
     });
