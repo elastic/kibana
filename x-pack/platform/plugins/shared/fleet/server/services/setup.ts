@@ -310,7 +310,7 @@ async function createSetupSideEffects(
 
   logger.debug('Backfilling package policy supports_agentless field');
   await backfillPackagePolicySupportsAgentless(esClient);
-    
+
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
 
