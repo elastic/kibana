@@ -1767,11 +1767,19 @@ export default class esql_parser extends parser_config {
 	public clusterString(): ClusterStringContext {
 		let localctx: ClusterStringContext = new ClusterStringContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 42, esql_parser.RULE_clusterString);
+		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
 			this.state = 359;
-			this.match(esql_parser.UNQUOTED_SOURCE);
+			_la = this._input.LA(1);
+			if(!(_la===29 || _la===82)) {
+			this._errHandler.recoverInline(this);
+			}
+			else {
+				this._errHandler.reportMatch(this);
+			    this.consume();
+			}
 			}
 		}
 		catch (re) {
@@ -3791,7 +3799,7 @@ export default class esql_parser extends parser_config {
 	347,350,1,0,0,0,348,346,1,0,0,0,349,351,3,46,23,0,350,349,1,0,0,0,350,351,
 	1,0,0,0,351,39,1,0,0,0,352,353,3,42,21,0,353,354,5,37,0,0,354,356,1,0,0,
 	0,355,352,1,0,0,0,355,356,1,0,0,0,356,357,1,0,0,0,357,358,3,44,22,0,358,
-	41,1,0,0,0,359,360,5,82,0,0,360,43,1,0,0,0,361,362,7,2,0,0,362,45,1,0,0,
+	41,1,0,0,0,359,360,7,2,0,0,360,43,1,0,0,0,361,362,7,2,0,0,362,45,1,0,0,
 	0,363,364,5,81,0,0,364,369,5,82,0,0,365,366,5,38,0,0,366,368,5,82,0,0,367,
 	365,1,0,0,0,368,371,1,0,0,0,369,367,1,0,0,0,369,370,1,0,0,0,370,47,1,0,
 	0,0,371,369,1,0,0,0,372,373,5,20,0,0,373,378,3,40,20,0,374,375,5,38,0,0,
@@ -4989,6 +4997,9 @@ export class ClusterStringContext extends ParserRuleContext {
 	}
 	public UNQUOTED_SOURCE(): TerminalNode {
 		return this.getToken(esql_parser.UNQUOTED_SOURCE, 0);
+	}
+	public QUOTED_STRING(): TerminalNode {
+		return this.getToken(esql_parser.QUOTED_STRING, 0);
 	}
     public get ruleIndex(): number {
     	return esql_parser.RULE_clusterString;
