@@ -497,12 +497,7 @@ describe('autocomplete', () => {
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
-    testSuggestions('FROM index1 M/', [
-      ',',
-      'METADATA $0',
-      '| ',
-      ...recommendedQuerySuggestions.map((q) => q.queryString),
-    ]);
+    testSuggestions('FROM index1 M/', ['METADATA $0']);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
@@ -886,12 +881,7 @@ describe('autocomplete', () => {
 
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [
-      ',',
-      attachAsSnippet(attachTriggerCommand('METADATA $0')),
-      '| ',
-      ...recommendedQuerySuggestions.map((q) => q.queryString),
-    ]);
+    testSuggestions('FROM index1 M/', [attachAsSnippet(attachTriggerCommand('METADATA $0'))]);
 
     describe('ENRICH', () => {
       testSuggestions(
