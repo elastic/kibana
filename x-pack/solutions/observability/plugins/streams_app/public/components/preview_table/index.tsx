@@ -6,6 +6,7 @@
  */
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RecursiveRecord } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 
@@ -13,7 +14,7 @@ export function PreviewTable({
   documents,
   displayColumns,
 }: {
-  documents: unknown[];
+  documents: RecursiveRecord[];
   displayColumns?: string[];
 }) {
   const columns = useMemo(() => {
@@ -57,7 +58,7 @@ export function PreviewTable({
         if (!doc || typeof doc !== 'object') {
           return '';
         }
-        const value = (doc as Record<string, unknown>)[columnId];
+        const value = (doc as RecursiveRecord)[columnId];
         if (value === undefined || value === null) {
           return '';
         }

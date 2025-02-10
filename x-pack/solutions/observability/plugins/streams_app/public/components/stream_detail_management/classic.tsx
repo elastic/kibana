@@ -13,11 +13,12 @@ import { RedirectTo } from '../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { useKibana } from '../../hooks/use_kibana';
 import { ManagementTabs, Wrapper } from './wrapper';
+import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 
-type ManagementSubTabs = 'enrich' | 'overview';
+type ManagementSubTabs = 'enrich' | 'overview' | 'lifecycle';
 
 function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['enrich', 'overview'].includes(value);
+  return ['enrich', 'overview', 'lifecycle'].includes(value);
 }
 
 export function ClassicStreamDetailManagement({
@@ -47,6 +48,15 @@ export function ClassicStreamDetailManagement({
       ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
         defaultMessage: 'Extract field',
+      }),
+    };
+
+    tabs.lifecycle = {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+        defaultMessage: 'Data retention',
       }),
     };
   }
