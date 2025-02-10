@@ -115,7 +115,7 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
   es: Client,
   rules = SAMPLE_PREBUILT_RULES_WITH_HISTORICAL_VERSIONS
 ): Promise<void> => {
-  await es.bulk({
+  const response = await es.bulk({
     refresh: true,
     body: rules.flatMap((doc) => [
       {
@@ -127,4 +127,10 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
       doc,
     ]),
   });
+
+  if (response.errors) {
+    throw new Error(
+      `Unable to bulk create rule assets. Response items: ${JSON.stringify(response.items)}`
+    );
+  }
 };
