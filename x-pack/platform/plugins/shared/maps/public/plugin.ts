@@ -68,7 +68,7 @@ import {
 } from './api';
 import type { MapsXPackConfig, MapsConfigType } from '../server/config';
 import { APP_NAME, APP_ICON_SOLUTION, APP_ID } from '../common/constants';
-import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { mapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import {
   setIsCloudEnabled,
@@ -188,7 +188,7 @@ export class MapsPlugin
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations.registerAlias(getMapsVisTypeAlias());
+    plugins.visualizations.registerAlias(mapsVisTypeAlias);
 
     core.application.register({
       id: APP_ID,
@@ -247,7 +247,7 @@ export class MapsPlugin
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
 
-    registerUiActions(core, plugins.uiActions);
+    registerUiActions(core, plugins);
 
     if (!core.application.capabilities.maps_v2.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);
