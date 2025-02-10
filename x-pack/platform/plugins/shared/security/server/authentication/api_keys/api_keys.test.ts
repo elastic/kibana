@@ -483,14 +483,16 @@ describe('API Keys', () => {
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
-        api_key: {
-          name: 'test_api_key',
-          role_descriptors: { foo: true },
-          expiration: '1d',
+        body: {
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: { foo: true },
+            expiration: '1d',
+          },
+          grant_type: 'password',
+          username: 'foo',
+          password: 'bar',
         },
-        grant_type: 'password',
-        username: 'foo',
-        password: 'bar',
       });
     });
 
@@ -520,13 +522,15 @@ describe('API Keys', () => {
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
-        api_key: {
-          name: 'test_api_key',
-          role_descriptors: roleDescriptors,
-          expiration: '1d',
+        body: {
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'foo-access-token',
         },
-        grant_type: 'access_token',
-        access_token: 'foo-access-token',
       });
     });
 
@@ -559,16 +563,18 @@ describe('API Keys', () => {
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
-        api_key: {
-          name: 'test_api_key',
-          role_descriptors: { foo: true },
-          expiration: '1d',
-        },
-        grant_type: 'access_token',
-        access_token: 'foo-access-token',
-        client_authentication: {
-          scheme: 'SharedSecret',
-          value: 'secret',
+        body: {
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: { foo: true },
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'foo-access-token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'secret',
+          },
         },
       });
     });
@@ -851,27 +857,29 @@ describe('API Keys', () => {
         name: 'key-name',
       });
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
-        api_key: {
-          name: 'key-name',
-          role_descriptors: {
-            synthetics_writer: {
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['feature_uptime.all'],
-                  resources: ['*'],
-                },
-              ],
-              cluster: ['manage'],
-              indices: [],
-              run_as: [],
+        body: {
+          api_key: {
+            name: 'key-name',
+            role_descriptors: {
+              synthetics_writer: {
+                applications: [
+                  {
+                    application: 'kibana-.kibana',
+                    privileges: ['feature_uptime.all'],
+                    resources: ['*'],
+                  },
+                ],
+                cluster: ['manage'],
+                indices: [],
+                run_as: [],
+              },
             },
+            expiration: '1d',
           },
-          expiration: '1d',
+          grant_type: 'password',
+          password: 'bar',
+          username: 'foo',
         },
-        grant_type: 'password',
-        password: 'bar',
-        username: 'foo',
       });
     });
 
