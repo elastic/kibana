@@ -29,4 +29,18 @@ describe('telemetry events', () => {
       });
     });
   });
+
+  it('ensure event type have no collision', () => {
+    const eventTypes: Set<string> = new Set();
+    telemetryEvents.forEach((event) => {
+      expect(event).toHaveProperty('eventType');
+
+      try {
+        expect(eventTypes.has(event.eventType)).toBeFalsy();
+      } catch (e) {
+        throw new Error(`Event type "${event.eventType}" has collision.\n${e}`);
+      }
+      eventTypes.add(event.eventType);
+    });
+  });
 });

@@ -31,38 +31,38 @@ export interface BaseResultActionParams {
 
 // Setup actions
 
-interface ReportSetupConnectorSelectedActionParams {
+export interface ReportSetupConnectorSelectedActionParams {
   connectorType: string;
   connectorId: string;
 }
 
-interface ReportSetupMigrationOpenNewActionParams {
+export interface ReportSetupMigrationOpenNewActionParams {
   isFirstMigration: boolean;
 }
-interface ReportSetupMigrationOpenResourcesActionParams {
+export interface ReportSetupMigrationOpenResourcesActionParams {
   migrationId: string;
   missingResourcesCount: number;
 }
-interface ReportSetupRulesQueryCopiedActionParams {
+export interface ReportSetupRulesQueryCopiedActionParams {
   migrationId?: string;
 }
-interface ReportSetupMigrationCreatedActionParams extends BaseResultActionParams {
+export interface ReportSetupMigrationCreatedActionParams extends BaseResultActionParams {
   migrationId?: string;
   rulesCount: number;
 }
-interface ReportSetupMacrosQueryCopiedActionParams {
+export interface ReportSetupMacrosQueryCopiedActionParams {
   migrationId: string;
 }
-interface ReportSetupLookupNameCopiedActionParams {
+export interface ReportSetupLookupNameCopiedActionParams {
   migrationId: string;
 }
-interface ReportSetupResourcesUploadedActionParams extends BaseResultActionParams {
+export interface ReportSetupResourcesUploadedActionParams extends BaseResultActionParams {
   migrationId: string;
   type: RuleMigrationResourceType;
   count: number;
 }
 
-interface ReportStartTranslationActionParams extends BaseResultActionParams {
+export interface ReportStartTranslationActionParams extends BaseResultActionParams {
   migrationId: string;
   connectorId: string;
   isRetry: boolean;
@@ -71,12 +71,12 @@ interface ReportStartTranslationActionParams extends BaseResultActionParams {
 
 // Translated rule actions
 
-interface ReportTranslatedRuleUpdateActionParams {
+export interface ReportTranslatedRuleUpdateActionParams {
   migrationId: string;
   ruleMigrationId: string;
 }
 
-interface ReportTranslatedRuleInstallActionParams {
+export interface ReportTranslatedRuleInstallActionParams {
   migrationId: string;
   ruleMigrationId: string;
   author: 'elastic' | 'custom';
@@ -87,7 +87,7 @@ interface ReportTranslatedRuleInstallActionParams {
   };
 }
 
-interface ReportTranslatedRuleBulkInstallActionParams {
+export interface ReportTranslatedRuleBulkInstallActionParams {
   migrationId: string;
   enabled: boolean;
   count: number;

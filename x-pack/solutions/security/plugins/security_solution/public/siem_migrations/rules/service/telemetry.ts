@@ -12,7 +12,10 @@ import type {
   RuleMigrationResourceType,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
-import type { BaseResultActionParams } from '../../../common/lib/telemetry/events/siem_migrations/types';
+import type {
+  BaseResultActionParams,
+  ReportTranslatedRuleInstallActionParams,
+} from '../../../common/lib/telemetry/events/siem_migrations/types';
 import { SiemMigrationsEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
 
 export class SiemRulesMigrationsTelemetry {
@@ -119,18 +122,23 @@ export class SiemRulesMigrationsTelemetry {
     error?: Error;
   }) => {
     const { ruleMigration, enabled, error } = params;
-    const elasticRule = ruleMigration.elastic_rule;
-
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.TranslatedRuleInstall, {
+    const eventParams: ReportTranslatedRuleInstallActionParams = {
       migrationId: ruleMigration.migration_id,
       ruleMigrationId: ruleMigration.id,
-      author: elasticRule?.prebuilt_rule_id ? 'elastic' : 'custom',
-      ...(elasticRule?.prebuilt_rule_id && {
-        prebuiltRule: { id: elasticRule?.prebuilt_rule_id, title: elasticRule.title },
-      }),
+      author: 'custom',
       enabled,
       ...this.getBaseResultParams(error),
-    });
+    };
+
+    if (ruleMigration.elastic_rule?.prebuilt_rule_id) {
+      eventParams.author = 'elastic';
+      eventParams.prebuiltRule = {
+        id: ruleMigration.elastic_rule.prebuilt_rule_id,
+        title: ruleMigration.elastic_rule.title,
+      };
+    }
+
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.TranslatedRuleInstall, eventParams);
   };
 
   reportTranslatedRuleBulkInstall = (params: {
