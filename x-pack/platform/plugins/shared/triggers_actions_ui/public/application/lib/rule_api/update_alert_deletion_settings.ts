@@ -24,14 +24,14 @@ export const updateAlertDeletionSettings = async ({
   http: HttpSetup;
   alertDeletionSettings: RulesSettingsAlertDeletionProperties;
 }) => {
-  let body: string;
+  // let body: string;
   try {
-    body = JSON.stringify({
-      is_active_alert_deletion_enabled: alertDeletionSettings.isActiveAlertDeletionEnabled,
-      is_inactive_alert_deletion_enabled: alertDeletionSettings.isInactiveAlertDeletionEnabled,
-      active_alert_deletion_threshold: alertDeletionSettings.activeAlertDeletionThreshold,
-      inactive_alert_deletion_threshold: alertDeletionSettings.inactiveAlertDeletionThreshold,
-    });
+    // body = JSON.stringify({
+    //   is_active_alert_deletion_enabled: alertDeletionSettings.isActiveAlertDeletionEnabled,
+    //   is_inactive_alert_deletion_enabled: alertDeletionSettings.isInactiveAlertDeletionEnabled,
+    //   active_alert_deletion_threshold: alertDeletionSettings.activeAlertDeletionThreshold,
+    //   inactive_alert_deletion_threshold: alertDeletionSettings.inactiveAlertDeletionThreshold,
+    // });
   } catch (e) {
     throw new Error(`Unable to parse alert deletion settings update params: ${e}`);
   }
