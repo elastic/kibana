@@ -81,7 +81,6 @@ export class TrainedModelsService {
   private savedObjectsApiService!: SavedObjectsApiService;
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
-  private processedDeployments = new Set<string>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -424,7 +423,6 @@ export class TrainedModelsService {
       switchMap(() => {
         return this.waitForModelReady(deployment.modelId);
       }),
-      tap(() => this.processedDeployments.add(deployment.deploymentParams.deployment_id!)),
       tap(() => this.setDeployingStateForModel(deployment.modelId)),
       exhaustMap(() => {
         return firstValueFrom(
@@ -458,7 +456,6 @@ export class TrainedModelsService {
                 this.removeScheduledDeployments({
                   deploymentId: deployment.deploymentParams.deployment_id!,
                 });
-                this.processedDeployments.delete(deployment.deploymentParams.deployment_id!);
                 // Manually update the BehaviorSubject to ensure proper cleanup
                 // if user navigates away, as localStorage hook won't be available to handle updates
                 const updatedDeployments = this._scheduledDeployments$
@@ -479,7 +476,7 @@ export class TrainedModelsService {
       model &&
       isNLPModelItem(model) &&
       (model.deployment_ids.includes(deployment.deploymentParams.deployment_id!) ||
-        this.processedDeployments.has(deployment.deploymentParams.deployment_id!))
+        model.state === MODEL_STATE.STARTING)
     );
   }
 
