@@ -41,6 +41,8 @@ describe('WarningFlyoutStep', () => {
       indexName: 'foo',
       reindexName: 'reindexed-foo',
       aliases: [],
+      isFrozen: false,
+      isReadonly: false,
     },
   };
 

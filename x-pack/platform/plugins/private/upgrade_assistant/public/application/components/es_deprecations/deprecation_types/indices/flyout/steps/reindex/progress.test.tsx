@@ -28,6 +28,8 @@ describe('ReindexProgress', () => {
               indexName: 'foo',
               reindexName: 'reindexed-foo',
               aliases: [],
+              isFrozen: false,
+              isReadonly: false,
             },
           } as ReindexState
         }
@@ -96,6 +98,8 @@ describe('ReindexProgress', () => {
                       "meta": Object {
                         "aliases": Array [],
                         "indexName": "foo",
+                        "isFrozen": false,
+                        "isReadonly": false,
                         "reindexName": "reindexed-foo",
                       },
                       "reindexTaskPercComplete": null,
@@ -173,6 +177,8 @@ describe('ReindexProgress', () => {
               indexName: 'foo',
               reindexName: 'reindexed-foo',
               aliases: [],
+              isFrozen: true,
+              isReadonly: false,
             },
           } as ReindexState
         }

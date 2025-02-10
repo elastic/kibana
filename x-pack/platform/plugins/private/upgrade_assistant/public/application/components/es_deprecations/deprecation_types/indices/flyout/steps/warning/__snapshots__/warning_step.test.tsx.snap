@@ -17,7 +17,7 @@ exports[`WarningFlyoutStep renders 1`] = `
         >
           <MemoizedFormattedMessage
             defaultMessage="Back"
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.cancelButtonLabel"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.backButtonLabel"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

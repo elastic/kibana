@@ -39,6 +39,8 @@ exports[`ReindexStep renders 1`] = `
           "meta": Object {
             "aliases": Array [],
             "indexName": "myIndex",
+            "isFrozen": false,
+            "isReadonly": false,
             "reindexName": "reindexed-myIndex",
           },
           "reindexTaskPercComplete": null,
@@ -91,6 +93,7 @@ exports[`ReindexStep renders 1`] = `
 exports[`ReindexStep renders for frozen indices 1`] = `
 <Fragment>
   <EuiFlyoutBody>
+    <FrozenCallOut />
     <EuiText>
       <p>
         <MemoizedFormattedMessage
@@ -108,31 +111,6 @@ exports[`ReindexStep renders for frozen indices 1`] = `
           }
         />
       </p>
-      <EuiCallOut
-        iconType="iInCircle"
-        title={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="This index is frozen"
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexFrozenIndexTitle"
-          />
-        }
-      >
-        <MemoizedFormattedMessage
-          defaultMessage="Frozen indices will no longer be supported after the upgrade. As a result, this index will be transformed into a new, non-frozen index during the reindex operation. {docsLink}"
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexFrozenIndex"
-          values={
-            Object {
-              "docsLink": <EuiLink
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/unfreeze-index-api.html"
-                target="_blank"
-              >
-                Learn more
-              </EuiLink>,
-            }
-          }
-        />
-      </EuiCallOut>
-      <EuiSpacer />
       <p>
         <MemoizedFormattedMessage
           defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
@@ -152,6 +130,8 @@ exports[`ReindexStep renders for frozen indices 1`] = `
           "meta": Object {
             "aliases": Array [],
             "indexName": "myIndex",
+            "isFrozen": true,
+            "isReadonly": false,
             "reindexName": "reindexed-myIndex",
           },
           "reindexTaskPercComplete": null,
