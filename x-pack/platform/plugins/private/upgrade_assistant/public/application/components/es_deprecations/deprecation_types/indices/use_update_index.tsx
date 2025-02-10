@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import type { ApiService } from '../../../../lib/api';
 
 export interface UpdateIndexState {
@@ -14,7 +15,13 @@ export interface UpdateIndexState {
   reason?: string;
 }
 
-export const useUpdateIndex = ({ indexName, api }: { indexName: string; api: ApiService }) => {
+export interface UseUpdateIndexParams {
+  indexName: string;
+  api: ApiService;
+  correctiveAction: EnrichedDeprecationInfo['correctiveAction'];
+}
+
+export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIndexParams) => {
   const [failedState, setFailedState] = useState<boolean>(false);
   const [updateIndexState, setUpdateIndexState] = useState<UpdateIndexState>({
     failedBefore: false,
@@ -22,22 +29,20 @@ export const useUpdateIndex = ({ indexName, api }: { indexName: string; api: Api
   });
 
   const updateIndex = useCallback(async () => {
+    const operations: Array<'unfreeze' | 'blockWrite'> =
+      correctiveAction?.type === 'unfreeze' ? ['unfreeze'] : ['blockWrite', 'unfreeze'];
+
     setUpdateIndexState({ status: 'inProgress', failedBefore: failedState });
-    const res = await api.updateIndex(indexName);
-    // wait for 1.5 more seconds fur the UI to visually refresh
+    const res = await api.updateIndex(indexName, operations);
     const status = res.error ? 'failed' : 'complete';
     const failedBefore = failedState || status === 'failed';
     setFailedState(failedBefore);
-    setTimeout(
-      () =>
-        setUpdateIndexState({
-          status,
-          failedBefore,
-          ...(res.error && { reason: res.error.message.toString() }),
-        }),
-      1500
-    );
-  }, [api, failedState, indexName]);
+    setUpdateIndexState({
+      status,
+      failedBefore,
+      ...(res.error && { reason: res.error.message.toString() }),
+    });
+  }, [api, correctiveAction, failedState, indexName]);
 
   return {
     updateIndexState,

@@ -124,7 +124,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
                 title={
                   <FormattedMessage
                     id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.calloutTitle"
-                    defaultMessage="Marking the index as read-only will cause future update operations to fail"
+                    defaultMessage="Enable compatibility by marking this index as read-only"
                   />
                 }
                 color="warning"
@@ -133,7 +133,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
                 <p>
                   <FormattedMessage
                     id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.calloutDetail"
-                    defaultMessage="Please make sure that you no longer need to write or update documents in this index anymore. You will not be able to revert the read-only status after upgrading, as it is a pre-requisite for N-2 compatibility. If unsure, please consider reindexing this index instead."
+                    defaultMessage="You can enable compatibility with the next version by marking the index as read-only. Note that any attempts to insert new documents or update existing ones will fail. You can choose to reindex after upgrading if needed, to convert the index into a writable one."
                   />
                 </p>
               </EuiCallOut>
@@ -186,7 +186,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
               {flow === 'readonly' && (
                 <FormattedMessage
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.startButtonLabel"
-                  defaultMessage="Make read only"
+                  defaultMessage="Mark as read-only"
                 />
               )}
             </EuiButton>

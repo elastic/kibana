@@ -174,7 +174,7 @@ export const reindexServiceFactory = (
     });
 
     if (!putReadonly.acknowledged) {
-      throw new Error(`Index could not be set to readonly.`);
+      throw new Error(`Index could not be set to read-only.`);
     }
 
     return actions.updateReindexOp(reindexOp, { lastCompletedStep: ReindexStep.readonly });

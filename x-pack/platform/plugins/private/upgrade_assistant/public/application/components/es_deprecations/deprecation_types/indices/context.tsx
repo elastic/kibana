@@ -9,7 +9,7 @@ import React, { createContext, useContext } from 'react';
 
 import { ApiService } from '../../../../lib/api';
 import { useReindex, ReindexState } from './use_reindex';
-import { UpdateIndexState, useUpdateIndex } from './use_readonly';
+import { UpdateIndexState, useUpdateIndex } from './use_update_index';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
 export interface IndexStateContext {
@@ -48,7 +48,11 @@ export const IndexStatusProvider: React.FunctionComponent<Props> = ({
     api,
   });
 
-  const { updateIndexState, updateIndex } = useUpdateIndex({ indexName, api });
+  const { updateIndexState, updateIndex } = useUpdateIndex({
+    indexName,
+    api,
+    correctiveAction: deprecation.correctiveAction,
+  });
 
   return (
     <IndexContext.Provider

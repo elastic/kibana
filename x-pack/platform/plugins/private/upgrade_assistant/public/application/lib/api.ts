@@ -277,10 +277,11 @@ export class ApiService {
     });
   }
 
-  public async updateIndex(indexName: string) {
+  public async updateIndex(indexName: string, operations: Array<'unfreeze' | 'blockWrite'>) {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/update_index/${indexName}`,
       method: 'post',
+      body: { operations },
     });
   }
 

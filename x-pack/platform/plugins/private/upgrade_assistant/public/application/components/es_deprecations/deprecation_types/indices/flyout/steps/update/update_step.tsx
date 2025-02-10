@@ -21,10 +21,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { UpdateIndexState } from '../../../use_readonly';
+import type { UpdateIndexState } from '../../../use_update_index';
 import { FrozenCallOut } from '../frozen_callout';
-import { StepProgress, StepProgressStep } from '../../../../../common/step_progress';
-import { ReindexState } from '../../../use_reindex';
+import { StepProgress, type StepProgressStep } from '../../../../../common/step_progress';
+import type { ReindexState } from '../../../use_reindex';
 
 interface UpdateIndexFlyoutStepProps {
   action: 'unfreeze' | 'makeReadonly';

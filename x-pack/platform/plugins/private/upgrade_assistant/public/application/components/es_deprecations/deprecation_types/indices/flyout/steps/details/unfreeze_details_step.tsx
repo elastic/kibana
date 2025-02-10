@@ -27,7 +27,7 @@ import type { ReindexState } from '../../../use_reindex';
 import { useAppContext } from '../../../../../../../app_context';
 import { getReindexButtonLabel } from './messages';
 import { FrozenCallOut } from '../frozen_callout';
-import type { UpdateIndexState } from '../../../use_readonly';
+import type { UpdateIndexState } from '../../../use_update_index';
 
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.

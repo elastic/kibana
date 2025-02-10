@@ -45,6 +45,6 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   // Data streams reindexing
   registerMigrateDataStreamRoutes(dependencies);
 
-  // Make index read-only
+  // Mark index as read-only and unfreeze it
   registerUpdateIndexRoute(dependencies);
 }

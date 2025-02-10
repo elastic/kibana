@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -20,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { ReindexStatus } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
@@ -27,7 +29,7 @@ import type { ReindexState } from '../../../use_reindex';
 import { useAppContext } from '../../../../../../../app_context';
 import { getReindexButtonLabel } from './messages';
 import { FrozenCallOut } from '../frozen_callout';
-import type { UpdateIndexState } from '../../../use_readonly';
+import type { UpdateIndexState } from '../../../use_update_index';
 
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
@@ -42,7 +44,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const {
     services: {
       api,
-      core: { http },
+      core: { docLinks, http },
     },
   } = useAppContext();
 
@@ -151,7 +153,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               <p>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.index.flyout.detailsStep.readonlyCompatibleIndexText"
-                  defaultMessage="This index was created in ES 7.x. The index has been flagged as read-only, which allows for N-2 compatibility with the next major version."
+                  defaultMessage="This index was created in ES 7.x. It has been marked as read-only, which enables compatibility with the next major version."
                 />
               </p>
               <p>
@@ -167,43 +169,78 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               <p>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.index.flyout.detailsStep.notCompatibleIndexText"
-                  defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. You must address this issue before upgrading."
+                  defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
                 />
               </p>
-              <ul>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.index.flyout.detailsStep.reindexText"
-                  tagName="li"
-                  defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-                />
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.index.flyout.detailsStep.readOnlyText"
-                  tagName="li"
-                  defaultMessage="Alternatively, old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index."
-                />
-              </ul>
+              <EuiDescriptionList
+                rowGutterSize="m"
+                listItems={[
+                  {
+                    title: 'Option 1: Reindex data',
+                    description: (
+                      <EuiText size="m">
+                        <FormattedMessage
+                          id="xpack.upgradeAssistant.index.flyout.detailsStep.reindexText"
+                          defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                        />
+                      </EuiText>
+                    ),
+                  },
+                  {
+                    title: 'Option 2: Mark as read-only',
+                    description: (
+                      <EuiText size="m">
+                        <FormattedMessage
+                          id="xpack.upgradeAssistant.index.flyout.detailsStep.readOnlyText"
+                          defaultMessage="Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index. {docsLink}"
+                          values={{
+                            docsLink: (
+                              <EuiLink
+                                target="_blank"
+                                href={docLinks.links.upgradeAssistant.indexBlocks}
+                              >
+                                {i18n.translate(
+                                  'xpack.upgradeAssistant.index.flyout.detailsStep.learnMoreLinkLabel',
+                                  {
+                                    defaultMessage: 'Learn more',
+                                  }
+                                )}
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </EuiText>
+                    ),
+                  },
+                  {
+                    title: 'Option 3: Delete this index',
+                    description: (
+                      <EuiText size="m">
+                        <FormattedMessage
+                          id="xpack.upgradeAssistant.index.flyout.detailsStep.deleteText"
+                          defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}."
+                          values={{
+                            indexManagementLinkHtml: (
+                              <EuiLink
+                                href={`${http.basePath.prepend(
+                                  `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
+                                )}`}
+                              >
+                                <FormattedMessage
+                                  id="xpack.upgradeAssistant.index.flyout.detailsStep.indexMgmtLink"
+                                  defaultMessage="Go to index management"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </EuiText>
+                    ),
+                  },
+                ]}
+              />
             </Fragment>
           )}
-          <p>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.index.flyout.detailsStep.deleteText"
-              defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
-              values={{
-                indexManagementLinkHtml: (
-                  <EuiLink
-                    href={`${http.basePath.prepend(
-                      `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
-                    )}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.index.flyout.detailsStep.indexMgmtLink"
-                      defaultMessage="Go to index management"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
         </EuiText>
         <EuiSpacer />
       </EuiFlyoutBody>
@@ -231,7 +268,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     >
                       <FormattedMessage
                         id="xpack.upgradeAssistant.index.flyout.detailsStep.startIndexReadonlyButton"
-                        defaultMessage="Mark as read only"
+                        defaultMessage="Mark as read-only"
                       />
                     </EuiButton>
                   </EuiFlexItem>

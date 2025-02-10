@@ -26,11 +26,16 @@ export function registerUpdateIndexRoute({ router, lib: { handleEsError } }: Rou
       },
       options: {
         access: 'public',
-        summary: `Start or resume reindex`,
+        summary: `Perform certain update operations on a given index. Currently supported ones are: 'blockWrite' and 'unfreeze'`,
       },
       validate: {
         params: schema.object({
           index: schema.string(),
+        }),
+        body: schema.object({
+          operations: schema.arrayOf(
+            schema.oneOf([schema.literal('blockWrite'), schema.literal('unfreeze')])
+          ),
         }),
       },
     },
@@ -39,15 +44,28 @@ export function registerUpdateIndexRoute({ router, lib: { handleEsError } }: Rou
         elasticsearch: { client },
       } = await core;
       const { index } = request.params;
+      const { operations } = request.body;
       try {
         const esClient = client.asCurrentUser;
-        await esClient.indices.addBlock({ index, block: 'write' });
-        await esClient.indices.unfreeze({ index });
+        for (const operation of operations) {
+          switch (operation) {
+            case 'blockWrite': {
+              await esClient.indices.addBlock({ index, block: 'write' });
+              break;
+            }
+            case 'unfreeze': {
+              await esClient.indices.unfreeze({ index });
+              break;
+            }
+          }
+        }
+
         return response.ok();
       } catch (err) {
         if (err instanceof errors.ResponseError) {
           return handleEsError({ error: err, response });
         }
+
         return mapAnyErrorToKibanaHttpResponse(err);
       }
     })
