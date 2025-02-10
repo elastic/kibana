@@ -170,7 +170,7 @@ export interface Signature {
 }
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval' | 'operator';
+  type: 'builtin' | 'agg' | 'scalar' | 'operator';
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
