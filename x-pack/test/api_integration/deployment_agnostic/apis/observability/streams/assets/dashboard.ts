@@ -230,7 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe.only('suggestions', () => {
+    describe('suggestions', () => {
       before(async () => {
         await loadDashboards();
 
