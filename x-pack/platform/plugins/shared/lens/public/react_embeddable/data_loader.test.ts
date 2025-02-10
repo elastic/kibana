@@ -133,7 +133,7 @@ async function expectRerenderOnDataLoader(
     documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
     ...servicesOverrides,
   };
-  const { cleanup } = await loadEmbeddableData(
+  const { cleanup } = loadEmbeddableData(
     faker.string.uuid(),
     getState,
     api,
