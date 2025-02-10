@@ -13,7 +13,7 @@ import {
   EuiText,
   type EuiFlexGroupProps,
   EuiLink,
-  EuiToolTip
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InsightDistributionBar } from './insight_distribution_bar';
