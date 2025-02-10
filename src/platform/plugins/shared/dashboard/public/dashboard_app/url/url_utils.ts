@@ -15,10 +15,7 @@ import semverSatisfies from 'semver/functions/satisfies';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import {
-  DashboardPanelMap,
-  convertPanelsArrayToPanelMap,
-} from '../../../common';
+import { DashboardPanelMap, convertPanelsArrayToPanelMap } from '../../../common';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
 import { DashboardApi, DashboardState } from '../../dashboard_api/types';

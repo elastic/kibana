@@ -27,7 +27,9 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSecurityTags } from '../context/dashboard_context';
 
-const initialInput = new BehaviorSubject<ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>>({});
+const initialInput = new BehaviorSubject<
+  ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
+>({});
 
 const DashboardRendererComponent = ({
   canReadDashboard,

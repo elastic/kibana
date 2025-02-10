@@ -68,9 +68,7 @@ describe('ShowShareModal', () => {
     jest.clearAllMocks();
   });
 
-  const getPropsAndShare = (
-    unsavedState?: Partial<DashboardState>
-  ): ShowShareModalProps => {
+  const getPropsAndShare = (unsavedState?: Partial<DashboardState>): ShowShareModalProps => {
     dashboardBackupService.getState = jest.fn().mockReturnValue({ dashboardState: unsavedState });
     return {
       isDirty: true,
