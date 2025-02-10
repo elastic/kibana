@@ -90,6 +90,7 @@ describe('getSuggestions', () => {
     createMockStartDependencies() as unknown as LensPluginStartDependencies;
   const dataViews = dataViewPluginMocks.createStartContract();
   dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
+  mockStartDependencies.data.dataViews = dataViews;
   const dataviewSpecArr = [
     {
       id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
@@ -111,7 +112,7 @@ describe('getSuggestions', () => {
   it('returns the suggestions attributes correctly', async () => {
     const suggestionsAttributes = await getSuggestions(
       query,
-      startDependencies,
+      startDependencies.data,
       mockDatasourceMap(),
       mockVisualizationMap(),
       dataviewSpecArr,
@@ -127,7 +128,7 @@ describe('getSuggestions', () => {
     mockSuggestionApi.mockResolvedValueOnce([]);
     const suggestionsAttributes = await getSuggestions(
       query,
-      startDependencies,
+      startDependencies.data,
       mockDatasourceMap(),
       mockVisualizationMap(),
       dataviewSpecArr,
@@ -143,7 +144,7 @@ describe('getSuggestions', () => {
     const setErrorsSpy = jest.fn();
     const suggestionsAttributes = await getSuggestions(
       query,
-      startDependencies,
+      startDependencies.data,
       mockDatasourceMap(),
       mockVisualizationMap(),
       dataviewSpecArr,
