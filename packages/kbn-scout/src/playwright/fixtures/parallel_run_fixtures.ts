@@ -20,7 +20,7 @@ import type {
 } from './worker';
 import {
   scoutPageParallelFixture,
-  browserAuthParallelFixture,
+  browserAuthFixture,
   pageObjectsParallelFixture,
   validateTagsFixture,
 } from './test';
@@ -32,7 +32,7 @@ export const scoutParallelFixtures = mergeTests(
   scoutSpaceParallelFixture,
   apiFixtures,
   // test scope fixtures
-  browserAuthParallelFixture,
+  browserAuthFixture,
   scoutPageParallelFixture,
   pageObjectsParallelFixture,
   validateTagsFixture

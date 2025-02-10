@@ -117,7 +117,7 @@ describe('variable support', () => {
       setTestFunctions([
         // this test function is just used to test the type of the variable
         {
-          type: 'eval',
+          type: 'scalar',
           description: 'Test function',
           supportedCommands: ['eval'],
           name: 'test',
@@ -128,7 +128,7 @@ describe('variable support', () => {
         // this test function is used to check that the correct return type is used
         // when determining variable types
         {
-          type: 'eval',
+          type: 'scalar',
           description: 'Test function',
           supportedCommands: ['eval'],
           name: 'return_value',
