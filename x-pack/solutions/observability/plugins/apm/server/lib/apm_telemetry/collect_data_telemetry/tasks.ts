@@ -15,7 +15,7 @@ import {
   AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
   OPEN_TELEMETRY_BASE_AGENT_NAMES,
-  RUM_AGENT_NAMES
+  RUM_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils/src/agent_names';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
@@ -694,7 +694,6 @@ export const tasks: TelemetryTask[] = [
         },
         Promise.resolve({} as Record<string, number>)
       );
-      
 
       const services = await telemetryClient.search({
         index: [indices.error, indices.span, indices.metric, indices.transaction],
@@ -958,7 +957,7 @@ export const tasks: TelemetryTask[] = [
       const size = 3;
       const toComposite = (outerKey: string | number, innerKey: string | number) =>
         `${outerKey}/${innerKey}`;
-  
+
       const agentNameAggs = {
         [AGENT_ACTIVATION_METHOD]: {
           terms: {
@@ -1037,7 +1036,7 @@ export const tasks: TelemetryTask[] = [
       const agentDataWithoutOtel = await AGENT_NAMES_WITHOUT_OTEL.reduce(
         async (prevJob, agentName) => {
           const data = await prevJob;
-  
+
           const response = await telemetryClient.search({
             index: [indices.error, indices.metric, indices.transaction],
             body: {
@@ -1055,13 +1054,13 @@ export const tasks: TelemetryTask[] = [
               aggs: agentNameAggs,
             },
           });
-  
+
           const { aggregations } = response;
-  
+
           if (!aggregations) {
             return data;
           }
-  
+
           data[agentName] = {
             agent: {
               activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
@@ -1138,7 +1137,7 @@ export const tasks: TelemetryTask[] = [
               },
             },
           };
-  
+
           return data;
         },
         Promise.resolve({} as NonNullable<APMTelemetry['agents']>)
@@ -1147,7 +1146,7 @@ export const tasks: TelemetryTask[] = [
       const agentDataWithOtel = await OPEN_TELEMETRY_BASE_AGENT_NAMES.reduce(
         async (prevJob, baseAgentName) => {
           const data = await prevJob;
-  
+
           const response = await telemetryClient.search({
             index: [indices.error, indices.metric, indices.transaction],
             body: {
@@ -1173,16 +1172,16 @@ export const tasks: TelemetryTask[] = [
               },
             },
           });
-  
+
           if (!response.aggregations) {
             return data;
           }
-  
+
           const dynamicAgentData: NonNullable<APMTelemetry['agents']> = {};
-  
+
           for (const agentBucket of response.aggregations.agent_name.buckets) {
             const agentKey = agentBucket.key as string;
-  
+
             dynamicAgentData[agentKey as AgentName] = {
               agent: {
                 activation_method: agentBucket[AGENT_ACTIVATION_METHOD].buckets
@@ -1265,9 +1264,8 @@ export const tasks: TelemetryTask[] = [
                 },
               },
             };
-            
           }
-  
+
           return {
             ...data,
             ...dynamicAgentData,
@@ -1275,7 +1273,7 @@ export const tasks: TelemetryTask[] = [
         },
         Promise.resolve({} as APMTelemetry['agents'])
       );
-  
+
       return {
         agents: {
           ...agentDataWithoutOtel,
