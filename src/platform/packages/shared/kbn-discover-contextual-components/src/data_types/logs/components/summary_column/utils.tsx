@@ -49,20 +49,20 @@ import { EventOutcomeBadgeWithActions } from '../event_outcome_badge';
 const getUnformattedFields = <
   Document extends DataTableRecord,
   Fields extends string & keyof Document['flattened'],
-  Formatted extends Record<Fields, NonNullable<Document['flattened'][Fields]>>
+  Unformatted extends Record<Fields, NonNullable<Document['flattened'][Fields]>>
 >(
   doc: Document,
   fields: readonly Fields[]
-): Readonly<Formatted> =>
+): Readonly<Unformatted> =>
   fields.reduce((acc, field) => {
     const fieldValue = getFieldValue(doc, field);
 
     if (fieldValue != null) {
-      acc[field] = fieldValue as Formatted[Fields];
+      acc[field] = fieldValue as Unformatted[Fields];
     }
 
     return acc;
-  }, {} as Formatted);
+  }, {} as Unformatted);
 
 const DurationIcon = () => {
   const { euiTheme } = useEuiTheme();
