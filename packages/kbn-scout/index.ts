@@ -37,6 +37,13 @@ export type {
   ScoutServerConfig,
   ScoutTestConfig,
 } from './src/types';
+export {
+  kbnSuperTestWithAuthClient,
+  getEsArchiver,
+  getEsClient,
+  getKbnClient,
+  getLogger,
+} from './src/common';
 
 // re-export from Playwright
 export type { Locator } from 'playwright/test';
