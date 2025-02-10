@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiDataGridCellValueElementProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
@@ -73,11 +74,14 @@ export const getRenderCellValueFn = ({
       columnMeta: columnsMeta?.[columnId],
     });
     const ctx = useContext(UnifiedDataTableContext);
+    const { euiTheme } = useEuiTheme();
+    const { backgroundBasePrimary: anchorColor } = euiTheme.colors;
 
     useEffect(() => {
       if (row?.isAnchor) {
         setCellProps({
           className: 'unifiedDataTable__cell--highlight',
+          css: { backgroundColor: anchorColor },
         });
       } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
         setCellProps({
@@ -86,7 +90,7 @@ export const getRenderCellValueFn = ({
       } else {
         setCellProps({ style: undefined });
       }
-    }, [ctx, row, setCellProps]);
+    }, [ctx, row, setCellProps, anchorColor]);
 
     if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;

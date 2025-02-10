@@ -14,6 +14,7 @@ import {
   Condition,
   processorDefinitionSchema,
   isSchema,
+  RecursiveRecord,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
@@ -23,7 +24,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 
-type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
+type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
 
 export interface TableColumn {
   name: string;
@@ -39,7 +40,7 @@ export interface UseProcessingSimulatorReturn {
   hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
-  samples: Array<Record<PropertyKey, unknown>>;
+  samples: RecursiveRecord[];
   simulation?: Simulation | null;
   tableColumns: TableColumn[];
   refreshSamples: () => void;
@@ -124,10 +125,10 @@ export const useProcessingSimulator = ({
         return { documents: [] };
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
+      return streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
         signal,
         params: {
-          path: { id: definition.stream.name },
+          path: { name: definition.stream.name },
           body: {
             if: samplingCondition,
             start: start?.valueOf(),
@@ -141,7 +142,7 @@ export const useProcessingSimulator = ({
     { disableToastOnError: true }
   );
 
-  const sampleDocs = samples?.documents as Array<Record<PropertyKey, unknown>>;
+  const sampleDocs = samples?.documents;
 
   const {
     loading: isLoadingSimulation,
@@ -149,7 +150,7 @@ export const useProcessingSimulator = ({
     error: simulationError,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition || isEmpty(sampleDocs) || isEmpty(liveDraftProcessors)) {
+      if (!definition || isEmpty<RecursiveRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
         return Promise.resolve(null);
       }
 
@@ -164,10 +165,10 @@ export const useProcessingSimulator = ({
         return Promise.resolve(null);
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
+      return streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
         signal,
         params: {
-          path: { id: definition.stream.name },
+          path: { name: definition.stream.name },
           body: {
             documents: sampleDocs,
             processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),
