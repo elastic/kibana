@@ -67,7 +67,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.promptAutocomplete('e');
 
-
       // 3) Wait for the autocomplete suggestions to appear
       await retry.waitFor('autocomplete to be visible', () =>
         PageObjects.console.isAutocompleteVisible()
