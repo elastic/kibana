@@ -69,7 +69,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.indices.flyout.detailsStep.insufficientPrivilegeCallout.calloutTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.insufficientPrivilegeCallout.calloutTitle"
                   defaultMessage="You do not have sufficient privileges to reindex this index."
                 />
               }
@@ -87,14 +87,14 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               data-test-subj="lowDiskSpaceCallout"
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.indices.flyout.detailsStep.lowDiskSpaceCalloutTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.lowDiskSpaceCalloutTitle"
                   defaultMessage="Nodes with low disk space"
                 />
               }
             >
               <>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.indices.flyout.detailsStep.lowDiskSpaceCalloutDescription"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.lowDiskSpaceCalloutDescription"
                   defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
                 />
 
@@ -104,7 +104,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                   {nodes.map(({ nodeName, available, nodeId }) => (
                     <li key={nodeId} data-test-subj="impactedNodeListItem">
                       <FormattedMessage
-                        id="xpack.upgradeAssistant.index.flyout.detailsStep.lowDiskSpaceUsedText"
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.lowDiskSpaceUsedText"
                         defaultMessage="{nodeName} ({available} available)"
                         values={{
                           nodeName,
@@ -129,12 +129,12 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               title={
                 hasFetchFailed ? (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.index.flyout.detailsStep.fetchFailedCalloutTitle"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.fetchFailedCalloutTitle"
                     defaultMessage="Data stream reindex status not available"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.index.flyout.detailsStep.reindexingFailedCalloutTitle"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingFailedCalloutTitle"
                     defaultMessage="Data stream reindexing error"
                   />
                 )
@@ -152,13 +152,13 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.index.flyout.detailsStep.readonlyCompatibleIndexText"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readonlyCompatibleIndexText"
                   defaultMessage="This index was created in ES 7.x. It has been marked as read-only, which enables compatibility with the next major version."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.index.flyout.detailsStep.reindexText"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexText"
                   defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
                 />
               </p>
@@ -168,7 +168,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.index.flyout.detailsStep.notCompatibleIndexText"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
                   defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
                 />
               </p>
@@ -180,7 +180,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     description: (
                       <EuiText size="m">
                         <FormattedMessage
-                          id="xpack.upgradeAssistant.index.flyout.detailsStep.reindexText"
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexText"
                           defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
                         />
                       </EuiText>
@@ -191,7 +191,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     description: (
                       <EuiText size="m">
                         <FormattedMessage
-                          id="xpack.upgradeAssistant.index.flyout.detailsStep.readOnlyText"
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readOnlyText"
                           defaultMessage="Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index. {docsLink}"
                           values={{
                             docsLink: (
@@ -200,7 +200,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                                 href={docLinks.links.upgradeAssistant.indexBlocks}
                               >
                                 {i18n.translate(
-                                  'xpack.upgradeAssistant.index.flyout.detailsStep.learnMoreLinkLabel',
+                                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
                                   {
                                     defaultMessage: 'Learn more',
                                   }
@@ -217,7 +217,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     description: (
                       <EuiText size="m">
                         <FormattedMessage
-                          id="xpack.upgradeAssistant.index.flyout.detailsStep.deleteText"
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
                           defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}."
                           values={{
                             indexManagementLinkHtml: (
@@ -227,7 +227,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                                 )}`}
                               >
                                 <FormattedMessage
-                                  id="xpack.upgradeAssistant.index.flyout.detailsStep.indexMgmtLink"
+                                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
                                   defaultMessage="Go to index management"
                                 />
                               </EuiLink>
@@ -249,7 +249,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
               <FormattedMessage
-                id="xpack.upgradeAssistant.index.flyout.detailsStep.closeButtonLabel"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -267,7 +267,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                       data-test-subj="startIndexReadonlyButton"
                     >
                       <FormattedMessage
-                        id="xpack.upgradeAssistant.index.flyout.detailsStep.startIndexReadonlyButton"
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
                         defaultMessage="Mark as read-only"
                       />
                     </EuiButton>

@@ -7,7 +7,7 @@ exports[`ReindexStep renders 1`] = `
       <p>
         <MemoizedFormattedMessage
           defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexDescription"
           values={
             Object {
               "docsLink": <EuiLink
@@ -23,7 +23,7 @@ exports[`ReindexStep renders 1`] = `
       <p>
         <MemoizedFormattedMessage
           defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.readonlyCallout.backgroundResumeDetail"
         />
       </p>
     </EuiText>
@@ -62,7 +62,7 @@ exports[`ReindexStep renders 1`] = `
         >
           <MemoizedFormattedMessage
             defaultMessage="Close"
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.closeButtonLabel"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -79,7 +79,7 @@ exports[`ReindexStep renders 1`] = `
         >
           <MemoizedFormattedMessage
             defaultMessage="Start reindexing"
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
           />
         </EuiButton>
       </EuiFlexItem>
@@ -95,7 +95,7 @@ exports[`ReindexStep renders for frozen indices 1`] = `
       <p>
         <MemoizedFormattedMessage
           defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexDescription"
           values={
             Object {
               "docsLink": <EuiLink
@@ -113,13 +113,13 @@ exports[`ReindexStep renders for frozen indices 1`] = `
         title={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="This index is frozen"
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndexTitle"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexFrozenIndexTitle"
           />
         }
       >
         <MemoizedFormattedMessage
           defaultMessage="Frozen indices will no longer be supported after the upgrade. As a result, this index will be transformed into a new, non-frozen index during the reindex operation. {docsLink}"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexFrozenIndex"
           values={
             Object {
               "docsLink": <EuiLink
@@ -136,7 +136,7 @@ exports[`ReindexStep renders for frozen indices 1`] = `
       <p>
         <MemoizedFormattedMessage
           defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.readonlyCallout.backgroundResumeDetail"
         />
       </p>
     </EuiText>
@@ -175,7 +175,7 @@ exports[`ReindexStep renders for frozen indices 1`] = `
         >
           <MemoizedFormattedMessage
             defaultMessage="Close"
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.closeButtonLabel"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -192,7 +192,7 @@ exports[`ReindexStep renders for frozen indices 1`] = `
         >
           <MemoizedFormattedMessage
             defaultMessage="Start reindexing"
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
           />
         </EuiButton>
       </EuiFlexItem>

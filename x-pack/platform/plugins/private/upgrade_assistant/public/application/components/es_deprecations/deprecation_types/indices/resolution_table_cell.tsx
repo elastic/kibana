@@ -23,77 +23,77 @@ import { useIndexContext } from './context';
 
 const i18nTexts = {
   reindexLoadingStatusText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexLoadingStatusText',
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexLoadingStatusText',
     {
       defaultMessage: 'Loading status…',
     }
   ),
   reindexInProgressText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexInProgressText',
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexInProgressText',
     {
       defaultMessage: 'Reindexing in progress…',
     }
   ),
   reindexCompleteText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexCompleteText',
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexCompleteText',
     {
       defaultMessage: 'Reindex complete',
     }
   ),
   reindexFailedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexFailedText',
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexFailedText',
     {
       defaultMessage: 'Reindex failed',
     }
   ),
   reindexFetchFailedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexFetchFailedText',
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexFetchFailedText',
     {
       defaultMessage: 'Reindex status not available',
     }
   ),
   reindexCanceledText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexCanceledText',
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexCanceledText',
     {
       defaultMessage: 'Reindex cancelled',
     }
   ),
   reindexPausedText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexPausedText',
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexPausedText',
     {
       defaultMessage: 'Reindex paused',
     }
   ),
-  reindexText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.reindexLabel', {
+  reindexText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.reindexLabel', {
     defaultMessage: 'Reindex',
   }),
   reindexTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.reindexTooltipLabel',
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexTooltipLabel',
     {
       defaultMessage: 'Resolve this issue by reindexing into a new, compatible index.',
     }
   ),
-  updateText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.updateLabel', {
+  updateText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.updateLabel', {
     defaultMessage: 'Update',
   }),
   updateCompleteText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.updateCompleteText',
+    'xpack.upgradeAssistant.esDeprecations.indices.updateCompleteText',
     {
       defaultMessage: 'Update complete',
     }
   ),
   updateTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.updateTooltipLabel',
+    'xpack.upgradeAssistant.esDeprecations.indices.updateTooltipLabel',
     {
       defaultMessage:
         'Resolve this issue by updating this index. This issue can be resolved automatically either by making the index read-only (recommended for large indices) or by reindexing into a new, compatible index.',
     }
   ),
-  unfreezeText: i18n.translate('xpack.upgradeAssistant.esDeprecations.reindex.unfreezeLabel', {
+  unfreezeText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.unfreezeLabel', {
     defaultMessage: 'Unfreeze',
   }),
   unfreezeTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.unfreezeTooltipLabel',
+    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeTooltipLabel',
     {
       defaultMessage: 'Resolve this issue by unfreezing this index.',
     }

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { ReindexStatus } from '../../../../../../../../../common/types';
 
 export const getReindexButtonLabel = (status?: ReindexStatus) => {
@@ -16,42 +15,30 @@ export const getReindexButtonLabel = (status?: ReindexStatus) => {
     case ReindexStatus.failed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.tryAgainLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.tryAgainLabel"
           defaultMessage="Try again"
         />
       );
     case ReindexStatus.inProgress:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.reindexingLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.reindexingLabel"
           defaultMessage="Reindexing…"
         />
       );
     case ReindexStatus.cancelled:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.restartLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.restartLabel"
           defaultMessage="Restart reindexing"
         />
       );
     default:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.reindexButton.runReindexLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.runReindexLabel"
           defaultMessage="Start reindexing"
         />
       );
   }
-};
-
-export const containerMessages = {
-  unknownMessage: i18n.translate('xpack.upgradeAssistant.dataStream.flyout.unknownMessage', {
-    defaultMessage: 'Unknown',
-  }),
-  errorLoadingDataStreamInfo: i18n.translate(
-    'xpack.upgradeAssistant.dataStream.flyout.errorLoadingDataStreamInfo',
-    {
-      defaultMessage: 'Error loading data stream info',
-    }
-  ),
 };

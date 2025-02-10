@@ -49,7 +49,7 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     return (
       <>
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelledTitle"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.cancelledTitle"
           defaultMessage="Reindexing cancelled."
         />
       </>
@@ -71,7 +71,7 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Loading:
       cancelText = (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.cancelButton.cancellingLabel"
           defaultMessage="Cancelling…"
         />
       );
@@ -79,7 +79,7 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Success:
       cancelText = (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.cancelButton.cancelledLabel"
           defaultMessage="Cancelled"
         />
       );
@@ -87,7 +87,7 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Error:
       cancelText = (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.cancelButton.errorLabel"
           defaultMessage="Could not cancel"
         />
       );
@@ -95,7 +95,7 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     default:
       cancelText = (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.cancelButton.cancelLabel"
           defaultMessage="Cancel"
         />
       );
@@ -106,12 +106,12 @@ const ReindexingDocumentsStepTitle: React.FunctionComponent<{
       <EuiFlexItem grow={false}>
         {stepInProgress ? (
           <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
             defaultMessage="Reindexing documents."
           />
         ) : (
           <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.reindexingDocumentsStepTitle"
             defaultMessage="Reindex documents."
           />
         )}
@@ -141,7 +141,7 @@ const getStepTitle = (
   if (step === ReindexStep.readonly) {
     return inProgress ? (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.readonlyStepTitle"
         defaultMessage="Setting {indexName} index to read-only."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
@@ -149,7 +149,7 @@ const getStepTitle = (
       />
     ) : (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.readonlyStepTitle"
         defaultMessage="Set {indexName} index to read-only."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
@@ -161,7 +161,7 @@ const getStepTitle = (
   if (step === ReindexStep.newIndexCreated) {
     return inProgress ? (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.createIndexStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.createIndexStepTitle"
         defaultMessage="Creating {reindexName} index."
         values={{
           reindexName: <EuiCode>{meta.reindexName}</EuiCode>,
@@ -169,7 +169,7 @@ const getStepTitle = (
       />
     ) : (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.createIndexStepTitle"
         defaultMessage="Create {reindexName} index."
         values={{
           reindexName: <EuiCode>{meta.reindexName}</EuiCode>,
@@ -181,7 +181,7 @@ const getStepTitle = (
   if (step === ReindexStep.indexSettingsRestored) {
     return inProgress ? (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.indexSettingsRestoredStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.indexSettingsRestoredStepTitle"
         defaultMessage="Copying original index settings from {indexName} to {reindexName}."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
@@ -190,7 +190,7 @@ const getStepTitle = (
       />
     ) : (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.indexSettingsRestoredStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.indexSettingsRestoredStepTitle"
         defaultMessage="Copy original index settings from {indexName} to {reindexName}."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
@@ -203,7 +203,7 @@ const getStepTitle = (
   if (step === ReindexStep.aliasCreated) {
     return inProgress ? (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.aliasCreatedStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.aliasCreatedStepTitle"
         defaultMessage="Creating {indexName} alias for {reindexName} index."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
@@ -212,7 +212,7 @@ const getStepTitle = (
       />
     ) : (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasCreatedStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.aliasCreatedStepTitle"
         defaultMessage="Create {indexName} alias for {reindexName} index."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
@@ -225,7 +225,7 @@ const getStepTitle = (
   if (step === ReindexStep.originalIndexDeleted) {
     return inProgress ? (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.originalIndexDeletedStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.originalIndexDeletedStepTitle"
         defaultMessage="Deleting original {indexName} index."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
@@ -233,7 +233,7 @@ const getStepTitle = (
       />
     ) : (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.originalIndexDeletedStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.originalIndexDeletedStepTitle"
         defaultMessage="Delete original {indexName} index."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
@@ -245,7 +245,7 @@ const getStepTitle = (
   if (step === ReindexStep.existingAliasesUpdated) {
     return inProgress ? (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.aliasesUpdatedStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.aliasesUpdatedStepTitle"
         defaultMessage="Updating {existingAliases} aliases to point to {reindexName} index."
         values={{
           existingAliases: <EuiCode>{`[${meta.aliases.join(',')}]`}</EuiCode>,
@@ -254,7 +254,7 @@ const getStepTitle = (
       />
     ) : (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasesUpdatedStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.aliasesUpdatedStepTitle"
         defaultMessage="Update {existingAliases} aliases to point to {reindexName} index."
         values={{
           existingAliases: <EuiCode>{`[${meta.aliases.join(',')}]`}</EuiCode>,
@@ -378,7 +378,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
         <h3>
           {status === ReindexStatus.inProgress ? (
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingInProgressTitle"
               defaultMessage="Reindexing in progress… {percents}"
               values={{
                 percents: getReindexProgressLabel(
@@ -391,7 +391,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
             />
           ) : (
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklistTitle"
               defaultMessage="Reindexing process"
             />
           )}

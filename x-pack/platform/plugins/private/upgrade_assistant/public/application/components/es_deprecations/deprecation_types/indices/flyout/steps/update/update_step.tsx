@@ -58,7 +58,7 @@ export const UpdateIndexFlyoutStep: React.FunctionComponent<UpdateIndexFlyoutSte
   const title =
     action === 'makeReadonly' ? (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.step.readonlyStepText"
         defaultMessage="Setting {indexName} index to read-only."
         values={{
           indexName: <EuiCode>{indexName}</EuiCode>,
@@ -66,7 +66,7 @@ export const UpdateIndexFlyoutStep: React.FunctionComponent<UpdateIndexFlyoutSte
       />
     ) : (
       <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.step.unfreezeStepText"
         defaultMessage="Unfreezing {indexName} index."
         values={{
           indexName: <EuiCode>{indexName}</EuiCode>,
@@ -90,19 +90,19 @@ export const UpdateIndexFlyoutStep: React.FunctionComponent<UpdateIndexFlyoutSte
           <h3>
             {(status === 'inProgress' || status === 'incomplete') && (
               <FormattedMessage
-                id="xpack.upgradeAssistant.index.flyout.updateStep.inProgressText"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.title.updateInProgressText"
                 defaultMessage="Upgrade in progress…"
               />
             )}
             {status === 'complete' && (
               <FormattedMessage
-                id="xpack.upgradeAssistant.index.flyout.updateStep.completeText"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.title.updateCompleteText"
                 defaultMessage="Operation completed"
               />
             )}
             {status === 'failed' && (
               <FormattedMessage
-                id="xpack.upgradeAssistant.index.flyout.updateStep.failedText"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.title.updateFailedText"
                 defaultMessage="Operation failed"
               />
             )}
@@ -116,7 +116,7 @@ export const UpdateIndexFlyoutStep: React.FunctionComponent<UpdateIndexFlyoutSte
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
               <FormattedMessage
-                id="xpack.upgradeAssistant.index.flyout.updateStep.closeButtonLabel"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -131,7 +131,7 @@ export const UpdateIndexFlyoutStep: React.FunctionComponent<UpdateIndexFlyoutSte
                 data-test-subj="startIndexReindexingButton"
               >
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.index.flyout.updateStep.retry"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.retryButtonLabel"
                   defaultMessage="Retry"
                 />
               </EuiButton>

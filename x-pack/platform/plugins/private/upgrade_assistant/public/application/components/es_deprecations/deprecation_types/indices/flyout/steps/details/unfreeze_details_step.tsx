@@ -67,7 +67,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.indices.flyout.detailsStep.insufficientPrivilegeCallout.calloutTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.insufficientPrivilegeCallout.calloutTitle"
                   defaultMessage="You do not have sufficient privileges to reindex this index."
                 />
               }
@@ -85,14 +85,14 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
               data-test-subj="lowDiskSpaceCallout"
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.indices.flyout.detailsStep.lowDiskSpaceCalloutTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.lowDiskSpaceCalloutTitle"
                   defaultMessage="Nodes with low disk space"
                 />
               }
             >
               <>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.indices.flyout.detailsStep.lowDiskSpaceCalloutDescription"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.lowDiskSpaceCalloutDescription"
                   defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
                 />
 
@@ -102,7 +102,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                   {nodes.map(({ nodeName, available, nodeId }) => (
                     <li key={nodeId} data-test-subj="impactedNodeListItem">
                       <FormattedMessage
-                        id="xpack.upgradeAssistant.index.flyout.detailsStep.lowDiskSpaceUsedText"
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.lowDiskSpaceUsedText"
                         defaultMessage="{nodeName} ({available} available)"
                         values={{
                           nodeName,
@@ -127,12 +127,12 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
               title={
                 hasFetchFailed ? (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.index.flyout.detailsStep.fetchFailedCalloutTitle"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.fetchFailedCalloutTitle"
                     defaultMessage="Data stream reindex status not available"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.index.flyout.detailsStep.reindexingFailedCalloutTitle"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingFailedCalloutTitle"
                     defaultMessage="Data stream reindexing error"
                   />
                 )
@@ -149,26 +149,26 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
           {reindexState.meta.isReadonly && (
             <p>
               <FormattedMessage
-                id="xpack.upgradeAssistant.index.flyout.detailsStep.readonlyCompatibleIndexText"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readonlyCompatibleIndexText"
                 defaultMessage="This index was created in ES 7.x. The index has been flagged as read-only, which allows for N-2 compatibility with the next major version."
               />
             </p>
           )}
           <ul>
             <FormattedMessage
-              id="xpack.upgradeAssistant.index.flyout.detailsStep.mustUnfreezeText"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.mustUnfreezeText"
               tagName="li"
               defaultMessage="In order to address this issue, you must unfreeze this index and keep it as read-only. This will enable compatibility with the next major version."
             />
             <FormattedMessage
-              id="xpack.upgradeAssistant.index.flyout.detailsStep.canReindexText"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.canReindexText"
               tagName="li"
               defaultMessage="Alternatively, you might opt for reindexing this index. The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
             />
           </ul>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.index.flyout.detailsStep.deleteText"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
               defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
               values={{
                 indexManagementLinkHtml: (
@@ -178,7 +178,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                     )}`}
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.index.flyout.detailsStep.indexMgmtLink"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
                       defaultMessage="Go to index management"
                     />
                   </EuiLink>
@@ -194,7 +194,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
               <FormattedMessage
-                id="xpack.upgradeAssistant.index.flyout.detailsStep.closeButtonLabel"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -224,7 +224,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                     data-test-subj="startIndexReadonlyButton"
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.index.flyout.detailsStep.unfreezeIndexButton"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreezeIndexButton"
                       defaultMessage="Unfreeze"
                     />
                   </EuiButton>

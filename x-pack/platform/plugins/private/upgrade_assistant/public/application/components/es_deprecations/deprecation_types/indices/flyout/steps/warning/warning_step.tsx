@@ -104,7 +104,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
               <EuiCallOut
                 title={
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.reindex.calloutTitle"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutTitle"
                     defaultMessage="This index requires destructive changes that cannot be reversed"
                   />
                 }
@@ -113,7 +113,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
               >
                 <p>
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.reindex.calloutDetail"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutDetail"
                     defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
                   />
                 </p>
@@ -123,7 +123,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
               <EuiCallOut
                 title={
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.calloutTitle"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.readonly.calloutTitle"
                     defaultMessage="Enable compatibility by marking this index as read-only"
                   />
                 }
@@ -132,7 +132,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
               >
                 <p>
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.calloutDetail"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.readonly.calloutDetail"
                     defaultMessage="You can enable compatibility with the next version by marking the index as read-only. Note that any attempts to insert new documents or update existing ones will fail. You can choose to reindex after upgrading if needed, to convert the index into a writable one."
                   />
                 </p>
@@ -143,7 +143,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.acceptChangesTitle"
                   defaultMessage="Accept changes"
                 />
               </h3>
@@ -170,7 +170,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="arrowLeft" onClick={back} flush="left">
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.cancelButtonLabel"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.backButtonLabel"
                 defaultMessage="Back"
               />
             </EuiButtonEmpty>
@@ -179,13 +179,13 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
             <EuiButton fill color="primary" onClick={confirm} disabled={blockAdvance}>
               {flow === 'reindex' && (
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.reindex.startButtonLabel"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.startButtonLabel"
                   defaultMessage="Start reindexing"
                 />
               )}
               {flow === 'readonly' && (
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.readonly.startButtonLabel"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.readonly.startButtonLabel"
                   defaultMessage="Mark as read-only"
                 />
               )}

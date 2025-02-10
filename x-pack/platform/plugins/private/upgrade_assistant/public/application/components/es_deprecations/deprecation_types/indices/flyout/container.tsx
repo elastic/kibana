@@ -233,7 +233,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="reindexDetailsFlyoutTitle">
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.flyoutHeader"
               defaultMessage="Update {index}"
               values={{ index }}
             />

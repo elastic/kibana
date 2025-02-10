@@ -23,20 +23,20 @@ export const FrozenCallOut: React.FunctionComponent = () => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.readonly.reindexFrozenIndexTitle"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.frozenCallout.reindexFrozenIndexTitle"
             defaultMessage="This index is frozen"
           />
         }
         iconType="iInCircle"
       >
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.readonly.reindexFrozenIndex"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.frozenCallout.reindexFrozenIndex"
           defaultMessage="Frozen indices will no longer be supported after the upgrade. As a result, this index will be transformed into a non-frozen index during the update operation. {docsLink}"
           values={{
             docsLink: (
               <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.unfreezeApi}>
                 {i18n.translate(
-                  'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
+                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
                   {
                     defaultMessage: 'Learn more',
                   }

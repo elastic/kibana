@@ -44,7 +44,7 @@ describe('ReindexProgress', () => {
           <h3>
             <MemoizedFormattedMessage
               defaultMessage="Reindexing in progress… {percents}"
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingInProgressTitle"
               values={
                 Object {
                   "percents": "0%",
@@ -60,7 +60,7 @@ describe('ReindexProgress', () => {
                 "status": "inProgress",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Setting {indexName} index to read-only."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.readonlyStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
@@ -74,7 +74,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Create {reindexName} index."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.createIndexStepTitle"
                   values={
                     Object {
                       "reindexName": <EuiCode>
@@ -108,7 +108,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Copy original index settings from {indexName} to {reindexName}."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.indexSettingsRestoredStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.indexSettingsRestoredStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
@@ -125,7 +125,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Create {indexName} alias for {reindexName} index."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasCreatedStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.aliasCreatedStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
@@ -142,7 +142,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Delete original {indexName} index."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.originalIndexDeletedStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.originalIndexDeletedStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>

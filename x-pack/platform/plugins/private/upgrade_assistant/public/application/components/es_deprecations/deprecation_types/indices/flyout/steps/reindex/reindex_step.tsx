@@ -34,35 +34,35 @@ const buttonLabel = (status?: ReindexStatus) => {
     case ReindexStatus.failed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.tryAgainLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.tryAgainLabel"
           defaultMessage="Try again"
         />
       );
     case ReindexStatus.inProgress:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.reindexingLabel"
           defaultMessage="Reindexing…"
         />
       );
     case ReindexStatus.paused:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.resumeLabel"
           defaultMessage="Resume reindexing"
         />
       );
     case ReindexStatus.cancelled:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.restartLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.restartLabel"
           defaultMessage="Restart reindexing"
         />
       );
     default:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
           defaultMessage="Start reindexing"
         />
       );
@@ -103,7 +103,7 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.insufficientPrivilegeCallout.calloutTitle"
                   defaultMessage="You do not have sufficient privileges to reindex this index"
                 />
               }
@@ -121,14 +121,14 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
               data-test-subj="lowDiskSpaceCallout"
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceCalloutTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.lowDiskSpaceCalloutTitle"
                   defaultMessage="Nodes with low disk space"
                 />
               }
             >
               <>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceCalloutDescription"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.lowDiskSpaceCalloutDescription"
                   defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
                 />
 
@@ -138,7 +138,7 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
                   {nodes.map(({ nodeName, available, nodeId }) => (
                     <li key={nodeId} data-test-subj="impactedNodeListItem">
                       <FormattedMessage
-                        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceUsedText"
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.lowDiskSpaceUsedText"
                         defaultMessage="{nodeName} ({available} available)"
                         values={{
                           nodeName,
@@ -163,12 +163,12 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
               title={
                 hasFetchFailed ? (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.fetchFailedCalloutTitle"
                     defaultMessage="Reindex status not available"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingFailedCalloutTitle"
                     defaultMessage="Reindexing error"
                   />
                 )
@@ -183,13 +183,13 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexDescription"
               defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
               values={{
                 docsLink: (
                   <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.remoteReindex}>
                     {i18n.translate(
-                      'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
+                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
                       {
                         defaultMessage: 'Learn more',
                       }
@@ -201,7 +201,7 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
           </p>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.readonlyCallout.backgroundResumeDetail"
               defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
             />
           </p>
@@ -214,7 +214,7 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
               <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.closeButtonLabel"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
