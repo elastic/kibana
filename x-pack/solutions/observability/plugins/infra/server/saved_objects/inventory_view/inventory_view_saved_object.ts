@@ -23,9 +23,14 @@ const getInventoryViewTitle = (savedObject: SavedObject<unknown>) =>
   );
 
 const schemaV1 = schema.object({}, { unknowns: 'allow' });
-const schemaV2 = schema.object({
-  legend: schema.object({ steps: schema.number({ max: 18, min: 2 }) }),
-});
+const schemaV2 = schema.object(
+  {
+    legend: schema.maybe(
+      schema.object({ steps: schema.number({ max: 18, min: 2 }) }, { unknowns: 'allow' })
+    ),
+  },
+  { unknowns: 'allow' }
+);
 
 export const inventoryViewSavedObjectType: SavedObjectsType = {
   name: inventoryViewSavedObjectName,
@@ -64,7 +69,7 @@ export const inventoryViewSavedObjectType: SavedObjectsType = {
         },
       ],
       schemas: {
-        forwardCompatibility: schemaV2.extends({}, { unknowns: 'ignore' }),
+        forwardCompatibility: schemaV2,
         create: schemaV2,
       },
     },
