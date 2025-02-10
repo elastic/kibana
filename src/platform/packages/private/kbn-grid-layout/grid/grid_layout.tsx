@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -132,16 +132,18 @@ export const GridLayout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const memoizedContext = useMemo(
+    () =>
+      ({
+        renderPanelContents,
+        useCustomDragHandle,
+        gridLayoutStateManager,
+      } as GridLayoutContextType),
+    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
+  );
+
   return (
-    <GridLayoutContext.Provider
-      value={
-        {
-          renderPanelContents,
-          useCustomDragHandle,
-          gridLayoutStateManager,
-        } as GridLayoutContextType
-      }
-    >
+    <GridLayoutContext.Provider value={memoizedContext}>
       <GridHeightSmoother>
         <div
           ref={(divElement) => {
