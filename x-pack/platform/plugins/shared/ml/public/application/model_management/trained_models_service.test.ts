@@ -103,6 +103,8 @@ describe('TrainedModelsService', () => {
     mockTrainedModelsApiService.getTrainedModelsList.mockRejectedValueOnce(error);
 
     trainedModelsService.fetchModels();
+    // Wait for debounceTime to finish
+    await new Promise((resolve) => setTimeout(resolve, 100));
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
@@ -191,6 +193,8 @@ describe('TrainedModelsService', () => {
       threads_per_allocation: 1,
       deployment_id: 'my-deployment-id',
     });
+    // Wait for debounceTime to finish
+    await new Promise((resolve) => setTimeout(resolve, 100));
     await flushPromises();
 
     expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledWith({
@@ -237,6 +241,8 @@ describe('TrainedModelsService', () => {
       threads_per_allocation: 1,
       deployment_id: 'my-deployment-id',
     });
+    // Wait for debounceTime to finish
+    await new Promise((resolve) => setTimeout(resolve, 100));
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
