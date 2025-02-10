@@ -16,7 +16,7 @@ import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
 
 export function generateLayer(
-  id: string,
+  name: string,
   definition: WiredStreamDefinition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
@@ -36,7 +36,7 @@ export function generateLayer(
   });
 
   return {
-    name: getComponentTemplateName(id),
+    name: getComponentTemplateName(name),
     template: {
       lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
@@ -49,7 +49,7 @@ export function generateLayer(
     version: ASSET_VERSION,
     _meta: {
       managed: true,
-      description: `Default settings for the ${id} stream`,
+      description: `Default settings for the ${name} stream`,
     },
   };
 }
