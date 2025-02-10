@@ -115,18 +115,47 @@ export class TelemetryConfigWatcher {
 
       if (updates.length) {
         try {
-          await this.policyService.bulkUpdate(
+          this.logger.debug(`Updating ${page}. page, ${updates.length} policies on current page.`);
+          const bulkUpdateResponse = await this.policyService.bulkUpdate(
             this.makeInternalSOClient(this.soStart),
             this.esClient,
             updates
           );
+
+          if (bulkUpdateResponse.failedPolicies.length > 0) {
+            this.logger.debug(
+              `Failed to update ${bulkUpdateResponse.failedPolicies.length} of ${page} policies, trying again once more...`
+            );
+            throw new Error(
+              `Failed to update ${bulkUpdateResponse.failedPolicies.length} policies.`
+            );
+          }
+
+          this.logger.debug(`Successfully updated ${updates.length} policies on page ${page}.`);
         } catch (e) {
           // try again for transient issues
           try {
-            await this.policyService.bulkUpdate(
+            const bulkUpdateResponse = await this.policyService.bulkUpdate(
               this.makeInternalSOClient(this.soStart),
               this.esClient,
               updates
+            );
+            if (bulkUpdateResponse.failedPolicies.length > 0) {
+              this.logger.warn(
+                `Failed to update ${
+                  bulkUpdateResponse.failedPolicies.length
+                } of ${page} policies.\n${JSON.stringify(
+                  bulkUpdateResponse.failedPolicies,
+                  null,
+                  2
+                )}`
+              );
+              throw new Error(
+                `Failed to update ${bulkUpdateResponse.failedPolicies.length} policies.`
+              );
+            }
+            this.logger.debug(
+              `Successfully updated ${updates.length} policies on page ${page} on second try.`
             );
           } catch (ee) {
             this.logger.warn(
