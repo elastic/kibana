@@ -1552,7 +1552,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{} & { form_action: string[]; }> | undefined>; strict: ",
+              "<Readonly<{} & { form_action: string[]; object_src: string[]; }> | undefined>; strict: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",

@@ -52,6 +52,15 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
+  async deleteIndexTemplate(name: IndexTemplateName) {
+    try {
+      await this.client.indices.deleteIndexTemplate({ name });
+      this.logger.info(`Index template successfully deleted: ${name}`);
+    } catch (err) {
+      this.logger.error(`Index template deletion failed: ${name} - ${err.message}`);
+    }
+  }
+
   async createComponentTemplate({
     name,
     mappings,
@@ -147,6 +156,17 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.info(`Custom pipeline created: ${id}`);
     } catch (err) {
       this.logger.error(`Custom pipeline creation failed: ${id} - ${err.message}`);
+    }
+  }
+
+  async deleteCustomPipeline(id = LogsCustom) {
+    try {
+      this.client.ingest.deletePipeline({
+        id,
+      });
+      this.logger.info(`Custom pipeline deleted: ${id}`);
+    } catch (err) {
+      this.logger.error(`Custom pipeline deletion failed: ${id} - ${err.message}`);
     }
   }
 
