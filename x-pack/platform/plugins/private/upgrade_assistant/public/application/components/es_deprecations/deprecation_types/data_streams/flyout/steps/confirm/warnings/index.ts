@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-// https://github.com/DefinitelyTyped/DefinitelyTyped/pull/40309
+export { IncompatibleDataInDataStreamWarningCheckbox } from './incompatible_data';
 
-import type { MovementMode, DraggableId } from '@hello-pangea/dnd';
+export { AffectExistingSetupsWarningCheckbox } from './existing_setups';
 
-export interface BeforeCapture {
-  draggableId: DraggableId;
-  mode: MovementMode;
-}
+export type { WarningCheckboxProps } from './warning_step_checkbox';

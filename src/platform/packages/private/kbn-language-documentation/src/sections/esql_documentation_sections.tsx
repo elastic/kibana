@@ -398,9 +398,60 @@ FROM employees
       ),
     },
     {
+      label: i18n.translate('languageDocumentation.documentationESQL.lookupJoin', {
+        defaultMessage: 'LOOKUP JOIN',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.lookupJoin.markdown',
+            {
+              defaultMessage: `### LOOKUP JOIN
+You can use \`LOOKUP JOIN\` to add data from an existing index to incoming rows. While this is similar to \`ENRICH\`, it does not require an enrich policy to be executed beforehand. Additionally, if multiple matching documents are found in the lookup index, they will generate multiple output rows.
+
+\`\`\`
+ROW language_code = 1
+| LOOKUP JOIN languages ON language_code
+\`\`\`
+
+An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. To create a lookup index, set the index mode to lookup.
+
+\`\`\`
+PUT languages
+'{
+  "settings": {
+    "index":{
+      "mode":"lookup"
+    }
+  }
+}'
+\`\`\`
+
+The join key field must have a compatible type and match the name of the field in the lookup index to find matching documents. You can use \`RENAME\` or \`EVAL\` to rename columns as needed.
+
+\`\`\`
+FROM employees
+| EVAL language_code = languages
+| LOOKUP JOIN languages ON language_code
+\`\`\`
+
+In case of name collisions, the fields from the lookup index will override the existing fields.
+            `,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
       label: i18n.translate('languageDocumentation.documentationESQL.mvExpand', {
         defaultMessage: 'MV_EXPAND',
       }),
+      preview: true,
       description: (
         <Markdown
           markdownContent={i18n.translate(

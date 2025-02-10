@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerReindexDataStreamRoutes } from './reindex_data_stream';
+export { registerMigrateDataStreamRoutes } from './data_stream_routes';

@@ -18,19 +18,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
-import {
-  DataStreamReindexWarning,
-  DataStreamReindexWarningTypes,
-} from '../../../../../../../../../common/types';
 
-export const hasReindexWarning = (
-  warnings: DataStreamReindexWarning[],
-  warningType: DataStreamReindexWarningTypes
-): boolean => {
-  return Boolean(warnings.find((warning) => warning.warningType === warningType));
-};
-
-const WarningCheckbox: React.FunctionComponent<{
+export const WarningCheckbox: React.FunctionComponent<{
   isChecked: boolean;
   warningId: string;
   label: React.ReactNode;
@@ -55,7 +44,7 @@ const WarningCheckbox: React.FunctionComponent<{
               <EuiIconTip
                 content={
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.documentationLinkLabel"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.documentationLinkLabel"
                     defaultMessage="Documentation"
                   />
                 }
@@ -82,22 +71,3 @@ export interface WarningCheckboxProps {
   docLinks: DocLinksStart['links'];
   id: string;
 }
-
-export const IncompatibleDataInDataStreamWarningCheckbox: React.FunctionComponent<
-  WarningCheckboxProps
-> = ({ isChecked, onChange, id }) => {
-  return (
-    <WarningCheckbox
-      isChecked={isChecked}
-      onChange={onChange}
-      warningId={id}
-      label={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.incompatibleDataWarningTitle"
-          defaultMessage="Reindex all incompatible data for this data stream"
-        />
-      }
-      description={null}
-    />
-  );
-};

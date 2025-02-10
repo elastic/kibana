@@ -56,7 +56,6 @@ describe('HostName', () => {
     fieldName: 'host.name',
     contextId: 'test-context-id',
     eventId: 'test-event-id',
-    isDraggable: false,
     fieldType: 'keyword',
     isAggregatable: true,
     value: 'Mock Host',
@@ -72,20 +71,6 @@ describe('HostName', () => {
     expect(wrapper.find('[data-test-subj="host-details-button"]').last().text()).toEqual(
       props.value
     );
-  });
-
-  test('should render DefaultDraggable if isDraggable is true', () => {
-    const testProps = {
-      ...props,
-      isDraggable: true,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <HostName {...testProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="DefaultDraggable"]').exists()).toEqual(true);
   });
 
   test('should not open any flyout or panels if context in not defined', async () => {
@@ -169,7 +154,6 @@ describe('HostName', () => {
             hostName: props.value,
             contextID: props.contextId,
             scopeId: TableId.alertsOnAlertsPage,
-            isDraggable: false,
           },
         },
       });
@@ -200,7 +184,6 @@ describe('HostName', () => {
             hostName: props.value,
             contextID: props.contextId,
             scopeId: 'timeline-1',
-            isDraggable: false,
           },
         },
       });
