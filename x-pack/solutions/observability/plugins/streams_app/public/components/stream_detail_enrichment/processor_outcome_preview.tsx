@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { flattenObject } from '@kbn/object-utils';
 import { isEmpty } from 'lodash';
+import { RecursiveRecord } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
@@ -51,7 +52,7 @@ export const ProcessorOutcomePreview = ({
 
   const simulationDocuments = useMemo(() => {
     if (!simulation?.documents) {
-      return samples.map((doc) => flattenObject(doc));
+      return samples.map((doc) => flattenObject(doc)) as RecursiveRecord[];
     }
 
     const filterDocuments = (filter: DocsFilterOption) => {
@@ -210,7 +211,7 @@ const OutcomeControls = ({
 };
 
 interface OutcomePreviewTableProps {
-  documents: Array<Record<PropertyKey, unknown>>;
+  documents: RecursiveRecord[];
   columns: string[];
 }
 

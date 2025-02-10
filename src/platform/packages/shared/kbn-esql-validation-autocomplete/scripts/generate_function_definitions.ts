@@ -36,7 +36,7 @@ const aggregationSupportedCommandsAndOptions = {
 
 // coalesce can be removed when a test is added for version type
 // (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['bucket', 'case']);
+const excludedFunctions = new Set(['bucket', 'case', 'categorize']);
 
 const extraFunctions: FunctionDefinition[] = [
   {

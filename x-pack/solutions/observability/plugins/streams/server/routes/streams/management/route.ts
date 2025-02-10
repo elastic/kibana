@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { conditionSchema } from '@kbn/streams-schema';
+import {
+  RecursiveRecord,
+  conditionSchema,
+  conditionToQueryDsl,
+  getFields,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
-import { getFields } from '../../../lib/streams/helpers/condition_fields';
-import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
@@ -105,7 +108,7 @@ export const sampleStreamRoute = createServerRoute({
       size: z.optional(z.number()),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<{ documents: unknown[] }> => {
+  handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
     const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
@@ -162,7 +165,7 @@ export const sampleStreamRoute = createServerRoute({
       ...searchBody,
     });
 
-    return { documents: results.hits.hits.map((hit) => hit._source) };
+    return { documents: results.hits.hits.map((hit) => hit._source) as RecursiveRecord[] };
   },
 });
 
