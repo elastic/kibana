@@ -171,7 +171,7 @@ export const useProcessingSimulator = ({
           path: { id: definition.stream.name },
           body: {
             documents: sampleDocs,
-            processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),
+            processing: liveDraftProcessors.map(processorConverter.toSimulateDefinition),
           },
         },
       });

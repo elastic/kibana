@@ -12,10 +12,12 @@ import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
   FieldDefinitionConfig,
   ProcessorDefinition,
+  ProcessorDefinitionWithId,
   RecursiveRecord,
   getProcessorType,
   namedFieldDefinitionConfigSchema,
   processorDefinitionSchema,
+  processorWithIdDefinitionSchema,
   recursiveRecord,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
@@ -38,7 +40,7 @@ import { NonAdditiveProcessorError } from '../../../lib/streams/errors/non_addit
 const paramsSchema = z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
-    processing: z.array(processorDefinitionSchema),
+    processing: z.array(processorWithIdDefinitionSchema),
     documents: z.array(recursiveRecord),
     detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
@@ -87,8 +89,6 @@ export const simulateProcessorRoute = createServerRoute({
 
 /* processing/_simulate API helpers */
 
-const getProcessorId = (id: number) => `processor-${id}`;
-
 const prepareSimulationDocs = (documents: RecursiveRecord[], streamId: string) => {
   return documents.map((doc, id) => ({
     _index: streamId,
@@ -98,7 +98,7 @@ const prepareSimulationDocs = (documents: RecursiveRecord[], streamId: string) =
 };
 
 const prepareSimulationProcessors = (
-  processing: ProcessorDefinition[]
+  processing: ProcessorDefinitionWithId[]
 ): IngestProcessorContainer[] => {
   //
   /**
@@ -106,13 +106,15 @@ const prepareSimulationProcessors = (
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const processors = processing.map((processor, id) => {
-    const type = getProcessorType(processor);
+  const processors = processing.map((processor) => {
+    const { id, ...processorConfig } = processor;
+
+    const type = getProcessorType(processorConfig);
     return {
       [type]: {
-        ...(processor as any)[type], // Safe to use any here due to type structure
+        ...(processorConfig as any)[type], // Safe to use any here due to type structure
         ignore_failure: false,
-        tag: getProcessorId(id),
+        tag: id,
         on_failure: [
           {
             append: {
