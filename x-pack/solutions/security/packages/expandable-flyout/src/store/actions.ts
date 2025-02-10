@@ -144,17 +144,29 @@ export const changePushVsOverlayAction = createAction<{
 
 export const setDefaultWidthsAction = createAction<{
   /**
-   * Default width for the right section
+   * Default width for the right section in overlay mode
    */
-  right: number;
+  rightOverlay: number;
   /**
-   * Default width for the left section
+   * Default width for the left section in overlay mode
    */
-  left: number;
+  leftOverlay: number;
   /**
-   * Default width for the preview section
+   * Default width for the preview section in overlay mode
    */
-  preview: number;
+  previewOverlay: number;
+  /**
+   * Default width for the right section in push mode
+   */
+  rightPush: number;
+  /**
+   * Default width for the left section in push mode
+   */
+  leftPush: number;
+  /**
+   * Default width for the preview section in push mode
+   */
+  previewPush: number;
 }>(ActionType.setDefaultWidths);
 
 export const changeUserCollapsedWidthAction = createAction<{
