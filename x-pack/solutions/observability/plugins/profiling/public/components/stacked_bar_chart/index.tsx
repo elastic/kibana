@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { XYChartElementEvent } from '@elastic/charts';
+import type { CustomTooltip, SeriesIdentifier, XYChartElementEvent } from '@elastic/charts';
 import {
   Axis,
   BrushAxis,
@@ -58,7 +58,7 @@ export function StackedBarChart({
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
 
-  function CustomTooltipWithSubChart({ header }) {
+  const CustomTooltipWithSubChart: CustomTooltip<{}, SeriesIdentifier> = ({ header }) => {
     if (!highlightedSample) {
       return null;
     }
@@ -90,7 +90,7 @@ export function StackedBarChart({
         </EuiPanel>
       </TooltipContainer>
     );
-  }
+  };
 
   return (
     <Chart size={{ height }}>
