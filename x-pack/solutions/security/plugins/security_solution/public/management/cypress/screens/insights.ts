@@ -35,4 +35,8 @@ export const workflowInsightsSelectors = {
     cy.getByTestSubj('trustedAppsListPage-flyout-submitButton').click(),
   insightsComponentDoesntExist: () =>
     cy.getByTestSubj('endpointDetailsInsightsWrapper').should('not.exist'),
+  validateErrorToastContent: (content: string) =>
+    cy
+      .getByTestSubj('globalToastList')
+      .within(() => cy.getByTestSubj('euiToastBody').contains(content)),
 };
