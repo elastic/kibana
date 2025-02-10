@@ -28,6 +28,7 @@ import {
   filter,
   catchError,
   debounceTime,
+  merge,
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
@@ -411,7 +412,7 @@ export class TrainedModelsService {
             );
           }),
           switchMap((deployments) =>
-            from(deployments).pipe(mergeMap((deployment) => this.handleDeployment$(deployment)))
+            merge(...deployments.map((deployment) => this.handleDeployment$(deployment)))
           )
         )
         .subscribe()
