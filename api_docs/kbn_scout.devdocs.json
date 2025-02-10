@@ -547,6 +547,22 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaUrl.domain",
+            "type": "Function",
+            "tags": [],
+            "label": "domain",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.KibanaUrl.app",
             "type": "Function",
             "tags": [],
@@ -1065,8 +1081,6 @@
             "section": "def-common.SamlSessionManager",
             "text": "SamlSessionManager"
           },
-          "; } & { scoutSpace: ",
-          "ScoutSpaceParallelFixture",
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
           "; } & { log: ",
