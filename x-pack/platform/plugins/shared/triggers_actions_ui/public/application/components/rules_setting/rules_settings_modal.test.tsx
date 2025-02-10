@@ -24,8 +24,8 @@ import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_setti
 import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settings';
 import { updateQueryDelaySettings } from '../../lib/rule_api/update_query_delay_settings';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-import { updateAlertDeletionSettings } from '../../lib/rule_api/update_alert_deletion_settings';
-import { fetchAlertDeletionSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alert_deletion_settings';
+import { updateAlertsDeletionSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_deletion_settings/update_alerts_deletion_settings';
+import { fetchAlertsDeletionSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_deletion_settings/fetch_alerts_deletion_settings';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
@@ -44,12 +44,15 @@ jest.mock('../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alert_deletion_settings', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_deletion_settings', () => ({
   fetchAlertDeletionSettings: jest.fn(),
 }));
-jest.mock('../../lib/rule_api/update_alert_deletion_settings', () => ({
-  updateAlertDeletionSettings: jest.fn(),
-}));
+jest.mock(
+  '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_deletion_settings/update_alerts_deletion_settings',
+  () => ({
+    updateAlertDeletionSettings: jest.fn(),
+  })
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,12 +82,13 @@ const updateQueryDelaySettingsMock = updateQueryDelaySettings as unknown as jest
 const getIsExperimentalFeatureEnabledMock = getIsExperimentalFeatureEnabled as jest.MockedFunction<
   typeof getIsExperimentalFeatureEnabled
 >;
-const updateAlertDeletionSettingsMock =
-  updateAlertDeletionSettings as unknown as jest.MockedFunction<typeof updateAlertDeletionSettings>;
+const updateAlertsDeletionSettingsMock =
+  updateAlertsDeletionSettings as unknown as jest.MockedFunction<
+    typeof updateAlertsDeletionSettings
+  >;
 
-const fetchAlertDeletionSettingsMock = fetchAlertDeletionSettings as unknown as jest.MockedFunction<
-  typeof fetchAlertDeletionSettings
->;
+const fetchAlertsDeletionSettingsMock =
+  fetchAlertsDeletionSettings as unknown as jest.MockedFunction<typeof fetchAlertsDeletionSettings>;
 
 const mockFlappingSetting: RulesSettingsFlapping = {
   enabled: true,
@@ -185,7 +189,7 @@ describe('rules_settings_modal', () => {
     updateFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     getQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
     updateQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
-    fetchAlertDeletionSettingsMock.mockResolvedValue(mockAlertDeletionSetting);
+    fetchAlertsDeletionSettingsMock.mockResolvedValue(mockAlertDeletionSetting);
     getIsExperimentalFeatureEnabledMock.mockReturnValue(true);
   });
 
@@ -269,7 +273,7 @@ describe('rules_settings_modal', () => {
 
     expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
-    expect(updateAlertDeletionSettingsMock).not.toHaveBeenCalled();
+    expect(updateAlertsDeletionSettingsMock).not.toHaveBeenCalled();
     expect(modalProps.onSave).not.toHaveBeenCalled();
 
     expect(screen.queryByTestId('centerJustifiedSpinner')).toBe(null);
@@ -279,7 +283,7 @@ describe('rules_settings_modal', () => {
 
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
-    expect(fetchAlertDeletionSettingsMock).toHaveBeenCalledTimes(1);
+    expect(fetchAlertsDeletionSettingsMock).toHaveBeenCalledTimes(1);
   });
 
   test('should prevent statusChangeThreshold from being greater than lookBackWindow', async () => {
@@ -503,7 +507,7 @@ describe('rules_settings_modal', () => {
       jest.clearAllMocks();
       user = userEvent.setup();
       getIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-      updateAlertDeletionSettingsMock.mockResolvedValue(mockAlertDeletionSetting);
+      updateAlertsDeletionSettingsMock.mockResolvedValue(mockAlertDeletionSetting);
       getQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
     });
 
@@ -531,7 +535,7 @@ describe('rules_settings_modal', () => {
         expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
       });
       expect(modalProps.onClose).toHaveBeenCalledTimes(1);
-      expect(updateAlertDeletionSettingsMock).toHaveBeenCalledWith(
+      expect(updateAlertsDeletionSettingsMock).toHaveBeenCalledWith(
         expect.objectContaining({
           alertDeletionSettings: {
             isActiveAlertDeletionEnabled: true,
@@ -547,7 +551,7 @@ describe('rules_settings_modal', () => {
     });
 
     test('should show error message if it fails', async () => {
-      fetchAlertDeletionSettingsMock.mockRejectedValue('failed!');
+      fetchAlertsDeletionSettingsMock.mockRejectedValue('failed!');
       render(<RulesSettingsModalWithProviders {...modalProps} />);
       await waitForModalLoad();
 

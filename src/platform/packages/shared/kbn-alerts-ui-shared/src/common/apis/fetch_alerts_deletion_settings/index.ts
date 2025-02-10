@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './fetch_alert_deletion_settings';
+export { fetchAlertsDeletionSettings } from './fetch_alerts_deletion_settings';
+export { updateAlertsDeletionSettings } from './update_alerts_deletion_settings';

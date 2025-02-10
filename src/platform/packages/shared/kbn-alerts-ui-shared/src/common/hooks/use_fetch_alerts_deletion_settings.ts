@@ -9,19 +9,19 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { RulesSettingsAlertDeletion } from '@kbn/alerting-types/rule_settings';
-import { fetchAlertDeletionSettings } from '../apis/fetch_alert_deletion_settings';
+import { RulesSettingsAlertsDeletion } from '@kbn/alerting-types/rule_settings';
+import { fetchAlertsDeletionSettings } from '../apis/fetch_alerts_deletion_settings';
 
 interface Props {
   http: HttpStart;
   enabled: boolean;
-  onSuccess?: (settings: RulesSettingsAlertDeletion) => void;
+  onSuccess?: (settings: RulesSettingsAlertsDeletion) => void;
 }
-export const useFetchAlertDeletionSettings = (props: Props) => {
+export const useFetchAlertsDeletionSettings = (props: Props) => {
   const { http, enabled, onSuccess } = props;
 
   const queryFn = () => {
-    return fetchAlertDeletionSettings({ http });
+    return fetchAlertsDeletionSettings({ http });
   };
 
   const { data, isFetching, isError, isLoadingError, isLoading, isInitialLoading } = useQuery({

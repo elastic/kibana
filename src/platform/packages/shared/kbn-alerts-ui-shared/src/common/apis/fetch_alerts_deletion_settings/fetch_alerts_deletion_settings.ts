@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { HttpSetup } from '@kbn/core/public';
+// import { AsApiContract } from '@kbn/actions-types';
+// import { RulesSettingsAlertDeletion } from '@kbn/alerting-types';
+// import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { AsApiContract } from '@kbn/actions-types';
-import { RulesSettingsAlertDeletion } from '@kbn/alerting-types';
+import { RulesSettingsAlertDeletion } from '@kbn/alerting-plugin/common';
 
-export const transformAlertDeletionSettingsResponse = ({
+const transformAlertsDeletionSettingsResponse = ({
   active_alert_deletion_threshold: activeAlertDeletionThreshold,
   is_active_alert_deletion_enabled: isActiveAlertDeletionEnabled,
   inactive_alert_deletion_threshold: inactiveAlertDeletionThreshold,
@@ -29,3 +33,23 @@ export const transformAlertDeletionSettingsResponse = ({
   updatedAt,
   updatedBy,
 });
+
+export const fetchAlertsDeletionSettings = async ({ http }: { http: HttpSetup }) => {
+  // TODO: https://github.com/elastic/kibana/issues/209258
+  // const res = await http.get<AsApiContract<RulesSettingsAlertDeletion>>(
+  //   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_alert_deletion`
+  // );
+
+  const res = {
+    is_active_alert_deletion_enabled: false,
+    is_inactive_alert_deletion_enabled: false,
+    active_alert_deletion_threshold: 0,
+    inactive_alert_deletion_threshold: 90,
+    created_at: String(new Date().valueOf),
+    updated_at: String(new Date().valueOf),
+    created_by: null,
+    updated_by: null,
+  };
+
+  return transformAlertsDeletionSettingsResponse(res);
+};
