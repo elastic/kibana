@@ -38,7 +38,10 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provide
             </span>
           </EuiFlexItem>
         ) : null}
-        {isEndpointPreconfigured(inferenceId) ? (
+       
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    {isEndpointPreconfigured(inferenceId) ? (
           <EuiFlexItem grow={false}>
             <span>
               <EuiBetaBadge
@@ -50,7 +53,5 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provide
             </span>
           </EuiFlexItem>
         ) : null}
-      </EuiFlexGroup>
-    </EuiFlexItem>
   </EuiFlexGroup>
 );
