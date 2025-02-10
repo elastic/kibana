@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.16.4>>
 * <<release-notes-8.16.3>>
 * <<release-notes-8.16.2>>
 * <<release-notes-8.16.1>>
@@ -83,7 +84,43 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+
+[[release-notes-8.16.4]]
+== {kib} 8.16.4
+
+The 8.16.4 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.16.4]]
+=== Bug fixes
+Dashboards and visualizations::
+* Fixes an issue with all embeddables getting rebuilt on refresh ({kibana-pull}209677[#209677]).
+* Sets options list control to fetch a maximum of 1,000 terms upon scrolling ({kibana-pull}207901[#207901]).
+* Fixes scroll-jumping when interacting with the Lens editor flyout ({kibana-pull}207429[#207429]).
+* Fixes an issue with Kibana Chrome appearing in generated reports ({kibana-pull}206988[#206988]).
+* Fixes missing highlight theme for HJSON in *Vega* ({kibana-pull}208858[#208858]).
+* Adds an accessible label to range slider in *Lens* ({kibana-pull}205308[#205308]).
+Discover::
+* Fixes document comparison table padding ({kibana-pull}205984[#205984]).
+Osquery::
+* Increases maximum Osquery timeout to 24 hours ({kibana-pull}207276[#207276]).
+Elastic Observability solution::
+* Displays `No Data` in Threshold breached component ({kibana-pull}209561[#209561]).
+* Fixes the preview chart in the Custom threshold rule creation form when the field name has slashes ({kibana-pull}209263[#209263]).
+* Fixes multiple AI assistant flyouts ({kibana-pull}209158[#209158]).
+* Fixes using data view runtime fields during rule execution for the custom threshold rule ({kibana-pull}209133[#209133]).
+* Fixes an issue with running processes missing from the processes table ({kibana-pull}209076[#209076]).
+* Fixes heatmap regression when Inspect flag is turned off ({kibana-pull}208726[#208726]).
+* Fixes missing exception stack trace ({kibana-pull}208577[#208577]).
+* Fixes leading wildcard issue on the Custom threshold alert details page ({kibana-pull}206615[#206615]).
+Elastic Security solution::
+For the Elastic Security 8.16.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes breaks in YAML parsing by using single quotes in Structured log template ({kibana-pull}209736[#209736]).
+* Adds missing fields to input manifest templates ({kibana-pull}208768[#208768]).
+* Adds missing fields into AWS S3 manifest ({kibana-pull}208080[#208080]).
 [[release-notes-8.16.3]]
+
 == {kib} 8.16.3
 The 8.16.3 release includes the following bug fixes.
 [float]
