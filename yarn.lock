@@ -9283,7 +9283,7 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.20.1.tgz#867e187d8113d0646eab7859c7835ed0656d8315"
   integrity sha512-TYiTDtuItiv95YMsrRxyCs1HKLrDPtTvpaD3+kDKXBnFDeJuYKZ+eHXpCr6YeN4inxfVBs7DLhHsQcs9srddyQ==
 
-"@redocly/openapi-core@1.28.5":
+"@redocly/openapi-core@1.28.5", "@redocly/openapi-core@^1.4.0":
   version "1.28.5"
   resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.28.5.tgz#5415f5bb12cc6916743169758d5cba7413df14ad"
   integrity sha512-eAuL+x1oBbodJksPm4UpFU57A6z1n1rx9JNpD87CObwtbRf5EzW29Ofd0t057bPGcHc8cYZtZzJ69dcRQ9xGdg==
@@ -9295,22 +9295,6 @@
     js-levenshtein "^1.1.6"
     js-yaml "^4.1.0"
     minimatch "^5.0.1"
-    pluralize "^8.0.0"
-    yaml-ast-parser "0.0.43"
-
-"@redocly/openapi-core@^1.4.0":
-  version "1.27.2"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.27.2.tgz#109163901fd8a2853e805877fe234b65e3c5753a"
-  integrity sha512-qVrDc27DHpeO2NRCMeRdb4299nijKQE3BY0wrA+WUHlOLScorIi/y7JzammLk22IaTvjR9Mv9aTAdjE1aUwJnA==
-  dependencies:
-    "@redocly/ajv" "^8.11.2"
-    "@redocly/config" "^0.20.1"
-    colorette "^1.2.0"
-    https-proxy-agent "^7.0.4"
-    js-levenshtein "^1.1.6"
-    js-yaml "^4.1.0"
-    minimatch "^5.0.1"
-    node-fetch "^2.6.1"
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
