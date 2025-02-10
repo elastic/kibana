@@ -34,6 +34,7 @@ import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
+  topNavStrings,
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
@@ -149,7 +150,23 @@ export function InternalDashboardTopNav({
   useEffect(() => {
     const dashboardTitleBreadcrumbs = [
       {
-        text: dashboardTitle,
+        text:
+          viewMode === 'edit' ? (
+            <>
+              {dashboardTitle}
+              <EuiIcon
+                tabIndex={0}
+                role="button"
+                aria-label={topNavStrings.settings.description}
+                size="s"
+                type="pencil"
+                className="dshTitleBreadcrumbs__updateIcon"
+                onClick={() => openSettingsFlyout(dashboardApi)}
+              />
+            </>
+          ) : (
+            dashboardTitle
+          ),
       },
     ];
 
@@ -179,7 +196,7 @@ export function InternalDashboardTopNav({
         }
       );
     }
-  }, [redirectTo, dashboardTitle, customLeadingBreadCrumbs]);
+  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs, lastSavedId]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
