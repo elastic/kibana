@@ -58,7 +58,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
               size="s"
               onClick={async () => {
                 setIsLoading(true);
-                await executeAddLensPanelAction();
+                await executeAddLensPanelAction(dashboardApi);
                 if (isMounted()) {
                   setIsLoading(false);
                 }

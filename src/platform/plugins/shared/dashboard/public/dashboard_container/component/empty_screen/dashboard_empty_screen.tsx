@@ -99,7 +99,7 @@ export function DashboardEmptyScreen() {
               iconType="lensApp"
               onClick={async () => {
                 setIsLoading(true);
-                await executeAddLensPanelAction();
+                await executeAddLensPanelAction(dashboardApi);
                 if (isMounted()) {
                   setIsLoading(false);
                 }
