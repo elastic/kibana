@@ -33,6 +33,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const TAG_ID = '00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d';
 
   async function loadDashboards() {
+    // clear out all lingering dashboards
+    const dashboards = await kibanaServer.savedObjects.find({
+      type: 'dashboard',
+    });
+    await kibanaServer.savedObjects.bulkDelete({
+      objects: dashboards.saved_objects.map((d) => ({ type: 'dashboard', id: d.id })),
+    });
+
     for (const archive of ARCHIVES) {
       await kibanaServer.importExport.load(archive, { space: SPACE_ID });
     }
