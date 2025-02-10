@@ -1083,7 +1083,7 @@
         "tags": [],
         "label": "Direction",
         "description": [],
-        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

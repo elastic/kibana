@@ -47,7 +47,7 @@ import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../common/siem_migrations/rules/utils';
-import { useUpdateMigrationRules } from '../../logic/use_update_migration_rules';
+import { useUpdateMigrationRule } from '../../logic/use_update_migration_rule';
 import { UpdatedByLabel } from './updated_by';
 
 /*
@@ -93,9 +93,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
 
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
-    const { mutateAsync: updateMigrationRules } = useUpdateMigrationRules(
-      ruleMigration.migration_id
-    );
+    const { mutateAsync: updateMigrationRule } = useUpdateMigrationRule(ruleMigration);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const isLoading = isDataLoading || isUpdating;
@@ -107,23 +105,21 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         }
         setIsUpdating(true);
         try {
-          await updateMigrationRules([
-            {
-              id: ruleMigration.id,
-              elastic_rule: {
-                title: ruleName,
-                query: ruleQuery,
-                query_language: 'esql',
-              },
+          await updateMigrationRule({
+            id: ruleMigration.id,
+            elastic_rule: {
+              title: ruleName,
+              query: ruleQuery,
+              query_language: 'esql',
             },
-          ]);
+          });
         } catch (error) {
           addError(error, { title: logicI18n.UPDATE_MIGRATION_RULES_FAILURE });
         } finally {
           setIsUpdating(false);
         }
       },
-      [addError, ruleMigration, isLoading, updateMigrationRules]
+      [isLoading, updateMigrationRule, ruleMigration, addError]
     );
 
     const ruleDetailsToOverview = useMemo(() => {

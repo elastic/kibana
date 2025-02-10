@@ -339,9 +339,7 @@ export function InternalDashboardTopNav({
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews ?? []}
-        saveQueryMenuVisibility={
-          getDashboardCapabilities().saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-        }
+        allowSavingQueries
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== 'print'}
         setMenuMountPoint={

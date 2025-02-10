@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
+export function getElasticsearchQueryOrThrow(kuery: QuerySchema = ''): QueryDslQueryContainer {
   try {
     if (kqlQuerySchema.is(kuery)) {
       return toElasticsearchQuery(fromKueryExpression(kuery));
@@ -23,6 +24,6 @@ export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
       );
     }
   } catch (err) {
-    return [];
+    return [] as QueryDslQueryContainer;
   }
 }

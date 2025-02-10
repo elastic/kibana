@@ -21,5 +21,6 @@ export const useFetchSynonymRule = (synonymsSetId: string, ruleId: string) => {
         `/internal/search_synonyms/synonyms/${synonymsSetId}/${ruleId}`
       );
     },
+    enabled: !!synonymsSetId && !!ruleId,
   });
 };

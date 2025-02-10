@@ -7,7 +7,7 @@
 
 import { ContentReferencesStore } from '../../types';
 
-export const contentReferencesStoreFactoryMock: () => ContentReferencesStore = jest
+export const newContentReferencesStoreMock: () => ContentReferencesStore = jest
   .fn()
   .mockReturnValue({
     add: jest.fn().mockImplementation((creator: Parameters<ContentReferencesStore['add']>[0]) => {

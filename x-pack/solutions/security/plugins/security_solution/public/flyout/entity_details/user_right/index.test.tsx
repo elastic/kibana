@@ -11,14 +11,14 @@ import { TestProviders } from '../../../common/mock';
 import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
 import type {
-  FlyoutPanelProps,
-  ExpandableFlyoutState,
   ExpandableFlyoutApi,
+  ExpandableFlyoutState,
+  FlyoutPanelProps,
 } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
-  useExpandableFlyoutState,
   useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 import { mockManagedUserData, mockObservedUser } from './mocks';
 import { mockRiskScoreState } from '../../shared/mocks';
@@ -27,7 +27,6 @@ const mockProps: UserPanelProps = {
   userName: 'test',
   contextID: 'test-user-panel',
   scopeId: 'test-scope-id',
-  isDraggable: false,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');

@@ -51,6 +51,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -412,6 +413,10 @@ export interface UnifiedDataTableProps {
    */
   enableComparisonMode?: boolean;
   /**
+   * Set to true to allow users to search in cell values
+   */
+  enableInTableSearch?: boolean;
+  /**
    * Optional extra props passed to the renderCellValue function/component.
    */
   cellContext?: EuiDataGridProps['cellContext'];
@@ -494,6 +499,7 @@ export const UnifiedDataTable = ({
   rowLineHeightOverride,
   customGridColumnsConfiguration,
   enableComparisonMode,
+  enableInTableSearch = false,
   cellContext,
   renderCellPopover,
   getRowIndicator,
@@ -527,6 +533,14 @@ export const UnifiedDataTable = ({
   } = selectedDocsState;
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+
+  const changeCurrentPageIndex = useCallback(
+    (value: number) => {
+      setCurrentPageIndex(value);
+      onUpdatePageIndex?.(value);
+    },
+    [setCurrentPageIndex, onUpdatePageIndex]
+  );
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -632,15 +646,10 @@ export const UnifiedDataTable = ({
       onUpdateRowsPerPage?.(pageSize);
     };
 
-    const onChangePage = (newPageIndex: number) => {
-      setCurrentPageIndex(newPageIndex);
-      onUpdatePageIndex?.(newPageIndex);
-    };
-
     return isPaginationEnabled
       ? {
           onChangeItemsPerPage,
-          onChangePage,
+          onChangePage: changeCurrentPageIndex,
           pageIndex: currentPageIndex,
           pageSize: currentPageSize,
           pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize),
@@ -652,7 +661,7 @@ export const UnifiedDataTable = ({
     onUpdateRowsPerPage,
     currentPageSize,
     currentPageIndex,
-    onUpdatePageIndex,
+    changeCurrentPageIndex,
   ]);
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
@@ -736,6 +745,24 @@ export const UnifiedDataTable = ({
     ]
   );
 
+  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
+
+  const {
+    inTableSearchTermCss,
+    inTableSearchControl,
+    cellContextWithInTableSearchSupport,
+    renderCellValueWithInTableSearchSupport,
+  } = useDataGridInTableSearch({
+    enableInTableSearch,
+    dataGridWrapper,
+    dataGridRef,
+    visibleColumns,
+    rows: displayedRows,
+    renderCellValue,
+    cellContext,
+    pagination: paginationObj,
+  });
+
   const renderCustomPopover = useMemo(
     () => renderCellPopover ?? getCustomCellPopoverRenderer(),
     [renderCellPopover]
@@ -812,6 +839,7 @@ export const UnifiedDataTable = ({
   const {
     rowHeight: headerRowHeight,
     rowHeightLines: headerRowHeightLines,
+    lineCountInput: headerLineCountInput,
     onChangeRowHeight: onChangeHeaderRowHeight,
     onChangeRowHeightLines: onChangeHeaderRowHeightLines,
   } = useRowHeight({
@@ -823,14 +851,15 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight: onUpdateHeaderRowHeight,
   });
 
-  const { rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = useRowHeight({
-    storage,
-    consumer,
-    key: 'dataGridRowHeight',
-    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
-    rowHeightState,
-    onUpdateRowHeight,
-  });
+  const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
+    useRowHeight({
+      storage,
+      consumer,
+      key: 'dataGridRowHeight',
+      configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+      rowHeightState,
+      onUpdateRowHeight,
+    });
 
   const euiGridColumns = useMemo(
     () =>
@@ -945,11 +974,11 @@ export const UnifiedDataTable = ({
   ]);
 
   const additionalControls = useMemo(() => {
-    if (!externalAdditionalControls && !selectedDocsCount) {
+    if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
       return null;
     }
 
-    return (
+    const leftControls = (
       <>
         {Boolean(selectedDocsCount) && (
           <DataTableDocumentToolbarBtn
@@ -970,6 +999,15 @@ export const UnifiedDataTable = ({
         {externalAdditionalControls}
       </>
     );
+
+    if (!renderCustomToolbar && inTableSearchControl) {
+      return {
+        left: leftControls,
+        right: inTableSearchControl,
+      };
+    }
+
+    return leftControls;
   }, [
     selectedDocsCount,
     selectedDocsState,
@@ -984,6 +1022,8 @@ export const UnifiedDataTable = ({
     unifiedDataTableContextValue.pageSize,
     toastNotifications,
     visibleColumns,
+    renderCustomToolbar,
+    inTableSearchControl,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
@@ -993,11 +1033,15 @@ export const UnifiedDataTable = ({
             renderCustomToolbar({
               toolbarProps,
               gridProps: {
-                additionalControls,
+                additionalControls:
+                  additionalControls && 'left' in additionalControls
+                    ? additionalControls.left
+                    : additionalControls,
+                inTableSearchControl,
               },
             })
         : undefined,
-    [renderCustomToolbar, additionalControls]
+    [renderCustomToolbar, additionalControls, inTableSearchControl]
   );
 
   const showDisplaySelector = useMemo(():
@@ -1021,23 +1065,22 @@ export const UnifiedDataTable = ({
           {onUpdateDataGridDensity ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
-            rowHeightLines={rowHeightLines}
             onChangeRowHeight={onChangeRowHeight}
             onChangeRowHeightLines={onChangeRowHeightLines}
             headerRowHeight={headerRowHeight}
-            headerRowHeightLines={headerRowHeightLines}
             onChangeHeaderRowHeight={onChangeHeaderRowHeight}
             onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
             maxAllowedSampleSize={maxAllowedSampleSize}
             sampleSize={sampleSizeState}
             onChangeSampleSize={onUpdateSampleSize}
+            lineCountInput={lineCountInput}
+            headerLineCountInput={headerLineCountInput}
           />
         </>
       ),
     };
   }, [
     headerRowHeight,
-    headerRowHeightLines,
     maxAllowedSampleSize,
     onChangeHeaderRowHeight,
     onChangeHeaderRowHeightLines,
@@ -1047,9 +1090,10 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight,
     onUpdateSampleSize,
     rowHeight,
-    rowHeightLines,
     sampleSizeState,
     onUpdateDataGridDensity,
+    lineCountInput,
+    headerLineCountInput,
   ]);
 
   const toolbarVisibility = useMemo(
@@ -1086,8 +1130,6 @@ export const UnifiedDataTable = ({
     rowHeightLines,
     rowLineHeight: rowLineHeightOverride,
   });
-
-  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -1139,6 +1181,7 @@ export const UnifiedDataTable = ({
           data-description={searchDescription}
           data-document-number={displayedRows.length}
           className={classnames(className, 'unifiedDataTable__table')}
+          css={inTableSearchTermCss}
         >
           {isCompareActive ? (
             <CompareDocuments
@@ -1171,7 +1214,7 @@ export const UnifiedDataTable = ({
               leadingControlColumns={leadingControlColumns}
               onColumnResize={onResize}
               pagination={paginationObj}
-              renderCellValue={renderCellValue}
+              renderCellValue={renderCellValueWithInTableSearchSupport}
               ref={dataGridRef}
               rowCount={rowCount}
               schemaDetectors={schemaDetectors}
@@ -1182,7 +1225,7 @@ export const UnifiedDataTable = ({
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={trailingControlColumns}
-              cellContext={cellContext}
+              cellContext={cellContextWithInTableSearchSupport}
               renderCellPopover={renderCustomPopover}
               // Don't use row overscan when showing Document column since
               // rendering so much DOM content in each cell impacts performance

@@ -73,8 +73,6 @@ export const buildESQLTheme = ({
           'as',
           'limit',
           'dev_lookup',
-          'dev_join_lookup',
-          'dev_join',
           'dev_join_full',
           'dev_join_left',
           'dev_join_right',
@@ -86,6 +84,8 @@ export const buildESQLTheme = ({
           'asc',
           'desc',
           'nulls_order',
+          'join_lookup',
+          'join',
         ],
         euiTheme.colors.accent,
         true // isBold

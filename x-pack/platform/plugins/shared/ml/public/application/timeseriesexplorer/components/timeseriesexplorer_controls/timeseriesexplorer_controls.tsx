@@ -114,7 +114,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
 
   const globalTimeRange = useTimeRangeUpdates(true);
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
 
   const closePopoverOnAction = useCallback(
     (actionCallback: Function) => {

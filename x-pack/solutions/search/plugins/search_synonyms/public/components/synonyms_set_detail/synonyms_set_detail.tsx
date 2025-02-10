@@ -8,16 +8,15 @@
 import { useParams } from 'react-router-dom';
 import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymsSetRuleTable } from './synonyms_set_rule_table';
+import { ConnectToApiButton } from '../connect_to_api/connect_to_api_button';
+import { ConnectToApiFlyout } from '../connect_to_api/connect_to_api_flyout';
 
 export const SynonymsSetDetail = () => {
   const { synonymsSetId = '' } = useParams<{
     synonymsSetId?: string;
   }>();
-
   const {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
@@ -26,6 +25,7 @@ export const SynonymsSetDetail = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const [isApiConnectModalVisible, setIsApiConnectModalVisible] = React.useState(false);
 
   return (
     <KibanaPageTemplate
@@ -41,23 +41,23 @@ export const SynonymsSetDetail = () => {
         restrictWidth
         color="primary"
         rightSideItems={[
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton color="text" iconType="endpoint">
-                <FormattedMessage
-                  id="xpack.searchSynonyms.synonymsSetDetail.connectToApiButton"
-                  defaultMessage="Connect to API"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon iconType="boxesHorizontal" size="m" color="text" />
-            </EuiFlexItem>
-          </EuiFlexGroup>,
+          <ConnectToApiButton
+            onClick={() => {
+              setIsApiConnectModalVisible(true);
+            }}
+          />,
         ]}
       />
       <KibanaPageTemplate.Section restrictWidth>
         {synonymsSetId && <SynonymsSetRuleTable synonymsSetId={synonymsSetId} />}
+        {isApiConnectModalVisible && (
+          <ConnectToApiFlyout
+            rulesetId={synonymsSetId}
+            onClose={() => {
+              setIsApiConnectModalVisible(false);
+            }}
+          />
+        )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
     </KibanaPageTemplate>
