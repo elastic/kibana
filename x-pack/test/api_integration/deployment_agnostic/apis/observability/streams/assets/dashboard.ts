@@ -260,7 +260,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
 
           expect(response.status).to.eql(200);
-          expect(response.body.suggestions.length).to.eql(2);
+          expect(response.body.suggestions.length).to.eql(3);
         });
 
         it('filters suggested dashboards based on tags', async () => {
@@ -272,7 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
 
           expect(response.status).to.eql(200);
-          expect(response.body.suggestions.length).to.eql(2);
+          expect(response.body.suggestions.length).to.eql(1);
         });
 
         it('filters suggested dashboards based on the query', async () => {
