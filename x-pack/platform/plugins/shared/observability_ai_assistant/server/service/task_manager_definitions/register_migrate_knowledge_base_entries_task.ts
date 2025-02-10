@@ -16,6 +16,10 @@ import { getElserModelStatus } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { setupConversationAndKbIndexAssets } from '../setup_conversation_and_kb_index_assets';
+import {
+  isSemanticTextUnsupportedError,
+  reIndexKnowledgeBase,
+} from '../knowledge_base_service/reindex_knowledge_base';
 
 const TASK_ID = 'obs-ai-assistant:knowledge-base-migration-task-id';
 const TASK_TYPE = 'obs-ai-assistant:knowledge-base-migration';
@@ -160,6 +164,15 @@ export async function runSemanticTextKnowledgeBaseMigration({
     logger.debug(`Knowledge base migration: Migrated ${promises.length} entries`);
     await runSemanticTextKnowledgeBaseMigration({ esClient, logger, config });
   } catch (e) {
+    if (isSemanticTextUnsupportedError(e)) {
+      logger.warn('Knowledge base migration: Cannot run migration until index is re-indexed');
+      await reIndexKnowledgeBase({ logger, esClient });
+
+      // Retry migration after re-indexing
+      await runSemanticTextKnowledgeBaseMigration({ esClient, logger, config });
+      return;
+    }
+
     logger.error(`Knowledge base migration failed: ${e.message}`);
   }
 }
