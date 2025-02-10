@@ -171,7 +171,7 @@ test('renders actions as complete if there are more than 0 defined actions', asy
   };
 
   render(<TestComponent />);
-
+  // Regex means "Step 2" NOT followed by " is incomplete" or " has errors"
   expect(await screen.getByText(/Step 2(?!( is incomplete)|( has errors))/)).toBeInTheDocument();
 });
 
