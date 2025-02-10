@@ -205,11 +205,11 @@ export const checkForFrozenIndices = async ({
   const responseIndices = isArray(fieldCapsResponse.indices)
     ? fieldCapsResponse.indices
     : [fieldCapsResponse.indices];
-  // Cold and frozen indices start with `restored-` and `partial-`, respectively, but it's possible
-  // for some regular hot/warm index to start with those prefixes as well by coincidence. If we find indices with that naming pattern,
-  // we fetch the index settings to verify that they are actually cold/frozen indices.
-  const partialAndRestoredIndices = responseIndices.filter((index) => index.startsWith('partial-'));
-  if (partialAndRestoredIndices.length > 0) {
+  // Frozen indices start with `partial-`, but it's possible
+  // for some regular hot/warm index to start with that prefix as well by coincidence. If we find indices with that naming pattern,
+  // we fetch the index settings to verify that they are actually frozen indices.
+  const partialIndices = responseIndices.filter((index) => index.startsWith('partial-'));
+  if (partialIndices.length > 0) {
     const frozenIndices = [];
     // See https://www.elastic.co/guide/en/elasticsearch/reference/current/data-tiers.html#data-tier-allocation for
     // details on _tier_preference
@@ -225,7 +225,7 @@ export const checkForFrozenIndices = async ({
         tierPreferencesResp[key].settings?.index?.routing?.allocation?.include?._tier_preference;
       if (tiers) {
         const preferredTier = tiers.split(',')[0];
-        if (preferredTier === 'data_frozen') {
+        if (preferredTier === 'data_frozen' && partialIndices.includes(key)) {
           frozenIndices.push(key);
         }
       }
