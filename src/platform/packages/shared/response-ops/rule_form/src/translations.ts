@@ -793,3 +793,9 @@ export const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
     defaultMessage: 'Sorry about that, something went wrong.',
   }
 );
+
+export const DEFAULT_RULE_NAME = (ruleTypeName: string) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.defaultRuleName', {
+    defaultMessage: `{ruleTypeName} rule`,
+    values: { ruleTypeName },
+  });

@@ -31,7 +31,11 @@ import {
   getInitialSchedule,
   parseRuleCircuitBreakerErrorMessage,
 } from './utils';
-import { RULE_CREATE_SUCCESS_TEXT, RULE_CREATE_ERROR_TEXT } from './translations';
+import {
+  RULE_CREATE_SUCCESS_TEXT,
+  RULE_CREATE_ERROR_TEXT,
+  DEFAULT_RULE_NAME,
+} from './translations';
 
 export interface CreateRuleFormProps {
   ruleTypeId: string;
@@ -176,7 +180,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           formData: {
             ...getDefaultFormData({
               ruleTypeId,
-              name: `${ruleType.name} rule`,
+              name: DEFAULT_RULE_NAME(ruleType.name),
               consumer: getInitialConsumer({
                 consumer,
                 ruleType,
