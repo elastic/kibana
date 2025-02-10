@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { get, uniq, uniqBy } from 'lodash';
+import { uniq, uniqBy } from 'lodash';
 import type {
   AstProviderFn,
   ESQLAst,
@@ -45,7 +45,6 @@ import {
   noCaseCompare,
   correctQuerySyntax,
   getColumnByName,
-  sourceExists,
   findFinalWord,
   getAllCommands,
   getExpressionType,
@@ -100,7 +99,6 @@ import {
   getQueryForFields,
   getSourcesFromCommands,
   isAggFunctionUsedAlready,
-  removeQuoteForSuggestedSources,
   getValidSignaturesAndTypesToSuggestNext,
   handleFragment,
   getFieldsOrFunctionsSuggestions,
@@ -110,7 +108,6 @@ import {
   checkFunctionInvocationComplete,
 } from './helper';
 import { FunctionParameter, isParameterType } from '../definitions/types';
-import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
