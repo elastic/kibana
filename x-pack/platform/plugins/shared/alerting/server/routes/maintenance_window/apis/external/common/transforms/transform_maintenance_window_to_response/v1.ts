@@ -20,7 +20,6 @@ export const transformMaintenanceWindowToResponse = (
     id: maintenanceWindow.id,
     title: maintenanceWindow.title,
     enabled: maintenanceWindow.enabled,
-    expiration_date: maintenanceWindow.expirationDate,
 
     // TODO schedule schema
     start: maintenanceWindow.rRule.dtstart,
