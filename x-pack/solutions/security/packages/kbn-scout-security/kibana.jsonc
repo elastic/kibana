@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "test-helper",
   "id": "@kbn/scout-security",
   "owner": "@elastic/security-solution",
   "devOnly": true
