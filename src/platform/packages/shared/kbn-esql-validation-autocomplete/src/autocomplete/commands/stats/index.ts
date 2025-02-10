@@ -45,14 +45,13 @@ export async function suggest(
     await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
     true
   );
+  const controlSuggestions = getControlSuggestionIfSupported(
+    Boolean(supportsControls),
+    getVariablesByType
+  );
 
   switch (pos) {
     case 'expression_without_assignment':
-      const controlSuggestions = getControlSuggestionIfSupported(
-        Boolean(supportsControls),
-        getVariablesByType
-      );
-
       return [
         ...controlSuggestions,
         ...getFunctionSuggestions({ command: 'stats' }),
@@ -60,7 +59,7 @@ export async function suggest(
       ];
 
     case 'expression_after_assignment':
-      return [...getFunctionSuggestions({ command: 'stats' })];
+      return [...controlSuggestions, ...getFunctionSuggestions({ command: 'stats' })];
 
     case 'expression_complete':
       return [
