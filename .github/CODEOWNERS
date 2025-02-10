@@ -121,7 +121,6 @@ packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
-packages/kbn-scout-oblt @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-some-dev-log @elastic/kibana-operations
@@ -920,6 +919,7 @@ x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elasti
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant

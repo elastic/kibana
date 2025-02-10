@@ -15,7 +15,7 @@ Its primary goal is to simplify the test development experience for teams workin
 The `@kbn/scout-oblt` structure includes the following key directories and files:
 
 ```
-packages/kbn-scout-oblt/
+x-pack/solutions/observability/packages/kbn-scout-oblt/
 ├── src/
 │   ├── playwright/
 │   │   └── fixtures
