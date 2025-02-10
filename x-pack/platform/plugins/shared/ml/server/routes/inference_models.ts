@@ -85,15 +85,12 @@ export function inferenceModelRoutes(
     .addVersion(
       {
         version: '1',
-        validate: {},
+        validate: false,
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, response }) => {
         try {
-          const body = await client.asCurrentUser.transport.request<{
-            models: InferenceAPIConfigResponse[];
-          }>({
-            method: 'GET',
-            path: `/_inference/_all`,
+          const body = await client.asCurrentUser.inference.get({
+            inference_id: '_all',
           });
           return response.ok({
             body,
