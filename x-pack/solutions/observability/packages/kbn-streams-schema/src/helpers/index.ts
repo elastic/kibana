@@ -7,3 +7,5 @@
 
 export * from './type_guards';
 export * from './hierarchy';
+export * from './condition_fields';
+export * from './condition_to_query_dsl';

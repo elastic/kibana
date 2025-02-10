@@ -40,7 +40,7 @@ const excludedFunctions = new Set(['bucket', 'case', 'categorize']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
-    type: 'eval',
+    type: 'scalar',
     name: 'case',
     description:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
@@ -250,7 +250,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     FunctionDefinition,
     'supportedCommands' | 'supportedOptions'
   > =
-    ESFunctionDefinition.type === 'eval'
+    ESFunctionDefinition.type === 'scalar'
       ? scalarSupportedCommandsAndOptions
       : aggregationSupportedCommandsAndOptions;
 
@@ -833,13 +833,13 @@ ${functionsType === 'operators' ? `import { isNumericType } from '../../shared/e
     const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
 
     if (functionDefinition.name.toLowerCase() === 'match') {
-      scalarFunctionDefinitions.push({ ...functionDefinition, type: 'eval' });
+      scalarFunctionDefinitions.push({ ...functionDefinition, type: 'scalar' });
       continue;
     }
     if (functionDefinition.type === 'operator' || isLikeOperator) {
       operatorDefinitions.push(functionDefinition);
     }
-    if (functionDefinition.type === 'eval' && !isLikeOperator) {
+    if (functionDefinition.type === 'scalar' && !isLikeOperator) {
       scalarFunctionDefinitions.push(functionDefinition);
     } else if (functionDefinition.type === 'agg') {
       aggFunctionDefinitions.push(functionDefinition);
