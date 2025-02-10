@@ -8,9 +8,12 @@ import React, { ReactNode } from 'react';
 
 import { useValues } from 'kea';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import {
   EuiBadge,
   EuiBadgeProps,
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
@@ -38,7 +41,6 @@ import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_help
 import {
   CONNECTOR_DETAIL_TAB_PATH,
   CONNECTOR_INTEGRATION_DETAIL_PATH,
-  FLEET_AGENT_DETAIL_LOGS_PATH,
   FLEET_AGENT_DETAIL_PATH,
   FLEET_POLICY_DETAIL_PATH,
 } from '../../routes';
@@ -53,7 +55,7 @@ import { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_
 
 import { Agent } from '@kbn/fleet-plugin/common';
 
-import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { KibanaDeps } from '@kbn/enterprise-search-plugin/common/types';
 
 export interface ConnectorStatsProps {
   connector: Connector;
@@ -214,12 +216,20 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
   agentlessOverview,
 }) => {
   const { connectorTypes } = useValues(KibanaLogic);
+  const {
+    services: { discover },
+  } = useKibana<KibanaDeps>();
   const { http } = useValues(HttpLogic);
   const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
   const columns = connector.is_native ? 2 : 3;
 
   const agnetlessPolicyExists = !!agentlessOverview?.policy;
   const agentlessAgentExists = !!agentlessOverview?.agent;
+
+  const logsTimeRangeLast6hrs = {
+    from: 'now-6h',
+    to: 'now',
+  };
 
   return (
     <EuiFlexGrid columns={columns} direction="row">
@@ -477,19 +487,67 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             footer={
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
+                  {agentlessAgentExists && (
+                    <EuiButton
+                      data-test-subj="connectorStatsViewLogsButton"
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
+                        { defaultMessage: 'View in Discover' }
+                      )}
+                      iconType="discoverApp"
+                      onClick={() => {
+                        discover.locator?.navigate({
+                          dataViewId: 'logs-*',
+                          filters: [
+                            {
+                              meta: {
+                                key: 'labels.connector_id',
+                                index: 'logs-*',
+                                type: 'phrase',
+                                params: connector.id,
+                              },
+                              query: {
+                                match_phrase: {
+                                  'labels.connector_id': connector.id,
+                                },
+                              },
+                            },
+                            {
+                              meta: {
+                                key: 'elastic_agent.id',
+                                index: 'logs-*',
+                                type: 'phrase',
+                                params: connector.id,
+                              },
+                              query: {
+                                match_phrase: {
+                                  'elastic_agent.id': agentlessOverview.agent.id,
+                                },
+                              },
+                            },
+                          ],
+                          timeRange: logsTimeRangeLast6hrs,
+                          columns: ['message', 'log.level', 'labels.sync_job_id'],
+                        });
+                      }}
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
+                        { defaultMessage: 'View logs' }
+                      )}
+                    </EuiButton>
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   {agentlessAgentExists ? (
                     <EuiButtonEmpty
                       isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
                       size="s"
-                      href={
-                        !!agentlessOverview && !!agentlessOverview.agent.id
-                          ? http.basePath.prepend(
-                              generateEncodedPath(FLEET_AGENT_DETAIL_PATH, {
-                                agentId: agentlessOverview.agent.id,
-                              })
-                            )
-                          : ''
-                      }
+                      href={http.basePath.prepend(
+                        generateEncodedPath(FLEET_AGENT_DETAIL_PATH, {
+                          agentId: agentlessOverview.agent.id,
+                        })
+                      )}
                     >
                       {i18n.translate(
                         'xpack.enterpriseSearch.connectors.connectorStats.hostOverview',
@@ -502,27 +560,6 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                     <EuiText size="s" color="warning">
                       {noAgentLabel}
                     </EuiText>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {agentlessAgentExists && (
-                    <EuiButtonEmpty
-                      isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
-                      size="s"
-                      iconType="discoverApp"
-                      href={http.basePath.prepend(
-                        generateEncodedPath(FLEET_AGENT_DETAIL_LOGS_PATH, {
-                          agentId: agentlessOverview.agent.id,
-                        })
-                      )}
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.connectors.connectorStats.managePolicy',
-                        {
-                          defaultMessage: 'View logs',
-                        }
-                      )}
-                    </EuiButtonEmpty>
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
