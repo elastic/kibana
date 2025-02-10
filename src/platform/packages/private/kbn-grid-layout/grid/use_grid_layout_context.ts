@@ -10,7 +10,7 @@
 import { createContext, useContext } from 'react';
 import { UseCustomDragHandle, GridLayoutStateManager } from './types';
 
-type GridLayoutContextType = {
+export type GridLayoutContextType = {
   gridLayoutStateManager: GridLayoutStateManager;
 } & UseCustomDragHandle;
 

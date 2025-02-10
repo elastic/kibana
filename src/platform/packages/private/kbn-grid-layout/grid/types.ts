@@ -107,6 +107,10 @@ export interface PanelInteractionEvent {
   };
 }
 
+/**
+ * This type is used to conditionally change the type of `renderPanelContents` depending
+ * on the value of `useCustomDragHandle`
+ */
 export type UseCustomDragHandle =
   | {
       useCustomDragHandle: true;
@@ -116,8 +120,11 @@ export type UseCustomDragHandle =
       ) => React.ReactNode;
     }
   | {
-      useCustomDragHandle?: false;
+      useCustomDragHandle: false | undefined;
       renderPanelContents: (panelId: string) => React.ReactNode;
     };
 
+/**
+ * Controls whether the resize + drag handles are visible and functioning
+ */
 export type GridAccessMode = 'VIEW' | 'EDIT';
