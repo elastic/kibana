@@ -9,18 +9,13 @@
 
 import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getTraceDocumentOverview } from '@kbn/discover-utils';
 import { spanAttributeIds, transactionAttributeIds } from './resources/attribute_ids';
 import { getAttributeConfiguration } from './resources/get_attribute_configuration';
+import { FieldActionsProvider } from '../../hooks/use_field_actions';
+import { FieldWithActions } from './sub_components/field_with_actions/field_with_actions';
 export type TracesOverviewProps = DocViewRenderProps;
 
 export function TracesOverview({
@@ -41,34 +36,40 @@ export function TracesOverview({
   )}`;
 
   return (
-    <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
-      <EuiSpacer size="m" />
-      <EuiTitle size="s">
-        <h1>{detailTitle}</h1>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      {(isTransaction ? transactionAttributeIds : spanAttributeIds).map((attributeId) => {
-        const attributeConfiguration = getAttributeConfiguration(parsedDoc)[attributeId];
+    <FieldActionsProvider
+      columns={columns}
+      filter={filter}
+      onAddColumn={onAddColumn}
+      onRemoveColumn={onRemoveColumn}
+    >
+      <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
+        <EuiSpacer size="m" />
+        <EuiTitle size="s">
+          <h1>{detailTitle}</h1>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        {(isTransaction ? transactionAttributeIds : spanAttributeIds).map((attributeId) => {
+          const attributeConfiguration = getAttributeConfiguration(parsedDoc)[attributeId];
 
-        if (!attributeConfiguration.content) {
-          return null;
-        }
-        return (
-          <div key={attributeId}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
-                <EuiTitle size="xxxs">
-                  <h3>{attributeConfiguration.title}</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={2}>
-                <div>{attributeConfiguration.content}</div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiHorizontalRule margin="xs" />
-          </div>
-        );
-      })}
-    </EuiPanel>
+          if (!attributeConfiguration.content) {
+            return null;
+          }
+          return (
+            <div key={attributeId}>
+              <FieldWithActions
+                data-test-subj={`unifiedDocViewTracesOverviewAttribute-${attributeId}`}
+                label={attributeConfiguration.title}
+                field={attributeId}
+                value={attributeConfiguration.value}
+                formattedValue={attributeConfiguration.value}
+              >
+                {() => <div>{attributeConfiguration.content}</div>}
+              </FieldWithActions>
+              <EuiHorizontalRule margin="xs" />
+            </div>
+          );
+        })}
+      </EuiPanel>
+    </FieldActionsProvider>
   );
 }
