@@ -7,16 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import {
-  FieldDefinitionConfig,
-  NamedFieldDefinitionConfig,
-  WiredStreamGetResponse,
-} from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../types';
+import { SchemaField, isSchemaFieldTyped } from '../types';
+import { convertToFieldDefinitionConfig } from '../utils';
 
 export const useSchemaFields = ({
   definition,
@@ -204,11 +201,6 @@ export const useSchemaFields = ({
     updateField,
   };
 };
-
-const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldDefinitionConfig => ({
-  type: field.type,
-  ...(field.format && field.type === 'date' ? { format: field.format } : {}),
-});
 
 const hasChanges = (
   field: Partial<NamedFieldDefinitionConfig>,
