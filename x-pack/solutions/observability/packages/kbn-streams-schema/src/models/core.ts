@@ -29,11 +29,11 @@ export const primitive: z.ZodType<Primitive> = z.union([
   z.undefined(),
 ]);
 
-interface RecursiveRecord {
+export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | RecursiveRecord;
 }
 
-const recursiveRecord: z.ZodType<RecursiveRecord> = z.record(
+export const recursiveRecord: z.ZodType<RecursiveRecord> = z.record(
   z.union([primitive, z.array(primitive), z.lazy(() => recursiveRecord)])
 );
 
