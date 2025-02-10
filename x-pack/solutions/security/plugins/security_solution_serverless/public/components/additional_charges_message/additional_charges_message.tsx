@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { ADDITIONAL_CHARGES_MESSAGE } from '../../upselling/translations';
 
 export const AdditionalChargesMessage: React.FC = () => {
   return (
