@@ -286,12 +286,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     include_unmapped: true,
                     runtime_mappings: runtimeMappings,
                     ignore_unavailable: true,
-                    index_filter: buildTimeRangeFilter({
-                      to: params.to,
-                      from: params.from,
-                      primaryTimestamp,
-                      secondaryTimestamp,
-                    }),
                   },
                   { meta: true }
                 )
@@ -309,8 +303,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               }
               skipExecution = foundNoIndices;
 
+              const frozenFieldCaps = await services.scopedClusterClient.asCurrentUser.fieldCaps({
+                index: inputIndex,
+                fields: ['_id'],
+                ignore_unavailable: true,
+                index_filter: buildTimeRangeFilter({
+                  to: params.to,
+                  from: params.from,
+                  primaryTimestamp,
+                  secondaryTimestamp,
+                }),
+              });
+
               const frozenWarning = await checkForFrozenIndices({
-                fieldCapsResponse: timestampFieldCaps,
+                fieldCapsResponse: frozenFieldCaps,
                 inputIndices: inputIndex,
                 esClient: services.scopedClusterClient.asCurrentUser,
               });

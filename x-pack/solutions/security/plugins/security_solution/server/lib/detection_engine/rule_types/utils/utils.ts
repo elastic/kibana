@@ -198,13 +198,13 @@ export const checkForFrozenIndices = async ({
   inputIndices,
   esClient,
 }: {
-  fieldCapsResponse: TransportResult<FieldCapsResponse, unknown>;
+  fieldCapsResponse: FieldCapsResponse;
   inputIndices: string[];
   esClient: ElasticsearchClient;
 }): Promise<string | undefined> => {
-  const responseIndices = isArray(fieldCapsResponse.body.indices)
-    ? fieldCapsResponse.body.indices
-    : [fieldCapsResponse.body.indices];
+  const responseIndices = isArray(fieldCapsResponse.indices)
+    ? fieldCapsResponse.indices
+    : [fieldCapsResponse.indices];
   // Cold and frozen indices start with `restored-` and `partial-`, respectively, but it's possible
   // for some regular hot/warm index to start with those prefixes as well by coincidence. If we find indices with that naming pattern,
   // we fetch the index settings to verify that they are actually cold/frozen indices.
@@ -232,7 +232,7 @@ export const checkForFrozenIndices = async ({
     }
     if (frozenIndices.length > 0) {
       return `This rule found frozen indices that could not be excluded by the time range filter: ${frozenIndices.join(
-        ','
+        ', '
       )}`;
     }
   }
